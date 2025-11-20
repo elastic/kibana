@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import useMount from 'react-use/lib/useMount';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -43,6 +42,7 @@ import { useAsyncFunction } from '../../hooks/use_async_function';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
+import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -50,6 +50,7 @@ export interface SingleTabViewProps {
   urlStateStorage: IKbnUrlStateStorage;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 interface SessionInitializationState {
@@ -67,6 +68,7 @@ export const SingleTabView = ({
   urlStateStorage,
   internalState,
   runtimeStateManager,
+  searchSessionManager,
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
@@ -105,6 +107,7 @@ export const SingleTabView = ({
         stateStorageContainer: urlStateStorage,
         internalState,
         runtimeStateManager,
+        searchSessionManager,
       });
       const customizationService = await getConnectedCustomizationService({
         stateContainer,
@@ -127,8 +130,8 @@ export const SingleTabView = ({
       : { loading: true }
   );
 
-  useMount(() => {
-    if (!currentStateContainer || !currentCustomizationService) {
+  useEffect(() => {
+    if (!currentStateContainer && !currentCustomizationService) {
       const historyLocationState = services.getScopedHistory<
         MainHistoryLocationState & { defaultState?: DiscoverAppState }
       >()?.location.state;
@@ -138,7 +141,7 @@ export const SingleTabView = ({
         defaultUrlState: historyLocationState?.defaultState,
       });
     }
-  });
+  }, [currentCustomizationService, currentStateContainer, initializeTab, services]);
 
   if (initializeTabState.loading) {
     return <BrandedLoadingIndicator />;

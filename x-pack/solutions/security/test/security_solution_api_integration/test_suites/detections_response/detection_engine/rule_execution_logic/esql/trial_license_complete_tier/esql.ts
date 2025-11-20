@@ -23,6 +23,7 @@ import {
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
+import { deleteAllRules, deleteAllAlerts, createRule } from '@kbn/detections-response-ftr-services';
 import {
   getPreviewAlerts,
   previewRule,
@@ -40,11 +41,6 @@ import {
   setBrokenRuntimeField,
   unsetBrokenRuntimeField,
 } from '../../../../utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -68,7 +64,8 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('@ess @serverless ES|QL rule type', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/235886
+  describe.skip('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'

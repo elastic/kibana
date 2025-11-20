@@ -7,13 +7,16 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiFlexItem,
+  EuiButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useIngestSampleData } from '../hooks/use_ingest_data';
 import { useSampleDataStatus } from '../hooks/use_sample_data_status';
 import { useKibana } from '../hooks/use_kibana';
@@ -22,12 +25,27 @@ import { useNavigateToDashboard } from '../hooks/use_navigate_to_dashboard';
 import { AnalyticsEvents } from '../analytics/constants';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
 
-export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSampleDataClick }) => {
+interface SampleDataActionButtonProps {
+  clickEvent?: string;
+  hasRequiredLicense?: boolean;
+}
+
+export const SampleDataActionButton = ({
+  clickEvent = AnalyticsEvents.installSampleDataClick,
+  hasRequiredLicense = false,
+}: SampleDataActionButtonProps) => {
   const usageTracker = useUsageTracker();
-  const { ingestSampleData, isLoading } = useIngestSampleData();
+  const { ingestSampleData } = useIngestSampleData();
   const { share, uiSettings } = useKibana().services;
-  const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
+  const {
+    isInstalled,
+    indexName,
+    dashboardId,
+    isLoading: isStatusLoading,
+    isInstalling,
+  } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
+  const isAgentBuilderAvailable = uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false);
 
   const onInstallButtonClick = useCallback(() => {
     usageTracker.click(clickEvent);
@@ -63,13 +81,21 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
     }
   }, [share, indexName]);
 
+  const navigateToAgentBuilder = useCallback(async () => {
+    if (isAgentBuilderAvailable) {
+      const agentBuilderLocator = share.url.locators.get('AGENT_BUILDER_LOCATOR_ID');
+      await agentBuilderLocator?.navigate({});
+    }
+  }, [share, isAgentBuilderAvailable]);
+
   if (isStatusLoading) {
     return null;
   }
 
   if (isInstalled && indexName) {
     const button = (
-      <EuiButtonEmpty
+      <EuiButton
+        color="text"
         data-test-subj="viewDataBtn"
         size="s"
         iconType="arrowDown"
@@ -77,7 +103,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
         onClick={onViewButtonClick}
       >
         <FormattedMessage id="xpack.searchHomepage.sampleData.view" defaultMessage="View Data" />
-      </EuiButtonEmpty>
+      </EuiButton>
     );
 
     return (
@@ -92,6 +118,21 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
           <EuiContextMenuPanel
             css={{ minWidth: 250 }}
             items={[
+              ...(isAgentBuilderAvailable
+                ? [
+                    <EuiContextMenuItem
+                      key="agentBuilder"
+                      onClick={navigateToAgentBuilder}
+                      icon="comment"
+                      data-test-subj="agentBuilderMenuItem"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchHomepage.shared.createIndex.ingestSampleData.linkToAgentBuilder"
+                        defaultMessage="Agents"
+                      />
+                    </EuiContextMenuItem>,
+                  ]
+                : []),
               <EuiContextMenuItem key="discover" onClick={navigateToDiscover} icon="discoverApp">
                 <FormattedMessage
                   id="xpack.searchHomepage.sampleData.linkToDiscover"
@@ -131,20 +172,37 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
     );
   }
 
-  return (
-    <EuiButtonEmpty
-      color="primary"
+  const button = (
+    <EuiButton
+      color="text"
       iconSide="left"
       iconType="download"
       size="s"
       data-test-subj="installSampleBtn"
-      isLoading={isLoading}
+      isLoading={isInstalling}
+      disabled={!hasRequiredLicense}
       onClick={onInstallButtonClick}
     >
       <FormattedMessage
         id="xpack.searchHomepage.sampleData.btn"
-        defaultMessage="Install a sample dataset"
+        defaultMessage="Sample knowledge base"
       />
-    </EuiButtonEmpty>
+    </EuiButton>
+  );
+
+  return hasRequiredLicense ? (
+    button
+  ) : (
+    <EuiToolTip
+      position="bottom"
+      title={i18n.translate('xpack.searchHomepage.sampleData.licenseTooltip.title', {
+        defaultMessage: 'Enterprise',
+      })}
+      content={i18n.translate('xpack.searchHomepage.sampleData.licenseTooltip.description', {
+        defaultMessage: 'This dataset makes use of AI features that require an Enterprise license.',
+      })}
+    >
+      {button}
+    </EuiToolTip>
   );
 };

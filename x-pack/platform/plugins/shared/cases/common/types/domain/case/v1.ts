@@ -49,9 +49,16 @@ export const CaseSeverityRt = rt.union([
  * Case
  */
 
-export const CaseSettingsRt = rt.strict({
-  syncAlerts: rt.boolean,
-});
+export const CaseSettingsRt = rt.intersection([
+  rt.strict({
+    syncAlerts: rt.boolean,
+  }),
+  rt.exact(
+    rt.partial({
+      extractObservables: rt.boolean,
+    })
+  ),
+]);
 
 const CaseBaseFields = {
   /**
@@ -126,6 +133,7 @@ export const CaseAttributesRt = rt.intersection([
     external_service: rt.union([ExternalServiceRt, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
+    total_observables: rt.union([rt.number, rt.null]),
   }),
   rt.exact(
     rt.partial({
@@ -144,6 +152,7 @@ export const CaseRt = rt.intersection([
     id: rt.string,
     totalComment: rt.number,
     totalAlerts: rt.number,
+    totalEvents: rt.union([rt.number, rt.undefined]),
     version: rt.string,
   }),
   rt.exact(
@@ -157,6 +166,7 @@ export const CasesRt = rt.array(CaseRt);
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
+  events: rt.number,
   userComments: rt.number,
 });
 

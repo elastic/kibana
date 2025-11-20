@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import { SplunkXmlDashboardParser } from '../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml';
 import type { GraphNode } from '../../types';
 
@@ -12,6 +14,21 @@ export const getParseOriginalDashboardNode = (): GraphNode => {
   return async (state) => {
     if (state.original_dashboard.vendor !== 'splunk') {
       throw new Error('Unsupported dashboard vendor');
+    }
+
+    // Check if the XML content is supported
+    const supportCheck = SplunkXmlDashboardParser.isSupportedSplunkXml(
+      state.original_dashboard.data
+    );
+    if (!supportCheck.isSupported) {
+      return {
+        parsed_original_dashboard: {
+          title: state.original_dashboard.title,
+          panels: [],
+        },
+        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+        comments: [generateAssistantComment(`Unsupported Splunk XML: ${supportCheck.reason}`)],
+      };
     }
 
     const parser = new SplunkXmlDashboardParser(state.original_dashboard.data);

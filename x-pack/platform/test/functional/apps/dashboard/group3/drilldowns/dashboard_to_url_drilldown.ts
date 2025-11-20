@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create dashboard to URL drilldown and use it to navigate to discover', async () => {
-      await dashboard.gotoDashboardEditMode(
+      await dashboard.loadDashboardInEditMode(
         dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
       );
 

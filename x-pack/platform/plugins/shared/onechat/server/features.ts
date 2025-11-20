@@ -6,7 +6,6 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
   ONECHAT_APP_ID,
@@ -23,7 +22,6 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     minimumLicense: 'enterprise',
     order: 1000,
     category: DEFAULT_APP_CATEGORIES.kibana,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['kibana', ONECHAT_APP_ID],
     catalogue: [ONECHAT_FEATURE_ID],
     privileges: {
@@ -35,7 +33,12 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           all: [],
           read: [],
         },
-        ui: [uiPrivileges.show, uiPrivileges.showManagement],
+        ui: [
+          uiPrivileges.show,
+          uiPrivileges.showManagement,
+          uiPrivileges.manageTools,
+          uiPrivileges.manageAgents,
+        ],
       },
       read: {
         app: ['kibana', ONECHAT_APP_ID],

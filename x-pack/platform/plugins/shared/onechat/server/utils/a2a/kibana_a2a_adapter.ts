@@ -26,7 +26,7 @@ export class KibanaA2AAdapter {
   constructor(
     private logger: Logger,
     private getInternalServices: () => InternalStartServices,
-    private getBaseUrl: () => string
+    private getBaseUrl: (request: KibanaRequest) => Promise<string>
   ) {}
 
   /**
@@ -35,12 +35,12 @@ export class KibanaA2AAdapter {
   private async createA2AComponents(kibanaRequest: KibanaRequest, agentId: string) {
     // Get agent and create agent card
     const { agents, tools } = this.getInternalServices();
-    const agentClient = await agents.getScopedClient({ request: kibanaRequest });
-    const agent = await agentClient.get(agentId);
+    const agentRegistry = await agents.getRegistry({ request: kibanaRequest });
+    const agent = await agentRegistry.get(agentId);
 
     const agentCard = await createAgentCard({
       agent,
-      baseUrl: this.getBaseUrl(),
+      baseUrl: await this.getBaseUrl(kibanaRequest),
       toolsService: tools,
       request: kibanaRequest,
     });

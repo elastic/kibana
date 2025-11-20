@@ -10,11 +10,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-import type { EuiDataGridControlColumn } from '@elastic/eui';
+import { type EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
@@ -25,10 +26,7 @@ import {
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import {
-  useEnableExperimental,
-  useIsExperimentalFeatureEnabled,
-} from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
@@ -43,7 +41,6 @@ import type { KueryFilterQueryKind } from '../../../../../../common/types/timeli
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
@@ -53,8 +50,6 @@ import { isTimerangeSame } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
-import { NotesFlyout } from '../../properties/notes_flyout';
-import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
@@ -87,13 +82,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView: experimentalDataView, status: sourcererStatus } = useDataView(
-    SourcererScopeName.timeline
+    PageScope.timeline
   );
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
 
   const {
     browserFields: oldBrowserFields,
@@ -103,7 +98,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns: oldSelectedPatterns,
     sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
   const loadingSourcerer = useMemo(
     () => (newDataViewPickerEnabled ? sourcererStatus !== 'ready' : oldLoadingSourcerer),
@@ -257,73 +252,44 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-
-  const {
-    associateNote,
-    notes,
-    isNotesFlyoutVisible,
-    closeNotesFlyout,
-    showNotesFlyout,
-    eventId: noteEventId,
-    setNotesEventId,
-  } = useNotesInFlyout({
-    eventIdToNoteIds,
-    refetch,
-    timelineId,
-    activeTab,
-  });
 
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
-      const indexName = selectedPatterns.join(',');
-      if (eventId && !securitySolutionNotesDisabled) {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: timelineId,
-            },
-          },
-          left: {
-            id: DocumentDetailsLeftPanelKey,
-            path: {
-              tab: LeftPanelNotesTab,
-            },
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: timelineId,
-            },
-          },
-        });
-        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
-          location: timelineId,
-        });
-        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-          location: timelineId,
-          panel: 'left',
-        });
-      } else {
-        if (eventId) {
-          setNotesEventId(eventId);
-          showNotesFlyout();
-        }
+      if (!eventId) {
+        return;
       }
+
+      const indexName = selectedPatterns.join(',');
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: LeftPanelNotesTab,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+      });
+      telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
+        location: timelineId,
+      });
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+        location: timelineId,
+        panel: 'left',
+      });
     },
-    [
-      openFlyout,
-      securitySolutionNotesDisabled,
-      selectedPatterns,
-      telemetry,
-      timelineId,
-      showNotesFlyout,
-      setNotesEventId,
-    ]
+    [openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
   const leadingControlColumns = useTimelineControlColumn({
@@ -374,20 +340,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [timelineDataService, combinedQueries, kqlQueryLanguage]);
   // </Synchronisation of the timeline data service>
 
-  const NotesFlyoutMemo = useMemo(() => {
-    return (
-      <NotesFlyout
-        associateNote={associateNote}
-        eventId={noteEventId}
-        show={isNotesFlyoutVisible}
-        notes={notes}
-        onClose={closeNotesFlyout}
-        onCancel={closeNotesFlyout}
-        timelineId={timelineId}
-      />
-    );
-  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
-
   return (
     <>
       <TimelineRefetch
@@ -398,12 +350,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         skip={!canQueryTimeline}
       />
-      {NotesFlyoutMemo}
-
       <UnifiedTimelineBody
         header={
           <QueryTabHeader
             activeTab={activeTab}
+            dataViewId={dataViewId}
+            currentIndices={currentTimeline.indexNames}
             filterManager={timelineFilterManager}
             show={show && activeTab === TimelineTabs.query}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}

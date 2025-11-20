@@ -6,14 +6,14 @@
  */
 
 import {
+  EuiCodeBlock,
+  EuiFlexItem,
   EuiFlyout,
-  EuiTitle,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiPortal,
-  EuiFlexItem,
-  EuiCodeBlock,
   EuiSpacer,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -29,10 +29,8 @@ interface QueryDetailsFlyoutProps {
 
 const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action, onClose }) => {
   const { euiTheme } = useEuiTheme();
-
-  // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
   const maskProps = useMemo(
-    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
     [euiTheme.levels.flyout]
   );
 

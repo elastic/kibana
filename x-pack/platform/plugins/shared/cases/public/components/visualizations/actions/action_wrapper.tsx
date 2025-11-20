@@ -35,6 +35,7 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
   const casePermissions = canUseCases(application.capabilities)(owner ? [owner] : undefined);
   // TODO: Remove when https://github.com/elastic/kibana/issues/143201 is developed
   const syncAlerts = owner === SECURITY_SOLUTION_OWNER;
+  const extractObservables = owner === SECURITY_SOLUTION_OWNER;
 
   return (
     <KibanaRenderContextProvider {...startServices}>
@@ -43,7 +44,10 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
           ...casesActionContextProps,
           owner: owner ? [owner] : [],
           permissions: casePermissions,
-          features: { alerts: { sync: syncAlerts } },
+          features: {
+            alerts: { sync: syncAlerts },
+            observables: { enabled: true, autoExtract: extractObservables },
+          },
         }}
       >
         {children}

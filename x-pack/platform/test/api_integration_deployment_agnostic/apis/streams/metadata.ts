@@ -34,9 +34,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: 'This is a test stream',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: {
-              steps: [],
-            },
+            processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],
@@ -57,9 +56,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: 'Updated test stream description',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: {
-              steps: [],
-            },
+            processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],

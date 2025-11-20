@@ -29,7 +29,7 @@ import { SampleDataPanel } from './sample_data_panel';
 import { useIngestSampleData } from '../../hooks/use_ingest_data';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
-import { useKibana } from '../../hooks/use_kibana';
+import { useIsSampleDataAvailable } from '../../hooks/use_is_sample_data_available';
 
 export interface CreateIndexFormProps {
   indexName: string;
@@ -52,9 +52,13 @@ export const CreateIndexForm = ({
   showAPIKeyCreateLabel,
   userPrivileges,
 }: CreateIndexFormProps) => {
-  const { sampleDataIngest } = useKibana().services;
   const usageTracker = useUsageTracker();
   const { ingestSampleData, isLoading: isIngestingSampleData } = useIngestSampleData();
+  const {
+    hasRequiredLicense,
+    isPluginAvailable: isSampleDataPluginAvailable,
+    hasPrivileges: hasSampleDataRequiredPrivileges,
+  } = useIsSampleDataAvailable();
   const onIngestSampleData = useCallback(() => {
     usageTracker.click(AnalyticsEvents.createIndexIngestSampleDataClick);
     ingestSampleData();
@@ -179,14 +183,15 @@ export const CreateIndexForm = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {sampleDataIngest && (
+          {isSampleDataPluginAvailable && hasSampleDataRequiredPrivileges && (
+            <EuiFlexItem grow={false}>
               <SampleDataPanel
                 isLoading={isIngestingSampleData}
                 onIngestSampleData={onIngestSampleData}
+                hasRequiredLicense={hasRequiredLicense}
               />
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     </>

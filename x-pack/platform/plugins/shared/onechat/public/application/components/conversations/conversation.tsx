@@ -5,33 +5,30 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiResizableContainer, useEuiScrollBar, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
-import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
-import { useConversationId } from '../../hooks/use_conversation_id';
-import { useSendMessage } from '../../context/send_message_context';
+import { useConversationId } from '../../context/conversation/use_conversation_id';
+import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
+import { useSendMessage } from '../../context/send_message/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
-
-const fullHeightStyles = css`
-  height: 100%;
-`;
-const conversationContainerStyles = css`
-  ${fullHeightStyles}
-  width: 100%;
-`;
+import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
+import { conversationElementWidthStyles, fullWidthAndHeightStyles } from './conversation.styles';
+import { ScrollButton } from './scroll_button';
 
 export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
-  const { euiTheme } = useEuiTheme();
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
+  const shouldStickToBottom = useShouldStickToBottom();
+
+  useSendPredefinedInitialMessage();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -47,66 +44,53 @@ export const Conversation: React.FC<{}> = () => {
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
-  // Stick to bottom only on initial conversation load or when {conversationId} is changed
+  // Stick to bottom only when user returns to an existing conversation (conversationId is defined and changes)
   useEffect(() => {
-    if (isFetched && conversationId) {
+    if (isFetched && conversationId && shouldStickToBottom) {
       requestAnimationFrame(() => {
         stickToBottom();
       });
     }
-  }, [stickToBottom, isFetched, conversationId]);
+  }, [stickToBottom, isFetched, conversationId, shouldStickToBottom]);
 
-  const scrollContainerStyles = css`
-    overflow-y: auto;
-    ${fullHeightStyles}
+  const containerStyles = css`
+    ${fullWidthAndHeightStyles}
+  `;
+
+  // Necessary to position the scroll button absolute to the container.
+  const scrollWrapperStyles = css`
+    ${fullWidthAndHeightStyles}
+    position: relative;
+    min-height: 0;
+  `;
+
+  const scrollableStyles = css`
     ${useEuiScrollBar()}
+    overflow-y: auto;
   `;
 
-  useSyncAgentId();
-
-  const scrollDownButtonStyles = css`
-    position: absolute;
-    bottom: ${euiTheme.size.xl};
-    left: 50%;
-    transform: translateX(-50%);
-  `;
+  if (!hasActiveConversation) {
+    return <NewConversationPrompt />;
+  }
 
   return (
-    <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
-      {(EuiResizablePanel, EuiResizableButton) => {
-        return (
-          <>
-            {hasActiveConversation ? (
-              <EuiResizablePanel initialSize={80}>
-                <div ref={scrollContainerRef} css={scrollContainerStyles}>
-                  <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
-                </div>
-                {showScrollButton && (
-                  <EuiButtonIcon
-                    display="base"
-                    size="s"
-                    color="text"
-                    css={scrollDownButtonStyles}
-                    iconType="sortDown"
-                    aria-label="Scroll down"
-                    onClick={scrollToMostRecentRoundBottom}
-                  />
-                )}
-              </EuiResizablePanel>
-            ) : (
-              <EuiResizablePanel initialSize={80}>
-                <div css={fullHeightStyles}>
-                  <NewConversationPrompt />
-                </div>
-              </EuiResizablePanel>
-            )}
-            <EuiResizableButton />
-            <EuiResizablePanel initialSize={20} minSize="20%">
-              <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
-            </EuiResizablePanel>
-          </>
-        );
-      }}
-    </EuiResizableContainer>
+    <EuiFlexGroup direction="column" alignItems="center" css={containerStyles}>
+      <EuiFlexItem grow={true} css={scrollWrapperStyles}>
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          ref={scrollContainerRef}
+          css={scrollableStyles}
+        >
+          <EuiFlexItem css={conversationElementWidthStyles}>
+            <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
+      </EuiFlexItem>
+      <EuiFlexItem css={conversationElementWidthStyles} grow={false}>
+        <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

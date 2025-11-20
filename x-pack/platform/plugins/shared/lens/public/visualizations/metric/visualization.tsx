@@ -15,10 +15,6 @@ import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
-import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
-import { layerTypes } from '../../../common/layer_types';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import { getSuggestions } from './suggestions';
 import type {
   Visualization,
   OperationMetadata,
@@ -26,14 +22,17 @@ import type {
   VisualizationDimensionGroupConfig,
   Suggestion,
   UserMessage,
-} from '../../types';
+  FormBasedPersistedState,
+} from '@kbn/lens-common';
+import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
+import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
+import { getSuggestions } from './suggestions';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
-import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
@@ -47,6 +46,8 @@ import {
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
 import { convertToRunTimeState } from './runtime_state';
+import { MetricAppearanceSettings } from './toolbar';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -663,8 +664,8 @@ export const getMetricVisualization = ({
     return updated;
   },
 
-  ToolbarComponent(props) {
-    return <Toolbar {...props} />;
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: MetricAppearanceSettings }} />;
   },
 
   DimensionEditorDataExtraComponent(props) {

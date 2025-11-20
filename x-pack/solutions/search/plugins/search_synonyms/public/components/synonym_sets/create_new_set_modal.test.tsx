@@ -9,7 +9,7 @@ import React from 'react';
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { usePutSynonymsSet } from '../../hooks/use_put_synonyms_set';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CreateSynonymsSetModal } from './create_new_set_modal';
 import { I18nProvider } from '@kbn/i18n-react';
 

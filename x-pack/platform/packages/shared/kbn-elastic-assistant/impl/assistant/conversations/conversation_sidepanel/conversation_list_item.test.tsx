@@ -21,6 +21,7 @@ const mockPaginationObserver = jest.fn();
 const ownerConvo = { ...welcomeConvo, isConversationOwner: true };
 const testProps = {
   conversation: ownerConvo,
+  currentUser: { name: 'elastic' },
   handleCopyUrl: mockCopyUrl,
   handleDuplicateConversation: mockDuplicate,
   isActiveConversation: false,

@@ -49,6 +49,7 @@ export {
   type ToolChoice,
   type CustomToolChoice,
   type ToolCallArguments,
+  type ToolCallbackResult,
 } from './tools';
 
 export type {
@@ -58,6 +59,7 @@ export type {
   ToolCallbacksOfToolOptions,
   ToolNamesOf,
   ToolsOfChoice,
+  ToolCallsOfToolOptions,
 } from './tools_of';
 
 export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
@@ -75,7 +77,7 @@ export {
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
   isToolValidationError,
-  isTokenLimitReachedError,
+  isOutputTokenLimitReachedError,
   isToolNotFoundError,
 } from './errors';
 
@@ -91,3 +93,12 @@ export type {
   NamedEntityRecognitionRule,
   AnonymizationSettings,
 } from './anonymization';
+
+export type {
+  InferenceCallbacks,
+  InferenceCallbackErrorEvent,
+  InferenceCallbackCompleteEvent,
+  InferenceCompleteCallbackHandler,
+  InferenceErrorCallbackHandler,
+  InferenceEventEmitter,
+} from './callbacks';

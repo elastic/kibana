@@ -13,11 +13,12 @@ import type {
   ElasticsearchClient,
   Logger,
 } from '@kbn/core/server';
-import { REINDEX_OP_TYPE, getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
-import type { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
+import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
+import type { FlatSettings, GetRollupJobByIndexNameType } from '@kbn/upgrade-assistant-pkg-server';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexArgs, ReindexOptions, ReindexOperation } from '../../../common';
 import type { ReindexSavedObject } from './types';
-import { ReindexStatus, ReindexStep } from '../../../common';
+import { ReindexStep } from '../../../common';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -90,7 +91,9 @@ export interface ReindexActions {
 export const reindexActionsFactory = (
   client: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  log: Logger
+  log: Logger,
+  getRollupJobByIndexName: GetRollupJobByIndexNameType,
+  rollupsEnabled: boolean
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {
@@ -139,7 +142,10 @@ export const reindexActionsFactory = (
       reindexOptions?: ReindexOptions;
     }): Promise<ReindexSavedObject> {
       // gets rollup job if it exists and needs stopping, otherwise returns undefined
-      const rollupJob = await getRollupJobByIndexName(esClient, log, indexName);
+      let rollupJob: string | undefined;
+      if (rollupsEnabled) {
+        rollupJob = await getRollupJobByIndexName(esClient, log, indexName);
+      }
 
       const settings = indexSettings ? JSON.stringify(indexSettings) : undefined;
 

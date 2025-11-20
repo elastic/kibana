@@ -13,10 +13,7 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
 } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import {
-  countDownTest,
-  routeWithNamespace,
-} from '../../../../../config/services/detections_response';
+import { countDownTest, routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import { getAttackDiscoverySchedulesApis } from './apis';
 import { getSimpleAttackDiscoverySchedule } from '../mocks';
 
@@ -126,6 +123,30 @@ export const getMissingAssistantKibanaPrivilegesError = ({
   return {
     error: 'Forbidden',
     message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [elasticAssistant]`,
+    statusCode: 403,
+  };
+};
+
+export const getMissingScheduleKibanaPrivilegesError = ({
+  routeDetails,
+}: {
+  routeDetails: string;
+}) => {
+  return {
+    error: 'Forbidden',
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [securitySolution-updateAttackDiscoverySchedule]`,
+    statusCode: 403,
+  };
+};
+
+export const getMissingAssistantAndScheduleKibanaPrivilegesError = ({
+  routeDetails,
+}: {
+  routeDetails: string;
+}) => {
+  return {
+    error: 'Forbidden',
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [elasticAssistant,securitySolution-updateAttackDiscoverySchedule]`,
     statusCode: 403,
   };
 };

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export * from './entity_index';
-export * from './ingest_pipeline';
 export * from './component_template';
 export * from './enrich_policy';
+export * from './entity_index';
+export * from './entity_reset_index';
+export * from './entity_snapshot_index';
+export * from './ingest_pipeline';

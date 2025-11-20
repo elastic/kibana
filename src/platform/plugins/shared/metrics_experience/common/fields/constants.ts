@@ -20,4 +20,19 @@ export const NUMERIC_TYPES = [
   ES_FIELD_TYPES.SCALED_FLOAT,
   ES_FIELD_TYPES.UNSIGNED_LONG,
   ES_FIELD_TYPES.HISTOGRAM,
+  ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+  ES_FIELD_TYPES.TDIGEST,
+];
+
+// For the dimensions, the field MUST have `time_series_dimension` attribute set
+// in the mappings and it can only be the following types:
+export const DIMENSION_TYPES = [
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.BOOLEAN,
+  ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.INTEGER,
+  ES_FIELD_TYPES.SHORT,
+  ES_FIELD_TYPES.BYTE,
+  ES_FIELD_TYPES.UNSIGNED_LONG,
 ];

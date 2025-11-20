@@ -33,7 +33,10 @@ export class UiSettingsClient extends UiSettingsClientCommon {
     this.setLocally(key, newVal);
 
     try {
-      const { settings } = await this.api.batchSet(key, newVal);
+      const { settings } = await this.api.batchSet(
+        key,
+        newVal === this.cache[key].value ? null : newVal
+      );
       this.cache = defaultsDeep({}, defaults, settings);
       return true;
     } catch (error) {

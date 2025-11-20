@@ -1,0 +1,40 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          listAgentsResponseExample:
+            description: "Example response that returns one built-in Elastic agent and one created by the user"
+            value: 
+              results:
+              - id: elastic-ai-agent
+                type: chat
+                name: Elastic AI Agent
+                description: Elastic AI Agent
+                configuration:
+                  tools:
+                  - tool_ids:
+                    - platform.core.search
+                    - platform.core.list_indices
+                    - platform.core.get_index_mapping
+                    - platform.core.get_document_by_id
+              - id: created-agent-id
+                type: chat
+                name: Search Index Helper
+                description: Hi! I can help you search the data within the indices starting with
+                  "content-" prefix.
+                labels:
+                - custom-indices
+                - department-search
+                avatar_color: "#BFDBFF"
+                avatar_symbol: SI
+                configuration:
+                  instructions: You are a custom agent that wants to help searching data using all
+                    indices starting with prefix "content-".
+                  tools:
+                  - tool_ids:
+                    - platform.core.search
+                    - platform.core.list_indices
+                    - platform.core.get_index_mapping
+                    - platform.core.get_document_by_id

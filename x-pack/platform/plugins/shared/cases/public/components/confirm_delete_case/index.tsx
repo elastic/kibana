@@ -8,19 +8,23 @@
 import React from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import * as i18n from './translations';
+import { useFocusButtonTrap } from '../use_focus_button';
 
 interface ConfirmDeleteCaseModalProps {
   totalCasesToBeDeleted: number;
   onCancel: () => void;
   onConfirm: () => void;
+  focusButtonRef?: React.Ref<HTMLAnchorElement | HTMLButtonElement>;
 }
 
 const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
   totalCasesToBeDeleted,
   onCancel,
   onConfirm,
+  focusButtonRef,
 }) => {
   const titleId = useGeneratedHtmlId();
+  const focusTrapProps = useFocusButtonTrap(focusButtonRef);
 
   return (
     <EuiConfirmModal
@@ -36,6 +40,7 @@ const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
         id: titleId,
       }}
       aria-labelledby={titleId}
+      focusTrapProps={focusTrapProps}
     >
       {i18n.CONFIRM_QUESTION(totalCasesToBeDeleted)}
     </EuiConfirmModal>

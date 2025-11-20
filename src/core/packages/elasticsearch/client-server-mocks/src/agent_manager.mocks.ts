@@ -8,7 +8,9 @@
  */
 
 import type { AgentStatsProvider } from '@kbn/core-elasticsearch-client-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
-export const createAgentStatsProviderMock = (): jest.Mocked<AgentStatsProvider> => ({
-  getAgentsStats: jest.fn(),
-});
+export const createAgentStatsProviderMock = (): jest.Mocked<AgentStatsProvider> =>
+  lazyObject({
+    getAgentsStats: jest.fn(),
+  });

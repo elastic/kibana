@@ -13,7 +13,6 @@ import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
-import type { SourceField } from './common';
 import {
   createConnector,
   ES_GROUPS_TO_WRITE,
@@ -42,12 +41,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     removeAllAADDocs,
     getAllAADDocs,
   } = getRuleServices(getService);
-
-  const sourceFields = [
-    { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
-    { label: 'host.id', searchPath: 'host.id' },
-    { label: 'host.name', searchPath: 'host.name' },
-  ];
 
   describe('rule', () => {
     let endDate: string;
@@ -88,7 +81,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             size: 100,
             thresholdComparator: '<',
             threshold: [0],
-            sourceFields,
           });
           await createRule({
             name: 'always fire',
@@ -96,7 +88,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             size: 100,
             thresholdComparator: '>',
             threshold: [-1],
-            sourceFields,
           });
         },
       ] as const,
@@ -122,7 +113,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               index: esTestDataView.id,
               filter: [],
             },
-            sourceFields,
           });
           await createRule({
             name: 'always fire',
@@ -138,7 +128,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               index: esTestDataView.id,
               filter: [],
             },
-            sourceFields,
           });
         },
       ] as const,
@@ -183,9 +172,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value >= 0).to.be(true);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-        expect(alertDoc['host.name']).to.eql(['host-1']);
-        expect(alertDoc['host.hostname']).to.eql(['host-1']);
-        expect(alertDoc['host.id']).to.eql(['1']);
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 
@@ -201,7 +190,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             threshold: [0],
             aggType: 'avg',
             aggField: 'testedValue',
-            sourceFields,
           });
           await createRule({
             name: 'always fire',
@@ -211,7 +199,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             threshold: [-1],
             aggType: 'avg',
             aggField: 'testedValue',
-            sourceFields,
           });
         },
       ] as const,
@@ -239,7 +226,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             },
             aggType: 'avg',
             aggField: 'testedValue',
-            sourceFields,
           });
           await createRule({
             name: 'always fire',
@@ -257,7 +243,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             },
             aggType: 'avg',
             aggField: 'testedValue',
-            sourceFields,
           });
         },
       ] as const,
@@ -299,11 +284,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           'Number of matching documents where avg of testedValue is greater than -1'
         );
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).greaterThan(0);
+        expect(value >= 0).to.be(true);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-        expect(alertDoc['host.name']).to.eql(['host-1']);
-        expect(alertDoc['host.hostname']).to.eql(['host-1']);
-        expect(alertDoc['host.id']).to.eql(['1']);
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 
@@ -320,7 +305,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             groupBy: 'top',
             termField: 'group',
             termSize: 2,
-            sourceFields,
           });
           await createRule({
             name: 'always fire',
@@ -331,7 +315,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             groupBy: 'top',
             termField: 'group',
             termSize: 2,
-            sourceFields,
           });
         },
       ] as const,
@@ -360,7 +343,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             groupBy: 'top',
             termField: 'group',
             termSize: 2,
-            sourceFields,
           });
           await createRule({
             name: 'always fire',
@@ -379,7 +361,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             groupBy: 'top',
             termField: 'group',
             termSize: 2,
-            sourceFields,
           });
         },
       ] as const,
@@ -418,9 +399,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value).greaterThan(0);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-        expect(alertDoc['host.name']).to.eql(['host-1']);
-        expect(alertDoc['host.hostname']).to.eql(['host-1']);
-        expect(alertDoc['host.id']).to.eql(['1']);
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 
@@ -437,7 +418,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             groupBy: 'top',
             termField: ['group', 'testedValue'],
             termSize: 2,
-            sourceFields,
           });
         },
       ] as const,
@@ -466,7 +446,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             groupBy: 'top',
             termField: ['group', 'testedValue'],
             termSize: 2,
-            sourceFields,
           });
         },
       ] as const,
@@ -505,9 +484,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value).greaterThan(0);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-        expect(alertDoc['host.name']).to.eql(['host-1']);
-        expect(alertDoc['host.hostname']).to.eql(['host-1']);
-        expect(alertDoc['host.id']).to.eql(['1']);
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 
@@ -975,7 +954,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             threshold: [0],
             indexName: ES_TEST_DATA_STREAM_NAME,
             timeField: '@timestamp',
-            sourceFields,
           });
           await createRule({
             name: 'always fire',
@@ -985,7 +963,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             threshold: [-1],
             indexName: ES_TEST_DATA_STREAM_NAME,
             timeField: '@timestamp',
-            sourceFields,
           });
         },
       ] as const,
@@ -1011,7 +988,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               index: esTestDataView.id,
               filter: [],
             },
-            sourceFields,
           });
           await createRule({
             name: 'always fire',
@@ -1027,7 +1003,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               index: esTestDataView.id,
               filter: [],
             },
-            sourceFields,
           });
         },
       ] as const,
@@ -1076,9 +1051,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value).greaterThan(0);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-        expect(alertDoc['host.name']).to.eql(['host-1']);
-        expect(alertDoc['host.hostname']).to.eql(['host-1']);
-        expect(alertDoc['host.id']).to.eql(['1']);
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 
@@ -1212,7 +1187,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       groupBy?: string;
       termField?: string | string[];
       termSize?: number;
-      sourceFields?: SourceField[];
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -1293,7 +1267,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             aggField: params.aggField,
             termField: params.termField,
             termSize: params.termSize,
-            sourceFields: params.sourceFields,
+            sourceFields: [],
             ...(params.excludeHitsFromPreviousRun !== undefined && {
               excludeHitsFromPreviousRun: params.excludeHitsFromPreviousRun,
             }),

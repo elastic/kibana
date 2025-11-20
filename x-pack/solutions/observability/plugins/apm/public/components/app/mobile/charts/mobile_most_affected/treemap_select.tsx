@@ -97,6 +97,12 @@ export function TreemapSelect({
             onChange={onChange}
             itemLayoutAlign="top"
             hasDividers
+            aria-label={i18n.translate(
+              'xpack.apm.mobile.errorOverview.treemap.dropdown.ariaLabel',
+              {
+                defaultMessage: 'Treemap',
+              }
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

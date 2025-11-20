@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { buildStepExecutionsTree } from '../build_step_executions_tree';
 
 // Helper function to create a valid WorkflowStepExecutionDto with all required properties
@@ -18,13 +18,14 @@ const createStepExecution = (
   id: 'default-id',
   stepId: 'default-step',
   stepType: 'action',
-  path: [],
+  scopeStack: [],
   workflowRunId: 'workflow-run-1',
   workflowId: 'workflow-1',
   status: ExecutionStatus.COMPLETED,
   startedAt: '2023-01-01T00:00:00Z',
   topologicalIndex: 0,
-  executionIndex: 0,
+  globalExecutionIndex: 0,
+  stepExecutionIndex: 0,
   ...overrides,
 });
 
@@ -44,8 +45,8 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'step-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
       ];
 
@@ -78,8 +79,8 @@ describe('buildStepExecutionsTree', () => {
             stepId: 'step-1',
             stepType: 'action',
             status,
-            executionIndex: 0,
-            path: [],
+            stepExecutionIndex: 0,
+            scopeStack: [],
           }),
         ];
 
@@ -97,16 +98,16 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'step-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'step-2',
           stepType: 'action',
           status: ExecutionStatus.RUNNING,
-          executionIndex: 1,
-          path: [],
+          stepExecutionIndex: 1,
+          scopeStack: [],
         }),
       ];
 
@@ -141,24 +142,34 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'foreach-1',
           stepType: 'foreach',
           status: ExecutionStatus.RUNNING,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'iteration-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: ['foreach-1', '0'],
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'foreach-1',
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
+            },
+          ],
         }),
         createStepExecution({
           id: 'exec-3',
           stepId: 'iteration-2',
           stepType: 'action',
           status: ExecutionStatus.FAILED,
-          executionIndex: 1,
-          path: ['foreach-1', '1'],
+          stepExecutionIndex: 1,
+          scopeStack: [
+            {
+              stepId: 'foreach-1',
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '1' }],
+            },
+          ],
         }),
       ];
     });
@@ -234,16 +245,21 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'if-1',
           stepType: 'if',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'then-action',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: ['if-1'],
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'if-1',
+              nestedScopes: [{ nodeId: 'if-1', nodeType: 'foreach', scopeId: 'true' }],
+            },
+          ],
         }),
       ];
 
@@ -255,15 +271,24 @@ describe('buildStepExecutionsTree', () => {
         stepType: 'if',
         executionIndex: 0,
         stepExecutionId: 'exec-1',
-        status: ExecutionStatus.COMPLETED,
+        status: 'completed',
         children: [
           {
-            stepId: 'then-action',
-            stepType: 'action',
+            stepId: 'true',
+            stepType: 'if-branch',
             executionIndex: 0,
-            stepExecutionId: 'exec-2',
-            status: ExecutionStatus.COMPLETED,
-            children: [],
+            stepExecutionId: undefined,
+            status: 'skipped',
+            children: [
+              {
+                stepId: 'then-action',
+                stepType: 'action',
+                executionIndex: 0,
+                stepExecutionId: 'exec-2',
+                status: 'completed',
+                children: [],
+              },
+            ],
           },
         ],
       });
@@ -276,8 +301,8 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'if-1',
           stepType: 'if',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
       ];
 
@@ -303,24 +328,38 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'foreach-1',
           stepType: 'foreach',
           status: ExecutionStatus.RUNNING,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'if-1',
           stepType: 'if',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: ['foreach-1'],
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'foreach-1',
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
+            },
+          ],
         }),
         createStepExecution({
           id: 'exec-3',
           stepId: 'action-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: ['foreach-1', 'if-1'],
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'foreach-1',
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '1' }],
+            },
+            {
+              stepId: 'if-1',
+              nestedScopes: [{ nodeId: 'if-1', nodeType: 'foreach' }],
+            },
+          ],
         }),
       ];
 
@@ -332,21 +371,38 @@ describe('buildStepExecutionsTree', () => {
         stepType: 'foreach',
         executionIndex: 0,
         stepExecutionId: 'exec-1',
-        status: ExecutionStatus.RUNNING,
+        status: 'running',
         children: [
           {
-            stepId: 'if-1',
-            stepType: 'if',
+            stepId: '0',
+            stepType: 'foreach-iteration',
             executionIndex: 0,
-            stepExecutionId: 'exec-2',
-            status: ExecutionStatus.COMPLETED,
+            stepExecutionId: undefined,
+            status: 'skipped',
+            children: [
+              {
+                stepId: 'if-1',
+                stepType: 'if',
+                executionIndex: 0,
+                stepExecutionId: 'exec-2',
+                status: 'completed',
+                children: [],
+              },
+            ],
+          },
+          {
+            stepId: '1',
+            stepType: 'foreach-iteration',
+            executionIndex: 0,
+            stepExecutionId: undefined,
+            status: 'skipped',
             children: [
               {
                 stepId: 'action-1',
                 stepType: 'action',
                 executionIndex: 0,
                 stepExecutionId: 'exec-3',
-                status: ExecutionStatus.COMPLETED,
+                status: 'completed',
                 children: [],
               },
             ],
@@ -364,16 +420,23 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'foreach-1',
           stepType: 'foreach',
           status: ExecutionStatus.RUNNING,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'action-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: ['foreach-1', 'missing-iteration'],
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'foreach-1',
+              nestedScopes: [
+                { nodeId: 'foreach-1', nodeType: 'foreach', scopeId: 'missing-iteration' },
+              ],
+            },
+          ],
         }),
       ];
 
@@ -407,16 +470,21 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'if-1',
           stepType: 'if',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'action-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: ['if-1', 'missing-branch'],
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'if-1',
+              nestedScopes: [{ nodeId: 'if-1', nodeType: 'foreach', scopeId: 'missing-branch' }],
+            },
+          ],
         }),
       ];
 
@@ -450,16 +518,23 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'custom-step',
           stepType: 'custom',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'action-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: ['custom-step', 'missing-child'],
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'custom-step',
+              nestedScopes: [
+                { nodeId: 'custom-step', nodeType: 'foreach', scopeId: 'missing-child' },
+              ],
+            },
+          ],
         }),
       ];
 
@@ -495,32 +570,37 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'step-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'foreach-1',
           stepType: 'foreach',
           status: ExecutionStatus.RUNNING,
-          executionIndex: 1,
-          path: [],
+          stepExecutionIndex: 1,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-3',
           stepId: 'iteration-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: ['foreach-1'],
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'foreach-1',
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
+            },
+          ],
         }),
         createStepExecution({
           id: 'exec-4',
           stepId: 'if-1',
           stepType: 'if',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 2,
-          path: [],
+          stepExecutionIndex: 2,
+          scopeStack: [],
         }),
       ];
 
@@ -532,7 +612,7 @@ describe('buildStepExecutionsTree', () => {
 
       expect(result[1].stepId).toBe('foreach-1');
       expect(result[1].children).toHaveLength(1);
-      expect(result[1].children[0].stepId).toBe('iteration-1');
+      expect(result[1].children[0].stepId).toBe('0');
 
       expect(result[2].stepId).toBe('if-1');
       expect(result[2].children).toHaveLength(0);
@@ -545,24 +625,24 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'step-3',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 2,
-          path: [],
+          stepExecutionIndex: 2,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-1',
           stepId: 'step-1',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'step-2',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 1,
-          path: [],
+          stepExecutionIndex: 1,
+          scopeStack: [],
         }),
       ];
 
@@ -584,8 +664,8 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'step-1',
           stepType: undefined as any,
           status: undefined as any,
-          executionIndex: undefined as any,
-          path: [],
+          stepExecutionIndex: undefined as any,
+          scopeStack: [],
         }),
       ];
 
@@ -609,24 +689,29 @@ describe('buildStepExecutionsTree', () => {
           stepId: 'action',
           stepType: 'action',
           status: ExecutionStatus.COMPLETED,
-          executionIndex: 0,
-          path: [],
+          stepExecutionIndex: 0,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-2',
           stepId: 'foreach-1',
           stepType: 'foreach',
           status: ExecutionStatus.RUNNING,
-          executionIndex: 1,
-          path: [],
+          stepExecutionIndex: 1,
+          scopeStack: [],
         }),
         createStepExecution({
           id: 'exec-3',
           stepId: 'action',
           stepType: 'action',
           status: ExecutionStatus.FAILED,
-          executionIndex: 0,
-          path: ['foreach-1'],
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'foreach-1',
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
+            },
+          ],
         }),
       ];
 
@@ -638,8 +723,210 @@ describe('buildStepExecutionsTree', () => {
 
       expect(result[1].stepId).toBe('foreach-1');
       expect(result[1].children).toHaveLength(1);
-      expect(result[1].children[0].stepId).toBe('action');
-      expect(result[1].children[0].status).toBe(ExecutionStatus.FAILED);
+      expect(result[1].children[0].stepId).toBe('0');
+      expect(result[1].children[0].status).toBe(ExecutionStatus.SKIPPED);
+    });
+  });
+
+  describe('with execution context (pseudo-steps)', () => {
+    it('should prepend trigger pseudo-step when event data exists', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          workflowRunId: 'workflow-run-1',
+        }),
+      ];
+
+      const executionContext = {
+        event: {
+          alerts: { data: [{ id: 'alert-1' }] },
+          rule: { id: 'rule-1', name: 'Test Rule' },
+        },
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Event');
+      expect(result[0].stepType).toBe('__trigger');
+      expect(result[0].stepExecutionId).toBe('__pseudo_trigger__');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+      expect(result[0].status).toBe(ExecutionStatus.COMPLETED);
+      expect(result[0].children).toEqual([]);
+
+      expect(result[1].stepId).toBe('step-1');
+      expect(result[1].isTriggerPseudoStep).toBeUndefined();
+    });
+
+    it('should prepend inputs pseudo-step when inputs data exists', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          workflowRunId: 'workflow-run-1',
+        }),
+      ];
+
+      const executionContext = {
+        inputs: {
+          name: 'John Doe',
+          count: 42,
+        },
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Inputs');
+      expect(result[0].stepType).toBe('__inputs');
+      expect(result[0].stepExecutionId).toBe('__pseudo_inputs__');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+      expect(result[0].status).toBe(ExecutionStatus.COMPLETED);
+      expect(result[0].children).toEqual([]);
+
+      expect(result[1].stepId).toBe('step-1');
+    });
+
+    it('should prepend both trigger and inputs pseudo-steps in correct order', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          workflowRunId: 'workflow-run-1',
+        }),
+      ];
+
+      const executionContext = {
+        event: {
+          alerts: { data: [{ id: 'alert-1' }] },
+        },
+        inputs: {
+          name: 'Jane Doe',
+        },
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].stepId).toBe('Event');
+      expect(result[0].stepType).toBe('__trigger');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+
+      expect(result[1].stepId).toBe('Inputs');
+      expect(result[1].stepType).toBe('__inputs');
+      expect(result[1].isTriggerPseudoStep).toBe(true);
+
+      expect(result[2].stepId).toBe('step-1');
+      expect(result[2].isTriggerPseudoStep).toBeUndefined();
+    });
+
+    it('should not add pseudo-steps when context is missing', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].stepId).toBe('step-1');
+      expect(result[0].isTriggerPseudoStep).toBeUndefined();
+    });
+
+    it('should not add pseudo-steps when context is empty', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions, {});
+
+      expect(result).toHaveLength(1);
+      expect(result[0].stepId).toBe('step-1');
+    });
+
+    it('should not add inputs pseudo-step when inputs object is empty', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const executionContext = {
+        inputs: {},
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].stepId).toBe('step-1');
+    });
+
+    it('should prepend pseudo-steps before complex nested structures', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'foreach',
+          stepType: 'foreach',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack: [],
+        }),
+        createStepExecution({
+          id: 'exec-2',
+          stepId: 'nested-step',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack: [
+            {
+              stepId: 'foreach',
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
+            },
+          ],
+        }),
+      ];
+
+      const executionContext = {
+        event: { trigger: 'test' },
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Event');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+      expect(result[1].stepId).toBe('foreach');
+      expect(result[1].children).toHaveLength(1);
+    });
+
+    it('should handle empty step executions with context', () => {
+      const executionContext = {
+        event: { alert: 'data' },
+        inputs: { value: 1 },
+      };
+
+      const result = buildStepExecutionsTree([], executionContext);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Event');
+      expect(result[1].stepId).toBe('Inputs');
     });
   });
 });

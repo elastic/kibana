@@ -8,7 +8,7 @@
 import { z, ZodFirstPartyTypeKind } from '@kbn/zod';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiCode, EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
 import { useAgentPolicyFormContext } from '../../sections/agent_policy/components/agent_policy_form';
@@ -32,6 +32,10 @@ export const validateSchema = (coercedSchema: z.ZodString, newValue: any): strin
   if (!validationResults.success) {
     return validationResults.error.issues[0].message;
   }
+};
+
+const renderer = {
+  renderCode: (code: string) => <EuiCode>{code}</EuiCode>,
 };
 
 export const SettingsFieldWrapper: React.FC<{
@@ -81,7 +85,7 @@ export const SettingsFieldWrapper: React.FC<{
       title={<h4>{settingsConfig.title}</h4>}
       description={
         <>
-          {settingsConfig.description}{' '}
+          {settingsConfig.description({ renderer })}{' '}
           {settingsConfig.learnMoreLink && (
             <EuiLink href={settingsConfig.learnMoreLink} external>
               <FormattedMessage

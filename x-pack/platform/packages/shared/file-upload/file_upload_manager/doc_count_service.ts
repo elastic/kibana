@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { AnalysisResult } from '@kbn/file-upload-common';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import type { Subscription } from 'rxjs';
 import { catchError, exhaustMap, finalize, from, map, takeWhile, throwError, timer } from 'rxjs';
@@ -76,4 +80,39 @@ export class DocCountService {
   public resetInitialDocCount() {
     this.initialDocCount = 0;
   }
+}
+
+const DOC_COUNT = 10;
+
+export async function getSampleDocs(
+  data: DataPublicPluginStart,
+  analysisResult: AnalysisResult,
+  fileName: string
+): Promise<DataTableRecord[]> {
+  const docs = analysisResult.preview?.docs.filter((doc) => !doc.error);
+  if (docs === undefined || docs.length === 0) {
+    return [];
+  }
+
+  const tempDataView = await data.dataViews.create(
+    {
+      id: fileName,
+      title: `temp_${fileName}`,
+      allowNoIndex: true,
+    },
+    true,
+    false
+  );
+  return (
+    docs.slice(0, DOC_COUNT).map((doc, i) => {
+      return buildDataTableRecord(
+        {
+          ...doc.doc,
+          _id: `${fileName}-${i}`,
+          _index: `temp_index_${i}`,
+        } as EsHitRecord,
+        tempDataView
+      );
+    }) ?? []
+  );
 }

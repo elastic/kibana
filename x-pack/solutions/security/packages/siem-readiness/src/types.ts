@@ -10,3 +10,7 @@ export interface SiemReadinessTask {
   status: 'completed' | 'incomplete';
   meta?: Record<string, unknown>;
 }
+
+export interface TaskSource extends SiemReadinessTask {
+  '@timestamp': string;
+}

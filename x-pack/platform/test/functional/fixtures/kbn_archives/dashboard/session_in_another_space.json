@@ -48,6 +48,35 @@
 {
   "attributes": {
     "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "Sum of Bytes by Extension (Delayed 5s) - Another Space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Sum of Bytes by Extension (Delayed 5s) - Another Space\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"bytes\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"extension.raw\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"shard_delay\",\"params\":{\"delay\":\"5s\"},\"schema\":\"split\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Sum of bytes\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Sum of bytes\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true,\"circlesRadius\":1}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"row\":true,\"palette\":{\"type\":\"palette\",\"name\":\"kibana_palette\"},\"isVislibVis\":true,\"detailedTooltip\":true,\"legendSize\":\"auto\"}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "a1b2c3d4-e5f6-789a-bcde-f0123456789a",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "originId": "delayed-viz-another-space",
+  "references": [
+    {
+      "id": "d1bd6c84-d9d0-56fb-8a72-63fe60020920",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2019-01-22T19:32:31.206Z",
+  "version": "WzI5LDJd"
+}
+
+{
+  "attributes": {
+    "description": "",
     "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
@@ -74,4 +103,42 @@
   "type": "dashboard",
   "updated_at": "2019-01-22T19:32:47.232Z",
   "version": "WzMwLDJd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"w\":48,\"h\":15,\"x\":0,\"y\":15,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_2\"}]",
+    "timeRestore": true,
+    "timeFrom": "2015-09-19T17:34:10.297Z",
+    "timeTo": "2015-09-23T00:09:17.180Z",
+    "title": "A Dashboard in another space + Delay 5s",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "f9e8d7c6-b5a4-9382-7160-f5e4d3c2b1a0",
+  "migrationVersion": {
+    "dashboard": "8.3.0"
+  },
+  "originId": "my-dashboard-with-delay",
+  "references": [
+    {
+      "id": "73f456f1-e0df-570b-82c1-0ff40e1321b9",
+      "name": "1:panel_1",
+      "type": "visualization"
+    },
+    {
+      "id": "a1b2c3d4-e5f6-789a-bcde-f0123456789a",
+      "name": "2:panel_2",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2019-01-22T19:32:47.232Z",
+  "version": "WzMxLDJd"
 }

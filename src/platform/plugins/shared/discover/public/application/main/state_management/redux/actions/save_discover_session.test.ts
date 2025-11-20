@@ -134,8 +134,6 @@ describe('saveDiscoverSession', () => {
     );
     const setDataViewSpy = jest.spyOn(dataViewsActions, 'setDataView');
     const setSavedSearchSpy = jest.spyOn(state.savedSearchState, 'set');
-    const undoSavedSearchChangesSpy = jest.spyOn(state.actions, 'undoSavedSearchChanges');
-    const resetInitialStateSpy = jest.spyOn(state.appState, 'resetInitialState');
     const currentTabId = state.getCurrentTab().id;
 
     jest
@@ -155,8 +153,6 @@ describe('saveDiscoverSession', () => {
     expect(setSavedSearchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ breakdownField: 'breakdown-test' })
     );
-    expect(undoSavedSearchChangesSpy).toHaveBeenCalled();
-    expect(resetInitialStateSpy).toHaveBeenCalled();
   });
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {
@@ -271,8 +267,9 @@ describe('saveDiscoverSession', () => {
     expect(createdSpec.name).toBe('Adhoc Name');
 
     const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    const savedTab = tabs.find((t) => t.id === 'adhoc-replace-tab');
-
+    expect(tabs).toHaveLength(2);
+    const savedTab = tabs[1];
+    expect(savedTab?.id).toBe('test-uuid');
     expect((savedTab?.serializedSearchSource?.index as DataViewSpec).id).toBe('test-uuid');
     expect(savedTab?.serializedSearchSource?.filter?.[0].meta.index).toBe('test-uuid');
   });
@@ -353,8 +350,10 @@ describe('saveDiscoverSession', () => {
     expect(dataViewsClearCacheSpy).not.toHaveBeenCalled();
 
     const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    const savedTab = tabs.find((t) => t.id === 'esql-tab');
+    expect(tabs).toHaveLength(2);
 
+    const savedTab = tabs[1];
+    expect(savedTab?.id).toBe('test-uuid');
     expect((savedTab?.serializedSearchSource.index as DataViewSpec).id).toBe(esqlId);
   });
 

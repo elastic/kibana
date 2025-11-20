@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import { validateInternalRuleType } from '../../../../lib/validate_internal_rule_type';
 import {
   snoozeBodyInternalSchemaV1,
   snoozeParamsInternalSchemaV1,
@@ -39,9 +40,20 @@ export const snoozeRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
+        const ruleTypes = alertingContext.listTypes();
+
         const params: SnoozeRuleRequestInternalParamsV1 = req.params;
         const body = transformSnoozeBodyV1(req.body);
+
         try {
+          const rule = await rulesClient.get({ id: params.id });
+
+          validateInternalRuleType({
+            ruleTypeId: rule.alertTypeId,
+            ruleTypes,
+            operationText: 'snooze',
+          });
+
           await rulesClient.snooze({ ...params, ...body });
           return res.noContent();
         } catch (e) {

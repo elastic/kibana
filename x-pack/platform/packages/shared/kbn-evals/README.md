@@ -70,6 +70,7 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, phoenix
 | `inferenceClient`           | Bound to the connector declared by the active Playwright project.                           |
 | `phoenixClient`             | Client for the Phoenix API (to run experiments)                                             |
 | `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets |
+| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)          |
 
 ## Running the suite
 
@@ -104,6 +105,50 @@ Now run the tests exactly like a normal Scout/Playwright suite in another termin
 ```bash
 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
 ```
+
+## Customizing Report Display
+
+By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
+
+```ts
+// my_eval.test.ts
+import {
+  evaluate as base,
+  type EvaluationScoreRepository,
+  type EvaluationScoreDocument,
+} from '@kbn/evals';
+
+export const evaluate = base.extend({
+  reportModelScore: async ({}, use) => {
+    // Custom reporter implementation
+    await use(async (scoreRepository, runId, log) => {
+      // Query Elasticsearch for evaluation results
+      const docs = await scoreRepository.getScoresByRunId(runId);
+
+      if (docs.length === 0) {
+        log.error(`No results found for run: ${runId}`);
+        return;
+      }
+
+      // Build your custom report
+      log.info('=== CUSTOM REPORT ===');
+      log.info(`Model: ${docs[0].model.id}`);
+      log.info(`Run ID: ${runId}`);
+      log.info(`Total evaluations: ${docs.length}`);
+
+      // Group by dataset, calculate aggregates, write to file, etc.
+      const datasetResults = groupByDataset(docs);
+      writeToFile(`report-${runId}.json`, datasetResults);
+    });
+  },
+});
+
+evaluate('my test', async ({ phoenixClient }) => {
+  // Your test logic here
+});
+```
+
+**Note:** Elasticsearch export always happens first and is not affected by custom reporters. This ensures all results are persisted regardless of custom reporting logic.
 
 ## Elasticsearch Export
 
@@ -187,6 +232,33 @@ The helper will spin up one `local` project per available connector so results a
 ```bash
 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
 ```
+
+### Selecting specific evaluators
+
+To enable selective evaluator execution, wrap your evaluators with the `selectEvaluators` function:
+
+```ts
+import { selectEvaluators } from '@kbn/evals';
+
+await phoenixClient.runExperiment(
+  {
+    dataset,
+    task: myTask,
+  },
+  selectEvaluators([
+    ...createQuantitativeCorrectnessEvaluators(),
+    createQuantitativeGroundednessEvaluator(),
+  ])
+);
+```
+
+Then control which evaluators run using the `SELECTED_EVALUATORS` environment variable with a comma-separated list of evaluator names:
+
+```bash
+SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+```
+
+If not specified, all evaluators will run by default.
 
 ### Repeated evaluations
 

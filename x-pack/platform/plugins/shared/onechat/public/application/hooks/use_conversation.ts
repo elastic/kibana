@@ -5,23 +5,32 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
-import { useSendMessage } from '../context/send_message_context';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { queryKeys } from '../query_keys';
-import { newConversationId } from '../utils/new_conversation';
-import { useConversationId } from './use_conversation_id';
+import { newConversationId, createNewRound } from '../utils/new_conversation';
+import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
+import { storageKeys } from '../storage_keys';
+import { useSendMessage } from '../context/send_message/send_message_context';
+import { useValidateAgentId } from './agents/use_validate_agent_id';
+import { useConversationContext } from '../context/conversation/conversation_context';
+import { rebuildAttachmentMapFromConversation } from '../context/conversation/rebuild_attachment_map_from_conversation';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
+  const { setAttachmentMap } = useConversationContext();
+
   const {
     data: conversation,
     isLoading,
+    isFetching,
     isFetched,
   } = useQuery({
     queryKey,
@@ -34,19 +43,57 @@ export const useConversation = () => {
       }
       return conversationsService.get({ conversationId });
     },
+    onSuccess: (data) => {
+      if (setAttachmentMap) {
+        setAttachmentMap(rebuildAttachmentMapFromConversation(data));
+      }
+    },
   });
 
-  return { conversation, isLoading, isFetched };
+  return { conversation, isLoading, isFetching, isFetched };
 };
 
 export const useConversationStatus = () => {
-  const { isLoading, isFetched } = useConversation();
-  return { isLoading, isFetched };
+  const { isLoading, isFetching, isFetched } = useConversation();
+  return { isLoading, isFetching, isFetched };
+};
+
+const useGetNewConversationAgentId = () => {
+  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const validateAgentId = useValidateAgentId();
+
+  // Ensure we always return a string
+  return (): string => {
+    const isAgentIdValid = validateAgentId(agentIdStorage);
+    if (isAgentIdValid) {
+      return agentIdStorage;
+    }
+    return oneChatDefaultAgentId;
+  };
 };
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
-  return conversation?.agent_id;
+  const context = useConversationContext();
+  const agentId = conversation?.agent_id;
+  const conversationId = useConversationId();
+  const isNewConversation = !conversationId;
+  const getNewConversationAgentId = useGetNewConversationAgentId();
+
+  if (agentId) {
+    return agentId;
+  }
+
+  if (context.agentId) {
+    return context.agentId;
+  }
+
+  // For new conversations, agent id must be defined
+  if (isNewConversation) {
+    return getNewConversationAgentId();
+  }
+
+  return undefined;
 };
 
 export const useConversationTitle = () => {
@@ -61,10 +108,8 @@ export const useConversationRounds = () => {
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
     if (Boolean(error) && pendingMessage) {
-      return [
-        ...rounds,
-        { id: '', input: { message: pendingMessage }, response: { message: '' }, steps: [] },
-      ];
+      const pendingRound = createNewRound({ userMessage: pendingMessage, roundId: '' });
+      return [...rounds, pendingRound];
     }
     return rounds;
   }, [conversation?.rounds, error, pendingMessage]);

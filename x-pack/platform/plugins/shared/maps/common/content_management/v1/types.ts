@@ -11,6 +11,7 @@ import type {
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 import type { MapContentType } from '../types';
+import type { MapAttributes } from '../../../server';
 
 export type MapCrudTypes = ContentManagementCrudTypes<
   MapContentType,
@@ -22,12 +23,3 @@ export type MapCrudTypes = ContentManagementCrudTypes<
     onlyTitle?: boolean;
   }
 >;
-
-/* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
-export type MapAttributes = {
-  title: string;
-  description?: string;
-  mapStateJSON?: string;
-  layerListJSON?: string;
-  uiStateJSON?: string;
-};

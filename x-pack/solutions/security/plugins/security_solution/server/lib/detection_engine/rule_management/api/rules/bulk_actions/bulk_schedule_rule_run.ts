@@ -7,6 +7,7 @@
 
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import type { ScheduleBackfillParams } from '@kbn/alerting-plugin/server/application/backfill/methods/schedule/types';
+import { backfillInitiator } from '@kbn/alerting-plugin/common/constants';
 import type { BulkManualRuleRun } from '../../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
@@ -62,6 +63,7 @@ export const bulkScheduleBackfill = async ({
   // Then if it's not a dry run, we schedule backfill for the rules that passed the validation
   const params: ScheduleBackfillParams = validatedRules.map(({ id }) => ({
     ruleId: id,
+    initiator: backfillInitiator.USER,
     ranges: [{ start: runPayload.start_date, end: runPayload.end_date }],
   }));
 

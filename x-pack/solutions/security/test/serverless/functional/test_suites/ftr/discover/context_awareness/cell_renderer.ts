@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
 
-  describe('cell renderer', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/233484
+  describe.skip('cell renderer', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
       await PageObjects.common.navigateToApp('security', {

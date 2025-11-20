@@ -12,6 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
 import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,
@@ -66,4 +69,64 @@ export const createTabItem = (allTabs: TabState[]): TabItem => {
   const label = nextNumber ? `${baseLabel} ${nextNumber}` : baseLabel;
 
   return { id, label };
+};
+
+/**
+ * Parses a JSON string into a ControlPanelsState object.
+ * If the JSON is invalid or null, it returns an empty object.
+ *
+ * @param jsonString - The JSON string to parse.
+ * @returns A ControlPanelsState object or an empty object if parsing fails.
+ */
+
+export const parseControlGroupJson = (
+  jsonString?: string | null
+): ControlPanelsState<ESQLControlState> => {
+  try {
+    return jsonString ? JSON.parse(jsonString) : {};
+  } catch (e) {
+    return {};
+  }
+};
+
+/**
+ * @param panels - The control panels state, which may be null.
+ * @description Extracts ESQL variables from the control panels state.
+ * Each ESQL control panel is expected to have a `variableName`, `variableType`, and `selectedOptions`.
+ * Returns an array of `ESQLControlVariable` objects.
+ * If `panels` is null or empty, it returns an empty array.
+ * @returns An array of ESQLControlVariable objects.
+ */
+export const extractEsqlVariables = (
+  panels: ControlPanelsState<ESQLControlState> | null
+): ESQLControlVariable[] => {
+  if (!panels || Object.keys(panels).length === 0) {
+    return [];
+  }
+  const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
+    if (panel.type === ESQL_CONTROL) {
+      const isSingleSelect = panel.singleSelect ?? true;
+      const selectedValues = panel.selectedOptions || [];
+
+      let value: string | number | (string | number)[];
+
+      if (isSingleSelect) {
+        // Single select: return the first selected value, converting to number if possible
+        const singleValue = selectedValues[0];
+        value = isNaN(Number(singleValue)) ? singleValue : Number(singleValue);
+      } else {
+        // Multi select: return array with numbers converted from strings when possible
+        value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
+      }
+
+      acc.push({
+        key: panel.variableName,
+        type: panel.variableType,
+        value,
+      });
+    }
+    return acc;
+  }, []);
+
+  return variables;
 };

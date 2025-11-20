@@ -6063,6 +6063,22 @@
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewListItem.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nWhether the data view is managed by the application."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7046,7 +7062,7 @@
             "signature": [
               "{ name: string; backing_indices?: string[] | undefined; timestamp_field?: string | undefined; indices?: string[] | undefined; aliases?: string[] | undefined; attributes?: ",
               "ResolveIndexResponseItemIndexAttrs",
-              "[] | undefined; data_stream?: string | undefined; }"
+              "[] | undefined; data_stream?: string | undefined; mode?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
             "deprecated": false,
@@ -7288,7 +7304,7 @@
                 "section": "def-common.DataViewAttributes",
                 "text": "DataViewAttributes"
               },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; managed?: boolean | undefined; }) => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -7364,6 +7380,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.PersistenceAPI.create.$2.managed",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "managed",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -7651,7 +7681,7 @@
           },
           "> | undefined; fieldAttrs?: ",
           "FieldAttrsAsObject",
-          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
         "deprecated": false,
@@ -13678,6 +13708,10 @@
                 "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
+              },
+              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/data_views_service/loader.ts"
               },
@@ -13692,10 +13726,6 @@
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "ml",
@@ -13907,15 +13937,23 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/modules/indicators/hooks/use_ti_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-observability",
@@ -14008,6 +14046,14 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/public/components/edit_index_pattern/create_edit_field/create_edit_field.tsx"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_index_form.tsx"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_index_form.tsx"
               },
               {
                 "plugin": "inputControlVis",
@@ -14103,15 +14149,15 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/explore/network/pages/details/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
               }
             ]
           },
@@ -14639,6 +14685,19 @@
             "description": [],
             "signature": [
               "string[]"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/abstract_data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.AbstractDataView.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nWhether the data view is managed by the application."
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/abstract_data_views.ts",
             "deprecated": false,
@@ -21695,6 +21754,22 @@
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewListItem.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nWhether the data view is managed by the application."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -25109,7 +25184,7 @@
               },
               "> | undefined; fieldAttrs?: ",
               "FieldAttrsAsObject",
-              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/common/expressions/load_index_pattern.ts",
             "deprecated": false,
@@ -25351,7 +25426,7 @@
                 "section": "def-common.DataViewAttributes",
                 "text": "DataViewAttributes"
               },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; managed?: boolean | undefined; }) => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -25427,6 +25502,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-common.PersistenceAPI.create.$2.managed",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "managed",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -25784,18 +25873,6 @@
             "references": [
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
@@ -25813,10 +25890,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
@@ -26798,7 +26871,7 @@
           },
           "> | undefined; fieldAttrs?: ",
           "FieldAttrsAsObject",
-          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
         "deprecated": false,

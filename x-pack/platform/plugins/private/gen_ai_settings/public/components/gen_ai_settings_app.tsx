@@ -18,7 +18,6 @@ import {
   EuiTitle,
   EuiLink,
   useEuiTheme,
-  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +25,6 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '../../common/constants';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
@@ -35,6 +33,7 @@ import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_
 import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
+import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -42,8 +41,13 @@ interface GenAiSettingsAppProps {
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks, notifications, featureFlags } = services;
-  const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
+  const { application, http, docLinks } = services;
+  const {
+    showSpacesIntegration,
+    isPermissionsBased,
+    showAiBreadcrumb,
+    showAiAssistantsVisibilitySetting,
+  } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
 
@@ -88,11 +92,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     });
   }, [application, http.basePath, isPermissionsBased]);
 
-  const showDefaultLlmSetting = featureFlags.getBooleanValue(
-    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    false
-  );
-
   const connectorDescription = useMemo(() => {
     if (!hasElasticManagedLlm) {
       return (
@@ -103,7 +102,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               hasConnectorsAllPrivilege ? 'set up' : 'have'
             } a Generative AI connector. {manageConnectors}`}
             values={{
-              manageConnectors: showDefaultLlmSetting ? (
+              manageConnectors: (
                 <EuiLink
                   href={application.getUrlForApp('management', {
                     path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
@@ -117,7 +116,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                     }
                   />
                 </EuiLink>
-              ) : null,
+              ),
             }}
           />
         </p>
@@ -147,7 +146,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 />
               </EuiLink>
             ),
-            manageConnectors: showDefaultLlmSetting ? (
+            manageConnectors: (
               <EuiLink
                 href={application.getUrlForApp('management', {
                   path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
@@ -159,7 +158,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   defaultMessage="Manage connectors"
                 />
               </EuiLink>
-            ) : null,
+            ),
             elasticManagedLlm: (
               <strong>
                 <FormattedMessage
@@ -189,51 +188,14 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     canManageSpaces,
     docLinks,
     application,
-    showDefaultLlmSetting,
   ]);
 
   async function handleSave() {
-    try {
-      await saveAll();
-    } catch (e) {
-      const error = e as Error;
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.observabilityAiAssistantManagement.save.error', {
-          defaultMessage: 'An error occurred while saving the settings',
-        }),
-        text: error.message,
-      });
-      throw error;
+    const needsReload = await saveAll();
+    if (needsReload) {
+      window.location.reload();
     }
   }
-
-  const manageConnectorsButton = useMemo(() => {
-    return (
-      <EuiButton
-        iconType="popout"
-        iconSide="right"
-        data-test-subj="manageConnectorsLink"
-        onClick={() => {
-          application.navigateToApp('management', {
-            path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
-            openInNewTab: true,
-          });
-        }}
-      >
-        {hasConnectorsAllPrivilege ? (
-          <FormattedMessage
-            id="genAiSettings.goToConnectorsButtonLabel"
-            defaultMessage="Manage connectors"
-          />
-        ) : (
-          <FormattedMessage
-            id="genAiSettings.viewConnectorsButtonLabel"
-            defaultMessage="View connectors"
-          />
-        )}
-      </EuiButton>
-    );
-  }, [application, hasConnectorsAllPrivilege]);
 
   return (
     <>
@@ -276,11 +238,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               <EuiFormRow fullWidth>
                 <EuiFlexGroup gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    {showDefaultLlmSetting ? (
-                      <DefaultAIConnector connectors={connectors} />
-                    ) : (
-                      manageConnectorsButton
-                    )}
+                    <DefaultAIConnector connectors={connectors} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFormRow>
@@ -363,6 +321,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   />
                 </EuiFormRow>
               </EuiDescribedFormGroup>
+            )}
+            {showAiAssistantsVisibilitySetting && (
+              <EuiFlexItem>
+                <AIAssistantVisibility />
+              </EuiFlexItem>
             )}
           </EuiPanel>
         </EuiPageSection>

@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FAIL_TIMELINE_DETAILS = i18n.translate(
-  'xpack.securitySolution.timeline.failDescription',
-  {
-    defaultMessage: 'An error has occurred',
-  }
-);
-
 export const FAIL_TIMELINE_SEARCH_DETAILS = i18n.translate(
   'xpack.securitySolution.timeline.failSearchDescription',
   {

@@ -10,20 +10,15 @@ import { i18n } from '@kbn/i18n';
 export const progressMessages = {
   selectingTarget: () => {
     return i18n.translate('xpack.onechat.tools.search.progress.selectingTarget', {
-      defaultMessage: 'Selecting the best target for this query',
+      defaultMessage: 'Identifying the most relevant data source',
     });
   },
-  selectedTarget: (target: string) => {
-    return i18n.translate('xpack.onechat.tools.search.progress.selectedTarget', {
-      defaultMessage: 'Selected "{target}" as the next search target',
+  resolvingSearchStrategy: ({ target }: { target: string }) => {
+    return i18n.translate('xpack.onechat.tools.search.progress.searchStrategy', {
+      defaultMessage: 'Analyzing strategy to search against "{target}"',
       values: {
         target,
       },
-    });
-  },
-  resolvingSearchStrategy: () => {
-    return i18n.translate('xpack.onechat.tools.search.progress.searchStrategy', {
-      defaultMessage: 'Thinking about the search strategy to use',
     });
   },
   performingRelevanceSearch: ({ term }: { term: string }) => {
@@ -36,7 +31,7 @@ export const progressMessages = {
   },
   performingNlSearch: ({ query }: { query: string }) => {
     return i18n.translate('xpack.onechat.tools.search.progress.performingTextSearch', {
-      defaultMessage: 'Generating an ES|QL for "{query}"',
+      defaultMessage: 'Generating an ES|QL query for "{query}"',
       values: {
         query,
       },

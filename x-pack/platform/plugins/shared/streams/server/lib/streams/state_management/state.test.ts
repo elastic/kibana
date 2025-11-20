@@ -43,6 +43,7 @@ describe('State', () => {
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
+        settings: {},
         wired: {
           fields: {},
           routing: [],
@@ -55,6 +56,7 @@ describe('State', () => {
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
+        settings: {},
         classic: {},
       },
     };

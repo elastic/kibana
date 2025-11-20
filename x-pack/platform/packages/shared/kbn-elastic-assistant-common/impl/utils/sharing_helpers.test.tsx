@@ -45,13 +45,18 @@ describe('getIsConversationOwner', () => {
   const user: User = { id: 'user1', name: 'Alice' };
   const otherUser: User = { id: 'user2', name: 'Bob' };
 
-  it('returns false when undefined user', () => {
+  it('returns true when undefined user', () => {
     const conversation = { id: 'abc', createdBy: user, users: [user] };
-    expect(getIsConversationOwner(conversation, undefined)).toBe(false);
+    expect(getIsConversationOwner(conversation, undefined)).toBe(true);
   });
 
-  it('returns false when undefined conversation', () => {
-    expect(getIsConversationOwner(undefined, user)).toBe(false);
+  it('returns true when undefined conversation', () => {
+    expect(getIsConversationOwner(undefined, user)).toBe(true);
+  });
+
+  it('returns true when user is empty object', () => {
+    const conversation = { id: 'abc', createdBy: user, users: [user] };
+    expect(getIsConversationOwner(conversation, {})).toBe(true);
   });
 
   it('returns true when empty conversation id (is new conversation)', () => {

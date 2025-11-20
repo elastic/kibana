@@ -8,7 +8,7 @@
  */
 
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
-import type { ValueFormatConfig } from '@kbn/lens-plugin/common';
+import type { ValueFormatConfig } from '@kbn/lens-common';
 import type { LensApiMetricOperation } from '../../schema/metric_ops';
 
 describe('Format Transforms', () => {

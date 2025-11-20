@@ -10,43 +10,46 @@ export const timeUnits = [
   {
     value: 'd',
     text: i18n.translate('xpack.failureStoreModal.timeUnits.daysLabel', {
-      defaultMessage: 'days',
+      defaultMessage: 'Days',
     }),
   },
   {
     value: 'h',
     text: i18n.translate('xpack.failureStoreModal.timeUnits.hoursLabel', {
-      defaultMessage: 'hours',
+      defaultMessage: 'Hours',
     }),
   },
   {
     value: 'm',
     text: i18n.translate('xpack.failureStoreModal.timeUnits.minutesLabel', {
-      defaultMessage: 'minutes',
+      defaultMessage: 'Minutes',
     }),
   },
   {
     value: 's',
     text: i18n.translate('xpack.failureStoreModal.timeUnits.secondsLabel', {
-      defaultMessage: 'seconds',
+      defaultMessage: 'Seconds',
     }),
   },
+];
+
+export const extraTimeUnits = [
   {
     value: 'ms',
     text: i18n.translate('xpack.failureStoreModal.timeUnits.msLabel', {
-      defaultMessage: 'milliseconds',
+      defaultMessage: 'Milliseconds',
     }),
   },
   {
     value: 'micros',
     text: i18n.translate('xpack.failureStoreModal.timeUnits.microsLabel', {
-      defaultMessage: 'microseconds',
+      defaultMessage: 'Microseconds',
     }),
   },
   {
     value: 'nanos',
     text: i18n.translate('xpack.failureStoreModal.timeUnits.nanosLabel', {
-      defaultMessage: 'nanoseconds',
+      defaultMessage: 'Nanoseconds',
     }),
   },
 ];

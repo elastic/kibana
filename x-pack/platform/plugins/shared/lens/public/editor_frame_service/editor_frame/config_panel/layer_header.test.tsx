@@ -18,20 +18,28 @@ import {
 import { LayerHeader } from './layer_header';
 import { renderWithReduxStore } from '../../../mocks';
 import userEvent from '@testing-library/user-event';
-import type { LensAppState } from '../../../state_management';
+import type { DatasourceMap, LensAppState, VisualizationMap } from '@kbn/lens-common';
+import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
+
+interface RenderLayerSettingsOptions {
+  propsOverrides?: Partial<React.ComponentProps<typeof LayerHeader>>;
+  preloadedStateOverrides?: Partial<LensAppState>;
+  datasourceMapOverrides?: DatasourceMap;
+  visualizationMapOverrides?: VisualizationMap;
+}
 
 describe('LayerHeader', () => {
-  const renderLayerSettings = (
+  const renderLayerSettings = ({
     propsOverrides = {},
-    { preloadedStateOverrides }: { preloadedStateOverrides: Partial<LensAppState> } = {
-      preloadedStateOverrides: {},
-    }
-  ) => {
-    const datasourceMap = {
+    preloadedStateOverrides = {},
+    datasourceMapOverrides,
+    visualizationMapOverrides,
+  }: RenderLayerSettingsOptions = {}) => {
+    const datasourceMap = datasourceMapOverrides ?? {
       testDatasource: createMockDatasource(),
       testDatasource2: createMockDatasource('testDatasource2'),
     };
-    const visualizationMap = {
+    const visualizationMap = visualizationMapOverrides ?? {
       testVis: createMockVisualization(),
       testVis2: {
         ...createMockVisualization('testVis2'),
@@ -50,19 +58,19 @@ describe('LayerHeader', () => {
       hiddenVis: { ...createMockVisualization('hiddenVis'), hideFromChartSwitch: () => true },
     };
     const rtlRender = renderWithReduxStore(
-      <LayerHeader
-        datasourceMap={datasourceMap}
-        visualizationMap={visualizationMap}
-        activeVisualizationId="testVis"
-        layerConfigProps={{
-          layerId: 'myLayer',
-          state: {},
-          frame: createMockFramePublicAPI(),
-          setState: jest.fn(),
-          onChangeIndexPattern: jest.fn(),
-        }}
-        {...propsOverrides}
-      />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        <LayerHeader
+          activeVisualizationId="testVis"
+          layerConfigProps={{
+            layerId: 'myLayer',
+            state: {},
+            frame: createMockFramePublicAPI(),
+            setState: jest.fn(),
+            onChangeIndexPattern: jest.fn(),
+          }}
+          {...propsOverrides}
+        />
+      </EditorFrameServiceProvider>,
       {},
       {
         storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
@@ -97,7 +105,7 @@ describe('LayerHeader', () => {
   };
 
   it('should use custom renderer if passed', () => {
-    renderLayerSettings({ activeVisualizationId: 'testVis2' });
+    renderLayerSettings({ propsOverrides: { activeVisualizationId: 'testVis2' } });
     expect(screen.getByText('CustomLayerHeader')).toBeInTheDocument();
     expect(screen.queryByTestId('lnsChartSwitchPopover')).not.toBeInTheDocument();
   });
@@ -123,11 +131,20 @@ describe('LayerHeader', () => {
 
   it('should render static header if only one visualization is available', () => {
     renderLayerSettings({
-      visualizationMap: {
+      preloadedStateOverrides: {},
+      visualizationMapOverrides: {
         testVis: {
           ...createMockVisualization(),
           getDescription: () => ({ label: 'myVisualizationType', icon: 'empty' }),
-          visualizationTypes: ['testVis'],
+          visualizationTypes: [
+            {
+              id: 'testVis',
+              description: 'myVisualizationType',
+              icon: 'empty',
+              label: 'testVis',
+              sortPriority: 1,
+            },
+          ],
         },
       },
     });
@@ -137,8 +154,10 @@ describe('LayerHeader', () => {
 
   it('Discover path: should only allow switch to subtypes when onlyAllowSwitchToSubtypes is true', async () => {
     const { openChartSwitch, getAllChartSwitchOptions } = renderLayerSettings({
-      onlyAllowSwitchToSubtypes: true,
-      activeVisualizationId: 'testVis3',
+      propsOverrides: {
+        onlyAllowSwitchToSubtypes: true,
+        activeVisualizationId: 'testVis3',
+      },
     });
     await openChartSwitch();
     expect(getAllChartSwitchOptions()).toEqual([

@@ -12,12 +12,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
@@ -206,17 +205,19 @@ export class EditRoleMappingPage extends Component<Props, State> {
           />
           &nbsp;
           {this.isReadOnlyRoleMapping() && (
-            <EuiToolTip
-              data-test-subj="readOnlyRoleMappingTooltip"
+            <EuiIconTip
               content={
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.readOnlyRoleMappingBadge.readOnlyRoleMappingCanNotBeModifiedTooltip"
                   defaultMessage="Read only role mappings are built-in and cannot be removed or modified."
                 />
               }
-            >
-              <EuiIcon style={{ verticalAlign: 'super' }} type={'lock'} />
-            </EuiToolTip>
+              data-test-subj="readOnlyRoleMappingTooltip"
+              iconProps={{
+                style: { verticalAlign: 'super' },
+              }}
+              type="lock"
+            />
           )}
         </>
       );
@@ -281,6 +282,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
     if (this.checkEmptyAnyAllMappings(this.state.roleMapping!.rules as RoleMappingRule)) {
       return (
         <EuiCallOut
+          announceOnMount
           title="Warning"
           color="warning"
           iconType="alert"

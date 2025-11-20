@@ -5,31 +5,35 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiText,
-  EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common';
+import { type AgentDefinition } from '@kbn/onechat-common';
+import { countBy } from 'lodash';
+import React, { useMemo } from 'react';
+import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
-import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
-import { useDeleteAgent } from '../../../context/delete_agent_context';
+import { appPaths } from '../../../utils/app_paths';
+import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
+import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../agent_avatar';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const columnNames = {
   name: i18n.translate('xpack.onechat.agents.nameColumn', { defaultMessage: 'Name' }),
@@ -57,19 +61,23 @@ const actionLabels = {
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useOnechatAgents();
+  const { manageAgents } = useUiPrivileges();
   const { createOnechatUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(10);
 
   const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
     const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
       width: '48px',
       align: 'center',
       render: (agent) =>
-        agent.id === oneChatDefaultAgentId ? (
-          <EuiIcon type="logoElastic" size="xl" />
+        agent.readonly && !agent.avatar_symbol ? (
+          <EuiIcon type={agent.avatar_icon ?? 'logoElastic'} size="xl" />
         ) : (
           <AgentAvatar agent={agent} size="m" />
         ),
+      'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
@@ -78,10 +86,15 @@ export const AgentsList: React.FC = () => {
       render: (name: string, agent: AgentDefinition) => (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            {agent.id === oneChatDefaultAgentId ? (
-              <EuiText size="s">{name}</EuiText>
+            {agent.readonly ? (
+              <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
+                {name}
+              </EuiText>
             ) : (
-              <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}>
+              <EuiLink
+                data-test-subj="agentBuilderAgentsListName"
+                href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}
+              >
                 {name}
               </EuiLink>
             )}
@@ -91,20 +104,20 @@ export const AgentsList: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
+      'data-test-subj': 'agentBuilderAgentsListNameAndDescription',
     };
 
     const agentLabels: EuiTableFieldDataColumnType<AgentDefinition> = {
       field: 'labels',
       name: columnNames.labels,
-      render: (labels?: string[]) => (
-        <EuiFlexGroup direction="row" wrap>
-          {labels?.map((label) => (
-            <EuiFlexItem key={label} grow={false}>
-              <EuiBadge>{label}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ),
+      render: (labels?: string[]) => {
+        if (!labels) {
+          return null;
+        }
+
+        return <Labels labels={labels} />;
+      },
+      'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
@@ -114,6 +127,7 @@ export const AgentsList: React.FC = () => {
           icon: 'comment',
           name: actionLabels.chat,
           description: actionLabels.chatDescription,
+          'data-test-subj': (agent) => `agentBuilderAgentsListChat-${agent.id}`,
           isPrimary: true,
           showOnHover: true,
           href: (agent) =>
@@ -124,20 +138,22 @@ export const AgentsList: React.FC = () => {
           icon: 'pencil',
           name: actionLabels.edit,
           description: actionLabels.editDescription,
+          'data-test-subj': (agent) => `agentBuilderAgentsListEdit-${agent.id}`,
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
-          // Don't display edit action for default agent
-          available: (agent) => agent.id !== oneChatDefaultAgentId,
+          available: (agent) => !agent.readonly && manageAgents,
         },
         {
           type: 'icon',
           icon: 'copy',
           name: actionLabels.clone,
           description: actionLabels.cloneDescription,
+          'data-test-subj': (agent) => `agentBuilderAgentsListClone-${agent.id}`,
           showOnHover: true,
           href: (agent) =>
             createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
+          available: () => manageAgents,
         },
         {
           // Have to use a custom action to display the danger color
@@ -148,10 +164,8 @@ export const AgentsList: React.FC = () => {
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiIcon type="trash" color="danger" />
                   <EuiLink
+                    data-test-subj={`agentBuilderAgentsListDelete-${agent.id}`}
                     onClick={() => {
-                      if (agent.id === oneChatDefaultAgentId) {
-                        return;
-                      }
                       deleteAgent({ agent });
                     }}
                     color="danger"
@@ -162,14 +176,13 @@ export const AgentsList: React.FC = () => {
               </EuiToolTip>
             );
           },
-          // Don't display delete action for default agent
-          available: (agent) => agent.id !== oneChatDefaultAgentId,
+          available: (agent) => !agent.readonly && manageAgents,
         },
       ],
     };
 
     return [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
-  }, [createOnechatUrl, deleteAgent]);
+  }, [createOnechatUrl, deleteAgent, manageAgents]);
 
   const errorMessage = useMemo(
     () =>
@@ -183,11 +196,18 @@ export const AgentsList: React.FC = () => {
 
   const labelOptions = useMemo(() => {
     const labels = agents.flatMap((agent) => agent.labels ?? []);
-    return Array.from(new Set(labels)).map((label) => ({ value: label }));
+    const matchesByLabel = countBy(labels);
+    const uniqueLabels = Object.keys(matchesByLabel);
+    return uniqueLabels.map((label) => ({
+      value: label,
+      view: <FilterOptionWithMatchesBadge name={label} matches={matchesByLabel[label]} />,
+    }));
   }, [agents]);
 
   return (
     <EuiInMemoryTable
+      data-test-subj="agentBuilderAgentsListTable"
+      rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
       items={agents}
       itemId={(agent) => agent.id}
       columns={columns}
@@ -202,8 +222,24 @@ export const AgentsList: React.FC = () => {
             options: labelOptions,
             field: 'labels',
             operator: 'exact',
+            autoSortOptions: false,
           },
         ],
+      }}
+      pagination={{
+        pageIndex,
+        pageSize,
+        pageSizeOptions: [10, 25, 50, 100],
+        showPerPageOptions: true,
+      }}
+      onTableChange={({ page }: CriteriaWithPagination<AgentDefinition>) => {
+        if (page) {
+          setPageIndex(page.index);
+          if (page.size !== pageSize) {
+            setPageSize(page.size);
+            setPageIndex(0);
+          }
+        }
       }}
       loading={isLoading}
       error={errorMessage}

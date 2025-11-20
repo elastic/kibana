@@ -26,7 +26,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../constants';
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type {
@@ -44,6 +43,7 @@ import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
+import { deleteComponentTemplates } from '../elasticsearch/template/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
 import { auditLoggingService } from '../../audit_logging';
@@ -237,7 +237,7 @@ export const deleteESAsset = async (
   } else if (assetType === ElasticsearchAssetType.indexTemplate) {
     return deleteIndexTemplate(esClient, id);
   } else if (assetType === ElasticsearchAssetType.componentTemplate) {
-    return deleteComponentTemplate(esClient, id);
+    return deleteComponentTemplates(esClient, [id]);
   } else if (assetType === ElasticsearchAssetType.transform) {
     return deleteTransforms(esClient, [id], true);
   } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
@@ -415,17 +415,6 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
   }
 }
 
-async function deleteComponentTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
-  // '*' shouldn't ever appear here, but it still would delete all templates
-  if (name && name !== '*' && !name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX)) {
-    try {
-      await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
-    } catch (error) {
-      throw new FleetError(`Error deleting component template ${name}: ${error.message}`);
-    }
-  }
-}
-
 export async function deleteKibanaSavedObjectsAssets({
   savedObjectsClient,
   installedPkg,
@@ -504,9 +493,9 @@ export function cleanupComponentTemplate(
   esClient: ElasticsearchClient
 ) {
   const idsToDelete = installedObjects
-    .filter((asset) => asset.type === ElasticsearchAssetType.mlModel)
+    .filter((asset) => asset.type === ElasticsearchAssetType.componentTemplate)
     .map((asset) => asset.id);
-  return deleteComponentTemplate(esClient, idsToDelete[0]);
+  return deleteComponentTemplates(esClient, idsToDelete);
 }
 
 export function cleanupTransforms(

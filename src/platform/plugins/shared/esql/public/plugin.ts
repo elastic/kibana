@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -21,6 +20,11 @@ import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups
 
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { registerESQLEditorAnalyticsEvents } from '@kbn/esql-editor';
+import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -40,12 +44,15 @@ interface EsqlPluginSetupDependencies {
 
 interface EsqlPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
-  expressions: ExpressionsStart;
   uiActions: UiActionsStart;
-  data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
+  // LOOKUP JOIN deps
+  share: SharePluginStart;
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  fileUpload: FileUploadPluginStart;
 }
 
 export interface EsqlPluginStart {
@@ -55,12 +62,18 @@ export interface EsqlPluginStart {
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   variablesService: EsqlVariablesService;
+  isServerless: boolean;
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
-  public setup(_: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
     uiActions.registerTrigger(updateESQLQueryTrigger);
     uiActions.registerTrigger(esqlControlTrigger);
+
+    registerESQLEditorAnalyticsEvents(core.analytics);
+    registerIndexEditorAnalyticsEvents(core.analytics);
 
     return {};
   }
@@ -69,14 +82,18 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     core: CoreStart,
     {
       dataViews,
-      expressions,
       data,
       uiActions,
       fieldsMetadata,
       usageCollection,
       licensing,
+      fileUpload,
+      fieldFormats,
+      share,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+
     const storage = new Storage(localStorage);
 
     // Register triggers
@@ -102,6 +119,16 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
         data.query.timefilter.timefilter
       );
       return createESQLControlAction;
+    });
+
+    /** Async register the index editor UI actions */
+    registerIndexEditorActions({
+      data,
+      coreStart: core,
+      share,
+      uiActions,
+      fieldFormats,
+      fileUpload,
     });
 
     const variablesService = new EsqlVariablesService();
@@ -138,8 +165,9 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       queryString: string,
       activeSolutionId: SolutionId
     ) => {
+      const encodedQuery = encodeURIComponent(queryString);
       const result = await core.http.get(
-        `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryString}`
+        `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${encodedQuery}`
       );
       return result;
     };
@@ -164,6 +192,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     );
 
     const start = {
+      isServerless,
       getJoinIndicesAutocomplete,
       getTimeseriesIndicesAutocomplete,
       getEditorExtensionsAutocomplete: cachedGetEditorExtensionsAutocomplete,
@@ -172,17 +201,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       getLicense: async () => await licensing?.getLicense(),
     };
 
-    setKibanaServices(
-      start,
-      core,
-      dataViews,
-      data,
-      expressions,
-      storage,
-      uiActions,
-      fieldsMetadata,
-      usageCollection
-    );
+    setKibanaServices(start, core, data, storage, uiActions, fieldsMetadata, usageCollection);
 
     return start;
   }

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "cheerio", "node"]
@@ -15,5 +15,6 @@
     "@kbn/std",
     "@kbn/expect",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/test-jest-helpers",
   ]
 }

@@ -28,6 +28,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -112,10 +113,15 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('addFilter');
   }
 
+  public async isDataGridUpdating() {
+    return await this.testSubjects.exists('discoverDataGridUpdating');
+  }
+
   public async waitUntilSearchingHasFinished() {
     await this.testSubjects.missingOrFail('loadingSpinner', {
       timeout: this.defaultFindTimeout * 10,
     });
+    // TODO: Should we add a check for `discoverDataGridUpdating` too?
   }
 
   public async waitUntilTabIsLoaded() {
@@ -173,12 +179,17 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickSaveSearchButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton');
     await this.testSubjects.click('discoverSaveButton');
   }
 
   public async clickLoadSavedSearchButton() {
     await this.testSubjects.moveMouseTo('discoverOpenButton');
     await this.testSubjects.click('discoverOpenButton');
+  }
+
+  public async hasUnsavedChangesBadge() {
+    return await this.testSubjects.exists('unsavedChangesBadge');
   }
 
   public async revertUnsavedChanges() {
@@ -470,6 +481,15 @@ export class DiscoverPageObject extends FtrService {
 
   public async expectSourceViewerToExist() {
     return await this.find.byClassName('monaco-editor');
+  }
+
+  public async expectDocTableToBeLoaded() {
+    const renderComplete = await this.testSubjects.getAttribute(
+      'discoverDocTable',
+      'data-render-complete'
+    );
+
+    expect(renderComplete).to.be('true');
   }
 
   public async findFieldByNameOrValueInDocViewer(name: string) {
@@ -795,6 +815,7 @@ export class DiscoverPageObject extends FtrService {
       await this.fieldEditor.setPopularity(popularity);
     }
     await this.fieldEditor.save();
+    await this.fieldEditor.waitUntilClosed();
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -843,5 +864,22 @@ export class DiscoverPageObject extends FtrService {
     await this.browser.pressKeys(this.browser.keys.RIGHT);
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.waitForDropToFinish();
+  }
+
+  /**
+   * Saves the Discover chart to a new dashboard
+   * It doesn't save to library
+   * @param title
+   */
+  public async saveHistogramToDashboard(title: string) {
+    await this.timeToVisualize.setSaveModalValues(title, {
+      saveAsNew: true,
+      redirectToOrigin: false,
+      addToDashboard: 'new',
+      saveToLibrary: false,
+    });
+
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.testSubjects.missingOrFail('confirmSaveSavedObjectButton');
   }
 }

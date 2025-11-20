@@ -14,8 +14,7 @@ export const createMetricsContextServiceMock = () => {
   const metricsExperienceClient: MetricsExperienceClient = {
     getDimensions: jest.fn().mockResolvedValue([]),
     getFields: jest.fn().mockResolvedValue([]),
-    postData: jest.fn().mockResolvedValue({}),
-    getIndexPatternMetadata: jest.fn().mockResolvedValue({ indexPatternMetadata: {} }),
+    searchFields: jest.fn().mockResolvedValue([]),
   };
 
   return getMetricsContextService({

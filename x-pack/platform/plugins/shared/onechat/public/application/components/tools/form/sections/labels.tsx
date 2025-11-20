@@ -32,10 +32,6 @@ export const Labels = ({ mode }: LabelsProps) => {
       title={i18nMessages.toolLabels.documentation.title}
       icon="tag"
       description={i18nMessages.toolLabels.documentation.description}
-      documentation={{
-        title: i18nMessages.toolLabels.documentation.documentationLink,
-        href: '#', // TODO: add documentation link when available
-      }}
     >
       <EuiFormRow
         label={i18nMessages.toolLabels.form.label}

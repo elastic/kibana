@@ -19,7 +19,7 @@
         "label": "createTracedEsClient",
         "description": [],
         "signature": [
-          "({\n  client,\n  logger,\n  plugin,\n  labels,\n}: { client: ",
+          "({\n  client,\n  abortSignal,\n  logger,\n  plugin,\n  labels,\n}: { client: ",
           "ElasticsearchClient",
           "; logger: ",
           {
@@ -29,7 +29,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; plugin?: string | undefined; labels?: Record<string, string> | undefined; }) => ",
+          "; abortSignal?: AbortSignal | undefined; plugin?: string | undefined; labels?: Record<string, string> | undefined; }) => ",
           {
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
@@ -47,7 +47,7 @@
             "id": "def-server.createTracedEsClient.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  logger,\n  plugin,\n  labels,\n}",
+            "label": "{\n  client,\n  abortSignal,\n  logger,\n  plugin,\n  labels,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
             "deprecated": false,
@@ -1068,6 +1068,20 @@
                     "section": "def-common.Logger",
                     "text": "Logger"
                   }
+                ],
+                "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/traced-es-client",
+                "id": "def-server.createTracedEsClient.$1.abortSignal",
+                "type": "Object",
+                "tags": [],
+                "label": "abortSignal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
                 "deprecated": false,
@@ -2610,16 +2624,16 @@
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
             "docId": "kibKbnTracedEsClientPluginApi",
-            "section": "def-server.UnparsedEsqlResponse",
-            "text": "UnparsedEsqlResponse"
+            "section": "def-server.ParsedEsqlResponse",
+            "text": "ParsedEsqlResponse"
           },
           " | ",
           {
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
             "docId": "kibKbnTracedEsClientPluginApi",
-            "section": "def-server.ParsedEsqlResponse",
-            "text": "ParsedEsqlResponse"
+            "section": "def-server.UnparsedEsqlResponse",
+            "text": "UnparsedEsqlResponse"
           }
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
@@ -2672,7 +2686,7 @@
           "FieldValue",
           "[] | undefined; filter?: ",
           "QueryDslQueryContainer",
-          " | undefined; query: string; profile?: boolean | undefined; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; locale?: string | undefined; delimiter?: string | undefined; tables?: Record<string, Record<string, ",
+          " | undefined; query: string; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; profile?: boolean | undefined; locale?: string | undefined; delimiter?: string | undefined; tables?: Record<string, Record<string, ",
           "EsqlTableValuesContainer",
           ">> | undefined; drop_null_columns?: boolean | undefined; allow_partial_results?: boolean | undefined; include_ccs_metadata?: boolean | undefined; }"
         ],

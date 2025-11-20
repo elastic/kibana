@@ -17,12 +17,17 @@ import {
   mergeConfigHeadersWithSecretHeaders,
 } from '@kbn/actions-plugin/server/lib';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { CONNECTOR_NAME } from '@kbn/connector-schemas/cases_webhook';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
+import type {
+  CasesWebhookPublicConfigurationType,
+  ExternalServiceIncidentResponse,
+} from '@kbn/connector-schemas/cases_webhook';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
-import { WebhookMethods } from '../../../common/auth/constants';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 
 import {
-  createServiceError,
+  addServiceMessageToError,
   getObjectValueByKeyAsString,
   stringifyObjValues,
   removeSlash,
@@ -32,14 +37,10 @@ import type {
   CreateIncidentParams,
   ExternalServiceCredentials,
   ExternalService,
-  CasesWebhookPublicConfigurationType,
-  ExternalServiceIncidentResponse,
   GetIncidentResponse,
   UpdateIncidentParams,
   CreateCommentParams,
 } from './types';
-
-import * as i18n from './translations';
 
 export const createExternalService = (
   actionId: string,
@@ -84,11 +85,11 @@ export const createExternalService = (
     authType,
     basicAuth,
     sslOverrides,
-    connectorName: i18n.NAME,
+    connectorName: CONNECTOR_NAME,
   });
 
   if (!getIncidentUrl || !createIncidentUrlConfig || !viewIncidentUrl || !updateIncidentUrl) {
-    throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
+    throw Error(`[Action]${CONNECTOR_NAME}: Wrong configuration.`);
   }
 
   const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
@@ -159,7 +160,7 @@ export const createExternalService = (
 
       return { id, title };
     } catch (error) {
-      throw createServiceError(error, `Unable to get case with id ${id}`);
+      throw addServiceMessageToError(error, `Unable to get case with id ${id}`);
     }
   };
 
@@ -230,7 +231,7 @@ export const createExternalService = (
         pushedDate: new Date().toISOString(),
       };
     } catch (error) {
-      throw createServiceError(error, 'Unable to create case');
+      throw addServiceMessageToError(error, 'Unable to create case');
     }
   };
 
@@ -312,7 +313,7 @@ export const createExternalService = (
         pushedDate: new Date().toISOString(),
       };
     } catch (error) {
-      throw createServiceError(error, `Unable to update case with id ${incidentId}`);
+      throw addServiceMessageToError(error, `Unable to update case with id ${incidentId}`);
     }
   };
 
@@ -362,7 +363,10 @@ export const createExternalService = (
         res,
       });
     } catch (error) {
-      throw createServiceError(error, `Unable to create comment at case with id ${incidentId}`);
+      throw addServiceMessageToError(
+        error,
+        `Unable to create comment at case with id ${incidentId}`
+      );
     }
   };
 

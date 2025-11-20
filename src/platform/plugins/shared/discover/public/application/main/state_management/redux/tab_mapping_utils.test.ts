@@ -31,7 +31,7 @@ const tab1 = getTabStateMock({
     timeRange: { from: 'now-7d', to: 'now' },
     refreshInterval: { pause: true, value: 500 },
   },
-  initialAppState: { columns: ['column1'] },
+  appState: { columns: ['column1'] },
 });
 const tab2 = getTabStateMock({
   id: '2',
@@ -44,7 +44,7 @@ const tab2 = getTabStateMock({
     timeRange: { from: 'now-15m', to: 'now' },
     refreshInterval: { pause: false, value: 1000 },
   },
-  initialAppState: { columns: ['column2'] },
+  appState: { columns: ['column2'] },
 });
 
 describe('tab mapping utils', () => {
@@ -56,24 +56,7 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
-          "dataRequestParams": Object {
-            "searchSessionId": undefined,
-            "timeRangeAbsolute": undefined,
-            "timeRangeRelative": undefined,
-          },
-          "duplicatedFromId": "0",
-          "globalState": Object {
-            "refreshInterval": Object {
-              "pause": true,
-              "value": 500,
-            },
-            "timeRange": Object {
-              "from": "now-7d",
-              "to": "now",
-            },
-          },
-          "id": "2",
-          "initialAppState": Object {
+          "appState": Object {
             "breakdownField": undefined,
             "columns": Array [
               "column2",
@@ -95,7 +78,29 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
+          "controlGroupState": undefined,
+          "dataRequestParams": Object {
+            "isSearchSessionRestored": false,
+            "searchSessionId": undefined,
+            "timeRangeAbsolute": undefined,
+            "timeRangeRelative": undefined,
+          },
+          "duplicatedFromId": "0",
+          "esqlVariables": Array [],
+          "forceFetchOnSelect": false,
+          "globalState": Object {
+            "refreshInterval": Object {
+              "pause": true,
+              "value": 500,
+            },
+            "timeRange": Object {
+              "from": "now-7d",
+              "to": "now",
+            },
+          },
+          "id": "2",
           "initialInternalState": Object {
+            "controlGroupJson": undefined,
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
             },
@@ -106,6 +111,11 @@ describe('tab mapping utils', () => {
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,
@@ -122,24 +132,7 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
-          "dataRequestParams": Object {
-            "searchSessionId": undefined,
-            "timeRangeAbsolute": undefined,
-            "timeRangeRelative": undefined,
-          },
-          "duplicatedFromId": "0",
-          "globalState": Object {
-            "refreshInterval": Object {
-              "pause": false,
-              "value": 1000,
-            },
-            "timeRange": Object {
-              "from": "now-15m",
-              "to": "now",
-            },
-          },
-          "id": "2",
-          "initialAppState": Object {
+          "appState": Object {
             "breakdownField": undefined,
             "columns": Array [
               "column2",
@@ -161,7 +154,29 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
+          "controlGroupState": undefined,
+          "dataRequestParams": Object {
+            "isSearchSessionRestored": false,
+            "searchSessionId": undefined,
+            "timeRangeAbsolute": undefined,
+            "timeRangeRelative": undefined,
+          },
+          "duplicatedFromId": "0",
+          "esqlVariables": Array [],
+          "forceFetchOnSelect": false,
+          "globalState": Object {
+            "refreshInterval": Object {
+              "pause": false,
+              "value": 1000,
+            },
+            "timeRange": Object {
+              "from": "now-15m",
+              "to": "now",
+            },
+          },
+          "id": "2",
           "initialInternalState": Object {
+            "controlGroupJson": undefined,
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
             },
@@ -172,6 +187,11 @@ describe('tab mapping utils', () => {
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,
@@ -203,6 +223,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "description": "description",
           "grid": Object {},
@@ -272,6 +293,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
@@ -304,6 +326,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
@@ -351,6 +374,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "default_column",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,

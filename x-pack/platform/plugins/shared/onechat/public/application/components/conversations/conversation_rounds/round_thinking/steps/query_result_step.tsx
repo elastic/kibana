@@ -22,23 +22,13 @@ export const QueryResultStep: React.FC<QueryResultStepProps> = ({ result: { data
       background: none;
     }
   `;
-  const dsl = 'dsl' in data && data.dsl;
-  const esql = 'esql' in data && data.esql;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        {esql && (
-          <EuiCodeBlock css={codeBlockStyles} language="sql" isCopyable paddingSize="m">
-            {esql}
-          </EuiCodeBlock>
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {dsl && (
-          <EuiCodeBlock css={codeBlockStyles} language="json" isCopyable paddingSize="m">
-            {JSON.stringify(dsl, null, 2)}
-          </EuiCodeBlock>
-        )}
+        <EuiCodeBlock css={codeBlockStyles} language="esql" isCopyable paddingSize="m">
+          {data.esql}
+        </EuiCodeBlock>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

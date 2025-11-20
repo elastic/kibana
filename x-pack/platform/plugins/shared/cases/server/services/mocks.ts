@@ -6,6 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { lazyObject } from '@kbn/lazy-object';
 import type {
   AlertService,
   CaseConfigureService,
@@ -45,7 +46,7 @@ export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
-  const service: PublicMethodsOf<CaseServiceMock> = {
+  const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
     deleteCase: jest.fn(),
     findCases: jest.fn(),
     getAllCaseComments: jest.fn(),
@@ -64,38 +65,38 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     executeAggregations: jest.fn(),
     bulkDeleteCaseEntities: jest.fn(),
     getCategories: jest.fn(),
-  };
+  });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as CaseServiceMock;
 };
 
 export const createConfigureServiceMock = (): CaseConfigureServiceMock => {
-  const service: PublicMethodsOf<CaseConfigureService> = {
+  const service: PublicMethodsOf<CaseConfigureService> = lazyObject({
     delete: jest.fn(),
     get: jest.fn(),
     find: jest.fn(),
     patch: jest.fn(),
     post: jest.fn(),
-  };
+  });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as CaseConfigureServiceMock;
 };
 
 export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => {
-  const service: PublicMethodsOf<ConnectorMappingsService> = {
+  const service: PublicMethodsOf<ConnectorMappingsService> = lazyObject({
     find: jest.fn(),
     post: jest.fn(),
     update: jest.fn(),
-  };
+  });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as ConnectorMappingsServiceMock;
 };
 
 const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceMock => {
-  const service: PublicMethodsOf<UserActionPersister> = {
+  const service: PublicMethodsOf<UserActionPersister> = lazyObject({
     bulkAuditLogCaseDeletion: jest.fn(),
     bulkCreateUpdateCase: jest.fn(),
     buildUserActions: jest.fn(),
@@ -103,7 +104,7 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
     bulkCreateAttachmentCreation: jest.fn(),
     createUserAction: jest.fn(),
     bulkCreateUserAction: jest.fn(),
-  };
+  });
 
   return service as unknown as CaseUserActionPersisterServiceMock;
 };
@@ -120,7 +121,7 @@ const createUserActionFinderServiceMock = (): CaseUserActionFinderServiceMock =>
 type FakeUserActionService = PublicMethodsOf<CaseUserActionService> & UserActionServiceOperations;
 
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
-  const service: FakeUserActionService = {
+  const service: FakeUserActionService = lazyObject({
     creator: createUserActionPersisterServiceMock(),
     finder: createUserActionFinderServiceMock(),
     getConnectorFieldsBeforeLatestPush: jest.fn(),
@@ -132,14 +133,14 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
     getMultipleCasesUserActionsTotal: jest.fn(),
     getCaseUserActionStats: jest.fn(),
     getUsers: jest.fn(),
-  };
+  });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as CaseUserActionServiceMock;
 };
 
 export const createAlertServiceMock = (): AlertServiceMock => {
-  const service: PublicMethodsOf<AlertService> = {
+  const service: PublicMethodsOf<AlertService> = lazyObject({
     updateAlertsStatus: jest.fn(),
     getAlerts: jest.fn(),
     executeAggregations: jest.fn(),
@@ -147,14 +148,14 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     ensureAlertsAuthorized: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
-  };
+  });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as AlertServiceMock;
 };
 
 const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
-  const service: PublicMethodsOf<AttachmentGetter> = {
+  const service: PublicMethodsOf<AttachmentGetter> = lazyObject({
     get: jest.fn(),
     bulkGet: jest.fn(),
     getAllAlertsAttachToCase: jest.fn(),
@@ -162,7 +163,8 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachments: jest.fn(),
     getAllAlertIds: jest.fn(),
-  };
+    getAllEventIds: jest.fn(),
+  });
 
   return service as unknown as AttachmentGetterServiceMock;
 };
@@ -170,7 +172,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
 type FakeAttachmentService = PublicMethodsOf<AttachmentService> & AttachmentServiceOperations;
 
 export const createAttachmentServiceMock = (): AttachmentServiceMock => {
-  const service: FakeAttachmentService = {
+  const service: FakeAttachmentService = lazyObject({
     getter: createAttachmentGetterServiceMock(),
     bulkDelete: jest.fn(),
     create: jest.fn(),
@@ -182,31 +184,31 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     executeCaseActionsAggregations: jest.fn(),
     executeCaseAggregations: jest.fn(),
     countPersistableStateAndExternalReferenceAttachments: jest.fn(),
-  };
+  });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as AttachmentServiceMock;
 };
 
 export const createLicensingServiceMock = (): LicensingServiceMock => {
-  const service: PublicMethodsOf<LicensingService> = {
+  const service: PublicMethodsOf<LicensingService> = lazyObject({
     notifyUsage: jest.fn(),
     getLicenseInformation: jest.fn(),
     isAtLeast: jest.fn(),
     isAtLeastPlatinum: jest.fn().mockReturnValue(true),
     isAtLeastGold: jest.fn(),
     isAtLeastEnterprise: jest.fn(),
-  };
+  });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as LicensingServiceMock;
 };
 
 export const createNotificationServiceMock = (): NotificationServiceMock => {
-  const service: PublicMethodsOf<EmailNotificationService> = {
+  const service: PublicMethodsOf<EmailNotificationService> = lazyObject({
     notifyAssignees: jest.fn(),
     bulkNotifyAssignees: jest.fn(),
-  };
+  });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as NotificationServiceMock;

@@ -15,7 +15,7 @@ export const CODE_OWNER_AREAS = [
   'search',
   'observability',
   'security',
-  'chat',
+  'workplaceai',
 ] as const;
 export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];
 
@@ -59,7 +59,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/obs-entities',
     'elastic/obs-knowledge-team',
     'elastic/obs-ux-infra_services-team',
-    'elastic/obs-ux-logs-team',
+    'elastic/obs-onboarding-team',
     'elastic/obs-ux-management-team',
     'elastic/observability-design',
     'elastic/observability-ui',
@@ -67,7 +67,8 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/streams-program-team',
   ],
   security: [
-    'elastic/kibana-cloud-security-posture',
+    'elastic/contextual-security-apps',
+    'elastic/integration-experience',
     'elastic/security-asset-management',
     'elastic/security-data-analytics',
     'elastic/security-defend-workflows',
@@ -78,17 +79,13 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-engineering-productivity',
     'elastic/security-entity-analytics',
     'elastic/security-generative-ai',
-    'elastic/security-scalability',
     'elastic/security-service-integrations',
     'elastic/security-solution',
     'elastic/security-threat-hunting',
     'elastic/security-threat-hunting-explore',
     'elastic/security-threat-hunting-investigations',
   ],
-  chat: [
-    // TODO add owner teams here (once they exist)
-    // https://github.com/elastic/kibana/issues/213469
-  ],
+  workplaceai: ['elastic/search-kibana'],
 };
 
 /**

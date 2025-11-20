@@ -10,6 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-server-internal';
 import { compareFieldLists, type CompareResult } from './compare_type_field_lists';
 import { readCurrentFields, writeCurrentFields } from './current_fields';
 import { extractFieldListsFromPlugins } from './extract_field_lists_from_plugins';
@@ -62,6 +63,7 @@ export const runModelVersionMappingAdditionsChecks = async ({
   if (fix || override) {
     log.info(`Updating field file with override: ${override}`);
     const updatedFields = updateCurrentFields(currentFields, results, override);
+    removeFields(updatedFields, REMOVED_TYPES);
     await writeCurrentFields(updatedFields);
   }
 };
@@ -109,4 +111,14 @@ const updateCurrentFields = (
     }
   });
   return updatedFields;
+};
+
+const removeFields = (fields: FieldListMap, removedFields: string[]): FieldListMap => {
+  for (const field of removedFields) {
+    if (Object.prototype.hasOwnProperty.call(fields, field)) {
+      delete fields[field];
+    }
+  }
+
+  return fields;
 };

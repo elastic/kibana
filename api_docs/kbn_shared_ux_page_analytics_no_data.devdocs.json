@@ -14,7 +14,13 @@
         ],
         "signature": [
           "({ onDataViewCreated, allowAdHocDataView, onTryESQL, onESQLNavigationComplete, }: ",
-          "AnalyticsNoDataPageProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+            "section": "def-public.AnalyticsNoDataPageProps",
+            "text": "AnalyticsNoDataPageProps"
+          },
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
@@ -29,7 +35,13 @@
             "label": "{\n  onDataViewCreated,\n  allowAdHocDataView,\n  onTryESQL,\n  onESQLNavigationComplete,\n}",
             "description": [],
             "signature": [
-              "AnalyticsNoDataPageProps"
+              {
+                "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+                "section": "def-public.AnalyticsNoDataPageProps",
+                "text": "AnalyticsNoDataPageProps"
+              }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
             "deprecated": false,
@@ -86,7 +98,13 @@
         ],
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
-          "AnalyticsNoDataPageKibanaDependencies",
+          {
+            "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+            "section": "def-public.AnalyticsNoDataPageKibanaDependencies",
+            "text": "AnalyticsNoDataPageKibanaDependencies"
+          },
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/services.tsx",
@@ -102,7 +120,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "AnalyticsNoDataPageKibanaDependencies",
+              {
+                "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+                "section": "def-public.AnalyticsNoDataPageKibanaDependencies",
+                "text": "AnalyticsNoDataPageKibanaDependencies"
+              },
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/services.tsx",
@@ -125,7 +149,13 @@
         ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
-          "AnalyticsNoDataPageServices",
+          {
+            "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+            "section": "def-public.AnalyticsNoDataPageServices",
+            "text": "AnalyticsNoDataPageServices"
+          },
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/services.tsx",
@@ -141,7 +171,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "AnalyticsNoDataPageServices",
+              {
+                "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+                "section": "def-public.AnalyticsNoDataPageServices",
+                "text": "AnalyticsNoDataPageServices"
+              },
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/services.tsx",
@@ -204,7 +240,7 @@
                     "tags": [],
                     "label": "path",
                     "description": [],
-                    "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.d.ts",
+                    "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -227,7 +263,7 @@
         "description": [
           "\nProps for the `AnalyticsNoDataPage` component."
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,7 +279,7 @@
             "signature": [
               "(dataView: unknown) => void"
             ],
-            "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -257,7 +293,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.d.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -277,7 +313,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -293,7 +329,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -311,7 +347,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -333,17 +369,32 @@
           "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component as well as any dependencies."
         ],
         "signature": [
-          "KibanaDependencies",
+          {
+            "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+            "section": "def-public.KibanaDependencies",
+            "text": "KibanaDependencies"
+          },
           " & ",
-          "KibanaDependencies",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+            "section": "def-public.KibanaDependencies",
+            "text": "KibanaDependencies"
+          },
           " & ",
-          "NoDataViewsPromptKibanaDependencies",
-          " & ",
-          "KibanaDependencies",
-          " & ",
-          "RedirectAppLinksKibanaDependencies"
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptKibanaDependencies",
+            "text": "NoDataViewsPromptKibanaDependencies"
+          },
+          " & KibanaDependencies"
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -358,17 +409,39 @@
           "\nServices that are consumed by this component and any dependencies."
         ],
         "signature": [
-          "Services",
+          {
+            "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
           " & ",
-          "Services",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
           " & ",
-          "Services",
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
           " & ",
-          "RedirectAppLinksServices",
-          " & ",
-          "NoDataViewsPromptServices"
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          }
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

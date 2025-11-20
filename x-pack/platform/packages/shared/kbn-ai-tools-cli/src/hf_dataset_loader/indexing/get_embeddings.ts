@@ -32,21 +32,51 @@ export async function getEmbeddings({
     logger,
   });
 
-  const docsWithEmbeddings = await esClient
-    .search<Record<string, any>>({
-      index: indexName,
-      size: documents.length,
-      fields: ['_inference_fields'],
-    })
-    .then((response) =>
-      response.hits.hits.map((hit) => {
-        const source = hit._source!;
-        Object.entries(source._inference_fields ?? {}).forEach(([fieldName, config]) => {
-          delete (config as Record<string, any>).inference.model_settings.service;
-        });
-        return { ...source, _id: hit._id };
-      })
-    );
+  const docsWithEmbeddings: Array<Record<string, unknown>> = [];
+  const scrollDuration = '1m';
+  const scrollSize = 1000;
+
+  // Use scroll API to handle large datasets with 10k+ documents.
+  let response = await esClient.search<Record<string, any>>({
+    index: indexName,
+    scroll: scrollDuration,
+    size: scrollSize,
+    fields: ['_inference_fields'],
+    query: {
+      match_all: {},
+    },
+  });
+
+  const pushToDocsWithEmbeddings = (hit: Record<string, any>) => {
+    const source = hit._source!;
+    docsWithEmbeddings.push({ ...source, _id: hit._id });
+  };
+
+  // Process initial batch
+  for (const hit of response.hits.hits) {
+    pushToDocsWithEmbeddings(hit);
+  }
+
+  // Continue scrolling through all results
+  while (response.hits.hits.length > 0) {
+    response = await esClient.scroll({
+      scroll_id: response._scroll_id!,
+      scroll: scrollDuration,
+    });
+
+    for (const hit of response.hits.hits) {
+      pushToDocsWithEmbeddings(hit);
+    }
+  }
+
+  // Clear the scroll context
+  if (response._scroll_id) {
+    await esClient.clearScroll({ scroll_id: [response._scroll_id] }).catch((err) => {
+      logger.warn(`Failed to clear scroll context: ${err.message}`);
+    });
+  }
+
+  logger.info(`Retrieved ${docsWithEmbeddings.length} documents with embeddings`);
 
   await esClient.indices.delete({ index: indexName });
 

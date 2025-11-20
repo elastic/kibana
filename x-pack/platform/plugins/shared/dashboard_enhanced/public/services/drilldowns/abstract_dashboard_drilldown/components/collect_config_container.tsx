@@ -106,7 +106,7 @@ export class CollectConfigContainer extends React.Component<
     if (!this.isMounted) return;
 
     // handle case when destination dashboard no longer exists
-    if (dashboardResponse.status === 'error' && dashboardResponse.error?.statusCode === 404) {
+    if (dashboardResponse.status === 'error' && dashboardResponse.notFound) {
       this.setState({
         error: txtDestinationDashboardNotFound(config.dashboardId),
       });
@@ -136,16 +136,16 @@ export class CollectConfigContainer extends React.Component<
     const { dashboard } = this.props.params.start().plugins;
     const findDashboardsService = await dashboard.findDashboardsService();
     const results = await findDashboardsService.search({
-      search: searchString ? `${searchString}*` : '',
-      size: 100,
+      search: searchString ?? '',
+      per_page: 100,
     });
 
     // bail out if this response is no longer needed
     if (!this.isMounted) return;
     if (searchString !== this.state.searchString) return;
 
-    const dashboardList = results.hits.map(({ id, attributes }) =>
-      dashboardToMenuItem(id, attributes.title)
+    const dashboardList = results.dashboards.map(({ id, data }) =>
+      dashboardToMenuItem(id, data.title)
     );
 
     this.setState({ dashboards: dashboardList, isLoading: false });

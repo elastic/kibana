@@ -44,7 +44,7 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ http, toasts, config: { allowContextWindowLength, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, }, }: InferenceServicesProps) => React.JSX.Element | null"
+          "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, enableCustomHeaders, reenterSecretsOnEdit, }, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
         "deprecated": false,
@@ -55,7 +55,7 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n  },\n}",
+            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    allowTemperature,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n    enableCustomHeaders,\n    reenterSecretsOnEdit,\n  },\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"
@@ -111,6 +111,39 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/inference_endpoint_exists.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.isMapWithStringValues",
+        "type": "Function",
+        "tags": [],
+        "label": "isMapWithStringValues",
+        "description": [],
+        "signature": [
+          "(value: unknown) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.isMapWithStringValues.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -276,6 +309,20 @@
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.Config.temperature",
+            "type": "number",
+            "tags": [],
+            "label": "temperature",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -384,7 +431,15 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number | boolean | null"
+              "string | number | boolean | ",
+              {
+                "pluginId": "@kbn/inference-endpoint-ui-common",
+                "scope": "public",
+                "docId": "kibKbnInferenceEndpointUiCommonPluginApi",
+                "section": "def-public.Map",
+                "text": "Map"
+              },
+              " | null"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
             "deprecated": false,
@@ -746,7 +801,7 @@
                 "section": "def-public.FieldsConfiguration",
                 "text": "FieldsConfiguration"
               },
-              "[]"
+              "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
             "deprecated": false,
@@ -1051,6 +1106,21 @@
       },
       {
         "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.Map",
+        "type": "Type",
+        "tags": [],
+        "label": "Map",
+        "description": [],
+        "signature": [
+          "{ [x: string]: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
         "id": "def-public.MAX_NUMBER_OF_ALLOCATIONS",
         "type": "string",
         "tags": [],
@@ -1148,7 +1218,21 @@
                     "section": "def-public.FieldType",
                     "text": "FieldType"
                   },
-                  ".INTEGER; updatable: false; }; }[]"
+                  ".INTEGER; updatable: true; }; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.INTERNAL_OVERRIDE_FIELDS.ServiceProviderKeys.elasticsearch.serverlessOnly",
+                "type": "boolean",
+                "tags": [],
+                "label": "serverlessOnly",
+                "description": [],
+                "signature": [
+                  "true"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
                 "deprecated": false,
@@ -1451,6 +1535,55 @@
               {
                 "parentPluginId": "@kbn/inference-endpoint-ui-common",
                 "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.cohere.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.contextualai",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.contextualai]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.contextualai.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.contextualai.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.contextualai.solutions",
                 "type": "Array",
                 "tags": [],
                 "label": "solutions",

@@ -1,0 +1,28 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".kibana-siem-dashboard-migrations-migrations-default",
+    "aliases": {},
+    "mappings": {
+      "dynamic": "false",
+      "_meta": {
+        "namespace": "default",
+        "kibana": {
+          "version": "9.2.0"
+        },
+        "managed": true
+      },
+      "properties": {
+        "created_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "name": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

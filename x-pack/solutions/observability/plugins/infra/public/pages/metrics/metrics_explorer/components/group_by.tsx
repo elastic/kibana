@@ -38,6 +38,7 @@ export const MetricsExplorerGroupBy = ({ options, onChange }: Props) => {
 
   return (
     <EuiComboBox
+      compressed
       data-test-subj="metricsExplorer-groupBy"
       placeholder={i18n.translate('xpack.infra.metricsExplorer.groupByLabel', {
         defaultMessage: 'Everything',

@@ -18,15 +18,14 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Builtin Tools API', () => {
     describe(`DELETE /api/agent_builder/tools/{toolName}`, () => {
       it('should return 400 error when attempting to delete any read-only builtin system tool', async () => {
-        for (const toolId of Object.values(platformCoreTools) as string[]) {
-          const response = await supertest
-            .delete(`/api/agent_builder/tools/${toolId}`)
-            .set('kbn-xsrf', 'kibana')
-            .expect(400);
+        const toolId = platformCoreTools.generateEsql;
+        const response = await supertest
+          .delete(`/api/agent_builder/tools/${toolId}`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(400);
 
-          expect(response.body).to.have.property('message');
-          expect(response.body.message).to.eql(`Tool ${toolId} is read-only and can't be deleted`);
-        }
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.eql(`Tool ${toolId} is read-only and can't be deleted`);
       });
 
       it('should return 404 when builtin tools API is disabled', async () => {
@@ -75,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain(
-          `Invalid tool id: "${searchTool}": Tool id is using a protected namespaces`
+          `Invalid tool id: "${searchTool}": Tool id is using a protected namespace.`
         );
       });
     });

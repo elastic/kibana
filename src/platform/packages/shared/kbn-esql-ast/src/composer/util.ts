@@ -11,6 +11,7 @@ import { isBooleanLiteral, isCommand } from '../ast/is';
 import { Builder } from '../builder';
 import { ParameterHole, DoubleParameterHole } from './parameter_hole';
 import { Walker } from '../walker';
+import { SynthLiteralFragment } from '../synth/synth_literal_fragment';
 import type { ESQLCommand, ESQLNamedParamLiteral } from '../types';
 import type { ComposerQuery } from './composer_query';
 import type { ComposerQueryTagHole, ParameterShorthandHole } from './types';
@@ -59,6 +60,10 @@ export const processTemplateHoles = (
 
   for (let i = 0; i < length; i++) {
     const hole = holes[i];
+
+    if (hole instanceof SynthLiteralFragment) {
+      continue;
+    }
 
     if (hole instanceof ParameterHole || hole instanceof DoubleParameterHole) {
       const originalName = hole.name ?? `p${params.size}`;

@@ -12,7 +12,6 @@ import moment from 'moment';
 import type EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
 import type { EuiBetaBadgeProps } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
 import { parse } from 'query-string';
 
 import type { Capabilities } from '@kbn/core/public';
@@ -32,22 +31,21 @@ import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
+import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
-import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
+import { getFullPath } from '../..';
 
 import type {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
 import type { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
-import { serializeReferences } from '../../utils/saved_visualization_references';
 import { serializeState } from '../../embeddable/state';
 
 interface VisualizeCapabilities {
@@ -190,20 +188,19 @@ export const getTopNavConfig = (
           }
 
           if (stateTransfer) {
-            const serializedVis = vis.serialize();
-            const { references } = serializeReferences(serializedVis);
-            stateTransfer.navigateToWithEmbeddablePackage(app, {
-              state: {
-                type: VISUALIZE_EMBEDDABLE_TYPE,
-                serializedState: {
-                  rawState: {
-                    savedObjectId: id,
+            stateTransfer.navigateToWithEmbeddablePackages(app, {
+              state: [
+                {
+                  type: VISUALIZE_EMBEDDABLE_TYPE,
+                  serializedState: {
+                    rawState: {
+                      savedObjectId: id,
+                    },
                   },
-                  references,
+                  embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
+                  searchSessionId: data.search.session.getSessionId(),
                 },
-                embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
-                searchSessionId: data.search.session.getSessionId(),
-              },
+              ],
               path,
             });
           } else {
@@ -257,15 +254,17 @@ export const getTopNavConfig = (
       return;
     }
 
-    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-      state: {
-        serializedState: serializeState({
-          serializedVis: vis.serialize(),
-        }),
-        embeddableId,
-        type: VISUALIZE_EMBEDDABLE_TYPE,
-        searchSessionId: data.search.session.getSessionId(),
-      },
+    stateTransfer.navigateToWithEmbeddablePackages(originatingApp, {
+      state: [
+        {
+          serializedState: serializeState({
+            serializedVis: vis.serialize(),
+          }),
+          embeddableId,
+          type: VISUALIZE_EMBEDDABLE_TYPE,
+          searchSessionId: data.search.session.getSessionId(),
+        },
+      ],
       path: originatingPath,
     });
   };
@@ -329,58 +328,13 @@ export const getTopNavConfig = (
             integration: {
               export: {
                 pdfReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('visualizations.exports.pdfReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'visualizations.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage: 'URL may change if you upgrade Kibana.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 imageReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('visualizations.exports.imageReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'visualizations.exports.imageReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage: 'URL may change if you upgrade Kibana.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 csvReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('visualizations.exports.csvReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'visualizations.exports.csvReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage: 'URL may change if you upgrade Kibana.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
               },
             },
@@ -606,19 +560,21 @@ export const getTopNavConfig = (
                   history.replace(appPath);
                   setActiveUrl(appPath);
 
-                  stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-                    state: {
-                      serializedState: serializeState({
-                        serializedVis: vis.serialize(),
-                        titles: {
-                          title: newTitle,
-                          description: newDescription,
-                        },
-                      }),
-                      embeddableId,
-                      type: VISUALIZE_EMBEDDABLE_TYPE,
-                      searchSessionId: data.search.session.getSessionId(),
-                    },
+                  stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+                    state: [
+                      {
+                        serializedState: serializeState({
+                          serializedVis: vis.serialize(),
+                          titles: {
+                            title: newTitle,
+                            description: newDescription,
+                          },
+                        }),
+                        embeddableId,
+                        type: VISUALIZE_EMBEDDABLE_TYPE,
+                        searchSessionId: data.search.session.getSessionId(),
+                      },
+                    ],
                     path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
                   });
 

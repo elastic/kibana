@@ -20,7 +20,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSkeletonText,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from '@emotion/styled';
@@ -89,16 +89,19 @@ export const MetricItemIcon = ({
   if (activeMWs.length) {
     return (
       <Container>
-        <EuiToolTip
+        <EuiIconTip
           content={i18n.translate(
             'xpack.synthetics.metricItemIcon.euiButtonIcon.maintenanceWindowActive',
             {
               defaultMessage: 'Monitor is stopped while maintenance windows are running.',
             }
           )}
-        >
-          <EuiIcon color="warning" data-test-subj="syntheticsMetricItemIconButton" type="pause" />
-        </EuiToolTip>
+          type="pause"
+          color="warning"
+          iconProps={{
+            'data-test-subj': 'syntheticsMetricItemIconButton',
+          }}
+        />
       </Container>
     );
   }
@@ -154,6 +157,7 @@ export const MetricItemIcon = ({
               </>
             )}
             <EuiCallOut
+              announceOnMount
               title={
                 latestPing?.error?.message ? (
                   latestPing?.error?.message

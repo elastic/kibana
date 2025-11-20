@@ -55,6 +55,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
+            settings: {},
             processing: {
               steps: [
                 {

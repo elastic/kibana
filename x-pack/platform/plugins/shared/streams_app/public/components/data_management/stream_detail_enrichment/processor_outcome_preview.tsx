@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiFilterButton,
@@ -17,17 +18,19 @@ import {
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
 import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import type { GrokProcessor } from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
+import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
+import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
+import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { getPercentageFormatter } from '../../../util/formatters';
-import { useKibana } from '../../../hooks/use_kibana';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
+  getAllFieldsInOrder,
   getSourceField,
   getTableColumns,
-  getUniqueDetectedFields,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import {
@@ -40,17 +43,18 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { isProcessorUnderEdit } from './state_management/processor_state_machine';
+import { isStepUnderEdit } from './state_management/steps_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
-import { docViewJson } from './doc_viewer_json';
-import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
-import type { DataTableRecordWithIndex } from './preview_flyout';
-import { PreviewFlyout } from './preview_flyout';
-import { MemoProcessingPreviewTable } from './processing_preview_table';
+import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
+import { PreviewFlyout, MemoPreviewTable, type PreviewTableMode } from '../shared';
+import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
+import { RowSelectionContext } from '../shared/preview_table';
+import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
+import { useDataSourceSelector } from './state_management/data_source_state_machine';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -58,17 +62,16 @@ export const ProcessorOutcomePreview = () => {
     selectPreviewRecords(snapshot.context)
   );
 
-  const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
-    state.context.dataSourcesRefs.some((ref) => {
-      const snap = ref.getSnapshot();
-      return (
-        snap.matches({ enabled: 'loadingData' }) || snap.matches({ enabled: 'debouncingChanges' })
-      );
-    })
+  const activeDataSourceRef = useStreamEnrichmentSelector((snapshot) =>
+    getActiveDataSourceRef(snapshot.context.dataSourcesRefs)
+  );
+
+  const isDataSourceLoading = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.matches({ enabled: 'loadingData' }) : false
   );
 
   if (isEmpty(samples)) {
-    if (areDataSourcesLoading) {
+    if (isDataSourceLoading) {
       return (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
@@ -129,6 +132,7 @@ const PreviewDocumentsGroupBy = () => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <EuiFilterGroup
+        compressed={true}
         aria-label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
           { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
@@ -173,7 +177,16 @@ const PreviewDocumentsGroupBy = () => {
 };
 
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
+  const [userSelectedViewMode, setViewMode] = useLocalStorage<PreviewTableMode>(
+    'streams:processorOutcomePreview:viewMode',
+    'summary'
+  );
+
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
+  const streamName = useSimulatorSelector((state) => state.context.streamName);
+
+  const { fieldTypes: dataViewFieldTypes, dataView: streamDataView } =
+    useStreamDataViewFieldTypes(streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
     (state) => state.context.previewColumnsSorting
@@ -192,31 +205,20 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const shouldShowRowSourceAvatars = useStreamEnrichmentSelector(
-    (state) => state.context.dataSourcesRefs.length >= 2
-  );
   const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
-    const currentProcessorRef = state.context.processorsRefs.find((processorRef) =>
-      isProcessorUnderEdit(processorRef.getSnapshot())
+    const currentProcessorRef = state.context.stepRefs.find(
+      (stepRef) =>
+        isActionBlock(stepRef.getSnapshot().context.step) && isStepUnderEdit(stepRef.getSnapshot())
     );
 
     if (!currentProcessorRef) return undefined;
 
-    return getSourceField(currentProcessorRef.getSnapshot().context.processor);
+    const step = currentProcessorRef.getSnapshot().context.step;
+
+    if (isActionBlock(step)) return getSourceField(step);
   });
 
-  const { dependencies } = useKibana();
-  const { unifiedDocViewer } = dependencies.start;
-
-  const docViewsRegistry = useMemo(() => {
-    const docViewers = unifiedDocViewer.registry.getAll();
-    const myRegistry = new DocViewsRegistry([
-      docViewers.find((docView) => docView.id === 'doc_view_table')!,
-      docViewDiff,
-      docViewJson,
-    ]);
-    return myRegistry;
-  }, [unifiedDocViewer.registry]);
+  const docViewsRegistry = useDocViewerSetup(true);
 
   const {
     setExplicitlyEnabledPreviewColumns,
@@ -226,18 +228,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   } = useStreamEnrichmentEvents();
 
   const allColumns = useMemo(() => {
-    // Get all fields from the preview documents
-    const fields = new Set<string>();
-    previewDocuments.forEach((doc) => {
-      Object.keys(doc).forEach((key) => {
-        fields.add(key);
-      });
-    });
-    // Keep the detected fields as first columns on the table and sort the rest alphabetically
-    const uniqDetectedFields = getUniqueDetectedFields(detectedFields);
-    const otherFields = Array.from(fields).filter((field) => !uniqDetectedFields.includes(field));
-
-    return [...uniqDetectedFields, ...otherFields.sort()];
+    return getAllFieldsInOrder(previewDocuments, detectedFields);
   }, [detectedFields, previewDocuments]);
 
   const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
@@ -250,6 +241,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const grokMode =
     draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
     draftProcessor.processor.action === 'grok' &&
     !isEmpty(draftProcessor.processor.from) &&
     // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
@@ -269,6 +261,12 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       ? currentProcessorSourceField
       : undefined;
 
+  // Calculate if view mode should be forced to 'columns'
+  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+
+  // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
+  const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
+
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
       currentProcessorSourceField: validCurrentProcessorSourceField,
@@ -277,7 +275,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     });
 
     if (cols.length === 0) {
-      // If no columns are detected, we fall back to all fields from the preview documents
+      // If no columns are detected, fall back to all fields from the preview documents
       cols = allColumns;
     }
     // Filter out columns that are explicitly disabled
@@ -288,6 +286,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         filteredCols.push(col);
       }
     });
+
     return filteredCols;
   }, [
     allColumns,
@@ -309,22 +308,56 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const previewColumns = grokColumns ?? availableColumns;
 
+  // Calculate columns specifically for summary mode
+  const displayColumnsForSummaryMode = useMemo(() => {
+    // Start with detected fields
+    const uniqueDetectedFields = detectedFields ? detectedFields.map((field) => field.name) : [];
+    const baseFields = Array.from(new Set(uniqueDetectedFields));
+
+    // Remove explicitly disabled columns
+    const filteredFields = baseFields.filter(
+      (field) => !explicitlyDisabledPreviewColumns.includes(field)
+    );
+
+    // Add explicitly enabled columns (if they exist in allColumns)
+    const fieldsToShow = [...filteredFields];
+    explicitlyEnabledPreviewColumns.forEach((col) => {
+      if (!fieldsToShow.includes(col) && allColumns.includes(col)) {
+        fieldsToShow.push(col);
+      }
+    });
+
+    return fieldsToShow;
+  }, [
+    detectedFields,
+    explicitlyDisabledPreviewColumns,
+    explicitlyEnabledPreviewColumns,
+    allColumns,
+  ]);
+
+  // Use appropriate columns based on view mode
+  const displayColumnsForTable =
+    effectiveViewMode === 'summary' ? displayColumnsForSummaryMode : previewColumns;
+
   const setVisibleColumns = useCallback(
     (visibleColumns: string[]) => {
       if (visibleColumns.length === 0) {
-        // If no columns are visible, we reset the explicitly enabled and disabled columns
-        setExplicitlyDisabledPreviewColumns(allColumns);
+        // If no columns are visible, reset to default state
+        setExplicitlyDisabledPreviewColumns([]);
+        setExplicitlyEnabledPreviewColumns([]);
+        setPreviewColumnsOrder([]);
         return;
       }
+
       // find which columns got added or removed comparing visibleColumns with the current displayColumns
-      const addedColumns = visibleColumns.filter((col) => !previewColumns.includes(col));
+      const addedColumns = visibleColumns.filter((col) => !displayColumnsForTable.includes(col));
       if (addedColumns.length > 0) {
         setExplicitlyEnabledPreviewColumns([
           ...explicitlyEnabledPreviewColumns,
           ...addedColumns.filter((col) => !explicitlyEnabledPreviewColumns.includes(col)),
         ]);
       }
-      const removedColumns = previewColumns.filter((col) => !visibleColumns.includes(col));
+      const removedColumns = displayColumnsForTable.filter((col) => !visibleColumns.includes(col));
       if (removedColumns.length > 0) {
         setExplicitlyDisabledPreviewColumns([
           ...explicitlyDisabledPreviewColumns,
@@ -334,10 +367,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       setPreviewColumnsOrder(visibleColumns);
     },
     [
-      allColumns,
       explicitlyDisabledPreviewColumns,
       explicitlyEnabledPreviewColumns,
-      previewColumns,
+      displayColumnsForTable,
       setExplicitlyDisabledPreviewColumns,
       setExplicitlyEnabledPreviewColumns,
       setPreviewColumnsOrder,
@@ -366,46 +398,11 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   );
 
   const hits = useMemo(() => {
-    return previewDocuments.map((doc, index) =>
-      // make sure the ID is unique when remapping a new batch of preview documents so the document flyout will refresh properly
-      ({
-        raw: doc,
-        flattened: doc,
-        index,
-        id: `${index}-${Date.now()}`,
-      })
-    );
+    return toDataTableRecordWithIndex(previewDocuments);
   }, [previewDocuments]);
 
-  const [currentDoc, setExpandedDoc] = React.useState<DataTableRecordWithIndex | undefined>(
-    undefined
-  );
-
-  useEffect(() => {
-    if (currentDoc) {
-      // if a current doc is set but not in the hits, update it to point to the newly mapped hit with the same index
-      const hit = hits.find((h) => h.index === currentDoc.index);
-      if (hit && hit !== currentDoc) {
-        setExpandedDoc(hit);
-      } else if (!hit && currentDoc) {
-        // if the current doc is not found in the hits, reset it
-        setExpandedDoc(undefined);
-      }
-    }
-  }, [currentDoc, hits]);
-
-  const currentDocRef = useRef<DataTableRecordWithIndex | undefined>(currentDoc);
-  currentDocRef.current = currentDoc;
-  const hitsRef = useRef<DataTableRecordWithIndex[]>(hits);
-  hitsRef.current = hits;
-  const onRowSelected = useCallback((rowIndex: number) => {
-    if (currentDocRef.current && hitsRef.current[rowIndex] === currentDocRef.current) {
-      // If the same row is clicked, we collapse the flyout
-      setExpandedDoc(undefined);
-      return;
-    }
-    setExpandedDoc(hitsRef.current[rowIndex]);
-  }, []);
+  const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
+    useDocumentExpansion(hits);
 
   const docViewerContext = useMemo(
     () => ({
@@ -424,29 +421,47 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     }
   }, [docViewerContext, docViewsRegistry, hasSimulatedRecords]);
 
+  const rowSelectionContextValue = useMemo(
+    () => ({ selectedRowIndex, onRowSelected }),
+    [selectedRowIndex, onRowSelected]
+  );
+
+  const viewToggleMode = useMemo(
+    () => ({
+      currentMode: userSelectedViewMode ?? 'summary',
+      setViewMode,
+      isDisabled: isViewModeForced,
+    }),
+    [userSelectedViewMode, isViewModeForced, setViewMode]
+  );
+
   return (
     <>
-      <MemoProcessingPreviewTable
-        documents={previewDocuments}
-        originalSamples={originalSamples}
-        showRowSourceAvatars={shouldShowRowSourceAvatars}
-        onRowSelected={onRowSelected}
-        selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
-        displayColumns={previewColumns}
-        rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
-        toolbarVisibility
-        setVisibleColumns={setVisibleColumns}
-        sorting={previewColumnsSorting}
-        setSorting={setPreviewColumnsSorting}
-        columnOrderHint={previewColumnsOrder}
-        renderCellValue={renderCellValue}
-      />
+      <RowSelectionContext.Provider value={rowSelectionContextValue}>
+        <MemoPreviewTable
+          documents={previewDocuments}
+          displayColumns={displayColumnsForTable}
+          rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
+          toolbarVisibility
+          setVisibleColumns={setVisibleColumns}
+          sorting={previewColumnsSorting}
+          setSorting={setPreviewColumnsSorting}
+          columnOrderHint={previewColumnsOrder}
+          renderCellValue={renderCellValue}
+          mode={effectiveViewMode}
+          streamName={streamName}
+          viewModeToggle={viewToggleMode}
+          dataViewFieldTypes={dataViewFieldTypes}
+        />
+      </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>
         <PreviewFlyout
           currentDoc={currentDoc}
           hits={hits}
           setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
+          streamName={streamName}
+          streamDataView={streamDataView}
         />
       </DocViewerContext.Provider>
     </>

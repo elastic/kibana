@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   type FtrConfigProvider,
@@ -16,6 +14,8 @@ import {
   defineDockerServersConfig,
   packageRegistryDocker,
 } from '@kbn/test';
+import apm from 'elastic-apm-node';
+import path from 'path';
 import { v4 as uuidV4 } from 'uuid';
 import { services } from '../services';
 import type { AnyStep } from './journey';
@@ -36,7 +36,7 @@ export function makeFtrConfigProvider(
       ? 'x-pack/platform/test/functional/config.base.ts'
       : 'src/platform/test/functional/config.base.js';
     const ftrConfigPath = configPath ?? defaultConfigPath;
-    const baseConfig = (await readConfigFile(Path.resolve(REPO_ROOT, ftrConfigPath))).getAll();
+    const baseConfig = (await readConfigFile(path.resolve(REPO_ROOT, ftrConfigPath))).getAll();
 
     const testBuildId = process.env.BUILDKITE_BUILD_ID ?? `local-${uuidV4()}`;
     const testJobId = process.env.BUILDKITE_JOB_ID ?? `local-${uuidV4()}`;
@@ -62,6 +62,36 @@ export function makeFtrConfigProvider(
       ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
       journeyName: config.getName(),
     };
+
+    const allApmLabels = {
+      ...config.getExtraApmLabels(),
+      testJobId,
+      testBuildId,
+      journeyName: config.getName(),
+      ftrConfig: config.getRepoRelPath(),
+      ...JOURNEY_APM_CONFIG.globalLabels,
+    };
+
+    Object.entries(allApmLabels).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        apm.setGlobalLabel(key, value);
+      }
+    });
+
+    const allApmLabelsStringified = Object.entries(allApmLabels)
+      .flatMap(([key, value]) => (value === null || value === undefined ? [] : `${key}=${value}`))
+      .join(',');
+
+    /**
+     * This is used by CI to set the docker registry port
+     * you can also define this environment variable locally when running tests which
+     * will spin up a local docker package registry locally for you
+     * if this is defined it takes precedence over the `packageRegistryOverride` variable
+     */
+    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
+    const packageRegistryConfig = path.join(__dirname, '../fixtures/package_registry_config.yml');
+    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
 
     return {
       ...baseConfig,
@@ -103,25 +133,10 @@ export function makeFtrConfigProvider(
         ],
 
         env: {
-          ELASTIC_APM_ACTIVE: JOURNEY_APM_CONFIG.active,
-          ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: JOURNEY_APM_CONFIG.contextPropagationOnly,
-          ELASTIC_APM_ENVIRONMENT: JOURNEY_APM_CONFIG.environment,
-          ELASTIC_APM_TRANSACTION_SAMPLE_RATE: JOURNEY_APM_CONFIG.transactionSampleRate,
-          ELASTIC_APM_SERVER_URL: JOURNEY_APM_CONFIG.serverUrl,
-          ELASTIC_APM_SECRET_TOKEN: JOURNEY_APM_CONFIG.secretToken,
           ELASTIC_APM_CAPTURE_BODY: JOURNEY_APM_CONFIG.captureBody,
           ELASTIC_APM_CAPTURE_HEADERS: JOURNEY_APM_CONFIG.captureRequestHeaders,
           ELASTIC_APM_LONG_FIELD_MAX_LENGTH: JOURNEY_APM_CONFIG.longFieldMaxLength,
-          ELASTIC_APM_GLOBAL_LABELS: Object.entries({
-            ...config.getExtraApmLabels(),
-            testJobId,
-            testBuildId,
-            journeyName: config.getName(),
-            ftrConfig: config.getRepoRelPath(),
-            ...JOURNEY_APM_CONFIG.globalLabels,
-          })
-            .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
-            .join(','),
+          ELASTIC_APM_GLOBAL_LABELS: allApmLabelsStringified,
         },
       },
     };

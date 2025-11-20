@@ -7,12 +7,21 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
+import {
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  SecurityGroupName,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
+import {
+  SecurityLinkGroup,
+  i18nStrings,
+  securityLink,
+} from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
-import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
 import { type Services } from '../common/services';
 import { createStackManagementNavigationTree } from './stack_management_navigation';
+import { createV2footerItemsTree } from './v2_footer_items';
 
 const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectType.title',
@@ -22,20 +31,6 @@ const SOLUTION_NAME = i18n.translate(
 export const createNavigationTree = async (
   services: Services
 ): Promise<NavigationTreeDefinition> => {
-  // Check if user has AI Value access
-  let hasAiValueAccess = false;
-  try {
-    const currentUser = await services.security.authc.getCurrentUser();
-    if (currentUser) {
-      const userRoles = currentUser.roles || [];
-      const allowedRoles = ['admin', 'soc_manager'];
-      hasAiValueAccess = allowedRoles.some((role) => userRoles.includes(role));
-    }
-  } catch (error) {
-    // If we can't get the current user, default to no access
-    hasAiValueAccess = false;
-  }
-
   return {
     body: [
       {
@@ -48,37 +43,61 @@ export const createNavigationTree = async (
         defaultIsCollapsed: false,
         children: [
           {
-            link: 'discover',
+            link: securityLink(SecurityPageName.landing),
+            title: SOLUTION_NAME,
+            icon: 'logoSecurity',
+            renderAs: 'home',
+            sideNavVersion: 'v2',
           },
-          defaultNavigationTree.dashboards(),
+          {
+            link: 'discover',
+            sideNavVersion: 'v1',
+          },
+          defaultNavigationTree.dashboards({ sideNavVersion: 'v1' }),
           {
             breadcrumbStatus: 'hidden',
             children: [
-              defaultNavigationTree.rules(),
+              defaultNavigationTree.rules({ sideNavVersion: 'v1' }),
+              services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+                ? defaultNavigationTree.alertDetections({ sideNavVersion: 'v1' })
+                : {
+                    id: SecurityPageName.alerts,
+                    link: securityLink(SecurityPageName.alerts),
+                    sideNavVersion: 'v1',
+                  },
               {
-                id: SecurityPageName.alerts,
-                link: securityLink(SecurityPageName.alerts),
+                link: 'workflows',
+                withBadge: true,
+                badgeTypeV2: 'techPreview' as const,
+                badgeOptions: {
+                  icon: 'beaker',
+                  tooltip: i18nStrings.workflows.badgeTooltip,
+                },
+                sideNavVersion: 'v1',
               },
               {
                 id: SecurityPageName.attackDiscovery,
                 link: securityLink(SecurityPageName.attackDiscovery),
+                sideNavVersion: 'v1',
               },
               {
                 id: SecurityPageName.cloudSecurityPostureFindings,
                 link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+                sideNavVersion: 'v1',
               },
-              defaultNavigationTree.cases(),
+              defaultNavigationTree.cases({ sideNavVersion: 'v1' }),
             ],
           },
           {
             breadcrumbStatus: 'hidden',
             children: [
-              defaultNavigationTree.entityAnalytics(),
-              defaultNavigationTree.explore(),
-              defaultNavigationTree.investigations(),
+              defaultNavigationTree.entityAnalytics({ sideNavVersion: 'v1' }),
+              defaultNavigationTree.explore({ sideNavVersion: 'v1' }),
+              defaultNavigationTree.investigations({ sideNavVersion: 'v1' }),
               {
                 id: SecurityPageName.threatIntelligence,
                 link: securityLink(SecurityPageName.threatIntelligence),
+                sideNavVersion: 'v1',
               },
             ],
           },
@@ -88,15 +107,19 @@ export const createNavigationTree = async (
               {
                 id: SecurityPageName.assetInventory,
                 link: securityLink(SecurityPageName.assetInventory),
+                sideNavVersion: 'v1',
               },
-              defaultNavigationTree.assets(services),
+              defaultNavigationTree.assets(services, { sideNavVersion: 'v1' }),
               {
                 id: SecurityPageName.siemReadiness,
                 link: securityLink(SecurityPageName.siemReadiness),
+                sideNavVersion: 'v1',
               },
             ],
           },
-          defaultNavigationTree.ml(),
+          defaultNavigationTree.ml({ sideNavVersion: 'v1' }),
+          // version 2 sidenav
+          ...defaultNavigationTree.v2(services),
         ],
       },
     ],
@@ -105,13 +128,81 @@ export const createNavigationTree = async (
         id: 'security_solution_nav_footer',
         type: 'navGroup',
         children: [
-          defaultNavigationTree.launchpad({ hasAiValueAccess }),
+          {
+            id: SecurityGroupName.launchpad,
+            title: SecurityLinkGroup[SecurityGroupName.launchpad].title,
+            renderAs: 'panelOpener',
+            sideNavVersion: 'v1',
+            iconV2: 'launch',
+            children: [
+              {
+                children: [
+                  {
+                    id: SecurityPageName.landing,
+                    link: securityLink(SecurityPageName.landing),
+                    sideNavVersion: 'v1',
+                  },
+                  {
+                    // value report
+                    id: SecurityPageName.aiValue,
+                    link: securityLink(SecurityPageName.aiValue),
+                    sideNavVersion: 'v1',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: SecurityGroupName.launchpad,
+            title: i18nStrings.launchPad.title,
+            renderAs: 'panelOpener',
+            sideNavVersion: 'v2',
+            iconV2: 'launch',
+            children: [
+              {
+                children: [
+                  {
+                    id: SecurityPageName.landing,
+                    link: securityLink(SecurityPageName.landing),
+                    sideNavVersion: 'v2',
+                  },
+                  {
+                    id: SecurityPageName.siemReadiness,
+                    link: securityLink(SecurityPageName.siemReadiness),
+                    sideNavVersion: 'v2',
+                  },
+                  {
+                    // value report
+                    id: SecurityPageName.aiValue,
+                    link: securityLink(SecurityPageName.aiValue),
+                    sideNavVersion: 'v2',
+                  },
+                ],
+              },
+              {
+                title: i18nStrings.launchPad.migrations.title,
+                children: [
+                  {
+                    id: SecurityPageName.siemMigrationsRules,
+                    link: securityLink(SecurityPageName.siemMigrationsRules),
+                    sideNavVersion: 'v2',
+                  },
+                  {
+                    id: SecurityPageName.siemMigrationsDashboards,
+                    link: securityLink(SecurityPageName.siemMigrationsDashboards),
+                    sideNavVersion: 'v2',
+                  },
+                ],
+              },
+            ],
+          },
           {
             link: 'dev_tools',
             title: i18nStrings.devTools,
             icon: 'editorCodeBlock',
           },
-          createStackManagementNavigationTree(),
+          createStackManagementNavigationTree({ sideNavVersion: 'v1' }),
+          createV2footerItemsTree(),
         ],
       },
     ],

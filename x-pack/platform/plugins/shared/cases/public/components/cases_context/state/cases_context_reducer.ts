@@ -8,7 +8,6 @@
 import { assertNever } from '@kbn/std';
 import type { AllCasesSelectorModalProps } from '../../all_cases/selector_modal';
 import type { CreateCaseFlyoutProps } from '../../create/flyout';
-import type { RemoveAlertModalProps } from '../../case_view/components/remove_alert_from_case_modal';
 
 export const getInitialCasesContextState = (): CasesContextState => {
   return {
@@ -16,9 +15,6 @@ export const getInitialCasesContextState = (): CasesContextState => {
       isFlyoutOpen: false,
     },
     selectCaseModal: {
-      isModalOpen: false,
-    },
-    removeAlertModal: {
       isModalOpen: false,
     },
   };
@@ -33,10 +29,6 @@ export interface CasesContextState {
     isModalOpen: boolean;
     props?: AllCasesSelectorModalProps;
   };
-  removeAlertModal: {
-    isModalOpen: boolean;
-    props?: RemoveAlertModalProps;
-  };
 }
 
 export enum CasesContextStoreActionsList {
@@ -44,10 +36,7 @@ export enum CasesContextStoreActionsList {
   CLOSE_CREATE_CASE_FLYOUT,
   OPEN_ADD_TO_CASE_MODAL,
   CLOSE_ADD_TO_CASE_MODAL,
-  OPEN_REMOVE_ALERT_MODAL,
-  CLOSE_REMOVE_ALERT_MODAL,
 }
-
 export type CasesContextStoreAction =
   | {
       type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT;
@@ -58,12 +47,7 @@ export type CasesContextStoreAction =
       type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL;
       payload: AllCasesSelectorModalProps;
     }
-  | { type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL }
-  | {
-      type: CasesContextStoreActionsList.OPEN_REMOVE_ALERT_MODAL;
-      payload: RemoveAlertModalProps;
-    }
-  | { type: CasesContextStoreActionsList.CLOSE_REMOVE_ALERT_MODAL };
+  | { type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL };
 
 export const casesContextReducer: React.Reducer<CasesContextState, CasesContextStoreAction> = (
   state: CasesContextState,
@@ -81,12 +65,6 @@ export const casesContextReducer: React.Reducer<CasesContextState, CasesContextS
     }
     case CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL: {
       return { ...state, selectCaseModal: { isModalOpen: false } };
-    }
-    case CasesContextStoreActionsList.OPEN_REMOVE_ALERT_MODAL: {
-      return { ...state, removeAlertModal: { isModalOpen: true, props: action.payload } };
-    }
-    case CasesContextStoreActionsList.CLOSE_REMOVE_ALERT_MODAL: {
-      return { ...state, removeAlertModal: { isModalOpen: false } };
     }
     default:
       assertNever(action);

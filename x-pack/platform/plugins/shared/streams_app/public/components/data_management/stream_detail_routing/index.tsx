@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiResizableContainer,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { Streams } from '@kbn/streams-schema';
@@ -40,7 +39,11 @@ interface StreamDetailRoutingProps {
 
 export function StreamDetailRouting(props: StreamDetailRoutingProps) {
   const router = useStreamsAppRouter();
-  const { core, dependencies } = useKibana();
+  const {
+    core,
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
   const {
     data,
     streams: { streamsRepositoryClient },
@@ -57,6 +60,7 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
       timeState$={timeState$}
       streamsRepositoryClient={streamsRepositoryClient}
       forkSuccessNofitier={createForkSuccessNofitier({ core, router })}
+      telemetryClient={telemetryClient}
     >
       <StreamDetailRoutingImpl />
     </StreamRoutingContextProvider>
@@ -94,7 +98,8 @@ export function StreamDetailRoutingImpl() {
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
       routingSnapshot.can({ type: 'routingRule.save' }) ||
-      routingSnapshot.can({ type: 'routingRule.fork' }),
+      routingSnapshot.can({ type: 'routingRule.fork' }) ||
+      routingSnapshot.can({ type: 'suggestion.saveSuggestion' }),
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
@@ -102,7 +107,6 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
-  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's']);
 
   return (
     <EuiFlexItem
@@ -120,23 +124,22 @@ export function StreamDetailRoutingImpl() {
       >
         <EuiPanel
           hasShadow={false}
-          hasBorder
           className={css`
             display: flex;
             max-width: 100%;
             overflow: auto;
             flex-grow: 1;
           `}
-          paddingSize="xs"
+          paddingSize="none"
         >
-          <EuiResizableContainer direction={isVerticalLayout ? 'vertical' : 'horizontal'}>
+          <EuiResizableContainer>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
                   initialSize={40}
-                  minSize="150px"
+                  minSize="400px"
                   tabIndex={0}
-                  paddingSize="s"
+                  paddingSize="l"
                   color="subdued"
                   className={css`
                     overflow: auto;
@@ -146,13 +149,13 @@ export function StreamDetailRoutingImpl() {
                   <ChildStreamList availableStreams={availableStreams} />
                 </EuiResizablePanel>
 
-                <EuiResizableButton accountForScrollbars="both" />
+                <EuiResizableButton indicator="border" />
 
                 <EuiResizablePanel
                   initialSize={60}
                   tabIndex={0}
                   minSize="300px"
-                  paddingSize="s"
+                  paddingSize="l"
                   className={css`
                     display: flex;
                     flex-direction: column;
@@ -172,7 +175,9 @@ export function StreamDetailRoutingImpl() {
               })}
               onCancel={cancelChanges}
               onConfirm={saveChanges}
-              isLoading={routingSnapshot.matches({ ready: { reorderingRules: 'updatingStream' } })}
+              isLoading={routingSnapshot.matches({
+                ready: { reorderingRules: 'updatingStream' },
+              })}
               disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
               insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
             />

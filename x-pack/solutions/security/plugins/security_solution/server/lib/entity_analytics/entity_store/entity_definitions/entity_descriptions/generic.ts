@@ -7,7 +7,7 @@
 
 import { newestValue } from './field_utils';
 import type { EntityDescription } from '../types';
-import { getCommonFieldDescriptions } from './common';
+import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 
 export const GENERIC_DEFINITION_VERSION = '1.0.0';
 export const GENERIC_IDENTITY_FIELD = 'entity.id';
@@ -20,11 +20,7 @@ export const genericEntityEngineDescription: EntityDescription = {
     timestampField: '@timestamp',
   },
   fields: [
-    newestValue({ source: 'entity.name' }),
-    newestValue({ source: 'entity.source' }),
-    newestValue({ source: 'entity.type' }),
-    newestValue({ source: 'entity.sub_type' }),
-    newestValue({ source: 'entity.url' }),
+    ...getEntityFieldsDescriptions(),
 
     newestValue({ source: 'cloud.account.id' }),
     newestValue({ source: 'cloud.account.name' }),

@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { TestBed } from '@kbn/test-jest-helpers';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export { registerTestBed, getRandomString } from '@kbn/test-jest-helpers';
+export { getRandomString } from '@kbn/test-jest-helpers';

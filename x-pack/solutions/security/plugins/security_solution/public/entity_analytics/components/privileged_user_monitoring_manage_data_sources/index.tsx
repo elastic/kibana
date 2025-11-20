@@ -9,10 +9,12 @@ import { EuiCallOut, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CsvUploadManageDataSource } from './csv_upload_manage_data_source';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { IndexImportManageDataSource } from './index_import_manage_data_source';
+import { IntegrationsManageDataSource } from './integrations_manage_data_source';
 
 export interface AddDataSourceResult {
   successful: boolean;
@@ -27,6 +29,9 @@ export const PrivilegedUserMonitoringManageDataSources = ({
   const spaceId = useSpaceId();
   const [addDataSourceResult, setAddDataSourceResult] = useState<AddDataSourceResult | undefined>();
 
+  const { application } = useKibana().services;
+  const fleetRead = application?.capabilities?.fleetv2?.read ?? false;
+
   return (
     <>
       <EuiButtonEmpty
@@ -34,6 +39,12 @@ export const PrivilegedUserMonitoringManageDataSources = ({
         iconType="arrowLeft"
         iconSide="left"
         onClick={onBackToDashboardClicked}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.backAriaLabel',
+          {
+            defaultMessage: 'Back to privileged user monitoring',
+          }
+        )}
       >
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.back"
@@ -52,6 +63,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
       {addDataSourceResult?.successful && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               addDataSourceResult.userCount > 0
                 ? i18n.translate(
@@ -76,6 +88,19 @@ export const PrivilegedUserMonitoringManageDataSources = ({
         </>
       )}
 
+      {!fleetRead && (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.integrations.noAccessMessage"
+              defaultMessage="Insufficient privileges to view or manage integrations data source. Please contact your administrator."
+            />
+          }
+          color="warning"
+        />
+      )}
+      {fleetRead && <IntegrationsManageDataSource />}
+      <EuiSpacer size="xxl" />
       <IndexImportManageDataSource setAddDataSourceResult={setAddDataSourceResult} />
       <EuiSpacer size="xxl" />
       {spaceId && (

@@ -6,7 +6,7 @@
  */
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -54,12 +54,6 @@ mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
   caseHooksReturnedValue
 );
 
-mockKibana.services.cases.hooks.useRemoveAlertFromCaseModal.mockReturnValue({
-  ...caseHooksReturnedValue,
-  onSuccess: jest.fn(),
-  onClose: jest.fn(),
-});
-
 mockKibana.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
 const mockLicensing = licensingMock.createStart();
 
@@ -74,8 +68,8 @@ const config: ConfigSchema = {
     alertDetails: {
       uptime: { enabled: false },
     },
-    managedOtlpServiceUrl: '',
   },
+  managedOtlpServiceUrl: '',
 };
 
 const getFormatterMock = jest.fn();
@@ -140,7 +134,6 @@ describe('ObservabilityActions component', () => {
       | 'cveProps'
       | 'clearSelection'
       | 'observabilityRuleTypeRegistry'
-      | 'openAlertInFlyout'
       | 'refresh'
     > = {
       tableId: pageId,
@@ -152,7 +145,6 @@ describe('ObservabilityActions component', () => {
       cveProps: {} as unknown as EuiDataGridCellValueElementProps,
       clearSelection: noop,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      openAlertInFlyout: jest.fn(),
       refresh,
     };
 

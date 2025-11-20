@@ -20,6 +20,10 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type {
+  ReindexServicePublicSetup,
+  ReindexServicePublicStart,
+} from '@kbn/reindex-service-plugin/public';
 
 export interface IndexManagementStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
@@ -35,6 +39,7 @@ export interface SetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
   cloud?: CloudSetup;
+  reindexService: ReindexServicePublicSetup;
 }
 
 export interface StartDependencies {
@@ -47,6 +52,7 @@ export interface StartDependencies {
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
   streams?: StreamsPluginStart;
+  reindexService: ReindexServicePublicStart;
 }
 
 export interface ClientConfigType {

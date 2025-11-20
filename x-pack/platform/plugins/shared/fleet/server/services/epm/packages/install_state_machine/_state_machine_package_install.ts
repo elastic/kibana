@@ -57,9 +57,11 @@ import {
   cleanupArchiveEntriesStep,
   cleanupKnowledgeBaseStep,
   stepInstallKibanaAssetsWithStreaming,
+  stepInstallPrecheck,
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
+import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -90,8 +92,13 @@ export interface InstallContext extends StateContext<StateNames> {
  */
 const regularStatesDefinition: StateMachineStates<StateNames> = {
   create_restart_installation: {
-    nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
+    nextState: INSTALL_STATES.INSTALL_PRECHECK,
     onTransition: stepCreateRestartInstallation,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_precheck: {
+    onTransition: stepInstallPrecheck,
+    nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
   install_kibana_assets: {
@@ -154,6 +161,11 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,
+    nextState: INSTALL_STATES.CREATE_ALERTING_RULES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_alerting_rules: {
+    onTransition: stepCreateAlertingRules,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },

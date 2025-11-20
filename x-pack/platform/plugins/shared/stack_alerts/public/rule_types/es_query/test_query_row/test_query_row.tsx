@@ -140,7 +140,13 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
       )}
       {testQueryWarning && (
         <EuiFormRow fullWidth>
-          <EuiCallOut color="warning" size="s" title={testQueryWarning} iconType="warning" />
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            size="s"
+            title={testQueryWarning}
+            iconType="warning"
+          />
         </EuiFormRow>
       )}
       {showTable && testQueryPreview && (

@@ -179,7 +179,7 @@ describe('resourceInstaller', () => {
 
           const install = installer.installCommonResources();
           const timeout = new Promise((resolve) => {
-            setTimeout(resolve, 1000);
+            setTimeout(resolve, 250);
           });
 
           await Promise.race([install, timeout]);
@@ -485,6 +485,309 @@ describe('resourceInstaller', () => {
           expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
           expect(mockClusterClient.indices.getAlias).not.toHaveBeenCalled();
           expect(mockClusterClient.indices.create).not.toHaveBeenCalled();
+        });
+
+        it('should install namespace level resources when additionalPrefix is defined', async () => {
+          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          mockClusterClient.ilm.getLifecycle.mockResolvedValue({
+            '.customPrefix.alerts-observability.logs.alerts-policy': {
+              version: 1,
+              modified_date: '2025-10-02T15:05:30.113Z',
+              policy: {
+                phases: {
+                  hot: {
+                    min_age: '0ms',
+                    actions: { rollover: { max_age: '1d', max_primary_shard_size: '50gb' } },
+                  },
+                  delete: {
+                    min_age: '1d',
+                    actions: { delete: { delete_searchable_snapshot: true } },
+                  },
+                },
+              },
+            },
+          });
+          mockClusterClient.indices.simulateTemplate.mockImplementation(async () => ({
+            template: {
+              aliases: {
+                alias_name_1: {
+                  is_hidden: true,
+                },
+                alias_name_2: {
+                  is_hidden: true,
+                },
+              },
+              mappings: { enabled: false },
+              settings: {},
+            },
+          }));
+          mockClusterClient.indices.getAlias.mockImplementation(async () => ({}));
+          mockClusterClient.indices.getDataStream.mockImplementation(async () => ({
+            data_streams: [],
+          }));
+          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const installer = new ResourceInstaller({
+            logger: loggerMock.create(),
+            isWriteEnabled: true,
+            disabledRegistrationContexts: [],
+            getResourceName: jest.fn(),
+            getClusterClient,
+            frameworkAlerts: frameworkAlertsService,
+            pluginStop$,
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+          });
+
+          const indexOptions = {
+            additionalPrefix: '.customPrefix',
+            feature: AlertConsumers.LOGS,
+            registrationContext: 'observability.logs',
+            dataset: Dataset.alerts,
+            componentTemplateRefs: [],
+            componentTemplates: [
+              {
+                name: 'mappings',
+              },
+            ],
+          };
+          const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: '8.1.0' });
+
+          await installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default');
+          if (useDataStreamForAlerts) {
+            expect(mockClusterClient.indices.simulateTemplate).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default-index-template',
+                template: expect.objectContaining({
+                  settings: {
+                    auto_expand_replicas: '0-1',
+                    hidden: true,
+                    'index.mapping.ignore_malformed': true,
+                    'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                    'index.mapping.total_fields.limit': 2500,
+                  },
+                }),
+              })
+            );
+            expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default-index-template',
+                template: expect.objectContaining({
+                  settings: {
+                    auto_expand_replicas: '0-1',
+                    hidden: true,
+                    'index.mapping.ignore_malformed': true,
+                    'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                    'index.mapping.total_fields.limit': 2500,
+                  },
+                }),
+              })
+            );
+            expect(mockClusterClient.indices.getDataStream).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default',
+                expand_wildcards: 'all',
+              })
+            );
+            expect(mockClusterClient.indices.createDataStream).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default',
+              })
+            );
+          } else {
+            expect(mockClusterClient.indices.simulateTemplate).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default-index-template',
+                template: expect.objectContaining({
+                  settings: {
+                    'index.lifecycle': {
+                      name: '.customPrefix.alerts-observability.logs.alerts-policy',
+                      rollover_alias: '.customPrefix.alerts-observability.logs.alerts-default',
+                    },
+                    auto_expand_replicas: '0-1',
+                    hidden: true,
+                    'index.mapping.ignore_malformed': true,
+                    'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                    'index.mapping.total_fields.limit': 2500,
+                  },
+                }),
+              })
+            );
+            expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default-index-template',
+                template: expect.objectContaining({
+                  settings: {
+                    'index.lifecycle': {
+                      name: '.customPrefix.alerts-observability.logs.alerts-policy',
+                      rollover_alias: '.customPrefix.alerts-observability.logs.alerts-default',
+                    },
+                    auto_expand_replicas: '0-1',
+                    hidden: true,
+                    'index.mapping.ignore_malformed': true,
+                    'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                    'index.mapping.total_fields.limit': 2500,
+                  },
+                }),
+              })
+            );
+            expect(mockClusterClient.indices.getAlias).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default',
+              })
+            );
+            expect(mockClusterClient.ilm.getLifecycle).toHaveBeenCalledWith({
+              name: '.customPrefix.alerts-observability.logs.alerts-policy',
+            });
+            expect(mockClusterClient.indices.create).toHaveBeenCalledWith(
+              expect.objectContaining({
+                index: '.internal.customPrefix.alerts-observability.logs.alerts-default-000001',
+              })
+            );
+          }
+        });
+
+        it('should use default alert policy if additionalPrefix is defined but no matching ILM policy exists', async () => {
+          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          mockClusterClient.ilm.getLifecycle.mockImplementation(() => {
+            throw new Error('No matching policy found');
+          });
+          mockClusterClient.indices.simulateTemplate.mockImplementation(async () => ({
+            template: {
+              aliases: {
+                alias_name_1: {
+                  is_hidden: true,
+                },
+                alias_name_2: {
+                  is_hidden: true,
+                },
+              },
+              mappings: { enabled: false },
+              settings: {},
+            },
+          }));
+          mockClusterClient.indices.getAlias.mockImplementation(async () => ({}));
+          mockClusterClient.indices.getDataStream.mockImplementation(async () => ({
+            data_streams: [],
+          }));
+          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const installer = new ResourceInstaller({
+            logger: loggerMock.create(),
+            isWriteEnabled: true,
+            disabledRegistrationContexts: [],
+            getResourceName: jest.fn(),
+            getClusterClient,
+            frameworkAlerts: frameworkAlertsService,
+            pluginStop$,
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+          });
+
+          const indexOptions = {
+            additionalPrefix: '.customPrefix',
+            feature: AlertConsumers.LOGS,
+            registrationContext: 'observability.logs',
+            dataset: Dataset.alerts,
+            componentTemplateRefs: [],
+            componentTemplates: [
+              {
+                name: 'mappings',
+              },
+            ],
+          };
+          const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: '8.1.0' });
+
+          await installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default');
+          if (useDataStreamForAlerts) {
+            expect(mockClusterClient.indices.simulateTemplate).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default-index-template',
+                template: expect.objectContaining({
+                  settings: {
+                    auto_expand_replicas: '0-1',
+                    hidden: true,
+                    'index.mapping.ignore_malformed': true,
+                    'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                    'index.mapping.total_fields.limit': 2500,
+                  },
+                }),
+              })
+            );
+            expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default-index-template',
+                template: expect.objectContaining({
+                  settings: {
+                    auto_expand_replicas: '0-1',
+                    hidden: true,
+                    'index.mapping.ignore_malformed': true,
+                    'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                    'index.mapping.total_fields.limit': 2500,
+                  },
+                }),
+              })
+            );
+            expect(mockClusterClient.indices.getDataStream).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default',
+                expand_wildcards: 'all',
+              })
+            );
+            expect(mockClusterClient.indices.createDataStream).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default',
+              })
+            );
+          } else {
+            expect(mockClusterClient.indices.simulateTemplate).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default-index-template',
+                template: expect.objectContaining({
+                  settings: {
+                    'index.lifecycle': {
+                      name: '.alerts-ilm-policy',
+                      rollover_alias: '.customPrefix.alerts-observability.logs.alerts-default',
+                    },
+                    auto_expand_replicas: '0-1',
+                    hidden: true,
+                    'index.mapping.ignore_malformed': true,
+                    'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                    'index.mapping.total_fields.limit': 2500,
+                  },
+                }),
+              })
+            );
+            expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default-index-template',
+                template: expect.objectContaining({
+                  settings: {
+                    'index.lifecycle': {
+                      name: '.alerts-ilm-policy',
+                      rollover_alias: '.customPrefix.alerts-observability.logs.alerts-default',
+                    },
+                    auto_expand_replicas: '0-1',
+                    hidden: true,
+                    'index.mapping.ignore_malformed': true,
+                    'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                    'index.mapping.total_fields.limit': 2500,
+                  },
+                }),
+              })
+            );
+            expect(mockClusterClient.indices.getAlias).toHaveBeenCalledWith(
+              expect.objectContaining({
+                name: '.customPrefix.alerts-observability.logs.alerts-default',
+              })
+            );
+            expect(mockClusterClient.ilm.getLifecycle).toHaveBeenCalledWith({
+              name: '.customPrefix.alerts-observability.logs.alerts-policy',
+            });
+            expect(mockClusterClient.indices.create).toHaveBeenCalledWith(
+              expect.objectContaining({
+                index: '.internal.customPrefix.alerts-observability.logs.alerts-default-000001',
+              })
+            );
+          }
         });
       });
 

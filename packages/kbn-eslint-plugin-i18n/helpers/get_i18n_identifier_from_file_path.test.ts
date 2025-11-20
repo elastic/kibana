@@ -13,6 +13,10 @@ const SYSTEMPATH = 'systemPath';
 
 const testMap = [
   [
+    'x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx',
+    'xpack.observability_onboarding',
+  ],
+  [
     'x-pack/solutions/observability/plugins/observability/public/header_actions.tsx',
     'xpack.observability',
   ],

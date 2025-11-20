@@ -42,6 +42,7 @@ const uiSettingsClient = uiSettingsServiceMock.createClient();
 const wrappedScopedClusterClient = wrappedScopedClusterClientMock.create();
 const getDataViews = jest.fn().mockResolvedValue(dataViews);
 const getWrappedSearchSourceClient = jest.fn();
+const getAsyncSearchClient = jest.fn();
 
 const fakeRequest = {
   headers: {},
@@ -199,6 +200,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -223,6 +225,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -310,6 +313,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -334,6 +338,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -393,71 +398,6 @@ describe('RuleTypeRunner', () => {
       });
     });
 
-    test('should update maintenance window ids in event logger if alerts are affected', async () => {
-      alertsClient.updatePersistedAlertsWithMaintenanceWindowIds.mockResolvedValueOnce({
-        alertId: ['1'],
-        maintenanceWindowIds: ['abc'],
-      });
-      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
-
-      const { state, error, stackTrace } = await ruleTypeRunner.run({
-        context: {
-          alertingEventLogger,
-          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          logger,
-          queryDelaySec: 0,
-          maintenanceWindowsService,
-          request: fakeRequest,
-          ruleId: RULE_ID,
-          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
-          ruleRunMetricsStore,
-          spaceId: 'default',
-          isServerless: false,
-        },
-        alertsClient,
-        executionId: 'abc',
-        executorServices: {
-          getDataViews,
-          ruleMonitoringService: publicRuleMonitoringService,
-          ruleResultService: publicRuleResultService,
-          savedObjectsClient,
-          uiSettingsClient,
-          wrappedScopedClusterClient,
-          getWrappedSearchSourceClient,
-        },
-        rule: mockedRule,
-        ruleType,
-        startedAt: new Date(DATE_1970),
-        state: mockTaskInstance().state,
-        validatedParams: mockedRuleParams,
-      });
-
-      expect(ruleType.executor).toHaveBeenCalled();
-
-      expect(state).toEqual({ foo: 'bar' });
-      expect(error).toBeUndefined();
-      expect(stackTrace).toBeUndefined();
-      expect(alertsClient.hasReachedAlertLimit).toHaveBeenCalled();
-      expect(alertsClient.checkLimitUsage).toHaveBeenCalled();
-      expect(alertingEventLogger.setExecutionSucceeded).toHaveBeenCalledWith(
-        `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
-      );
-      expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
-      expect(alertsClient.persistAlerts).toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
-      expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['abc']);
-      expect(alertsClient.logAlerts).toHaveBeenCalledWith({
-        ruleRunMetricsStore,
-        shouldLogAlerts: true,
-      });
-    });
-
     test('should return error when checkLimitUsage() throws error', async () => {
       const err = new Error('limit exceeded');
       alertsClient.checkLimitUsage.mockImplementationOnce(() => {
@@ -489,6 +429,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -513,6 +454,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -597,6 +539,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -621,6 +564,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -705,6 +649,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -717,6 +662,7 @@ describe('RuleTypeRunner', () => {
     });
 
     test('should handle reaching alert limit when rule type executor succeeds', async () => {
+      alertsClient.getMaxAlertLimit.mockReturnValueOnce(100);
       alertsClient.hasReachedAlertLimit.mockReturnValueOnce(true);
       ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
 
@@ -744,6 +690,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -768,6 +715,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -824,7 +772,6 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
         shouldLogAlerts: true,
@@ -832,6 +779,7 @@ describe('RuleTypeRunner', () => {
     });
 
     test('should handle reaching alert limit when rule type executor throws error', async () => {
+      alertsClient.getMaxAlertLimit.mockReturnValueOnce(100);
       alertsClient.hasReachedAlertLimit.mockReturnValueOnce(true);
       alertsClient.hasReachedAlertLimit.mockReturnValueOnce(true);
       const err = new Error('executor error');
@@ -863,6 +811,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -887,6 +836,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -943,7 +893,6 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
         shouldLogAlerts: true,
@@ -982,6 +931,7 @@ describe('RuleTypeRunner', () => {
             uiSettingsClient,
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
+            getAsyncSearchClient,
           },
           rule: mockedRule,
           ruleType,
@@ -1007,6 +957,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -1053,7 +1004,6 @@ describe('RuleTypeRunner', () => {
       expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
       expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
@@ -1089,6 +1039,7 @@ describe('RuleTypeRunner', () => {
             uiSettingsClient,
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
+            getAsyncSearchClient,
           },
           rule: mockedRule,
           ruleType,
@@ -1114,6 +1065,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -1163,119 +1115,6 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).not.toHaveBeenCalled();
-      expect(alertsClient.logAlerts).not.toHaveBeenCalled();
-    });
-
-    test('should throw error if alertsClient.updatePersistedAlertsWithMaintenanceWindowIds throws error', async () => {
-      alertsClient.updatePersistedAlertsWithMaintenanceWindowIds.mockImplementationOnce(() => {
-        throw new Error('update alerts with maintenance window ids failed');
-      });
-
-      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
-
-      await expect(
-        ruleTypeRunner.run({
-          context: {
-            alertingEventLogger,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            request: fakeRequest,
-            queryDelaySec: 0,
-            logger,
-            ruleId: RULE_ID,
-            maintenanceWindowsService,
-            ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
-            ruleRunMetricsStore,
-            spaceId: 'default',
-            isServerless: false,
-          },
-          alertsClient,
-          executionId: 'abc',
-          executorServices: {
-            getDataViews,
-            ruleMonitoringService: publicRuleMonitoringService,
-            ruleResultService: publicRuleResultService,
-            savedObjectsClient,
-            uiSettingsClient,
-            wrappedScopedClusterClient,
-            getWrappedSearchSourceClient,
-          },
-          rule: mockedRule,
-          ruleType,
-          startedAt: new Date(DATE_1970),
-          state: mockTaskInstance().state,
-          validatedParams: mockedRuleParams,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"update alerts with maintenance window ids failed"`
-      );
-
-      expect(ruleType.executor).toHaveBeenCalledWith({
-        executionId: 'abc',
-        ruleExecutionTimeout: '5m',
-        services: {
-          alertFactory: alertsClient.factory(),
-          alertsClient: alertsClient.client(),
-          getDataViews: expect.any(Function),
-          getMaintenanceWindowIds: expect.any(Function),
-          ruleMonitoringService: publicRuleMonitoringService,
-          ruleResultService: publicRuleResultService,
-          savedObjectsClient,
-          scopedClusterClient: wrappedScopedClusterClient.client(),
-          getSearchSourceClient: expect.any(Function),
-          share: {},
-          shouldStopExecution: expect.any(Function),
-          shouldWriteAlerts: expect.any(Function),
-          uiSettingsClient,
-        },
-        params: mockedRuleParams,
-        state: mockTaskInstance().state,
-        startedAt: new Date(DATE_1970),
-        startedAtOverridden: false,
-        previousStartedAt: null,
-        spaceId: 'default',
-        isServerless: false,
-        rule: {
-          id: RULE_ID,
-          name: mockedRule.name,
-          tags: mockedRule.tags,
-          consumer: mockedRule.consumer,
-          producer: ruleType.producer,
-          revision: mockedRule.revision,
-          ruleTypeId: mockedRule.alertTypeId,
-          ruleTypeName: ruleType.name,
-          enabled: mockedRule.enabled,
-          schedule: mockedRule.schedule,
-          actions: mockedRule.actions,
-          createdBy: mockedRule.createdBy,
-          updatedBy: mockedRule.updatedBy,
-          createdAt: mockedRule.createdAt,
-          updatedAt: mockedRule.updatedAt,
-          throttle: mockedRule.throttle,
-          notifyWhen: mockedRule.notifyWhen,
-          muteAll: mockedRule.muteAll,
-          snoozeSchedule: mockedRule.snoozeSchedule,
-          alertDelay: mockedRule.alertDelay,
-        },
-        logger,
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        getTimeRange: expect.any(Function),
-      });
-
-      expect(alertsClient.hasReachedAlertLimit).toHaveBeenCalled();
-      expect(alertsClient.checkLimitUsage).toHaveBeenCalled();
-      expect(alertingEventLogger.setExecutionSucceeded).toHaveBeenCalledWith(
-        `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
-      );
-      expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        ruleRunMetricsStore,
-      });
-      expect(alertsClient.persistAlerts).toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
@@ -1311,6 +1150,7 @@ describe('RuleTypeRunner', () => {
             uiSettingsClient,
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
+            getAsyncSearchClient,
           },
           rule: mockedRule,
           ruleType,
@@ -1336,6 +1176,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -1385,7 +1226,6 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
         shouldLogAlerts: true,
@@ -1419,6 +1259,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType: { ...ruleType, ruleTaskTimeout: mockRuleExecutionTimeout },
@@ -1463,6 +1304,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -1487,7 +1329,6 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
         shouldLogAlerts: false,
@@ -1540,6 +1381,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -1564,7 +1406,6 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
         shouldLogAlerts: true,
@@ -1599,6 +1440,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -1623,7 +1465,6 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
         shouldLogAlerts: true,

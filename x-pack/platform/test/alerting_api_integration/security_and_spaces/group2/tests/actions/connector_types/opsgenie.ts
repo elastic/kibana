@@ -66,6 +66,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: simulatorUrl,
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -86,8 +87,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -112,7 +112,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://opsgenie.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error validating url: target url "http://opsgenie.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -133,8 +133,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: Field \"apiKey\": Required`,
             });
           });
       });
@@ -213,8 +212,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [message]: expected value of type [string] but got [undefined])',
+            service_message: `Request validation failed (Field \"message\": Required)`,
           });
         });
 
@@ -233,8 +231,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [alias]: expected value of type [string] but got [undefined])',
+            service_message: `Request validation failed (Field \"alias\": Required)`,
           });
         });
 
@@ -266,8 +263,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.type]: types that failed validation:\n - [responders.0.type.0]: expected value to equal [team]\n - [responders.0.type.1]: expected value to equal [user]\n - [responders.0.type.2]: expected value to equal [escalation]\n - [responders.0.type.3]: expected value to equal [schedule]\n- [responders.0.1.id]: expected value of type [string] but got [undefined]\n- [responders.0.2.username]: expected value of type [string] but got [undefined])',
+                service_message: `Request validation failed (Field \"responders.0\": Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name')`,
               });
             });
 
@@ -296,8 +292,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.name]: expected value of type [string] but got [undefined]\n- [responders.0.1.id]: expected value of type [string] but got [undefined]\n- [responders.0.2.username]: expected value of type [string] but got [undefined])',
+                service_message: `Request validation failed (4 errors:\n [1]: Field \"responders.0.name\": Required;\n [2]: Field \"responders.0.id\": Required;\n [3]: Field \"responders.0.username\": Required;\n [4]: Field \"responders.0.type\": Invalid literal value, expected \"user\")`,
               });
             });
 
@@ -399,8 +394,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [visibleTo.0]: types that failed validation:\n- [visibleTo.0.0.type]: expected value to equal [team]\n- [visibleTo.0.1.id]: expected value of type [string] but got [undefined]\n- [visibleTo.0.2.id]: expected value of type [string] but got [undefined]\n- [visibleTo.0.3.username]: expected value of type [string] but got [undefined])',
+                service_message: `Request validation failed (Field \"visibleTo.0\": Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name')`,
               });
             });
 
@@ -464,8 +458,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [details.bananas]: expected value of type [string] but got [number])',
+                service_message: `Request validation failed (Field \"details.bananas\": Expected string, received number)`,
               });
             });
 
@@ -716,7 +709,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });
@@ -740,7 +733,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });

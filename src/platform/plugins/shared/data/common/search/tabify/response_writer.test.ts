@@ -216,7 +216,6 @@ describe('TabbedAggResponseWriter class', () => {
           params: {
             id: 'terms',
             params: {
-              missingBucketLabel: 'Missing',
               otherBucketLabel: 'Other',
             },
           },
@@ -230,7 +229,6 @@ describe('TabbedAggResponseWriter class', () => {
             params: {
               field: 'geo.src',
               missingBucket: false,
-              missingBucketLabel: 'Missing',
               order: 'desc',
               otherBucket: false,
               otherBucketLabel: 'Other',
@@ -282,7 +280,6 @@ describe('TabbedAggResponseWriter class', () => {
           params: {
             id: 'terms',
             params: {
-              missingBucketLabel: 'Missing',
               otherBucketLabel: 'Other',
             },
           },
@@ -296,7 +293,6 @@ describe('TabbedAggResponseWriter class', () => {
             params: {
               field: 'geo.src',
               missingBucket: false,
-              missingBucketLabel: 'Missing',
               order: 'desc',
               otherBucket: false,
               otherBucketLabel: 'Other',

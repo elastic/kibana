@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
@@ -17,12 +18,11 @@ import {
   installPrebuiltRules,
   installFleetPackage,
 } from '../../../../../utils';
-import { deleteAllRules } from '../../../../../../../config/services/detections_response';
 import {
   MOCK_BETA_PKG_VERSION,
   MOCK_PKG_VERSION,
-  PREBUILT_RULE_ID_A,
-  PREBUILT_RULE_ID_B,
+  PREBUILT_RULE_A_ASSET_ID,
+  PREBUILT_RULE_B_ASSET_ID,
 } from '../../configs/edge_cases/ess_air_gapped_with_bundled_packages.config';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -61,8 +61,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(fleetPackageInstallationResponse.items.length).toBe(2);
       expect(fleetPackageInstallationResponse.items).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ id: PREBUILT_RULE_ID_A }),
-          expect.objectContaining({ id: PREBUILT_RULE_ID_B }),
+          expect.objectContaining({ id: PREBUILT_RULE_A_ASSET_ID }),
+          expect.objectContaining({ id: PREBUILT_RULE_B_ASSET_ID }),
         ])
       );
 

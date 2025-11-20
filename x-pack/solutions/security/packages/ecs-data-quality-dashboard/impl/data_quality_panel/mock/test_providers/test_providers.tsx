@@ -12,7 +12,7 @@ import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 import React from 'react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { Theme } from '@elastic/charts';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import type { UserProfileService } from '@kbn/core/public';
@@ -23,6 +23,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 import type { AssistantProviderProps } from '@kbn/elastic-assistant/impl/assistant_context';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataQualityProviderProps } from '../../data_quality_context';
 import { DataQualityProvider } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
@@ -98,6 +99,11 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     userProfileService: jest.fn() as unknown as UserProfileService,
     getUrlForApp: jest.fn(),
     chrome,
+    settings: {
+      client: {
+        get: jest.fn(),
+      },
+    } as unknown as SettingsStart,
   };
 
   return (

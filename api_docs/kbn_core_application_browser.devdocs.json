@@ -1062,10 +1062,6 @@
               {
                 "plugin": "@kbn/test-suites-src",
                 "path": "src/platform/test/plugin_functional/plugins/kbn_top_nav/public/application.tsx"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/public/mocks.ts"
               }
             ]
           },

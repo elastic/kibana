@@ -26,19 +26,18 @@ import {
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartGauge } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
+  FormBasedPersistedState,
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
   Suggestion,
   UserMessage,
   Visualization,
-} from '../../types';
+} from '@kbn/lens-common';
 import { getSuggestions } from './suggestions';
 import type { GaugeVisualizationState } from './constants';
 import { GROUP_ID, LENS_GAUGE_ID } from './constants';
-import { GaugeToolbar } from './toolbar_component';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
@@ -50,6 +49,8 @@ import {
   GAUGE_MIN_GT_METRIC,
   GAUGE_MIN_NE_MAX,
 } from '../../user_messages_ids';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { GaugeStyleSettings } from './toolbar_component';
 
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -412,8 +413,8 @@ export const getGaugeVisualization = ({
     return <GaugeDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  ToolbarComponent(props) {
-    return <GaugeToolbar {...props} />;
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: GaugeStyleSettings }} />;
   },
 
   getSupportedLayers(state, frame) {

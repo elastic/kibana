@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -37,8 +37,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/expandable-flyout",
     "@kbn/grouping",
-    "@kbn/core-http-server-mocks",
-    "@kbn/shared-ux-router",
     "@kbn/std",
+    "@kbn/react-query"
   ]
 }

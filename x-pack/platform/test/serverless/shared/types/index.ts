@@ -43,4 +43,6 @@ export interface CreateTestConfigOptions<
   pageObjects?: TPageObjects;
   apps?: Record<string, { pathname: string; hash?: string }>;
   enableFleetDockerRegistry?: boolean;
+  screenshots?: { directory: string };
+  indexRefreshInterval?: string | false;
 }

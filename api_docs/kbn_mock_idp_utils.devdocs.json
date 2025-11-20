@@ -66,7 +66,7 @@
           "\nCreates a SAML response that can be passed directly to the Kibana ACS endpoint to authenticate a user.\n"
         ],
         "signature": [
-          "(options: { kibanaUrl: string; authnRequestId?: string | undefined; username: string; full_name?: string | undefined; email?: string | undefined; roles: string[]; }) => Promise<string>"
+          "(options: { kibanaUrl: string; authnRequestId?: string | undefined; username: string; full_name?: string | undefined; email?: string | undefined; roles: string[]; serverless?: { organizationId: string; projectType: string; uiamEnabled: boolean; } | undefined; }) => Promise<string>"
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
         "deprecated": false,
@@ -160,6 +160,20 @@
                 "description": [],
                 "signature": [
                   "string[]"
+                ],
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createSAMLResponse.$1.serverless",
+                "type": "Object",
+                "tags": [],
+                "label": "serverless",
+                "description": [],
+                "signature": [
+                  "{ organizationId: string; projectType: string; uiamEnabled: boolean; } | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
                 "deprecated": false,
@@ -274,6 +288,66 @@
       },
       {
         "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN",
+        "description": [],
+        "signature": [
+          "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT",
+        "description": [],
+        "signature": [
+          "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN",
+        "description": [],
+        "signature": [
+          "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT",
+        "description": [],
+        "signature": [
+          "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
         "id": "def-common.MOCK_IDP_ENTITY_ID",
         "type": "string",
         "tags": [],
@@ -356,6 +430,66 @@
         "description": [],
         "signature": [
           "\"mock-idp-mapping\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_ORGANIZATION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_ORGANIZATION_ID",
+        "description": [],
+        "signature": [
+          "\"1234567890\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_PROJECT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_PROJECT_ID",
+        "description": [],
+        "signature": [
+          "\"abcde1234567890\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_SHARED_SECRET",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_SHARED_SECRET",
+        "description": [],
+        "signature": [
+          "\"Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_SIGNING_SECRET",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_SIGNING_SECRET",
+        "description": [],
+        "signature": [
+          "\"MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,

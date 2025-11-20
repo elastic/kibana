@@ -49,7 +49,6 @@ describe('APM Onboarding', () => {
       cy.contains('Java');
       cy.contains('.NET');
       cy.contains('PHP');
-      cy.contains('OpenTelemetry');
     });
 
     it('navigation to different Tabs', () => {
@@ -76,9 +75,6 @@ describe('APM Onboarding', () => {
 
       cy.contains('PHP').click();
       cy.contains('apk add --allow-untrusted <package-file>.apk');
-
-      cy.contains('OpenTelemetry').click();
-      cy.contains('Instrument your app with OpenTelemetry SDK');
     });
   });
 
@@ -140,9 +136,6 @@ describe('APM Onboarding', () => {
       cy.getByTestSubj('apiKeySuccessCallout').should('exist');
 
       cy.contains('PHP').click();
-      cy.getByTestSubj('apiKeySuccessCallout').should('exist');
-
-      cy.contains('OpenTelemetry').click();
       cy.getByTestSubj('apiKeySuccessCallout').should('exist');
     });
 

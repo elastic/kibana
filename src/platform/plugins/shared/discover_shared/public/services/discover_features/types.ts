@@ -11,8 +11,9 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
-import type { SpanLinks } from '@kbn/apm-types';
+import type { SpanLinks, ErrorsByTraceId } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FeaturesRegistry } from '../../../common';
 
 /**
@@ -29,6 +30,7 @@ import type { FeaturesRegistry } from '../../../common';
 
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
+  dataView: DataView;
 }
 
 export interface ObservabilityStreamsFeature {
@@ -59,6 +61,19 @@ export interface ObservabilityTracesSpanLinksFeature {
   ) => Promise<SpanLinks>;
 }
 
+export interface ObservabilityTracesFetchErrorsFeature {
+  id: 'observability-traces-fetch-errors';
+  fetchErrorsByTraceId: (
+    params: {
+      traceId: string;
+      docId?: string;
+      start: string;
+      end: string;
+    },
+    signal: AbortSignal
+  ) => Promise<ErrorsByTraceId>;
+}
+
 export interface ObservabilityCreateSLOFeature {
   id: 'observability-create-slo';
   createSLOFlyout: (props: {
@@ -70,7 +85,8 @@ export interface ObservabilityCreateSLOFeature {
 export interface ObservabilityLogEventsFeature {
   id: 'observability-log-events';
   render: (props: {
-    query: Query;
+    query?: Query;
+    nonHighlightingQuery?: Query;
     timeRange: TimeRange;
     index: string;
     displayOptions?: {
@@ -108,6 +124,7 @@ export type DiscoverFeature =
   | ObservabilityCreateSLOFeature
   | ObservabilityLogEventsFeature
   | ObservabilityTracesSpanLinksFeature
+  | ObservabilityTracesFetchErrorsFeature
   | SecuritySolutionFeature;
 
 /**

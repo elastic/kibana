@@ -10,7 +10,7 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { isEmpty, omit } from 'lodash';
 import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
-import { scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
+import { scheduleRruleSchemaV3 } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { ScheduleType } from '@kbn/reporting-server';
@@ -28,7 +28,10 @@ import {
   transformRawScheduledReportToReport,
   transformRawScheduledReportToTaskParams,
 } from './lib';
-import { ScheduledReportAuditAction, scheduledReportAuditEvent } from '../audit_events';
+import {
+  ScheduledReportAuditAction,
+  scheduledReportAuditEvent,
+} from '../../../services/audit_events/audit_events';
 
 // Using the limit specified in the cloud email service limits
 // https://www.elastic.co/docs/explore-analyze/alerts-cases/watcher/enable-watcher#cloud-email-service-limits
@@ -37,7 +40,7 @@ const MAX_ALLOWED_EMAILS = 30;
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
   body: schema.object({
-    schedule: scheduleRruleSchemaV2,
+    schedule: scheduleRruleSchemaV3,
     notification: schema.maybe(rawNotificationSchema),
     jobParams: schema.string(),
   }),

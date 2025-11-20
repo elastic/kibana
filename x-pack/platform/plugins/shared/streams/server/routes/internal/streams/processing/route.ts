@@ -26,6 +26,7 @@ import {
   handleProcessingGrokSuggestions,
   processingGrokSuggestionsSchema,
 } from './grok_suggestions_handler';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -48,14 +49,16 @@ export const simulateProcessorRoute = createServerRoute({
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
-    return simulateProcessing({ params, scopedClusterClient, streamsClient });
+    return simulateProcessing({ params, scopedClusterClient, streamsClient, fieldsMetadataClient });
   },
 });
 
@@ -108,6 +111,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
         streamsClient,
         scopedClusterClient,
         fieldsMetadataClient,
+        signal: getRequestAbortSignal(request),
       })
     ).pipe(
       map((grokProcessor) => ({

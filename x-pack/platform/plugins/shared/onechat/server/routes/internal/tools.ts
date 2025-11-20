@@ -13,14 +13,19 @@ import type {
   BulkDeleteToolResponse,
   BulkDeleteToolResult,
   ResolveSearchSourcesResponse,
+  ListWorkflowsResponse,
+  GetWorkflowResponse,
+  GetToolTypeInfoResponse,
 } from '../../../common/http_api/tools';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 
 export function registerInternalToolsRoutes({
   router,
+  coreSetup,
   getInternalServices,
   logger,
+  pluginsSetup: { workflowsManagement },
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -72,7 +77,7 @@ export function registerInternalToolsRoutes({
   // resolve search sources (internal)
   router.get(
     {
-      path: '/internal/chat/tools/_resolve_search_sources',
+      path: `${internalApiPath}/tools/_resolve_search_sources`,
       validate: {
         query: schema.object({
           pattern: schema.string(),
@@ -109,6 +114,114 @@ export function registerInternalToolsRoutes({
         body: {
           results,
           total: results.length,
+        },
+      });
+    })
+  );
+
+  // list available tool types (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_types_info`,
+      validate: false,
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { tools } = getInternalServices();
+
+      const toolTypes = tools.getToolTypeInfo();
+
+      return response.ok<GetToolTypeInfoResponse>({
+        body: {
+          toolTypes,
+        },
+      });
+    })
+  );
+
+  // list workflows (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_list_workflows`,
+      validate: {
+        query: schema.object({
+          page: schema.number({ defaultValue: 1 }),
+          limit: schema.number({ defaultValue: 10000 }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      if (!workflowsManagement) {
+        return response.ok<ListWorkflowsResponse>({
+          body: {
+            results: [],
+          },
+        });
+      }
+
+      const currentSpace = (await ctx.onechat).spaces.getSpaceId();
+
+      const { results } = await workflowsManagement.management.getWorkflows(
+        { page: request.query.page, size: request.query.limit, enabled: [true] },
+        currentSpace
+      );
+
+      return response.ok<ListWorkflowsResponse>({
+        body: {
+          results: results.map((workflow) => ({
+            id: workflow.id,
+            name: workflow.name,
+            description: workflow.description,
+          })),
+        },
+      });
+    })
+  );
+
+  // get workflow (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_get_workflow/{id}`,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      if (!workflowsManagement) {
+        return response.ok<GetWorkflowResponse>({
+          body: {
+            id: '',
+            name: '',
+            description: '',
+          },
+        });
+      }
+
+      const currentSpace = (await ctx.onechat).spaces.getSpaceId();
+
+      const workflow = await workflowsManagement.management.getWorkflow(
+        request.params.id,
+        currentSpace
+      );
+
+      return response.ok<GetWorkflowResponse>({
+        body: {
+          id: workflow!.id,
+          name: workflow!.name,
+          description: workflow!.description,
         },
       });
     })

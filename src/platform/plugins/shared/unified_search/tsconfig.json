@@ -1,14 +1,9 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "public/**/*",
-    "public/**/*.json",
-    "server/**/*",
-    "../../../../../typings/**/*",
-  ],
+  "include": ["public/**/*", "public/**/*.json", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -53,8 +48,9 @@
     "@kbn/aiops-utils",
     "@kbn/esql-ast",
     "@kbn/background-search",
+    "@kbn/split-button",
+    "@kbn/cps",
+    "@kbn/css-utils",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -6,6 +6,7 @@
  */
 
 import styled from '@emotion/styled';
+import { UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS } from '@kbn/unified-data-table/src/hooks/use_full_screen_watcher';
 import { createGlobalStyle } from 'styled-components';
 
 export const EmbeddedDiscoverContainer = styled.div`
@@ -17,21 +18,25 @@ export const EmbeddedDiscoverContainer = styled.div`
 `;
 
 // TODO remember to remove the className added to discover/public/components/discover_grid_flyout/discover_grid_flyout.tsx when removing this
+// For its usage in the Security Solution timeline, we need Discover flyout to be above the timeline (which has a z-index of 1002)
 export const TimelineESQLGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask){
       .DiscoverFlyout {
-      z-index: 1002; // For its usage in the Security Solution timeline, we need Discover flyout to be above the timeline (which has a z-index of 1001)
+      z-index: 1003;
     }
     .esqlInlineDocumentationFlyout {
-      z-index: 1002 !important;
+      z-index: 1003 !important;
     }
     .euiOverlayMask {
-      z-index: 1001 !important;
+      z-index: 1002 !important;
     }
   }
 
   // TODO this should be removed when we change the ES|QL tab to be our own component instead of Discover (hopefully 8.15)
-  .unifiedDataTable__fullScreen .dscPageBody * {
+  .${UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS} .dscPageBody * {
     z-index: unset !important;
+  }
+  .${UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS} .ESQLEditor {
+    visibility: hidden;
   }
 `;

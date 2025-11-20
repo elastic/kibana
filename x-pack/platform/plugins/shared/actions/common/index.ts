@@ -17,7 +17,6 @@ export type {
 } from './types';
 export { InvalidEmailReason, isActionTypeExecutorResult } from './types';
 export {
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AlertHistoryEsIndexConnectorId,
   buildAlertHistoryDocument,
@@ -48,6 +47,7 @@ export {
   GenerativeAIForObservabilityConnectorFeatureId,
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   EndpointSecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
   AlertingConnectorFeature,
   CasesConnectorFeature,
   UptimeConnectorFeature,
@@ -56,6 +56,7 @@ export {
   GenerativeAIForObservabilityFeature,
   GenerativeAIForSearchPlaygroundFeature,
   EndpointSecurityConnectorFeature,
+  WorkflowsConnectorFeature,
   areValidFeatures,
   getConnectorFeatureName,
   getConnectorCompatibility,
@@ -78,3 +79,9 @@ export const ACTIONS_FEATURE_ID = 'actions';
 export const DEFAULT_MICROSOFT_EXCHANGE_URL = 'https://login.microsoftonline.com';
 export const DEFAULT_MICROSOFT_GRAPH_API_URL = 'https://graph.microsoft.com/v1.0';
 export const DEFAULT_MICROSOFT_GRAPH_API_SCOPE = 'https://graph.microsoft.com/.default';
+
+// Default == max, which we will change later when we have more
+// information on email sizes.  Greater than 25MB does seem to cause
+// OOMs, so that seems like a safe limit for now.
+export const MAX_EMAIL_BODY_LENGTH = 25 * 1000 * 1000; // 25MB
+export const DEFAULT_EMAIL_BODY_LENGTH = MAX_EMAIL_BODY_LENGTH;

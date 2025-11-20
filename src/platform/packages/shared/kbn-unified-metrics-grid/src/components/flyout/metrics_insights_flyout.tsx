@@ -22,25 +22,27 @@ import {
   EuiTitle,
   EuiPortal,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
+import { useFieldsMetadataContext } from '../../context/fields_metadata';
 
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
   esqlQuery?: string;
-  isOpen: boolean;
   onClose: () => void;
+  chartRef: { current: HTMLDivElement | null };
 }
 
 export const MetricInsightsFlyout = ({
   metric,
   esqlQuery,
-  isOpen,
+  chartRef,
   onClose,
 }: MetricInsightsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
@@ -51,6 +53,11 @@ export const MetricInsightsFlyout = ({
     defaultWidth
   );
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
+  const { fieldsMetadata = {} } = useFieldsMetadataContext();
+
+  useEffect(() => {
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  }, []);
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
@@ -63,8 +70,6 @@ export const MetricInsightsFlyout = ({
     [onClose]
   );
 
-  if (!isOpen) return null;
-
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
 
@@ -73,15 +78,24 @@ export const MetricInsightsFlyout = ({
       <EuiFlyoutResizable
         onClose={onClose}
         type="push"
+        pushMinBreakpoint="xl"
         size={flyoutWidth}
         onKeyDown={onKeyDown}
-        pushMinBreakpoint="xl"
         data-test-subj="metricsExperienceFlyout"
         aria-label={i18n.translate(
           'metricsExperience.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',
           { defaultMessage: 'Metric Insights Flyout' }
         )}
         ownFocus
+        focusTrapProps={{
+          returnFocus: () => {
+            if (chartRef.current) {
+              chartRef.current.focus();
+              return false;
+            }
+            return true;
+          },
+        }}
         minWidth={minWidth}
         maxWidth={maxWidth}
         onResize={setFlyoutWidth}
@@ -112,11 +126,21 @@ export const MetricInsightsFlyout = ({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <MetricFlyoutBody metric={metric} esqlQuery={esqlQuery} />
+          <MetricFlyoutBody
+            metric={metric}
+            esqlQuery={esqlQuery}
+            description={fieldsMetadata[metric.name]?.description}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButtonEmpty iconType="cross" onClick={onClose}>
-            {i18n.translate('metricsExperience.metricInsightsFlyout.closeButtonEmptyLabel', {
+          <EuiButtonEmpty
+            iconType="cross"
+            onClick={onClose}
+            aria-label={i18n.translate('metricsExperience.metricInsightsFlyout.close.ariaLabel', {
+              defaultMessage: 'Close metric insights flyout',
+            })}
+          >
+            {i18n.translate('metricsExperience.metricInsightsFlyout.close.label', {
               defaultMessage: 'Close',
             })}
           </EuiButtonEmpty>

@@ -23,6 +23,7 @@ import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { createCoreStartMock } from './core_start.mock';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 export function createCoreSetupMock({
   basePath = '',
@@ -33,7 +34,7 @@ export function createCoreSetupMock({
   pluginStartDeps?: object;
   pluginStartContract?: any;
 } = {}) {
-  const mock = {
+  const mock = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     application: applicationServiceMock.createSetupContract(),
     customBranding: customBrandingServiceMock.createSetupContract(),
@@ -53,11 +54,11 @@ export function createCoreSetupMock({
     theme: themeServiceMock.createSetupContract(),
     security: securityServiceMock.createSetup(),
     userProfile: userProfileServiceMock.createSetup(),
-    plugins: {
+    plugins: lazyObject({
       onSetup: jest.fn(),
       onStart: jest.fn(),
-    },
-  };
+    }),
+  });
 
   return mock;
 }

@@ -12,7 +12,10 @@ import {
   type KibanaPhoenixClient,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
+  selectEvaluators,
 } from '@kbn/evals';
+import type { ExperimentTask } from '@kbn/evals/src/types';
+import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { OnechatEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
@@ -58,41 +61,48 @@ export function createEvaluateDataset({
       examples,
     } satisfies EvaluationDataset;
 
+    const callConverseAndEvaluate: ExperimentTask<DatasetExample, TaskOutput> = async ({
+      input,
+      output,
+      metadata,
+    }) => {
+      const response = await chatClient.converse({
+        messages: [{ message: input.question }],
+      });
+
+      // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
+      const [correctnessResult, groundednessResult] = await Promise.all([
+        evaluators.correctnessAnalysis().evaluate({
+          input,
+          expected: output,
+          output: response,
+          metadata,
+        }),
+        evaluators.groundednessAnalysis().evaluate({
+          input,
+          expected: output,
+          output: response,
+          metadata,
+        }),
+      ]);
+
+      return {
+        errors: response.errors,
+        messages: response.messages,
+        correctnessAnalysis: correctnessResult?.metadata,
+        groundednessAnalysis: groundednessResult?.metadata,
+      };
+    };
+
     await phoenixClient.runExperiment(
       {
         dataset,
-        task: async ({ input, output, metadata }) => {
-          const response = await chatClient.converse({
-            messages: [{ message: input.question }],
-          });
-
-          // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
-          const [correctnessResult, groundednessResult] = await Promise.all([
-            evaluators.correctnessAnalysis().evaluate({
-              input,
-              expected: output,
-              output: response,
-              metadata,
-            }),
-            evaluators.groundednessAnalysis().evaluate({
-              input,
-              expected: output,
-              output: response,
-              metadata,
-            }),
-          ]);
-          const correctnessAnalysis = correctnessResult.metadata;
-          const groundednessAnalysis = groundednessResult.metadata;
-
-          return {
-            errors: response.errors,
-            messages: response.messages,
-            correctnessAnalysis,
-            groundednessAnalysis,
-          };
-        },
+        task: callConverseAndEvaluate,
       },
-      [...createQuantitativeCorrectnessEvaluators(), createQuantitativeGroundednessEvaluator()]
+      selectEvaluators([
+        ...createQuantitativeCorrectnessEvaluators(),
+        createQuantitativeGroundednessEvaluator(),
+      ])
     );
   };
 }

@@ -27,7 +27,7 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import styled from '@emotion/styled';
 import { RELATED_INTEGRATION } from '../../../constants';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useAdditionalBulkActions } from '../../../hooks/alert_summary/use_additional_bulk_actions';
 import { APP_ID, CASES_FEATURE_ID } from '../../../../../common';
 import { ActionsCell } from './actions_cell';
@@ -90,6 +90,7 @@ export const CASES_CONFIGURATION = {
   featureId: CASES_FEATURE_ID,
   owner: [APP_ID],
   syncAlerts: true,
+  extractObservables: true,
 };
 
 // This will guarantee that ALL cells will have their values vertically centered.
@@ -105,7 +106,7 @@ export const EuiDataGridStyleWrapper = styled.div`
 
 export interface AdditionalTableContext {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }
@@ -120,7 +121,7 @@ export interface TableProps {
    */
   groupingFilters: Filter[];
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }
@@ -174,7 +175,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
 
   const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
 
-  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
+  const browserFields = useBrowserFields(PageScope.alerts, dataView);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);

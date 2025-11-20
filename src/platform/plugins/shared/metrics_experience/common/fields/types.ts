@@ -17,11 +17,9 @@ export interface MetricField {
   dimensions: Dimension[];
   type: string;
   instrument?: MappingTimeSeriesMetricType;
-  unit?: string;
-  description?: string;
-  source?: 'otel' | 'ecs' | 'custom';
-  stability?: 'stable' | 'beta' | 'experimental';
+  unit?: MetricUnit;
   display?: string;
+  scope?: string;
   noData?: boolean;
 }
 
@@ -30,3 +28,16 @@ export interface MetricFieldsResponse {
   total: number;
   error?: string;
 }
+
+export type MetricUnit =
+  | 'ns'
+  | 'us'
+  | 'ms'
+  | 's'
+  | 'm'
+  | 'h'
+  | 'd'
+  | 'percent'
+  | 'bytes'
+  | 'count'
+  | `{${string}}`; // otel special units of count

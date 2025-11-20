@@ -182,10 +182,7 @@ export class BaseValidator {
     currentItem?: ExceptionListItemSchema
   ): Promise<void> {
     if (this.isItemByPolicy(item)) {
-      const spaceId = this.endpointAppContext.experimentalFeatures
-        .endpointManagementSpaceAwarenessEnabled
-        ? await this.getActiveSpaceId()
-        : undefined;
+      const spaceId = await this.getActiveSpaceId();
       const { packagePolicy, savedObjects } =
         this.endpointAppContext.getInternalFleetServices(spaceId);
       const policyIds = getPolicyIdsFromArtifact(item);
@@ -217,11 +214,7 @@ export class BaseValidator {
         (policyId) => !policiesFromFleet.some((policy) => policyId === policy.id)
       );
 
-      if (
-        this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
-        invalidPolicyIds.length > 0 &&
-        currentItem
-      ) {
+      if (invalidPolicyIds.length > 0 && currentItem) {
         const currentItemPolicyIds = getPolicyIdsFromArtifact(currentItem);
 
         // Check to see if the invalid policy IDs are ones that the current item (pre-update) already has,
@@ -269,7 +262,6 @@ export class BaseValidator {
     currentItem: Pick<ExceptionListItemSchema, 'tags'>
   ): Promise<void> {
     if (
-      this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
       this.wasOwnerSpaceIdTagsChanged(updatedItem, currentItem) &&
       !(await this.endpointAuthzPromise).canManageGlobalArtifacts
     ) {
@@ -281,11 +273,7 @@ export class BaseValidator {
   }
 
   protected async validateCreateOwnerSpaceIds(item: ExceptionItemLikeOptions): Promise<void> {
-    if (
-      this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
-      item.tags &&
-      item.tags.length > 0
-    ) {
+    if (item.tags && item.tags.length > 0) {
       if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
         return;
       }
@@ -324,16 +312,11 @@ export class BaseValidator {
   }
 
   protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
-    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-      if (
-        !this.isItemByPolicy(item) &&
-        !(await this.endpointAuthzPromise).canManageGlobalArtifacts
-      ) {
-        throw new EndpointArtifactExceptionValidationError(
-          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
-          403
-        );
-      }
+    if (!this.isItemByPolicy(item) && !(await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+      throw new EndpointArtifactExceptionValidationError(
+        `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+        403
+      );
     }
   }
 
@@ -341,127 +324,116 @@ export class BaseValidator {
     updatedItem: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
     currentSavedItem: ExceptionListItemSchema
   ): Promise<void> {
-    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-      // Those with global artifact management privilege can do it all
-      if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
-        return;
-      }
+    // Those with global artifact management privilege can do it all
+    if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+      return;
+    }
 
-      // If either the updated item or the saved item is a global artifact, then
-      // error out - user needs global artifact management privilege
-      if (!this.isItemByPolicy(updatedItem) || !this.isItemByPolicy(currentSavedItem)) {
-        throw new EndpointArtifactExceptionValidationError(
-          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
-          403
-        );
-      }
+    // If either the updated item or the saved item is a global artifact, then
+    // error out - user needs global artifact management privilege
+    if (!this.isItemByPolicy(updatedItem) || !this.isItemByPolicy(currentSavedItem)) {
+      throw new EndpointArtifactExceptionValidationError(
+        `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+        403
+      );
+    }
 
-      const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
+    const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
 
-      // Per-space items can only be managed from one of the `ownerSpaceId`'s
-      if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
-        throw new EndpointArtifactExceptionValidationError(
-          ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
-          403
-        );
-      }
+    // Per-space items can only be managed from one of the `ownerSpaceId`'s
+    if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+      throw new EndpointArtifactExceptionValidationError(
+        ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
+        403
+      );
     }
   }
 
   protected async validateCanDeleteItemInActiveSpace(
     currentSavedItem: ExceptionListItemSchema
   ): Promise<void> {
-    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-      // Those with global artifact management privilege can do it all
-      if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
-        return;
-      }
+    // Those with global artifact management privilege can do it all
+    if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+      return;
+    }
 
-      // If item is a global artifact then error - user must have global artifact management privilege
-      if (!this.isItemByPolicy(currentSavedItem)) {
-        throw new EndpointArtifactExceptionValidationError(
-          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
-          403
-        );
-      }
+    // If item is a global artifact then error - user must have global artifact management privilege
+    if (!this.isItemByPolicy(currentSavedItem)) {
+      throw new EndpointArtifactExceptionValidationError(
+        `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+        403
+      );
+    }
 
-      const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
+    const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
 
-      // Per-space items can only be deleted from one of the `ownerSpaceId`'s
-      if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
-        throw new EndpointArtifactExceptionValidationError(
-          ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
-          403
-        );
-      }
+    // Per-space items can only be deleted from one of the `ownerSpaceId`'s
+    if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+      throw new EndpointArtifactExceptionValidationError(
+        ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
+        403
+      );
     }
   }
 
   protected async validateCanReadItemInActiveSpace(
     currentSavedItem: ExceptionListItemSchema
   ): Promise<void> {
-    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-      this.logger.debug(
-        () => `Validating if can read single item:\n${stringify(currentSavedItem)}`
-      );
+    this.logger.debug(() => `Validating if can read single item:\n${stringify(currentSavedItem)}`);
 
-      // Everyone can read global artifacts and those with global artifact management privilege can do it all
-      if (
-        isArtifactGlobal(currentSavedItem) ||
-        (await this.endpointAuthzPromise).canManageGlobalArtifacts
-      ) {
-        return;
-      }
-
-      const activeSpaceId = await this.getActiveSpaceId();
-      const ownerSpaceIds = getArtifactOwnerSpaceIds(currentSavedItem);
-      const policyIds = getPolicyIdsFromArtifact(currentSavedItem);
-
-      // If per-policy item is not assigned to any policy (dangling artifact) and this artifact
-      // is owned by the active space, then allow read.
-      if (policyIds.length === 0 && ownerSpaceIds.includes(activeSpaceId)) {
-        return;
-      }
-
-      // if at least one policy is visible in active space, then allow read
-      if (policyIds.length > 0) {
-        const { packagePolicy, savedObjects } =
-          this.endpointAppContext.getInternalFleetServices(activeSpaceId);
-        const soClient = savedObjects.createInternalScopedSoClient({ spaceId: activeSpaceId });
-        const policiesFromFleet = await packagePolicy
-          .getByIDs(soClient, policyIds, {
-            ignoreMissing: true,
-          })
-          .then((packagePolicies) => {
-            this.logger.debug(
-              () =>
-                `Lookup of policy ids:[${policyIds.join(
-                  ' | '
-                )}]\nvia fleet for space ID [${activeSpaceId}] returned:\n${stringify(
-                  (packagePolicies ?? []).map((policy) => ({
-                    id: policy.id,
-                    name: policy.name,
-                    spaceIds: policy.spaceIds,
-                  }))
-                )}`
-            );
-
-            return groupBy(packagePolicies ?? [], 'id');
-          });
-
-        if (policyIds.some((policyId) => Boolean(policiesFromFleet[policyId]))) {
-          return;
-        }
-      }
-
-      this.logger.debug(
-        () => `item can not be read from space [${activeSpaceId}]:\n${stringify(currentSavedItem)}`
-      );
-
-      throw new EndpointExceptionsValidationError(
-        `Item not found in space [${activeSpaceId}]`,
-        404
-      );
+    // Everyone can read global artifacts and those with global artifact management privilege can do it all
+    if (
+      isArtifactGlobal(currentSavedItem) ||
+      (await this.endpointAuthzPromise).canManageGlobalArtifacts
+    ) {
+      return;
     }
+
+    const activeSpaceId = await this.getActiveSpaceId();
+    const ownerSpaceIds = getArtifactOwnerSpaceIds(currentSavedItem);
+    const policyIds = getPolicyIdsFromArtifact(currentSavedItem);
+
+    // If per-policy item is not assigned to any policy (dangling artifact) and this artifact
+    // is owned by the active space, then allow read.
+    if (policyIds.length === 0 && ownerSpaceIds.includes(activeSpaceId)) {
+      return;
+    }
+
+    // if at least one policy is visible in active space, then allow read
+    if (policyIds.length > 0) {
+      const { packagePolicy, savedObjects } =
+        this.endpointAppContext.getInternalFleetServices(activeSpaceId);
+      const soClient = savedObjects.createInternalScopedSoClient({ spaceId: activeSpaceId });
+      const policiesFromFleet = await packagePolicy
+        .getByIDs(soClient, policyIds, {
+          ignoreMissing: true,
+        })
+        .then((packagePolicies) => {
+          this.logger.debug(
+            () =>
+              `Lookup of policy ids:[${policyIds.join(
+                ' | '
+              )}]\nvia fleet for space ID [${activeSpaceId}] returned:\n${stringify(
+                (packagePolicies ?? []).map((policy) => ({
+                  id: policy.id,
+                  name: policy.name,
+                  spaceIds: policy.spaceIds,
+                }))
+              )}`
+          );
+
+          return groupBy(packagePolicies ?? [], 'id');
+        });
+
+      if (policyIds.some((policyId) => Boolean(policiesFromFleet[policyId]))) {
+        return;
+      }
+    }
+
+    this.logger.debug(
+      () => `item can not be read from space [${activeSpaceId}]:\n${stringify(currentSavedItem)}`
+    );
+
+    throw new EndpointExceptionsValidationError(`Item not found in space [${activeSpaceId}]`, 404);
   }
 }

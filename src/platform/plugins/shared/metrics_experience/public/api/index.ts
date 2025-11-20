@@ -66,36 +66,15 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
         },
         signal,
       }),
-
-    postData: (
-      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/data'>['params']['body'],
+    searchFields: (
+      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/fields/_search'>['params']['body'],
       signal?: AbortSignal | null
     ) =>
-      request('POST /internal/metrics_experience/data', {
+      request('POST /internal/metrics_experience/fields/_search', {
         params: {
           body: params,
         },
         signal,
       }),
-    getIndexPatternMetadata(
-      {
-        indexPattern,
-        from,
-        to,
-      }: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}'>['params']['path'] &
-        MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}'>['params']['query'],
-      signal?: AbortSignal | null
-    ) {
-      return request('GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}', {
-        params: {
-          path: { indexPattern },
-          query: {
-            from,
-            to,
-          },
-        },
-        signal,
-      });
-    },
   };
 }

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -61,12 +62,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: {
-            steps: [],
-          },
+          settings: {},
+          processing: { steps: [] },
           classic: {},
         },
-      });
+      } satisfies Streams.ClassicStream.Definition);
     });
 
     it('endpoint is resolving wired stream properly', async () => {

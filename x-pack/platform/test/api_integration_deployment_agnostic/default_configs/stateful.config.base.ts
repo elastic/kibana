@@ -36,6 +36,7 @@ interface CreateTestConfigOptions<T> {
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
+  indexRefreshInterval?: string | false;
 }
 
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
@@ -121,7 +122,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
           // if the config is run locally, explicitly enable mock-idp-plugin for UI role selector
-          ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
+          ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
           `--plugin-path=${samlIdPPlugin}`,
@@ -150,6 +151,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           ...(options?.kbnTestServer?.serverArgs ?? []),
         ],
       },
+      indexRefreshInterval: options.indexRefreshInterval,
     };
   };
 }

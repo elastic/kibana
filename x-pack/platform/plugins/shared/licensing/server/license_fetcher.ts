@@ -108,8 +108,8 @@ function normalizeServerLicense(
 
 function normalizeFeatures(rawFeatures: estypes.XpackInfoFeatures) {
   const features: PublicFeatures = {};
-  for (const [name, feature] of Object.entries(rawFeatures)) {
-    features[name] = {
+  for (const [id, feature] of Object.entries(rawFeatures)) {
+    features[id] = {
       isAvailable: feature.available,
       isEnabled: feature.enabled,
     };

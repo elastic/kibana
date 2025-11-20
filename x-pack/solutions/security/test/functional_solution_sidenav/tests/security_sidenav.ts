@@ -50,11 +50,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // check the Investigations subsection
-        await solutionNavigation.sidenav.openPanel('securityGroup:investigations'); // open Investigations panel
-        await testSubjects.click(`~panelNavItem-id-timelines`);
-        await solutionNavigation.sidenav.expectLinkActive({
-          navId: 'securityGroup:investigations',
-        });
+        await solutionNavigation.sidenav.expandMore();
+        // open Investigations popover and navigate to some link inside the popover to open the panel
+        await solutionNavigation.sidenav.clickLink({ navId: 'securityGroup:investigations' });
+        await solutionNavigation.sidenav.clickLink({ navId: 'timelines' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Timelines' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           deepLinkId: 'securitySolutionUI:timelines',
@@ -73,11 +72,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('renders a feedback callout', async () => {
+        await solutionNavigation.sidenav.feedbackCallout.reset();
         await solutionNavigation.sidenav.feedbackCallout.expectExists();
         await solutionNavigation.sidenav.feedbackCallout.dismiss();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
         await browser.refresh();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      });
+
+      it('renders tour', async () => {
+        await solutionNavigation.sidenav.tour.reset();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-more');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectHidden();
+        await browser.refresh();
+        await solutionNavigation.sidenav.tour.expectHidden();
+      });
+
+      it('opens panel on legacy management landing page', async () => {
+        await common.navigateToApp('management', { basePath: `/s/${spaceCreated.id}` });
+        await testSubjects.existOrFail('managementHomeSolution');
+        await solutionNavigation.sidenav.expectPanelExists('stack_management');
       });
     });
   });

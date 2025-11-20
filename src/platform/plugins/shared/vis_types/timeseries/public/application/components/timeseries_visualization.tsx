@@ -13,7 +13,7 @@ import type { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { visContainerStyle } from '@kbn/visualizations-plugin/public';
+import { visContainerStyle } from '@kbn/visualizations-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { TimeseriesLoading } from './timeseries_loading';

@@ -12,13 +12,18 @@ export type {
   CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
+  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   // execution engine
   Provider,
   ProviderInput,
   RunWorkflowCommand,
+  RunStepCommand,
   RunWorkflowResponseDto,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
+  StackFrame,
   UpdatedWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
@@ -32,8 +37,21 @@ export type {
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+  // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  // api types
+  WorkflowsSearchParams,
+  // connector types
+  ConnectorSubAction,
+  ConnectorInstance,
+  ConnectorTypeInfo,
+  ConnectorContractUnion,
+  EnhancedInternalConnectorContract,
+  InternalConnectorContract,
+  DynamicConnectorContract,
 } from './v1';
 
 // exported full to use enum as values
@@ -47,31 +65,3 @@ export {
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';
-
-export type {
-  GraphNode,
-  AtomicGraphNode,
-  EnterConditionBranchNode,
-  EnterConditionBranchNodeSchema,
-  EnterForeachNode,
-  EnterIfNode,
-  EnterRetryNode,
-  ExitConditionBranchNode,
-  ExitConditionBranchNodeSchema,
-  ExitForeachNode,
-  ExitIfNode,
-  ExitRetryNode,
-  EnterContinueNode,
-  ExitContinueNode,
-  WaitGraphNodeSchema,
-  WaitGraphNode,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
-  EnterTryBlockNode,
-  ExitTryBlockNode,
-  EnterNormalPathNode,
-  ExitNormalPathNode,
-  EnterFallbackPathNode,
-  ExitFallbackPathNode,
-  UnionExecutionGraphNode,
-} from './execution';

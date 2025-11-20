@@ -297,7 +297,8 @@ export async function getSavedVisualization(
 }
 
 export async function saveVisualization(
-  savedObject: VisSavedObject,
+  savedObject: ISavedVis &
+    Pick<VisSavedObject, 'displayName' | 'lastSavedTitle' | 'searchSource' | 'tags' | 'version'>,
   {
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,

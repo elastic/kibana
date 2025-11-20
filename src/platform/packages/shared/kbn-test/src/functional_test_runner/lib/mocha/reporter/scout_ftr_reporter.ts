@@ -201,6 +201,10 @@ export class ScoutFTRReporter {
     /**
      * Root suite execution has ended
      */
+    const passes = this.runner.stats?.passes ?? 0;
+    const failures = this.runner.stats?.failures ?? 0;
+    const pending = this.runner.stats?.pending ?? 0;
+
     this.report.logEvent({
       ...datasources.environmentMetadata,
       reporter: {
@@ -211,9 +215,18 @@ export class ScoutFTRReporter {
         ...this.baseTestRunInfo,
         status: this.runner.stats?.failures === 0 ? 'passed' : 'failed',
         duration: this.runner.stats?.duration || 0,
+        tests: {
+          passes,
+          failures,
+          pending,
+          total: passes + failures + pending,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 

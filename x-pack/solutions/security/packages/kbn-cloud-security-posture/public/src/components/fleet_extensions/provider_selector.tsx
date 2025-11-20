@@ -12,13 +12,13 @@ import { useCloudSetup } from './hooks/use_cloud_setup_context';
 interface ProviderSelectorProps {
   disabled: boolean;
   selectedProvider: CloudProviders;
-  setInput: (inputType: CloudProviders) => void;
+  setSelectedProvider: (provider: CloudProviders) => void;
 }
 
 export const ProviderSelector = ({
   selectedProvider,
   disabled,
-  setInput,
+  setSelectedProvider,
 }: ProviderSelectorProps) => {
   const { templateInputOptions } = useCloudSetup();
   const options = templateInputOptions.map((option) => ({
@@ -32,7 +32,7 @@ export const ProviderSelector = ({
       disabled={disabled}
       idSelected={selectedProvider}
       options={options}
-      onChange={(inputType) => setInput(inputType as CloudProviders)}
+      onChange={(provider) => setSelectedProvider(provider as CloudProviders)}
       size="m"
     />
   );

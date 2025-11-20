@@ -31,6 +31,7 @@ import {
 } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
+import { DiscoverSearchSessionManager } from './discover_search_session';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
@@ -58,6 +59,10 @@ describe('Test discover app state container', () => {
       runtimeStateManager: createRuntimeStateManager(),
       urlStateStorage: stateStorage,
       tabsStorageManager,
+      searchSessionManager: new DiscoverSearchSessionManager({
+        history: discoverServiceMock.history,
+        session: discoverServiceMock.data.search.session,
+      }),
     });
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
@@ -81,26 +86,16 @@ describe('Test discover app state container', () => {
       injectCurrentTab: createTabActionInjector(getCurrentTab().id),
     });
 
-  test('hasChanged returns whether the current state has changed', async () => {
-    const state = getStateContainer();
-    state.set({
-      dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
-    });
-    expect(state.hasChanged()).toBeTruthy();
-    state.resetInitialState();
-    expect(state.hasChanged()).toBeFalsy();
-  });
-
   test('getPrevious returns the state before the current', async () => {
     const state = getStateContainer();
     state.set({
       dataSource: createDataViewDataSource({ dataViewId: 'first' }),
     });
-    const stateA = state.getState();
+    const stateA = state.get();
     state.set({
       dataSource: createDataViewDataSource({ dataViewId: 'second' }),
     });
-    expect(state.getPrevious()).toEqual(stateA);
+    expect(getCurrentTab().previousAppState).toEqual(stateA);
   });
 
   describe('getAppStateFromSavedSearch', () => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 // info on nodemailer: https://nodemailer.com/about/
+import type { SentMessageInfo } from 'nodemailer';
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
@@ -24,9 +24,10 @@ import type {
   ProxySettings,
 } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import type { Attachment } from '@kbn/connector-schemas/email';
+import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import type { Attachment } from '.';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -127,7 +128,6 @@ export async function sendEmailWithExchange(
     credentials: {
       config: {
         clientId: clientId as string,
-        tenantId: tenantId as string,
       },
       secrets: {
         clientSecret: clientSecret as string,
@@ -147,29 +147,12 @@ export async function sendEmailWithExchange(
     Authorization: accessToken,
   };
 
+  const { onFulfilled, onRejected } = getOauth2DeleteTokenAxiosInterceptor({
+    connectorTokenClient,
+    connectorId,
+  });
   const axiosInstance = axios.create();
-  axiosInstance.interceptors.response.use(
-    async (response: AxiosResponse) => {
-      // Look for 4xx errors that indicate something is wrong with the request
-      // We don't know for sure that it is an access token issue but remove saved
-      // token just to be sure
-      if (response.status >= 400 && response.status < 500) {
-        await connectorTokenClient.deleteConnectorTokens({ connectorId });
-      }
-      return response;
-    },
-    async (error) => {
-      const statusCode = error?.response?.status;
-
-      // Look for 4xx errors that indicate something is wrong with the request
-      // We don't know for sure that it is an access token issue but remove saved
-      // token just to be sure
-      if (statusCode >= 400 && statusCode < 500) {
-        await connectorTokenClient.deleteConnectorTokens({ connectorId });
-      }
-      return Promise.reject(error);
-    }
-  );
+  axiosInstance.interceptors.response.use(onFulfilled, onRejected);
 
   return await sendEmailGraphApi(
     {
@@ -184,6 +167,8 @@ export async function sendEmailWithExchange(
     axiosInstance
   );
 }
+
+export type SentMessageInfoResult = SentMessageInfo & { message?: unknown };
 
 // send an email using nodemailer
 async function sendEmailWithNodemailer(
@@ -216,7 +201,7 @@ async function sendEmailWithNodemailer(
   const transportConfig = getTransportConfig(configurationUtilities, logger, transport, hasAuth);
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
   connectorUsageCollector.addRequestBodyBytes(undefined, email);
-  const result = await nodemailerTransport.sendMail(email);
+  const result: SentMessageInfoResult = await nodemailerTransport.sendMail(email);
 
   if (service === JSON_TRANSPORT_SERVICE) {
     try {

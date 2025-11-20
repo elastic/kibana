@@ -56,7 +56,7 @@ const stateColumnHeader = (
       defaultMessage: 'Active, inactive, or error.',
     })}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
         defaultMessage: 'State',
       })}{' '}
@@ -74,7 +74,7 @@ const conditionLastMetHeader = (
       }
     )}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
         defaultMessage: 'Condition last met',
       })}{' '}
@@ -92,7 +92,7 @@ const lastCheckedHeader = (
       }
     )}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
         defaultMessage: 'Last checked',
       })}{' '}
@@ -111,7 +111,7 @@ const commentHeader = (
       }
     )}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
         defaultMessage: 'Comment',
       })}{' '}
@@ -518,6 +518,7 @@ export const WatchListPage = () => {
             queryError && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   data-test-subj="watcherListSearchError"
                   iconType="warning"
                   color="danger"

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -39,15 +39,12 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/index-management-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/es-types",
     "@kbn/console-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/core-logging-server-mocks",
     "@kbn/discover-plugin",
     "@kbn/content-connectors-plugin",
-    "@kbn/index-management-shared-types",
     "@kbn/react-kibana-context-render",
-    "@kbn/security-api-key-management",
     "@kbn/search-inference-endpoints",
     "@kbn/security-plugin-types-common",
     "@kbn/search-indices",
@@ -57,6 +54,8 @@
     "@kbn/security-plugin-types-public",
     "@kbn/deeplinks-search",
     "@kbn/core-application-browser",
-    "@kbn/search-shared-ui"
+    "@kbn/search-shared-ui",
+    "@kbn/deeplinks-management",
+    "@kbn/react-query"
   ]
 }

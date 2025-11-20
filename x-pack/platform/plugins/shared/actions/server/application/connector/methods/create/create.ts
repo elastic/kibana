@@ -167,5 +167,6 @@ export async function create({
     isPreconfigured: false,
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
+    isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
   };
 }

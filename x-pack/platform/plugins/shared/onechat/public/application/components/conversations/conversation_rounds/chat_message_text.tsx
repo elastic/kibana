@@ -22,13 +22,14 @@ import {
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
+import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import {
   Cursor,
   esqlLanguagePlugin,
-  getVisualizationHandler,
+  createVisualizationRenderer,
   loadingCursorPlugin,
-  visualizationPlugin,
+  visualizationTagParser,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
 
@@ -86,7 +87,9 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
       esql: (props) => {
         return (
           <>
-            <EuiCodeBlock>{props.value}</EuiCodeBlock>
+            <EuiCodeBlock language="esql" isCopyable>
+              {props.value}
+            </EuiCodeBlock>
             <EuiSpacer size="m" />
           </>
         );
@@ -117,7 +120,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
           </EuiTableRowCell>
         );
       },
-      visualization: getVisualizationHandler({
+      [visualizationElement.tagName]: createVisualizationRenderer({
         startDependencies,
         stepsFromCurrentRound,
         stepsFromPrevRounds,
@@ -128,7 +131,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
       parsingPluginList: [
         loadingCursorPlugin,
         esqlLanguagePlugin,
-        visualizationPlugin,
+        visualizationTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,

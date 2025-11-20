@@ -37,7 +37,7 @@ export async function loadHuggingFaceDatasets({
   logger,
   accessToken,
   datasets = PREDEFINED_HUGGING_FACE_DATASETS,
-  limit = 1000,
+  limit,
   clear = false,
 }: {
   esClient: ElasticsearchClient;
@@ -97,6 +97,10 @@ export async function loadHuggingFaceDatasets({
       documents: docsWithEmbeddings,
       dataset,
       logger,
+      bulkHelperOverrides: {
+        // With embeddings already generated, larger flush size will not overload ELSER inference and improves performance
+        flushBytes: 1024 * 1024 * 5,
+      },
     });
 
     logger.info(`Indexed dataset`);

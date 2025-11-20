@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useCasesToast } from '../common/use_cases_toast';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
@@ -13,7 +13,6 @@ import type { ServerError } from '../types';
 import { patchComment } from './api';
 import { casesMutationsKeys } from './constants';
 import * as i18n from './translations';
-import { AttachmentType } from '../../common/types/domain';
 
 interface UpdateComment {
   caseId: string;
@@ -34,8 +33,9 @@ export const useUpdateComment = () => {
       patchComment({
         caseId,
         commentId,
-        patch: { owner, comment: commentUpdate, type: AttachmentType.user },
+        commentUpdate,
         version,
+        owner,
       }),
     {
       mutationKey: casesMutationsKeys.updateComment,

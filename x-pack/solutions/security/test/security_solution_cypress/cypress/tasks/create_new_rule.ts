@@ -597,6 +597,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
 
 export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).scrollIntoView();
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
@@ -838,6 +839,7 @@ export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreatePro
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+  cy.get(COMBO_BOX_OPTION).should('have.length.gte', 1);
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(optionsToComboboxText(jobsAsArray));
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,

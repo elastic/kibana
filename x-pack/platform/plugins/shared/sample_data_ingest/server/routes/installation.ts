@@ -12,9 +12,12 @@ import {
   STATUS_API_PATH,
   DatasetSampleType,
   type StatusResponse,
-  type InstallResponse,
+  type InstallingResponse,
+  type InstalledResponse,
+  InstallationStatus,
 } from '../../common';
 import type { InternalServices } from '../types';
+import { scheduleInstallSampleDataTask } from '../tasks';
 
 export const registerInstallationRoutes = ({
   router,
@@ -39,35 +42,56 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
+      const { sampleDataManager, taskManager, logger } = getServices();
+      const sampleType = DatasetSampleType.elasticsearch;
       const core = await ctx.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
-
-      const { sampleDataManager } = getServices();
-      const { client: soClient, getImporter } = core.savedObjects;
+      const soClient = core.savedObjects.client;
 
       try {
-        const installResponse = await sampleDataManager.installSampleData({
-          sampleType: DatasetSampleType.elasticsearch,
+        const currentStatus = await sampleDataManager.getSampleDataStatus({
+          sampleType,
           esClient,
           soClient,
-          soImporter: getImporter(soClient),
         });
 
-        return res.ok<InstallResponse>({
+        if (currentStatus.status === InstallationStatus.Installing) {
+          return res.ok<InstallingResponse>({
+            body: {
+              status: currentStatus.status,
+              taskId: currentStatus.taskId || '',
+            },
+          });
+        }
+
+        if (
+          currentStatus.status === InstallationStatus.Installed &&
+          currentStatus.indexName &&
+          currentStatus.dashboardId
+        ) {
+          return res.ok<InstalledResponse>({
+            body: {
+              status: currentStatus.status,
+              indexName: currentStatus.indexName,
+              dashboardId: currentStatus.dashboardId,
+            },
+          });
+        }
+
+        const taskId = await scheduleInstallSampleDataTask({
+          taskManager,
+          logger,
+          sampleType,
+        });
+
+        return res.ok<InstallingResponse>({
           body: {
-            status: 'installed',
-            ...installResponse,
+            status: InstallationStatus.Installing,
+            taskId,
           },
         });
       } catch (e) {
-        switch (e?.meta?.body?.error?.type) {
-          case 'resource_already_exists_exception':
-            return res.conflict({
-              body: {
-                message: e.message,
-              },
-            });
-        }
+        logger.error('Failed to schedule sample data installation', e);
 
         return res.customError({
           statusCode: e?.meta && e.meta?.statusCode ? e.meta?.statusCode : 500,
@@ -96,11 +120,10 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
+      const { sampleDataManager } = getServices();
       const core = await ctx.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
       const soClient = core.savedObjects.client;
-
-      const { sampleDataManager } = getServices();
 
       try {
         const statusData = await sampleDataManager.getSampleDataStatus({
@@ -110,7 +133,13 @@ export const registerInstallationRoutes = ({
         });
 
         return res.ok<StatusResponse>({
-          body: statusData,
+          body: {
+            status: statusData.status,
+            indexName: statusData.indexName,
+            dashboardId: statusData.dashboardId,
+            taskId: statusData.taskId,
+            error: statusData.error,
+          },
         });
       } catch (e) {
         return res.customError({

@@ -32,18 +32,3 @@ export const HIDE_ALL_ASSISTANTS = i18n.translate(
   'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
   { defaultMessage: 'Hide all assistants' }
 );
-
-export const SHOW_SECURITY = i18n.translate(
-  'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
-  { defaultMessage: 'Show Security AI Assistant' }
-);
-
-export const SHOW_OBSERVABILITY = i18n.translate(
-  'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
-  { defaultMessage: 'Show Observability AI Assistant' }
-);
-
-export const HIDE_ASSISTANT = i18n.translate(
-  'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
-  { defaultMessage: 'Hide AI Assistant' }
-);

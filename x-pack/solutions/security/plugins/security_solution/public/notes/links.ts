@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  NOTES_FEATURE_ID,
   NOTES_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
-  NOTES_FEATURE_ID,
 } from '../../common/constants';
 import { NOTES } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
@@ -28,5 +28,4 @@ export const links: LinkItem = {
   landingIcon: 'filebeatApp',
   skipUrlState: true,
   hideTimeline: false,
-  hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
 };

@@ -20,7 +20,8 @@ import { EsqlDocumentBase, runAndValidateEsqlQuery } from '@kbn/inference-plugin
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { omit, once } from 'lodash';
 import moment from 'moment';
-import { describeDataset, sortAndTruncateAnalyzedFields } from '../../..';
+import { indexPatternToCcs } from '@kbn/es-query';
+import { describeDataset, formatDocumentAnalysis } from '../../..';
 import { EsqlPrompt } from './prompt';
 
 const loadEsqlDocBase = once(() => EsqlDocumentBase.load());
@@ -54,7 +55,6 @@ export async function executeAsEsqlAgent({
   end?: number;
   signal: AbortSignal;
   prompt: string;
-  tools?: Record<string, ToolDefinition>;
   toolCallbacks?: ToolCallbacksOfToolOptions<ToolOptions>;
 }): Promise<PromptResponse> {
   const docBase = await loadEsqlDocBase();
@@ -91,7 +91,11 @@ export async function executeAsEsqlAgent({
         return {
           response: await esClient.indices
             .resolveIndex({
-              name: toolCall.function.arguments.name.flatMap((index) => index.split(',')),
+              name: indexPatternToCcs(
+                toolCall.function.arguments.name.length
+                  ? toolCall.function.arguments.name.flatMap((index) => index.split(','))
+                  : '*'
+              ),
               allow_no_indices: true,
             })
             .then((response) => {
@@ -118,7 +122,7 @@ export async function executeAsEsqlAgent({
 
         return {
           response: {
-            analysis: sortAndTruncateAnalyzedFields(analysis),
+            analysis: formatDocumentAnalysis(analysis),
           },
         };
       },
@@ -158,7 +162,7 @@ export async function executeAsEsqlAgent({
 
         return {
           response: {
-            queries: results,
+            results,
           },
         };
       },

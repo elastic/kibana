@@ -753,6 +753,14 @@ export const failedDocsErrorsColumnName = i18n.translate(
   }
 );
 
+export const failedDocsErrorsColumnNameTooltip = i18n.translate(
+  'xpack.datasetQuality.details.failedDocs.errorsTooltip',
+  {
+    defaultMessage:
+      'Sample of error messages for each error type. For more details, open the error type in Discover.',
+  }
+);
+
 export const readMore = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.flyout.message.readMore',
   {
@@ -814,5 +822,12 @@ export const fieldFilterNoneMatching = i18n.translate(
   'xpack.datasetQuality.details.qualityIssuesTable.fieldFilterNoneMatching',
   {
     defaultMessage: 'No fields found',
+  }
+);
+
+export const enableFailureStoreButtonLabel = i18n.translate(
+  'xpack.datasetQuality.enableFailureStore',
+  {
+    defaultMessage: 'Enable failure store',
   }
 );

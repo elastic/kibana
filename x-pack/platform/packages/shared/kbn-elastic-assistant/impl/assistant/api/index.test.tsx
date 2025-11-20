@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ApiConfig } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 
 import type { FetchConnectorExecuteAction } from '.';
 import { fetchConnectorExecuteAction } from '.';
@@ -68,6 +68,8 @@ describe('API tests', () => {
 
   describe('fetchConnectorExecuteAction', () => {
     it('calls the non-stream API when assistantStreamingEnabled is false', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+
       await fetchConnectorExecuteAction({
         ...fetchConnectorArgs,
         assistantStreamingEnabled: false,
@@ -77,7 +79,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...staticDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"screenContext":{"timeZone":"America/New_York"}}',
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"screenContext":{"timeZone":"America/New_York"}}',
         }
       );
     });
@@ -89,7 +91,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...streamingDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"screenContext":{"timeZone":"America/New_York"}}',
+          body: '{"message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"screenContext":{"timeZone":"America/New_York"}}',
         }
       );
     });
@@ -146,6 +148,8 @@ describe('API tests', () => {
     });
 
     it('calls the api with the expected optional request parameters', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         assistantStreamingEnabled: false,
@@ -160,7 +164,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...staticDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{"auuid":"real.hostname"},"screenContext":{"timeZone":"America/New_York"},"alertsIndexPattern":".alerts-security.alerts-default","size":30}',
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{"auuid":"real.hostname"},"screenContext":{"timeZone":"America/New_York"},"alertsIndexPattern":".alerts-security.alerts-default","size":30}',
         }
       );
     });

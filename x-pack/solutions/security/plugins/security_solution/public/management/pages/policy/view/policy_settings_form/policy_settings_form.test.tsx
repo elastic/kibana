@@ -51,23 +51,16 @@ describe('Endpoint Policy Settings Form', () => {
       'data-test-subj': 'test',
     };
 
-    mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: false });
+    storageMock.set('securitySolution.showEventMergingBanner', false);
 
     render = () => (renderResult = mockedContext.render(<PolicySettingsForm {...formProps} />));
   });
 
   describe('event merging banner', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: true });
+      storageMock.set('securitySolution.showEventMergingBanner', true);
     });
 
-    it('should hide the banner if its not allowed to be displayed', () => {
-      mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: false });
-
-      render();
-
-      expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
-    });
     it('should show the event merging banner if it has never been dismissed', () => {
       render();
 

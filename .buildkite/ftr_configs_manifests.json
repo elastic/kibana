@@ -10,6 +10,6 @@
         ".buildkite/ftr_oblt_serverless_configs.yml",
         ".buildkite/ftr_security_serverless_configs.yml",
         ".buildkite/ftr_search_serverless_configs.yml",
-        ".buildkite/ftr_chat_serverless_configs.yml"
+        ".buildkite/ftr_workplace_ai_serverless_configs.yml"
     ]
 }

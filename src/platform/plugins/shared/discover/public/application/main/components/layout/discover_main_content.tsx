@@ -46,7 +46,10 @@ export interface DiscoverMainContentProps {
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
-  onFieldEdited: () => Promise<void>;
+  onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
   panelsToggle: ReactElement<PanelsToggleProps>;
@@ -83,7 +86,9 @@ export const DiscoverMainContent = ({
 
       return new Promise<VIEW_MODE>((resolve, reject) => {
         // return a promise to report when the view mode has been updated
-        stateContainer.appState.subscribe((state) => {
+        const subscription = stateContainer.appState.state$.subscribe((state) => {
+          subscription.unsubscribe();
+
           if (state.viewMode === mode) {
             resolve(mode);
           } else {

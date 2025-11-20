@@ -19,7 +19,7 @@ const setup = (props: Partial<React.ComponentProps<typeof SplitButton>> = {}) =>
 
   const user = userEvent.setup();
 
-  render(
+  const { container } = render(
     <SplitButton
       data-test-subj="split-button"
       onClick={onMainButtonClick}
@@ -34,6 +34,7 @@ const setup = (props: Partial<React.ComponentProps<typeof SplitButton>> = {}) =>
     onMainButtonClick,
     onSecondaryButtonClick,
     user,
+    container,
   };
 };
 
@@ -42,14 +43,16 @@ describe('<SplitButton />', () => {
     it('should render the primary button icon', () => {
       // Given
       const primaryButtonIcon = 'plus';
-      setup({ iconType: primaryButtonIcon });
 
       // When
-      const primaryButton = screen.getByTestId('split-button-primary-button');
+      const { container } = setup({ iconType: primaryButtonIcon });
 
       // Then
+      const primaryButton = screen.getByTestId('split-button');
+      const iconSpan = container.querySelector('span[data-euiicon-type]');
+
       expect(primaryButton).toBeVisible();
-      expect(primaryButton).toHaveAttribute('data-icon', primaryButtonIcon);
+      expect(iconSpan).toHaveAttribute('data-euiicon-type', primaryButtonIcon);
     });
   });
 
@@ -59,12 +62,14 @@ describe('<SplitButton />', () => {
       const secondaryButtonIcon = 'clock';
 
       // When
-      setup({ secondaryButtonIcon });
+      const { container } = setup({ secondaryButtonIcon });
 
       // Then
       const secondaryButton = screen.getByTestId('split-button-secondary-button');
+      const iconSpan = container.querySelector('span[data-euiicon-type]');
+
       expect(secondaryButton).toBeVisible();
-      expect(secondaryButton).toHaveAttribute('data-icon', secondaryButtonIcon);
+      expect(iconSpan).toHaveAttribute('data-euiicon-type', secondaryButtonIcon);
     });
   });
 
@@ -74,7 +79,7 @@ describe('<SplitButton />', () => {
       const { user, onMainButtonClick } = setup();
 
       // When
-      const primaryButton = screen.getByTestId('split-button-primary-button');
+      const primaryButton = screen.getByTestId('split-button');
       await user.click(primaryButton);
 
       // Then

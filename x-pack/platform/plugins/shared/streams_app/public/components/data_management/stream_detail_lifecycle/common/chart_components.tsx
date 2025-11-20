@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  formatNumber,
   useEuiTheme,
 } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
@@ -25,34 +26,113 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import { orderIlmPhases } from '../helpers/helpers';
 import { formatBytes } from '../helpers/format_bytes';
-import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
+import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestion_rate';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { CalculatedStats } from '../helpers/get_calculated_stats';
 
 interface ChartComponentProps {
   definition: Streams.ingest.all.GetResponse;
-  stats?: DataStreamStats;
   timeState: TimeState;
   isLoadingStats: boolean;
+  stats?: CalculatedStats;
+  aggregations?: StreamAggregations;
+  statsError: Error | undefined;
 }
 
 export function ChartBarSeries({
-  definition,
   stats,
   timeState,
   isLoadingStats,
+  aggregations,
+  statsError,
 }: ChartComponentProps) {
+  const mainStreamResult = useIngestionRate({
+    calculatedStats: stats,
+    timeState,
+    aggregations,
+    isLoading: isLoadingStats,
+    error: statsError,
+  });
+
+  const formatAsBytes = !!stats;
+
   const {
     ingestionRate,
     isLoading: isLoadingIngestionRate,
     error: ingestionRateError,
-  } = useIngestionRate({ definition, stats, timeState });
+  } = mainStreamResult;
+
+  return (
+    <ChartBarSeriesBase
+      ingestionRate={ingestionRate}
+      isLoadingIngestionRate={isLoadingIngestionRate}
+      ingestionRateError={ingestionRateError}
+      isLoadingStats={isLoadingStats}
+      formatAsBytes={formatAsBytes}
+      isFailureStore={false}
+    />
+  );
+}
+
+export function FailureStoreChartBarSeries({
+  stats,
+  timeState,
+  isLoadingStats,
+  aggregations,
+  statsError,
+}: ChartComponentProps) {
+  const failureStoreResult = useIngestionRate({
+    calculatedStats: stats,
+    timeState,
+    aggregations,
+    isLoading: isLoadingStats,
+    error: statsError,
+  });
+
+  const formatAsBytes = !!stats;
+
+  const {
+    ingestionRate,
+    isLoading: isLoadingIngestionRate,
+    error: ingestionRateError,
+  } = failureStoreResult;
+
+  return (
+    <ChartBarSeriesBase
+      ingestionRate={ingestionRate}
+      isLoadingIngestionRate={isLoadingIngestionRate}
+      ingestionRateError={ingestionRateError}
+      isLoadingStats={isLoadingStats}
+      formatAsBytes={formatAsBytes}
+      isFailureStore
+    />
+  );
+}
+
+export function ChartBarSeriesBase({
+  ingestionRate,
+  isLoadingIngestionRate,
+  ingestionRateError,
+  isLoadingStats,
+  formatAsBytes,
+  isFailureStore,
+}: {
+  ingestionRate: any;
+  isLoadingIngestionRate: boolean;
+  ingestionRateError: Error | undefined;
+  isLoadingStats: boolean;
+  formatAsBytes?: boolean;
+  isFailureStore: boolean;
+}) {
+  // Use the appropriate hook based on isFailureStore flag
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
     <>
@@ -62,8 +142,10 @@ export function ChartBarSeries({
         <BarSeries
           id="ingestionRate"
           name="Ingestion rate"
-          data={ingestionRate.buckets}
-          color={euiTheme.colors.severity.success}
+          data={ingestionRate.buckets as Array<{ key: any; value: any }>}
+          color={
+            isFailureStore ? euiTheme.colors.severity.danger : euiTheme.colors.severity.success
+          }
           // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           xAccessor={'key'}
@@ -79,7 +161,7 @@ export function ChartBarSeries({
         <Axis
           id="left-axis"
           position="left"
-          tickFormat={(value) => formatBytes(value)}
+          tickFormat={(value) => (formatAsBytes ? formatBytes(value) : formatNumber(value, '0,0'))}
           gridLine={{ visible: true }}
         />
       </Chart>
@@ -87,17 +169,19 @@ export function ChartBarSeries({
   );
 }
 
-export function ChartBarPhasesSeries({
-  definition,
-  stats,
-  timeState,
+function ChartBarPhasesSeriesBase({
+  ingestionRate,
+  isLoadingIngestionRate,
+  ingestionRateError,
   isLoadingStats,
-}: ChartComponentProps) {
-  const {
-    ingestionRate,
-    isLoading: isLoadingIngestionRate,
-    error: ingestionRateError,
-  } = useIngestionRatePerTier({ definition, stats, timeState });
+  formatAsBytes,
+}: {
+  ingestionRate: any;
+  isLoadingIngestionRate: boolean;
+  ingestionRateError: Error | undefined;
+  isLoadingStats: boolean;
+  formatAsBytes?: boolean;
+}) {
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const chartBaseTheme = useElasticChartsTheme();
 
@@ -112,7 +196,7 @@ export function ChartBarPhasesSeries({
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
     <>
@@ -125,7 +209,7 @@ export function ChartBarPhasesSeries({
                 id={`ingestionRate-${tier}`}
                 key={`ingestionRate-${tier}`}
                 name={capitalize(tier)}
-                data={buckets}
+                data={buckets as Array<{ key: any; value: any }>}
                 color={ilmPhases[tier as PhaseName].color}
                 // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
@@ -141,7 +225,13 @@ export function ChartBarPhasesSeries({
               tickFormat={(value) => moment(value).format('YYYY-MM-DD HH:mm:ss')}
               gridLine={{ visible: true }}
             />
-            <Axis id="left-axis" position="left" tickFormat={(value) => formatBytes(value)} />
+            <Axis
+              id="left-axis"
+              position="left"
+              tickFormat={(value) =>
+                formatAsBytes ? formatBytes(value) : formatNumber(value, '0,0')
+              }
+            />
           </Chart>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
@@ -149,6 +239,41 @@ export function ChartBarPhasesSeries({
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
+  );
+}
+
+export function ChartBarPhasesSeries({
+  definition,
+  stats,
+  timeState,
+  isLoadingStats,
+}: ChartComponentProps) {
+  const { timeState: defaultTimeState } = useTimefilter();
+  const currentTimeState = timeState || defaultTimeState;
+
+  // Use the appropriate hook based on isFailureStore flag
+  const mainStreamResult = useIngestionRatePerTier({
+    definition,
+    calculatedStats: stats,
+    timeState: currentTimeState,
+  });
+
+  const {
+    ingestionRate,
+    isLoading: isLoadingIngestionRate,
+    error: ingestionRateError,
+  } = mainStreamResult;
+
+  const formatAsBytes = Boolean(stats?.bytesPerDoc && stats?.bytesPerDoc > 0);
+
+  return (
+    <ChartBarPhasesSeriesBase
+      ingestionRate={ingestionRate}
+      isLoadingIngestionRate={isLoadingIngestionRate}
+      ingestionRateError={ingestionRateError}
+      isLoadingStats={isLoadingStats}
+      formatAsBytes={formatAsBytes}
+    />
   );
 }
 

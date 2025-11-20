@@ -599,4 +599,53 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         }
       }
     );
+
+  router.versioned
+    .post({
+      path: '/internal/file_upload/preview_docs',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
+      options: {
+        body: {
+          accepts: ['application/json'],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              docs: schema.arrayOf(schema.any()),
+              pipeline: schema.any(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { docs, pipeline } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+          const resp = await esClient.asInternalUser.ingest.simulate({
+            pipeline,
+            docs: docs.map((doc) => {
+              return {
+                _source: doc,
+              };
+            }),
+          });
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
 }

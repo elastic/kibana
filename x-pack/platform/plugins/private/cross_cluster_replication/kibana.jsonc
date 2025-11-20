@@ -21,15 +21,15 @@
       "management",
       "remoteClusters",
       "indexManagement",
-      "features"
+      "features",
+      "dataViews"
     ],
     "optionalPlugins": [
       "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "esUiShared",
-      "data"
+      "esUiShared"
     ]
   }
 }

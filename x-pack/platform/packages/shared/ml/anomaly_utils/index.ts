@@ -110,4 +110,6 @@ export type {
   MlAnomalyResultType,
   MlPartitionFieldsType,
   MlRecordForInfluencer,
+  CriteriaField,
+  Influencer,
 } from './types';

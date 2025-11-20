@@ -78,7 +78,6 @@ export const defaultConfig: ScoutServerConfig = {
     serverArgs: [
       `--server.restrictInternalApis=true`,
       `--server.port=${servers.kibana.port}`,
-      `--server.prototypeHardening=true`,
       '--status.allowAnonymous=true',
       `--migrations.zdt.runOnRoles=${JSON.stringify(['ui'])}`,
       // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
@@ -149,6 +148,24 @@ export const defaultConfig: ScoutServerConfig = {
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      `--xpack.fleet.fleetServerHosts=${JSON.stringify([
+        {
+          id: 'default-fleet-server',
+          name: 'Default Fleet Server',
+          is_default: true,
+          host_urls: ['https://localhost:8220'],
+        },
+      ])}`,
+      `--xpack.fleet.outputs=${JSON.stringify([
+        {
+          id: 'es-default-output',
+          name: 'Default Output',
+          type: 'elasticsearch',
+          is_default: true,
+          is_default_monitoring: true,
+          hosts: ['https://localhost:9200'],
+        },
+      ])}`,
     ],
   },
 };

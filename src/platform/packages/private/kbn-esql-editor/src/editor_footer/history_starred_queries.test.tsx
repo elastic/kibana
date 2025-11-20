@@ -48,6 +48,13 @@ const mockHistoryItems = [
   },
 ];
 
+// Add mock data with more than 20 items for pagination testing
+const mockManyHistoryItems = Array.from({ length: 25 }, (_, i) => ({
+  queryString: `FROM index_${i} | WHERE field = "value_${i}"`,
+  timeRan: '',
+  status: 'success' as const,
+}));
+
 describe('Starred and History queries components', () => {
   const services = {
     core: coreMock.createStart(),
@@ -499,6 +506,60 @@ describe('Starred and History queries components', () => {
         expect(screen.getByPlaceholderText('Search starred queries')).toBeInTheDocument();
         expect(screen.queryByTestId('ESQLEditor-history-search')).not.toBeInTheDocument();
       });
+    });
+
+    it('should show pagination controls when there are more than 20 items', async () => {
+      mockGetHistoryItems.mockReturnValue(mockManyHistoryItems);
+      mockGetStorageStats.mockReturnValue({
+        queryCount: 25,
+        storageSizeKB: 5,
+        maxStorageLimitKB: 50,
+        storageUsagePercent: 10,
+      });
+
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={800}
+            onUpdateAndSubmit={jest.fn()}
+            height={400}
+          />
+        </KibanaContextProvider>
+      );
+
+      // Wait for the component to render
+      await waitFor(() => {
+        expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
+      });
+
+      // Check that pagination controls are present by looking for EUI pagination class
+      await waitFor(() => {
+        const paginationElement = document.querySelector('.euiPagination');
+        expect(paginationElement).toBeInTheDocument();
+      });
+    });
+
+    it('should not show pagination controls when there are 20 or fewer items', async () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={800}
+            onUpdateAndSubmit={jest.fn()}
+            height={400}
+          />
+        </KibanaContextProvider>
+      );
+
+      // Wait for the component to render
+      await waitFor(() => {
+        expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
+      });
+
+      // Check that pagination controls are not present
+      const paginationElement = document.querySelector('.euiPagination');
+      expect(paginationElement).not.toBeInTheDocument();
     });
   });
 });

@@ -8,17 +8,23 @@
  */
 
 import type { TabItem } from '@kbn/unified-tabs';
-import type { TabState } from './types';
+import { type TabState } from './types';
 
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   globalState: {},
+  appState: {},
+  previousAppState: {},
+  forceFetchOnSelect: false,
   isDataViewLoading: false,
   dataRequestParams: {
     timeRangeAbsolute: undefined,
     timeRangeRelative: undefined,
     searchSessionId: undefined,
+    isSearchSessionRestored: false,
   },
   overriddenVisContextAfterInvalidation: undefined,
+  controlGroupState: undefined,
+  esqlVariables: [],
   resetDefaultProfileState: {
     resetId: '',
     columns: false,

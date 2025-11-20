@@ -15,6 +15,7 @@ import type {
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
+import type { ObjectType } from '@kbn/config-schema';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -30,6 +31,14 @@ import type { EnhancementRegistryDefinition } from '../common/enhancements/types
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
+  /*
+   * Use registerTransforms to register transforms and schema for an embeddable type.
+   * Transforms decouple REST API state from stored state,
+   * allowing embeddables to have one shape for REST APIs and another for storage.
+   * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.
+   * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
+   * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+   */
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
@@ -38,6 +47,11 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+  /**
+   * Returns all embeddable schemas registered with registerTransforms.
+   */
+  getEmbeddableSchemas: () => ObjectType[];
+
   getTransforms: (type: string) => EmbeddableTransforms | undefined;
 };
 
@@ -87,6 +101,10 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(core: CoreStart) {
     return {
+      getEmbeddableSchemas: () =>
+        Object.values(this.transformsRegistry)
+          .map((transforms) => transforms.schema)
+          .filter((schema) => Boolean(schema)) as ObjectType[],
       getTransforms: (type: string) => {
         return this.transformsRegistry[type];
       },

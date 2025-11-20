@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -8,9 +8,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/server-route-repository",
-    "@kbn/kibana-react-plugin",
-    "@kbn/esql-ast",
-    "@kbn/shared-ux-utility",
     "@kbn/server-route-repository-client",
     "@kbn/traced-es-client",
     "@kbn/es-query",
@@ -19,6 +16,11 @@
     "@kbn/zod",
     "@kbn/es-types",
     "@kbn/zod-helpers",
-    "@kbn/core-feature-flags-server"
+    "@kbn/core-feature-flags-server",
+    "@kbn/otel-semantic-conventions",
+    "@kbn/i18n",
+    "@kbn/core-chrome-browser",
+    "@kbn/data-plugin",
+    "@kbn/esql-composer"
   ]
 }

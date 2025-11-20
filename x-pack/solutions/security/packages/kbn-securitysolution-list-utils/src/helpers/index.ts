@@ -51,6 +51,7 @@ import {
   isNotInListOperator,
   matchesOperator,
   doesNotMatchOperator,
+  ALL_OPERATORS_SANS_MATCHES,
 } from '../autocomplete_operators';
 
 import type {
@@ -723,8 +724,9 @@ export const getOperatorOptions = (
           doesNotExistOperator,
         ];
   } else {
+    const supportMatches = fieldSupportsMatches(item.field);
     return listType === 'detection'
-      ? fieldSupportsMatches(item.field)
+      ? supportMatches
         ? DETECTION_ENGINE_EXCEPTION_OPERATORS
         : [
             isOperator,
@@ -736,7 +738,9 @@ export const getOperatorOptions = (
             isInListOperator,
             isNotInListOperator,
           ]
-      : ALL_OPERATORS;
+      : supportMatches
+      ? ALL_OPERATORS
+      : ALL_OPERATORS_SANS_MATCHES;
   }
 };
 

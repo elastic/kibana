@@ -47,11 +47,12 @@ export const FileAttachmentMetadataPayloadRt = rt.strict({
  */
 
 export enum AttachmentType {
-  user = 'user',
-  alert = 'alert',
   actions = 'actions',
+  alert = 'alert',
+  event = 'event',
   externalReference = 'externalReference',
   persistableState = 'persistableState',
+  user = 'user',
 }
 
 export const UserCommentAttachmentPayloadRt = rt.strict({
@@ -78,6 +79,17 @@ export type UserCommentAttachmentAttributes = rt.TypeOf<typeof UserCommentAttach
 export type UserCommentAttachment = rt.TypeOf<typeof UserCommentAttachmentRt>;
 
 /**
+ * Generic event
+ */
+
+export const EventAttachmentPayloadRt = rt.strict({
+  type: rt.literal(AttachmentType.event),
+  eventId: rt.union([rt.array(rt.string), rt.string]),
+  index: rt.union([rt.array(rt.string), rt.string]),
+  owner: rt.string,
+});
+
+/**
  * Alerts
  */
 
@@ -97,6 +109,11 @@ export const AlertAttachmentAttributesRt = rt.intersection([
   AttachmentAttributesBasicRt,
 ]);
 
+export const EventAttachmentAttributesRt = rt.intersection([
+  EventAttachmentPayloadRt,
+  AttachmentAttributesBasicRt,
+]);
+
 export const AlertAttachmentRt = rt.intersection([
   AlertAttachmentAttributesRt,
   rt.strict({
@@ -105,9 +122,19 @@ export const AlertAttachmentRt = rt.intersection([
   }),
 ]);
 
+export const EventAttachmentRt = rt.intersection([
+  EventAttachmentAttributesRt,
+  rt.strict({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
 export type AlertAttachmentPayload = rt.TypeOf<typeof AlertAttachmentPayloadRt>;
+export type EventAttachmentPayload = rt.TypeOf<typeof EventAttachmentPayloadRt>;
 export type AlertAttachmentAttributes = rt.TypeOf<typeof AlertAttachmentAttributesRt>;
 export type AlertAttachment = rt.TypeOf<typeof AlertAttachmentRt>;
+export type EventAttachment = rt.TypeOf<typeof EventAttachmentRt>;
 
 /**
  * Actions
@@ -262,13 +289,12 @@ export type ExternalReferenceAttachment = rt.TypeOf<typeof ExternalReferenceAtta
 /**
  * Persistable state
  */
-export const PersistableStateAttachmentStateRt = rt.record(rt.string, jsonValueRt);
 
 export const PersistableStateAttachmentPayloadRt = rt.strict({
   type: rt.literal(AttachmentType.persistableState),
   owner: rt.string,
   persistableStateAttachmentTypeId: rt.string,
-  persistableStateAttachmentState: PersistableStateAttachmentStateRt,
+  persistableStateAttachmentState: rt.record(rt.string, jsonValueRt),
 });
 
 const PersistableStateAttachmentAttributesRt = rt.intersection([
@@ -287,7 +313,6 @@ export const PersistableStateAttachmentRt = rt.intersection([
 export type PersistableStateAttachmentPayload = rt.TypeOf<
   typeof PersistableStateAttachmentPayloadRt
 >;
-export type PersistableStateAttachmentState = rt.TypeOf<typeof PersistableStateAttachmentStateRt>;
 export type PersistableStateAttachment = rt.TypeOf<typeof PersistableStateAttachmentRt>;
 export type PersistableStateAttachmentAttributes = rt.TypeOf<
   typeof PersistableStateAttachmentAttributesRt
@@ -300,6 +325,7 @@ export type PersistableStateAttachmentAttributes = rt.TypeOf<
 export const AttachmentPayloadRt = rt.union([
   UserCommentAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
+  EventAttachmentPayloadRt,
   ActionsAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
@@ -309,6 +335,7 @@ export const AttachmentPayloadRt = rt.union([
 export const AttachmentAttributesRt = rt.union([
   UserCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,
+  EventAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceAttachmentAttributesRt,
   PersistableStateAttachmentAttributesRt,
@@ -317,6 +344,7 @@ export const AttachmentAttributesRt = rt.union([
 const AttachmentAttributesNoSORt = rt.union([
   UserCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,
+  EventAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceNoSOAttachmentAttributesRt,
   PersistableStateAttachmentAttributesRt,
@@ -325,6 +353,7 @@ const AttachmentAttributesNoSORt = rt.union([
 const AttachmentAttributesWithoutRefsRt = rt.union([
   UserCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,
+  EventAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceWithoutRefsAttachmentAttributesRt,
   PersistableStateAttachmentAttributesRt,
@@ -350,6 +379,7 @@ export const AttachmentPatchAttributesRt = rt.intersection([
   rt.union([
     rt.exact(rt.partial(UserCommentAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(AlertAttachmentPayloadRt.type.props)),
+    rt.exact(rt.partial(EventAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ActionsAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ExternalReferenceNoSOAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ExternalReferenceSOAttachmentPayloadRt.type.props)),

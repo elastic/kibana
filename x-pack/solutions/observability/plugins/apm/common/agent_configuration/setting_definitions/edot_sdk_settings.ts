@@ -45,6 +45,21 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
+    key: 'infer_spans',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate('xpack.apm.agentConfig.infer_spans.label', {
+      defaultMessage: 'Inferred Spans On/Off',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.edot.infer_spans.description', {
+      defaultMessage:
+        'Set Inferred Spans to be on or off\n' +
+        'Note with Java for this to apply, inferred spans needs to be enabled at JVM startup by setting OTEL_INFERRED_SPANS_ENABLED to true\n' +
+        '\n',
+    }),
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/php/elastic'],
+  },
+  {
     key: 'logging_level',
     validation: loggingLevelRt,
     type: 'select',
@@ -85,7 +100,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'The default interval between checking the collector for new changes to config.\n' +
         'Note the interval is automatically exponentially extended on failures then reset to the value specified here, on recovery.',
     }),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'sampling_rate',
@@ -100,7 +115,12 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'To reduce overhead and storage requirements, you can set the sampling rate to a value between 0.0 and 1.0. ' +
         'Further details can be found in the [OpenTelemetry Sampling Concepts](https://opentelemetry.io/docs/concepts/sampling/) page.',
     }),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/python/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
+    ],
   },
   {
     key: 'send_traces',

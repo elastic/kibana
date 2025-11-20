@@ -6,8 +6,10 @@
  */
 
 import {
+  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -25,6 +27,12 @@ export interface StreamsFeatures {
   groupStreams?: {
     enabled: boolean;
   };
+  contentPacks?: {
+    enabled: boolean;
+  };
+  attachments?: {
+    enabled: boolean;
+  };
 }
 
 export interface StreamsPrivileges {
@@ -33,6 +41,7 @@ export interface StreamsPrivileges {
     show: boolean;
   };
   features: StreamsFeatures;
+  isLoading?: boolean;
 }
 
 export function useStreamsPrivileges(): StreamsPrivileges {
@@ -62,6 +71,10 @@ export function useStreamsPrivileges(): StreamsPrivileges {
     STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
   );
 
+  const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
+
+  const attachmentsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS, false);
+
   return {
     ui: streams as {
       [STREAMS_UI_PRIVILEGES.manage]: boolean;
@@ -81,6 +94,13 @@ export function useStreamsPrivileges(): StreamsPrivileges {
       groupStreams: {
         enabled: groupStreamsEnabled,
       },
+      contentPacks: {
+        enabled: contentPacksEnabled,
+      },
+      attachments: {
+        enabled: attachmentsEnabled,
+      },
     },
+    isLoading: !license,
   };
 }

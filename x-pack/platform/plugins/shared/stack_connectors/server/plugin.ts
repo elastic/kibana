@@ -6,12 +6,14 @@
  */
 
 import type { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { registerInferenceConnectorsUsageCollector } from './usage/inference/inference_connectors_usage_collector';
 import { registerConnectorTypes } from './connector_types';
 import {
   validSlackApiChannelsRoute,
@@ -21,8 +23,10 @@ import {
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
+import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ConnectorsPluginsStart {
@@ -59,6 +63,14 @@ export class StackConnectorsPlugin
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       experimentalFeatures: this.experimentalFeatures,
     });
+
+    if (this.experimentalFeatures.connectorsFromSpecs) {
+      registerConnectorTypesFromSpecs({ actions });
+    }
+
+    if (plugins.usageCollection) {
+      registerInferenceConnectorsUsageCollector(plugins.usageCollection, core);
+    }
   }
 
   public start() {}

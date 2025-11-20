@@ -49,7 +49,7 @@ describe('Timeline', { tags: ['@ess'] }, () => {
     openTimeline();
 
     cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
-      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 3);
+      cy.get(TIMELINE_AND_OR_BADGE).filter(':visible').should('be.visible').and('have.length', 1);
       cy.get(TIMELINE_DRAGGABLE_ITEM).should('contain.text', 'threat.feed.name: "AbuseCH Malware"');
     });
     closeTimeline();
@@ -57,12 +57,12 @@ describe('Timeline', { tags: ['@ess'] }, () => {
     cy.log('add to timeline when clicking in an indicator flyout overview tab table row');
 
     openFlyout();
-    addToTimelineFromFlyoutOverviewTabTable();
+    addToTimelineFromFlyoutOverviewTabTable('threat.indicator.file.hash.md5');
     closeFlyout();
     openTimeline();
 
     cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
-      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 5);
+      cy.get(TIMELINE_AND_OR_BADGE).filter(':visible').should('be.visible').and('have.length', 2);
       cy.get(TIMELINE_DRAGGABLE_ITEM).should(
         'contain.text',
         'threat.indicator.file.hash.md5: "a7f997be65f62fdbe5ec076f0fe207f7"'
@@ -80,9 +80,11 @@ describe('Timeline', { tags: ['@ess'] }, () => {
     closeFlyout();
     openTimeline();
 
-    cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
-      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 5);
-    });
+    cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER)
+      .filter(':visible')
+      .within(() => {
+        cy.get(TIMELINE_AND_OR_BADGE).filter(':visible').should('be.visible').and('have.length', 3);
+      });
 
     closeTimeline();
 
@@ -92,7 +94,7 @@ describe('Timeline', { tags: ['@ess'] }, () => {
     openTimeline();
 
     cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
-      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 7);
+      cy.get(TIMELINE_AND_OR_BADGE).filter(':visible').should('be.visible').and('have.length', 4);
       cy.get(TIMELINE_DRAGGABLE_ITEM).should('contain.text', 'threat.indicator.type: "file"');
     });
 

@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import type { ScopedRunnerRunToolsParams, OnechatToolEvent } from '@kbn/onechat-server';
+import type {
+  ScopedRunnerRunToolsParams,
+  OnechatToolEvent,
+  ToolHandlerFn,
+} from '@kbn/onechat-server';
+import { getToolResultId } from '@kbn/onechat-server/tools/utils';
 import type { CreateScopedRunnerDepsMock, MockedTool, ToolRegistryMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
@@ -17,15 +22,22 @@ import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
+jest.mock('@kbn/onechat-server/tools/utils');
+
+const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
+
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
   let registry: ToolRegistryMock;
   let tool: MockedTool;
+  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
+
+    getToolResultIdMock.mockReturnValue('some-result-id');
 
     registry = createToolRegistryMock();
     const {
@@ -33,11 +45,15 @@ describe('runTool', () => {
     } = runnerDeps;
     getRegistry.mockResolvedValue(registry);
 
-    tool = createMockedTool({
-      schema: z.object({
+    toolHandler = jest.fn().mockReturnValue({ results: [] });
+
+    tool = createMockedTool({});
+    tool.getSchema.mockReturnValue(
+      z.object({
         foo: z.string(),
-      }),
-    });
+      })
+    );
+    tool.getHandler.mockReturnValue(toolHandler);
     registry.get.mockResolvedValue(tool);
   });
 
@@ -57,11 +73,12 @@ describe('runTool', () => {
   });
 
   it('throws if the tool parameters do not match the schema', async () => {
-    tool = createMockedTool({
-      schema: z.object({
+    tool.getSchema.mockReturnValue(
+      z.object({
         bar: z.string(),
-      }),
-    });
+      })
+    );
+
     registry.get.mockResolvedValue(tool);
 
     const params: ScopedRunnerRunToolsParams = {
@@ -88,8 +105,8 @@ describe('runTool', () => {
       parentManager: runnerManager,
     });
 
-    expect(tool.handler).toHaveBeenCalledTimes(1);
-    expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
+    expect(toolHandler).toHaveBeenCalledTimes(1);
+    expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
   });
 
   it('truncates the parameters not defined on the schema', async () => {
@@ -103,8 +120,8 @@ describe('runTool', () => {
       parentManager: runnerManager,
     });
 
-    expect(tool.handler).toHaveBeenCalledTimes(1);
-    expect(tool.handler).toHaveBeenCalledWith({ foo: 'bar' }, expect.any(Object));
+    expect(toolHandler).toHaveBeenCalledTimes(1);
+    expect(toolHandler).toHaveBeenCalledWith({ foo: 'bar' }, expect.any(Object));
   });
 
   it('returns the expected value', async () => {
@@ -115,7 +132,7 @@ describe('runTool', () => {
       },
     };
 
-    tool.handler.mockReturnValue({
+    toolHandler.mockReturnValue({
       results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
     });
 
@@ -125,7 +142,13 @@ describe('runTool', () => {
     });
 
     expect(results).toEqual({
-      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
+      results: [
+        {
+          tool_result_id: 'some-result-id',
+          type: ToolResultType.other,
+          data: { test: true, over: 9000 },
+        },
+      ],
     });
   });
 
@@ -137,7 +160,7 @@ describe('runTool', () => {
       },
     };
 
-    tool.handler.mockImplementation(() => {
+    toolHandler.mockImplementation(() => {
       return { results: [{ type: ToolResultType.other, data: { value: 42 } }] };
     });
 
@@ -146,8 +169,8 @@ describe('runTool', () => {
       parentManager: runnerManager,
     });
 
-    expect(tool.handler).toHaveBeenCalledTimes(1);
-    const context = tool.handler.mock.lastCall![1];
+    expect(toolHandler).toHaveBeenCalledTimes(1);
+    const context = toolHandler.mock.lastCall![1];
 
     expect(context).toEqual(
       expect.objectContaining({
@@ -172,7 +195,7 @@ describe('runTool', () => {
       },
     };
 
-    tool.handler.mockImplementation((toolParams, { events }) => {
+    toolHandler.mockImplementation((toolParams, { events }) => {
       events.reportProgress('some progress');
       return { results: [{ type: ToolResultType.other, data: { foo: 'bar' } }] };
     });

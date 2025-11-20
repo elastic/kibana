@@ -150,7 +150,7 @@ describe('When using runscript action from response console', () => {
       });
 
       await waitFor(() => {
-        expect(renderResult.getAllByTestId('scriptSelector-runscript-script')).toHaveLength(2);
+        expect(renderResult.getAllByTestId('scriptSelector-runscript-0-script')).toHaveLength(2);
       });
     });
 
@@ -167,10 +167,10 @@ describe('When using runscript action from response console', () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'runscript --script', { inputOnly: true });
       await waitFor(() =>
-        user.click(renderResult.getAllByTestId('scriptSelector-runscript-script')[0])
+        user.click(renderResult.getAllByTestId('scriptSelector-runscript-0-script')[0])
       );
       await waitFor(() => {
-        expect(renderResult.queryByTestId('scriptSelector-runscript-popupPanel')).toBeNull();
+        expect(renderResult.queryByTestId('scriptSelector-runscript-0-popoverPanel')).toBeNull();
       });
       consoleMockUtils.submitCommand();
 
@@ -183,10 +183,10 @@ describe('When using runscript action from response console', () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'runscript --script', { inputOnly: true });
       await waitFor(() =>
-        user.click(renderResult.getAllByTestId('scriptSelector-runscript-script')[0])
+        user.click(renderResult.getAllByTestId('scriptSelector-runscript-0-script')[0])
       );
       await waitFor(() => {
-        expect(renderResult.queryByTestId('scriptSelector-runscript-popupPanel')).toBeNull();
+        expect(renderResult.queryByTestId('scriptSelector-runscript-0-popoverPanel')).toBeNull();
       });
 
       expect(renderResult.getByTestId('test-footer')).toHaveTextContent(
@@ -198,10 +198,10 @@ describe('When using runscript action from response console', () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'runscript --script', { inputOnly: true });
       await waitFor(() =>
-        user.click(renderResult.getAllByTestId('scriptSelector-runscript-script')[1])
+        user.click(renderResult.getAllByTestId('scriptSelector-runscript-0-script')[1])
       );
       await waitFor(() => {
-        expect(renderResult.queryByTestId('scriptSelector-runscript-popupPanel')).toBeNull();
+        expect(renderResult.queryByTestId('scriptSelector-runscript-0-popoverPanel')).toBeNull();
       });
       consoleMockUtils.submitCommand();
 
@@ -211,6 +211,52 @@ describe('When using runscript action from response console', () => {
           path: '/api/endpoint/action/run_script',
           version: '2023-10-31',
         });
+      });
+    });
+
+    it('should show textarea popup for --inputPrams', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'runscript --inputParams', { inputOnly: true });
+      await waitFor(() => {
+        expect(
+          renderResult.queryByTestId('textareaInputArgument-runscript-inputParams-0-popoverPanel')
+        ).not.toBeNull();
+      });
+    });
+  });
+
+  describe('and agent type is Microsoft Defender', () => {
+    beforeEach(async () => {
+      const _render = render;
+
+      render = () => _render('microsoft_defender_endpoint');
+    });
+
+    it('should show textarea popup for --Args', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'runscript --Args', { inputOnly: true });
+      await waitFor(() => {
+        expect(
+          renderResult.queryByTestId('textareaInputArgument-runscript-Args-0-popoverPanel')
+        ).not.toBeNull();
+      });
+    });
+  });
+
+  describe('and agent type is Crowdstrike', () => {
+    beforeEach(async () => {
+      const _render = render;
+
+      render = () => _render('crowdstrike');
+    });
+
+    it('should show textarea popup for --CommandLine', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'runscript --CommandLine', { inputOnly: true });
+      await waitFor(() => {
+        expect(
+          renderResult.queryByTestId('textareaInputArgument-runscript-CommandLine-0-popoverPanel')
+        ).not.toBeNull();
       });
     });
   });

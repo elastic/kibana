@@ -8,10 +8,13 @@
  */
 
 import type { ComponentProps } from 'react';
-import React, { useState } from 'react';
+import React, { useImperativeHandle, useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createRestorableStateProvider } from './restorable_state_provider';
+import {
+  createRestorableStateProvider,
+  type RestorableStateProviderApi,
+} from './restorable_state_provider';
 
 const mockCustomLocalStorageKey = 'test-restorable-state';
 let mockStoredValue: string | undefined;
@@ -124,6 +127,25 @@ describe('createRestorableStateProvider', () => {
     render(<WrappedComponent {...propsWithSavedState} />);
     expect(screen.getAllByTestId('message-button')[1]).toHaveTextContent('Hi - 0');
     expect(screen.getAllByTestId('another-message-button')[1]).toHaveTextContent('---');
+  });
+
+  it('withRestorableState should preserve the ref of the wrapped component', () => {
+    const { withRestorableState } = createRestorableStateProvider<RestorableState>();
+
+    interface CustomRef {
+      someMethod: () => null;
+    }
+    const ComponentWithRef = React.forwardRef<CustomRef>((props, ref) => {
+      useImperativeHandle(ref, () => ({
+        someMethod: () => null,
+      }));
+      return <div>Hello</div>;
+    });
+
+    const WrappedComponent = withRestorableState(ComponentWithRef);
+    const ref = React.createRef<CustomRef & RestorableStateProviderApi>();
+    render(<WrappedComponent ref={ref} initialState={{}} onInitialStateChange={() => {}} />);
+    expect(ref.current?.someMethod).toBeDefined();
   });
 
   it('useRestorableRef should work correctly', async () => {

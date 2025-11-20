@@ -16,6 +16,8 @@ import {
   TargetType,
 } from '../../../../../common/endpoint/types/workflow_insights';
 
+const groupSeparator = ':::';
+
 export async function buildPolicyResponseFailureWorkflowInsights({
   defendInsights,
   request,
@@ -26,6 +28,7 @@ export async function buildPolicyResponseFailureWorkflowInsights({
   return defendInsights
     .filter((insight) => insight.remediation && insight.remediation.message)
     .map((insight) => {
+      const displayName = insight.group.split(groupSeparator)[1];
       const workflowInsight: SecurityWorkflowInsight = {
         '@timestamp': currentTime,
         message: 'Policy response failure detected',
@@ -50,7 +53,7 @@ export async function buildPolicyResponseFailureWorkflowInsights({
           notes: {
             llm_model: apiConfig.model ?? '',
           },
-          display_name: insight.group,
+          display_name: displayName,
         },
         remediation: {
           descriptive: (insight.remediation?.message as string) ?? '',

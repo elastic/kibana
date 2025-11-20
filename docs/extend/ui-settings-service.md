@@ -32,8 +32,11 @@ Configuration through the Advanced Settings UI is restricted to users authorised
 
 
 ## Configuration with UI settings overrides [uisettings-overrides]
+```{applies_to}
+stack: preview
+```
 
-[preview] When a setting is configured as an override in kibana.yml, it will override any other value stored in the config saved object. If an override is misconfigured, it will fail config validation and prevent Kibana from starting up. The override applies to Kibana as a whole for all spaces and users and the option will be disabled in the Advanced Settings page. We refer to these as "global" overrides.
+When a setting is configured as an override in kibana.yml, it will override any other value stored in the config saved object. If an override is misconfigured, it will fail config validation and prevent Kibana from starting up. The override applies to Kibana as a whole for all spaces and users and the option will be disabled in the Advanced Settings page. We refer to these as "global" overrides.
 
 Use the top-level `uiSettings` key for this, for example:
 

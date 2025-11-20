@@ -69,7 +69,7 @@ describe('esaggs expression function - public', () => {
       aggs: {
         createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
       } as unknown as jest.Mocked<AggsStart>,
-      indexPatterns: {
+      dataViews: {
         create: jest.fn().mockResolvedValue({}),
       } as unknown as jest.Mocked<DataViewsContract>,
       searchSource: {} as unknown as jest.Mocked<ISearchStartSearchSource>,
@@ -81,7 +81,7 @@ describe('esaggs expression function - public', () => {
   test('calls indexPatterns.create with the values provided by the subexpression arg', async () => {
     await definition().fn(null, args, mockHandlers).toPromise();
 
-    expect(startDependencies.indexPatterns.create).toHaveBeenCalledWith(args.index.value, true);
+    expect(startDependencies.dataViews.create).toHaveBeenCalledWith(args.index.value, true);
   });
 
   test('calls aggs.createAggConfigs with the values provided by the subexpression arg', async () => {

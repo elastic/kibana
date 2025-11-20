@@ -7,7 +7,7 @@
 
 import type { FetchSLOHealthResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 

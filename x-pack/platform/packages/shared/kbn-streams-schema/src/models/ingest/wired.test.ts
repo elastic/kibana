@@ -15,10 +15,9 @@ describe('WiredStream', () => {
         name: 'wired-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
+          lifecycle: { inherit: {} },
           processing: { steps: [] },
+          settings: {},
           wired: {
             fields: {},
             routing: [],
@@ -35,12 +34,9 @@ describe('WiredStream', () => {
         name: 'wired-stream',
         description: null,
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: {
-            steps: [],
-          },
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           wired: {
             fields: {},
             routing: [],
@@ -51,6 +47,7 @@ describe('WiredStream', () => {
         name: 'wired-stream',
         description: '',
         ingest: {
+          settings: {},
           wired: {
             fields: {},
             routing: [],
@@ -61,9 +58,8 @@ describe('WiredStream', () => {
         name: 'wired-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
+          lifecycle: { inherit: {} },
+          settings: {},
           processing: { steps: [] },
           classic: {},
           wired: {
@@ -84,10 +80,9 @@ describe('WiredStream', () => {
           name: 'wired-stream',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
+            lifecycle: { inherit: {} },
             processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],
@@ -100,11 +95,15 @@ describe('WiredStream', () => {
           monitor: true,
           simulate: true,
           text_structure: true,
+          read_failure_store: true,
+          manage_failure_store: true,
+          view_index_metadata: true,
         },
         effective_lifecycle: {
           dsl: {},
           from: 'logs',
         },
+        effective_settings: {},
         inherited_fields: {},
         ...emptyAssets,
       },
@@ -118,10 +117,9 @@ describe('WiredStream', () => {
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
+            lifecycle: { inherit: {} },
             processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],
@@ -132,6 +130,7 @@ describe('WiredStream', () => {
           dsl: {},
           from: 'logs',
         },
+        effective_settings: {},
         inherited_fields: {},
         privileges: {
           lifecycle: true,
@@ -139,6 +138,8 @@ describe('WiredStream', () => {
           monitor: true,
           simulate: true,
           text_structure: true,
+          failure_store: true,
+          view_index_metadata: true,
         },
         dashboards: [],
         queries: [],
@@ -154,10 +155,9 @@ describe('WiredStream', () => {
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
+            lifecycle: { inherit: {} },
             processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],
@@ -179,12 +179,9 @@ describe('WiredStream', () => {
           name: 'my-name',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: {
-              steps: [],
-            },
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],

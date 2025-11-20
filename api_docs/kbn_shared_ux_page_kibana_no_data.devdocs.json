@@ -14,7 +14,13 @@
         ],
         "signature": [
           "({ onDataViewCreated, noDataConfig, allowAdHocDataView, onTryESQL, onESQLNavigationComplete, showPlainSpinner, }: ",
-          "KibanaNoDataPageProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+            "section": "def-public.KibanaNoDataPageProps",
+            "text": "KibanaNoDataPageProps"
+          },
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
@@ -29,7 +35,13 @@
             "label": "{\n  onDataViewCreated,\n  noDataConfig,\n  allowAdHocDataView,\n  onTryESQL,\n  onESQLNavigationComplete,\n  showPlainSpinner,\n}",
             "description": [],
             "signature": [
-              "KibanaNoDataPageProps"
+              {
+                "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+                "section": "def-public.KibanaNoDataPageProps",
+                "text": "KibanaNoDataPageProps"
+              }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
             "deprecated": false,
@@ -51,7 +63,13 @@
         ],
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
-          "KibanaNoDataPageKibanaDependencies",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+            "section": "def-public.KibanaNoDataPageKibanaDependencies",
+            "text": "KibanaNoDataPageKibanaDependencies"
+          },
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/impl/src/services.tsx",
@@ -67,7 +85,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "KibanaNoDataPageKibanaDependencies",
+              {
+                "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+                "section": "def-public.KibanaNoDataPageKibanaDependencies",
+                "text": "KibanaNoDataPageKibanaDependencies"
+              },
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/impl/src/services.tsx",
@@ -90,7 +114,13 @@
         ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
-          "KibanaNoDataPageServices",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+            "section": "def-public.KibanaNoDataPageServices",
+            "text": "KibanaNoDataPageServices"
+          },
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/impl/src/services.tsx",
@@ -106,7 +136,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "KibanaNoDataPageServices",
+              {
+                "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+                "section": "def-public.KibanaNoDataPageServices",
+                "text": "KibanaNoDataPageServices"
+              },
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/impl/src/services.tsx",
@@ -132,15 +168,24 @@
           "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component and its dependencies."
         ],
         "signature": [
-          "KibanaDependencies",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+            "section": "def-public.KibanaDependencies",
+            "text": "KibanaDependencies"
+          },
           " & ",
-          "NoDataViewsPromptKibanaDependencies",
-          " & ",
-          "KibanaDependencies",
-          " & ",
-          "RedirectAppLinksKibanaDependencies"
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptKibanaDependencies",
+            "text": "NoDataViewsPromptKibanaDependencies"
+          },
+          " & KibanaDependencies"
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -155,15 +200,31 @@
           "\nA list of Services that are consumed by this component.."
         ],
         "signature": [
-          "Services",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
           " & ",
-          "Services",
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
           " & ",
-          "RedirectAppLinksServices",
-          " & ",
-          "NoDataViewsPromptServices"
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          }
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

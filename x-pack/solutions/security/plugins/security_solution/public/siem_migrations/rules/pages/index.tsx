@@ -23,7 +23,7 @@ import { HeaderButtons, UnknownMigration } from '../../common/components';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { RuleMigrationDataInputWrapper } from '../components/data_input_flyout/data_input_wrapper';
 import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
-import { MigrationProgressPanel } from '../components/migration_status_panels/migration_progress_panel';
+import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules';
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
@@ -122,7 +122,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-              <MigrationProgressPanel migrationStats={migrationStats} />
+              <MigrationProgressPanel migrationStats={migrationStats} migrationType="rule" />
             )}
           </>
         </RuleMigrationDataInputWrapper>
@@ -133,6 +133,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       <SecuritySolutionPageWrapper>
         <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} />} border>
           <HeaderButtons
+            migrationType="rule"
             migrationsStats={ruleMigrationsStats}
             selectedMigrationId={migrationId}
             onMigrationIdChange={onMigrationIdChange}
@@ -141,6 +142,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
         <EuiSkeletonLoading
+          key={migrationId}
           data-test-subj="migrationRulesPageLoading"
           isLoading={isLoading}
           loadingContent={

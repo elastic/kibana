@@ -21,23 +21,13 @@
     "functions": [
       {
         "parentPluginId": "@kbn/esql-validation-autocomplete",
-        "id": "def-common.getColumnsByTypeHelper",
+        "id": "def-common.getHoverItem",
         "type": "Function",
         "tags": [],
-        "label": "getColumnsByTypeHelper",
-        "description": [
-          "\nEfficiently computes the list of columns available after the given query\nand returns column querying utilities.\n"
-        ],
+        "label": "getHoverItem",
+        "description": [],
         "signature": [
-          "(query: ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstQueryExpression",
-            "text": "ESQLAstQueryExpression"
-          },
-          ", originalQueryText: string, resourceRetriever: ",
+          "(fullText: string, offset: number, callbacks: ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
@@ -45,60 +35,48 @@
             "section": "def-common.ESQLCallbacks",
             "text": "ESQLCallbacks"
           },
-          " | undefined) => { getColumnsByType: (expectedType?: string | readonly string[], ignored?: string[]) => Promise<",
-          "ESQLColumnData",
-          "[]>; getColumnMap: () => Promise<Map<string, ",
-          "ESQLColumnData",
-          ">>; }"
+          " | undefined) => Promise<HoverContent>"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/hover/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.getColumnsByTypeHelper.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLAstQueryExpression",
-                "text": "ESQLAstQueryExpression"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.getColumnsByTypeHelper.$2",
+            "id": "def-common.getHoverItem.$1",
             "type": "string",
             "tags": [],
-            "label": "originalQueryText",
-            "description": [
-              "the text of the original query, used to infer column names from expressions"
-            ],
+            "label": "fullText",
+            "description": [],
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/hover/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.getColumnsByTypeHelper.$3",
+            "id": "def-common.getHoverItem.$2",
+            "type": "number",
+            "tags": [],
+            "label": "offset",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/hover/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.getHoverItem.$3",
             "type": "Object",
             "tags": [],
-            "label": "resourceRetriever",
+            "label": "callbacks",
             "description": [],
             "signature": [
               {
@@ -110,7 +88,7 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/hover/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -225,6 +203,101 @@
       },
       {
         "parentPluginId": "@kbn/esql-validation-autocomplete",
+        "id": "def-common.inlineSuggest",
+        "type": "Function",
+        "tags": [],
+        "label": "inlineSuggest",
+        "description": [],
+        "signature": [
+          "(fullText: string, textBeforeCursor: string, range: { readonly startLineNumber: number; readonly startColumn: number; readonly endLineNumber: number; readonly endColumn: number; } | undefined, callbacks: ",
+          {
+            "pluginId": "@kbn/esql-validation-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "section": "def-common.ESQLCallbacks",
+            "text": "ESQLCallbacks"
+          },
+          " | undefined) => Promise<{ items: ",
+          "InlineSuggestionItem",
+          "[]; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/inline_suggestions/inline_suggest.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.inlineSuggest.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fullText",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/inline_suggestions/inline_suggest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.inlineSuggest.$2",
+            "type": "string",
+            "tags": [],
+            "label": "textBeforeCursor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/inline_suggestions/inline_suggest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.inlineSuggest.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "signature": [
+              "{ readonly startLineNumber: number; readonly startColumn: number; readonly endLineNumber: number; readonly endColumn: number; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/inline_suggestions/inline_suggest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.inlineSuggest.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "callbacks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLCallbacks",
+                "text": "ESQLCallbacks"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/inline_suggestions/inline_suggest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-validation-autocomplete",
         "id": "def-common.suggest",
         "type": "Function",
         "tags": [],
@@ -310,18 +383,24 @@
         "tags": [],
         "label": "validateQuery",
         "description": [
-          "\nES|QL validation public API\nIt takes a query string and returns a list of messages (errors and warnings) after validate\nThe astProvider is optional, but if not provided the default one from '@kbn/esql-validation-autocomplete' will be used.\nThis is useful for async loading the ES|QL parser and reduce the bundle size, or to swap grammar version.\nAs for the callbacks, while optional, the validation function will selectively ignore some errors types based on each callback missing."
+          "\nES|QL validation public API\nIt takes a query string and returns a list of messages (errors and warnings) after validate\nThe astProvider is optional, but if not provided the default one from '@kbn/esql-validation-autocomplete' will be used.\nThis is useful for async loading the ES|QL parser and reduce the bundle size, or to swap grammar version.\nAs for the callbacks, while optional, the validation function will selectively ignore some errors types based on each callback missing.\n"
         ],
         "signature": [
-          "(queryString: string, options: ",
-          "ValidationOptions",
-          ", callbacks: ",
+          "(queryString: string, callbacks: ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
             "docId": "kibKbnEsqlValidationAutocompletePluginApi",
             "section": "def-common.ESQLCallbacks",
             "text": "ESQLCallbacks"
+          },
+          " | undefined, options: ",
+          {
+            "pluginId": "@kbn/esql-validation-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "section": "def-common.ValidationOptions",
+            "text": "ValidationOptions"
           },
           " | undefined) => Promise<",
           "ValidationResult",
@@ -337,7 +416,9 @@
             "type": "string",
             "tags": [],
             "label": "queryString",
-            "description": [],
+            "description": [
+              "- The query string to validate"
+            ],
             "signature": [
               "string"
             ],
@@ -351,23 +432,10 @@
             "id": "def-common.validateQuery.$2",
             "type": "Object",
             "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "ValidationOptions"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.validateQuery.$3",
-            "type": "Object",
-            "tags": [],
             "label": "callbacks",
-            "description": [],
+            "description": [
+              "- Optional callbacks for resource retrieval."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/esql-validation-autocomplete",
@@ -375,6 +443,28 @@
                 "docId": "kibKbnEsqlValidationAutocompletePluginApi",
                 "section": "def-common.ESQLCallbacks",
                 "text": "ESQLCallbacks"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.validateQuery.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ValidationOptions",
+                "text": "ValidationOptions"
               },
               " | undefined"
             ],
@@ -532,7 +622,7 @@
             "label": "getJoinIndices",
             "description": [],
             "signature": [
-              "(() => Promise<{ indices: ",
+              "((cacheOptions?: { forceRefresh?: boolean | undefined; } | undefined) => Promise<{ indices: ",
               {
                 "pluginId": "@kbn/esql-types",
                 "scope": "common",
@@ -545,7 +635,35 @@
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-validation-autocomplete",
+                "id": "def-common.ESQLCallbacks.getJoinIndices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "cacheOptions",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/esql-validation-autocomplete",
+                    "id": "def-common.ESQLCallbacks.getJoinIndices.$1.forceRefresh",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "forceRefresh",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           },
           {
@@ -703,6 +821,100 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLCallbacks.getHistoryStarredItems",
+            "type": "Function",
+            "tags": [],
+            "label": "getHistoryStarredItems",
+            "description": [],
+            "signature": [
+              "(() => Promise<string[]>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLCallbacks.canCreateLookupIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "canCreateLookupIndex",
+            "description": [],
+            "signature": [
+              "((indexName: string) => Promise<boolean>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-validation-autocomplete",
+                "id": "def-common.ESQLCallbacks.canCreateLookupIndex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLCallbacks.isServerless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isServerless",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-validation-autocomplete",
+        "id": "def-common.ValidationOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidationOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ValidationOptions.invalidateColumnsCache",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "invalidateColumnsCache",
+            "description": [
+              "\nForces cache invalidation for column metadata.\nOnly effective when 'getColumnsFor' callback is provided in ESQLCallbacks.\nUse when schema changes have occurred (e.g., new fields added to lookup indices)."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

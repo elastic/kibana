@@ -10,7 +10,8 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
@@ -19,7 +20,15 @@ import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../..';
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 import { RepositoryComboBoxField } from './repository_combobox_field';
 
-import './_searchable_snapshot_field.scss';
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    searchableSnapshotField: css`
+      max-width: ${euiTheme.components.forms.maxWidth};
+    `,
+  };
+};
+
 import { i18nTexts as i18nTextsEdit } from '../../../../i18n_texts';
 
 export interface Props {
@@ -83,6 +92,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   phase,
   canBeDisabled = true,
 }) => {
+  const styles = useStyles();
   const {
     services: { cloud, docLinks, getUrlForApp },
   } = useKibana();
@@ -159,6 +169,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
           } else if (repos.length === 0) {
             calloutContent = (
               <EuiCallOut
+                announceOnMount={false}
                 color="warning"
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesTitle',
@@ -194,6 +205,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
           ) {
             calloutContent = (
               <EuiCallOut
+                announceOnMount={false}
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesWithNameTitle',
                   { defaultMessage: 'Repository name not found' }
@@ -227,7 +239,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
         }
 
         return (
-          <div className="ilmSearchableSnapshotField">
+          <div css={styles.searchableSnapshotField}>
             <UseField
               path={searchableSnapshotRepoPath}
               defaultValue={!!searchableSnapshotGlobalRepo ? [searchableSnapshotGlobalRepo] : []}
@@ -257,6 +269,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
       infoCallout = (
         <EuiCallOut
+          announceOnMount={false}
           size="s"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
@@ -271,6 +284,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     } else if (isDisabledDueToLicense) {
       infoCallout = (
         <EuiCallOut
+          announceOnMount={false}
           data-test-subj="searchableSnapshotDisabledDueToLicense"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle',

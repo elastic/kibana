@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type { TEcsFields, TMetadataFields, TOtelFields } from '../../../common';
-import { FieldMetadata } from '../../../common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
 import { OtelFieldsRepository } from './repositories/otel_fields_repository';
+import { FieldMetadata } from '../../../common/fields_metadata/models/field_metadata';
 
 const ecsFields = {
   '@timestamp': {
@@ -244,6 +244,15 @@ describe('FieldsMetadataClient class', () => {
       expect(integrationFieldsExtractor).not.toHaveBeenCalled();
       expect(fieldInstance).toBeUndefined();
     });
+
+    it('should not resolve the field if the source is not allowed', async () => {
+      // '_index' is a metadata field, but we filter for ECS sources only
+      const fieldInstance = await fieldsMetadataClient.getByName('_index', {
+        source: ['ecs'],
+      });
+
+      expect(fieldInstance).toBeUndefined();
+    });
   });
 
   describe('#find', () => {
@@ -288,6 +297,19 @@ describe('FieldsMetadataClient class', () => {
       expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
       expect(Object.hasOwn(fields, 'onepassword.client.platform_version')).toBeTruthy();
       expect(Object.hasOwn(fields, 'not-existing-field')).toBeFalsy();
+    });
+
+    it('should not resolve the fields from sources not allowed', async () => {
+      // Should resolve '@timestamp' from ECS but not '_index'
+      const fieldsDictionaryInstance = await fieldsMetadataClient.find({
+        fieldNames: ['@timestamp', '_index'],
+        source: ['ecs'],
+      });
+
+      const fields = fieldsDictionaryInstance.toPlain();
+
+      expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
+      expect(Object.hasOwn(fields, '_index')).toBeFalsy();
     });
   });
 

@@ -316,7 +316,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; width?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; width?: string | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
               "EuiTableDataType",
               " | undefined; render?: ((value: any, item: ",
               {
@@ -328,7 +328,7 @@
               },
               ") => React.ReactNode) | undefined; align?: ",
               "HorizontalAlignment",
-              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; nameTooltip?: ",
+              " | undefined; height?: string | number | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; nameTooltip?: ",
               "EuiTableColumnNameTooltipProps",
               " | undefined; textOnly?: boolean | undefined; truncateText?: boolean | { lines: number; } | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",
@@ -1024,6 +1024,32 @@
                 "section": "def-common.SavedObjectMetadata",
                 "text": "SavedObjectMetadata"
               }
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectRelation.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectRelation.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
@@ -2220,6 +2246,32 @@
                 "section": "def-common.SavedObjectMetadata",
                 "text": "SavedObjectMetadata"
               }
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectRelation.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectRelation.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,

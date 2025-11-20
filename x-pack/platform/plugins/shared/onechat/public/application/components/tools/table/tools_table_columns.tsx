@@ -7,7 +7,7 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common/tools';
+import type { ToolDefinition } from '@kbn/onechat-common/tools';
 import React from 'react';
 import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../tags/tool_tags';
@@ -15,12 +15,16 @@ import { ToolContextMenu } from './tools_table_context_menu';
 import { ToolIdWithDescription } from './tools_table_id';
 import { ToolQuickActions } from './tools_table_quick_actions';
 
-export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinitionWithSchema>> => {
+export const getToolsTableColumns = ({
+  canManageTools,
+}: {
+  canManageTools: boolean;
+}): Array<EuiBasicTableColumn<ToolDefinition>> => {
   return [
     // Readonly indicator
     {
       width: '30px',
-      render: (tool: ToolDefinitionWithSchema) =>
+      render: (tool: ToolDefinition) =>
         tool.readonly ? <EuiIconTip type="lock" content={labels.tools.readOnly} /> : null,
     },
     {
@@ -28,7 +32,7 @@ export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
       name: labels.tools.toolIdLabel,
       sortable: true,
       width: '60%',
-      render: (_, tool: ToolDefinitionWithSchema) => <ToolIdWithDescription tool={tool} />,
+      render: (_, tool: ToolDefinition) => <ToolIdWithDescription tool={tool} />,
     },
     {
       field: 'tags',
@@ -38,9 +42,9 @@ export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
     {
       width: '100px',
       align: 'right',
-      render: (tool: ToolDefinitionWithSchema) => (
+      render: (tool: ToolDefinition) => (
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-          {!tool.readonly && <ToolQuickActions tool={tool} />}
+          {!tool.readonly && canManageTools && <ToolQuickActions tool={tool} />}
           <ToolContextMenu tool={tool} />
         </EuiFlexGroup>
       ),

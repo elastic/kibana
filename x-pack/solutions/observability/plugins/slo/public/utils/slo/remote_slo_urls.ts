@@ -76,19 +76,6 @@ export function createRemoteSloDisableUrl(
   return remoteUrl.toString();
 }
 
-export function createRemoteSloAddToCaseUrl(
-  slo: SLOWithSummaryResponse,
-  spaceId: string = 'default'
-) {
-  const remoteUrl = createBaseRemoteSloDetailsUrl(slo, spaceId);
-  if (!remoteUrl) {
-    return undefined;
-  }
-
-  remoteUrl.searchParams.append('addToCase', 'true');
-  return remoteUrl.toString();
-}
-
 export function createRemoteSloEditUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
   if (!slo.remote || slo.remote.kibanaUrl === '') {
     return undefined;

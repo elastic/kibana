@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -28,14 +29,22 @@ export const DELETE_MIGRATION_FAILURE = i18n.translate(
 
 export const DELETE_MIGRATION_RULE_MUTATION_KEY = ['DELETE', SIEM_RULE_MIGRATION_PATH];
 
-export const useDeleteMigration = (migrationId: string, migrationType: MigrationType) => {
+export const useDeleteMigration = (migrationType: MigrationType) => {
   const { addError, addSuccess } = useAppToasts();
   const { siemMigrations } = useKibana().services;
-  const migrationService =
-    migrationType === 'rule' ? siemMigrations.rules : siemMigrations.dashboards;
+  const deleteMigration = useCallback(
+    (migrationId: string) => {
+      if (migrationType === 'rule') {
+        return siemMigrations.rules.deleteMigration(migrationId);
+      } else {
+        return siemMigrations.dashboards.deleteMigration(migrationId);
+      }
+    },
+    [siemMigrations, migrationType]
+  );
 
   return useMutation({
-    mutationFn: () => migrationService.deleteMigration(migrationId),
+    mutationFn: (migrationId: string) => deleteMigration(migrationId),
     onSuccess: () => {
       addSuccess(DELETE_MIGRATION_SUCCESS);
     },

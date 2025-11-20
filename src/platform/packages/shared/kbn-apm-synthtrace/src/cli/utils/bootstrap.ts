@@ -27,12 +27,14 @@ export async function bootstrap({
 
   const kibanaClient = getKibanaClient({
     target: kibanaUrl,
+    apiKey: runOptions.apiKey,
     logger,
   });
 
   const client = new Client({
     node: esUrl,
-    tls: getEsClientTlsSettings(esUrl),
+    ...(runOptions.apiKey && { auth: { apiKey: runOptions.apiKey } }),
+    tls: getEsClientTlsSettings(esUrl, runOptions.insecure),
     Connection: HttpConnection,
     requestTimeout: 30_000,
   });

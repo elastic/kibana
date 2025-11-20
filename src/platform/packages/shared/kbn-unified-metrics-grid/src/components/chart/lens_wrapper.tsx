@@ -10,39 +10,36 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { useBoolean } from '@kbn/react-hooks';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import type { AggregateQuery } from '@kbn/es-query';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import { ChartTitle } from './chart_title';
 
 export type LensWrapperProps = {
-  metric: MetricField;
   lensProps: LensProps;
-  onViewDetails: (metric: MetricField, esqlQuery: string) => void;
+  titleHighlight?: string;
+  onViewDetails?: () => void;
+  onCopyToDashboard?: () => void;
+  syncTooltips?: boolean;
+  syncCursor?: boolean;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
-const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
+const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
 
 export function LensWrapper({
   lensProps,
-  metric,
   services,
   onBrushEnd,
   onFilter,
   abortController,
+  titleHighlight,
   onViewDetails,
+  onCopyToDashboard,
+  syncTooltips,
+  syncCursor,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
-  const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
 
-  const { EmbeddableComponent, SaveModalComponent } = services.lens;
-
-  const esqlQuery = (lensProps?.attributes?.state?.query as AggregateQuery).esql ?? '';
-
-  const handleViewDetails = React.useCallback(() => {
-    onViewDetails(metric, esqlQuery);
-  }, [onViewDetails, metric, esqlQuery]);
+  const { EmbeddableComponent } = services.lens;
 
   const chartCss = css`
     position: relative;
@@ -52,6 +49,10 @@ export function LensWrapper({
       position: absolute;
       height: 100%;
       width: 100%;
+    }
+
+    & .embPanel__header {
+      visibility: hidden;
     }
 
     & .lnsExpressionRenderer {
@@ -73,32 +74,25 @@ export function LensWrapper({
   `;
 
   const extraActions = useLensExtraActions({
-    copyToDashboard: { onClick: toggleSaveModalVisible },
-    viewDetails: { onClick: handleViewDetails },
+    copyToDashboard: onCopyToDashboard ? { onClick: onCopyToDashboard } : undefined,
+    viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
   });
 
   return (
-    <>
-      <div css={chartCss}>
-        <EmbeddableComponent
-          {...lensProps}
-          extraActions={extraActions}
-          abortController={abortController}
-          disabledActions={DEFAULT_DISABLED_ACTIONS}
-          withDefaultActions
-          onBrushEnd={onBrushEnd}
-          onFilter={onFilter}
-        />
-      </div>
-      {isSaveModalVisible && (
-        <SaveModalComponent
-          initialInput={{ attributes: lensProps.attributes }}
-          onClose={toggleSaveModalVisible}
-          // Disables saving ESQL charts to the library.
-          // it will only copy it to a dashboard
-          isSaveable={false}
-        />
-      )}
-    </>
+    <div css={chartCss}>
+      <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
+      <EmbeddableComponent
+        {...lensProps}
+        title={lensProps.attributes.title}
+        extraActions={extraActions}
+        abortController={abortController}
+        disabledActions={DEFAULT_DISABLED_ACTIONS}
+        withDefaultActions
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+        syncTooltips={syncTooltips}
+        syncCursor={syncCursor}
+      />
+    </div>
   );
 }

@@ -23,7 +23,9 @@ export const timeseriesCommand = {
   name: 'ts',
   methods: timeseriesCommandMethods,
   metadata: {
-    hidden: true,
+    type: 'source' as const,
+    hidden: false,
+    preview: true,
     description: i18n.translate('kbn-esql-ast.esql.definitions.metricsDoc', {
       defaultMessage:
         'A metrics-specific source command, use this command to load data from TSDB indices. ' +

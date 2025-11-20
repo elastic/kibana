@@ -21,7 +21,7 @@ export const createUpdatedColumn = (): TableColumn => {
       <TableHeader
         id={SIEM_DASHBOARDS_MIGRATIONS_UPDATED_HEADER_ID}
         title={i18n.COLUMN_UPDATED}
-        tooltipContent={i18n.COLUMN_UPDATED}
+        tooltipContent={i18n.UPDATE_COLUMN_TOOLTIP}
       />
     ),
     render: (value: DashboardMigrationDashboard['original_dashboard']['last_updated']) => (
@@ -29,7 +29,7 @@ export const createUpdatedColumn = (): TableColumn => {
     ),
     sortable: true,
     truncateText: true,
-    align: 'center',
+    align: 'left',
     width: '15%',
   };
 };

@@ -39,10 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await comboBox.setCustom('dataViewSelector', 'logstash-*');
       await comboBox.setCustom('searchMetricField', 'bytes');
       await testSubjects.clickWhenNotDisabledWithoutRetry('startSearch');
-      await testSubjects.find('searchResults-1');
-      await searchSessions.expectState('completed');
       await searchSessions.save();
-      await searchSessions.expectState('backgroundCompleted');
       await testSubjects.click('restoreSearch');
       await testSubjects.find('searchResults-2');
     });

@@ -7,77 +7,70 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';
-import type { TimeRange } from '@kbn/data-plugin/common';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
-import { DIMENSIONS_COLUMN } from '../../../common/utils';
-import { useEsqlQueryInfo } from '../../../hooks';
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import {
+  createMetricAggregation,
+  createTimeBucketAggregation,
+  DIMENSIONS_COLUMN,
+  getLensMetricFormat,
+} from '../../../common/utils';
 
+interface UseChartLayersParams {
+  dimensions?: Dimension[];
+  metric: MetricField;
+  color?: string;
+  seriesType?: LensSeriesLayer['seriesType'];
+  customFunction?: string;
+}
+
+/**
+ * A hook that computes the Lens series layer configuration for the metrics chart.
+ *
+ * @param dimensions - An array of dimension fields to break down the series by.
+ * @param metric - The metric field to be visualized.
+ * @param color - The color to apply to the series.
+ * @returns An array of LensSeriesLayer configurations.
+ */
 export const useChartLayers = ({
-  query,
-  timeRange,
+  dimensions = [],
+  metric,
   color,
   seriesType,
-  services,
-  abortController,
-}: {
-  query: string;
-  color?: string;
-  unit?: string;
-  timeRange: TimeRange;
-  seriesType: LensSeriesLayer['seriesType'];
-  services: ChartSectionProps['services'];
-  abortController?: AbortController;
-} & Pick<ChartSectionProps, 'services'>): Array<LensSeriesLayer> => {
-  const queryInfo = useEsqlQueryInfo({ query });
+  customFunction,
+}: UseChartLayersParams): LensSeriesLayer[] => {
+  return useMemo((): LensSeriesLayer[] => {
+    const metricField = createMetricAggregation({
+      instrument: metric.instrument,
+      metricName: metric.name,
+      customFunction,
+    });
+    const hasDimensions = dimensions.length > 0;
 
-  const { value: columns = [] } = useAsync(
-    () =>
-      getESQLQueryColumns({
-        esqlQuery: query,
-        search: services.data.search.search,
-        signal: abortController?.signal,
-      }),
-
-    [query, services.data.search.search, timeRange]
-  );
-
-  const layers = useMemo<LensSeriesLayer[]>(() => {
-    const xAxisColumn = columns.find((col) => col.meta.type === 'date');
-    const xAxis: LensSeriesLayer['xAxis'] = {
-      type: 'dateHistogram',
-      field: xAxisColumn?.name ?? '@timestamp',
-    };
-
-    const yAxis: LensBaseLayer[] = columns
-      .filter(
-        (col) =>
-          col.name !== DIMENSIONS_COLUMN &&
-          col.meta.type !== 'date' &&
-          !queryInfo.dimensions.some((dim) => dim === col.name)
-      )
-      .map((col) => ({
-        label: col.name,
-        value: col.name,
-        decimals: 1,
-        compactValues: true,
-        seriesColor: color,
-      }));
-
-    const hasDimensions = queryInfo.dimensions.length > 0;
     return [
       {
         type: 'series',
-        seriesType,
-        xAxis,
-        yAxis,
-        breakdown: hasDimensions ? DIMENSIONS_COLUMN : undefined,
+        seriesType: seriesType || hasDimensions ? 'line' : 'area',
+        xAxis: {
+          field: createTimeBucketAggregation({}),
+          type: 'dateHistogram',
+        },
+        yAxis: [
+          {
+            value: metricField,
+            label: metricField,
+            compactValues: true,
+            seriesColor: color,
+            ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
+          },
+        ],
+        breakdown: hasDimensions
+          ? dimensions.length === 1
+            ? dimensions[0].name
+            : DIMENSIONS_COLUMN
+          : undefined,
       },
     ];
-  }, [columns, queryInfo.dimensions, seriesType, color]);
-
-  return layers;
+  }, [color, customFunction, dimensions, metric.instrument, metric.name, metric.unit, seriesType]);
 };

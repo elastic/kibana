@@ -179,7 +179,7 @@
         "label": "ApplicationVarName",
         "description": [],
         "signature": [
-          "\"application.content.right\" | \"application.content.width\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.height\" | \"application.content.left\" | \"application.topBar.right\" | \"application.topBar.width\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.height\" | \"application.topBar.left\" | \"application.bottomBar.right\" | \"application.bottomBar.width\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.height\" | \"application.bottomBar.left\""
+          "\"application.content.right\" | \"application.content.width\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.height\" | \"application.topBar.right\" | \"application.topBar.width\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.height\" | \"application.bottomBar.right\" | \"application.bottomBar.width\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.height\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
         "deprecated": false,
@@ -194,7 +194,7 @@
         "label": "CSSVarName",
         "description": [],
         "signature": [
-          "\"application.right\" | \"application.width\" | \"application.top\" | \"application.bottom\" | \"application.height\" | \"application.left\" | \"footer.right\" | \"footer.width\" | \"footer.top\" | \"footer.bottom\" | \"footer.height\" | \"footer.left\" | \"header.right\" | \"header.width\" | \"header.top\" | \"header.bottom\" | \"header.height\" | \"header.left\" | \"banner.right\" | \"banner.width\" | \"banner.top\" | \"banner.bottom\" | \"banner.height\" | \"banner.left\" | \"navigation.right\" | \"navigation.width\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.height\" | \"navigation.left\" | \"sidebar.right\" | \"sidebar.width\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.height\" | \"sidebar.left\" | \"application.content.right\" | \"application.content.width\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.height\" | \"application.content.left\" | \"application.topBar.right\" | \"application.topBar.width\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.height\" | \"application.topBar.left\" | \"application.bottomBar.right\" | \"application.bottomBar.width\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.height\" | \"application.bottomBar.left\""
+          "\"application.right\" | \"application.width\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.height\" | \"footer.right\" | \"footer.width\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.height\" | \"header.right\" | \"header.width\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.height\" | \"banner.right\" | \"banner.width\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.height\" | \"navigation.right\" | \"navigation.width\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.height\" | \"sidebar.right\" | \"sidebar.width\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.height\" | \"application.content.right\" | \"application.content.width\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.height\" | \"application.topBar.right\" | \"application.topBar.width\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.height\" | \"application.bottomBar.right\" | \"application.bottomBar.width\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.height\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
         "deprecated": false,
@@ -224,7 +224,7 @@
         "label": "LayoutProperty",
         "description": [],
         "signature": [
-          "\"right\" | \"width\" | \"top\" | \"bottom\" | \"height\" | \"left\""
+          "\"right\" | \"width\" | \"top\" | \"bottom\" | \"left\" | \"height\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
         "deprecated": false,
@@ -239,7 +239,7 @@
         "label": "LayoutVarName",
         "description": [],
         "signature": [
-          "\"application.right\" | \"application.width\" | \"application.top\" | \"application.bottom\" | \"application.height\" | \"application.left\" | \"footer.right\" | \"footer.width\" | \"footer.top\" | \"footer.bottom\" | \"footer.height\" | \"footer.left\" | \"header.right\" | \"header.width\" | \"header.top\" | \"header.bottom\" | \"header.height\" | \"header.left\" | \"banner.right\" | \"banner.width\" | \"banner.top\" | \"banner.bottom\" | \"banner.height\" | \"banner.left\" | \"navigation.right\" | \"navigation.width\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.height\" | \"navigation.left\" | \"sidebar.right\" | \"sidebar.width\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.height\" | \"sidebar.left\""
+          "\"application.right\" | \"application.width\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.height\" | \"footer.right\" | \"footer.width\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.height\" | \"header.right\" | \"header.width\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.height\" | \"banner.right\" | \"banner.width\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.height\" | \"navigation.right\" | \"navigation.width\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.height\" | \"sidebar.right\" | \"sidebar.width\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.height\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
         "deprecated": false,
@@ -366,12 +366,12 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-layout-constants",
-            "id": "def-common.layoutLevels.sidebar",
+            "id": "def-common.layoutLevels.navigation",
             "type": "number",
             "tags": [],
-            "label": "sidebar",
+            "label": "navigation",
             "description": [
-              "// Interactive layout components that need higher priority than euiFlyout (1000)"
+              "// 999 is chosen to be the same as old EuiCollapsibleNavBeta for backwards compatibility"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
             "deprecated": false,
@@ -379,11 +379,13 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-layout-constants",
-            "id": "def-common.layoutLevels.navigation",
+            "id": "def-common.layoutLevels.sidebar",
             "type": "number",
             "tags": [],
-            "label": "navigation",
-            "description": [],
+            "label": "sidebar",
+            "description": [
+              "// Interactive layout components that need higher priority than euiFlyout (1000)"
+            ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
             "deprecated": false,
             "trackAdoption": false

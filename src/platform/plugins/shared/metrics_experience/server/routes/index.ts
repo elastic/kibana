@@ -8,15 +8,11 @@
  */
 
 import { dimensionsRoutes } from './dimensions/route';
-import { metricDataApi as metricDataRoutes } from './api/data';
 import { fieldsRoutes } from './fields/route';
-import { indexPatternMetadataRoutes } from './index_pattern/route';
 
 export const routeRepository = {
   ...dimensionsRoutes,
   ...fieldsRoutes,
-  ...indexPatternMetadataRoutes,
-  ...metricDataRoutes, // TODO: Remove once we integrate with Lens for the charts
 };
 
 export type MetricsExperienceRouteRepository = typeof routeRepository;

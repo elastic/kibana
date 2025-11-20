@@ -20,13 +20,17 @@ import type {
 function getIntegrationStatus(
   item: PackageListItem,
   isUpgrading: boolean,
-  isUninstalling: boolean
+  isUninstalling: boolean,
+  isRollingback: boolean
 ): InstalledPackagesUIInstallationStatus {
   if (isUpgrading) {
     return 'upgrading';
   }
   if (isUninstalling) {
     return 'uninstalling';
+  }
+  if (isRollingback) {
+    return 'rolling_back';
   }
   if (item.status === 'install_failed') {
     return 'install_failed';
@@ -53,10 +57,13 @@ export function useInstalledIntegrations(
   filters: InstalledIntegrationsFilter,
   pagination: Pagination,
   upgradingIntegrations?: InstalledPackageUIPackageListItem[],
-  uninstallingIntegrations?: InstalledPackageUIPackageListItem[]
+  uninstallingIntegrations?: InstalledPackageUIPackageListItem[],
+  rollingbackIntegrations?: InstalledPackageUIPackageListItem[],
+  prereleaseIntegrationsEnabled?: boolean
 ) {
   const { data, isInitialLoading, isLoading } = useGetPackagesQuery({
     withPackagePoliciesCount: true,
+    prerelease: prereleaseIntegrationsEnabled,
   });
 
   const internalInstalledPackages: InstalledPackageUIPackageListItem[] = useMemo(
@@ -70,11 +77,12 @@ export function useInstalledIntegrations(
             installation_status: getIntegrationStatus(
               item,
               upgradingIntegrations?.some((u) => u.name === item.name) ?? false,
-              uninstallingIntegrations?.some((u) => u.name === item.name) ?? false
+              uninstallingIntegrations?.some((u) => u.name === item.name) ?? false,
+              rollingbackIntegrations?.some((u) => u.name === item.name) ?? false
             ),
           },
         })),
-    [data, upgradingIntegrations, uninstallingIntegrations]
+    [data, upgradingIntegrations, uninstallingIntegrations, rollingbackIntegrations]
   );
 
   const localSearch = useLocalSearch(internalInstalledPackages, isInitialLoading);
