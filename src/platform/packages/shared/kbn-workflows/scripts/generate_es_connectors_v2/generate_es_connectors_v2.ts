@@ -21,6 +21,12 @@ import {
 import type { SpecificationTypes } from './types';
 import type { HttpMethod, InternalConnectorContract } from '../../types/latest';
 
+interface ContractMeta extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
+  contractName: string;
+  operationIds: string[];
+  schemaImports: string[];
+}
+
 export const generateAndSaveEsConnectors = () => {
   try {
     const schema = JSON.parse(
@@ -30,13 +36,16 @@ export const generateAndSaveEsConnectors = () => {
       fs.readFileSync(ES_SPEC_OPENAPI_PATH, 'utf8')
     ) as OpenAPIV3.Document;
 
-    const endpoints = schema.endpoints.filter((endpoint) => endpoint.name === 'search').slice(0, 1);
+    const endpoints = schema.endpoints.filter(
+      (endpoint) => !endpoint.name.startsWith('_internal.')
+    );
 
     generateZodSchemas();
 
-    console.log(`Generating ${schema.endpoints.length} Elasticsearch connectors`);
+    console.log(`Generating Elasticsearch connectors from ${endpoints.length} endpoints...`);
 
-    const contractsWritten = new Set<string>();
+    const contracts = endpoints.map((endpoint) => generateContractMeta(endpoint, openApiSpec));
+
     fs.writeFileSync(
       ES_CONTRACTS_OUTPUT_FILE_PATH,
       `/*
@@ -60,53 +69,39 @@ export const generateAndSaveEsConnectors = () => {
 
 import type { InternalConnectorContract } from '../../types/latest';
 import { z } from '@kbn/zod/v4';
-import { ${endpoints
-        .map((endpoint) => [getRequestSchemaName(endpoint), getResponseSchemaName(endpoint)])
-        .flat()
+import { getShape } from '../utils';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import { ${contracts
+        .flatMap((contract) => contract.schemaImports)
         .join(',\n')} } from './schemas/zod.gen';
 
+// declare contracts
+${contracts.map((contract) => generateContractBlock(contract)).join('\n')}
+
+// export contracts
+export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
+${contracts.map((contract) => `  ${contract.contractName},`).join('\n')}
+];
 `,
       'utf8'
     );
-    for (const endpoint of endpoints) {
-      console.log(`Generating contract for ${endpoint.name}...`);
-      fs.appendFileSync(
-        ES_CONTRACTS_OUTPUT_FILE_PATH,
-        // eslint-disable-next-line prefer-template
-        generateContractBlock(endpoint, openApiSpec) + '\n',
-        'utf8'
-      );
-      contractsWritten.add(generateContractName(endpoint));
-    }
 
-    fs.appendFileSync(
-      ES_CONTRACTS_OUTPUT_FILE_PATH,
-      `export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
-${Array.from(contractsWritten)
-  .map((contract) => `  ${contract},`)
-  .join('\n')}
-];
-`.trim(),
-      'utf8'
-    );
     eslintFixAndPrettifyGeneratedCode();
 
-    console.log(`Successfully generated ${contractsWritten.size} Elasticsearch connectors`);
-    return { success: true, count: contractsWritten.size };
+    console.log(`Successfully generated ${contracts.length} Elasticsearch connectors`);
+    return { success: true, count: contracts.length };
   } catch (error) {
     console.error('Error generating Elasticsearch connectors:', error);
     return { success: false, count: 0 };
   }
 };
 
-/**
- * Generate API client using openapi-zod-client CLI
- */
 function generateZodSchemas() {
   try {
     console.log('🔄 Generating Zod schemas from OpenAPI spec...');
 
-    // Use openapi-zod-client CLI to generate TypeScript client
+    // Use openapi-zod-client CLI to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
     const command = `npx @hey-api/openapi-ts@0.87.5 -f ${OPENAPI_TS_CONFIG_PATH}`;
     console.log(`Running: ${command}`);
 
@@ -142,14 +137,9 @@ function eslintFixAndPrettifyGeneratedCode() {
   }
 }
 
-function generateContractBlock(
-  endpoint: SpecificationTypes.Endpoint,
-  openApiSpec: OpenAPIV3.Document
-): string {
-  const contract = generateContract(endpoint, openApiSpec);
-
+function generateContractBlock(contract: ContractMeta): string {
   return `
-const ${generateContractName(endpoint)}: InternalConnectorContract = {
+const ${contract.contractName}: InternalConnectorContract = {
   type: '${contract.type}',
   description: \`${escapeString(contract.description ?? '')}\`,
   methods: ${JSON.stringify(contract?.methods ?? [])},
@@ -161,13 +151,13 @@ const ${generateContractName(endpoint)}: InternalConnectorContract = {
     urlParams: ${JSON.stringify(contract?.parameterTypes?.urlParams ?? [])},
     bodyParams: ${JSON.stringify(contract?.parameterTypes?.bodyParams ?? [])},
   },
-  paramsSchema: ${generateParamsSchemaString(endpoint)},
-  outputSchema: ${generateOutputSchemaString(endpoint)},
+  paramsSchema: ${generateParamsSchemaString(contract.operationIds)},
+  outputSchema: ${generateOutputSchemaString(contract.operationIds)},
 }`.trim();
 }
 
 function generateContractName(endpoint: SpecificationTypes.Endpoint): string {
-  return `${getSchemaNamePrefix(endpoint).toUpperCase()}_CONTRACT`;
+  return `${toSnakeCase(endpoint.name).toUpperCase()}_CONTRACT`;
 }
 
 function escapeString(str: string): string {
@@ -177,15 +167,22 @@ function escapeString(str: string): string {
     .replace(/\$/g, '\\$'); // Escape dollar signs (template literals)
 }
 
-function generateContract(
+function generateContractMeta(
   endpoint: SpecificationTypes.Endpoint,
   openApiDocument: OpenAPIV3.Document
-): InternalConnectorContract {
+): ContractMeta {
   const type = `elasticsearch.${endpoint.name}`;
   const description = endpoint.description;
   const documentation = endpoint.docUrl;
   const { methods, patterns } = generateMethodsAndPatterns(endpoint);
   const parameterTypes = generateParameterTypes(endpoint, openApiDocument);
+
+  const contractName = generateContractName(endpoint);
+  const operationIds = getRelatedOperationIds(endpoint, openApiDocument);
+  const schemaImports = operationIds.flatMap((operationId) => [
+    getRequestSchemaName(operationId),
+    getResponseSchemaName(operationId),
+  ]);
 
   return {
     type,
@@ -195,9 +192,32 @@ function generateContract(
     documentation,
     isInternal: true,
     parameterTypes,
-    // paramsSchema: generateParamsSchema(endpoint),
-    // outputSchema: generateOutputSchema(endpoint),
+
+    contractName,
+    operationIds,
+    schemaImports,
   };
+}
+
+function getRelatedOperationIds(
+  endpoint: SpecificationTypes.Endpoint,
+  openApiDocument: OpenAPIV3.Document
+): string[] {
+  const operationIds: string[] = [];
+  for (const url of endpoint.urls) {
+    const openapiPath = openApiDocument.paths[url.path];
+    if (openapiPath) {
+      for (const method of url.methods) {
+        const operation = openapiPath[
+          method.toLowerCase() as keyof typeof openapiPath
+        ] as OpenAPIV3.OperationObject;
+        if (operation && operation.operationId) {
+          operationIds.push(operation.operationId);
+        }
+      }
+    }
+  }
+  return operationIds;
 }
 
 function generateParameterTypes(
@@ -247,29 +267,73 @@ function generateMethodsAndPatterns(endpoint: SpecificationTypes.Endpoint): {
   return { methods, patterns };
 }
 
-function generateParamsSchemaString(endpoint: SpecificationTypes.Endpoint): string {
-  return `z.object({
-    ...(${getRequestSchemaName(endpoint)}.shape.body?.unwrap()?.shape ?? {}), 
-    ...(${getRequestSchemaName(endpoint)}.shape.path?.unwrap()?.shape ?? {}), 
-    ...(${getRequestSchemaName(endpoint)}.shape.query?.unwrap()?.shape ?? {}),
-})`;
+function generateParamsSchemaString(operationIds: string[]): string {
+  if (operationIds.length === 0) {
+    return 'z.optional(z.looseObject({}))';
+  }
+  if (operationIds.length === 1) {
+    return `z.looseObject({
+      ...(getShape(getShape(${getRequestSchemaName(operationIds[0])}).body)), 
+      ...(getShape(getShape(${getRequestSchemaName(operationIds[0])}).path)), 
+      ...(getShape(getShape(${getRequestSchemaName(operationIds[0])}).query)),
+    }).partial()`;
+  }
+  return `z.looseObject({${operationIds
+    .map(
+      (operationId) => `...(getShape(getShape(${getRequestSchemaName(operationId)}).body)), 
+    ...(getShape(getShape(${getRequestSchemaName(operationId)}).path)), 
+    ...(getShape(getShape(${getRequestSchemaName(operationId)}).query)),`
+    )
+    .join('\n')}}).partial()`;
 }
 
-function generateOutputSchemaString(endpoint: SpecificationTypes.Endpoint): string {
+function generateOutputSchemaString(operationIds: string[]): string {
   return `z.object({
-    output: ${getResponseSchemaName(endpoint)},
+    output: z.looseObject({
+      ${operationIds
+        .map((operationId) => `...(getShape(getShape(${getResponseSchemaName(operationId)})))`)
+        .join(', ')}
+    }),
     error: z.any().optional(),
   })`;
 }
 
-function getRequestSchemaName(endpoint: SpecificationTypes.Endpoint): string {
-  return `${getSchemaNamePrefix(endpoint)}_request`;
+function getRequestSchemaName(operationId: string): string {
+  return `${getSchemaNamePrefix(operationId)}_request`;
 }
 
-function getResponseSchemaName(endpoint: SpecificationTypes.Endpoint): string {
-  return `${getSchemaNamePrefix(endpoint)}_response`;
+function getResponseSchemaName(operationId: string): string {
+  return `${getSchemaNamePrefix(operationId)}_response`;
 }
 
-function getSchemaNamePrefix(endpoint: SpecificationTypes.Endpoint): string {
-  return `${endpoint.name.replace('.', '_')}`;
+// copied from packages/openapi-ts/src/openApi/common/parser/sanitize.ts, which is licensed under the MIT license
+/**
+ * Sanitizes namespace identifiers so they are valid TypeScript identifiers of a certain form.
+ *
+ * 1: Remove any leading characters that are illegal as starting character of a typescript identifier.
+ * 2: Replace illegal characters in remaining part of type name with hyphen (-).
+ *
+ * Step 1 should perhaps instead also replace illegal characters with underscore, or prefix with it, like sanitizeEnumName
+ * does. The way this is now one could perhaps end up removing all characters, if all are illegal start characters. It
+ * would be sort of a breaking change to do so, though, previously generated code might change then.
+ *
+ * JavaScript identifier regexp pattern retrieved from https://developer.mozilla.org/docs/Web/JavaScript/Reference/Lexical_grammar#identifiers
+ *
+ * The output of this is expected to be converted to PascalCase
+ */
+export const sanitizeNamespaceIdentifier = (name: string) =>
+  name
+    .replace(/^[^\p{ID_Start}]+/u, '')
+    .replace(/[^$\u200c\u200d\p{ID_Continue}]/gu, '-')
+    .replace(/[$+]/g, '-');
+
+function toSnakeCase(str: string): string {
+  return str
+    .replace(/-(\d+)/g, '$1') // Remove hyphen before numbers
+    .replace(/-/g, '_') // Replace remaining hyphens with underscores
+    .replace(/\./g, '_'); // Replace dots with underscores
+}
+
+export function getSchemaNamePrefix(operationId: string): string {
+  return toSnakeCase(sanitizeNamespaceIdentifier(operationId));
 }
