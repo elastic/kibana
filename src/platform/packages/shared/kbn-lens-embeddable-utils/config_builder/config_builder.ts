@@ -33,6 +33,10 @@ import {
   fromAPItoLensState as fromHeatmapAPItoLensState,
   fromLensStateToAPI as fromHeatmapLensStateToAPI,
 } from './transforms/charts/heatmap';
+import {
+  fromAPItoLensState as fromTagcloudAPItoLensState,
+  fromLensStateToAPI as fromTagcloudLensStateToAPI,
+} from './transforms/charts/tagcloud';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
@@ -42,6 +46,7 @@ const compatibilityMap: Record<string, string> = {
   lnsLegacyMetric: 'legacy_metric',
   lnsGauge: 'gauge',
   lnsHeatmap: 'heatmap',
+  lnsTagcloud: 'tagcloud',
 };
 
 /**
@@ -82,6 +87,10 @@ export class LensConfigBuilder {
     heatmap: {
       fromAPItoLensState: fromHeatmapAPItoLensState,
       fromLensStateToAPI: fromHeatmapLensStateToAPI,
+    },
+    tagcloud: {
+      fromAPItoLensState: fromTagcloudAPItoLensState,
+      fromLensStateToAPI: fromTagcloudLensStateToAPI,
     },
   } as const;
   private dataViewsAPI: DataViewsCommon | undefined;
