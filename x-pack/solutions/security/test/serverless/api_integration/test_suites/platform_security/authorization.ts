@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
         adminCredentials = await svlUserManager.getM2MApiCookieCredentialsWithRoleScope('admin');
       });
 
-      it('composite features', async () => {
+      // TODO: see https://github.com/elastic/kibana/pull/243499
+      it.skip('composite features', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/security/privileges?includeActions=true')
           .set(svlCommonApi.getInternalRequestHeader())
