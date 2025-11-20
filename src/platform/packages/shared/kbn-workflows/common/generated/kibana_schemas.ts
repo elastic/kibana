@@ -1608,7 +1608,7 @@ export const APM_UI_delete_agent_configurations_response = z
   .partial()
   .passthrough();
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const APM_UI_settings_object = z.record(z.string());
+export const APM_UI_settings_object = z.record(z.string(), z.string());
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_agent_configuration_object = z
   .object({
@@ -1876,7 +1876,7 @@ export const PostAttackDiscoveryBulk_Body = z
   })
   .passthrough();
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const Security_Attack_discovery_API_Replacements = z.record(z.string());
+export const Security_Attack_discovery_API_Replacements = z.record(z.string(), z.string());
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Attack_discovery_API_NonEmptyTimestamp = z.string();
 // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -2,22 +2,19 @@
 /* eslint-disable import/no-default-export */
 // import type { UserConfig } from '@hey-api/openapi-ts';
 
-import { ES_SPEC_OPENAPI_PATH, OPENAPI_TS_OUTPUT_FOLDER_PATH } from '../constants';
+import {
+  ES_SPEC_OPENAPI_PATH,
+  OPENAPI_TS_OUTPUT_FILENAME,
+  OPENAPI_TS_OUTPUT_FOLDER_PATH,
+} from '../constants';
 
 const config = {
-  // debuging on just one endpoint
-  // parser: {
-  //   filters: {
-  //     tags: {
-  //       include: ['search'],
-  //     },
-  //     // operations: {
-  //     //   include: ['GET /{index}/_search'],
-  //     // },
-  //   },
-  // },
   input: ES_SPEC_OPENAPI_PATH,
-  output: OPENAPI_TS_OUTPUT_FOLDER_PATH,
+  output: {
+    clean: false, // don't clean the output folder, as it is shared with kibana schemas
+    path: OPENAPI_TS_OUTPUT_FOLDER_PATH,
+    fileName: OPENAPI_TS_OUTPUT_FILENAME,
+  },
   plugins: [
     {
       name: 'zod',

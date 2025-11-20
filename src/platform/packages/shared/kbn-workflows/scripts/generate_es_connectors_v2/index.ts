@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonSchema7Type } from 'zod-to-json-schema';
-import { z } from '@kbn/zod/v4';
-
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type | null {
-  try {
-    return z.toJSONSchema(yamlSchema);
-  } catch (error) {
-    // console.error('Error generating JSON schema from YAML schema:', error);
-    return null;
-  }
-}
+export { generateAndSaveEsConnectors } from './generate_es_connectors_v2';

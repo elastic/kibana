@@ -636,9 +636,8 @@ function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] 
 
 function generateKibanaConnectors(): InternalConnectorContract[] {
   // TODO: bring the kibana connectors back, with the new approach to schemas generation
-  return [];
   // Lazy load the generated Kibana connectors
-  // eslint-disable-next-line no-unreachable
+  // FIX: this is not really a lazy load, we should use a dynamic import instead
   const {
     GENERATED_KIBANA_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires

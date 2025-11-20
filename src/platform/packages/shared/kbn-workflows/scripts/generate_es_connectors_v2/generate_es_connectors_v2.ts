@@ -16,6 +16,7 @@ import {
   ES_SPEC_OPENAPI_PATH,
   ES_SPEC_SCHEMA_PATH,
   OPENAPI_TS_CONFIG_PATH,
+  OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
 import type { SpecificationTypes } from './types';
@@ -74,7 +75,7 @@ import { getShape } from '../utils';
 // import all needed request and response schemas generated from the OpenAPI spec
 import { ${contracts
         .flatMap((contract) => contract.schemaImports)
-        .join(',\n')} } from './schemas/zod.gen';
+        .join(',\n')} } from './schemas/${OPENAPI_TS_OUTPUT_FILENAME}.gen';
 
 // declare contracts
 ${contracts.map((contract) => generateContractBlock(contract)).join('\n')}
@@ -102,13 +103,16 @@ function generateZodSchemas() {
     console.log('🔄 Generating Zod schemas from OpenAPI spec...');
 
     // Use openapi-zod-client CLI to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
-    const command = `npx @hey-api/openapi-ts@0.87.5 -f ${OPENAPI_TS_CONFIG_PATH}`;
+    const command = `npx @hey-api/openapi-ts@0.88.0 -f ${OPENAPI_TS_CONFIG_PATH}`;
     console.log(`Running: ${command}`);
 
     execSync(command, { stdio: 'inherit' });
     console.log('✅ Zod schemas generated successfully');
 
-    const zodPath = Path.resolve(OPENAPI_TS_OUTPUT_FOLDER_PATH, 'zod.gen.ts');
+    const zodPath = Path.resolve(
+      OPENAPI_TS_OUTPUT_FOLDER_PATH,
+      `${OPENAPI_TS_OUTPUT_FILENAME}.gen.ts`
+    );
 
     // replace zod imports with @kbn/zod
     const zodSchemas = fs.readFileSync(zodPath, 'utf8');

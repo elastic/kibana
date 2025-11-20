@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
- * Generated at: 2025-11-20T10:08:49.900Z
+ * Generated at: 2025-11-20T18:16:02.506Z
  * Source: elasticsearch-specification repository (582 APIs)
  *
  * To regenerate: node scripts/generate_workflows_contracts.js
@@ -1637,7 +1637,7 @@ import {
   xpack_info_response,
   xpack_usage_request,
   xpack_usage_response,
-} from './schemas/zod.gen';
+} from './schemas/es_openapi_zod.gen';
 import type { InternalConnectorContract } from '../../types/latest';
 import { getShape } from '../utils';
 

@@ -33,6 +33,7 @@ const ES_CONTRACTS_OUTPUT_FILE_PATH = Path.resolve(
 );
 const OPENAPI_TS_OUTPUT_FOLDER_PATH = Path.resolve(ES_GENERATED_OUTPUT_FOLDER_PATH, 'schemas');
 const OPENAPI_TS_CONFIG_PATH = Path.resolve(SCRIPT_FOLDER_PATH, 'schemas/openapi_ts.config.ts');
+const OPENAPI_TS_OUTPUT_FILENAME = 'es_openapi_zod'; // .gen.ts will be added automatically
 
 export {
   ES_SPEC_OUTPUT_PATH,
@@ -42,4 +43,5 @@ export {
   ES_CONTRACTS_OUTPUT_FILE_PATH,
   OPENAPI_TS_CONFIG_PATH,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
+  OPENAPI_TS_OUTPUT_FILENAME,
 };
