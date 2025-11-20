@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { api, tracing } from '@elastic/opentelemetry-node/sdk';
 import type { InferenceTracingOtlpExportConfig } from '@kbn/inference-tracing-config';
 import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
@@ -37,11 +37,7 @@ export class OTLPSpanProcessor extends BaseInferenceSpanProcessor {
   processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
     // Drop parent context from @kbn/evals spans to make them queryable as roots
     if (span.attributes['inscrumentationScope.name'] === '@kbn/evals' && span.parentSpanContext) {
-      span = {
-        ...span,
-        spanContext: span.spanContext.bind(span),
-        parentSpanContext: undefined,
-      };
+      delete (span as { parentSpanContext: api.SpanContext | undefined }).parentSpanContext;
     }
 
     if (!span.parentSpanContext) {
