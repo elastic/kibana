@@ -15,7 +15,6 @@ import type {
   ComboBoxOption,
 } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
-import { isAwsCloudConnectorVars } from '../utils';
 import { AWS_PROVIDER } from '../constants';
 
 export const AWSReusableConnectorForm: React.FC<{
@@ -24,22 +23,20 @@ export const AWSReusableConnectorForm: React.FC<{
   credentials: AwsCloudConnectorCredentials;
   setCredentials: (credentials: AwsCloudConnectorCredentials) => void;
 }> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
-  const { data: cloudConnectors = [] } = useGetCloudConnectors();
+  const { data: cloudConnectors = [] } = useGetCloudConnectors(AWS_PROVIDER);
 
-  // Filter the connectors to only AWS
+  // Map connectors to AWS format
   const awsConnectionData: AwsCloudConnectorOption[] = useMemo(() => {
-    return cloudConnectors
-      .filter((connector) => isAwsCloudConnectorVars(connector.vars, AWS_PROVIDER))
-      .map((connector) => {
-        const awsVars = connector.vars as AwsCloudConnectorVars;
-        return {
-          label: connector.name,
-          value: connector.id,
-          id: connector.id,
-          roleArn: awsVars.role_arn,
-          externalId: awsVars.external_id,
-        };
-      });
+    return cloudConnectors.map((connector) => {
+      const awsVars = connector.vars as AwsCloudConnectorVars;
+      return {
+        label: connector.name,
+        value: connector.id,
+        id: connector.id,
+        roleArn: awsVars.role_arn,
+        externalId: awsVars.external_id,
+      };
+    });
   }, [cloudConnectors]);
 
   // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
@@ -54,9 +51,9 @@ export const AWSReusableConnectorForm: React.FC<{
 
   // Find the currently selected connector based on credentials
   const selectedConnector = useMemo(() => {
-    const targetId = (isEditPage && cloudConnectorId) || credentials?.cloudConnectorId;
+    const targetId = cloudConnectorId || credentials?.cloudConnectorId;
     return targetId ? comboBoxOptions.find((opt) => opt.value === targetId) || null : null;
-  }, [isEditPage, cloudConnectorId, credentials?.cloudConnectorId, comboBoxOptions]);
+  }, [cloudConnectorId, credentials?.cloudConnectorId, comboBoxOptions]);
 
   const handleConnectorChange = useCallback(
     (selected: Array<{ label: string; value?: string }>) => {

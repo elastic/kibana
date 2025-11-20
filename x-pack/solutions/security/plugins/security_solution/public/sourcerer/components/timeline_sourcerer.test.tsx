@@ -7,13 +7,12 @@
 
 import React from 'react';
 
-import { render, cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
-import { SourcererScopeName } from '../store/model';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Sourcerer } from '.';
-import { sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { useSourcererDataView } from '../containers';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
+import { PageScope } from '../../data_view_manager/constants';
 
 const mockDispatch = jest.fn();
 
@@ -61,7 +60,7 @@ const sourcererDataView = {
 
 describe('timeline sourcerer', () => {
   const testProps = {
-    scope: sourcererModel.SourcererScopeName.timeline,
+    scope: PageScope.timeline,
   };
 
   beforeEach(async () => {
@@ -146,8 +145,8 @@ describe('timeline sourcerer', () => {
         ...mockGlobalState.sourcerer,
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          [PageScope.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
             loading: false,
             selectedDataViewId: id,
             selectedPatterns: [`${mockGlobalState.sourcerer.signalIndexName}`],
@@ -158,7 +157,7 @@ describe('timeline sourcerer', () => {
 
     render(
       <TestProviders store={createMockStore(state2)}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
 

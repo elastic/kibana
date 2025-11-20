@@ -39,6 +39,7 @@ function mapSettingsSO(settingsSo: SavedObject<SettingsSOAttributes>): Settings 
       settingsSo.attributes.use_space_awareness_migration_started_at ?? undefined,
     preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
     delete_unenrolled_agents: settingsSo.attributes.delete_unenrolled_agents,
+    ilm_migration_status: settingsSo.attributes.ilm_migration_status,
   };
 }
 
