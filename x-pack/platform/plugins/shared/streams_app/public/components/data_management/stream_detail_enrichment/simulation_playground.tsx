@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiNotificationBadge,
   EuiProgress,
   EuiSpacer,
@@ -56,6 +57,11 @@ export const SimulationPlayground = ({
     state ? state.matches({ enabled: 'loadingData' }) : false
   );
 
+  const hasOutdatedDocuments = useDataSourceSelector(
+    activeDataSourceRef,
+    (state) => state?.context.hasOutdatedDocuments ?? false
+  );
+
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
 
   return (
@@ -68,15 +74,34 @@ export const SimulationPlayground = ({
                 isSelected={isViewingDataPreview}
                 onClick={viewSimulationPreviewData}
                 append={
-                  <EuiButtonIcon
-                    iconType="refresh"
-                    onClick={refreshSimulation}
-                    isLoading={isDataSourceLoading}
-                    aria-label={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
-                      { defaultMessage: 'Refresh data preview' }
+                  <EuiFlexGroup alignItems="center" gutterSize="xs">
+                    <EuiFlexItem>
+                      <EuiButtonIcon
+                        iconType="refresh"
+                        onClick={refreshSimulation}
+                        isLoading={isDataSourceLoading}
+                        aria-label={i18n.translate(
+                          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
+                          { defaultMessage: 'Refresh data preview' }
+                        )}
+                      />
+                    </EuiFlexItem>
+                    {hasOutdatedDocuments && (
+                      <EuiFlexItem>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.outdatedDocumentsTooltip.content',
+                            {
+                              defaultMessage:
+                                'Some documents are older than the most recent stream changes. Refresh to update simulation samples.',
+                            }
+                          )}
+                          type="warning"
+                          color="warning"
+                        />
+                      </EuiFlexItem>
                     )}
-                  />
+                  </EuiFlexGroup>
                 }
               >
                 {i18n.translate(
