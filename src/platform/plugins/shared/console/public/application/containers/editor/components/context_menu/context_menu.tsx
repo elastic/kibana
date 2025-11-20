@@ -18,11 +18,11 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { convertRequestToLanguage, StorageKeys } from '../../../../../services';
 import type { EditorRequest } from '../../types';
-
 import { useServicesContext } from '../../../../contexts';
 import {
   DEFAULT_LANGUAGE,

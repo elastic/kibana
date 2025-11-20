@@ -9,12 +9,26 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import type { NotificationsStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { ContextMenu } from './context_menu';
 import { ServicesContextProvider } from '../../../../contexts';
 import type { ContextValue } from '../../../../contexts/services_context';
+
+jest.mock('./language_selector_modal', () => ({
+  LanguageSelectorModal: () => <div>Language Selector Modal</div>,
+}));
+
+jest.mock('../../../../../services', () => ({
+  convertRequestToLanguage: jest.fn(() =>
+    Promise.resolve({ data: 'mocked request code', error: null })
+  ),
+  StorageKeys: {
+    DEFAULT_LANGUAGE: 'default_language',
+  },
+}));
 
 const mockNotifications: Pick<NotificationsStart, 'toasts'> = {
   toasts: {
@@ -27,8 +41,12 @@ const mockNotifications: Pick<NotificationsStart, 'toasts'> = {
 const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue => {
   return {
     services: {
-      storage: {} as any,
+      storage: {
+        get: jest.fn(() => 'curl'),
+        set: jest.fn(),
+      } as any,
       esHostService: {
+        getHost: jest.fn(() => 'http://localhost:9200'),
         init: jest.fn(),
       } as any,
       history: {} as any,
@@ -61,14 +79,11 @@ const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue =
 };
 
 const defaultProps = {
+  getRequests: jest.fn(() => Promise.resolve([{ method: 'GET', url: '/', data: [] }])),
   getDocumentation: jest.fn(() => Promise.resolve('https://elastic.co/docs')),
   autoIndent: jest.fn(),
   notifications: mockNotifications,
-  currentLanguage: 'curl',
-  onLanguageChange: jest.fn(),
-  isKbnRequestSelected: false,
-  onMenuOpen: jest.fn(),
-  onCopyAs: jest.fn(() => Promise.resolve()),
+  getIsKbnRequestSelected: jest.fn(() => Promise.resolve(false)),
 };
 
 describe('ContextMenu', () => {
