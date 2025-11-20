@@ -375,6 +375,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
             <EuiButton
               size="s"
               disabled={
+                !showHeaderInputs ||
                 isLoading ||
                 (isEdit && !updatable) ||
                 (!isEdit &&
