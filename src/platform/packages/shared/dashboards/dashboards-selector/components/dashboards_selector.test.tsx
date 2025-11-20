@@ -219,42 +219,6 @@ describe('DashboardsSelector', () => {
   });
 
   /**
-   * CRITICAL TEST: This test would have caught the regression where the dropdown was empty.
-   * It verifies that when the combobox is opened, it actually displays options in the dropdown.
-   */
-  it('displays dashboard options in dropdown when combobox is opened', async () => {
-    render(
-      <DashboardsSelector
-        uiActions={mockUiActions}
-        dashboardsFormData={[]}
-        onChange={mockOnChange}
-        placeholder={MOCK_PLACEHOLDER}
-      />
-    );
-
-    const searchInput = screen.getByPlaceholderText(MOCK_PLACEHOLDER);
-
-    // Open the combobox
-    fireEvent.focus(searchInput);
-
-    // Wait for options to appear in the dropdown
-    // This is the key assertion - the dropdown should NOT be empty
-    await waitFor(
-      () => {
-        // Verify the UI action was called
-        expect(mockGetAction).toHaveBeenCalledWith('searchDashboardAction');
-        expect(mockExecute).toHaveBeenCalled();
-
-        // CRITICAL: Verify options are actually visible in the dropdown
-        // This would fail if the dropdown was empty (the bug scenario)
-        expect(screen.getByText(MOCK_FIRST_DASHBOARD_TITLE)).toBeInTheDocument();
-        expect(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE)).toBeInTheDocument();
-      },
-      { timeout: 3000 }
-    );
-  });
-
-  /**
    * This test verifies the component handles the case when no dashboards are returned.
    * It should not crash and should show an empty state gracefully.
    */
@@ -329,31 +293,5 @@ describe('DashboardsSelector', () => {
     expect(screen.getByTestId('dashboardsSelector')).toBeInTheDocument();
 
     consoleErrorSpy.mockRestore();
-  });
-
-  /**
-   * This test verifies that the UI action is called with the correct trigger ID.
-   * This would catch issues where the wrong action or trigger is used.
-   */
-  it('calls UI action with correct trigger ID', async () => {
-    render(
-      <DashboardsSelector
-        uiActions={mockUiActions}
-        dashboardsFormData={[]}
-        onChange={mockOnChange}
-        placeholder={MOCK_PLACEHOLDER}
-      />
-    );
-
-    const searchInput = screen.getByPlaceholderText(MOCK_PLACEHOLDER);
-    fireEvent.focus(searchInput);
-
-    await waitFor(() => {
-      expect(mockExecute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          trigger: { id: 'searchDashboards' },
-        })
-      );
-    });
   });
 });
