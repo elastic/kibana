@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { healthStatusSchema, sloIdSchema, stateSchema } from '../../schema';
 import { allOrAnyString } from '../../schema/common';
 
-const fetchSLOHealthDataSchema = t.array(
+const fetchSLOHealthResponseSchema = t.array(
   t.type({
     sloId: sloIdSchema,
     sloRevision: t.number,
@@ -22,24 +22,10 @@ const fetchSLOHealthDataSchema = t.array(
   })
 );
 
-const fetchSLOHealthResponseSchema = t.type({
-  data: fetchSLOHealthDataSchema,
-  total: t.number,
-  page: t.number,
-  perPage: t.number,
-});
-
 const fetchSLOHealthParamsSchema = t.type({
-  body: t.intersection([
-    t.type({
-      list: t.array(t.type({ sloId: sloIdSchema, sloInstanceId: allOrAnyString })),
-    }),
-    t.partial({
-      page: t.number,
-      perPage: t.number,
-      statusFilter: t.union([t.literal('healthy'), t.literal('unhealthy')]),
-    }),
-  ]),
+  body: t.type({
+    list: t.array(t.type({ sloId: sloIdSchema, sloInstanceId: allOrAnyString })),
+  }),
 });
 
 type FetchSLOHealthResponse = t.OutputOf<typeof fetchSLOHealthResponseSchema>;
