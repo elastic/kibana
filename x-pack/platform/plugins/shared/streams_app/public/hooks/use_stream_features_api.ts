@@ -13,10 +13,7 @@ import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import { useKibana } from './use_kibana';
 
 interface StreamFeaturesApi {
-  upsertQuery: (
-    feature: Pick<Feature, 'type' | 'name'>,
-    request: Pick<Feature, 'filter' | 'description'>
-  ) => Promise<void>;
+  upsertQuery: (feature: Feature) => Promise<void>;
   identifyFeatures: (
     connectorId: string,
     to: string,
@@ -96,7 +93,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         },
       });
     },
-    upsertQuery: async (feature, request) => {
+    upsertQuery: async (feature) => {
       await streamsRepositoryClient.fetch(
         'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
         {
@@ -107,7 +104,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
               featureType: feature.type,
               featureName: feature.name,
             },
-            body: request,
+            body: feature,
           },
         }
       );

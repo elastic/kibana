@@ -43,19 +43,18 @@ export const StreamFeatureDetailsFlyout = ({
   const [featureDescription, setFeatureDescription] = React.useState(feature.description);
   const { upsertQuery } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
-  const [featureFilter, setFeatureFilter] = React.useState<Condition | undefined>(feature.filter);
+  const [featureFilter, setFeatureFilter] = React.useState<Condition>(feature.filter);
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
     setIsUpdating(true);
-    upsertQuery(feature, {
-      description: featureDescription,
-      filter: featureFilter,
-    }).finally(() => {
-      setIsUpdating(false);
-      refreshFeatures();
-      closeFlyout();
-    });
+    upsertQuery({ ...feature, description: featureDescription, filter: featureFilter }).finally(
+      () => {
+        setIsUpdating(false);
+        refreshFeatures();
+        closeFlyout();
+      }
+    );
   };
 
   return (
