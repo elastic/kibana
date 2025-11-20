@@ -46,7 +46,7 @@ export const registerSiemRuleMigrationsEnhanceRoute = (
             const { migration_id: migrationId } = req.params;
             const {
               vendor,
-              enhancement_type: enhancementType,
+              type: enhancementType,
               data,
             } = req.body as RuleMigrationEnhanceRuleRequestBody;
 

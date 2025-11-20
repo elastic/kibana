@@ -60,7 +60,7 @@ export const QRadarMitreRequest = z.object({
   /**
    * The type of enhancement data
    */
-  enhancement_type: z.literal('mitre'),
+  type: z.literal('mitre'),
   /**
    * QRadar MITRE mappings data keyed by rule name
    */

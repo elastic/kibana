@@ -6,7 +6,7 @@
  */
 
 import type { OriginalRuleVendor } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { QRadarProcessor } from './qradar/qradar_mitre_processor';
+import { QRadarProcessor } from './qradar/processor';
 
 export function getVendorProcessor(vendor: OriginalRuleVendor) {
   switch (vendor) {

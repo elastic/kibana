@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
       // Enhance the rule with MITRE mappings
       const enhancePayload: EnhanceRulesParams['payload'] = {
         vendor: 'qradar',
-        enhancement_type: 'mitre',
+        type: 'mitre',
         data: {
           [RULE_NAME]: {
             id: 'rule_123',
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
       // Enhance both rules
       const enhancePayload: EnhanceRulesParams['payload'] = {
         vendor: 'qradar',
-        enhancement_type: 'mitre',
+        type: 'mitre',
         data: {
           [rule1Name]: {
             id: 'rule_1',
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const enhancePayload: EnhanceRulesParams['payload'] = {
         vendor: 'qradar',
-        enhancement_type: 'mitre',
+        type: 'mitre',
         data: {
           [ruleName]: {
             id: 'rule_123',
@@ -207,7 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return error when no rules are found for update', async () => {
         const enhancePayload: EnhanceRulesParams['payload'] = {
           vendor: 'qradar',
-          enhancement_type: 'mitre',
+          type: 'mitre',
           data: {
             'Non-existent Rule': {
               id: 'rule_123',
@@ -237,7 +237,7 @@ export default ({ getService }: FtrProviderContext) => {
           payload: {
             // @ts-expect-error testing invalid vendor
             vendor: 'invalid_vendor',
-            enhancement_type: 'mitre',
+            type: 'mitre',
             data: {},
           },
           expectStatusCode: 400,
@@ -249,7 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationId: 'non-existent-migration-id',
           payload: {
             vendor: 'qradar',
-            enhancement_type: 'mitre',
+            type: 'mitre',
             data: {},
           },
           expectStatusCode: 404,

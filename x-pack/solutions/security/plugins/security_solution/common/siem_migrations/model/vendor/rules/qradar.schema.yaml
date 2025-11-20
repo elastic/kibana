@@ -70,7 +70,7 @@ components:
       description: Request to enhance rules with QRadar MITRE mappings
       required:
         - vendor
-        - enhancement_type
+        - type
         - data
       properties:
         vendor:
@@ -78,7 +78,7 @@ components:
           enum:
             - qradar
           description: The vendor identifier
-        enhancement_type:
+        type:
           type: string
           enum:
             - mitre

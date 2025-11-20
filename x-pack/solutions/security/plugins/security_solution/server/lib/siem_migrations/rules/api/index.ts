@@ -49,10 +49,11 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsCreateRulesRoute(router, logger);
   registerSiemRuleMigrationsGetRulesRoute(router, logger);
   registerSiemRuleMigrationsUpdateRulesRoute(router, logger);
-  registerSiemRuleMigrationsEnhanceRoute(router, logger);
+
   /** Qradar */
   if (config.experimentalFeatures.qradarRulesMigration) {
     registerSiemRuleMigrationsCreateQRadarRulesRoute(router, logger);
+    registerSiemRuleMigrationsEnhanceRoute(router, logger);
   }
   /** *******/
   /** *******/

@@ -8,19 +8,24 @@
 import type { RuleMigrationEnhanceRuleRequestBody } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
-import type { Threat } from '../../../../../../common/api/detection_engine';
+import type { QradarRule } from '../../../../../../common/siem_migrations/parsers/qradar/types';
+import type { CreateRuleMigrationRulesInput } from '../../data/rule_migrations_data_rules_client';
 import type { VendorProcessor, VendorProcessorContext } from '../types';
+import { transformMitreMapping, transformQRadarRuleToOriginalRule } from './transforms';
 
-type QRadarProcessors = 'rules' | RuleMigrationEnhanceRuleRequestBody['enhancement_type'];
+type QRadarProcessorType = 'rules' | RuleMigrationEnhanceRuleRequestBody['type'];
 
 type QRadarMitreProcesser = (data: QRadarMitreMappingsData) => Promise<RuleMigrationRule[]>;
 
-type QRadarRulesProcesser = (data: QRadarRulesProcesser) => Promise<RuleMigrationRule[]>;
+type QRadarRulesProcesser = (rules: QradarRule[]) => CreateRuleMigrationRulesInput[];
 
-type GetMitreProcessor = (type: 'mitre') => QRadarMitreProcesser;
-type GetRulesProcessor = (type: 'rules') => QRadarRulesProcesser;
+type QRadarProcessorFn<T extends QRadarProcessorType = 'rules'> = T extends 'mitre'
+  ? QRadarMitreProcesser
+  : QRadarRulesProcesser;
 
-type QRadarGetProcessor = GetMitreProcessor | GetRulesProcessor;
+type QRadarGetProcessor<T extends QRadarProcessorType = 'rules'> = (
+  type: T
+) => QRadarProcessorFn<T>;
 
 /**
  * Processor for QRadar MITRE mappings enhancement
@@ -28,15 +33,22 @@ type QRadarGetProcessor = GetMitreProcessor | GetRulesProcessor;
 export class QRadarProcessor implements VendorProcessor<QRadarGetProcessor> {
   constructor(private readonly context: VendorProcessorContext) {}
 
-  getProcessor(type: QRadarProcessors) {
+  getProcessor<T extends QRadarProcessorType>(type: T): QRadarProcessorFn<T> {
     switch (type) {
       case 'mitre':
-        return this.processMitreMappings.bind(this);
+        return this.processMitreMappings.bind(this) as QRadarProcessorFn<T>;
       case 'rules':
-        throw new Error('QRadar rules processor not implemented yet');
+        return this.processRules.bind(this) as QRadarProcessorFn<T>;
       default:
         throw new Error(`Unsupported QRadar processor type: ${type}`);
     }
+  }
+
+  processRules(rules: QradarRule[]): CreateRuleMigrationRulesInput[] {
+    return rules.map((rule) => ({
+      original_rule: transformQRadarRuleToOriginalRule(rule),
+      migration_id: this.context.migrationId,
+    }));
   }
 
   /**
@@ -73,7 +85,7 @@ export class QRadarProcessor implements VendorProcessor<QRadarGetProcessor> {
         const ruleTitle = rule.original_rule.title;
         const mitreMapping = data[ruleTitle];
         if (mitreMapping) {
-          const threat = this.transformMitreMapping(mitreMapping);
+          const threat = transformMitreMapping(mitreMapping);
           rulesToUpdate.push({
             ...rule,
             original_rule: {
@@ -92,52 +104,5 @@ export class QRadarProcessor implements VendorProcessor<QRadarGetProcessor> {
       logger.error(`Error processing QRadar MITRE mappings: ${errorMessage}`);
       throw error;
     }
-  }
-
-  /**
-   * Transforms QRadar MITRE mapping to Elastic Threat format
-   */
-  private transformMitreMapping(mitreMapping: QRadarMitreMappingsData[string]): Threat[] {
-    const threats: Threat[] = [];
-
-    if (!mitreMapping.mapping) {
-      return threats;
-    }
-
-    // Iterate over tactics in the mapping
-    for (const [tacticId, tactic] of Object.entries(mitreMapping.mapping)) {
-      if (tactic.enabled && tactic.techniques) {
-        const techniques: Array<{
-          id: string;
-          reference: string;
-          name: string;
-        }> = [];
-
-        // Iterate over techniques for this tactic
-        for (const [_techniqueKey, technique] of Object.entries(tactic.techniques)) {
-          if (technique.enabled && technique.id) {
-            techniques.push({
-              id: technique.id,
-              reference: `https://attack.mitre.org/techniques/${technique.id}/`,
-              name: technique.id, // QRadar doesn't provide technique names
-            });
-          }
-
-          if (techniques.length > 0) {
-            threats.push({
-              framework: 'MITRE ATT&CK',
-              tactic: {
-                id: tacticId,
-                reference: `https://attack.mitre.org/tactics/${tacticId}/`,
-                name: tactic.name,
-              },
-              technique: techniques,
-            });
-          }
-        }
-      }
-    }
-
-    return threats;
   }
 }

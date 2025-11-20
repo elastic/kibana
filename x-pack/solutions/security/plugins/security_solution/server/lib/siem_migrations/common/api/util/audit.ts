@@ -312,7 +312,7 @@ export class SiemMigrationAuditLogger {
     error?: Error;
   }): Promise<void> {
     const { migrationId, vendor, enhancementType, error } = params;
-    const message = `User enhanced rules with vendor=${vendor} enhancement_type=${enhancementType} for SIEM migration with [id=${migrationId}]`;
+    const message = `User enhanced rules with vendor=${vendor} type=${enhancementType} for SIEM migration with [id=${migrationId}]`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_ENHANCED_RULES,
       message,
