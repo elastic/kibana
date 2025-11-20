@@ -9,7 +9,7 @@ import { calculateAuto } from '@kbn/calculate-auto';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { TimeState } from '@kbn/es-query';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
-import { Condition } from '@kbn/streamlang';
+import type { Condition } from '@kbn/streamlang';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 import moment from 'moment';
 import { useKibana } from '../../../../hooks/use_kibana';
