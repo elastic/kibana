@@ -202,6 +202,48 @@ export default ({ getService }: FtrProviderContext) => {
       expect(tactic?.technique?.[0].id).toBe('T1078');
     });
 
+    it('should add tactic even if there are not techniques', async () => {
+      const ruleName = 'Test Rule with Tactic Only';
+      const { mockQradarXml } = getMockQRadarXml([ruleName]);
+      await migrationRulesRoutes.addQradarRulesToMigration({
+        migrationId,
+        payload: {
+          xml: mockQradarXml,
+        },
+      });
+
+      const enhancePayload: EnhanceRulesParams['payload'] = {
+        vendor: 'qradar',
+        type: 'mitre',
+        data: {
+          [ruleName]: {
+            id: 'rule_123',
+            mapping: {
+              TA0004: {
+                enabled: true,
+                name: 'Privilege Escalation',
+                techniques: {
+                  // No techniques enabled
+                },
+              },
+            },
+          },
+        },
+      };
+
+      await migrationRulesRoutes.enhanceRules({
+        migrationId,
+        payload: enhancePayload,
+      });
+
+      const { body: rulesResponse } = await migrationRulesRoutes.getRules({ migrationId });
+      const enhancedRule = rulesResponse.data[0];
+      const tactic = enhancedRule.original_rule?.threat?.[0];
+      expect(tactic).toBeDefined();
+      expect(tactic.tactic.id).toBe('TA0004');
+      expect(tactic.technique).toHaveLength(0);
+    });
+
     describe('Error cases', () => {
       const { mockQradarXml } = getMockQRadarXml(['some rule']);
       it('should return error when no rules are found for update', async () => {

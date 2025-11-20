@@ -22,15 +22,25 @@ export function transformMitreMapping(mitreMapping: QRadarMitreMappingsData[stri
 
   // Iterate over tactics in the mapping
   for (const [tacticId, tactic] of Object.entries(mitreMapping.mapping)) {
-    if (tactic.enabled && tactic.techniques) {
+    if (tactic.enabled) {
       const techniques: Array<{
         id: string;
         reference: string;
         name: string;
       }> = [];
 
+      const threat = {
+        framework: 'MITRE ATT&CK',
+        tactic: {
+          id: tacticId,
+          reference: `https://attack.mitre.org/tactics/${tacticId}/`,
+          name: tactic.name,
+        },
+        technique: techniques,
+      };
+
       // Iterate over techniques for this tactic
-      for (const [_techniqueKey, technique] of Object.entries(tactic.techniques)) {
+      for (const [_techniqueKey, technique] of Object.entries(tactic.techniques ?? {})) {
         if (technique.enabled && technique.id) {
           techniques.push({
             id: technique.id,
@@ -40,17 +50,10 @@ export function transformMitreMapping(mitreMapping: QRadarMitreMappingsData[stri
         }
 
         if (techniques.length > 0) {
-          threats.push({
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: tacticId,
-              reference: `https://attack.mitre.org/tactics/${tacticId}/`,
-              name: tactic.name,
-            },
-            technique: techniques,
-          });
+          threat.technique = techniques;
         }
       }
+      threats.push(threat);
     }
   }
 
