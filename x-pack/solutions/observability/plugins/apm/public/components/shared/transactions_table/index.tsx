@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
+import { sloListLocatorID } from '@kbn/observability-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { getLatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -30,7 +31,6 @@ import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getComparisonEnabled } from '../time_comparison/get_comparison_enabled';
-import { sloListLocatorID } from '@kbn/observability-plugin/common';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;

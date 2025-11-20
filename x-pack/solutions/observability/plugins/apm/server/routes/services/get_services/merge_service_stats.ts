@@ -47,7 +47,12 @@ export function mergeServiceStats({
   );
 
   return joinByKey(
-    asMutableArray([...serviceStats, ...matchedHealthStatuses, ...alertCounts, ...(sloCounts ?? [])] as const),
+    asMutableArray([
+      ...serviceStats,
+      ...matchedHealthStatuses,
+      ...alertCounts,
+      ...(sloCounts ?? []),
+    ] as const),
     'serviceName',
     function merge(a, b) {
       const aEnvs = 'environments' in a ? a.environments : [];

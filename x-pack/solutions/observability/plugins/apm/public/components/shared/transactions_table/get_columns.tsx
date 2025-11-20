@@ -14,7 +14,6 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sloListLocatorID } from '@kbn/observability-plugin/common';
 import React from 'react';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import type { ValuesType } from 'utility-types';
