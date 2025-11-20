@@ -12,35 +12,26 @@ import type { MessageEditorInstance } from './use_message_editor';
 
 const EDITOR_MAX_HEIGHT = 240;
 
-const useEditorStyles = (editorId: string) => {
-  const { euiTheme } = useEuiTheme();
-  const escapedId = CSS.escape(editorId);
-  const editorStyles = css`
-    height: 100%;
-    max-height: ${EDITOR_MAX_HEIGHT}px;
-    overflow-y: auto;
+const heightStyles = css`
+  height: 100%;
+  max-height: ${EDITOR_MAX_HEIGHT}px;
+  overflow-y: auto;
+`;
+const resetStyles = (id: string) => css`
+  &#${CSS.escape(id)} {
+    border-style: none;
+    box-shadow: none;
+    outline-style: none;
+    background-image: none;
     padding: 0;
+  }
+`;
+const disabledStyles = css`
+  &[contenteditable='false'] {
+    cursor: not-allowed;
+  }
+`;
 
-    &#${escapedId} {
-      border-style: none;
-      box-shadow: none;
-      outline-style: none;
-      background-image: none;
-    }
-
-    &[data-placeholder]:empty:before {
-      content: attr(data-placeholder);
-      color: ${euiTheme.colors.subduedText};
-      pointer-events: none;
-      display: block;
-    }
-
-    &[contenteditable='false'] {
-      cursor: not-allowed;
-    }
-  `;
-  return editorStyles;
-};
 interface MessageEditorProps {
   messageEditor: MessageEditorInstance;
   onSubmit: () => void;
@@ -48,6 +39,7 @@ interface MessageEditorProps {
   placeholder?: string;
   'data-test-subj'?: string;
 }
+
 export const MessageEditor: React.FC<MessageEditorProps> = ({
   messageEditor,
   onSubmit,
@@ -57,7 +49,16 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
 }) => {
   const { ref, onChange } = messageEditor._internal;
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
-  const editorStyles = useEditorStyles(editorId);
+  const { euiTheme } = useEuiTheme();
+  const placeholderStyles = css`
+    &[data-placeholder]:empty:before {
+      content: attr(data-placeholder);
+      color: ${euiTheme.colors.subduedText};
+      pointer-events: none;
+      display: block;
+    }
+  `;
+  const editorStyles = [heightStyles, resetStyles(editorId), disabledStyles, placeholderStyles];
 
   return (
     <div
