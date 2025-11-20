@@ -19,5 +19,6 @@
     "@kbn/es-mappings",
     "@kbn/core-logging-server-mocks",
     "@kbn/tooling-log",
+    "@kbn/core-elasticsearch-server",
   ]
 }
