@@ -14,7 +14,6 @@ import {
   COLLECTOR_PACKAGE_POLICY_NAME,
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
-import supertest from 'supertest';
 
 const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 
@@ -65,11 +64,6 @@ export async function setupProfiling(
   logger: ToolingLog
 ) {
   const log = logWithTimer(logger);
-
-  await apiServices.fleet.internal.setup();
-  log('Fleet infrastructure setup completed');
-  await apiServices.fleet.agent.setup();
-  log('Fleet agents setup completed');
   log('Checking if APM agent policy exists, creating if needed...');
   const getPolicyResponse = await apiServices.fleet.agent_policies.get({
     page: 1,
@@ -101,6 +95,7 @@ export async function setupProfiling(
         path: '/api/profiling/setup/es_resources',
         method: 'GET',
       });
+      log(`Checked profiling status: ${JSON.stringify(response.data)}`);
       return response.data as { has_setup: boolean; has_data: boolean };
     } catch (error: any) {
       log(`Error checking profiling status: ${error}`);
@@ -112,13 +107,12 @@ export async function setupProfiling(
     log(`Setting up Universal Profiling`);
 
     try {
-      const response = await kbnClient.request({
+      await kbnClient.request({
         description: 'Setup profiling resources',
         path: '/api/profiling/setup/es_resources',
         method: 'POST',
         body: {},
       });
-      log(`Universal Profiling setup response: ${JSON.stringify(response.data)}`);
     } catch (error: any) {
       log(`Error setting up profiling resources: ${error}`);
     }
@@ -128,13 +122,14 @@ export async function setupProfiling(
   log(`Universal Profiling set up`);
 }
 
-export async function getProfilingPackagePolicyIds(config: ScoutTestConfig) {
-  const st = supertest(buildKibanaUrl(config));
-  const res = await st
-    .get('/api/fleet/package_policies')
-    .set({ 'kbn-xsrf': 'foo' })
-    .set('x-elastic-internal-origin', 'Kibana');
-  const policies: PackagePolicy[] = res.body.items;
+export async function getProfilingPackagePolicyIds(kbnClient: KbnClient) {
+  const res = (await kbnClient.request({
+    method: 'GET',
+    description: 'Get package policies',
+    path: '/api/fleet/package_policies',
+  })) as { data: { items: PackagePolicy[] } };
+
+  const policies: PackagePolicy[] = res.data.items;
 
   const collector = policies.find((item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME);
   const symbolizer = policies.find((item) => item.name === SYMBOLIZER_PACKAGE_POLICY_NAME);
@@ -145,13 +140,13 @@ export async function getProfilingPackagePolicyIds(config: ScoutTestConfig) {
   };
 }
 
-export async function cleanUpProfilingData({
+export async function cleanUpProfiling({
   es,
-  config,
+  kbnClient,
   logger,
 }: {
   es: Client;
-  config: ScoutTestConfig;
+  kbnClient: KbnClient;
   logger: ToolingLog;
 }) {
   const log = logWithTimer(logger);
@@ -159,7 +154,7 @@ export async function cleanUpProfilingData({
 
   const [indices, { collectorId, symbolizerId }] = await Promise.all([
     es.cat.indices({ format: 'json' }),
-    getProfilingPackagePolicyIds(config),
+    getProfilingPackagePolicyIds(kbnClient),
   ]);
 
   const profilingIndices = indices
@@ -174,19 +169,19 @@ export async function cleanUpProfilingData({
     es.indices.deleteDataStream({
       name: 'profiling-events*',
     }),
-    collectorId ? await deletePackagePolicy(config, collectorId) : Promise.resolve(),
-    symbolizerId ? await deletePackagePolicy(config, symbolizerId) : Promise.resolve(),
+    collectorId ? await deletePackagePolicy(kbnClient, collectorId) : Promise.resolve(),
+    symbolizerId ? await deletePackagePolicy(kbnClient, symbolizerId) : Promise.resolve(),
   ]);
   log('Unloaded Profiling data');
 }
 
-export async function deletePackagePolicy(config: ScoutTestConfig, policy: string) {
-  const st = supertest(buildKibanaUrl(config));
-  return await st
-    .post('/api/fleet/package_policies/delete')
-    .set({ 'kbn-xsrf': 'foo' })
-    .set('x-elastic-internal-origin', 'Kibana')
-    .send({
+export async function deletePackagePolicy(kbnClient: KbnClient, policy: string) {
+  return await kbnClient.request({
+    method: 'POST',
+    description: 'Delete package policy',
+    path: '/api/fleet/package_policies/delete',
+    body: {
       packagePolicyIds: [policy],
-    });
+    },
+  });
 }

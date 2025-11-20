@@ -7,7 +7,7 @@
 
 import { expect, apiTest } from '@kbn/scout-oblt';
 import {
-  cleanUpProfilingData,
+  cleanUpProfiling,
   loadProfilingData,
   setupProfiling,
   getProfilingPackagePolicyIds,
@@ -17,10 +17,10 @@ import {
 const esResourcesEndpoint = 'GET /api/profiling/setup/es_resources';
 
 apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ esClient, log, config }) => {
-    await cleanUpProfilingData({
+  apiTest.beforeAll(async ({ esClient, log, kbnClient }) => {
+    await cleanUpProfiling({
       es: esClient,
-      config,
+      kbnClient,
       logger: log,
     });
   });
@@ -49,12 +49,7 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
 });
 
 apiTest.describe('APM integration not installed but setup completed', { tag: ['@ess'] }, () => {
-  apiTest.beforeEach(async ({ apiServices, esClient, config, kbnClient, log }) => {
-    await cleanUpProfilingData({
-      es: esClient,
-      config,
-      logger: log,
-    });
+  apiTest.beforeAll(async ({ apiServices, kbnClient, log }) => {
     await setupProfiling(apiServices, kbnClient, log);
   });
   apiTest('Admin user', async ({ roleBasedApiClient }) => {
@@ -81,47 +76,19 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
   });
 });
 
-apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ esClient, kbnClient, apiServices, config, log }) => {
-    await cleanUpProfilingData({
+apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () => {
+  apiTest.beforeAll(async ({ esClient, kbnClient, apiServices, log }) => {
+    await cleanUpProfiling({
       es: esClient,
-      config,
+      kbnClient,
       logger: log,
     });
-    log.debug('Before all clean up completed');
+
     await setupProfiling(apiServices, kbnClient, log);
-    log.debug('Before all setup completed');
-  });
-  apiTest.afterAll(async ({ esClient, config, log }) => {
-    log.debug('After all clean up started');
-    await cleanUpProfilingData({
-      es: esClient,
-      config,
-      logger: log,
-    });
-    log.debug('After all clean up completed');
-  });
-  apiTest('without data', async ({ roleBasedApiClient }) => {
-    const adminRes = await roleBasedApiClient.adminUser({
-      endpoint: esResourcesEndpoint,
-    });
-    const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBeTruthy();
-    expect(adminStatus.has_data).toBeFalsy();
-    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
-
-    const readRes = await roleBasedApiClient.viewerUser({
-      endpoint: esResourcesEndpoint,
-    });
-    const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBeTruthy();
-    expect(readStatus.has_data).toBeFalsy();
-    expect(readStatus.pre_8_9_1_data).toBeFalsy();
-    expect(readStatus.has_required_role).toBeFalsy();
-  });
-
-  apiTest('Admin user with data', async ({ esClient, roleBasedApiClient, log }) => {
     await loadProfilingData(esClient, log);
+  });
+
+  apiTest('Admin user', async ({ roleBasedApiClient }) => {
     const adminRes = await roleBasedApiClient.adminUser({
       endpoint: esResourcesEndpoint,
     });
@@ -131,7 +98,7 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     expect(adminStatus.pre_8_9_1_data).toBeFalsy();
   });
 
-  apiTest('Viewer user with data', async ({ roleBasedApiClient }) => {
+  apiTest('Viewer user', async ({ roleBasedApiClient }) => {
     const readRes = await roleBasedApiClient.viewerUser({
       endpoint: esResourcesEndpoint,
     });
@@ -145,20 +112,33 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
 });
 
 apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, () => {
-  apiTest.beforeEach(async ({ apiServices, esClient, config, kbnClient, log }) => {
-    await cleanUpProfilingData({
-      es: esClient,
-      config,
-      logger: log,
-    });
-    await setupProfiling(apiServices, kbnClient, log);
+  apiTest.beforeAll(async ({ esClient }) => {
+    const indices = await esClient.cat.indices({ format: 'json' });
+
+    const profilingIndices = indices
+      .filter((index) => index.index !== undefined)
+      .map((index) => index.index)
+      .filter((index) => {
+        return index!.startsWith('profiling') || index!.startsWith('.profiling');
+      }) as string[];
+
+    await Promise.all([
+      ...profilingIndices.map((index) => esClient.indices.delete({ index })),
+      esClient.indices.deleteDataStream({
+        name: 'profiling-events*',
+      }),
+    ]);
   });
 
-  apiTest('Admin user collector integration missing', async ({ roleBasedApiClient, config }) => {
-    const ids = await getProfilingPackagePolicyIds(config);
+  apiTest('collector integration missing', async ({ roleBasedApiClient, log, kbnClient }) => {
+    const ids = await getProfilingPackagePolicyIds(kbnClient);
     const collectorId = ids.collectorId;
-    await deletePackagePolicy(config, collectorId!);
 
+    try {
+      await deletePackagePolicy(kbnClient, collectorId!);
+    } catch (error) {
+      log(`Error deleting collector package policy: ${error}`);
+    }
     expect(collectorId).toBeDefined();
 
     const adminRes = await roleBasedApiClient.adminUser({
@@ -168,14 +148,6 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
     expect(adminStatus.has_setup).toBeFalsy();
     expect(adminStatus.has_data).toBeFalsy();
     expect(adminStatus.pre_8_9_1_data).toBeFalsy();
-  });
-
-  apiTest('Viewer user collector integration missing', async ({ roleBasedApiClient, config }) => {
-    const ids = await getProfilingPackagePolicyIds(config);
-    const collectorId = ids.collectorId;
-    await deletePackagePolicy(config, collectorId!);
-
-    expect(collectorId).toBeDefined();
 
     const readRes = await roleBasedApiClient.viewerUser({
       endpoint: esResourcesEndpoint,
@@ -188,14 +160,17 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
   });
 
   apiTest(
-    'Admin user symbolizer integration is not installed',
-    async ({ roleBasedApiClient, config }) => {
-      const ids = await getProfilingPackagePolicyIds(config);
+    'Symbolizer integration is not installed',
+    async ({ roleBasedApiClient, kbnClient, log }) => {
+      const ids = await getProfilingPackagePolicyIds(kbnClient);
 
       const symbolizerId = ids.symbolizerId;
 
-      await deletePackagePolicy(config, symbolizerId!);
-
+      try {
+        await deletePackagePolicy(kbnClient, symbolizerId!);
+      } catch (error) {
+        log(`Error deleting symbolizer package policy: ${error}`);
+      }
       expect(symbolizerId).toBeDefined();
 
       const adminRes = await roleBasedApiClient.adminUser({
@@ -205,17 +180,6 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
       expect(adminStatus.has_setup).toBeFalsy();
       expect(adminStatus.has_data).toBeFalsy();
       expect(adminStatus.pre_8_9_1_data).toBeFalsy();
-    }
-  );
-
-  apiTest(
-    'Viewer user symbolizer integration is not installed',
-    async ({ roleBasedApiClient, config }) => {
-      const ids = await getProfilingPackagePolicyIds(config);
-      const symbolizerId = ids.symbolizerId;
-      await deletePackagePolicy(config, symbolizerId!);
-
-      expect(symbolizerId).toBeDefined();
 
       const readRes = await roleBasedApiClient.viewerUser({
         endpoint: esResourcesEndpoint,

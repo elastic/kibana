@@ -31,7 +31,7 @@ export const roleBasedApiClientFixture = coreWorkerFixtures.extend<
 >({
   roleBasedApiClient: [
     async ({ config, log, esClient }, use) => {
-      log.info('Setting up profiling users for profilingClientFixture');
+      log.info('Setting up users for role-based api client.');
 
       await Promise.all([
         esClient.security.putUser({
