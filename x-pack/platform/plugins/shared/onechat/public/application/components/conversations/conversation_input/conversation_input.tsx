@@ -98,10 +98,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
 
-  const shouldDisableTextArea = !isAgentIdValid && isFetched && !!agentId;
+  const isInputDisabled = !isAgentIdValid && isFetched && !!agentId;
   const isSubmitDisabled = messageEditor.isEmpty || isSendingMessage || !isAgentIdValid;
 
-  const placeholder = shouldDisableTextArea ? disabledPlaceholder(agentId) : enabledPlaceholder;
+  const placeholder = isInputDisabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
   // Auto-focus when conversation changes
   useEffect(() => {
@@ -121,17 +121,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   };
 
   return (
-    <InputContainer isDisabled={shouldDisableTextArea}>
+    <InputContainer isDisabled={isInputDisabled}>
       <EuiFlexItem css={inputContainerStyles}>
         <MessageEditor
           messageEditor={messageEditor}
           onSubmit={handleSubmit}
-          disabled={shouldDisableTextArea}
+          disabled={isInputDisabled}
           placeholder={placeholder}
           data-test-subj="agentBuilderConversationInputEditor"
         />
       </EuiFlexItem>
-      {!shouldDisableTextArea && (
+      {!isInputDisabled && (
         <ConversationInputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
