@@ -10,7 +10,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DashboardsSelector } from './dashboards_selector';
-import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import userEvent from '@testing-library/user-event';
 
 const MOCK_FIRST_DASHBOARD_ID = 'dashboard-1';
@@ -62,7 +62,7 @@ describe('DashboardsSelector', () => {
 
   const mockUiActions = {
     getAction: mockGetAction,
-  } as unknown as UiActionsPublicStart;
+  } as unknown as UiActionsStart;
 
   it('renders the component', () => {
     render(
@@ -216,5 +216,144 @@ describe('DashboardsSelector', () => {
     // Verify that both selected options are now displayed
     expect(screen.getByText(MOCK_FIRST_DASHBOARD_TITLE)).toBeInTheDocument();
     expect(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE)).toBeInTheDocument();
+  });
+
+  /**
+   * CRITICAL TEST: This test would have caught the regression where the dropdown was empty.
+   * It verifies that when the combobox is opened, it actually displays options in the dropdown.
+   */
+  it('displays dashboard options in dropdown when combobox is opened', async () => {
+    render(
+      <DashboardsSelector
+        uiActions={mockUiActions}
+        dashboardsFormData={[]}
+        onChange={mockOnChange}
+        placeholder={MOCK_PLACEHOLDER}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText(MOCK_PLACEHOLDER);
+
+    // Open the combobox
+    fireEvent.focus(searchInput);
+
+    // Wait for options to appear in the dropdown
+    // This is the key assertion - the dropdown should NOT be empty
+    await waitFor(
+      () => {
+        // Verify the UI action was called
+        expect(mockGetAction).toHaveBeenCalledWith('searchDashboardAction');
+        expect(mockExecute).toHaveBeenCalled();
+
+        // CRITICAL: Verify options are actually visible in the dropdown
+        // This would fail if the dropdown was empty (the bug scenario)
+        expect(screen.getByText(MOCK_FIRST_DASHBOARD_TITLE)).toBeInTheDocument();
+        expect(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE)).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+  });
+
+  /**
+   * This test verifies the component handles the case when no dashboards are returned.
+   * It should not crash and should show an empty state gracefully.
+   */
+  it('handles empty dashboard results gracefully', async () => {
+    const emptyMockExecute = jest.fn((context: any) => {
+      if (context.onResults) {
+        context.onResults([]);
+      }
+    });
+
+    const emptyMockSearchAction = {
+      execute: emptyMockExecute,
+    };
+
+    const emptyMockUiActions = {
+      getAction: jest.fn().mockResolvedValue(emptyMockSearchAction),
+    } as unknown as UiActionsStart;
+
+    render(
+      <DashboardsSelector
+        uiActions={emptyMockUiActions}
+        dashboardsFormData={[]}
+        onChange={mockOnChange}
+        placeholder={MOCK_PLACEHOLDER}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText(MOCK_PLACEHOLDER);
+    fireEvent.focus(searchInput);
+
+    await waitFor(() => {
+      expect(emptyMockExecute).toHaveBeenCalled();
+    });
+
+    // Component should still render without crashing
+    expect(screen.getByTestId('dashboardsSelector')).toBeInTheDocument();
+  });
+
+  /**
+   * This test verifies the component handles UI action errors gracefully.
+   * This would catch issues where the UI action fails to execute.
+   */
+  it('handles UI action errors gracefully', async () => {
+    const errorMockUiActions = {
+      getAction: jest.fn().mockRejectedValue(new Error('Action not found')),
+    } as unknown as UiActionsStart;
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <DashboardsSelector
+        uiActions={errorMockUiActions}
+        dashboardsFormData={[]}
+        onChange={mockOnChange}
+        placeholder={MOCK_PLACEHOLDER}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText(MOCK_PLACEHOLDER);
+    fireEvent.focus(searchInput);
+
+    await waitFor(() => {
+      expect(errorMockUiActions.getAction).toHaveBeenCalledWith('searchDashboardAction');
+    });
+
+    // Component should handle error and log it
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading dashboards:', expect.any(Error));
+    });
+
+    // Component should still render without crashing
+    expect(screen.getByTestId('dashboardsSelector')).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  /**
+   * This test verifies that the UI action is called with the correct trigger ID.
+   * This would catch issues where the wrong action or trigger is used.
+   */
+  it('calls UI action with correct trigger ID', async () => {
+    render(
+      <DashboardsSelector
+        uiActions={mockUiActions}
+        dashboardsFormData={[]}
+        onChange={mockOnChange}
+        placeholder={MOCK_PLACEHOLDER}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText(MOCK_PLACEHOLDER);
+    fireEvent.focus(searchInput);
+
+    await waitFor(() => {
+      expect(mockExecute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          trigger: { id: 'searchDashboards' },
+        })
+      );
+    });
   });
 });
