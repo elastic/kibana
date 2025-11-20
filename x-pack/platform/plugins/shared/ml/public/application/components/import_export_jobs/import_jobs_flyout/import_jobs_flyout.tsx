@@ -44,11 +44,6 @@ import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 import { useEnabledFeatures } from '../../../contexts/ml';
 
-interface DatafeedValidationInfo {
-  hasWarning: boolean;
-  warningMessage?: string;
-}
-
 export interface Props {
   isDisabled: boolean;
   onImportComplete: (() => void) | null;
@@ -154,22 +149,11 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
         loadedFile.jobType
       );
 
-      const datafeedValidationMap = new Map<string, DatafeedValidationInfo>();
-
       if (loadedFile.jobType === 'anomaly-detector') {
         const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
           validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.job.job_id)
         );
         setAdJobs(tempJobs);
-
-        const datafeedValidationResults = await jobImportService.validateDatafeeds(tempJobs);
-
-        datafeedValidationResults.forEach((validation) => {
-          datafeedValidationMap.set(validation.jobId, {
-            hasWarning: validation.hasWarning,
-            warningMessage: validation.warningMessage,
-          });
-        });
       } else if (loadedFile.jobType === 'data-frame-analytics') {
         const tempJobs = (loadedFile.jobs as DataFrameAnalyticsConfig[]).filter((j) =>
           validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.id)
@@ -181,7 +165,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
 
       setJobIdObjects(
         validatedJobs.jobs.map(({ jobId, destIndex }) => {
-          const datafeedValidation = datafeedValidationMap.get(jobId);
+          const datafeedValidation = validatedJobs.datafeedValidations.get(jobId);
           return {
             jobId,
             originalId: jobId,

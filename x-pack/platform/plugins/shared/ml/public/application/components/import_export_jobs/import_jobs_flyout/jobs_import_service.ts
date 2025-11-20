@@ -232,6 +232,8 @@ export class JobImportService {
     const existingFilters = new Set((await this.getFilters()).map((f) => f.filter_id));
     const tempJobs: Array<{ jobId: string; destIndex?: string }> = [];
     const skippedJobs: SkippedJobs[] = [];
+    const sourceIndicesErrors = new Map<string, SourceIndexError[]>();
+    const datafeedValidations = new Map<string, DatafeedValidationResult>();
 
     const commonJobs: Array<{
       jobId: string;
@@ -251,7 +253,6 @@ export class JobImportService {
             indices: Array.isArray(j.source.index) ? j.source.index : [j.source.index],
           }));
 
-    const sourceIndicesErrors = new Map<string, SourceIndexError[]>();
     if (type === 'data-frame-analytics') {
       const sourceIndexErrors = await Promise.all(
         commonJobs.map(({ indices }) => this.validateJobSourceIndices(indices))
@@ -261,6 +262,18 @@ export class JobImportService {
         if (errors.length > 0) {
           sourceIndicesErrors.set(commonJobs[i].jobId, errors);
         }
+      });
+    }
+
+    if (type === 'anomaly-detector') {
+      // exclude jobs with missing filters
+      const validJobsForDatafeedCheck = (jobs as ImportedAdJob[]).filter(
+        (j) => !commonJobs.find((cj) => cj.jobId === j.job.job_id)?.filters?.length
+      );
+
+      const datafeedResults = await this.validateDatafeeds(validJobsForDatafeedCheck);
+      datafeedResults.forEach((result) => {
+        datafeedValidations.set(result.jobId, result);
       });
     }
 
@@ -285,6 +298,7 @@ export class JobImportService {
     return {
       jobs: tempJobs,
       skippedJobs,
+      datafeedValidations,
     };
   }
 
