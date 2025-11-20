@@ -17,11 +17,12 @@ import type {
   AsCodeGroupFilter,
   AsCodeDSLFilter,
 } from '@kbn/es-query-server';
+import type { Logger } from '@kbn/logging';
 import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 import { FilterStateStore } from '../..';
 import { FilterConversionError } from './errors';
-import { getFilterTypeForOperator } from './utils';
 import type { StoredFilter } from './types';
+import { FILTERS } from '../filters';
 import {
   isConditionFilter,
   isGroupFilter,
@@ -32,12 +33,34 @@ import {
 } from './type_guards';
 
 /**
- * Convert AsCodeFilter to stored Filter for runtime compatibility
+ * Get stored filter type name for operator
  */
-export function toStoredFilter(simplified: AsCodeFilter): StoredFilter {
+function getFilterTypeForOperator(operator: string): string {
+  switch (operator) {
+    case ASCODE_FILTER_OPERATOR.EXISTS:
+    case ASCODE_FILTER_OPERATOR.NOT_EXISTS:
+      return FILTERS.EXISTS;
+    case ASCODE_FILTER_OPERATOR.RANGE:
+      return FILTERS.RANGE;
+    case ASCODE_FILTER_OPERATOR.IS_ONE_OF:
+    case ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF:
+      return FILTERS.PHRASES;
+    default:
+      return FILTERS.PHRASE;
+  }
+}
+
+/**
+ * Convert AsCodeFilter to stored Filter for runtime compatibility
+ *
+ * @param filter The AsCodeFilter to convert
+ * @param logger Optional logger for warnings
+ * @returns StoredFilter or undefined if conversion fails
+ */
+export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFilter | undefined {
   try {
     // Validate filter structure - must have exactly one of: condition, group, or dsl
-    if (!isAsCodeFilter(simplified)) {
+    if (!isAsCodeFilter(filter)) {
       throw new FilterConversionError(
         'Invalid AsCodeFilter: must have exactly one of condition, group, or dsl'
       );
@@ -46,47 +69,41 @@ export function toStoredFilter(simplified: AsCodeFilter): StoredFilter {
     // Build base stored filter structure
     const storedFilter: StoredFilter = {
       $state: {
-        store: simplified.pinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+        store: filter.pinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
       },
       meta: {
-        alias: simplified.label || null,
-        disabled: simplified.disabled || false,
-        negate: simplified.negate || false,
+        alias: filter.label || null,
+        disabled: filter.disabled || false,
+        negate: filter.negate || false,
         // Only add optional properties if they have defined values (round-trip compatibility)
-        ...(simplified.controlledBy !== undefined ? { controlledBy: simplified.controlledBy } : {}),
-        ...(simplified.dataViewId !== undefined ? { index: simplified.dataViewId } : {}),
-        ...(simplified.isMultiIndex !== undefined ? { isMultiIndex: simplified.isMultiIndex } : {}),
-        ...(simplified.filterType !== undefined ? { type: simplified.filterType } : {}),
-        ...(simplified.key !== undefined ? { key: simplified.key } : {}),
-        ...(simplified.value !== undefined ? { value: simplified.value } : {}),
+        ...(filter.controlledBy !== undefined ? { controlledBy: filter.controlledBy } : {}),
+        ...(filter.dataViewId !== undefined ? { index: filter.dataViewId } : {}),
+        ...(filter.isMultiIndex !== undefined ? { isMultiIndex: filter.isMultiIndex } : {}),
+        ...(filter.filterType !== undefined ? { type: filter.filterType } : {}),
+        ...(filter.key !== undefined ? { key: filter.key } : {}),
+        ...(filter.value !== undefined ? { value: filter.value } : {}),
       },
     };
 
     // Convert based on filter type using type guards
-    if (isConditionFilter(simplified)) {
-      return convertFromSimpleCondition(simplified.condition, storedFilter);
+    if (isConditionFilter(filter)) {
+      return convertFromSimpleCondition(filter.condition, storedFilter);
     }
 
-    if (isGroupFilter(simplified)) {
-      return convertFromFilterGroup(simplified.group, storedFilter);
+    if (isGroupFilter(filter)) {
+      return convertFromFilterGroup(filter.group, storedFilter);
     }
 
-    if (isDSLFilter(simplified)) {
-      return convertFromDSLFilter(simplified, storedFilter);
+    if (isDSLFilter(filter)) {
+      return convertFromDSLFilter(filter, storedFilter);
     }
 
     throw new FilterConversionError(
       'AsCodeFilter must have exactly one of: condition, group, or dsl'
     );
   } catch (error) {
-    if (error instanceof FilterConversionError) {
-      throw error;
-    }
-    throw new FilterConversionError(
-      `Failed to convert simplified filter: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+    logger?.warn(`Failed to convert AsCodeFilter to stored filter: ${error.message}`);
+    return;
   }
 }
 
@@ -286,7 +303,7 @@ function convertFromFilterGroup(
       ? convertFromFilterGroup(typedCondition, cleanBase)
       : convertFromSimpleCondition(typedCondition, cleanBase);
 
-    // Clean up filter: remove $state, alias, and disabled from sub-filters
+    // Clean up filter: remove $state, alias, and disabled from all sub-filters
     const { $state, meta: filterMeta, ...cleanedUpFilter } = filter;
     const { alias, disabled, ...cleanedUpMeta } = filterMeta;
     return { ...cleanedUpFilter, meta: cleanedUpMeta };
@@ -297,7 +314,7 @@ function convertFromFilterGroup(
     ...baseStored,
     meta: {
       ...baseStored.meta,
-      type: 'combined',
+      type: FILTERS.COMBINED,
       relation: group.type.toUpperCase(),
       params: filterParams,
     },
