@@ -242,19 +242,24 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
       ? fromBucketLensApiToLensState(layer.breakdown_by, yColumnsWithIds)
       : undefined;
 
+    // Add bucketed coluns first
     if (xColumns) {
       addLayerColumn(newLayer, getAccessorNameForXY(layer, X_ACCESSOR), xColumns);
     }
-    for (const { id, column } of yColumnsWithIds) {
-      addLayerColumn(newLayer, id, column);
-    }
-    // console.log({ breakdownColumns, breakdown_by: layer.breakdown_by });
+
     if (breakdownColumns) {
       const breakdownById = getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR);
-      addLayerColumn(newLayer, breakdownById, breakdownColumns);
-      if (layer.breakdown_by?.aggregate_first) {
-        newLayer.columnOrder.unshift(newLayer.columnOrder.pop()!);
-      }
+      addLayerColumn(
+        newLayer,
+        breakdownById,
+        breakdownColumns,
+        layer.breakdown_by?.aggregate_first || !layer.x
+      );
+    }
+
+    // then metric ones
+    for (const { id, column } of yColumnsWithIds) {
+      addLayerColumn(newLayer, id, column);
     }
   }
   return datasource;
