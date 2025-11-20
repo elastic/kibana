@@ -217,7 +217,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
               <p>
                 <FormattedMessage
                   id="xpack.fleet.dataStreamList.deprecatedILMCalloutDescription"
-                  defaultMessage="You are using modified deprecated ILM policies ({policies}). These policies should be migrated according to the new lifecycle management approach. {learnMoreLink}."
+                  defaultMessage="You are using modified deprecated ILM policies ({policies}). These policies should be migrated according to the new lifecycle management approach. {learnMoreLink}"
                   values={{
                     policies: deprecatedILMCheck.deprecatedILMPolicies
                       .map(

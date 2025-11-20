@@ -4,17 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { type TypeOf, schema } from '@kbn/config-schema';
 
 import type { DataStream } from '../models';
 
 export interface GetDataStreamsResponse {
   data_streams: DataStream[];
 }
-
-export interface DeprecatedILMPolicyCheckResponse {
-  deprecatedILMPolicies: Array<{
-    policyName: string;
-    version: number;
-    componentTemplates: string[];
-  }>;
-}
+export const DeprecatedILMPolicyCheckResponseSchema = schema.object({
+  deprecatedILMPolicies: schema.arrayOf(
+    schema.object({
+      policyName: schema.string(),
+      version: schema.number(),
+      componentTemplates: schema.arrayOf(schema.string()),
+    })
+  ),
+});
+export type DeprecatedILMPolicyCheckResponse = TypeOf<
+  typeof DeprecatedILMPolicyCheckResponseSchema
+>;

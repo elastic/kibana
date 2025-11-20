@@ -11,7 +11,10 @@ import type { FleetRequestHandlerContext } from '../..';
 
 import { xpackMocks } from '../../mocks';
 
-import { ListDataStreamsResponseSchema, DeprecatedILMCheckResponseSchema } from '.';
+import { DeprecatedILMPolicyCheckResponseSchema } from '../../../common/types/rest_spec/data_stream';
+
+import { ListDataStreamsResponseSchema } from '.';
+
 import { getListHandler, getDeprecatedILMCheckHandler } from './handlers';
 
 jest.mock('./handlers', () => ({
@@ -87,13 +90,13 @@ describe('schema validation', () => {
       body: expectedResponse,
     });
 
-    const validateResp = DeprecatedILMCheckResponseSchema.validate(expectedResponse);
+    const validateResp = DeprecatedILMPolicyCheckResponseSchema.validate(expectedResponse);
     expect(validateResp).toEqual(expectedResponse);
   });
 
   it('deprecated ILM check should return valid response when no deprecated policies', async () => {
     const expectedResponse = {
-      deprecatedILMPolicies: [],
+      deprecatedPolicies: [],
     };
     getDeprecatedILMCheckHandlerMock.mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
@@ -103,7 +106,7 @@ describe('schema validation', () => {
       body: expectedResponse,
     });
 
-    const validateResp = DeprecatedILMCheckResponseSchema.validate(expectedResponse);
+    const validateResp = DeprecatedILMPolicyCheckResponseSchema.validate(expectedResponse);
     expect(validateResp).toEqual(expectedResponse);
   });
 });

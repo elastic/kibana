@@ -11,7 +11,7 @@ import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { API_VERSIONS } from '../../../common/constants';
 
 import { DATA_STREAM_API_ROUTES } from '../../constants';
-
+import { DeprecatedILMPolicyCheckResponseSchema } from '../../../common/types/rest_spec/data_stream';
 import { genericErrorResponse } from '../schema/errors';
 
 import { getListHandler, getDeprecatedILMCheckHandler } from './handlers';
@@ -40,16 +40,6 @@ export const ListDataStreamsResponseSchema = schema.object({
           serviceName: schema.string(),
         })
       ),
-    })
-  ),
-});
-
-export const DeprecatedILMCheckResponseSchema = schema.object({
-  deprecatedILMPolicies: schema.arrayOf(
-    schema.object({
-      policyName: schema.string(),
-      version: schema.number(),
-      componentTemplates: schema.arrayOf(schema.string()),
     })
   ),
 });
@@ -120,7 +110,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               description: 'OK: A successful request.',
-              body: () => DeprecatedILMCheckResponseSchema,
+              body: () => DeprecatedILMPolicyCheckResponseSchema,
             },
             400: {
               description: 'A bad request.',
