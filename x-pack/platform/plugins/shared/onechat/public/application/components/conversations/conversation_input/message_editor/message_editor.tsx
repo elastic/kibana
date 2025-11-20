@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, keys, useGeneratedHtmlId } from '@elastic/eui';
+import { useEuiTheme, keys, useGeneratedHtmlId, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
 
@@ -64,7 +64,16 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       display: block;
     }
   `;
-  const editorStyles = [heightStyles, resetStyles(editorId), disabledStyles, placeholderStyles];
+  const fontStyles = css`
+    ${useEuiFontSize('m')}
+  `;
+  const editorStyles = [
+    heightStyles,
+    resetStyles(editorId),
+    disabledStyles,
+    placeholderStyles,
+    fontStyles,
+  ];
 
   return (
     <div
