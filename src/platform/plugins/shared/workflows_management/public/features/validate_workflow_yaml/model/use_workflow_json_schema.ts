@@ -57,11 +57,8 @@ export const useWorkflowJsonSchema = ({
         : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
-      // Post-process to improve validation messages and add display names for connectors
-      const processedSchema = improveTypeFieldDescriptions(jsonSchema, connectorsData);
-
       return {
-        jsonSchema: processedSchema ?? null,
+        jsonSchema,
         uri,
       };
     } catch (error) {

@@ -267,6 +267,7 @@ function generateMethodsAndPatterns(endpoint: SpecificationTypes.Endpoint): {
   return { methods, patterns };
 }
 
+// TODO: unwrap and combine the shapes at the build time instead of at the runtime
 function generateParamsSchemaString(operationIds: string[]): string {
   if (operationIds.length === 0) {
     return 'z.optional(z.looseObject({}))';

@@ -58,7 +58,7 @@ export const GenAIInvokeAIParamsSchema = z.object({
         function: z.object({
           description: z.string().optional(),
           name: z.string(),
-          parameters: z.record(z.any()),
+          parameters: z.record(z.string(), z.any()),
           strict: z.boolean().optional(),
         }),
       })
@@ -86,7 +86,7 @@ export const GenAIInvokeAIParamsSchema = z.object({
         description: z.string(),
         parameters: z.object({
           type: z.string(),
-          properties: z.record(z.any()),
+          properties: z.record(z.string(), z.any()),
           additionalProperties: z.boolean(),
         }),
       })

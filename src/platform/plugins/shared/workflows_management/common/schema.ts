@@ -635,6 +635,7 @@ function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] 
 }
 
 function generateKibanaConnectors(): InternalConnectorContract[] {
+  // TODO: bring the kibana connectors back, with the new approach to schemas generation
   return [];
   // Lazy load the generated Kibana connectors
   // eslint-disable-next-line no-unreachable
@@ -655,9 +656,6 @@ export function convertDynamicConnectorsToContracts(
 ): ConnectorContractUnion[] {
   const connectorContracts: ConnectorContractUnion[] = [];
 
-  return [];
-
-  // eslint-disable-next-line no-unreachable
   Object.values(connectorTypes).forEach((connectorType) => {
     try {
       // Create connector ID schema with available instances
@@ -677,13 +675,16 @@ export function convertDynamicConnectorsToContracts(
           // Create type name: actionTypeId.subActionName (e.g., "inference.completion")
           const subActionType = `${connectorTypeName}.${subAction.name}`;
 
+          const paramsSchema = getSubActionParamsSchema(connectorType.actionTypeId, subAction.name);
+          const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, subAction.name);
+
           connectorContracts.push({
             type: subActionType,
             summary: subAction.displayName,
-            paramsSchema: getSubActionParamsSchema(connectorType.actionTypeId, subAction.name),
+            paramsSchema,
             connectorIdRequired: true,
             connectorId: connectorIdSchema,
-            outputSchema: getSubActionOutputSchema(connectorType.actionTypeId, subAction.name),
+            outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,
             instances: connectorType.instances,
           });
@@ -720,7 +721,6 @@ export function convertDynamicConnectorsToContracts(
     }
   });
 
-  // eslint-disable-next-line no-unreachable
   return connectorContracts;
 }
 
