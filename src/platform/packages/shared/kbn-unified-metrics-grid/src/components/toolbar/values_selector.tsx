@@ -138,17 +138,24 @@ export const ValuesSelector = ({
           )}
         </EuiFlexItem>
 
-        {count > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge>{count}</EuiNotificationBadge>
-          </EuiFlexItem>
-        )}
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          alignItems="center"
+          responsive={false}
+          gutterSize="s"
+        >
+          {count > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge>{count}</EuiNotificationBadge>
+            </EuiFlexItem>
+          )}
 
-        {isLoading && (
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        )}
+          {isLoading && (
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexGroup>
     );
   }, [isLoading, selectedValues.length]);
