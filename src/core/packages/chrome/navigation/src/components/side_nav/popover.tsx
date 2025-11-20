@@ -202,9 +202,8 @@ export const Popover = ({
         Boolean(
           triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused)
         );
-      const isTrappedByFlyout = (nextFocused as HTMLElement)?.classList.contains('euiFlyout');
 
-      if (isStayingInComponent === false && isTrappedByFlyout === false) {
+      if (isStayingInComponent === false) {
         handleClose();
       }
     },
