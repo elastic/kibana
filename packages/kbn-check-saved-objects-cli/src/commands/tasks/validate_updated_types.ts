@@ -8,6 +8,7 @@
  */
 
 import type { ListrTask } from 'listr2';
+import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import type { Task, TaskContext } from '../types';
 import { getUpdatedTypes, validateChanges } from '../../snapshots';
 import { getLatestTypeFixtures } from '../../migrations/fixtures';
@@ -18,7 +19,10 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
       title: 'Detecting updated types',
       task: () => {
         const updatedList = getUpdatedTypes({ from: ctx.from!, to: ctx.to! });
-        ctx.updatedTypes = ctx.registeredTypes!.filter(({ name }) => updatedList.includes(name));
+        ctx.updatedTypes = ctx
+          .registeredTypes!.filter(({ name }) => updatedList.includes(name))
+          // we tweak the types to store them all in the `.kibana_migrator` index for our checks
+          .map((type) => ({ ...type, indexPattern: defaultKibanaIndex }));
       },
     },
     {
