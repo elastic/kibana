@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 import { getMockCallbacks, mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import type { ICommandCallbacks } from '../../types';
@@ -68,6 +67,7 @@ describe('SET Autocomplete', () => {
   describe('Setting name suggestions -- Stateful', () => {
     const statefulSettings = settings
       .filter((s) => !s.serverlessOnly)
+      .filter((s) => !s.ignoreAsSuggestion)
       .map((setting) => `${setting.name} = `);
     it('suggests stateful settings after SET command', async () => {
       await setExpectSuggestions('SET ', statefulSettings);
@@ -89,22 +89,6 @@ describe('SET Autocomplete', () => {
           '_alias: *',
           '_alias:_origin',
         ]);
-      });
-    });
-
-    describe('Time zone setting', () => {
-      it('suggests time zones after assignment operator', async () => {
-        await setExpectSuggestions(
-          'SET time_zone = ',
-          TIMEZONE_OPTIONS.map((tz) => `"${tz}";`)
-        );
-      });
-
-      it('suggests time zones after assignment operator between quotes', async () => {
-        await setExpectSuggestions(
-          'SET time_zone = "',
-          TIMEZONE_OPTIONS.map((tz) => `${tz}`)
-        );
       });
     });
   });
