@@ -48,7 +48,7 @@ MANDATORY WORKFLOW - Complete in order:
 
    Tool: ${sanitizeToolId(SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID)}
 
-   Parameters: { query: "Find attack discoveries where kibana.alert.attack_discovery.alert_ids contains '[alert ID]'" }
+   Parameters: { alertIds: ["[alert ID]"] }
 
 4. Query RELATED ALERTS:
 
