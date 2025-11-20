@@ -14,9 +14,9 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { EXPIRATION_DURATION_SECONDS } from '@kbn/fleet-plugin/server/services/agents/upgrade_action_runner';
 import moment from 'moment';
+import { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
 export default function (providerContext: FtrProviderContextWithServices) {
