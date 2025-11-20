@@ -92,7 +92,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        // TODO rewrite to walk through tabs and assert layers there
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
 
         const referenceLineDimensions = await testSubjects.findAllDescendant(
@@ -101,8 +100,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         expect(referenceLineDimensions).to.have.length(1);
         expect(await referenceLineDimensions[0].getVisibleText()).to.be('Static value: 10');
+      });
 
-        const dimensions = await testSubjects.findAllDescendant('lns-dimensionTrigger', layers[1]);
+      // switch to data tab
+      await lens.ensureLayerTabIsActive(1);
+
+      await retry.try(async () => {
+        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
+        const dimensions = await testSubjects.findAllDescendant('lns-dimensionTrigger', layers[0]);
         expect(dimensions).to.have.length(2);
         expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
