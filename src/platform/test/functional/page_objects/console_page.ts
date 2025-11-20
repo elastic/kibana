@@ -485,8 +485,8 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('consoleMenuCopyToLanguage');
   }
 
-  public async isLanguageClientsButtonVisible() {
-    return await this.testSubjects.exists('consoleMenuLanguageClients');
+  public async isSelectLanguageButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuSelectLanguage');
   }
 
   public async clickCopyAsCurlButton() {
@@ -495,27 +495,35 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeLanguageAndCopy(language: string) {
-    // Change the default language
-    await this.changeDefaultLanguage(language);
+    // Click "Select language" to open language selector modal
+    await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    // Click copy to language button to copy
-    await this.testSubjects.click('consoleMenuCopyToLanguage');
+    // Wait for the modal to open
+    await this.retry.waitFor('language selector modal to open', async () => {
+      return await this.testSubjects.exists(`languageOption-${language}`);
+    });
+
+    // Select the language option
+    await this.testSubjects.click(`languageOption-${language}`);
+
+    // Click "Copy code" button to copy with the selected language
+    await this.testSubjects.click('copyAsLanguageSubmit');
   }
 
   public async changeDefaultLanguage(language: string) {
-    // Click "Language clients" to open nested panel
-    await this.testSubjects.click('consoleMenuLanguageClients');
+    // Click "Select language" to open language selector modal
+    await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    // Wait for the language clients panel to open
-    await this.retry.waitFor('language clients panel to open', async () => {
-      return await this.testSubjects.exists(`languageClientMenuItem-${language}`);
+    // Wait for the modal to open
+    await this.retry.waitFor('language selector modal to open', async () => {
+      return await this.testSubjects.exists(`changeDefaultLanguageTo-${language}`);
     });
 
-    // Wait for panel animation to complete
-    await this.common.sleep(300);
+    // Click "Set as default" link for the selected language
+    await this.testSubjects.click(`changeDefaultLanguageTo-${language}`);
 
-    // Click the language from the language list
-    await this.testSubjects.click(`languageClientMenuItem-${language}`);
+    // Close the modal
+    await this.testSubjects.click('closeCopyAsModal');
   }
 
   public async clickCopyToLanguageButton() {

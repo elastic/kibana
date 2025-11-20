@@ -33,11 +33,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
     });
 
-    it('should have options to copy to language, language clients, open documentation, and auto indent', async () => {
+    it('should have options to copy to language, open documentation, and auto indent', async () => {
       await PageObjects.console.clickContextMenu();
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
       expect(PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
-      expect(PageObjects.console.isLanguageClientsButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
     });
@@ -103,10 +102,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Focus editor once again
         await PageObjects.console.focusInputEditor();
 
-        // Verify that the Language clients button is hidden for kbn request
+        // Verify that the Select language button is hidden for kbn request
         await PageObjects.console.clickContextMenu();
-        const languageClientsVisible = await PageObjects.console.isLanguageClientsButtonVisible();
-        expect(languageClientsVisible).to.be(false);
+        const selectLanguageVisible = await PageObjects.console.isSelectLanguageButtonVisible();
+        expect(selectLanguageVisible).to.be(false);
       });
 
       it('allows to change default language', async () => {
@@ -125,12 +124,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Change default language to Python
         await PageObjects.console.changeDefaultLanguage('python');
 
-        // Wait for panel to return to main menu
-        await retry.waitFor('panel to return to main menu', async () => {
+        // Wait for context menu to be visible again
+        await retry.waitFor('context menu to be visible', async () => {
           return await testSubjects.exists('consoleMenuCopyToLanguage');
         });
 
-        // Wait for panel animation to complete
+        // Wait for UI to update
         await PageObjects.common.sleep(300);
 
         // Check that the menu item now shows "Copy to Python"
