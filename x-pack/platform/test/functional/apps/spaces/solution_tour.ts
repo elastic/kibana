@@ -138,6 +138,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
 
+        await retry.waitFor('global setting to indicate tour was shown', async () => {
+          const globalSettings = await getGlobalSettings();
+          log.debug(`Global settings: ${JSON.stringify(globalSettings)}`);
+          return globalSettings?.showSpaceSolutionTour === false;
+        });
+
         await spacesService.delete('foo-space');
         await browser.refresh();
 
