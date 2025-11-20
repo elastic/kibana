@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useReadListIndex, useCreateListIndex } from '@kbn/securitysolution-list-hooks';
+import { isAppError } from '@kbn/securitysolution-t-grid';
 import { useHttp, useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -31,9 +32,17 @@ export const useListsIndex = (): UseListsIndexReturn => {
   } = useCreateListIndex({
     http,
     onError: (err) => {
-      if (err != null) {
-        addError(err, { title: i18n.LISTS_INDEX_CREATE_FAILURE });
+      // TODO remove this when this hook is stateful. Right now it is being used in several places
+      // and there are race conditions that can make this attempt to create the index several times resulting in
+      // the error below.
+      if (
+        err === null ||
+        (isAppError(err) && err.body.message.includes('resource_already_exists_exception'))
+      ) {
+        return;
       }
+
+      addError(err, { title: i18n.LISTS_INDEX_CREATE_FAILURE });
     },
   });
 
