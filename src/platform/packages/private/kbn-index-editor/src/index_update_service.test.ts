@@ -230,7 +230,7 @@ describe('IndexUpdateService', () => {
       // Adding a column and editing its name counts as 1 col added
       service.addNewColumn();
       const newColumn = (await firstValueFrom(service.pendingColumnsToBeSaved$))[0];
-      service.editColumn('newColumn', newColumn.name);
+      service.editColumn('newColumn', newColumn.name, 'keyword');
 
       // Counts as 2 cell edited
       service.updateDoc('123', { field: 'value' });
