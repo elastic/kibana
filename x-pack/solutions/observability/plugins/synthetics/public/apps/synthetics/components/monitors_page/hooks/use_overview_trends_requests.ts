@@ -13,7 +13,8 @@ import { selectOverviewTrends, trendStatsBatch } from '../../../state';
 
 export const useOverviewTrendsRequests = (
   monitorsSortedByStatus: OverviewStatusMetaData[],
-  maxItem: number
+  maxItem: number,
+  rowCount: number
 ) => {
   const dispatch = useDispatch();
 
@@ -21,7 +22,7 @@ export const useOverviewTrendsRequests = (
 
   useEffect(() => {
     console.log('Will fetch trend data for visible monitors up to maxItem:', maxItem);
-    const visibleMonitors = monitorsSortedByStatus.slice(0, maxItem * 5);
+    const visibleMonitors = monitorsSortedByStatus.slice(0, maxItem * rowCount);
     const trendRequests = visibleMonitors.reduce((acc, item) => {
       if (trendData[item.configId + item.locationId] === undefined) {
         acc.push({
@@ -33,5 +34,5 @@ export const useOverviewTrendsRequests = (
       return acc;
     }, [] as TrendRequest[]);
     if (trendRequests.length) dispatch(trendStatsBatch.get(trendRequests));
-  }, [dispatch, maxItem, monitorsSortedByStatus, trendData]);
+  }, [dispatch, maxItem, monitorsSortedByStatus, rowCount, trendData]);
 };

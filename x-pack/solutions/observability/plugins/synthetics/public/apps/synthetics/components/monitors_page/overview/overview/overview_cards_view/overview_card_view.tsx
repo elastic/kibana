@@ -8,7 +8,7 @@
 import { type EuiAutoSize, EuiAutoSizer, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { FixedSizeList, type ListChildComponentProps } from 'react-window';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CardsViewFooter } from './cards_view_footer';
 import type { FlyoutParamProps } from '../types';
@@ -18,6 +18,7 @@ import { OverviewLoader } from '../overview_loader';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
 import { selectOverviewState, selectOverviewTrends } from '../../../../../state';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import { useOverviewTrendsRequests } from '../../../hooks/use_overview_trends_requests';
 
 const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
@@ -48,6 +49,8 @@ export const OverviewCardView = ({
   const trendData = useSelector(selectOverviewTrends);
   const { view } = useSelector(selectOverviewState);
   const [rowCount, setRowCount] = useState(5);
+
+  useOverviewTrendsRequests(monitorsSortedByStatus, maxItem, rowCount);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
