@@ -42,6 +42,7 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_STATE_NAMESPACE,
+  ALERT_MUTED,
 } from '@kbn/rule-data-utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from './object_remover';
@@ -171,6 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
+        [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
