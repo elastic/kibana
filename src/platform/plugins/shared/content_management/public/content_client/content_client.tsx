@@ -131,8 +131,6 @@ export class ContentClient {
   }
 
   search<I extends SearchIn, O = unknown>(input: I): Promise<O> {
-    // Direct call to crudClient to ensure fresh data (not cached by QueryClient)
-    // This matches the behavior of create, update, and delete methods
     return this.crudClientProvider(input.contentTypeId).search(
       addVersion(input, this.contentTypeRegistry)
     ) as Promise<O>;

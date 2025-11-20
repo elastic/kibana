@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -26,10 +25,10 @@ interface Dashboard {
 }
 
 async function searchDashboards(
-  uiActions: UiActionsPublicStart,
-  search?: string,
-  perPage: number = 100
+  uiActions: UiActionsStart,
+  options: { search?: string; perPage?: number } = {}
 ): Promise<Dashboard[]> {
+  const { search, perPage = 100 } = options;
   const searchAction = await uiActions.getAction('searchDashboardAction');
   return new Promise(function (resolve) {
     searchAction.execute({
@@ -51,7 +50,7 @@ export function DashboardsSelector({
   onChange,
   placeholder,
 }: {
-  uiActions: UiActionsPublicStart;
+  uiActions: UiActionsStart;
   dashboardsFormData: { id: string }[];
   onChange: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
   placeholder?: string;
@@ -67,19 +66,19 @@ export function DashboardsSelector({
   const [isComboBoxOpen, setIsComboBoxOpen] = useState(false);
 
   const fetchDashboardTitles = useCallback(async () => {
-    if (!dashboardsFormData?.length || !uiActions) {
+    if (!dashboardsFormData?.length) {
       return;
     }
 
     try {
       // Fetch all dashboards and filter by the IDs we need
-      const allDashboards = await searchDashboards(uiActions, undefined, 1000);
+      const allDashboards = await searchDashboards(uiActions, { perPage: 1000 });
       const dashboardMap = new Map(allDashboards.map((d) => [d.id, d]));
 
       const validDashboards = dashboardsFormData
         .map((dashboard) => {
           const foundDashboard = dashboardMap.get(dashboard.id);
-          if (foundDashboard && foundDashboard.title) {
+          if (foundDashboard) {
             return {
               label: foundDashboard.title,
               value: dashboard.id,
@@ -116,25 +115,22 @@ export function DashboardsSelector({
   );
 
   const loadDashboards = useCallback(async () => {
-    if (uiActions) {
-      setLoading(true);
-      try {
-        const dashboards = await searchDashboards(
-          uiActions,
-          searchValue.trim() || undefined,
-          100
-        );
-        const dashboardOptions = dashboards.map((dashboard) => ({
-          value: dashboard.id,
-          label: dashboard.title,
-        }));
-        setDashboardList(dashboardOptions);
-      } catch (error) {
-        console.error('Error loading dashboards:', error);
-        setDashboardList([]);
-      } finally {
-        setLoading(false);
-      }
+    setLoading(true);
+    try {
+      const trimmedSearch = searchValue.trim();
+      const dashboards = await searchDashboards(uiActions, {
+        search: trimmedSearch || undefined,
+        perPage: 100,
+      });
+      const dashboardOptions = dashboards.map((dashboard) => ({
+        value: dashboard.id,
+        label: dashboard.title,
+      }));
+      setDashboardList(dashboardOptions);
+    } catch (error) {
+      setDashboardList([]);
+    } finally {
+      setLoading(false);
     }
   }, [uiActions, searchValue]);
 
