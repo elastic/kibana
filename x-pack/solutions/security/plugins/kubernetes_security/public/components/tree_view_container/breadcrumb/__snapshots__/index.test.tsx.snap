@@ -3,20 +3,20 @@
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Breadcrumb button content correctly 1`] = `
 <div>
   <div
-    css="[object Object]"
+    class="css-ned1bf-Breadcrumb"
   >
     <div
       class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
             aria-label="Click Cluster breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
             type="button"
           >
@@ -29,7 +29,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -37,7 +37,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
         >
           <button
             aria-label="Click Namespace breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
             type="button"
           >
@@ -50,7 +50,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -58,7 +58,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
         >
           <button
             aria-label="Click Pod breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
             type="button"
           >
@@ -71,7 +71,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -79,7 +79,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
         >
           <button
             aria-label="Click Container Image breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
             type="button"
           >
@@ -95,7 +95,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
             type="button"
           >
             <span
@@ -118,20 +118,20 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted should display cluster icon button when no cluster name is provided 1`] = `
 <div>
   <div
-    css="[object Object]"
+    class="css-ned1bf-Breadcrumb"
   >
     <div
       class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
             aria-label="Click Cluster breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
             type="button"
           >
@@ -144,7 +144,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -152,7 +152,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
         >
           <button
             aria-label="Click Namespace breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
             type="button"
           >
@@ -165,7 +165,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -173,7 +173,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
         >
           <button
             aria-label="Click Pod breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
             type="button"
           >
@@ -186,7 +186,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -194,7 +194,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
         >
           <button
             aria-label="Click Container Image breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
             type="button"
           >
@@ -210,7 +210,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
             type="button"
           >
             <span
@@ -233,20 +233,20 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render breadcrumb icons 1`] = `
 <div>
   <div
-    css="[object Object]"
+    class="css-ned1bf-Breadcrumb"
   >
     <div
       class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
             aria-label="Click Cluster breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
             type="button"
           >
@@ -259,7 +259,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -267,7 +267,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         >
           <button
             aria-label="Click Namespace breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
             type="button"
           >
@@ -280,7 +280,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -288,7 +288,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         >
           <button
             aria-label="Click Node breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
             type="button"
           >
@@ -301,7 +301,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -309,7 +309,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         >
           <button
             aria-label="Click Pod breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
             type="button"
           >
@@ -322,7 +322,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -330,7 +330,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         >
           <button
             aria-label="Click Container Image breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
             type="button"
           >
@@ -346,7 +346,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
             type="button"
           >
             <span
@@ -369,20 +369,20 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render last  breadcrumb content only 1`] = `
 <div>
   <div
-    css="[object Object]"
+    class="css-ned1bf-Breadcrumb"
   >
     <div
       class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
             aria-label="Click Cluster breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
             type="button"
           >
@@ -395,7 +395,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -403,7 +403,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         >
           <button
             aria-label="Click Node breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
             type="button"
           >
@@ -416,7 +416,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
-          class="emotion-EuiIcon"
+          class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -424,7 +424,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         >
           <button
             aria-label="Click Container Image breadcrumb"
-            class="euiButtonIcon emotion-EuiButtonIcon"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
             type="button"
           >
@@ -440,7 +440,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
             type="button"
           >
             <span

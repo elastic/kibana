@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../test';
 import { createAppRootMockRenderer } from '../../../test';
@@ -44,37 +44,50 @@ describe('TreeNav component', () => {
     const elemLabel = await renderResult.getByTestId('treeNavType_generated-idlogical');
     expect(elemLabel).toHaveAttribute('aria-pressed', 'true');
   });
-
   it('shows the tree path according with the selected view type', async () => {
     renderResult = mockedContext.render(<TreeNavContainer />);
 
     const logicalViewPath = 'cluster / namespace / pod / container image';
-    const logicViewButton = renderResult.getByTestId('treeNavType_generated-idlogical');
-    expect(logicViewButton).toHaveAttribute('aria-pressed', 'true');
+    const infrastructureViewPath = 'cluster / node / pod / container image';
+
+    // Check initial state - logical view is selected
     expect(renderResult.getByText(logicalViewPath)).toBeInTheDocument();
 
-    const infraStructureViewRadio = renderResult.getByTestId(
-      'treeNavType_generated-idinfrastructure'
-    );
-    infraStructureViewRadio.click();
+    const infraButton = renderResult.getByRole('button', { name: /infrastructure/i });
+    fireEvent.click(infraButton);
 
-    expect(renderResult.getByText('cluster / node / pod / container image')).toBeInTheDocument();
+    expect(renderResult.getByText(infrastructureViewPath)).toBeInTheDocument();
 
-    logicViewButton.click();
+    // Click back to logical view
+    const logicalButton = renderResult.getByRole('button', { name: /logical/i });
+    fireEvent.click(logicalButton);
+
+    // Verify back to logical view
     expect(renderResult.getByText(logicalViewPath)).toBeInTheDocument();
   });
 
-  it('collapses / expands the tree nav when clicking on collapse button', async () => {
+  it('toggles tree nav visibility using display style when collapse/expand buttons are clicked', async () => {
     renderResult = mockedContext.render(<TreeNavContainer />);
 
-    expect(renderResult.getByText(/cluster/i)).toBeVisible();
+    // Find the main content div that contains the tree navigation
+    const treeContent = renderResult.container.querySelector('div[style*="display"]');
+    expect(treeContent).toBeInTheDocument();
 
-    const collapseButton = await renderResult.getByLabelText(/collapse/i);
-    collapseButton.click();
-    expect(renderResult.getByText(/cluster/i)).not.toBeVisible();
+    // Initial state: content should be visible (display: inherit)
+    expect(treeContent).toHaveStyle('display: inherit');
 
-    const expandButton = await renderResult.getByLabelText(/expand/i);
-    expandButton.click();
-    expect(renderResult.getByText(/cluster/i)).toBeVisible();
+    // Find and click the collapse button
+    const collapseBtn = renderResult.getByLabelText(/collapse/i);
+    fireEvent.click(collapseBtn);
+
+    // After collapse: content should be hidden (display: none)
+    expect(treeContent).toHaveStyle('display: none');
+
+    // Find and click the expand button
+    const expandBtn = renderResult.getByLabelText(/expand/i);
+    fireEvent.click(expandBtn);
+
+    // After expand: content should be visible again (display: inherit)
+    expect(treeContent).toHaveStyle('display: inherit');
   });
 });
