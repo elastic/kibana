@@ -8,12 +8,12 @@
 import { StatusError } from './status_error';
 
 /**
- * Error thrown when an attachment (dashboard, rule, etc.) is not found in the current space.
- * This represents the actual entity not existing or not being accessible.
+ * Error thrown when an attachment link is not found in storage.
+ * This represents a missing relationship between a stream and an attachment.
  */
-export class AttachmentNotFoundError extends StatusError {
+export class AttachmentLinkNotFoundError extends StatusError {
   constructor(message: string) {
     super(message, 404);
-    this.name = 'AttachmentNotFoundError';
+    this.name = 'AttachmentLinkNotFoundError';
   }
 }

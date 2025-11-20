@@ -10,6 +10,7 @@ import type { IStorageClient } from '@kbn/storage-adapter';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { AttachmentNotFoundError } from '../errors/attachment_not_found_error';
+import { AttachmentLinkNotFoundError } from '../errors/attachment_link_not_found_error';
 import type { AttachmentStorageSettings } from './storage_settings';
 import { ATTACHMENT_ID, ATTACHMENT_TYPE, ATTACHMENT_UUID, STREAM_NAMES } from './storage_settings';
 import {
@@ -102,6 +103,79 @@ export class AttachmentClient {
   };
 
   /**
+   * Map of validation functions for each attachment type.
+   * TypeScript will enforce that all attachment types have a corresponding validation function.
+   */
+  private validateAttachmentExistsInSpaceMap: Record<
+    AttachmentType,
+    (id: string) => Promise<void>
+  > = {
+    dashboard: async (id) => {
+      try {
+        await this.clients.soClient.get('dashboard', id);
+      } catch (error) {
+        throw new AttachmentNotFoundError(
+          `Dashboard with id "${id}" not found in the current space`
+        );
+      }
+    },
+    rule: async (id) => {
+      try {
+        await this.clients.rulesClient.get({ id });
+      } catch (error) {
+        throw new AttachmentNotFoundError(`Rule with id "${id}" not found in the current space`);
+      }
+    },
+  };
+
+  /**
+   * Validates that an attachment exists in the current space.
+   *
+   * @param link - The attachment link to validate
+   * @throws {AttachmentNotFoundError} If the attachment doesn't exist in the current space
+   */
+  private async validateAttachmentExistsInSpace(link: AttachmentLink): Promise<void> {
+    await this.validateAttachmentExistsInSpaceMap[link.type](link.id);
+  }
+
+  /**
+   * Fetches full attachment details for a given array of attachment links.
+   *
+   * Groups attachment links by type and fetches them efficiently using the appropriate
+   * client methods (bulk operations when available).
+   *
+   * @param attachmentLinks - Array of attachment links to fetch
+   * @returns A promise that resolves with an array of full attachment details
+   */
+  private async fetchAttachments(attachmentLinks: AttachmentLink[]): Promise<Attachment[]> {
+    // Group attachment IDs by type
+    const attachmentIdsByType: Record<AttachmentType, string[]> = {
+      dashboard: [],
+      rule: [],
+    };
+
+    attachmentLinks.forEach((link) => {
+      attachmentIdsByType[link.type].push(link.id);
+    });
+
+    // Fetch attachments for each type and flatten results
+    const attachments: Attachment[] = (
+      await Promise.all(
+        ATTACHMENT_TYPES.map(async (type) => {
+          const ids = attachmentIdsByType[type];
+          if (ids.length === 0) {
+            return [];
+          }
+
+          return this.getAttachmentEntitiesMap[type](ids);
+        })
+      )
+    ).flat();
+
+    return attachments;
+  }
+
+  /**
    * Links an attachment to a stream.
    *
    * If a link to the attachment already exists, adds the stream name to its list of associated streams.
@@ -110,6 +184,7 @@ export class AttachmentClient {
    * @param streamName - The name of the stream to link the attachment to
    * @param link - The attachment link containing the attachment id and type
    * @returns A promise that resolves when the linking operation is complete
+   * @throws {AttachmentNotFoundError} If the attachment doesn't exist in the current space
    *
    * @example
    * ```typescript
@@ -120,6 +195,9 @@ export class AttachmentClient {
    * ```
    */
   async linkAttachment(streamName: string, link: AttachmentLink): Promise<void> {
+    // Validate that the attachment exists in the current space
+    await this.validateAttachmentExistsInSpace(link);
+
     const uuid = getAttachmentLinkUuid(link);
 
     let streamNames: string[];
@@ -166,9 +244,10 @@ export class AttachmentClient {
    * If this is the last stream associated with the link, deletes the link entirely.
    *
    * @param streamName - The name of the stream to unlink the attachment from
-   * @param attachment - The attachment link containing the attachment id and type
+   * @param attachmentLink - The attachment link containing the attachment id and type
    * @returns A promise that resolves when the unlinking operation is complete
-   * @throws {AttachmentNotFoundError} If the attachment doesn't exist
+   * @throws {AttachmentLinkNotFoundError} If the attachment link doesn't exist
+   * @throws {AttachmentNotFoundError} If the attachment doesn't exist in the current space
    *
    * @example
    * ```typescript
@@ -178,30 +257,33 @@ export class AttachmentClient {
    * });
    * ```
    */
-  async unlinkAttachment(streamName: string, attachment: AttachmentLink): Promise<void> {
-    const uuid = getAttachmentLinkUuid(attachment);
+  async unlinkAttachment(streamName: string, attachmentLink: AttachmentLink): Promise<void> {
+    const uuid = getAttachmentLinkUuid(attachmentLink);
 
     let existingAttachment: AttachmentDocument;
 
     try {
-      // Try to fetch the existing attachment
+      // Try to fetch the existing attachment link
       const response = await this.clients.storageClient.get({ id: uuid });
 
       if (!response._source) {
-        throw new AttachmentNotFoundError(
-          `Attachment not found: ${attachment.type}:${attachment.id}`
+        throw new AttachmentLinkNotFoundError(
+          `Attachment link not found: ${attachmentLink.type}:${attachmentLink.id}`
         );
       }
 
       existingAttachment = response._source;
     } catch (error) {
       if (isNotFoundError(error)) {
-        throw new AttachmentNotFoundError(
-          `Attachment not found: ${attachment.type}:${attachment.id}`
+        throw new AttachmentLinkNotFoundError(
+          `Attachment link not found: ${attachmentLink.type}:${attachmentLink.id}`
         );
       }
       throw error;
     }
+
+    // Validate that the attachment exists in the current space
+    await this.validateAttachmentExistsInSpace(attachmentLink);
 
     const existingStreamNames = existingAttachment[STREAM_NAMES];
 
@@ -245,48 +327,71 @@ export class AttachmentClient {
    * It handles both linking (index) and unlinking (delete) operations, managing stream name
    * associations and automatic cleanup when attachments have no remaining stream associations.
    *
+   * All attachments must exist in the current space and all storage operations must succeed,
+   * otherwise the entire operation fails atomically.
+   *
    * @param streamName - The name of the stream for the bulk operations
    * @param operations - Array of bulk operations to perform (index or delete)
-   * @returns A promise that resolves with the bulk operation result
-   * @returns result.errors - Whether any errors occurred during the bulk operation
-   * @returns result.items - Optional array of operation results (if errors occurred)
+   * @returns A promise that resolves when all operations succeed
+   * @throws {AttachmentNotFoundError} If any attachment doesn't exist in the current space
+   * @throws {Error} If any storage operation fails
    *
    * @example
    * ```typescript
-   * const result = await attachmentClient.bulk('my-stream', [
+   * await attachmentClient.bulk('my-stream', [
    *   { index: { attachment: { id: 'dashboard-1', type: 'dashboard' } } },
    *   { delete: { attachment: { id: 'rule-1', type: 'rule' } } }
    * ]);
    * ```
    */
-  async bulk(streamName: string, operations: AttachmentBulkOperation[]) {
+  async bulk(streamName: string, operations: AttachmentBulkOperation[]): Promise<void> {
     if (operations.length === 0) {
-      return { errors: false };
+      return;
     }
 
     const attachmentMap = new Map<
       string,
       {
-        attachment: AttachmentLink;
+        attachmentLink: AttachmentLink;
         operation: 'link' | 'unlink';
         uuid: string;
       }
     >();
+    const attachmentLinksToValidate: AttachmentLink[] = [];
 
     operations.forEach((operation) => {
-      const attachment =
+      const attachmentLink =
         'index' in operation ? operation.index.attachment : operation.delete.attachment;
-      const uuid = getAttachmentLinkUuid(attachment);
+      const uuid = getAttachmentLinkUuid(attachmentLink);
+
+      // Only add to validation array if this is a new attachment (no duplicates)
+      if (!attachmentMap.has(uuid)) {
+        attachmentLinksToValidate.push(attachmentLink);
+      }
+
       attachmentMap.set(uuid, {
-        attachment,
+        attachmentLink,
         operation: 'index' in operation ? 'link' : 'unlink',
         uuid,
       });
     });
 
+    // Step 1: Validate all attachments exist in the current space
+
+    // Fetch attachments that exist in the current space
+    const fetchedAttachments = await this.fetchAttachments(attachmentLinksToValidate);
+
+    // Check if all attachments were found
+    if (fetchedAttachments.length !== attachmentLinksToValidate.length) {
+      const missingCount = attachmentLinksToValidate.length - fetchedAttachments.length;
+      throw new AttachmentNotFoundError(
+        `${missingCount} attachment${missingCount > 1 ? 's' : ''} not found in the current space`
+      );
+    }
+
+    // Step 2: Get existing attachments from storage
     const attachmentUuids = Array.from(attachmentMap.keys());
 
-    // Step 2: Bulk get all attachments from storage
     const existingAttachmentsResponse = await this.clients.storageClient.search({
       size: attachmentUuids.length,
       track_total_hits: false,
@@ -316,7 +421,7 @@ export class AttachmentClient {
       { index: { document: AttachmentDocument; _id: string } } | { delete: { _id: string } }
     > = [];
 
-    attachmentMap.forEach(({ attachment, operation, uuid }) => {
+    attachmentMap.forEach(({ attachmentLink, operation, uuid }) => {
       if (operation === 'link') {
         // For index operations: add stream name to stream.names array
         const existingAttachment = existingAttachmentsByUuid.get(uuid);
@@ -337,8 +442,8 @@ export class AttachmentClient {
           index: {
             _id: uuid,
             document: getAttachmentDocument({
-              id: attachment.id,
-              type: attachment.type,
+              id: attachmentLink.id,
+              type: attachmentLink.type,
               uuid,
               streamNames,
             }),
@@ -381,15 +486,14 @@ export class AttachmentClient {
     });
 
     if (bulkOperations.length === 0) {
-      return { errors: false };
+      return;
     }
 
-    const bulkResponse = await this.clients.storageClient.bulk({
+    // Execute bulk operation - will throw on any failure
+    await this.clients.storageClient.bulk({
       operations: bulkOperations,
       throwOnFail: true,
     });
-
-    return { errors: bulkResponse.errors, items: bulkResponse.items };
   }
 
   /**
@@ -426,33 +530,13 @@ export class AttachmentClient {
       },
     });
 
-    const attachmentDocuments: AttachmentDocument[] = attachmentsResponse.hits.hits.map(
-      ({ _source }) => _source
-    );
+    // Convert attachment documents to attachment links
+    const attachmentLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(({ _source }) => ({
+      id: _source[ATTACHMENT_ID],
+      type: _source[ATTACHMENT_TYPE],
+    }));
 
-    const attachmentIdsByType: Record<AttachmentType, string[]> = {
-      dashboard: [],
-      rule: [],
-    };
-
-    for (const attachment of attachmentDocuments) {
-      attachmentIdsByType[attachment[ATTACHMENT_TYPE]].push(attachment[ATTACHMENT_ID]);
-    }
-
-    const attachments: Attachment[] = (
-      await Promise.all(
-        (attachmentType ? [attachmentType] : ATTACHMENT_TYPES).map(async (type) => {
-          const ids = attachmentIdsByType[type];
-          if (ids.length === 0) {
-            return [];
-          }
-
-          return this.getAttachmentEntitiesMap[type](ids);
-        })
-      )
-    ).flat();
-
-    return attachments;
+    return this.fetchAttachments(attachmentLinks);
   }
 
   /**
@@ -576,8 +660,10 @@ export class AttachmentClient {
     const attachmentLinksDeleted = existingAttachmentLinks.filter((link) => !nextIds.has(link.id));
 
     const operations: AttachmentBulkOperation[] = [
-      ...attachmentLinksDeleted.map((attachment) => ({ delete: { attachment } })),
-      ...links.map((attachment) => ({ index: { attachment } })),
+      ...attachmentLinksDeleted.map((attachmentLink) => ({
+        delete: { attachment: attachmentLink },
+      })),
+      ...links.map((attachmentLink) => ({ index: { attachment: attachmentLink } })),
     ];
 
     if (operations.length) {

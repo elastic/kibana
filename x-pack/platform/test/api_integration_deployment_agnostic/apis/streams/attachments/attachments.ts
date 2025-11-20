@@ -25,6 +25,7 @@ import { loadDashboards, unloadDashboards } from '../helpers/dashboards';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
+  const spaces = getService('spaces');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
@@ -46,7 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const FIRST_RULE_ID = '09cef989-3ded-4a1e-b2b0-53d491d13397';
   const SECOND_RULE_ID = '312638da-43d1-4d6e-8fb8-9cae201cdd3a';
 
-  describe('Generic Attachment API', function () {
+  describe('Attachments API', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -66,19 +67,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
         await kibanaServer.importExport.load(RULE_ARCHIVE, { space: SPACE_ID });
 
-        await linkAttachment(apiClient, 'logs', 'dashboard', SEARCH_DASHBOARD_ID);
-        await linkAttachment(apiClient, 'logs', 'rule', FIRST_RULE_ID);
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        await linkAttachment({ apiClient, stream: 'logs', type: 'rule', id: FIRST_RULE_ID });
       });
 
       after(async () => {
-        await unlinkAttachment(apiClient, 'logs', 'dashboard', SEARCH_DASHBOARD_ID);
-        await unlinkAttachment(apiClient, 'logs', 'rule', FIRST_RULE_ID);
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        await unlinkAttachment({ apiClient, stream: 'logs', type: 'rule', id: FIRST_RULE_ID });
         await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
         await kibanaServer.importExport.unload(RULE_ARCHIVE, { space: SPACE_ID });
       });
 
       it('lists all attachments without type filter', async () => {
-        const response = await getAttachments(apiClient, 'logs');
+        const response = await getAttachments({ apiClient, stream: 'logs' });
 
         expect(response.attachments.length).to.eql(2);
         const types = response.attachments.map((a) => a.type).sort();
@@ -86,7 +97,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists only dashboards when type filter is dashboard', async () => {
-        const response = await getAttachments(apiClient, 'logs', 'dashboard');
+        const response = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+        });
 
         expect(response.attachments.length).to.eql(1);
         expect(response.attachments[0].type).to.eql('dashboard');
@@ -94,7 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists only rules when type filter is rule', async () => {
-        const response = await getAttachments(apiClient, 'logs', 'rule');
+        const response = await getAttachments({ apiClient, stream: 'logs', type: 'rule' });
 
         expect(response.attachments.length).to.eql(1);
         expect(response.attachments[0].type).to.eql('rule');
@@ -113,34 +128,52 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('links a dashboard to a stream', async () => {
-          const linkResponse = await linkAttachment(
+          const linkResponse = await linkAttachment({
             apiClient,
-            'logs',
-            'dashboard',
-            SEARCH_DASHBOARD_ID
-          );
+            stream: 'logs',
+            type: 'dashboard',
+            id: SEARCH_DASHBOARD_ID,
+          });
           expect(linkResponse.acknowledged).to.eql(true);
 
-          const listResponse = await getAttachments(apiClient, 'logs', 'dashboard');
+          const listResponse = await getAttachments({
+            apiClient,
+            stream: 'logs',
+            type: 'dashboard',
+          });
           expect(listResponse.attachments.length).to.eql(1);
           expect(listResponse.attachments[0].id).to.eql(SEARCH_DASHBOARD_ID);
 
           // Clean up
-          await unlinkAttachment(apiClient, 'logs', 'dashboard', SEARCH_DASHBOARD_ID);
+          await unlinkAttachment({
+            apiClient,
+            stream: 'logs',
+            type: 'dashboard',
+            id: SEARCH_DASHBOARD_ID,
+          });
         });
 
         it('unlinks a dashboard from a stream', async () => {
-          await linkAttachment(apiClient, 'logs', 'dashboard', SEARCH_DASHBOARD_ID);
-
-          const unlinkResponse = await unlinkAttachment(
+          await linkAttachment({
             apiClient,
-            'logs',
-            'dashboard',
-            SEARCH_DASHBOARD_ID
-          );
+            stream: 'logs',
+            type: 'dashboard',
+            id: SEARCH_DASHBOARD_ID,
+          });
+
+          const unlinkResponse = await unlinkAttachment({
+            apiClient,
+            stream: 'logs',
+            type: 'dashboard',
+            id: SEARCH_DASHBOARD_ID,
+          });
           expect(unlinkResponse.acknowledged).to.eql(true);
 
-          const listResponse = await getAttachments(apiClient, 'logs', 'dashboard');
+          const listResponse = await getAttachments({
+            apiClient,
+            stream: 'logs',
+            type: 'dashboard',
+          });
           expect(listResponse.attachments.length).to.eql(0);
         });
 
@@ -164,18 +197,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          await linkAttachment(apiClient, 'logs', 'dashboard', SEARCH_DASHBOARD_ID);
-          await linkAttachment(apiClient, 'logs.child', 'dashboard', SEARCH_DASHBOARD_ID);
+          await linkAttachment({
+            apiClient,
+            stream: 'logs',
+            type: 'dashboard',
+            id: SEARCH_DASHBOARD_ID,
+          });
+          await linkAttachment({
+            apiClient,
+            stream: 'logs.child',
+            type: 'dashboard',
+            id: SEARCH_DASHBOARD_ID,
+          });
 
-          const logsResponse = await getAttachments(apiClient, 'logs', 'dashboard');
-          const childResponse = await getAttachments(apiClient, 'logs.child', 'dashboard');
+          const logsResponse = await getAttachments({
+            apiClient,
+            stream: 'logs',
+            type: 'dashboard',
+          });
+          const childResponse = await getAttachments({
+            apiClient,
+            stream: 'logs.child',
+            type: 'dashboard',
+          });
 
           expect(logsResponse.attachments.length).to.eql(1);
           expect(childResponse.attachments.length).to.eql(1);
 
           // Clean up
-          await unlinkAttachment(apiClient, 'logs', 'dashboard', SEARCH_DASHBOARD_ID);
-          await unlinkAttachment(apiClient, 'logs.child', 'dashboard', SEARCH_DASHBOARD_ID);
+          await unlinkAttachment({
+            apiClient,
+            stream: 'logs',
+            type: 'dashboard',
+            id: SEARCH_DASHBOARD_ID,
+          });
+          await unlinkAttachment({
+            apiClient,
+            stream: 'logs.child',
+            type: 'dashboard',
+            id: SEARCH_DASHBOARD_ID,
+          });
           await deleteStream(apiClient, 'logs.child');
         });
       });
@@ -190,24 +251,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('links a rule to a stream', async () => {
-          const linkResponse = await linkAttachment(apiClient, 'logs', 'rule', FIRST_RULE_ID);
+          const linkResponse = await linkAttachment({
+            apiClient,
+            stream: 'logs',
+            type: 'rule',
+            id: FIRST_RULE_ID,
+          });
           expect(linkResponse.acknowledged).to.eql(true);
 
-          const listResponse = await getAttachments(apiClient, 'logs', 'rule');
+          const listResponse = await getAttachments({ apiClient, stream: 'logs', type: 'rule' });
           expect(listResponse.attachments.length).to.eql(1);
           expect(listResponse.attachments[0].id).to.eql(FIRST_RULE_ID);
 
           // Clean up
-          await unlinkAttachment(apiClient, 'logs', 'rule', FIRST_RULE_ID);
+          await unlinkAttachment({ apiClient, stream: 'logs', type: 'rule', id: FIRST_RULE_ID });
         });
 
         it('unlinks a rule from a stream', async () => {
-          await linkAttachment(apiClient, 'logs', 'rule', FIRST_RULE_ID);
+          await linkAttachment({ apiClient, stream: 'logs', type: 'rule', id: FIRST_RULE_ID });
 
-          const unlinkResponse = await unlinkAttachment(apiClient, 'logs', 'rule', FIRST_RULE_ID);
+          const unlinkResponse = await unlinkAttachment({
+            apiClient,
+            stream: 'logs',
+            type: 'rule',
+            id: FIRST_RULE_ID,
+          });
           expect(unlinkResponse.acknowledged).to.eql(true);
 
-          const listResponse = await getAttachments(apiClient, 'logs', 'rule');
+          const listResponse = await getAttachments({ apiClient, stream: 'logs', type: 'rule' });
           expect(listResponse.attachments.length).to.eql(0);
         });
       });
@@ -225,88 +296,136 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('bulk links multiple dashboards', async () => {
-        await bulkAttachments(apiClient, 'logs', [
-          { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
-          { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
-        ]);
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+          ],
+        });
 
-        const listResponse = await getAttachments(apiClient, 'logs', 'dashboard');
+        const listResponse = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+        });
         expect(listResponse.attachments.length).to.eql(2);
 
         // Clean up
-        await bulkAttachments(apiClient, 'logs', [
-          { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
-          { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
-        ]);
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+          ],
+        });
       });
 
       it('bulk unlinks multiple dashboards', async () => {
-        await bulkAttachments(apiClient, 'logs', [
-          { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
-          { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
-        ]);
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+          ],
+        });
 
-        await bulkAttachments(apiClient, 'logs', [
-          { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
-          { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
-        ]);
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+          ],
+        });
 
-        const listResponse = await getAttachments(apiClient, 'logs', 'dashboard');
+        const listResponse = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+        });
         expect(listResponse.attachments.length).to.eql(0);
       });
 
       it('bulk links mixed attachment types (dashboards and rules)', async () => {
-        await bulkAttachments(apiClient, 'logs', [
-          { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
-          { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
-          { index: { type: 'rule', id: FIRST_RULE_ID } },
-          { index: { type: 'rule', id: SECOND_RULE_ID } },
-        ]);
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+            { index: { type: 'rule', id: FIRST_RULE_ID } },
+            { index: { type: 'rule', id: SECOND_RULE_ID } },
+          ],
+        });
 
-        const allAttachments = await getAttachments(apiClient, 'logs');
+        const allAttachments = await getAttachments({ apiClient, stream: 'logs' });
         expect(allAttachments.attachments.length).to.eql(4);
 
-        const dashboards = await getAttachments(apiClient, 'logs', 'dashboard');
+        const dashboards = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+        });
         expect(dashboards.attachments.length).to.eql(2);
 
-        const rules = await getAttachments(apiClient, 'logs', 'rule');
+        const rules = await getAttachments({ apiClient, stream: 'logs', type: 'rule' });
         expect(rules.attachments.length).to.eql(2);
 
         // Clean up
-        await bulkAttachments(apiClient, 'logs', [
-          { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
-          { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
-          { delete: { type: 'rule', id: FIRST_RULE_ID } },
-          { delete: { type: 'rule', id: SECOND_RULE_ID } },
-        ]);
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+            { delete: { type: 'rule', id: FIRST_RULE_ID } },
+            { delete: { type: 'rule', id: SECOND_RULE_ID } },
+          ],
+        });
       });
 
       it('bulk operations with mixed actions (index and delete)', async () => {
         // First, link some attachments
-        await bulkAttachments(apiClient, 'logs', [
-          { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
-          { index: { type: 'rule', id: FIRST_RULE_ID } },
-        ]);
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { index: { type: 'rule', id: FIRST_RULE_ID } },
+          ],
+        });
 
         // Now do a mixed operation: add new ones and delete existing ones
-        await bulkAttachments(apiClient, 'logs', [
-          { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
-          { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
-          { index: { type: 'rule', id: SECOND_RULE_ID } },
-        ]);
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { delete: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+            { index: { type: 'rule', id: SECOND_RULE_ID } },
+          ],
+        });
 
-        const allAttachments = await getAttachments(apiClient, 'logs');
+        const allAttachments = await getAttachments({ apiClient, stream: 'logs' });
         expect(allAttachments.attachments.length).to.eql(3);
 
         const attachmentIds = allAttachments.attachments.map((a) => a.id).sort();
         expect(attachmentIds).to.eql([BASIC_DASHBOARD_ID, FIRST_RULE_ID, SECOND_RULE_ID].sort());
 
         // Clean up
-        await bulkAttachments(apiClient, 'logs', [
-          { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
-          { delete: { type: 'rule', id: FIRST_RULE_ID } },
-          { delete: { type: 'rule', id: SECOND_RULE_ID } },
-        ]);
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+            { delete: { type: 'rule', id: FIRST_RULE_ID } },
+            { delete: { type: 'rule', id: SECOND_RULE_ID } },
+          ],
+        });
       });
     });
 
@@ -391,6 +510,171 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.suggestions.length).to.eql(1);
         response.suggestions.forEach((suggestion) => {
           expect(suggestion.type).to.eql('dashboard');
+        });
+      });
+    });
+
+    describe('Cross-space linking', () => {
+      const TEST_SPACE_ID = 'test-space';
+
+      before(async () => {
+        // Create a new space
+        await spaces.create({
+          id: TEST_SPACE_ID,
+          name: 'Test Space',
+          disabledFeatures: [],
+        });
+
+        // Load dashboards and rules in the test space
+        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, TEST_SPACE_ID);
+        await kibanaServer.importExport.load(RULE_ARCHIVE, { space: TEST_SPACE_ID });
+      });
+
+      after(async () => {
+        await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, TEST_SPACE_ID);
+        await kibanaServer.importExport.unload(RULE_ARCHIVE, { space: TEST_SPACE_ID });
+        await spaces.delete(TEST_SPACE_ID);
+      });
+
+      it('should return 404 when trying to link a dashboard from another space', async () => {
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          expectedStatusCode: 404,
+        });
+      });
+
+      it('should return 404 when trying to link a rule from another space', async () => {
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
+          expectedStatusCode: 404,
+        });
+      });
+
+      it('should successfully link a dashboard from the same space', async () => {
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+
+        // Verify the link was created
+        const attachments = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          spaceId: TEST_SPACE_ID,
+        });
+        expect(attachments.attachments.length).to.eql(1);
+        expect(attachments.attachments[0].id).to.eql(SEARCH_DASHBOARD_ID);
+
+        // Clean up
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+      });
+
+      it('should successfully link a rule from the same space', async () => {
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+
+        // Verify the link was created
+        const attachments = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          spaceId: TEST_SPACE_ID,
+        });
+        expect(attachments.attachments.length).to.eql(1);
+        expect(attachments.attachments[0].id).to.eql(FIRST_RULE_ID);
+
+        // Clean up
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'rule',
+          id: FIRST_RULE_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+      });
+
+      it('should fail bulk operation when one attachment is from another space', async () => {
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [
+            { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
+            { index: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
+          ],
+          expectedStatusCode: 404,
+        });
+      });
+
+      it('should return suggestions in the test space', async () => {
+        const response = await getAttachmentSuggestions({
+          apiClient,
+          stream: 'logs',
+          tags: [],
+          query: '',
+          spaceId: TEST_SPACE_ID,
+        });
+
+        expect(response.suggestions.length).to.be.greaterThan(0);
+      });
+
+      it('should not return suggestions in the default space', async () => {
+        const response = await getAttachmentSuggestions({
+          apiClient,
+          stream: 'logs',
+          tags: [],
+          query: '',
+        });
+
+        expect(response.suggestions.length).to.eql(0);
+      });
+
+      it('should not see attachments from test space when querying from default space', async () => {
+        // Link a dashboard to the stream in the test space
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
+        });
+
+        // Try to get attachments from the default space
+        const response = await getAttachments({
+          apiClient,
+          stream: 'logs',
+        });
+
+        // Should not see any attachments because the dashboard was linked from test space
+        expect(response.attachments.length).to.eql(0);
+
+        // Clean up
+        await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+          spaceId: TEST_SPACE_ID,
         });
       });
     });

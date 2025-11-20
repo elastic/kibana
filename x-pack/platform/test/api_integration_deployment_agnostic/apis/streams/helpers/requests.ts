@@ -236,46 +236,68 @@ export async function getDashboardSuggestions(options: {
   return response.body;
 }
 
-export async function linkAttachment(
-  apiClient: StreamsSupertestRepositoryClient,
-  stream: string,
-  type: AttachmentType,
-  id: string
-) {
-  const response = await apiClient.fetch(
-    'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
-    {
-      params: { path: { streamName: stream, attachmentType: type, attachmentId: id } },
-    }
-  );
+export async function linkAttachment(options: {
+  apiClient: StreamsSupertestRepositoryClient;
+  stream: string;
+  type: AttachmentType;
+  id: string;
+  expectedStatusCode?: number;
+  spaceId?: string;
+}) {
+  const { apiClient, stream, type, id, expectedStatusCode = 200, spaceId } = options;
 
-  expect(response.status).to.be(200);
+  const baseEndpoint =
+    'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31';
+  const endpoint = spaceId
+    ? (baseEndpoint.replace('/api/', `/s/${spaceId}/api/`) as typeof baseEndpoint)
+    : baseEndpoint;
+
+  const response = await apiClient.fetch(endpoint, {
+    params: { path: { streamName: stream, attachmentType: type, attachmentId: id } },
+  });
+
+  expect(response.status).to.be(expectedStatusCode);
   return response.body;
 }
 
-export async function unlinkAttachment(
-  apiClient: StreamsSupertestRepositoryClient,
-  stream: string,
-  type: AttachmentType,
-  id: string
-) {
-  const response = await apiClient.fetch(
-    'DELETE /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
-    {
-      params: { path: { streamName: stream, attachmentType: type, attachmentId: id } },
-    }
-  );
+export async function unlinkAttachment(options: {
+  apiClient: StreamsSupertestRepositoryClient;
+  stream: string;
+  type: AttachmentType;
+  id: string;
+  expectedStatusCode?: number;
+  spaceId?: string;
+}) {
+  const { apiClient, stream, type, id, expectedStatusCode = 200, spaceId } = options;
 
-  expect(response.status).to.be(200);
+  const baseEndpoint =
+    'DELETE /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31';
+  const endpoint = spaceId
+    ? (baseEndpoint.replace('/api/', `/s/${spaceId}/api/`) as typeof baseEndpoint)
+    : baseEndpoint;
+
+  const response = await apiClient.fetch(endpoint, {
+    params: { path: { streamName: stream, attachmentType: type, attachmentId: id } },
+  });
+
+  expect(response.status).to.be(expectedStatusCode);
   return response.body;
 }
 
-export async function getAttachments(
-  apiClient: StreamsSupertestRepositoryClient,
-  stream: string,
-  type?: AttachmentType
-) {
-  const response = await apiClient.fetch('GET /api/streams/{streamName}/attachments 2023-10-31', {
+export async function getAttachments(options: {
+  apiClient: StreamsSupertestRepositoryClient;
+  stream: string;
+  type?: AttachmentType;
+  spaceId?: string;
+}) {
+  const { apiClient, stream, type, spaceId } = options;
+
+  const baseEndpoint = 'GET /api/streams/{streamName}/attachments 2023-10-31';
+  const endpoint = spaceId
+    ? (baseEndpoint.replace('/api/', `/s/${spaceId}/api/`) as typeof baseEndpoint)
+    : baseEndpoint;
+
+  const response = await apiClient.fetch(endpoint, {
     params: {
       path: { streamName: stream },
       query: type ? { attachmentType: type } : {},
@@ -286,25 +308,31 @@ export async function getAttachments(
   return response.body;
 }
 
-export async function bulkAttachments(
-  apiClient: StreamsSupertestRepositoryClient,
-  stream: string,
+export async function bulkAttachments(options: {
+  apiClient: StreamsSupertestRepositoryClient;
+  stream: string;
   operations: Array<
     | { index: { type: AttachmentType; id: string } }
     | { delete: { type: AttachmentType; id: string } }
-  >
-) {
-  const response = await apiClient.fetch(
-    'POST /api/streams/{streamName}/attachments/_bulk 2023-10-31',
-    {
-      params: {
-        path: { streamName: stream },
-        body: { operations },
-      },
-    }
-  );
+  >;
+  expectedStatusCode?: number;
+  spaceId?: string;
+}) {
+  const { apiClient, stream, operations, expectedStatusCode = 200, spaceId } = options;
 
-  expect(response.status).to.be(200);
+  const baseEndpoint = 'POST /api/streams/{streamName}/attachments/_bulk 2023-10-31';
+  const endpoint = spaceId
+    ? (baseEndpoint.replace('/api/', `/s/${spaceId}/api/`) as typeof baseEndpoint)
+    : baseEndpoint;
+
+  const response = await apiClient.fetch(endpoint, {
+    params: {
+      path: { streamName: stream },
+      body: { operations },
+    },
+  });
+
+  expect(response.status).to.be(expectedStatusCode);
   return response.body;
 }
 
@@ -314,18 +342,22 @@ export async function getAttachmentSuggestions(options: {
   type?: AttachmentType;
   tags: string[];
   query?: string;
+  spaceId?: string;
 }) {
-  const { apiClient, stream, type, tags, query = '' } = options;
-  const response = await apiClient.fetch(
-    'POST /internal/streams/{streamName}/attachments/_suggestions',
-    {
-      params: {
-        path: { streamName: stream },
-        body: { tags },
-        query: { query, ...(type ? { attachmentType: type } : {}) },
-      },
-    }
-  );
+  const { apiClient, stream, type, tags, query = '', spaceId } = options;
+
+  const baseEndpoint = 'POST /internal/streams/{streamName}/attachments/_suggestions';
+  const endpoint = spaceId
+    ? (baseEndpoint.replace('/internal/', `/s/${spaceId}/internal/`) as typeof baseEndpoint)
+    : baseEndpoint;
+
+  const response = await apiClient.fetch(endpoint, {
+    params: {
+      path: { streamName: stream },
+      body: { tags },
+      query: { query, ...(type ? { attachmentType: type } : {}) },
+    },
+  });
   expect(response.status).to.be(200);
 
   return response.body;
