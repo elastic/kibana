@@ -91,7 +91,7 @@ describe('conversationLangchainMessages', () => {
   it('returns only the user message if no previous rounds', () => {
     const nextInput = makeRoundInput('hello');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds: [], nextInput },
+      conversation: { previousRounds: [], nextInput, attachmentTypes: [] },
     });
     expect(result).toHaveLength(1);
     expect(isHumanMessage(result[0])).toBe(true);
@@ -112,7 +112,7 @@ describe('conversationLangchainMessages', () => {
     ];
     const nextInput = makeRoundInput('how are you?');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds, nextInput },
+      conversation: { previousRounds, nextInput, attachmentTypes: [] },
     });
 
     expect(result).toHaveLength(3);
@@ -149,7 +149,7 @@ describe('conversationLangchainMessages', () => {
     ];
     const nextInput = makeRoundInput('next');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds, nextInput },
+      conversation: { previousRounds, nextInput, attachmentTypes: [] },
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
@@ -215,7 +215,7 @@ describe('conversationLangchainMessages', () => {
     ];
     const nextInput = makeRoundInput('bye');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds, nextInput },
+      conversation: { previousRounds, nextInput, attachmentTypes: [] },
     });
     // 1 user + 1 assistant + 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(7);
@@ -274,7 +274,7 @@ describe('conversationLangchainMessages', () => {
     ];
     const nextInput = makeRoundInput('next');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds, nextInput },
+      conversation: { previousRounds, nextInput, attachmentTypes: [] },
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
@@ -295,7 +295,7 @@ describe('conversationLangchainMessages', () => {
       );
       const nextInput = makeRoundInput('hello with attachment', [attachment]);
       const result = conversationToLangchainMessages({
-        conversation: { previousRounds: [], nextInput },
+        conversation: { previousRounds: [], nextInput, attachmentTypes: [] },
       });
 
       expect(result).toHaveLength(1);
@@ -326,7 +326,7 @@ describe('conversationLangchainMessages', () => {
         attachment2,
       ]);
       const result = conversationToLangchainMessages({
-        conversation: { previousRounds: [], nextInput },
+        conversation: { previousRounds: [], nextInput, attachmentTypes: [] },
       });
 
       expect(result).toHaveLength(1);
@@ -361,7 +361,7 @@ describe('conversationLangchainMessages', () => {
       ];
       const nextInput = makeRoundInput('next message');
       const result = conversationToLangchainMessages({
-        conversation: { previousRounds, nextInput },
+        conversation: { previousRounds, nextInput, attachmentTypes: [] },
       });
 
       expect(result).toHaveLength(3);
