@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getLensLayerTypeTabDisplayName } from '@kbn/lens-common';
+import { getLensLayerTypeTabDisplayName, lensLayerTypeTabDisplayNames } from '@kbn/lens-common';
 import type { LayerAction, Visualization } from '@kbn/lens-common';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
@@ -235,7 +235,7 @@ export function LayerTabs({
 
       return {
         id: layerConfig.layerId,
-        label: layerLabels.get(layerConfig.layerId) || 'Unknown',
+        label: layerLabels.get(layerConfig.layerId) || lensLayerTypeTabDisplayNames.unknown,
         customMenuButton: (
           <LayerActions
             actions={compatibleActions}
