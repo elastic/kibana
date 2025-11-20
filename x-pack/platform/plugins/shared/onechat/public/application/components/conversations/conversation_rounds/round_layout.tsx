@@ -50,6 +50,8 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : ''}
   `;
 
+  const isCurrentRoundLoading = isResponseLoading && isCurrentRound;
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -64,13 +66,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
       {/* Thinking */}
       <EuiFlexItem grow={false}>
-        <RoundThinking steps={steps} isLoading={isResponseLoading} rawRound={rawRound} />
+        <RoundThinking steps={steps} isLoading={isCurrentRoundLoading} rawRound={rawRound} />
       </EuiFlexItem>
 
       {/* Response Message */}
       <EuiFlexItem grow={false}>
         <EuiFlexItem>
-          <RoundResponse response={response} steps={steps} isLoading={isResponseLoading} />
+          <RoundResponse response={response} steps={steps} isLoading={isCurrentRoundLoading} />
         </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>

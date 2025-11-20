@@ -16,23 +16,39 @@ const labels = {
   }),
 };
 
+// TODO: migrate to EUI
+const borderRadius = '12px 12px 0 12px';
+
 interface RoundInputProps {
   input: string;
 }
 
 export const RoundInput = ({ input }: RoundInputProps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
+  const backgroundColorStyle =
+    colorMode === 'DARK'
+      ? { background: euiTheme.colors.backgroundBasePrimary }
+      : {
+          background: `linear-gradient(
+          90deg,
+          ${euiTheme.colors.backgroundBasePrimary} 0%,
+          ${euiTheme.colors.backgroundBasePrimary} 70%,
+          ${euiTheme.colors.backgroundBaseSubdued} 100%
+        )`,
+        };
+
   const inputContainerStyles = css`
     align-self: end;
-    max-inline-size: 80%;
-    background-color: ${euiTheme.colors.backgroundBasePrimary};
+    max-inline-size: 90%;
+    background: ${backgroundColorStyle.background};
     ${euiTextBreakWord()}
+    border-radius: ${borderRadius};
   `;
 
   return (
     <EuiPanel
       css={inputContainerStyles}
-      paddingSize="m"
+      paddingSize="l"
       hasShadow={false}
       hasBorder={false}
       aria-label={labels.userMessage}
