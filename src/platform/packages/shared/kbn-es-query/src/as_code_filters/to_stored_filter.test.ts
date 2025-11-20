@@ -12,7 +12,6 @@ import type { StoredFilter } from './types';
 import { toStoredFilter } from './to_stored_filter';
 import { fromStoredFilter } from './from_stored_filter';
 import { FilterStateStore } from '../..';
-import { FilterConversionError } from './errors';
 import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
 
 describe('toStoredFilter', () => {
@@ -26,7 +25,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result = toStoredFilter(simplified);
+      const result = toStoredFilter(simplified) as StoredFilter;
 
       expect(result.$state).toEqual({ store: 'appState' });
       expect(result.meta).toMatchObject({
@@ -54,7 +53,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result = toStoredFilter(simplified);
+      const result = toStoredFilter(simplified) as StoredFilter;
 
       expect(result.$state).toEqual({ store: 'globalState' });
     });
@@ -70,7 +69,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result = toStoredFilter(simplified);
+      const result = toStoredFilter(simplified) as StoredFilter;
 
       // AND groups use combined filter format
       expect(result.meta.type).toBe('combined');
@@ -85,7 +84,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result = toStoredFilter(simplified);
+      const result = toStoredFilter(simplified) as StoredFilter;
 
       expect(result.query).toEqual({
         script: { source: 'doc.field.value > 0' },
@@ -93,10 +92,10 @@ describe('toStoredFilter', () => {
       expect(result.meta.type).toBe('custom');
     });
 
-    it('should throw for filters with no type', () => {
+    it('should return undefined for filters with no type', () => {
       const simplified = {} as AsCodeFilter;
 
-      expect(() => toStoredFilter(simplified)).toThrow(FilterConversionError);
+      expect(toStoredFilter(simplified)).toBeUndefined();
     });
   });
 
@@ -141,7 +140,7 @@ describe('toStoredFilter', () => {
       } as StoredFilter;
 
       const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
-      const roundTripFilter = toStoredFilter(asCodeFilter);
+      const roundTripFilter = toStoredFilter(asCodeFilter) as StoredFilter;
       expect(roundTripFilter).toEqual(originalFilter);
     });
 
@@ -152,7 +151,7 @@ describe('toStoredFilter', () => {
       const simpleFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
 
       // Convert back to StoredFilter
-      const roundTripFilter = toStoredFilter(simpleFilter);
+      const roundTripFilter = toStoredFilter(simpleFilter) as StoredFilter;
 
       // Verify core query is preserved
       expect(roundTripFilter.query).toEqual(originalFilter.query);
@@ -206,7 +205,7 @@ describe('toStoredFilter', () => {
       expect(asCodeFilter.filterType).toBe('phrase');
 
       // Convert back to StoredFilter
-      const roundTrip = toStoredFilter(asCodeFilter);
+      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // Verify script is preserved
       expect(roundTrip.query).toEqual(scriptedPhraseFilter.query);
@@ -251,7 +250,7 @@ describe('toStoredFilter', () => {
       expect(asCodeFilter.filterType).toBe('range');
 
       // Convert back to StoredFilter
-      const roundTrip = toStoredFilter(asCodeFilter);
+      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // Verify script is preserved
       expect(roundTrip.query).toEqual(scriptedRangeFilter.query);
@@ -298,7 +297,7 @@ describe('toStoredFilter', () => {
       expect(asCodeFilter.filterType).toBe('phrase');
 
       // Round-trip
-      const roundTrip = toStoredFilter(asCodeFilter);
+      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
       expect(roundTrip.query?.script).toBeDefined();
       expect(roundTrip.meta.type).toBe('phrase');
@@ -347,7 +346,7 @@ describe('toStoredFilter', () => {
       expect(asCodeFilter.key).toBe('@timestamp');
 
       // Convert back to StoredFilter
-      const roundTrip = toStoredFilter(asCodeFilter);
+      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // Verify format is present
       expect(roundTrip.query?.range?.['@timestamp']).toBeDefined();
@@ -394,7 +393,7 @@ describe('toStoredFilter', () => {
       expect(asCodeFilter.filterType).toBe('range');
 
       // Convert back
-      const roundTrip = toStoredFilter(asCodeFilter);
+      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
       expect(roundTrip.meta.type).toBe('range');
     });
@@ -427,7 +426,7 @@ describe('toStoredFilter', () => {
       };
 
       const asCodeFilter = fromStoredFilter(singleDateFilter) as AsCodeFilter;
-      const roundTrip = toStoredFilter(asCodeFilter);
+      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // Format is normalized (see previous test for explanation)
       expect(roundTrip.query?.range?.['@timestamp'].format).toBe('strict_date_optional_time');
@@ -467,7 +466,7 @@ describe('toStoredFilter', () => {
       }
       expect(asCodeFilter.pinned).toBe(true);
 
-      const roundTrip = toStoredFilter(asCodeFilter);
+      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
       expect(roundTrip.query?.range?.['@timestamp'].gte).toBe('now-15m');
       expect(roundTrip.query?.range?.['@timestamp'].lte).toBe('now');
     });
@@ -483,7 +482,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const storedFilter = toStoredFilter(asCodeFilter);
+      const storedFilter = toStoredFilter(asCodeFilter) as StoredFilter;
 
       expect(storedFilter.meta.type).toBe('phrases');
       expect(storedFilter.meta.negate).toBe(true);
@@ -544,7 +543,7 @@ describe('toStoredFilter', () => {
       }
 
       // Convert back to StoredFilter
-      const roundTripFilter = toStoredFilter(asCodeFilter);
+      const roundTripFilter = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // Should still be a phrases filter with negate: true
       expect(roundTripFilter.meta.type).toBe('phrases');
@@ -584,7 +583,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const storedFilter = toStoredFilter(asCodeFilter);
+      const storedFilter = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // Should be converted to a phrases filter with negate
       expect(storedFilter.meta.type).toBe('phrases');
@@ -631,7 +630,7 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(originalStoredFilter) as AsCodeFilter;
 
       // Convert back to StoredFilter
-      const roundTripFilter = toStoredFilter(asCodeFilter);
+      const roundTripFilter = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // The structure should remain the same
       expect(roundTripFilter.meta.type).toBe('phrases');
@@ -701,7 +700,7 @@ describe('toStoredFilter', () => {
       }
 
       // Round-trip back to stored format
-      const roundTripped = toStoredFilter(asCodeFilter);
+      const roundTripped = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // Both queries should be preserved
       if ('query' in roundTripped && roundTripped.query) {
@@ -711,8 +710,9 @@ describe('toStoredFilter', () => {
       }
     });
 
-    it('should handle single query filter with incomplete metadata as condition', () => {
-      // A filter that has query but incomplete metadata
+    it('should handle single query filter with incomplete metadata as DSL', () => {
+      // A filter that has query but incomplete metadata (no meta.type)
+      // Based on type-first approach, this should fall back to DSL
       const singleQueryFilter: StoredFilter = {
         meta: {
           // Incomplete metadata - no type, no key
@@ -732,14 +732,14 @@ describe('toStoredFilter', () => {
 
       const asCodeFilter = fromStoredFilter(singleQueryFilter) as AsCodeFilter;
 
-      // Should be converted to a simple condition
-      expect('condition' in asCodeFilter).toBe(true);
-      if ('condition' in asCodeFilter) {
-        expect(asCodeFilter.condition.field).toBe('message');
-        expect(asCodeFilter.condition.operator).toBe('is');
-        if ('value' in asCodeFilter.condition) {
-          expect(asCodeFilter.condition.value).toBe('error occurred');
-        }
+      // Should be preserved as DSL since there's no meta.type
+      expect('dsl' in asCodeFilter).toBe(true);
+      if ('dsl' in asCodeFilter) {
+        expect(asCodeFilter.dsl.query).toEqual({
+          match_phrase: {
+            message: 'error occurred',
+          },
+        });
       }
     });
 
@@ -840,7 +840,7 @@ describe('toStoredFilter', () => {
       }
 
       // Round-trip to verify NO data loss
-      const roundTripped = toStoredFilter(asCodeFilter);
+      const roundTripped = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // The should clause is PRESERVED (not lost!)
       if ('query' in roundTripped && roundTripped.query?.bool) {
@@ -885,6 +885,172 @@ describe('toStoredFilter', () => {
         expect(queryStr.includes('status')).toBe(true);
         expect(queryStr.includes('active')).toBe(true);
       }
+    });
+
+    it('should handle nested combined filters and strip $state from sub-filters during round-trip', () => {
+      // Complex nested combined filter structure
+      // Note: The input has $state on nested filters, but buildCombinedFilter strips these
+      const nestedCombinedFilter: StoredFilter = {
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        meta: {
+          type: 'combined',
+          relation: 'AND',
+          params: [
+            {
+              query: {
+                match_phrase: {
+                  'extension.keyword': 'deb',
+                },
+              },
+              meta: {
+                negate: true,
+                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                key: 'extension.keyword',
+                field: 'extension.keyword',
+                params: {
+                  query: 'deb',
+                },
+                type: 'phrase',
+                disabled: false,
+              },
+            },
+            {
+              $state: {
+                store: FilterStateStore.APP_STATE,
+              },
+              meta: {
+                type: 'combined',
+                relation: 'OR',
+                params: [
+                  {
+                    query: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match_phrase: {
+                              'machine.os.keyword': 'ios',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'machine.os.keyword': 'osx',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'machine.os.keyword': 'win 8',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    meta: {
+                      negate: true,
+                      index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                      key: 'machine.os.keyword',
+                      field: 'machine.os.keyword',
+                      params: ['ios', 'osx', 'win 8'],
+                      value: ['ios', 'osx', 'win 8'],
+                      type: 'phrases',
+                      disabled: false,
+                    },
+                  },
+                  {
+                    $state: {
+                      store: FilterStateStore.APP_STATE,
+                    },
+                    meta: {
+                      type: 'combined',
+                      relation: 'AND',
+                      params: [
+                        {
+                          query: {
+                            exists: {
+                              field: 'geo.dest',
+                            },
+                          },
+                          meta: {
+                            negate: true,
+                            index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                            key: 'geo.dest',
+                            field: 'geo.dest',
+                            value: 'exists',
+                            type: 'exists',
+                            disabled: false,
+                          },
+                        },
+                        {
+                          meta: {
+                            negate: false,
+                            index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                            key: 'geo.src',
+                            field: 'geo.src',
+                            value: 'exists',
+                            type: 'exists',
+                            disabled: false,
+                          },
+                          query: {
+                            exists: {
+                              field: 'geo.src',
+                            },
+                          },
+                        },
+                      ],
+                      index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                      disabled: false,
+                      negate: false,
+                    },
+                  },
+                ],
+                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                disabled: false,
+                negate: false,
+              },
+            },
+          ],
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        query: {},
+      };
+
+      // Convert to AsCodeFilter and back
+      const asCodeFilter = fromStoredFilter(nestedCombinedFilter);
+      expect(asCodeFilter).toBeDefined();
+
+      const roundTripped = toStoredFilter(asCodeFilter!) as StoredFilter;
+
+      // Verify top-level structure
+      expect(roundTripped.$state).toEqual({ store: FilterStateStore.APP_STATE });
+      expect(roundTripped.meta.type).toBe('combined');
+      expect(roundTripped.meta.relation).toBe('AND');
+      expect(Array.isArray(roundTripped.meta.params)).toBe(true);
+      expect(roundTripped.meta.params).toHaveLength(2);
+
+      // Verify first param is a simple phrase filter (no $state)
+      const firstParam = roundTripped.meta.params[0] as StoredFilter;
+      expect(firstParam.$state).toBeUndefined();
+      expect(firstParam.meta.type).toBe('phrase');
+      expect(firstParam.meta.key).toBe('extension.keyword');
+
+      // Verify second param is a nested combined filter WITHOUT $state
+      // The buildCombinedFilter function strips $state from all sub-filters
+      const secondParam = roundTripped.meta.params[1] as StoredFilter;
+      expect(secondParam.$state).toBeUndefined();
+      expect(secondParam.meta.type).toBe('combined');
+      expect(secondParam.meta.relation).toBe('OR');
+      expect(Array.isArray(secondParam.meta.params)).toBe(true);
+      expect(secondParam.meta.params).toHaveLength(2);
+
+      // Verify deeply nested combined filter also has no $state
+      const nestedCombinedInOr = secondParam.meta.params[1] as StoredFilter;
+      expect(nestedCombinedInOr.$state).toBeUndefined();
+      expect(nestedCombinedInOr.meta.type).toBe('combined');
+      expect(nestedCombinedInOr.meta.relation).toBe('AND');
     });
   });
 });

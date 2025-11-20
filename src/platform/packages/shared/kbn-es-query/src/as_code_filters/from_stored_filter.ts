@@ -11,8 +11,8 @@
  * Functions for converting stored filters to AsCodeFilter format
  *
  * CONVERSION APPROACH:
- * - Type-first: Uses meta.type from FILTERS enum when available for explicit, deterministic routing
- * - Fallback: Detects type from query structure for filters without meta.type (legacy/build functions)
+ * - Type-first: Uses meta.type from FILTERS enum for explicit, deterministic routing
+ * - Fallback: Filters without meta.type are preserved as DSL to prevent data loss
  * - DSL Preservation: Complex filters that can't be simplified are preserved as DSL
  *
  * This approach eliminates ambiguity, prevents data loss, and maintains backward compatibility.
@@ -29,7 +29,6 @@ import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 import type { StoredFilter } from './types';
 import { migrateFilter } from '../es_query/migrate_filter';
 import { FilterConversionError } from './errors';
-import { extractBaseProperties } from './utils';
 import { FILTERS } from '../filters/build_filters/types';
 import {
   isLegacyFilter,
@@ -44,29 +43,10 @@ import {
 } from './type_guards';
 
 /**
- * Validate that an array contains values of a single type (homogeneous)
- * @throws FilterConversionError if array contains mixed types
- */
-function validateHomogeneousArray(values: Array<string | number | boolean>, context: string): void {
-  if (values.length > 0) {
-    const firstType = typeof values[0];
-    const isHomogeneous = values.every((v) => typeof v === firstType);
-
-    if (!isHomogeneous) {
-      throw new FilterConversionError(
-        `${context} must have homogeneous value types, got mixed types: ${values
-          .map((v) => typeof v)
-          .join(', ')}`
-      );
-    }
-  }
-}
-
-/**
  * Convert stored Filter (from saved objects/URL state) to AsCodeFilter
  *
- * Uses type-first routing based on meta.type when available, with fallback to
- * query structure detection for filters without explicit types (from build functions).
+ * Uses type-first routing based on meta.type. Filters without meta.type are preserved
+ * as DSL to prevent data loss from incorrect parsing of complex queries.
  *
  * @param storedFilter The filter to convert (typically from saved object or URL state)
  * @returns AsCodeFilter with condition, group, or dsl format or undefined if conversion fails
@@ -122,13 +102,13 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
           return convertToDSLFilter(normalizedFilter, baseProperties);
 
         default:
-          // Unknown type - fall through to structure detection
-          break;
+          // Unknown type - fall back to DSL
+          return convertToDSLFilter(normalizedFilter, baseProperties);
       }
     }
 
-    // FALLBACK: Detect from query structure (for filters without meta.type)
-    return detectFromQueryStructure(normalizedFilter, baseProperties);
+    // FALLBACK: No meta.type - preserve as DSL to avoid data loss
+    return convertToDSLFilter(normalizedFilter, baseProperties);
   } catch (error) {
     logger?.warn(`Failed to convert stored filter: ${error.message}`);
     return;
@@ -136,9 +116,9 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
 }
 
 /**
- * Convert stored filter to simple condition (Strategy 1)
+ * Convert stored filter to simple condition
  * Extracts field, operator, and value from filter metadata and query structures
- * Used by both Strategy 1 (direct conversion) and Strategy 3 (group conversion helper)
+ * Used by type-specific converters and as a helper for group conversion
  */
 function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFilter['condition'] {
   const meta = storedFilter.meta || {};
@@ -246,95 +226,46 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
 }
 
 /**
- * Convert stored filter to filter group (Strategy 3)
- * Handles combined filters (legacy meta.type='combined') and bool queries (modern)
+ * Convert stored filter to filter group
+ * Handles combined filters (meta.type='combined') with proper meta.params structure
  * Recursively converts nested filters to preserve group structure
  */
 function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['group'] {
-  if (isCombinedFilter(storedFilter)) {
-    // ExtendedFilter type includes optional 'relation' property
-    // Note: relation can be 'or'/'OR' or 'and'/'AND' - normalize to lowercase
-    const type = storedFilter.meta.relation?.toString().toLowerCase() === 'or' ? 'or' : 'and';
+  if (!isCombinedFilter(storedFilter)) {
+    throw new FilterConversionError('Combined filter must have valid meta.params array structure');
+  }
 
-    // Type guard: params should be StoredFilter[] for combined filters
-    const params = storedFilter.meta.params;
-    if (!Array.isArray(params) || params.some((p) => typeof p === 'string')) {
-      throw new FilterConversionError('Combined filter params must be StoredFilter array');
+  // ExtendedFilter type includes optional 'relation' property
+  // Note: relation can be 'or'/'OR' or 'and'/'AND' - normalize to lowercase
+  const type = storedFilter.meta.relation?.toString().toLowerCase() === 'or' ? 'or' : 'and';
+
+  // isCombinedFilter already validated params is a non-empty Filter[] array
+  const params = storedFilter.meta.params as StoredFilter[];
+
+  const conditions = params.map((param) => {
+    // Each param is itself a complete stored filter
+    // Recursively convert it to get the condition or group
+    const paramFilter = fromStoredFilter(param);
+
+    // Extract just the condition or group from the converted filter
+    if (paramFilter && 'condition' in paramFilter && paramFilter.condition) {
+      return paramFilter.condition;
     }
-
-    const conditions = params.map((param) => {
-      // Special handling for phrases filters with bool wrappers - treat as groups
-      // This preserves the bool structure which is semantically important even for single values
-      if (isPhrasesFilter(param)) {
-        // Recursively convert the phrases filter to a group
-        return convertToFilterGroup(param);
-      }
-
-      // Each param is itself a complete stored filter
-      // Recursively convert it to get the condition
-      const paramFilter = fromStoredFilter(param);
-
-      // Extract just the condition from the converted filter
-      if (paramFilter && 'condition' in paramFilter && paramFilter.condition) {
-        return paramFilter.condition;
-      }
-      if (paramFilter && 'group' in paramFilter && paramFilter.group) {
-        return paramFilter.group;
-      }
-      // If it's a DSL filter, we can't convert it to a condition
-      throw new FilterConversionError('Cannot convert combined filter param to condition');
-    });
-
-    return {
-      type,
-      conditions: conditions as AsCodeGroupFilter['group']['conditions'],
-    };
-  }
-
-  // Handle bool query format (modern)
-  const query = storedFilter.query?.bool;
-  if (!query) {
-    throw new FilterConversionError('Expected bool query or combined meta for group filter');
-  }
-
-  const type = query.must ? 'and' : 'or';
-  const clausesRaw = query.must || query.should || [];
-  const clauses = Array.isArray(clausesRaw) ? clausesRaw : [clausesRaw];
-
-  const conditions = clauses.map((clause: unknown) => {
-    // Create a temporary stored filter for each clause to convert recursively
-    // For phrases filters and custom filters, each clause is a simple query - don't pass parent meta
-    const simplifiedMeta =
-      storedFilter.meta?.type === FILTERS.PHRASES || storedFilter.meta?.type === FILTERS.CUSTOM
-        ? {
-            // Extract just the field info, drop the type-specific metadata
-            // For custom filters, don't pass key/field as they may be generic ("query")
-            ...(storedFilter.meta.type !== FILTERS.CUSTOM && {
-              key: storedFilter.meta.key,
-              field: storedFilter.meta.field,
-            }),
-            negate: storedFilter.meta.negate,
-            disabled: storedFilter.meta.disabled,
-            index: storedFilter.meta.index,
-          }
-        : storedFilter.meta;
-
-    const clauseFilter = {
-      meta: simplifiedMeta,
-      query: clause as Record<string, unknown>,
-    };
-
-    return convertToSimpleCondition(clauseFilter);
+    if (paramFilter && 'group' in paramFilter && paramFilter.group) {
+      return paramFilter.group;
+    }
+    // If it's a DSL filter, we can't convert it to a condition
+    throw new FilterConversionError('Cannot convert combined filter param to condition');
   });
 
   return {
     type,
-    conditions,
+    conditions: conditions as AsCodeGroupFilter['group']['conditions'],
   };
 }
 
 /**
- * Convert stored filter to DSL format (Strategy 4 - Fallback)
+ * Convert stored filter to DSL format (fallback)
  * Used when filter cannot be converted to condition or group format
  * Preserves original query structure to prevent data loss
  */
@@ -385,7 +316,8 @@ function convertCustomFilter(
     ...baseProperties,
     dsl: convertToRawDSL(filter),
     ...(meta?.field || meta?.key ? { field: meta.field || meta.key } : {}),
-    ...(meta?.params ? { params: meta.params } : {}),
+    // Only preserve params for non-combined filters (combined filters use params differently)
+    ...(meta?.params && meta?.type !== 'combined' ? { params: meta.params } : {}),
   };
 }
 
@@ -493,81 +425,52 @@ function convertToDSLFilter(
     ...baseProperties,
     dsl: convertToRawDSL(filter),
     ...(filter.meta?.field ? { field: filter.meta.field } : {}),
-    ...(filter.meta?.params ? { params: filter.meta.params } : {}),
+    // Only preserve params for non-combined filters (combined filters use params differently)
+    ...(filter.meta?.params && filter.meta?.type !== 'combined'
+      ? { params: filter.meta.params }
+      : {}),
   };
 }
 
 /**
- * FALLBACK: Detect filter type from query structure
- * Used for filters without meta.type (from build functions or legacy sources)
+ * Extract base properties from stored filter
  */
-function detectFromQueryStructure(
-  filter: StoredFilter,
-  baseProperties: Partial<AsCodeFilter>
-): AsCodeFilter {
-  const query = filter.query;
+function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter> {
+  const $state = storedFilter.$state;
+  const meta = storedFilter.meta;
 
-  // Try to convert using existing strategies if metadata suggests it's compatible
-  if (query && typeof query === 'object') {
-    // Check for simple query types that can become conditions
-    // Only if they're NOT wrapped in a bool query
-    if (
-      !('bool' in query) &&
-      (hasExistsQuery(query) ||
-        hasRangeQuery(query) ||
-        hasMatchPhraseQuery(query) ||
-        hasMatchQuery(query) ||
-        hasTermQuery(query))
-    ) {
-      try {
-        const condition = convertToSimpleCondition(filter);
-        return {
-          ...baseProperties,
-          condition,
-        };
-      } catch (error) {
-        // Fall through to DSL if conversion fails
-      }
-    }
-
-    // Check for phrases filter structure (has bool.should with match_phrase clauses)
-    // This is a specific pattern we recognize
-    if (isPhrasesFilter(filter)) {
-      try {
-        const condition = convertToSimpleCondition(filter);
-        return {
-          ...baseProperties,
-          condition,
-        };
-      } catch (error) {
-        // Fall through to DSL if conversion fails
-      }
-    }
-
-    // Check for combined filter structure (meta.type='combined' with meta.params array)
-    // This is the ONLY bool query pattern we should convert to group in fallback
-    if (isCombinedFilter(filter)) {
-      try {
-        const group = convertToFilterGroup(filter);
-        return {
-          ...baseProperties,
-          group,
-        };
-      } catch (error) {
-        // Fall through to DSL if conversion fails
-      }
-    }
-
-    // DO NOT try to convert arbitrary bool queries to groups
-    // Bool queries without meta.type='combined' should preserve as DSL
-    // This prevents data loss from complex bool structures (must+should, must_not, etc.)
-  }
-
-  // Fallback: Preserve as DSL
   return {
-    ...baseProperties,
-    dsl: convertToRawDSL(filter),
-    ...(filter.meta?.field ? { field: filter.meta.field } : {}),
-    ...(filter.meta?.params ? { params: filter.meta.params } : {}),
+    pinned:
+      $state?.store === 'globalState' ? true : $state?.store === 'appState' ? false : undefined,
+    disabled: meta?.disabled === true ? true : meta?.disabled === false ? false : undefined,
+    controlledBy: meta?.controlledBy || undefined,
+    dataViewId: meta?.index || undefined,
+    negate: meta?.negate === true ? true : meta?.negate === false ? false : undefined,
+    label: meta?.alias || undefined,
+    // New properties for preserving metadata
+    isMultiIndex:
+      meta?.isMultiIndex === true ? true : meta?.isMultiIndex === false ? false : undefined,
+    filterType: meta?.type || undefined,
+    key: meta?.key || undefined,
+    value: meta?.value || undefined,
   };
+}
+
+/**
+ * Validate that an array contains values of a single type (homogeneous)
+ * @throws FilterConversionError if array contains mixed types
+ */
+function validateHomogeneousArray(values: Array<string | number | boolean>, context: string): void {
+  if (values.length > 0) {
+    const firstType = typeof values[0];
+    const isHomogeneous = values.every((v) => typeof v === firstType);
+
+    if (!isHomogeneous) {
+      throw new FilterConversionError(
+        `${context} must have homogeneous value types, got mixed types: ${values
+          .map((v) => typeof v)
+          .join(', ')}`
+      );
+    }
+  }
 }
