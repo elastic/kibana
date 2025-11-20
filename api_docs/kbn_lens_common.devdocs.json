@@ -32394,27 +32394,6 @@
       },
       {
         "parentPluginId": "@kbn/lens-common",
-        "id": "def-common.State",
-        "type": "Type",
-        "tags": [],
-        "label": "State",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/lens-common",
-            "scope": "common",
-            "docId": "kibKbnLensCommonPluginApi",
-            "section": "def-common.XYState",
-            "text": "XYState"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-lens-common/visualizations/xy/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/lens-common",
         "id": "def-common.StateSetter",
         "type": "Type",
         "tags": [],
