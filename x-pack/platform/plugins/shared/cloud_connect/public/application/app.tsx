@@ -44,11 +44,6 @@ export const CloudConnectedAppMain: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleConnect = () => {
-    // After successful connection, refetch cluster details
-    fetchClusterDetails();
-  };
-
   if (isLoading) {
     return (
       <EuiPage restrictWidth={1200}>
@@ -85,7 +80,7 @@ export const CloudConnectedAppMain: React.FC = () => {
         {clusterDetails ? (
           <ConnectedServicesPage clusterDetails={clusterDetails} onRefetch={handleRefetch} />
         ) : (
-          <OnboardingPage onConnect={handleConnect} />
+          <OnboardingPage onConnect={fetchClusterDetails} />
         )}
       </EuiPageBody>
     </EuiPage>
