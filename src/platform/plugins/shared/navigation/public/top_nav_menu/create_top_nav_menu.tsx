@@ -7,15 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { TopNavMenuPropsBeta } from '../top_nav_menu_beta/top_nav_menu_beta';
-import { TopNavMenuBeta } from '../top_nav_menu_beta/top_nav_menu_beta';
 import type { TopNavMenuProps } from './top_nav_menu';
-import { TopNavMenu } from './top_nav_menu';
 import type { RegisteredTopNavMenuData, RegisteredTopNavMenuDataBeta } from './top_nav_menu_data';
+
+const LazyTopNavMenu = lazy(async () => {
+  const { TopNavMenu } = await import('./top_nav_menu');
+  return { default: TopNavMenu };
+});
+
+const LazyTopNavMenuBeta = lazy(async () => {
+  const { TopNavMenuBeta } = await import('../top_nav_menu_beta/top_nav_menu_beta');
+  return { default: TopNavMenuBeta };
+});
 
 export function createTopNav(
   unifiedSearch: UnifiedSearchPublicPluginStart,
@@ -30,27 +38,31 @@ export function createTopNav(
     );
 
     const TopNavMenuComponent = isBeta ? (
-      <TopNavMenuBeta
-        {...(props as TopNavMenuPropsBeta<QT>)}
-        unifiedSearch={unifiedSearch}
-        config={
-          props.config
-            ? {
-                items: [
-                  ...(props.config as TopNavMenuPropsBeta<QT>['config'])!.items,
-                  ...relevantConfig,
-                ],
-                actionItem: (props.config as TopNavMenuPropsBeta<QT>['config'])!.actionItem,
-              }
-            : { items: relevantConfig }
-        }
-      />
+      <Suspense>
+        <LazyTopNavMenuBeta
+          {...(props as any)}
+          unifiedSearch={unifiedSearch}
+          config={
+            props.config
+              ? {
+                  items: [
+                    ...(props.config as TopNavMenuPropsBeta<QT>['config'])!.items,
+                    ...relevantConfig,
+                  ],
+                  actionItem: (props.config as TopNavMenuPropsBeta<QT>['config'])!.actionItem,
+                }
+              : { items: relevantConfig }
+          }
+        />
+      </Suspense>
     ) : (
-      <TopNavMenu
-        {...(props as TopNavMenuProps<QT>)}
-        unifiedSearch={unifiedSearch}
-        config={((props.config as TopNavMenuProps<QT>['config']) || []).concat(relevantConfig)}
-      />
+      <Suspense>
+        <LazyTopNavMenu
+          {...(props as any)}
+          unifiedSearch={unifiedSearch}
+          config={((props.config as TopNavMenuProps<QT>['config']) || []).concat(relevantConfig)}
+        />
+      </Suspense>
     );
 
     return <I18nProvider>{TopNavMenuComponent}</I18nProvider>;
