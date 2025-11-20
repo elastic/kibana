@@ -179,6 +179,7 @@ export default function (providerContext: FtrProviderContext) {
     return supertest
       .post(`/internal/fleet/agent_policies/_cleanup_revisions`)
       .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
       .send({ maxRevisions: MAX_REVISIONS })
       .expect(200);
   };

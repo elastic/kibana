@@ -72,7 +72,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
 
     // Setup app context service mocks
     mockAppContextService.getExperimentalFeatures.mockReturnValue({
-      fleetPolicyRevisionsCleanupTask: true,
+      enableFleetPolicyRevisionsCleanupTask: true,
     } as any);
 
     taskInstance = {
@@ -179,7 +179,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
 
     it('should skip execution when feature flag is disabled', async () => {
       mockAppContextService.getExperimentalFeatures.mockReturnValue({
-        fleetPolicyRevisionsCleanupTask: false,
+        enableFleetPolicyRevisionsCleanupTask: false,
       } as any);
 
       await mockTask.runTask(taskInstance, mockCore, abortController);

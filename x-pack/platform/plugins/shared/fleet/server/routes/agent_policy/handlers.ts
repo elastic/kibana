@@ -912,13 +912,6 @@ export const RunAgentPolicyRevisionsCleanupTaskHandler: FleetRequestHandler<
   const logger = appContextService.getLogger().get('httpRunAgentPolicyRevisionsCleanupTaskHandler');
   const kbnConfig = appContextService.getConfig()?.fleetPolicyRevisionsCleanup;
 
-  if (!appContextService.getExperimentalFeatures().fleetPolicyRevisionsCleanupTask) {
-    logger.debug(
-      '[FleetPolicyRevisionsCleanupTask] Aborting request: fleet policy revision cleanup task feature is disabled'
-    );
-    throw new FleetError('Fleet policy revision cleanup task feature is disabled');
-  }
-
   const config = {
     maxRevisions: kbnConfig?.maxRevisions,
     maxPolicies: kbnConfig?.maxPoliciesPerRun,

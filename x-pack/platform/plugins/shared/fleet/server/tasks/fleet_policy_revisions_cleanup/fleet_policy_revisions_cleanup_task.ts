@@ -123,7 +123,7 @@ export class FleetPolicyRevisionsCleanupTask {
     abortController: AbortController
   ) => {
     // Check if the feature flag is enabled
-    if (!appContextService.getExperimentalFeatures().fleetPolicyRevisionsCleanupTask) {
+    if (!appContextService.getExperimentalFeatures().enableFleetPolicyRevisionsCleanupTask) {
       this.logger.debug(
         '[FleetPolicyRevisionsCleanupTask] Aborting runTask: fleet policy revision cleanup task feature is disabled'
       );

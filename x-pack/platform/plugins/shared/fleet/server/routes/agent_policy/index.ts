@@ -641,6 +641,8 @@ export const registerRoutes = (
   router.versioned
     .post({
       path: AGENT_POLICY_API_ROUTES.CLEANUP_REVISIONS_PATTERN,
+      access: 'internal',
+      enableQueryVersion: true,
       security: {
         authz: {
           requiredPrivileges: [
@@ -656,7 +658,7 @@ export const registerRoutes = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: RunAgentPolicyRevisionsCleanupTaskRequestSchema,
           response: {
