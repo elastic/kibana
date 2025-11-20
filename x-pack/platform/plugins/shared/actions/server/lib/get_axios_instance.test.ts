@@ -35,7 +35,7 @@ describe('getAxiosInstance', () => {
       configurationUtilities,
       logger,
     });
-    const result = await getAxios({});
+    const result = await getAxios({ secrets: {} });
 
     expect(result).not.toBeUndefined();
     expect(result!.defaults.auth).toBeUndefined();
@@ -47,9 +47,9 @@ describe('getAxiosInstance', () => {
       configurationUtilities,
       logger,
     });
-    await expect(getAxios({ authType: 'foo' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Auth type \\"foo\\" is not registered."`
-    );
+    await expect(
+      getAxios({ secrets: { authType: 'foo' } })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Auth type \\"foo\\" is not registered."`);
     expect(logger.error).toHaveBeenCalledWith(
       `Error getting configured axios instance configured for auth type "foo": Auth type "foo" is not registered. `
     );
@@ -61,7 +61,9 @@ describe('getAxiosInstance', () => {
       configurationUtilities,
       logger,
     });
-    const result = await getAxios({ authType: 'basic', username: 'user', password: 'pass' });
+    const result = await getAxios({
+      secrets: { authType: 'basic', username: 'user', password: 'pass' },
+    });
 
     expect(result).not.toBeUndefined();
     expect(result!.defaults.auth).toEqual({ username: 'user', password: 'pass' });
@@ -71,12 +73,7 @@ describe('getAxiosInstance', () => {
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test1' });
-    expect(getCustomAgents).toHaveBeenCalledWith(
-      configurationUtilities,
-      logger,
-      'http://test1',
-      {}
-    );
+    expect(getCustomAgents).toHaveBeenCalledWith(configurationUtilities, logger, 'http://test1');
   });
 
   test('returns axios instance configured for bearer auth', async () => {
@@ -85,7 +82,7 @@ describe('getAxiosInstance', () => {
       configurationUtilities,
       logger,
     });
-    const result = await getAxios({ authType: 'bearer', token: 'abcdxyz' });
+    const result = await getAxios({ secrets: { authType: 'bearer', token: 'abcdxyz' } });
 
     expect(result).not.toBeUndefined();
     expect(result!.defaults.auth).toBeUndefined();
@@ -100,12 +97,7 @@ describe('getAxiosInstance', () => {
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test2' });
-    expect(getCustomAgents).toHaveBeenCalledWith(
-      configurationUtilities,
-      logger,
-      'http://test2',
-      {}
-    );
+    expect(getCustomAgents).toHaveBeenCalledWith(configurationUtilities, logger, 'http://test2');
   });
 
   test('returns axios instance configured for api_key_header auth', async () => {
@@ -115,8 +107,10 @@ describe('getAxiosInstance', () => {
       logger,
     });
     const result = await getAxios({
-      authType: 'api_key_header',
-      'X-Custom-Auth': 'i-am-a-custom-auth-string',
+      secrets: {
+        authType: 'api_key_header',
+        'X-Custom-Auth': 'i-am-a-custom-auth-string',
+      },
     });
 
     expect(result).not.toBeUndefined();
@@ -132,11 +126,34 @@ describe('getAxiosInstance', () => {
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test3' });
-    expect(getCustomAgents).toHaveBeenCalledWith(
+    expect(getCustomAgents).toHaveBeenCalledWith(configurationUtilities, logger, 'http://test3');
+  });
+
+  test('returns axios instance configured for pfx certificate auth', async () => {
+    const getAxios = getAxiosInstanceWithAuth({
+      authTypeRegistry,
       configurationUtilities,
       logger,
-      'http://test3',
-      {}
-    );
+    });
+    const result = await getAxios({
+      secrets: {
+        authType: 'pfx_certificate',
+        pfx: Buffer.from("Hi i'm a pfx"),
+        passphrase: 'aaaaaaa',
+        ca: Buffer.from("Hi i'm a ca"),
+      },
+    });
+
+    expect(result).not.toBeUndefined();
+    expect(result!.defaults.auth).toBeUndefined();
+
+    // @ts-expect-error
+    expect(result!.interceptors.request.handlers.length).toBe(1);
+
+    // @ts-expect-error
+    const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test2' });
+
+    // this interceptor was cleared and the auth type specific one was used
+    expect(getCustomAgents).not.toHaveBeenCalled();
   });
 });

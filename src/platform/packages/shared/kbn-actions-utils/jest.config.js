@@ -7,21 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
-import type { AuthContext, AuthTypeSpec } from '../connector_spec';
-
-const authSchema = z.object({});
-
-type AuthSchemaType = z.infer<typeof authSchema>;
-
-/**
- * No Authentication
- */
-export const NoAuth: AuthTypeSpec<AuthSchemaType> = {
-  id: 'none',
-  schema: authSchema,
-  configure: (_: AuthContext, axiosInstance: AxiosInstance): AxiosInstance => {
-    return axiosInstance;
-  },
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-actions-utils'],
 };

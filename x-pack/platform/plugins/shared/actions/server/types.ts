@@ -248,26 +248,9 @@ export interface ActionTaskExecutorParams {
   actionTaskParamsId: string;
 }
 
-export interface ProxySettings {
-  proxyUrl: string;
-  proxyBypassHosts: Set<string> | undefined;
-  proxyOnlyHosts: Set<string> | undefined;
-  proxyHeaders?: Record<string, string>;
-  proxySSLSettings: SSLSettings;
-}
-
 export interface ResponseSettings {
   maxContentLength: number;
   timeout: number;
-}
-
-export interface SSLSettings {
-  verificationMode?: 'none' | 'certificate' | 'full';
-  pfx?: Buffer;
-  cert?: Buffer;
-  key?: Buffer;
-  passphrase?: string;
-  ca?: Buffer;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {

@@ -6,12 +6,12 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import type { AxiosInstance } from 'axios';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '../../types';
 import type { ExecutorParams } from '../../sub_action_framework/types';
+import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 
 type RecordUnknown = Record<string, unknown>;
 
@@ -20,16 +20,20 @@ export const generateExecutorFunction = ({
   getAxiosInstanceWithAuth,
 }: {
   actions: ConnectorSpec['actions'];
-  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
+  getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
   ): Promise<ConnectorTypeExecutorResult<RecordUnknown | {}>> {
-    const { actionId, params, secrets, logger } = execOptions;
+    const { actionId: connectorId, params, secrets, logger, connectorTokenClient } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
     let data = null;
 
-    const axiosInstance = await getAxiosInstanceWithAuth({ ...secrets });
+    const axiosInstance = await getAxiosInstanceWithAuth({
+      connectorId,
+      secrets,
+      connectorTokenClient,
+    });
 
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
@@ -51,5 +55,5 @@ export const generateExecutorFunction = ({
       data = res;
     }
 
-    return { status: 'ok', data: data ?? {}, actionId };
+    return { status: 'ok', data: data ?? {}, actionId: connectorId };
   };

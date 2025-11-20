@@ -4523,6 +4523,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/actions-utils@link:src/platform/packages/shared/kbn-actions-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/advanced-settings-plugin@link:src/platform/plugins/private/advanced_settings":
   version "0.0.0"
   uid ""
