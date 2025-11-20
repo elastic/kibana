@@ -41,14 +41,11 @@ export const IndexSearchConfiguration = () => {
           render={({ field }) => (
             <EuiFieldNumber
               {...field}
-              value={field.value ?? ''}
-              placeholder="100 (default)"
-              onChange={(e) => {
-                const value = e.target.value ? parseInt(e.target.value, 10) : undefined;
-                field.onChange(value);
-              }}
+              onChange={(e) =>
+                field.onChange(isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber)
+              }
               min={1}
-              max={10000}
+              step={1}
               compressed
             />
           )}

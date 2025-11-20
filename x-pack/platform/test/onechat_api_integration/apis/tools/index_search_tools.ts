@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -15,21 +15,31 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
 
-  describe('ES|QL Tools API', () => {
+  describe('Index Search Tools API', () => {
     const createdToolIds: string[] = [];
+    const testIndex = 'test-search-onechat-index';
 
     const mockTool = {
-      id: 'cases-tool',
-      type: 'esql',
-      description: 'A test tool',
-      tags: ['test'],
+      id: 'search-tool',
+      type: 'index_search',
+      description: 'A test search tool',
+      tags: ['test', 'search'],
       configuration: {
-        query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: { case_id: { type: 'keyword', description: 'Case ID' } },
+        pattern: testIndex,
+        rowLimit: 100,
+        customInstructions: 'Search test data',
       },
     };
 
+    before(async () => {
+      // Create test index
+      await es.indices.create({
+        index: testIndex,
+      });
+    });
+
     after(async () => {
+      // Clean up created tools
       for (const toolId of createdToolIds) {
         try {
           await supertest
@@ -40,10 +50,17 @@ export default function ({ getService }: FtrProviderContext) {
           log.warning(`Failed to delete tool ${toolId}: ${error.message}`);
         }
       }
+
+      // Clean up test index
+      try {
+        await es.indices.delete({ index: testIndex });
+      } catch (error) {
+        log.warning(`Failed to delete test index ${testIndex}: ${error.message}`);
+      }
     });
 
     describe('POST /api/agent_builder/tools', () => {
-      it('should create a new ES|QL tool successfully', async () => {
+      it('should create a new index search tool successfully', async () => {
         const response = await supertest
           .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
@@ -51,11 +68,21 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(response.body).to.have.property('id', mockTool.id);
-        expect(response.body).to.have.property('type', 'esql');
+        expect(response.body).to.have.property('type', 'index_search');
         expect(response.body).to.have.property('description', mockTool.description);
         expect(response.body).to.have.property('configuration');
-        expect(response.body.configuration).to.have.property('query', mockTool.configuration.query);
-        expect(response.body.configuration.params).to.eql(mockTool.configuration.params);
+        expect(response.body.configuration).to.have.property(
+          'pattern',
+          mockTool.configuration.pattern
+        );
+        expect(response.body.configuration).to.have.property(
+          'rowLimit',
+          mockTool.configuration.rowLimit
+        );
+        expect(response.body.configuration).to.have.property(
+          'customInstructions',
+          mockTool.configuration.customInstructions
+        );
 
         createdToolIds.push(mockTool.id);
       });
@@ -88,7 +115,23 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return 404 when ES|QL tool API is disabled', async () => {
+      it('should require pattern in configuration', async () => {
+        const toolWithoutPattern = {
+          ...mockTool,
+          id: 'no-pattern-tool',
+          configuration: {
+            rowLimit: 100,
+          },
+        };
+
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(toolWithoutPattern)
+          .expect(400);
+      });
+
+      it('should return 404 when index search tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
           [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
@@ -104,102 +147,65 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should validate parameter types', async () => {
-        const toolWithInvalidParams = {
+      it('should validate index pattern exists', async () => {
+        const toolWithInvalidPattern = {
           ...mockTool,
-          id: 'invalid-params-tool',
-          params: {
-            validParam: {
-              type: 'string',
-              description: 'Valid parameter',
-            },
-            invalidParam: {
-              type: 'invalid_type',
-              description: 'Invalid parameter',
-            },
+          id: 'invalid-pattern-tool',
+          configuration: {
+            ...mockTool.configuration,
+            pattern: 'non-existent-index-pattern-that-definitely-does-not-exist-12345',
           },
         };
 
         await supertest
           .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
-          .send(toolWithInvalidParams)
+          .send(toolWithInvalidPattern)
+          .expect(400);
+      });
+
+      it('should fail if row limit is not a number', async () => {
+        const toolWithInvalidRowLimit = {
+          ...mockTool,
+          id: 'invalid-row-limit-tool',
+          configuration: {
+            ...mockTool.configuration,
+            rowLimit: 'not a number',
+          },
+        };
+
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(toolWithInvalidRowLimit)
+          .expect(400);
+      });
+
+      it('should fail if row limit is less than 1', async () => {
+        const toolWithInvalidRowLimit = {
+          ...mockTool,
+          id: 'invalid-row-limit-tool',
+          configuration: {
+            ...mockTool.configuration,
+            rowLimit: -1,
+          },
+        };
+
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(toolWithInvalidRowLimit)
           .expect(400);
       });
     });
 
-    describe('POST /api/agent_builder/tools/_execute', () => {
-      const testIndex = 'test-onechat-index';
-
-      before(async () => {
-        await es.indices.create({
-          index: testIndex,
-          mappings: {
-            properties: {
-              name: { type: 'text' },
-              age: { type: 'integer' },
-              '@timestamp': { type: 'date' },
-            },
-          },
-        });
-        await es.bulk({
-          body: [
-            { index: { _index: testIndex } },
-            { name: 'Test Case 1', age: 25, '@timestamp': '2023-01-01T00:00:00Z' },
-            { index: { _index: testIndex } },
-            { name: 'Test Case 2', age: 30, '@timestamp': '2023-01-02T00:00:00Z' },
-            { index: { _index: testIndex } },
-            { name: 'Test Case 3', age: 35, '@timestamp': '2023-01-03T00:00:00Z' },
-          ],
-        });
-        await es.indices.refresh({ index: testIndex });
-
-        const testTool = {
-          type: 'esql',
-          description: 'A test tool',
-          tags: ['test'],
-          configuration: {
-            query: `FROM ${testIndex} | LIMIT 3`,
-            params: {},
-          },
-          id: 'execute-test-tool',
-        };
-
-        await supertest
-          .post('/api/agent_builder/tools')
-          .set('kbn-xsrf', 'kibana')
-          .send(testTool)
-          .expect(200);
-
-        createdToolIds.push(testTool.id);
-      });
-
-      it('should execute a new ES|QL tool successfully', async () => {
-        const executeRequest = {
-          tool_id: 'execute-test-tool',
-          tool_params: {},
-        };
-        const response = await supertest
-          .post('/api/agent_builder/tools/_execute')
-          .set('kbn-xsrf', 'kibana')
-          .send(executeRequest)
-          .expect(200);
-
-        expect(response.body).to.have.property('results');
-      });
-
-      after(async () => {
-        await es.indices.delete({ index: testIndex });
-      });
-    });
-
-    describe('GET /api/agent_builder/tools/get-test-tool', () => {
+    describe('GET /api/agent_builder/tools/get-search-test-tool', () => {
       let testToolId: string;
 
       before(async () => {
         const testTool = {
           ...mockTool,
-          id: 'get-test-tool',
+          id: 'get-search-test-tool',
         };
 
         const response = await supertest
@@ -212,32 +218,40 @@ export default function ({ getService }: FtrProviderContext) {
         createdToolIds.push(testToolId);
       });
 
-      it('should retrieve an existing ES|QL tool', async () => {
-        const response = await supertest.get(`/api/agent_builder/tools/get-test-tool`).expect(200);
+      it('should retrieve an existing index search tool', async () => {
+        const response = await supertest
+          .get(`/api/agent_builder/tools/get-search-test-tool`)
+          .expect(200);
 
-        expect(response.body).to.have.property('id', 'get-test-tool');
-        expect(response.body).to.have.property('type', 'esql');
+        expect(response.body).to.have.property('id', 'get-search-test-tool');
+        expect(response.body).to.have.property('type', 'index_search');
         expect(response.body).to.have.property('description', mockTool.description);
         expect(response.body).to.have.property('configuration');
-        expect(response.body.configuration).to.have.property('query', mockTool.configuration.query);
-        expect(response.body.configuration.params).to.eql(mockTool.configuration.params);
+        expect(response.body.configuration).to.have.property(
+          'pattern',
+          mockTool.configuration.pattern
+        );
+        expect(response.body.configuration).to.have.property(
+          'rowLimit',
+          mockTool.configuration.rowLimit
+        );
       });
 
       it('should return 404 for non-existent tool', async () => {
         const response = await supertest
-          .get('/api/agent_builder/tools/non-existent-tool')
+          .get('/api/agent_builder/tools/non-existent-search-tool')
           .expect(404);
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain('not found');
       });
 
-      it('should return 404 when ES|QL tool API is disabled', async () => {
+      it('should return 404 when index search tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
           [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
-        await supertest.get(`/api/agent_builder/tools/get-test-tool`).expect(404);
+        await supertest.get(`/api/agent_builder/tools/get-search-test-tool`).expect(404);
 
         await kibanaServer.uiSettings.update({
           [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
@@ -250,7 +264,11 @@ export default function ({ getService }: FtrProviderContext) {
         for (let i = 0; i < 3; i++) {
           const testTool = {
             ...mockTool,
-            id: `list-test-tool-${i}`,
+            id: `list-search-test-tool-${i}`,
+            configuration: {
+              pattern: testIndex,
+              rowLimit: 50,
+            },
           };
 
           await supertest
@@ -263,20 +281,26 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('should list all ES|QL tools', async () => {
+      it('should list all index search tools', async () => {
         const response = await supertest.get('/api/agent_builder/tools').expect(200);
 
         expect(response.body).to.have.property('results');
         expect(response.body.results).to.be.an('array');
         expect(response.body.results.length).to.greaterThan(1);
+
+        // Verify at least some are index_search type
+        const indexSearchTools = response.body.results.filter(
+          (tool: any) => tool.type === 'index_search'
+        );
+        expect(indexSearchTools.length).to.greaterThan(0);
       });
 
-      it('should return 404 when ES|QL tool API is disabled', async () => {
+      it('should return 404 when index search tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
           [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
-        await supertest.get('/api/agent_builder/tools/esql').expect(404);
+        await supertest.get('/api/agent_builder/tools').expect(404);
 
         await kibanaServer.uiSettings.update({
           [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
@@ -284,11 +308,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('PUT /api/agent_builder/tools/update-test-tool', () => {
+    describe('PUT /api/agent_builder/tools/update-search-test-tool', () => {
       before(async () => {
         const testTool = {
           ...mockTool,
-          id: 'update-test-tool',
+          id: 'update-search-test-tool',
         };
 
         await supertest
@@ -300,36 +324,66 @@ export default function ({ getService }: FtrProviderContext) {
         createdToolIds.push(testTool.id);
       });
 
-      it('should update an existing ES|QL tool', async () => {
+      it('should update an existing index search tool description', async () => {
         const updates = {
-          description: 'Updated description',
+          description: 'Updated search description',
         };
 
         const response = await supertest
-          .put(`/api/agent_builder/tools/update-test-tool`)
+          .put(`/api/agent_builder/tools/update-search-test-tool`)
           .set('kbn-xsrf', 'kibana')
           .send(updates)
           .expect(200);
 
-        expect(response.body).to.have.property('id', 'update-test-tool');
+        expect(response.body).to.have.property('id', 'update-search-test-tool');
         expect(response.body).to.have.property('description', updates.description);
+      });
+
+      it('should update index search tool configuration', async () => {
+        const updates = {
+          configuration: {
+            pattern: testIndex,
+            rowLimit: 200,
+            customInstructions: 'Updated custom instructions',
+          },
+        };
+
+        const response = await supertest
+          .put(`/api/agent_builder/tools/update-search-test-tool`)
+          .set('kbn-xsrf', 'kibana')
+          .send(updates)
+          .expect(200);
+
+        expect(response.body).to.have.property('id', 'update-search-test-tool');
+        expect(response.body.configuration).to.have.property(
+          'pattern',
+          updates.configuration.pattern
+        );
+        expect(response.body.configuration).to.have.property(
+          'rowLimit',
+          updates.configuration.rowLimit
+        );
+        expect(response.body.configuration).to.have.property(
+          'customInstructions',
+          updates.configuration.customInstructions
+        );
       });
 
       it('should return 404 for non-existent tool', async () => {
         await supertest
-          .put('/api/agent_builder/tools/non-existent-tool')
+          .put('/api/agent_builder/tools/non-existent-search-tool')
           .set('kbn-xsrf', 'kibana')
           .send({ description: 'Updated description' })
           .expect(404);
       });
 
-      it('should return 404 when ES|QL tool API is disabled', async () => {
+      it('should return 404 when index search tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
           [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
         await supertest
-          .put(`/api/agent_builder/tools/update-test-tool`)
+          .put(`/api/agent_builder/tools/update-search-test-tool`)
           .set('kbn-xsrf', 'kibana')
           .send({ description: 'Updated Description' })
           .expect(404);
@@ -340,11 +394,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('DELETE /api/agent_builder/tools/delete-test-tool', () => {
+    describe('DELETE /api/agent_builder/tools/delete-search-test-tool', () => {
       before(async () => {
         const testTool = {
           ...mockTool,
-          id: 'delete-test-tool',
+          id: 'delete-search-test-tool',
         };
 
         await supertest
@@ -352,35 +406,36 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'kibana')
           .send(testTool)
           .expect(200);
-
-        createdToolIds.push(testTool.id);
       });
 
-      it('should delete an existing ES|QL tool', async () => {
+      it('should delete an existing index search tool', async () => {
         const response = await supertest
-          .delete(`/api/agent_builder/tools/delete-test-tool`)
+          .delete(`/api/agent_builder/tools/delete-search-test-tool`)
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
         expect(response.body).to.have.property('success', true);
       });
 
-      it('should return success even for non-existent tool', async () => {
+      it('should return 404 for non-existent tool', async () => {
         const response = await supertest
-          .delete('/api/agent_builder/tools/non-existent-tool')
+          .delete('/api/agent_builder/tools/non-existent-search-tool')
           .set('kbn-xsrf', 'kibana')
           .expect(404);
 
-        expect(response.body).to.have.property('message', 'Tool non-existent-tool not found');
+        expect(response.body).to.have.property(
+          'message',
+          'Tool non-existent-search-tool not found'
+        );
       });
 
-      it('should return 404 when ES|QL tool API is disabled', async () => {
+      it('should return 404 when index search tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
           [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
         await supertest
-          .delete(`/api/agent_builder/tools/delete-test-tool`)
+          .delete(`/api/agent_builder/tools/delete-search-test-tool`)
           .set('kbn-xsrf', 'kibana')
           .expect(404);
 
