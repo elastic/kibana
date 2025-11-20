@@ -75,7 +75,7 @@ export async function registerTools({
     createGetDataSourcesTool({ core, plugins, logger }),
     createSearchKnowledgeBaseTool({ core, logger }),
     createRunLogRateAnalysisTool({ core, logger }),
-    createGetAnomalyDetectionJobsTool({ core, logger }),
+    createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
   ];
 

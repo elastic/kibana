@@ -82,7 +82,6 @@ export const createSyntheticApmDataWithAnomalies = async ({
   );
 
   // Create anomaly detection job
-
   const editorClient = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
     withInternalHeaders: true,
     useCookieHeader: true,

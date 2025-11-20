@@ -52,13 +52,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         spikeEnd: SPIKE_END,
       });
 
-      // Create anomaly detection job
-      await supertest
-        .post('/internal/apm/settings/anomaly-detection/jobs')
-        .set('kbn-xsrf', 'true') // Add this line to include the XSRF header
-        .send({ environments: [ENVIRONMENT] })
-        .expect(200);
-
       await retry.waitFor('ML job to have anomalies', async () => {
         const toolResults =
           await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
