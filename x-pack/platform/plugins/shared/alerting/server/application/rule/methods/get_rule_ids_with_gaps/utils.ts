@@ -37,7 +37,7 @@ export function extractGapDurationSums(bucket: GapDurationBucket): GapDurationSu
  * Calculates aggregated gap fill status based on duration sums
  * Precedence: unfilled > in_progress > filled
  */
-export function calculateGapFillStatus(sums: GapDurationSums): GapFillStatus | null {
+export function calculateHighestPriorityGapFillStatus(sums: GapDurationSums): GapFillStatus | null {
   const { totalInProgressDurationMs, totalUnfilledDurationMs, totalFilledDurationMs } = sums;
   if (totalUnfilledDurationMs > 0) return 'unfilled';
   if (totalInProgressDurationMs > 0) return 'in_progress';

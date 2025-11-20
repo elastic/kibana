@@ -789,7 +789,7 @@ describe('Perform bulk action route', () => {
         expect.objectContaining({
           start: gapStartDate,
           end: gapEndDate,
-          aggregatedStatuses: ['unfilled'],
+          highestPriorityGapFillStatuses: ['unfilled'],
         })
       );
     });

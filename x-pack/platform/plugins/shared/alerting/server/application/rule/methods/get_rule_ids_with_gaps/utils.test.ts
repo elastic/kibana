@@ -7,7 +7,7 @@
 
 import {
   extractGapDurationSums,
-  calculateGapFillStatus,
+  calculateHighestPriorityGapFillStatus,
   COMMON_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from './utils';
@@ -79,10 +79,10 @@ describe('utils', () => {
     });
   });
 
-  describe('calculateGapFillStatus', () => {
+  describe('calculateHighestPriorityGapFillStatus', () => {
     it('returns unfilled when any unfilled ms > 0', () => {
       expect(
-        calculateGapFillStatus({
+        calculateHighestPriorityGapFillStatus({
           totalUnfilledDurationMs: 1,
           totalInProgressDurationMs: 0,
           totalFilledDurationMs: 100,
@@ -93,7 +93,7 @@ describe('utils', () => {
 
     it('returns in_progress when no unfilled and any in_progress > 0', () => {
       expect(
-        calculateGapFillStatus({
+        calculateHighestPriorityGapFillStatus({
           totalUnfilledDurationMs: 0,
           totalInProgressDurationMs: 50,
           totalFilledDurationMs: 0,
@@ -104,7 +104,7 @@ describe('utils', () => {
 
     it('returns filled when no unfilled/in_progress and filled > 0', () => {
       expect(
-        calculateGapFillStatus({
+        calculateHighestPriorityGapFillStatus({
           totalUnfilledDurationMs: 0,
           totalInProgressDurationMs: 0,
           totalFilledDurationMs: 10,
@@ -115,7 +115,7 @@ describe('utils', () => {
 
     it('returns null when all sums are 0', () => {
       expect(
-        calculateGapFillStatus({
+        calculateHighestPriorityGapFillStatus({
           totalUnfilledDurationMs: 0,
           totalInProgressDurationMs: 0,
           totalFilledDurationMs: 0,

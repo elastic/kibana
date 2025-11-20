@@ -118,14 +118,14 @@ export const getRuleIdsWithGaps = async ({
   signal,
   start,
   end,
-  aggregatedStatuses = [gapFillStatus.UNFILLED],
+  gapFillStatuses = [gapFillStatus.UNFILLED],
   hasUnfilledIntervals,
   hasInProgressIntervals,
   hasFilledIntervals,
 }: {
   start: string;
   end: string;
-  aggregatedStatuses: string[];
+  gapFillStatuses: string[];
   hasUnfilledIntervals?: boolean;
   hasInProgressIntervals?: boolean;
   hasFilledIntervals?: boolean;
@@ -138,7 +138,7 @@ export const getRuleIdsWithGaps = async ({
       body: JSON.stringify({
         start,
         end,
-        aggregated_statuses: aggregatedStatuses,
+        highest_priority_gap_fill_statuses: gapFillStatuses,
         ...(hasUnfilledIntervals !== undefined && {
           has_unfilled_intervals: hasUnfilledIntervals,
         }),

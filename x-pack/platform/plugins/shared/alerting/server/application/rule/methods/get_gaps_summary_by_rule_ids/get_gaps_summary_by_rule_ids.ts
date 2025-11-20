@@ -21,7 +21,7 @@ import {
 } from '../../../../rules_client/common/constants';
 import {
   extractGapDurationSums,
-  calculateGapFillStatus,
+  calculateHighestPriorityGapFillStatus,
   COMMON_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from '../get_rule_ids_with_gaps/utils';
@@ -143,7 +143,7 @@ export async function getGapsSummaryByRuleIds(
     const result: GetGapsSummaryByRuleIdsResponse = {
       data: resultBuckets.map((bucket) => {
         const sums = extractGapDurationSums(bucket);
-        const status = calculateGapFillStatus(sums) ?? undefined;
+        const status = calculateHighestPriorityGapFillStatus(sums) ?? undefined;
         return {
           ruleId: bucket.key,
           totalUnfilledDurationMs: sums.totalUnfilledDurationMs,

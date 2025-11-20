@@ -50,7 +50,7 @@ describe('getRuleIdsWithGaps', () => {
     start: '2024-01-01T00:00:00.000Z',
     end: '2024-01-02T00:00:00.000Z',
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-    aggregatedStatuses: [gapFillStatus.UNFILLED, gapFillStatus.IN_PROGRESS],
+    highestPriorityGapFillStatuses: [gapFillStatus.UNFILLED, gapFillStatus.IN_PROGRESS],
   };
 
   const filter = { type: 'mock_filter' };

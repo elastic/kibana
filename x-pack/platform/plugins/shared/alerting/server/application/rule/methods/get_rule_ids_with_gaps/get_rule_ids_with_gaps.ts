@@ -16,7 +16,7 @@ import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './typ
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   extractGapDurationSums,
-  calculateGapFillStatus,
+  calculateHighestPriorityGapFillStatus,
   COMMON_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from './utils';
@@ -32,7 +32,7 @@ import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
  *   (e.g. 'unfilled' | 'partially_filled' | 'filled') and controls which
  *   gaps are considered in the aggregations and latest timestamp query.
  *
- * - aggregatedStatuses: Computed, per-rule status filter applied after
+ * - highestPriorityGapFillStatuses: Computed, per-rule status filter applied after
  *   aggregation. For each rule we compute an aggregated status from the
  *   summed gap durations with precedence: unfilled > in_progress > filled.
  *   Only rules whose computed aggregated status matches one of the provided
@@ -65,7 +65,7 @@ export async function getRuleIdsWithGaps(
       throw error;
     }
 
-    const { start, end, statuses, aggregatedStatuses } = params;
+    const { start, end, statuses, highestPriorityGapFillStatuses } = params;
     const eventLogClient = await context.getEventLogClient();
 
     const filter = buildGapsFilter({
@@ -100,11 +100,12 @@ export async function getRuleIdsWithGaps(
     const buckets = byRuleAgg?.buckets ?? [];
 
     const ruleIds: string[] = [];
-    if (aggregatedStatuses?.length ?? 0 > 0) {
+    if (highestPriorityGapFillStatuses?.length ?? 0 > 0) {
       for (const b of buckets) {
         const sums = extractGapDurationSums(b);
-        const aggregatedStatus = calculateGapFillStatus(sums);
-        if (aggregatedStatus && aggregatedStatuses?.includes(aggregatedStatus)) ruleIds.push(b.key);
+        const gapFillStatus = calculateHighestPriorityGapFillStatus(sums);
+        if (gapFillStatus && highestPriorityGapFillStatuses?.includes(gapFillStatus))
+          ruleIds.push(b.key);
       }
     } else {
       for (const b of buckets) {

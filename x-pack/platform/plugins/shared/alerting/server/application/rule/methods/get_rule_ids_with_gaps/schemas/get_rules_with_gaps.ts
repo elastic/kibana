@@ -20,7 +20,7 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
       ])
     )
   ),
-  aggregatedStatuses: schema.maybe(
+  highestPriorityGapFillStatuses: schema.maybe(
     schema.arrayOf(
       schema.oneOf([
         schema.literal(gapFillStatus.UNFILLED),
