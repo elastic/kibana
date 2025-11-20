@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
-import { ConversationInputTextArea } from './conversation_input_text_area';
+import { MessageEditor, useMessageEditor } from './message_editor';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationInputActions } from './conversation_input_actions';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
 
 const MIN_HEIGHT = 150;
 
@@ -66,45 +67,77 @@ interface ConversationInputProps {
   onSubmit?: () => void;
 }
 
+const disabledPlaceholder = (agentId?: string) =>
+  i18n.translate('xpack.onechat.conversationInput.textArea.disabledPlaceholder', {
+    defaultMessage: 'Agent "{agentId}" has been deleted. Please start a new conversation.',
+    values: {
+      agentId,
+    },
+  });
+const enabledPlaceholder = i18n.translate(
+  'xpack.onechat.conversationInput.textArea.enabledPlaceholder',
+  {
+    defaultMessage: 'Ask anything',
+  }
+);
+
+const inputContainerStyles = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
 export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
-  const [input, setInput] = useState('');
-  const hasInput = Boolean(input.trim());
   const { sendMessage, pendingMessage } = useSendMessage();
   const { isFetched } = useOnechatAgents();
   const agentId = useAgentId();
+  const conversationId = useConversationId();
+  const messageEditor = useMessageEditor();
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
 
   const shouldDisableTextArea = !isAgentIdValid && isFetched && !!agentId;
-  const isSubmitDisabled = !hasInput || isSendingMessage || !isAgentIdValid;
+  const isSubmitDisabled = messageEditor.isEmpty() || isSendingMessage || !isAgentIdValid;
+
+  const placeholder = shouldDisableTextArea ? disabledPlaceholder(agentId) : enabledPlaceholder;
+
+  // Auto-focus when conversation changes
+  useEffect(() => {
+    setTimeout(() => {
+      messageEditor.focus();
+    }, 200);
+  }, [conversationId, messageEditor]);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {
       return;
     }
-    sendMessage({ message: input });
-    setInput('');
+    const content = messageEditor.getContent();
+    sendMessage({ message: content });
+    messageEditor.clear();
     onSubmit?.();
   };
 
   return (
     <InputContainer isDisabled={shouldDisableTextArea}>
-      <ConversationInputTextArea
-        input={input}
-        setInput={setInput}
-        onSubmit={handleSubmit}
-        disabled={shouldDisableTextArea}
-        agentId={agentId}
-      />
+      <EuiFlexItem css={inputContainerStyles}>
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={handleSubmit}
+          disabled={shouldDisableTextArea}
+          placeholder={placeholder}
+          data-test-subj="agentBuilderConversationInputEditor"
+        />
+      </EuiFlexItem>
       {!shouldDisableTextArea && (
         <ConversationInputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
           resetToPendingMessage={() => {
             if (pendingMessage) {
-              setInput(pendingMessage);
+              messageEditor.setContent(pendingMessage);
             }
           }}
           agentId={agentId}
