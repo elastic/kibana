@@ -17,3 +17,5 @@ export {
   deleteFile,
   deleteFileSync,
 } from './lib';
+
+export { sanitizeSvg } from './sanitizations/svg';

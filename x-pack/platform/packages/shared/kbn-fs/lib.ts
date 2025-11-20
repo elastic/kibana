@@ -21,6 +21,21 @@ import type { WriteFileOptions, FileMetadata, WriteFileContent } from './types';
 import { getSafePath, ensureDirectory, ensureDirectorySync } from './utils';
 import { validateAndSanitizeFileData } from './validations';
 
+/**
+ * Writes data to a file asynchronously, with automatic validation and sanitization.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param content - The content to write. Can be a string, Buffer, TypedArray, Iterable, AsyncIterable, or Stream
+ * @param options - Optional configuration
+ * @returns Metadata about the written file, including its alias and full path
+ *
+ * @example
+ * ```ts
+ * const metadata = await writeFile('report.csv', csvData, {
+ *   volume: 'reports',
+ * });
+ * ```
+ */
 export async function writeFile(
   name: string,
   content: WriteFileContent,
@@ -42,8 +57,18 @@ export async function writeFile(
 
 /**
  * Appends data to a file, creating the file if it does not yet exist.
- * Note: Validation (file size and mime type) is skipped for streaming content
- * (AsyncIterable or Stream) to prevent data corruption from stream consumption.
+ * The content is validated and sanitized before appending.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param content - The content to append (string or Uint8Array)
+ * @param options - Optional configuration
+ * @returns Metadata about the file, including its alias and full path
+ *
+ * @example
+ * ```ts
+ * // Appends to: data/logs/debug.log
+ * await appendFile('debug.log', 'Debug message\n', { volume: 'logs' });
+ * ```
  */
 export async function appendFile(
   name: string,
@@ -60,7 +85,20 @@ export async function appendFile(
 }
 
 /**
- * Creates a Writeable stream for writing to a file.
+ * Creates a Writable stream for writing to a file.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param volume - Optional namespace within the data directory to organize files
+ * @param options - Stream options (encoding or StreamOptions)
+ * @returns A Writable stream that writes to the specified file
+ *
+ * @example
+ * ```ts
+ * // Writes to: data/reports/report.csv
+ * const stream = createWriteStream('report.csv', 'reports', { encoding: 'utf8' });
+ * stream.write(data);
+ * stream.end();
+ * ```
  */
 export function createWriteStream(
   name: string,
@@ -75,7 +113,17 @@ export function createWriteStream(
 }
 
 /**
- * Reads the entire contents of a file.
+ * Reads the entire contents of a file asynchronously.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param volume - Optional namespace within the data directory
+ * @returns The file contents as a Buffer (or string if encoding is specified)
+ *
+ * @example
+ * ```ts
+ * // Reads from: data/reports/report.csv
+ * const report = await readFile('report.csv', 'reports');
+ * ```
  */
 export async function readFile(name: string, volume?: string): Promise<string | Buffer> {
   const { fullPath } = getSafePath(name, volume);
@@ -85,6 +133,18 @@ export async function readFile(name: string, volume?: string): Promise<string | 
 
 /**
  * Creates a Readable stream from a file.
+ * Useful for reading large files incrementally without loading everything into memory.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param volume - Optional namespace within the data directory
+ * @param options - Stream options (encoding or StreamOptions)
+ * @returns A Readable stream that reads from the specified file
+ *
+ * @example
+ * ```ts
+ * // Reads from: data/reports/report.csv
+ * const stream = createReadStream('report.csv', 'reports', { encoding: 'utf8' });
+ * ```
  */
 export function createReadStream(
   name: string,
@@ -97,7 +157,16 @@ export function createReadStream(
 }
 
 /**
- * Deletes a file.
+ * Deletes a file asynchronously.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param options - Optional configuration
+ *
+ * @example
+ * ```ts
+ * // Deletes: data/reports/old-report.csv
+ * await deleteFile('old-report.csv', { volume: 'reports' });
+ * ```
  */
 export async function deleteFile(
   name: string,
@@ -109,7 +178,19 @@ export async function deleteFile(
 }
 
 /**
- * Writes data to a file synchronously, replacing the file if `override` is true.
+ * Writes data to a file synchronously, with automatic validation and sanitization.
+ * All files are written to the data directory with path traversal protection.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param content - The content to write (string or ArrayBufferView)
+ * @param options - Optional configuration
+ * @returns Metadata about the written file, including its alias and full path
+ *
+ * @example
+ * ```ts
+ * // Writes to: data/reports/report.csv
+ * writeFileSync('report.csv', csvData, { volume: 'reports' });
+ * ```
  */
 export function writeFileSync(
   name: string,
@@ -133,6 +214,18 @@ export function writeFileSync(
 
 /**
  * Appends data to a file synchronously, creating the file if it does not yet exist.
+ * The content is validated and sanitized before appending.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param content - The content to append (string or Uint8Array)
+ * @param options - Optional configuration
+ * @returns Metadata about the file, including its alias and full path
+ *
+ * @example
+ * ```ts
+ * // Appends to: data/logs/debug.log
+ * appendFileSync('debug.log', 'Debug message\n', { volume: 'logs' });
+ * ```
  */
 export function appendFileSync(
   name: string,
@@ -151,6 +244,16 @@ export function appendFileSync(
 
 /**
  * Reads the entire contents of a file synchronously.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param volume - Optional namespace within the data directory
+ * @returns The file contents as a Buffer (or string if encoding is specified)
+ *
+ * @example
+ * ```ts
+ * // Reads from: data/reports/report.csv
+ * const report = readFileSync('report.csv', 'reports');
+ * ```
  */
 export function readFileSync(name: string, volume?: string): string | Buffer {
   const { fullPath } = getSafePath(name, volume);
@@ -160,6 +263,15 @@ export function readFileSync(name: string, volume?: string): string | Buffer {
 
 /**
  * Deletes a file synchronously.
+ *
+ * @param name - The filename (relative path within the data directory or volume)
+ * @param options - Optional configuration
+ *
+ * @example
+ * ```ts
+ * // Deletes: data/reports/old-report.csv
+ * deleteFileSync('old-report.csv', { volume: 'reports' });
+ * ```
  */
 export function deleteFileSync(name: string, options?: Pick<WriteFileOptions, 'volume'>): void {
   const { fullPath } = getSafePath(name, options?.volume);
@@ -167,6 +279,20 @@ export function deleteFileSync(name: string, options?: Pick<WriteFileOptions, 'v
   unlinkSync(fullPath);
 }
 
+/**
+ * Checks if a file exists synchronously.
+ *
+ * @param path - The file path (relative path within the data directory or volume)
+ * @param volume - Optional namespace within the data directory
+ * @returns `true` if the file exists, `false` otherwise
+ *
+ * @example
+ * ```ts
+ * // File exists at: data/reports/report.csv
+ * if (existsSync('report.csv', 'reports')) {
+ * }
+ * ```
+ */
 export function existsSync(path: string, volume?: string): boolean {
   const { fullPath } = getSafePath(path, volume);
 

@@ -18,7 +18,6 @@ module.exports = {
       category: 'Best Practices',
       recommended: true,
     },
-    fixable: 'code',
     schema: [
       {
         type: 'object',
@@ -100,9 +99,6 @@ module.exports = {
             context.report({
               node,
               message: disallowedMessage,
-              fix: (fixer) => {
-                return fixer.replaceText(node.source, "'@kbn/fs'");
-              },
             });
           }
         }
