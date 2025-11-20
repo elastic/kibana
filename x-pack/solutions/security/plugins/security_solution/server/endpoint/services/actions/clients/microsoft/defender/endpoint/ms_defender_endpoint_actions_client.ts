@@ -1389,9 +1389,9 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       });
 
       return {
-        stdout: output.script_output ?? '',
-        stderr: output.script_errors ?? '',
-        code: output.exit_code ?? '0',
+        stdout: output.script_output,
+        stderr: output.script_errors,
+        code: output.exit_code,
       };
     } catch (_error) {
       const error = `Failed to process runscript output file: ${_error.message}`;
@@ -1400,7 +1400,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       return {
         stdout: '',
         stderr: error,
-        code: '-1',
+        code: '1',
       };
     }
   }
