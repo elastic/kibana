@@ -10,7 +10,7 @@
 import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DashboardsSelector } from '@kbn/dashboards-selector';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
@@ -22,7 +22,7 @@ import {
 import { LabelWithTooltip } from './label_with_tooltip';
 
 export interface Props {
-  uiActions: UiActionsPublicStart;
+  uiActions: UiActionsStart;
 }
 
 export const RuleDashboards = ({ uiActions }: Props) => {

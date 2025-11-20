@@ -160,7 +160,7 @@ export const RuleDetails = () => {
           value={formData.artifacts?.investigation_guide?.blob ?? ''}
         />
       </EuiFormRow>
-      {plugins.uiActions && <RuleDashboards uiActions={plugins.uiActions} />}
+      {uiActions && <RuleDashboards uiActions={uiActions} />}
       <EuiSpacer size="xxl" />
     </>
   );
