@@ -57,18 +57,18 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
                       drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.04));
             `
             : `
-
-        `}
+          `}
         `}
       >
         <div
           css={css`
             ${!isSelected &&
             `
-            &:hover {
-              background-color: ${euiTheme.colors.lightShade};
-              border-radius: ${euiTheme.border.radius.small};
-            }`}
+              &:hover {
+                background-color: ${euiTheme.colors.lightShade};
+                border-radius: ${euiTheme.border.radius.small};
+              }
+            `}
           `}
         >
           {children}
