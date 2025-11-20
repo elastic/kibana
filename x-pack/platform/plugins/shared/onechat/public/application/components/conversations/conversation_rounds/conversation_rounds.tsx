@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
@@ -46,8 +46,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
           <RoundLayout
             key={index}
             scrollContainerHeight={scrollContainerHeight}
-            // TODO: eventually we will use a RoundInput component when we have more complicated inputs like file attachments
-            input={<EuiText size="s">{input.message}</EuiText>}
+            input={input.message}
             isResponseLoading={isResponseLoading}
             isCurrentRound={isCurrentRound}
             outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
