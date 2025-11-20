@@ -57,6 +57,7 @@
     "@kbn/ai-tools",
     "@kbn/logging-mocks",
     "@kbn/grok-heuristics",
+    "@kbn/dissect-heuristics",
     "@kbn/streamlang",
     "@kbn/licensing-types",
     "@kbn/core-elasticsearch-server-utils",
