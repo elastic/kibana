@@ -291,27 +291,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText('GET _search');
       });
 
-      it('should display copy to language button in action panel', async () => {
-        const testSubjects = getService('testSubjects');
-
-        // Verify the copy button exists in the action panel
-        const copyButtonExists = await testSubjects.exists('copyToLanguageActionButton');
-        expect(copyButtonExists).to.be(true);
-
-        // Verify it's visible
-        const copyButton = await testSubjects.find('copyToLanguageActionButton');
-        expect(await copyButton.isDisplayed()).to.be(true);
-      });
-
-      it('should copy request as curl by default when copy button is clicked', async () => {
-        const testSubjects = getService('testSubjects');
+      it('should copy request as curl by default from context menu', async () => {
         const toasts = getService('toasts');
 
-        // Select the request to make action panel appear
+        // Select the request
         await PageObjects.console.selectAllRequests();
 
-        // Click the action panel copy button without changing language
-        await testSubjects.click('copyToLanguageActionButton');
+        // Open context menu and click copy to language button
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.clickCopyToLanguageButton();
 
         // Verify toast message shows curl
         const resultToast = await toasts.getElementByIndex(1);
@@ -333,17 +321,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should copy request with selected language from context menu', async () => {
-        const testSubjects = getService('testSubjects');
         const toasts = getService('toasts');
 
-        // Select the request to make action panel appear
+        // Select the request
         await PageObjects.console.selectAllRequests();
 
         // Open context menu and change language to Python
         await PageObjects.console.clickContextMenu();
         await PageObjects.console.changeDefaultLanguage('python');
 
-        // Close the context menu by clicking on the editor
+        // Close and reopen context menu to copy with the new language
         await PageObjects.console.focusInputEditor();
 
         // Wait for context menu to close
@@ -351,11 +338,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return !(await PageObjects.console.isContextMenuOpen());
         });
 
-        // Select the request again to ensure action panel is visible
+        // Select the request again
         await PageObjects.console.selectAllRequests();
 
-        // Click the action panel copy button
-        await testSubjects.click('copyToLanguageActionButton');
+        // Open context menu and click copy to language button
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.clickCopyToLanguageButton();
 
         // Verify toast message shows Python
         const resultToast = await toasts.getElementByIndex(1);
@@ -377,7 +365,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should copy kbn requests as curl', async () => {
-        const testSubjects = getService('testSubjects');
         const toasts = getService('toasts');
 
         // First, set language to Python
@@ -396,8 +383,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText('GET kbn:/api/spaces/space');
         await PageObjects.console.selectAllRequests();
 
-        // Click action panel copy button
-        await testSubjects.click('copyToLanguageActionButton');
+        // Open context menu and click copy to language button
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.clickCopyToLanguageButton();
 
         // Verify it copies as curl (forced for Kibana requests)
         const resultToast = await toasts.getElementByIndex(1);

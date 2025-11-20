@@ -7,33 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiButtonIcon,
-  EuiContextMenu,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiPopover,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { convertRequestToLanguage, StorageKeys } from '../../../../../services';
+import type { EditorRequest } from '../../types';
 
 import { useServicesContext } from '../../../../contexts';
-import { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from '../../../../../../common/constants';
+import {
+  DEFAULT_LANGUAGE,
+  AVAILABLE_LANGUAGES,
+  KIBANA_API_PREFIX,
+} from '../../../../../../common/constants';
 
 interface Props {
+  getRequests: () => Promise<EditorRequest[]>;
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev: React.MouseEvent) => void;
   notifications: Pick<NotificationsStart, 'toasts'>;
-  currentLanguage: string;
-  onLanguageChange: (language: string) => void;
-  isKbnRequestSelected: boolean;
-  onMenuOpen: () => void;
-  onCopyAs: (language?: string) => Promise<void>;
+  /* A function that returns true if any of the selected requests is an internal Kibana request
+   * (starting with the kbn: prefix). This is needed here as we display only the curl language
+   * for internal Kibana requests since the other languages are not supported yet. */
+  getIsKbnRequestSelected: () => Promise<boolean | null>;
 }
 
 const DELAY_FOR_HIDING_SPINNER = 500;
@@ -42,60 +45,126 @@ const getLanguageLabelByValue = (value: string) => {
   return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
 };
 
-const getModifierKey = () => {
-  const isMac = navigator.platform.toLowerCase().includes('mac');
-  return isMac ? '⌘' : 'Ctrl';
-};
-
 export const ContextMenu = ({
+  getRequests,
   getDocumentation,
   autoIndent,
   notifications,
-  currentLanguage,
-  onLanguageChange,
-  isKbnRequestSelected,
-  onMenuOpen,
-  onCopyAs,
+  getIsKbnRequestSelected,
 }: Props) => {
+  // Get default language from local storage
   const {
+    services: { storage, esHostService },
     config: { isPackagedEnvironment },
   } = useServicesContext();
 
-  // Detect OS for keyboard shortcut display
-  const modifierKey = useMemo(() => getModifierKey(), []);
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
+  const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean | null>(null);
+  const [defaultLanguage, setDefaultLanguage] = useState(
+    storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
+  );
+  const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
+
+  // When a Kibana request is selected, force language to curl
+  useEffect(() => {
+    if (isKbnRequestSelected) {
+      setCurrentLanguage(DEFAULT_LANGUAGE);
+    } else {
+      setCurrentLanguage(defaultLanguage);
+    }
+  }, [defaultLanguage, isKbnRequestSelected]);
+
+  const copyText = async (text: string) => {
+    if (window.navigator?.clipboard) {
+      await window.navigator.clipboard.writeText(text);
+      return;
+    }
+    throw new Error('Could not copy to clipboard!');
+  };
+
+  // This function will convert all the selected requests to the language by
+  // calling convertRequestToLanguage and then copy the data to clipboard.
+  const copyAs = async (language?: string) => {
+    // Get the language we want to convert the requests to
+    const withLanguage = language || currentLanguage;
+    // Get all the selected requests
+    const requests = await getRequests();
+
+    // If we have any kbn requests, we should not allow the user to copy as
+    // anything other than curl
+    const hasKbnRequests = requests.some((req) => req.url.startsWith(KIBANA_API_PREFIX));
+
+    if (hasKbnRequests && withLanguage !== 'curl') {
+      notifications.toasts.addDanger({
+        title: i18n.translate('console.consoleMenu.copyAsMixedRequestsMessage', {
+          defaultMessage: 'Kibana requests can only be copied as curl',
+        }),
+      });
+
+      return;
+    }
+
+    const { data: requestsAsCode, error: requestError } = await convertRequestToLanguage({
+      language: withLanguage,
+      esHost: esHostService.getHost(),
+      kibanaHost: window.location.origin,
+      requests,
+    });
+
+    if (requestError) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('console.consoleMenu.copyAsFailedMessage', {
+          defaultMessage:
+            '{requestsCount, plural, one {Request} other {Requests}} could not be copied to clipboard',
+          values: { requestsCount: requests.length },
+        }),
+      });
+
+      return;
+    }
+
+    notifications.toasts.addSuccess({
+      title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
+        defaultMessage:
+          '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
+        values: { language: getLanguageLabelByValue(withLanguage), requestsCount: requests.length },
+      }),
+    });
+
+    await copyText(requestsAsCode);
+  };
+
+  const checkIsKbnRequestSelected = async () => {
+    setIsKbnRequestSelected(await getIsKbnRequestSelected());
+  };
+
+  const onCopyAsSubmit = async (language?: string) => {
+    const withLanguage = language || currentLanguage;
+
+    // Show loading spinner
+    setRequestConverterLoading(true);
+
+    // When copying as worked as expected, close the context menu popover
+    copyAs(withLanguage)
+      .then(() => {
+        setIsPopoverOpen(false);
+      })
+      .finally(() => {
+        // Delay hiding the spinner to avoid flickering between the spinner and
+        // the change language button
+        setTimeout(() => {
+          setRequestConverterLoading(false);
+        }, DELAY_FOR_HIDING_SPINNER);
+      });
+  };
 
   const closePopover = () => {
     setIsPopoverOpen(false);
   };
 
-  const onCopyAsSubmit = useCallback(
-    async (language?: string) => {
-      const withLanguage = language || currentLanguage;
-
-      // Show loading spinner
-      setRequestConverterLoading(true);
-
-      // When copying as worked as expected, close the context menu popover
-      onCopyAs(withLanguage)
-        .then(() => {
-          setIsPopoverOpen(false);
-        })
-        .finally(() => {
-          // Delay hiding the spinner to avoid flickering between the spinner and
-          // the change language button
-          setTimeout(() => {
-            setRequestConverterLoading(false);
-          }, DELAY_FOR_HIDING_SPINNER);
-        });
-    },
-    [currentLanguage, onCopyAs]
-  );
-
-  const openDocs = useCallback(async () => {
-    setIsPopoverOpen(false);
+  const openDocs = async () => {
+    closePopover();
     const documentation = await getDocumentation();
     if (!documentation) {
       notifications.toasts.addWarning({
@@ -106,29 +175,18 @@ export const ContextMenu = ({
       return;
     }
     window.open(documentation, '_blank');
-  }, [getDocumentation, notifications.toasts]);
+  };
 
-  const handleAutoIndent = useCallback(
-    (event: React.MouseEvent) => {
-      setIsPopoverOpen(false);
-      autoIndent(event);
-    },
-    [autoIndent]
-  );
-
-  const handleLanguageSelect = useCallback(
-    (language: string) => {
-      onLanguageChange(language);
-      setIsPopoverOpen(false);
-    },
-    [onLanguageChange]
-  );
+  const handleAutoIndent = (event: React.MouseEvent) => {
+    closePopover();
+    autoIndent(event);
+  };
 
   const button = (
     <EuiButtonIcon
       onClick={() => {
         setIsPopoverOpen((prev) => !prev);
-        onMenuOpen();
+        checkIsKbnRequestSelected();
       }}
       data-test-subj="toggleConsoleMenu"
       aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
@@ -139,131 +197,48 @@ export const ContextMenu = ({
     />
   );
 
-  // Build panels for EuiContextMenu
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
-    // Language selection panel (panel 1)
-    const languageItems = AVAILABLE_LANGUAGES.flatMap((lang, index) => {
-      const item = {
-        name: lang.label,
-        key: lang.value,
-        'data-test-subj': `languageClientMenuItem-${lang.value}`,
-        icon: currentLanguage === lang.value ? 'check' : 'empty',
-        onClick: () => handleLanguageSelect(lang.value),
-      };
-
-      // Add separator after each item except the last one
-      if (index < AVAILABLE_LANGUAGES.length - 1) {
-        return [item, { isSeparator: true as const, key: `separator-${lang.value}` }];
-      }
-
-      return [item];
-    });
-
-    // Main menu items (panel 0)
-    const mainItems = [
-      ...(!isPackagedEnvironment
-        ? [
-            {
-              name: (
-                <FormattedMessage
-                  id="console.monaco.requestOptions.copyToLanguageButtonLabel"
-                  defaultMessage="Copy to {language}"
-                  values={{ language: getLanguageLabelByValue(currentLanguage) }}
-                />
-              ),
-              key: 'copyToLanguage',
-              'data-test-subj': 'consoleMenuCopyToLanguage',
-              icon: isRequestConverterLoading ? <EuiLoadingSpinner size="m" /> : 'copyClipboard',
-              disabled: !window.navigator?.clipboard,
-              onClick: () => onCopyAsSubmit(),
-            },
-            // Hide Language clients option for Kibana requests
-            ...(!isKbnRequestSelected
-              ? [
-                  {
-                    name: (
-                      <FormattedMessage
-                        id="console.monaco.requestOptions.changeLanguageButtonLabel"
-                        defaultMessage="Change language"
-                      />
-                    ),
-                    key: 'languageClients',
-                    'data-test-subj': 'consoleMenuLanguageClients',
-                    icon: 'editorCodeBlock',
-                    panel: 1,
-                  },
-                ]
-              : []),
-          ]
-        : []),
-      {
-        name: (
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="console.monaco.requestOptions.autoIndentButtonLabel"
-                defaultMessage="Auto indent"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" data-test-subj="consoleMenuAutoIndentShortcut">
-                {modifierKey} + I
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        key: 'autoIndent',
-        'data-test-subj': 'consoleMenuAutoIndent',
-        icon: 'kqlFunction',
-        onClick: handleAutoIndent,
-      },
-      {
-        name: (
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="console.monaco.requestOptions.openDocumentationButtonLabel"
-                defaultMessage="Open API reference"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" data-test-subj="consoleMenuOpenDocsShortcut">
-                {modifierKey} + /
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        key: 'openDocs',
-        'data-test-subj': 'consoleMenuOpenDocs',
-        icon: 'documentation',
-        onClick: openDocs,
-      },
-    ];
-
-    return [
-      {
-        id: 0,
-        items: mainItems,
-      },
-      {
-        id: 1,
-        title: i18n.translate('console.consoleMenu.changeLanguagePanelTitle', {
-          defaultMessage: 'Change language',
-        }),
-        items: languageItems,
-      },
-    ];
-  }, [
-    isPackagedEnvironment,
-    isKbnRequestSelected,
-    currentLanguage,
-    isRequestConverterLoading,
-    modifierKey,
-    onCopyAsSubmit,
-    handleAutoIndent,
-    openDocs,
-    handleLanguageSelect,
-  ]);
+  const items = [
+    ...(!isPackagedEnvironment
+      ? [
+          <EuiContextMenuItem
+            key="Copy to"
+            data-test-subj="consoleMenuCopyToLanguage"
+            id="copyTo"
+            disabled={!window.navigator?.clipboard}
+            onClick={() => onCopyAsSubmit()}
+            icon={isRequestConverterLoading ? <EuiLoadingSpinner size="m" /> : 'copyClipboard'}
+          >
+            <FormattedMessage
+              id="console.monaco.requestOptions.copyToLanguageButtonLabel"
+              defaultMessage="Copy to {language}"
+              values={{ language: getLanguageLabelByValue(currentLanguage) }}
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    <EuiContextMenuItem
+      data-test-subj="consoleMenuAutoIndent"
+      key="Auto indent"
+      onClick={handleAutoIndent}
+      icon="kqlFunction"
+    >
+      <FormattedMessage
+        id="console.monaco.requestOptions.autoIndentButtonLabel"
+        defaultMessage="Auto indent"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="Open documentation"
+      data-test-subj="consoleMenuOpenDocs"
+      onClick={openDocs}
+      icon="documentation"
+    >
+      <FormattedMessage
+        id="console.monaco.requestOptions.openDocumentationButtonLabel"
+        defaultMessage="Open API reference"
+      />
+    </EuiContextMenuItem>,
+  ];
 
   return (
     <EuiPopover
@@ -274,7 +249,7 @@ export const ContextMenu = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="consoleMenu" />
+      <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
     </EuiPopover>
   );
 };

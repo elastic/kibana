@@ -23,14 +23,12 @@ import type { FieldType } from '@kbn/esql-ast/src/definitions/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
-import { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from '../../../../common/constants';
 import {
   useSetInitialValue,
   useSetupAutocompletePolling,
   useSetupAutosave,
   useResizeCheckerUtils,
   useKeyboardCommandsUtils,
-  useCopyToLanguage,
 } from './hooks';
 import {
   useServicesContext,
@@ -66,10 +64,6 @@ export interface EditorProps {
   enableSuggestWidgetRepositioning: boolean;
 }
 
-const getLanguageLabelByValue = (value: string) => {
-  return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
-};
-
 export const MonacoEditor = ({
   localStorageValue,
   value,
@@ -87,8 +81,6 @@ export const MonacoEditor = ({
       data,
       licensing,
       application,
-      storage,
-      esHostService,
     },
     docLinkVersion,
   } = context;
@@ -122,22 +114,6 @@ export const MonacoEditor = ({
   const isKbnRequestSelectedCallback = useCallback(async () => {
     return actionsProvider.current!.isKbnRequestSelected();
   }, []);
-
-  // Use the custom hook for copy and language management
-  const {
-    currentLanguage,
-    isKbnRequestSelected,
-    checkIsKbnRequestSelected,
-    onCopyToLanguageSubmit,
-    copyToLanguage,
-    handleLanguageChange,
-  } = useCopyToLanguage({
-    storage,
-    esHostService,
-    toasts,
-    getRequestsCallback,
-    isKbnRequestSelectedCallback,
-  });
 
   const getDocumenationLink = useCallback(async () => {
     return actionsProvider.current!.getDocumentationLink(docLinkVersion);
@@ -310,45 +286,12 @@ export const MonacoEditor = ({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('console.monaco.copyToLanguageButtonTooltipContent', {
-              defaultMessage: 'Copy to {language}',
-              values: {
-                language: getLanguageLabelByValue(
-                  isKbnRequestSelected ? DEFAULT_LANGUAGE : currentLanguage
-                ),
-              },
-            })}
-          >
-            <EuiButtonIcon
-              color="text"
-              iconType="copyClipboard"
-              onClick={onCopyToLanguageSubmit}
-              onMouseEnter={checkIsKbnRequestSelected}
-              onFocus={checkIsKbnRequestSelected}
-              data-test-subj="copyToLanguageActionButton"
-              aria-label={i18n.translate('console.monaco.copyToLanguageButtonAriaLabel', {
-                defaultMessage: 'Copy to {language}',
-                values: {
-                  language: getLanguageLabelByValue(
-                    isKbnRequestSelected ? DEFAULT_LANGUAGE : currentLanguage
-                  ),
-                },
-              })}
-              disabled={!window.navigator?.clipboard}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <ContextMenu
+            getRequests={getRequestsCallback}
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
             notifications={notifications}
-            currentLanguage={currentLanguage}
-            onLanguageChange={handleLanguageChange}
-            isKbnRequestSelected={isKbnRequestSelected}
-            onMenuOpen={checkIsKbnRequestSelected}
-            onCopyAs={copyToLanguage}
+            getIsKbnRequestSelected={isKbnRequestSelectedCallback}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
