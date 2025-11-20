@@ -12,8 +12,6 @@ import type { OnAppLeave } from '../context/app_leave_context';
 interface UseNavigationAbortParams {
   onAppLeave: OnAppLeave;
   isResponseLoading: boolean;
-  cancel: () => void;
-  markRoundAsAborted: () => void;
 }
 
 /**
@@ -26,8 +24,6 @@ interface UseNavigationAbortParams {
 export const useNavigationAbort = ({
   onAppLeave,
   isResponseLoading,
-  cancel,
-  markRoundAsAborted,
 }: UseNavigationAbortParams) => {
   const shouldAbortOnUnmountRef = useRef(false);
 
@@ -38,14 +34,12 @@ export const useNavigationAbort = ({
         return actions.confirm(
           i18n.translate('xpack.onechat.navigationAbort.message', {
             defaultMessage:
-              'A chat request is in progress. Do you want to navigate away and abort it?',
+              'A chat request is in progress. Are you sure you want to navigate away?',
           }),
           i18n.translate('xpack.onechat.navigationAbort.title', {
             defaultMessage: 'Abort chat request?',
           }),
-          () => {
-            shouldAbortOnUnmountRef.current = false;
-          },
+          () => {},
           i18n.translate('xpack.onechat.navigationAbort.confirmButton', {
             defaultMessage: 'Yes, abort',
           }),
@@ -59,19 +53,4 @@ export const useNavigationAbort = ({
       onAppLeave((actions) => actions.default());
     };
   }, [onAppLeave, isResponseLoading]);
-
-  useEffect(() => {
-    if (!isResponseLoading) {
-      shouldAbortOnUnmountRef.current = false;
-    }
-  }, [isResponseLoading]);
-
-  useEffect(() => {
-    return () => {
-      if (shouldAbortOnUnmountRef.current) {
-        cancel();
-        markRoundAsAborted();
-      }
-    };
-  }, [cancel, markRoundAsAborted]);
 };

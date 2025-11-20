@@ -161,8 +161,6 @@ export interface ConversationRound {
   model_usage: RoundModelUsageStats;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string;
-  /** status of the round, e.g., 'aborted' if the user navigated away and aborted the request */
-  status?: 'aborted';
 }
 
 export interface RoundModelUsageStats {

@@ -123,7 +123,6 @@ describe('chat_message_text', () => {
         deleteConversation: jest.fn(),
         renameConversation: jest.fn(),
         setTimeToFirstToken: jest.fn(),
-        markRoundAsAborted: jest.fn(),
       },
     });
   });
