@@ -38,6 +38,7 @@ interface QueueItem {
 /**
  * Runs log rate analysis data on an index given some alert metadata.
  */
+
 export async function fetchLogRateAnalysisForAlert({
   esClient,
   abortSignal,
@@ -54,8 +55,7 @@ export async function fetchLogRateAnalysisForAlert({
     searchQuery?: estypes.QueryDslQueryContainer;
   };
 }) {
-  const { alertStartedAt, timefield = '@timestamp' } = args;
-  const alertStart = moment(alertStartedAt);
+  const alertStart = moment(args.alertStartedAt);
 
   const intervalFactor = getIntervalFactor(
     args.alertRuleParameterTimeSize,
@@ -80,11 +80,47 @@ export async function fetchLogRateAnalysisForAlert({
     deviationMax: alertStart.valueOf(),
   };
 
-  const { searchQuery = { match_all: {} } } = args;
+  return runLogRateAnalysis({
+    esClient,
+    abortSignal,
+    arguments: {
+      index: args.index,
+      windowParameters,
+      timefield: args.timefield,
+      searchQuery: args.searchQuery,
+    },
+  });
+}
+
+export async function runLogRateAnalysis({
+  esClient,
+  abortSignal,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  abortSignal?: AbortSignal;
+  arguments: {
+    index: string;
+    windowParameters: {
+      baselineMin: number;
+      baselineMax: number;
+      deviationMin: number;
+      deviationMax: number;
+    };
+    timefield?: string;
+    searchQuery?: estypes.QueryDslQueryContainer;
+  };
+}) {
+  const {
+    index,
+    windowParameters,
+    timefield = '@timestamp',
+    searchQuery = { match_all: {} },
+  } = args;
 
   // Step 1: Get field candidates and total doc counts.
   const indexInfoParams: AiopsLogRateAnalysisSchema = {
-    index: args.index,
+    index,
     start: windowParameters.baselineMin,
     end: windowParameters.deviationMax,
     searchQuery: JSON.stringify(searchQuery),

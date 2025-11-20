@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import datemath from '@kbn/datemath';
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { fetchLogRateAnalysisForAlert } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
+import { runLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../../types';
+import { parseDatemath } from '../../utils/time';
 
 export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_log_rate_analysis';
 
@@ -62,7 +62,7 @@ export function createRunLogRateAnalysisTool({
     id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Explain log spikes or dips by comparing two time windows (baseline vs deviation) and letting Kibana\'s log rate analysis surface the most significant field/value cohorts and categorized messages. Use this whenever you need to answer "what changed in the logs?" for a given index.',
+      'Explain log spikes or dips by comparing two time windows (baseline vs deviation) and letting Kibana\'s log rate analysis surface the most significant field/value cohorts and categorized messages.\nUse this whenever you need to answer "what changed in the logs?" for a given index.',
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
     handler: async ({ index, timeFieldName = '@timestamp', baseline, deviation }, context) => {
@@ -70,22 +70,17 @@ export function createRunLogRateAnalysisTool({
         const esClient = context.esClient.asCurrentUser;
 
         const windowParameters: WindowParameters = {
-          baselineMin: parseDate(baseline.from),
-          baselineMax: parseDate(baseline.to, { roundUp: true }),
-          deviationMin: parseDate(deviation.from),
-          deviationMax: parseDate(deviation.to, { roundUp: true }),
+          baselineMin: parseDatemath(baseline.from),
+          baselineMax: parseDatemath(baseline.to, { roundUp: true }),
+          deviationMin: parseDatemath(deviation.from),
+          deviationMax: parseDatemath(deviation.to, { roundUp: true }),
         };
 
-        const deviationDurationMs = windowParameters.deviationMax - windowParameters.deviationMin;
-        const intervalMinutes = Math.max(1, Math.round(deviationDurationMs / 60000));
-
-        const response = await fetchLogRateAnalysisForAlert({
+        const response = await runLogRateAnalysis({
           esClient,
           arguments: {
             index,
-            alertStartedAt: new Date(windowParameters.deviationMax).toISOString(),
-            alertRuleParameterTimeSize: intervalMinutes,
-            alertRuleParameterTimeUnit: 'm',
+            windowParameters,
             timefield: timeFieldName,
             searchQuery: {
               match_all: {},
@@ -93,7 +88,7 @@ export function createRunLogRateAnalysisTool({
           },
         });
         logger.debug(
-          `Log rate analysis tool (${index}) found ${response.significantItems.length} items of type ${response.logRateAnalysisType}.`
+          `Log rate analysis tool (index: "${index}") found ${response.significantItems.length} items of type ${response.logRateAnalysisType}.`
         );
 
         return {
@@ -125,8 +120,4 @@ export function createRunLogRateAnalysisTool({
   };
 
   return toolDefinition;
-}
-
-function parseDate(value: string, options?: Parameters<typeof datemath.parse>[1]) {
-  return datemath.parse(value, options)?.valueOf() ?? 0;
 }

@@ -19,7 +19,7 @@ import {
 import {
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   createRunLogRateAnalysisTool,
-} from './get_log_rate_analysis/get_log_rate_analysis';
+} from './run_log_rate_analysis/run_log_rate_analysis';
 import {
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   createGetAnomalyDetectionJobsTool,
