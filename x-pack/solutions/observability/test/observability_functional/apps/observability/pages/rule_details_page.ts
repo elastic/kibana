@@ -239,5 +239,142 @@ export default ({ getService }: FtrProviderContext) => {
         await testSubjects.missingOrFail('actions');
       });
     });
+
+    describe('Related dashboards', function () {
+      const comboBox = getService('comboBox');
+      const kibanaServer = getService('kibanaServer');
+      let testDashboardId: string;
+      const testDashboardTitle = `Test Dashboard for Rule Details ${Date.now()}`;
+
+      before(async () => {
+        // Create a test dashboard that will appear in the dropdown
+        const { body: dashboardResponse } = await supertest
+          .post('/api/saved_objects/dashboard')
+          .set('kbn-xsrf', 'true')
+          .send({
+            attributes: {
+              title: testDashboardTitle,
+              description: 'Test dashboard for rule details functional test',
+              panelsJSON: '[]',
+              version: '1',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: '{}',
+              },
+            },
+          })
+          .expect(200);
+
+        testDashboardId = dashboardResponse.id;
+      });
+
+      after(async () => {
+        // Clean up the test dashboard
+        if (testDashboardId) {
+          await kibanaServer.savedObjects.delete({
+            type: 'dashboard',
+            id: testDashboardId,
+          });
+        }
+      });
+
+      it('should display dashboard options in "Related dashboards" dropdown when editing rule', async () => {
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+        await retry.waitFor(
+          'Rule details to be visible',
+          async () => await testSubjects.exists('ruleDetails')
+        );
+
+        // Click edit button to open the rule edit form
+        await testSubjects.click('actions');
+        await testSubjects.click('editRuleButton');
+
+        // Wait for the rule form to load
+        await retry.waitFor(
+          'Rule form to be visible',
+          async () => await testSubjects.exists('ruleDetailsNameInput')
+        );
+
+        // Try to find and click Details tab if it exists and is not already selected
+        // The form might already be on the Details tab
+        await retry.try(async () => {
+          try {
+            const detailsTab = await find.byButtonText('Details');
+            const isSelected = await detailsTab.getAttribute('aria-selected');
+            if (detailsTab && isSelected !== 'true') {
+              await detailsTab.click();
+            }
+          } catch (e) {
+            // Details tab might not exist or might already be selected
+            // Continue to check for dashboard selector
+          }
+        });
+
+        // Wait for the dashboard selector to be visible
+        // This will timeout if we're not on the Details tab
+        await retry.waitFor(
+          'Dashboard selector to be visible',
+          async () => await testSubjects.exists('dashboardsSelector'),
+          { timeout: 10000 }
+        );
+
+        // Get options list (this automatically opens the dropdown)
+        // getOptionsList returns a string with all options, not an array
+        const optionsText = await comboBox.getOptionsList('dashboardsSelector');
+
+        // Verify the dropdown is not empty - this is the critical assertion
+        // that would catch the empty dropdown bug
+        expect(optionsText.length).to.be.greaterThan(0);
+        expect(optionsText.trim()).to.not.be.empty();
+
+        // Verify our test dashboard appears in the list
+        expect(optionsText).to.contain(testDashboardTitle);
+      });
+
+      it('should allow selecting a dashboard from the dropdown when editing rule', async () => {
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+        await retry.waitFor(
+          'Rule details to be visible',
+          async () => await testSubjects.exists('ruleDetails')
+        );
+
+        // Click edit button to open the rule edit form
+        await testSubjects.click('actions');
+        await testSubjects.click('editRuleButton');
+
+        // Wait for the rule form to load
+        await retry.waitFor(
+          'Rule form to be visible',
+          async () => await testSubjects.exists('ruleDetailsNameInput')
+        );
+
+        // Try to find and click Details tab if it exists and is not already selected
+        await retry.try(async () => {
+          try {
+            const detailsTab = await find.byButtonText('Details');
+            const isSelected = await detailsTab.getAttribute('aria-selected');
+            if (detailsTab && isSelected !== 'true') {
+              await detailsTab.click();
+            }
+          } catch (e) {
+            // Details tab might not exist or might already be selected
+            // Continue to check for dashboard selector
+          }
+        });
+
+        // Wait for the dashboard selector to be visible
+        await retry.waitFor(
+          'Dashboard selector to be visible',
+          async () => await testSubjects.exists('dashboardsSelector'),
+          { timeout: 10000 }
+        );
+
+        // Select the test dashboard
+        await comboBox.set('dashboardsSelector', testDashboardTitle);
+
+        // Verify the dashboard is selected
+        const selectedOptions = await comboBox.getComboBoxSelectedOptions('dashboardsSelector');
+        expect(selectedOptions).to.contain(testDashboardTitle);
+      });
+    });
   });
 };
