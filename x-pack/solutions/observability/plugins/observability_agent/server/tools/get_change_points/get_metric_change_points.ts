@@ -207,26 +207,32 @@ export async function getMetricChangePoints({
 const getMetricChangePointsSchema = z.object({
   start: z
     .string()
-    .describe('The beginning of the time range, in datemath, like now-24h, or an ISO timestamp'),
-  end: z.string().describe('The end of the time range, in datemath, like now, or an ISO timestamp'),
+    .describe(
+      'The beginning of the time range, in Elasticsearch datemath, like `now-24h`, or an ISO timestamp'
+    ),
+  end: z
+    .string()
+    .describe(
+      'The end of the time range, in Elasticsearch datemath, like `now`, or an ISO timestamp'
+    ),
   metrics: z
     .array(
       z.object({
-        name: z.string().describe('The name of this set of metrics'),
-        index: z.string().describe('The index or index pattern where to find the metrics'),
+        name: z.string().describe('The name of the set of metrics'),
+        index: z.string().describe('The index or index pattern to find the metrics'),
         kqlFilter: z
           .string()
-          .describe('A KQL filter to filter the log documents by, e.g. my_field:foo')
+          .describe('A KQL filter to filter the log documents, e.g.: my_field:foo')
           .optional(),
         field: z
           .string()
           .describe(
-            'Metric field that contains the metric. Only use if the metric aggregation type is not count.'
+            'Metric field that contains the metric. Only use if the metric aggregation type is not `count`.'
           )
           .optional(),
         type: z
           .enum(['count', 'avg', 'sum', 'min', 'max', 'p95', 'p99'])
-          .describe('The type of metric aggregation to perform. Defaults to count')
+          .describe('The type of metric aggregation to perform. Defaults to `count`')
           .optional(),
         groupBy: z
           .array(z.string())
@@ -237,7 +243,7 @@ const getMetricChangePointsSchema = z.object({
     .optional()
     .default([{ name: 'CPU Usage', index: 'metrics-*' }])
     .describe(
-      'Analyze changes in metrics. DO NOT UNDER ANY CIRCUMSTANCES use date or metric fields for groupBy, leave empty unless needed.'
+      'Analyze changes in metrics. DO NOT UNDER ANY CIRCUMSTANCES use date or metric fields for groupBy. Leave empty unless needed.'
     ),
 });
 
@@ -253,13 +259,13 @@ export function createObservabilityGetMetricChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getMetricChangePointsSchema> = {
     id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
-    description: 'Returns change points like spikes and dips for metrics.',
+    description: 'Return change points such as spikes and dips for metrics.',
     schema: getMetricChangePointsSchema,
-    tags: ['observability'],
+    tags: ['observability', 'metrics'],
     handler: async ({ start, end, metrics = [] }, { esClient }) => {
       try {
         if (metrics.length === 0) {
-          throw new Error('No metrics were defined');
+          throw new Error('No metrics found');
         }
 
         const metricChangePoints = await Promise.all([
