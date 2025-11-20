@@ -151,6 +151,9 @@ $$$action-config-email-domain-allowlist$$$
 
     Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
 
+`xpack.actions.email.maximum_body_length` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3.0` {applies_to}`stack: ga 9.2.1` {applies_to}`stack: ga 9.1.7` {applies_to}`stack: ga 8.19.7`
+:    The maximum length of an email body in bytes.  Values longer than this length will be truncated.  The default is 25MB, the maximum is 25MB.
+
 `xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
 :    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 

@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { type LogDocumentOverview, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import type {
   Message,
   ObservabilityAIAssistantPublicStart,
@@ -35,7 +36,7 @@ export const LogAIAssistant = ({
       return undefined;
     }
 
-    const message = doc.fields.find((field) => field.field === 'message')?.value[0];
+    const message = getMessageFieldWithFallbacks(doc as unknown as LogDocumentOverview);
 
     if (!message) {
       return undefined;

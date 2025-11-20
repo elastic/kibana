@@ -6,6 +6,7 @@
  */
 
 import styled from '@emotion/styled';
+import { UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS } from '@kbn/unified-data-table/src/hooks/use_full_screen_watcher';
 import { createGlobalStyle } from 'styled-components';
 
 export const EmbeddedDiscoverContainer = styled.div`
@@ -31,7 +32,10 @@ export const TimelineESQLGlobalStyles = createGlobalStyle`
   }
 
   // TODO this should be removed when we change the ES|QL tab to be our own component instead of Discover (hopefully 8.15)
-  .unifiedDataTable__fullScreen .dscPageBody * {
+  .${UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS} .dscPageBody * {
     z-index: unset !important;
+  }
+  .${UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS} .ESQLEditor {
+    visibility: hidden;
   }
 `;

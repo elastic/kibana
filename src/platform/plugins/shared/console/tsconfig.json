@@ -3,8 +3,9 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/**/*"],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/core",
     "@kbn/dev-tools-plugin",
     "@kbn/es-ui-shared-plugin",

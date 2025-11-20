@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from './use_kibana';
 import { APIRoutes } from '../types';

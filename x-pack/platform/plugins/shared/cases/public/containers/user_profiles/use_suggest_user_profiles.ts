@@ -6,8 +6,8 @@
  */
 
 import { useState } from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { noop } from 'lodash';

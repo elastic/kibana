@@ -9,7 +9,7 @@ import { IndexDetailsTab } from '@kbn/index-management-plugin/common/constants';
 import React, { Suspense, lazy } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

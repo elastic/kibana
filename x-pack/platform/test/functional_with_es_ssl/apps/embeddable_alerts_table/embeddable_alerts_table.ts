@@ -46,7 +46,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const sampleData = getService('sampleData');
   const rules = getService('rules');
 
-  describe('Embeddable alerts panel', () => {
+  describe('Embeddable alerts panel', function () {
+    this.tags('skipFIPS');
+
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
 
@@ -104,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     for (const solution of ['stack', 'observability', 'security']) {
-      describe(`with ${solution} role`, () => {
+      describe(`with ${solution} role`, function () {
         const ruleName = `${solution}-rule`;
 
         before(async () => {

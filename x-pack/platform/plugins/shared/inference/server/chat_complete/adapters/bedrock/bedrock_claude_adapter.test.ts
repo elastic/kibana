@@ -237,6 +237,146 @@ Human:`,
       ]);
     });
 
+    it('correctly format consecutive tool result messages', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+            },
+            {
+              role: MessageRole.User,
+              content: 'another question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '0',
+                },
+                {
+                  function: {
+                    name: 'my_other_function',
+                    arguments: {
+                      baz: 'qux',
+                    },
+                  },
+                  toolCallId: '1',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: {
+                bar: 'foo',
+              },
+            },
+            {
+              name: 'my_other_function',
+              role: MessageRole.Tool,
+              toolCallId: '1',
+              response: {
+                qux: 'baz',
+              },
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function_2',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '2',
+                },
+                {
+                  function: {
+                    name: 'my_other_function_2',
+                    arguments: {
+                      baz: 'qux',
+                    },
+                  },
+                  toolCallId: '3',
+                },
+              ],
+            },
+            {
+              name: 'my_function_2',
+              role: MessageRole.Tool,
+              toolCallId: '2',
+              response: {
+                bar: 'foo',
+              },
+            },
+            {
+              name: 'my_other_function_2',
+              role: MessageRole.Tool,
+              toolCallId: '3',
+              response: {
+                qux: 'baz',
+              },
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question', type: 'text' }] },
+        { role: 'assistant', content: [{ text: 'answer', type: 'text' }] },
+        { role: 'user', content: [{ text: 'another question', type: 'text' }] },
+        {
+          role: 'assistant',
+          content: [
+            { toolUse: { toolUseId: '0', name: 'my_function', input: { foo: 'bar' } } },
+            { toolUse: { toolUseId: '1', name: 'my_other_function', input: { baz: 'qux' } } },
+          ],
+        },
+        {
+          role: 'user',
+          content: [
+            { toolResult: { toolUseId: '0', content: [{ json: { bar: 'foo' } }] } },
+            { toolResult: { toolUseId: '1', content: [{ json: { qux: 'baz' } }] } },
+          ],
+        },
+        {
+          role: 'assistant',
+          content: [
+            { toolUse: { toolUseId: '2', name: 'my_function_2', input: { foo: 'bar' } } },
+            { toolUse: { toolUseId: '3', name: 'my_other_function_2', input: { baz: 'qux' } } },
+          ],
+        },
+        {
+          role: 'user',
+          content: [
+            { toolResult: { toolUseId: '2', content: [{ json: { bar: 'foo' } }] } },
+            { toolResult: { toolUseId: '3', content: [{ json: { qux: 'baz' } }] } },
+          ],
+        },
+      ]);
+    });
+
     it('correctly format system message', () => {
       bedrockClaudeAdapter
         .chatComplete({

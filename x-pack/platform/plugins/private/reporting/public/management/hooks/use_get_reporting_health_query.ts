@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { HttpSetup } from '@kbn/core/public';
 import { getReportingHealth } from '../apis/get_reporting_health';
 import { queryKeys } from '../query_keys';

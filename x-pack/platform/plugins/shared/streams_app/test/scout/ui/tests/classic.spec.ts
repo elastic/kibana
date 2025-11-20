@@ -43,7 +43,7 @@ test.describe.skip('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.goto();
   });
 
-  test.afterAll(async ({ kbnClient, esClient, apiServices }) => {
+  test.afterAll(async ({ kbnClient, esClient }) => {
     await esClient.indices.deleteDataStream({ name: DATA_STREAM_NAME });
     await esClient.indices.deleteIndexTemplate({
       name: 'my-index-template',
@@ -51,7 +51,7 @@ test.describe.skip('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test('full flow', async ({ page, esClient, pageObjects }) => {
+  test('full flow', async ({ page, pageObjects }) => {
     // Update data retention
     await pageObjects.streams.gotoDataRetentionTab(DATA_STREAM_NAME);
 

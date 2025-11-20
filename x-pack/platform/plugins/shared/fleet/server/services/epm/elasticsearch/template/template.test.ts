@@ -1867,275 +1867,524 @@ describe('EPM template', () => {
     }).toThrow();
   });
 
-  it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
-    const dataStreamDatasetIsPrefixUnset = {
-      type: 'metrics',
-      dataset: 'package.dataset',
-      title: 'test data stream',
-      release: 'experimental',
-      package: 'package',
-      path: 'path',
-      ingest_pipeline: 'default',
-    } as RegistryDataStream;
-    const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
-    const templatePriorityDatasetIsPrefixUnset = 200;
-    const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixUnset);
-    const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixUnset);
-
-    expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixUnset);
-    expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixUnset);
-  });
-
-  it('tests priority and index pattern for data stream with dataset_is_prefix set to false', () => {
-    const dataStreamDatasetIsPrefixFalse = {
-      type: 'metrics',
-      dataset: 'package.dataset',
-      title: 'test data stream',
-      release: 'experimental',
-      package: 'package',
-      path: 'path',
-      ingest_pipeline: 'default',
-      dataset_is_prefix: false,
-    } as RegistryDataStream;
-    const templateIndexPatternDatasetIsPrefixFalse = 'metrics-package.dataset-*';
-    const templatePriorityDatasetIsPrefixFalse = 200;
-    const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixFalse);
-    const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixFalse);
-
-    expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixFalse);
-    expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixFalse);
-  });
-
-  it('tests priority and index pattern for data stream with dataset_is_prefix set to true', () => {
-    const dataStreamDatasetIsPrefixTrue = {
-      type: 'metrics',
-      dataset: 'package.dataset',
-      title: 'test data stream',
-      release: 'experimental',
-      package: 'package',
-      path: 'path',
-      ingest_pipeline: 'default',
-      dataset_is_prefix: true,
-    } as RegistryDataStream;
-    const templateIndexPatternDatasetIsPrefixTrue = 'metrics-package.dataset.*-*';
-    const templatePriorityDatasetIsPrefixTrue = 150;
-    const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixTrue);
-    const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixTrue);
-
-    expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixTrue);
-    expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixTrue);
-  });
-
-  describe('updateCurrentWriteIndices', () => {
-    it('update all the index matching, index template index pattern', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {
-          settings: { index: {} },
-          mappings: { properties: {} },
+  it('tests processing flattened field with ignore_above 1024', () => {
+    const flattenedFieldYml = `
+- name: flattenedField
+  type: flattened
+  ignore_above: 1024
+`;
+    const flattenedFieldMapping = {
+      properties: {
+        flattenedField: {
+          type: 'flattened',
+          ignore_above: 1024,
         },
-      } as any);
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: { properties: {} },
-            },
-          } as any,
-        },
-      ]);
-      expect(esClient.indices.getDataStream).toBeCalledWith({
-        name: 'test.*-*',
-        expand_wildcards: ['open', 'hidden'],
-      });
-      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
-      expect(putMappingsCall).toHaveLength(1);
-      expect(putMappingsCall[0]).toBe('test.prefix1-default');
-    });
-    it('update non replicated datastream', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [
-          { name: 'test-non-replicated' },
-          { name: 'test-replicated', replicated: true },
-        ],
-      } as any);
+      },
+    };
+    const fields: Field[] = load(flattenedFieldYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(flattenedFieldMapping);
+  });
+});
 
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {
-          settings: { index: {} },
-          mappings: { properties: {} },
-          lifecycle: {
-            data_retention: '7d',
+it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
+  const dataStreamDatasetIsPrefixUnset = {
+    type: 'metrics',
+    dataset: 'package.dataset',
+    title: 'test data stream',
+    release: 'experimental',
+    package: 'package',
+    path: 'path',
+    ingest_pipeline: 'default',
+  } as RegistryDataStream;
+  const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
+  const templatePriorityDatasetIsPrefixUnset = 200;
+  const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixUnset);
+  const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixUnset);
+
+  expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixUnset);
+  expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixUnset);
+});
+
+it('tests priority and index pattern for data stream with dataset_is_prefix set to false', () => {
+  const dataStreamDatasetIsPrefixFalse = {
+    type: 'metrics',
+    dataset: 'package.dataset',
+    title: 'test data stream',
+    release: 'experimental',
+    package: 'package',
+    path: 'path',
+    ingest_pipeline: 'default',
+    dataset_is_prefix: false,
+  } as RegistryDataStream;
+  const templateIndexPatternDatasetIsPrefixFalse = 'metrics-package.dataset-*';
+  const templatePriorityDatasetIsPrefixFalse = 200;
+  const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixFalse);
+  const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixFalse);
+
+  expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixFalse);
+  expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixFalse);
+});
+
+it('tests priority and index pattern for data stream with dataset_is_prefix set to true', () => {
+  const dataStreamDatasetIsPrefixTrue = {
+    type: 'metrics',
+    dataset: 'package.dataset',
+    title: 'test data stream',
+    release: 'experimental',
+    package: 'package',
+    path: 'path',
+    ingest_pipeline: 'default',
+    dataset_is_prefix: true,
+  } as RegistryDataStream;
+  const templateIndexPatternDatasetIsPrefixTrue = 'metrics-package.dataset.*-*';
+  const templatePriorityDatasetIsPrefixTrue = 150;
+  const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixTrue);
+  const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixTrue);
+
+  expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixTrue);
+  expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixTrue);
+});
+
+describe('updateCurrentWriteIndices', () => {
+  it('update all the index matching, index template index pattern', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {
+        settings: { index: {} },
+        mappings: { properties: {} },
+      },
+    } as any);
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test.*-*'],
+          template: {
+            settings: { index: {} },
+            mappings: { properties: {} },
           },
-        },
-      } as any);
+        } as any,
+      },
+    ]);
+    expect(esClient.indices.getDataStream).toBeCalledWith({
+      name: 'test.*-*',
+      expand_wildcards: ['open', 'hidden'],
+    });
+    const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+    expect(putMappingsCall).toHaveLength(1);
+    expect(putMappingsCall[0]).toBe('test.prefix1-default');
+  });
+  it('update non replicated datastream', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [
+        { name: 'test-non-replicated' },
+        { name: 'test-replicated', replicated: true },
+      ],
+    } as any);
 
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test-*'],
-            template: {
-              settings: { index: {} },
-              mappings: { properties: {} },
-            },
-          } as any,
-        },
-      ]);
-
-      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
-      expect(putMappingsCall).toHaveLength(1);
-      expect(putMappingsCall[0]).toBe('test-non-replicated');
-
-      const putDatastreamLifecycleCalls = esClient.transport.request.mock.calls;
-      expect(putDatastreamLifecycleCalls).toHaveLength(1);
-      expect(putDatastreamLifecycleCalls[0][0]).toEqual({
-        method: 'PUT',
-        path: '_data_stream/test-non-replicated/_lifecycle',
-        body: {
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {
+        settings: { index: {} },
+        mappings: { properties: {} },
+        lifecycle: {
           data_retention: '7d',
         },
-      });
+      },
+    } as any);
+
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test-*'],
+          template: {
+            settings: { index: {} },
+            mappings: { properties: {} },
+          },
+        } as any,
+      },
+    ]);
+
+    const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+    expect(putMappingsCall).toHaveLength(1);
+    expect(putMappingsCall[0]).toBe('test-non-replicated');
+
+    const putDatastreamLifecycleCalls = esClient.transport.request.mock.calls;
+    expect(putDatastreamLifecycleCalls).toHaveLength(1);
+    expect(putDatastreamLifecycleCalls[0][0]).toEqual({
+      method: 'PUT',
+      path: '_data_stream/test-non-replicated/_lifecycle',
+      body: {
+        data_retention: '7d',
+      },
+    });
+  });
+
+  it('should fill constant keywords from previous mappings', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [
+        {
+          name: 'test-constant.keyword-default',
+          indices: [
+            { index_name: '.ds-test-constant.keyword-default-0001' },
+            { index_name: '.ds-test-constant.keyword-default-0002' },
+          ],
+        },
+      ],
+    } as any);
+
+    esClient.indices.get.mockResponse({
+      'test-constant.keyword-default': {
+        mappings: {
+          properties: {
+            some_keyword_field: {
+              type: 'constant_keyword',
+            },
+          },
+        },
+      },
+    } as any);
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {
+        settings: { index: {} },
+        mappings: {
+          properties: {
+            some_keyword_field: {
+              type: 'constant_keyword',
+              value: 'some_value',
+            },
+          },
+        },
+      },
+    } as any);
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test-constant.keyword-*'],
+          template: {
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          },
+        } as any,
+      },
+    ]);
+    expect(esClient.indices.get).toBeCalledWith({
+      index: '.ds-test-constant.keyword-default-0002',
+    });
+    const putMappingsCalls = esClient.indices.putMapping.mock.calls;
+    expect(putMappingsCalls).toHaveLength(1);
+    expect(putMappingsCalls[0][0]).toEqual({
+      index: 'test-constant.keyword-default',
+      properties: {
+        some_keyword_field: {
+          type: 'constant_keyword',
+          value: 'some_value',
+        },
+      },
+      write_index_only: true,
+    });
+  });
+
+  it('should not error when previous mappings are not found', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test-constant.keyword-default' }],
+    } as any);
+    esClient.indices.get.mockResponse({
+      'test-constant.keyword-default': {
+        mappings: {
+          properties: {
+            some_keyword_field: {
+              type: 'constant_keyword',
+            },
+          },
+        },
+      },
+    } as any);
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {},
+    } as any);
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test-constant.keyword-*'],
+          template: {
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          },
+        } as any,
+      },
+    ]);
+    const putMappingsCalls = esClient.indices.putMapping.mock.calls;
+    expect(putMappingsCalls).toHaveLength(1);
+    expect(putMappingsCalls[0][0]).toEqual({
+      index: 'test-constant.keyword-default',
+      write_index_only: true,
+    });
+  });
+
+  it('should rollover on expected error', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.simulateTemplate.mockImplementation(() => {
+      throw new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'illegal_argument_exception',
+          },
+        },
+      } as any);
+    });
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test.*-*'],
+          template: {
+            settings: { index: {} },
+            mappings: { properties: {} },
+          },
+        } as any,
+      },
+    ]);
+
+    expect(esClient.transport.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/test.prefix1-default/_rollover',
+        querystring: {
+          lazy: true,
+        },
+      })
+    );
+  });
+
+  it('should rollover on expected error when field subobjects in mappings changed', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.get.mockResponse({
+      'test.prefix1-default': {
+        mappings: {},
+      },
+    } as any);
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {
+        settings: { index: {} },
+        mappings: { subobjects: false },
+      },
+    } as any);
+    esClient.indices.putMapping.mockImplementation(() => {
+      throw new errors.ResponseError({
+        body: {
+          error: {
+            message:
+              'mapper_exception\n' +
+              '\tRoot causes:\n' +
+              "\t\tmapper_exception: the [subobjects] parameter can't be updated for the object mapping [_doc]",
+          },
+        },
+      } as any);
     });
 
-    it('should fill constant keywords from previous mappings', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [
-          {
-            name: 'test-constant.keyword-default',
-            indices: [
-              { index_name: '.ds-test-constant.keyword-default-0001' },
-              { index_name: '.ds-test-constant.keyword-default-0002' },
-            ],
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test.*-*'],
+          template: {
+            settings: { index: {} },
+            mappings: {},
           },
-        ],
-      } as any);
+        } as any,
+      },
+    ]);
 
-      esClient.indices.get.mockResponse({
-        'test-constant.keyword-default': {
-          mappings: {
-            properties: {
-              some_keyword_field: {
-                type: 'constant_keyword',
-              },
-            },
+    expect(esClient.transport.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/test.prefix1-default/_rollover',
+        querystring: {
+          lazy: true,
+        },
+      })
+    );
+  });
+  it('should rollover on mapper exception with subobjects in reason', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.get.mockResponse({
+      'test.prefix1-default': {
+        mappings: {},
+      },
+    } as any);
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {
+        settings: { index: {} },
+        mappings: {},
+      },
+    } as any);
+    esClient.indices.putMapping.mockImplementation(() => {
+      throw new errors.ResponseError({
+        body: {
+          error: {
+            type: 'mapper_exception',
+            reason:
+              "the [subobjects] parameter can't be updated for the object mapping [okta.debug_context.debug_data]",
           },
         },
       } as any);
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {
-          settings: { index: {} },
-          mappings: {
-            properties: {
-              some_keyword_field: {
-                type: 'constant_keyword',
-                value: 'some_value',
-              },
-            },
+    });
+
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test.*-*'],
+          template: {
+            settings: { index: {} },
+            mappings: {},
+          },
+        } as any,
+      },
+    ]);
+
+    expect(esClient.transport.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/test.prefix1-default/_rollover',
+        querystring: {
+          lazy: true,
+        },
+      })
+    );
+  });
+
+  it('should rollover on mapper exception that change enabled object mappings', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.get.mockResponse({
+      'test.prefix1-default': {
+        mappings: {},
+      },
+    } as any);
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {
+        settings: { index: {} },
+        mappings: {},
+      },
+    } as any);
+    esClient.indices.putMapping.mockImplementation(() => {
+      throw new errors.ResponseError({
+        body: {
+          error: {
+            type: 'mapper_exception',
+            reason: `Mappings update for logs-cisco_ise.log-default failed due to ResponseError: mapper_exception
+ 	Root causes:
+		mapper_exception: the [enabled] parameter can't be updated for the object mapping [cisco_ise.log.cisco_av_pair]`,
           },
         },
       } as any);
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
+    });
+
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test.*-*'],
+          template: {
+            settings: { index: {} },
+            mappings: {},
+          },
+        } as any,
+      },
+    ]);
+
+    expect(esClient.transport.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/test.prefix1-default/_rollover',
+        querystring: {
+          lazy: true,
+        },
+      })
+    );
+  });
+
+  it('should skip rollover on expected error when flag is on', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.simulateTemplate.mockImplementation(() => {
+      throw new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'illegal_argument_exception',
+          },
+        },
+      } as any);
+    });
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(
+      esClient,
+      logger,
+      [
         {
           templateName: 'test',
           indexTemplate: {
-            index_patterns: ['test-constant.keyword-*'],
+            index_patterns: ['test.*-*'],
             template: {
-              template: {
-                settings: { index: {} },
-                mappings: { properties: {} },
-              },
+              settings: { index: {} },
+              mappings: { properties: {} },
             },
           } as any,
         },
-      ]);
-      expect(esClient.indices.get).toBeCalledWith({
-        index: '.ds-test-constant.keyword-default-0002',
-      });
-      const putMappingsCalls = esClient.indices.putMapping.mock.calls;
-      expect(putMappingsCalls).toHaveLength(1);
-      expect(putMappingsCalls[0][0]).toEqual({
-        index: 'test-constant.keyword-default',
-        properties: {
-          some_keyword_field: {
-            type: 'constant_keyword',
-            value: 'some_value',
-          },
-        },
-        write_index_only: true,
-      });
-    });
+      ],
+      {
+        skipDataStreamRollover: true,
+      }
+    );
 
-    it('should not error when previous mappings are not found', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test-constant.keyword-default' }],
-      } as any);
-      esClient.indices.get.mockResponse({
-        'test-constant.keyword-default': {
-          mappings: {
-            properties: {
-              some_keyword_field: {
-                type: 'constant_keyword',
-              },
-            },
-          },
-        },
-      } as any);
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {},
-      } as any);
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test-constant.keyword-*'],
-            template: {
-              template: {
-                settings: { index: {} },
-                mappings: { properties: {} },
-              },
-            },
-          } as any,
-        },
-      ]);
-      const putMappingsCalls = esClient.indices.putMapping.mock.calls;
-      expect(putMappingsCalls).toHaveLength(1);
-      expect(putMappingsCalls[0][0]).toEqual({
-        index: 'test-constant.keyword-default',
-        write_index_only: true,
-      });
+    expect(esClient.indices.rollover).not.toHaveBeenCalled();
+  });
+  it('should not rollover on unexpected error', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.simulateTemplate.mockImplementation(() => {
+      throw new Error();
     });
-
-    it('should rollover on expected error', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.simulateTemplate.mockImplementation(() => {
-        throw new errors.ResponseError({
-          statusCode: 400,
-          body: {
-            error: {
-              type: 'illegal_argument_exception',
-            },
-          },
-        } as any);
-      });
-      const logger = loggerMock.create();
+    const logger = loggerMock.create();
+    try {
       await updateCurrentWriteIndices(esClient, logger, [
         {
           templateName: 'test',
@@ -2148,418 +2397,189 @@ describe('EPM template', () => {
           } as any,
         },
       ]);
+      fail('expected updateCurrentWriteIndices to throw error');
+    } catch (err) {
+      // noop
+    }
 
-      expect(esClient.transport.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/test.prefix1-default/_rollover',
-          querystring: {
-            lazy: true,
-          },
-        })
-      );
+    expect(esClient.indices.rollover).not.toHaveBeenCalled();
+  });
+  it('should not throw on unexpected error when flag is on', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.simulateTemplate.mockImplementation(() => {
+      throw new Error();
     });
-
-    it('should rollover on expected error when field subobjects in mappings changed', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.get.mockResponse({
-        'test.prefix1-default': {
-          mappings: {},
-        },
-      } as any);
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {
-          settings: { index: {} },
-          mappings: { subobjects: false },
-        },
-      } as any);
-      esClient.indices.putMapping.mockImplementation(() => {
-        throw new errors.ResponseError({
-          body: {
-            error: {
-              message:
-                'mapper_exception\n' +
-                '\tRoot causes:\n' +
-                "\t\tmapper_exception: the [subobjects] parameter can't be updated for the object mapping [_doc]",
-            },
-          },
-        } as any);
-      });
-
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(
+      esClient,
+      logger,
+      [
         {
           templateName: 'test',
           indexTemplate: {
             index_patterns: ['test.*-*'],
             template: {
               settings: { index: {} },
-              mappings: {},
+              mappings: { properties: {} },
             },
           } as any,
         },
-      ]);
-
-      expect(esClient.transport.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/test.prefix1-default/_rollover',
-          querystring: {
-            lazy: true,
-          },
-        })
-      );
-    });
-    it('should rollover on mapper exception with subobjects in reason', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.get.mockResponse({
-        'test.prefix1-default': {
-          mappings: {},
-        },
-      } as any);
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {
-          settings: { index: {} },
-          mappings: {},
-        },
-      } as any);
-      esClient.indices.putMapping.mockImplementation(() => {
-        throw new errors.ResponseError({
-          body: {
-            error: {
-              type: 'mapper_exception',
-              reason:
-                "the [subobjects] parameter can't be updated for the object mapping [okta.debug_context.debug_data]",
-            },
-          },
-        } as any);
-      });
-
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
-
-      expect(esClient.transport.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/test.prefix1-default/_rollover',
-          querystring: {
-            lazy: true,
-          },
-        })
-      );
-    });
-
-    it('should rollover on mapper exception that change enabled object mappings', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.get.mockResponse({
-        'test.prefix1-default': {
-          mappings: {},
-        },
-      } as any);
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {
-          settings: { index: {} },
-          mappings: {},
-        },
-      } as any);
-      esClient.indices.putMapping.mockImplementation(() => {
-        throw new errors.ResponseError({
-          body: {
-            error: {
-              type: 'mapper_exception',
-              reason: `Mappings update for logs-cisco_ise.log-default failed due to ResponseError: mapper_exception
- 	Root causes:
-		mapper_exception: the [enabled] parameter can't be updated for the object mapping [cisco_ise.log.cisco_av_pair]`,
-            },
-          },
-        } as any);
-      });
-
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
-
-      expect(esClient.transport.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/test.prefix1-default/_rollover',
-          querystring: {
-            lazy: true,
-          },
-        })
-      );
-    });
-
-    it('should skip rollover on expected error when flag is on', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.simulateTemplate.mockImplementation(() => {
-        throw new errors.ResponseError({
-          statusCode: 400,
-          body: {
-            error: {
-              type: 'illegal_argument_exception',
-            },
-          },
-        } as any);
-      });
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(
-        esClient,
-        logger,
-        [
-          {
-            templateName: 'test',
-            indexTemplate: {
-              index_patterns: ['test.*-*'],
-              template: {
-                settings: { index: {} },
-                mappings: { properties: {} },
-              },
-            } as any,
-          },
-        ],
-        {
-          skipDataStreamRollover: true,
-        }
-      );
-
-      expect(esClient.indices.rollover).not.toHaveBeenCalled();
-    });
-    it('should not rollover on unexpected error', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.simulateTemplate.mockImplementation(() => {
-        throw new Error();
-      });
-      const logger = loggerMock.create();
-      try {
-        await updateCurrentWriteIndices(esClient, logger, [
-          {
-            templateName: 'test',
-            indexTemplate: {
-              index_patterns: ['test.*-*'],
-              template: {
-                settings: { index: {} },
-                mappings: { properties: {} },
-              },
-            } as any,
-          },
-        ]);
-        fail('expected updateCurrentWriteIndices to throw error');
-      } catch (err) {
-        // noop
+      ],
+      {
+        ignoreMappingUpdateErrors: true,
       }
+    );
 
-      expect(esClient.indices.rollover).not.toHaveBeenCalled();
-    });
-    it('should not throw on unexpected error when flag is on', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.simulateTemplate.mockImplementation(() => {
-        throw new Error();
-      });
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(
-        esClient,
-        logger,
-        [
-          {
-            templateName: 'test',
-            indexTemplate: {
-              index_patterns: ['test.*-*'],
-              template: {
-                settings: { index: {} },
-                mappings: { properties: {} },
-              },
-            } as any,
-          },
-        ],
-        {
-          ignoreMappingUpdateErrors: true,
-        }
-      );
+    expect(esClient.indices.rollover).not.toHaveBeenCalled();
+  });
 
-      expect(esClient.indices.rollover).not.toHaveBeenCalled();
-    });
-
-    it('should rollover on dynamic dimension mappings changed', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.get.mockResponse({
-        'test.prefix1-default': {
-          mappings: {},
+  it('should rollover on dynamic dimension mappings changed', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.get.mockResponse({
+      'test.prefix1-default': {
+        mappings: {},
+      },
+    } as any);
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {
+        settings: { index: {} },
+        mappings: {
+          dynamic_templates: [
+            { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+          ],
         },
-      } as any);
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {
-          settings: { index: {} },
-          mappings: {
-            dynamic_templates: [
-              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
-            ],
+      },
+    } as any);
+
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test.*-*'],
+          template: {
+            settings: { index: {} },
+            mappings: {},
           },
-        },
-      } as any);
+        } as any,
+      },
+    ]);
 
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
+    expect(esClient.transport.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/test.prefix1-default/_rollover',
+        querystring: {
+          lazy: true,
         },
-      ]);
+      })
+    );
+  });
 
-      expect(esClient.transport.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/test.prefix1-default/_rollover',
-          querystring: {
-            lazy: true,
+  it('should not rollover on dynamic dimension mappings not changed', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'test.prefix1-default' }],
+    } as any);
+    esClient.indices.get.mockResponse({
+      'test.prefix1-default': {
+        mappings: {
+          dynamic_templates: [
+            { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+            { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
+          ],
+        },
+      },
+    } as any);
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {
+        settings: { index: {} },
+        mappings: {
+          dynamic_templates: [
+            { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
+            { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+          ],
+        },
+      },
+    } as any);
+
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'test',
+        indexTemplate: {
+          index_patterns: ['test.*-*'],
+          template: {
+            settings: { index: {} },
+            mappings: {},
           },
-        })
-      );
-    });
+        } as any,
+      },
+    ]);
 
-    it('should not rollover on dynamic dimension mappings not changed', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test.prefix1-default' }],
-      } as any);
-      esClient.indices.get.mockResponse({
-        'test.prefix1-default': {
-          mappings: {
-            dynamic_templates: [
-              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
-              { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
-            ],
-          },
+    expect(esClient.transport.request).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/test.prefix1-default/_rollover',
+        querystring: {
+          lazy: true,
         },
-      } as any);
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {
-          settings: { index: {} },
-          mappings: {
-            dynamic_templates: [
-              { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
-              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
-            ],
-          },
-        },
-      } as any);
+      })
+    );
+  });
 
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
-
-      expect(esClient.transport.request).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/test.prefix1-default/_rollover',
-          querystring: {
-            lazy: true,
-          },
-        })
-      );
-    });
-
-    it('should not rollover when package do not define index mode and defaut source mode is logsdb', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'logs.prefix1-default' }],
-      } as any);
-      esClient.indices.get.mockResponse({
-        'logs.prefix1-default': {
-          mappings: {},
-          settings: {
-            index: {
-              mode: 'logsdb',
-              mapping: {
-                source: {
-                  mode: 'STORED',
-                },
+  it('should not rollover when package do not define index mode and defaut source mode is logsdb', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getDataStream.mockResponse({
+      data_streams: [{ name: 'logs.prefix1-default' }],
+    } as any);
+    esClient.indices.get.mockResponse({
+      'logs.prefix1-default': {
+        mappings: {},
+        settings: {
+          index: {
+            mode: 'logsdb',
+            mapping: {
+              source: {
+                mode: 'STORED',
               },
             },
           },
         },
-      } as any);
-      esClient.indices.simulateTemplate.mockResponse({
-        template: {
-          settings: { index: {} },
-          mappings: {},
-        },
-      } as any);
+      },
+    } as any);
+    esClient.indices.simulateTemplate.mockResponse({
+      template: {
+        settings: { index: {} },
+        mappings: {},
+      },
+    } as any);
 
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'logs.prefix1',
-          indexTemplate: {
-            index_patterns: ['logs.prefix1-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
-
-      expect(esClient.transport.request).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/test.prefix1-default/_rollover',
-          querystring: {
-            lazy: true,
+    const logger = loggerMock.create();
+    await updateCurrentWriteIndices(esClient, logger, [
+      {
+        templateName: 'logs.prefix1',
+        indexTemplate: {
+          index_patterns: ['logs.prefix1-*'],
+          template: {
+            settings: { index: {} },
+            mappings: {},
           },
-        })
-      );
-    });
+        } as any,
+      },
+    ]);
+
+    expect(esClient.transport.request).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/test.prefix1-default/_rollover',
+        querystring: {
+          lazy: true,
+        },
+      })
+    );
   });
 });

@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/logs-overview",
   "owner": [
-    "@elastic/obs-ux-logs-team"
+    "@elastic/obs-onboarding-team"
   ],
   "group": "platform",
   "visibility": "shared"

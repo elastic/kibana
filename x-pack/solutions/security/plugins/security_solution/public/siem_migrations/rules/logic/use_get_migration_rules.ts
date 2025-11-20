@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { useCallback } from 'react';
 import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';

@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { Transaction } from '@kbn/apm-types';
 import { maybe } from '../../../../common/utils/maybe';
 import {
@@ -119,7 +119,9 @@ export async function getTransaction({
     return undefined;
   }
 
-  const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+  const { server, transaction, processor, ...event } = accessKnownApmEventFields(hit.fields)
+    .requireFields(requiredFields)
+    .unflatten();
 
   const source =
     'span' in hit._source || 'transaction' in hit._source
@@ -132,11 +134,11 @@ export async function getTransaction({
   return {
     ...event,
     server: {
-      ...event.server,
-      port: event.server?.port ? Number(event.server?.port) : undefined,
+      ...server,
+      port: server?.port ? Number(server?.port) : undefined,
     },
     transaction: {
-      ...event.transaction,
+      ...transaction,
       marks: source?.transaction?.marks,
     },
     processor: {

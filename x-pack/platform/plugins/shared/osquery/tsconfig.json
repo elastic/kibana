@@ -82,6 +82,7 @@
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",
     "@kbn/spaces-utils",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/react-query"
   ]
 }

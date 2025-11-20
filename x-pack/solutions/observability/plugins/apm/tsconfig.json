@@ -139,6 +139,7 @@
     "@kbn/presentation-containers",
     "@kbn/object-utils",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

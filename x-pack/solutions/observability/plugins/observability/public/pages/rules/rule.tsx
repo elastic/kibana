@@ -104,7 +104,7 @@ export function RulePage() {
         id={id}
         ruleTypeId={ruleTypeId}
         validConsumers={observabilityRuleCreationValidConsumers}
-        multiConsumerSelection={AlertConsumers.LOGS}
+        multiConsumerSelection={AlertConsumers.ALERTS}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });

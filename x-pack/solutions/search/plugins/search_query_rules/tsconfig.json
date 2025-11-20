@@ -33,6 +33,7 @@
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/cloud-plugin",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

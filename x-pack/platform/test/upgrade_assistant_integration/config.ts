@@ -30,6 +30,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
 
   return {
     testFiles: [require.resolve('./upgrade_assistant')],
+    testConfigCategory: xPackApiTestsConfig.get('testConfigCategory'),
     servers: xPackApiTestsConfig.get('servers'),
     services: {
       ...commonFunctionalServices,

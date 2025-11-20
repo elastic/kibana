@@ -9,7 +9,7 @@ import { type EuiComboBoxOptionOption, EuiHealth, EuiFormRow } from '@elastic/eu
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { useAgentPoliciesSpaces, useStartServices } from '../../../../../../hooks';
 
