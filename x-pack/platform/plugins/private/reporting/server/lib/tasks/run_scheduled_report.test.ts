@@ -812,9 +812,6 @@ describe('Run Scheduled Report Task', () => {
                 - filename: {{filename}}
                 - objectType: {{objectType}}
                 - date: {{date}}
-                - output.contentType: {{output.contentType}}
-                - output.csvContainsFormulas: {{output.csvContainsFormulas}}
-                - output.maxSizeReached: {{output.maxSizeReached}}
                 `,
               },
             },
@@ -838,9 +835,6 @@ describe('Run Scheduled Report Task', () => {
                 - filename: Test Report\\-2025\\-06\\-04T00:00:00\\.000Z\\.pdf
                 - objectType: test
                 - date: 2025\\-06\\-04T00:00:00\\.000Z
-                - output.contentType: application/pdf
-                - output.csvContainsFormulas: false
-                - output.maxSizeReached: false
                 `,
         },
         filename: 'Test Report-2025-06-04T00:00:00.000Z.pdf',

@@ -146,14 +146,6 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           filename,
           objectType: scheduledReport.attributes.meta.objectType,
           date: scheduledReport.attributes.schedule?.rrule?.dtstart,
-          output: {
-            contentType: output.content_type,
-            csvContainsFormulas: output.csv_contains_formulas,
-            errorCode: output.error_code,
-            maxSizeReached: output.max_size_reached,
-            hasUserError: output.user_error,
-            warnings: output.warnings,
-          },
         };
         const subject = email.subject
           ? renderMustacheString(this.logger, email.subject, templateVariables, 'none')
