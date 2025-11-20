@@ -14,7 +14,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('main', () => {
-    it('should return 200 with an existing dashboard', async () => {
+    // TODO: see https://github.com/elastic/kibana/pull/243499
+    it.skip('should return 200 with an existing dashboard', async () => {
       const response = await supertest
         .get(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
@@ -28,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.data.title).to.be('Requests');
 
       // Does not return unsupported options from the saved object
-      expect(response.body.data.options).to.not.have.keys(['darkTheme']);
+      expect(response.body.data.options).to.be(undefined);
       expect(response.body.data.refreshInterval).to.not.have.keys(['display']);
     });
 

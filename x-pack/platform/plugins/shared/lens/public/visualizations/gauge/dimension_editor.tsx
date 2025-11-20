@@ -15,9 +15,9 @@ import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plug
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { css } from '@emotion/react';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { PalettePanelContainer } from '../../shared_components';
-import type { VisualizationDimensionEditorProps } from '../../types';
 import type { GaugeVisualizationState } from './constants';
 import { defaultPaletteParams } from './palette_config';
 import { getAccessorsFromState } from './utils';

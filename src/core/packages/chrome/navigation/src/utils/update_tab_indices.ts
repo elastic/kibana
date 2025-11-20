@@ -10,7 +10,7 @@
 /**
  * Updates the tab indices for a given set of elements.
  *
- * @param elements - The elements to update the tab indices for.
+ * @param elements - the elements to update the tab indices for.
  */
 export const updateTabIndices = (elements: HTMLElement[]) => {
   elements.forEach((el, idx) => {

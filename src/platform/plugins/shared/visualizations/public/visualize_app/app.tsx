@@ -20,6 +20,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { css } from '@emotion/react';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import type { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -27,7 +28,6 @@ import {
   VisualizeNoMatch,
   VisualizeByValueEditor,
 } from './components';
-import { VisualizeConstants } from '../../common/constants';
 
 const visAppStyles = {
   wrapperLoading: css({

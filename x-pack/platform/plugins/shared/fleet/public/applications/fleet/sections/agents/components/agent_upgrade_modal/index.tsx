@@ -564,6 +564,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       {isSelectedVersionIAR ? (
         <>
           <EuiCallOut
+            announceOnMount
             iconType="info"
             title={
               <FormattedMessage
@@ -654,6 +655,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             color="warning"
             title={
               <FormattedMessage
@@ -733,6 +735,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.fleet.upgradeAgents.warningCalloutErrors', {
               defaultMessage:

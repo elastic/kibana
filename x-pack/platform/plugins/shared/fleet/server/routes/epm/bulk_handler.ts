@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { appContextService, packagePolicyService } from '../../services';
+import { appContextService, licenseService, packagePolicyService } from '../../services';
 import type {
   BulkRollbackPackagesRequestSchema,
   BulkUninstallPackagesRequestSchema,
@@ -24,7 +24,7 @@ import type {
   GetOneBulkOperationPackagesResponse,
 } from '../../../common/types';
 import { getInstallationsByName } from '../../services/epm/packages/get';
-import { FleetError } from '../../errors';
+import { FleetError, FleetUnauthorizedError } from '../../errors';
 import {
   scheduleBulkUninstall,
   scheduleBulkUpgrade,
@@ -150,6 +150,10 @@ export const postBulkRollbackPackagesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const spaceId = fleetContext.spaceId;
+
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError('Rollback integration requires an enterprise license.');
+  }
 
   const taskManagerStart = getTaskManagerStart();
   await validateInstalledPackages(savedObjectsClient, request.body.packages, 'rollback');

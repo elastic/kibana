@@ -9,16 +9,17 @@ import { assertEvent, assign, sendTo, setup } from 'xstate5';
 import type { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEqual, omit } from 'lodash';
-import { euiPaletteColorBlindBehindText } from '@elastic/eui';
+import { useSelector } from '@xstate5/react';
 import type {
   DataSourceInput,
   DataSourceContext,
   DataSourceEvent,
   DataSourceMachineDeps,
   DataSourceToParentEvent,
+  DataSourceSimulationMode,
 } from './types';
 import {
-  createDataCollectionFailureNofitier,
+  createDataCollectionFailureNotifier,
   createDataCollectorActor,
 } from './data_collector_actor';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
@@ -26,15 +27,7 @@ import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
 export type DataSourceActorSnapshot = SnapshotFrom<typeof dataSourceMachine>;
 
-const dataSourceColors = euiPaletteColorBlindBehindText();
-let colorCounter = 0;
-
-// Retain a global state for assigning unique colors to data sources
-function getNewColor() {
-  const color = dataSourceColors[colorCounter % dataSourceColors.length];
-  colorCounter += 1;
-  return color;
-}
+export const useDataSourceSelector = useSelector;
 
 export const dataSourceMachine = setup({
   types: {
@@ -45,11 +38,34 @@ export const dataSourceMachine = setup({
   actors: {
     collectData: getPlaceholderFor(createDataCollectorActor),
   },
-  delays: {
-    dataSourceChangeDebounceTime: 800,
-  },
   actions: {
-    notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNofitier),
+    notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
+    restorePersistedCustomSamplesDocuments: assign(({ context }) => {
+      if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
+        const dataSource = sessionStorage.getItem(context.dataSource.storageKey);
+        if (dataSource) {
+          return {
+            dataSource: {
+              ...context.dataSource,
+              documents: JSON.parse(dataSource).documents,
+            },
+          };
+        }
+      }
+      return {};
+    }),
+    updatePersistedCustomSamplesDocuments: assign(({ context }) => {
+      if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
+        sessionStorage.setItem(context.dataSource.storageKey, JSON.stringify(context.dataSource));
+      }
+      return {};
+    }),
+    removePersistedCustomSamplesDocuments: assign(({ context }) => {
+      if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
+        sessionStorage.removeItem(context.dataSource.storageKey);
+      }
+      return {};
+    }),
     storeDataSource: assign(
       ({ context }, params: { dataSource: EnrichmentDataSourceWithUIAttributes }) => ({
         dataSource: { ...params.dataSource, id: context.dataSource.id },
@@ -69,7 +85,6 @@ export const dataSourceMachine = setup({
   },
   guards: {
     isEnabled: ({ context }) => context.dataSource.enabled,
-    isDeletable: ({ context }) => context.dataSource.type !== 'random-samples', // We don't allow deleting the random-sample source to always have a data source available
     isValidData: (_, params: { data?: SampleDocument[] }) => Array.isArray(params.data),
     shouldCollectData: ({ context, event }) => {
       assertEvent(event, 'dataSource.change');
@@ -82,53 +97,37 @@ export const dataSourceMachine = setup({
     },
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QQIYBcUGUD2BXATgMZgDEqGOBxAdBGADZhpgDaADALqKgAO2sASzQDsAO24gAHogCcMgMzUZAdlUAmNcpkBWACwBGfQBoQAT0S6AbIrYAOW5pn7ry2-rbKAvp5PkseIlI-SkDqNGwoKEYAQUJhADchU3YuJBA+QWExCWkENQNqZQ8ZNQUithldE3MEXTVLamttfRk3S202Uo9vX3R-KiC+kJpwyJi4gUS0ZP1U3n4hEXE03OtbajV5W11leTr9eWU1aot6xvlm1ucO0p6QYICaOmZ8AFsBUQ+oEhSJDMXsitEABafRqahsfS2eRsSz6ZTaaEIzYnBCI5TUeQySH6XQXEpwrw+e5DR5gWhMMBvD5fH6zP4LLLLUC5ZzrXH2WwySw6KHaZRVMyIRENLRqbSVWGWIpqO4PAbUMCiFAAI0YEDIpIV+DAADMdbAABa-NL-Jk5RDuNjUDm6Wwi3YVfTaVFIiH83TNTryUpqfRyrWhJWq9Waihk6iEQ0oUQwE3zTJLC1ojqFZS49MeXYdF1ChAlfQ2uoVG5aOQyAPhhXBtWQMP9UJRmNx+mmxlJoEIK3aG2tBE7O0HPGogtFtQlzq2SsNmg19UUlV4USEL4AYWjsbgJEksAwzGoKF1LwAFPLAuvm2AACJgRe4ZdgAAqAleYAAlPXhuS55AF0uV7GF6brA8bpO2gIsog8jQRCVh4jC456LYyiWKi7gOEo8jwkhKjuK405foqyq1hA1D0NgKAQF8V59CQVL4Ng+DUDw9DoLqjGvLQfSrtg9CMHEjGxOE+CgWaHaQQg0I2to1gIZ0zjSsoaFsDBbCdCplwwgc3jEqI2B0PAaRnsQDKJhBUggnC1C2Gp0qWDsOibChqLQTINoXOOyFFPClgERGzxUu8nyxqZALMhZCCgjY8KuDJGZOChxx5p6hbtNoFzpR0dTjrofnVsR6qheanZRdZtkoQ52hORKqIytQ2genCMKqPy2h5UGBW-gIECMEV4kRc6GJYh44oOLsliaGhGjgnYpTws4nTtESvRVh1Ia-nQd7LmuG4wIZCZhcmE1uc6dQ7DJRSejIykCpiDhsJ6dq6E41jtbOnWkeRlHUX0fXmbkey9gomxVQ9iWCjUJTWnizSGItMnbG95JUbA60QH94UA9YGyGPaOzOs6kIQ8K9pFkTHQoQ42nEsZyMMJS6NtmZmOWip6ytRcWJ2viqF5jJ1rDWCmhsIilQVjpQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QQIYBcUGUD2BXATgMZgB0EYaY+AtgJYB2DUAxANoAMAuoqAA7axaaWtno8QAD0QBaAIwAmEu1kAOAMzsAbLIDsAVnX75agDQgAnogM6SagJzLNmlXYAsRtQF9PZ1BhwExGQUVHSM9CysstxIIPyCwqLiUgiyziSyrirZdpp2eqp6Oq5mlggGmiQ6dvJ6blqaOuzy3r7oWHhEpGD0KABGADaQzH4dgaRo2FBQQwCChMIAbkLmHDF8AkIiYrEpdZWqafI6asdqeux6pYia7iTOddWushfydq0gowFdJD39QxARu1vkF8GAAGZg2AACzW4niWySu0Q+SUdh0TVc2hO7DsL2uCBcdhI+wK52Mb3ksg+X06QT+g2GtPGJEI0JQETAcNiCMSO1AKSxrgyeQcKiKJwuVwsKKaSip7Cyenkmj0zlcNOBdO6vUZgOZPzZHJgUXWcU2fOSiBcKhJpzU4tkdnUdWlZXR7HlskV4pVavFmv82t+uoBJAG2BQECYABF2swqPhsPgSLwBuhwcnqGR2gBhbADIYLZPzSb4bkbBLbK0IHS2716PRZfJUpwYgne1FNzs6PIaWReHyfLUs6Owf5Mkc-SbTOYLWjLNCrLjwi3V5EIDRqEmZPLPE54tQlGUIW42B7otwvZrvIcGoJjif6qcPsBDSgV81VpECqyabf5E8KhYgUFyyASBSKLkOjyG8zyvLeQ70Ng5DwLE95gKu378pIMhOCQjquBKbzKmovYEs8nryM8ThFG8djnERgZjD85CUDQDBMFhiI4Sk0h6CQrjsC4W6nLI4nKPIEGKrYW6NLUInHMxII6k+3GWhuci2oRxEtmRmgEioChorcmjsGoLwuHoynBgyYa0BAQzqeuv6pMqsl2G4REYmomjHB28jAfcVKXk4zSqjoNksnZkDhpG0YRHGGDOT+uEIG8GRKq4sGYr21EEs6UHFLo5KquqUWsbQ456ilvGIL525UoU7gvNemQQeKmXKER7C9ioVKDm0Qajm+IQQLVNbATY2V5GkrhZOcuQUeiVQ0b6lwuK4iGeEAA */
   id: 'dataSource',
   context: ({ input }) => ({
     parentRef: input.parentRef,
+    data: [],
     dataSource: input.dataSource,
     streamName: input.streamName,
-    uiAttributes: {
-      color: getNewColor(),
-    },
-    data: [],
+    simulationMode: getSimulationModeByDataSourceType(input.dataSource.type),
   }),
   initial: 'determining',
-  on: {
-    'dataSource.delete': {
-      guard: 'isDeletable',
-      target: '.deleted',
-    },
-    'dataSource.toggleActivity': [
-      {
-        guard: 'isEnabled',
-        target: '.disabled',
-        actions: [
-          { type: 'toggleDataSourceActivity' },
-          { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
-        ],
-      },
-      {
-        target: '.enabled',
-        actions: [
-          { type: 'toggleDataSourceActivity' },
-          { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
-        ],
-      },
-    ],
-  },
   states: {
     determining: {
+      entry: [{ type: 'restorePersistedCustomSamplesDocuments' }],
       always: [{ target: 'enabled', guard: 'isEnabled' }, { target: 'disabled' }],
     },
     enabled: {
       initial: 'loadingData',
       on: {
-        'dataSource.refresh': '.loadingData',
+        'dataSource.disable': {
+          target: 'disabled',
+          actions: [
+            { type: 'toggleDataSourceActivity' },
+            { type: 'updatePersistedCustomSamplesDocuments' },
+            { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+          ],
+        },
+        'dataSource.refresh': { target: '.loadingData', reenter: true },
         'dataSource.change': [
           {
             guard: 'shouldCollectData',
-            target: '.debouncingChanges',
+            target: '.loadingData',
             reenter: true,
             actions: [
               { type: 'storeDataSource', params: ({ event }) => event },
@@ -143,14 +142,8 @@ export const dataSourceMachine = setup({
           },
         ],
       },
-      exit: [{ type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } }],
       states: {
         idle: {},
-        debouncingChanges: {
-          after: {
-            dataSourceChangeDebounceTime: 'loadingData',
-          },
-        },
         loadingData: {
           invoke: {
             id: 'dataCollectorActor',
@@ -185,11 +178,32 @@ export const dataSourceMachine = setup({
         },
       },
     },
-    disabled: {},
+    disabled: {
+      on: {
+        'dataSource.enable': {
+          target: 'enabled',
+          actions: [
+            { type: 'toggleDataSourceActivity' },
+            { type: 'updatePersistedCustomSamplesDocuments' },
+            { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+          ],
+        },
+        'dataSource.change': {
+          actions: [
+            { type: 'storeDataSource', params: ({ event }) => event },
+            { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+          ],
+        },
+        'dataSource.delete': 'deleted',
+      },
+    },
     deleted: {
       id: 'deleted',
       type: 'final',
-      entry: [{ type: 'notifyParent', params: { eventType: 'dataSource.delete' } }],
+      entry: [
+        { type: 'notifyParent', params: { eventType: 'dataSource.delete' } },
+        { type: 'removePersistedCustomSamplesDocuments' },
+      ],
     },
   },
 });
@@ -202,6 +216,21 @@ export const createDataSourceMachineImplementations = ({
     collectData: createDataCollectorActor({ data }),
   },
   actions: {
-    notifyDataCollectionFailure: createDataCollectionFailureNofitier({ toasts }),
+    notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),
   },
 });
+
+const getSimulationModeByDataSourceType = (
+  dataSourceType: EnrichmentDataSourceWithUIAttributes['type']
+): DataSourceSimulationMode => {
+  switch (dataSourceType) {
+    case 'latest-samples':
+      return 'partial';
+    case 'kql-samples':
+      return 'partial';
+    case 'custom-samples':
+      return 'complete';
+    default:
+      throw new Error(`Invalid data source type: ${dataSourceType}`);
+  }
+};

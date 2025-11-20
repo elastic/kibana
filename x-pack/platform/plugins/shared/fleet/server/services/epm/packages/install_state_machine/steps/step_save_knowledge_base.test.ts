@@ -23,6 +23,9 @@ jest.mock('../../../../app_context', () => ({
       info: jest.fn(),
       debug: jest.fn(),
     }),
+    getExperimentalFeatures: jest.fn().mockReturnValue({
+      installIntegrationsKnowledge: true,
+    }),
   },
 }));
 
@@ -151,7 +154,50 @@ describe('stepSaveKnowledgeBase', () => {
     });
   });
 
-  it('should not save anything when no knowledge base files exist in archive', async () => {
+  it('should include all .md files from docs folder in knowledge base', async () => {
+    const entries: ArchiveEntry[] = [
+      {
+        path: 'test-package-1.0.0/docs/README.md',
+        buffer: Buffer.from('# Package README\n\nThis is the main package documentation.', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+        buffer: Buffer.from('# User Guide', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/docs/CHANGELOG.md',
+        buffer: Buffer.from('# Changelog\n\n## v1.0.0', 'utf8'),
+      },
+    ];
+
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
+
+    await stepSaveKnowledgeBase(context);
+
+    // Verify that all .md files from docs/ are included
+    expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent: [
+        {
+          fileName: 'README.md',
+          content: '# Package README\n\nThis is the main package documentation.',
+        },
+        {
+          fileName: 'guide.md',
+          content: '# User Guide',
+        },
+        {
+          fileName: 'CHANGELOG.md',
+          content: '# Changelog\n\n## v1.0.0',
+        },
+      ],
+    });
+  });
+
+  it('should include .md files from docs root even when no knowledge_base folder exists', async () => {
     const entries: ArchiveEntry[] = [
       {
         path: 'test-package-1.0.0/manifest.yml',
@@ -159,7 +205,50 @@ describe('stepSaveKnowledgeBase', () => {
       },
       {
         path: 'test-package-1.0.0/docs/README.md',
-        buffer: Buffer.from('# README', 'utf8'),
+        buffer: Buffer.from('# README\n\nPackage overview.', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/docs/INSTALL.md',
+        buffer: Buffer.from('# Installation\n\nInstall instructions.', 'utf8'),
+      },
+    ];
+
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
+
+    await stepSaveKnowledgeBase(context);
+
+    // Verify that all .md files are included even without knowledge_base folder
+    expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent: [
+        {
+          fileName: 'README.md',
+          content: '# README\n\nPackage overview.',
+        },
+        {
+          fileName: 'INSTALL.md',
+          content: '# Installation\n\nInstall instructions.',
+        },
+      ],
+    });
+  });
+
+  it('should not save anything when no .md files exist in docs folder', async () => {
+    const entries: ArchiveEntry[] = [
+      {
+        path: 'test-package-1.0.0/manifest.yml',
+        buffer: Buffer.from('name: test-package', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/other-file.md',
+        buffer: Buffer.from('# Other File', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/data_stream/logs/README.txt',
+        buffer: Buffer.from('Not a markdown file', 'utf8'),
       },
     ];
 
@@ -414,7 +503,7 @@ describe('stepSaveKnowledgeBase', () => {
       const mockArchiveIterator = createMockArchiveIterator(entries);
       const context = createMockContext(mockArchiveIterator);
 
-      await stepSaveKnowledgeBase(context);
+      const result = await stepSaveKnowledgeBase(context);
 
       expect(updateEsAssetReferences).toHaveBeenCalledWith(savedObjectsClient, 'test-package', [], {
         assetsToAdd: [
@@ -423,8 +512,8 @@ describe('stepSaveKnowledgeBase', () => {
         ],
       });
 
-      // Check that context was updated with new references
-      expect(context.esReferences).toEqual([
+      // Check that the return value contains the new references
+      expect(result.esReferences).toEqual([
         { id: 'test-package-guide.md', type: 'knowledge_base' },
         { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
       ]);
@@ -500,18 +589,22 @@ describe('stepSaveKnowledgeBase', () => {
       });
     });
 
-    it('should only process .md files in knowledge_base directory', async () => {
+    it('should only process .md files in docs directory', async () => {
       const entries: ArchiveEntry[] = [
         {
           path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
           buffer: Buffer.from('# Guide', 'utf8'),
         },
         {
-          path: 'test-package-1.0.0/docs/knowledge_base/image.png',
+          path: 'test-package-1.0.0/docs/README.md',
+          buffer: Buffer.from('# README', 'utf8'),
+        },
+        {
+          path: 'test-package-1.0.0/docs/image.png',
           buffer: Buffer.from('binary data', 'utf8'),
         },
         {
-          path: 'test-package-1.0.0/docs/knowledge_base/config.json',
+          path: 'test-package-1.0.0/docs/config.json',
           buffer: Buffer.from('{"config": true}', 'utf8'),
         },
       ];
@@ -521,7 +614,7 @@ describe('stepSaveKnowledgeBase', () => {
 
       await stepSaveKnowledgeBase(context);
 
-      // Should only process the .md file
+      // Should only process the .md files
       expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
         esClient,
         pkgName: 'test-package',
@@ -531,12 +624,16 @@ describe('stepSaveKnowledgeBase', () => {
             fileName: 'guide.md',
             content: '# Guide',
           },
+          {
+            fileName: 'README.md',
+            content: '# README',
+          },
         ],
       });
     });
   });
 
-  describe('License Validation', () => {
+  describe('Gating Validation', () => {
     it('should skip knowledge base processing when Enterprise license is not available', async () => {
       // Mock license service to return false for Enterprise license
       const { licenseService } = jest.requireMock('../../../../license');
@@ -583,6 +680,75 @@ describe('stepSaveKnowledgeBase', () => {
       await stepSaveKnowledgeBase(context);
 
       // Verify that saveKnowledgeBaseContentToIndex WAS called with Enterprise license
+      expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+        esClient,
+        pkgName: 'test-package',
+        pkgVersion: '1.0.0',
+        knowledgeBaseContent: [
+          {
+            fileName: 'guide.md',
+            content: '# User Guide\n\nThis is a comprehensive guide.',
+          },
+        ],
+      });
+
+      // Verify that updateEsAssetReferences WAS called
+      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(updateEsAssetReferences).toHaveBeenCalled();
+    });
+
+    it('should skip knowledge base processing when installIntegrationsKnowledge feature flag is disabled', async () => {
+      // Mock app context service to return experimental features with flag disabled
+      const { appContextService } = jest.requireMock('../../../../app_context');
+      appContextService.getExperimentalFeatures.mockReturnValue({
+        installIntegrationsKnowledge: false,
+      });
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      // Verify that saveKnowledgeBaseContentToIndex was NOT called due to feature flag being disabled
+      expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
+
+      // Verify that updateEsAssetReferences was NOT called
+      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(updateEsAssetReferences).not.toHaveBeenCalled();
+
+      // Reset the mock back to enabled for other tests
+      appContextService.getExperimentalFeatures.mockReturnValue({
+        installIntegrationsKnowledge: true,
+      });
+    });
+
+    it('should process knowledge base when installIntegrationsKnowledge feature flag is enabled', async () => {
+      // Ensure app context service returns experimental features with flag enabled
+      const { appContextService } = jest.requireMock('../../../../app_context');
+      appContextService.getExperimentalFeatures.mockReturnValue({
+        installIntegrationsKnowledge: true,
+      });
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      // Verify that saveKnowledgeBaseContentToIndex WAS called with feature flag enabled
       expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
         esClient,
         pkgName: 'test-package',

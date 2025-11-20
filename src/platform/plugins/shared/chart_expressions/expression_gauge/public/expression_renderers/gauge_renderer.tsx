@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';

@@ -8,7 +8,7 @@
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { AttackDiscoveryPostInternalRequestBody } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import { generateDepreciatedInternalApiResponse } from '../../public/post/helpers/generate_depreciated_internal_api_response';
 import { performChecks } from '../../../helpers';

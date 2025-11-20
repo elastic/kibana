@@ -46,6 +46,8 @@ export const typeToEuiIconMap = {
   rank_feature: { iconType: 'tokenRankFeature' },
   rank_features: { iconType: 'tokenRankFeatures' },
   histogram: { iconType: 'tokenHistogram' },
+  exponential_histogram: { iconType: 'tokenHistogram' },
+  tdigest: { iconType: 'tokenHistogram' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },

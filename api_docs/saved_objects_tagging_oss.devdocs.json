@@ -714,6 +714,41 @@
           },
           {
             "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.SavedObjectsTaggingApiUi.tagIdToReference",
+            "type": "Function",
+            "tags": [],
+            "label": "tagIdToReference",
+            "description": [
+              "\nReturns tag reference for given tag id"
+            ],
+            "signature": [
+              "(tagId: string) => ",
+              "SavedObjectReference"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.SavedObjectsTaggingApiUi.tagIdToReference.$1",
+                "type": "string",
+                "tags": [],
+                "label": "tagId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.SavedObjectsTaggingApiUi.getTagIdFromName",
             "type": "Function",
             "tags": [],
@@ -1225,7 +1260,7 @@
             "section": "def-common.Tag",
             "text": "Tag"
           },
-          " | { type: \"__create_option__\"; }>, \"options\" | \"prepend\" | \"append\" | \"async\" | \"selectedOptions\" | \"isClearable\" | \"fullWidth\" | \"compressed\" | \"optionMatcher\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
+          " | { type: \"__create_option__\"; }>, \"options\" | \"async\" | \"prepend\" | \"append\" | \"selectedOptions\" | \"isClearable\" | \"fullWidth\" | \"compressed\" | \"optionMatcher\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
           {
             "pluginId": "savedObjectsTaggingOss",
             "scope": "common",

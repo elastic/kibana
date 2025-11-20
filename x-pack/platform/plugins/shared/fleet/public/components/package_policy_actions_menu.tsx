@@ -145,6 +145,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         agentPolicies={agentPolicies}
         key="packagePolicyDelete"
         packagePolicyPackage={packagePolicy.package}
+        isAgentlessPolicy={packagePolicy.supports_agentless}
       >
         {(deletePackagePoliciesPrompt) => {
           return (

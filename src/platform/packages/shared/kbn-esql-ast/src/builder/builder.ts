@@ -16,6 +16,7 @@ import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
+  ESQLAstExpression,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
@@ -28,6 +29,7 @@ import type {
   ESQLLocation,
   ESQLNamedParamLiteral,
   ESQLParam,
+  ESQLParens,
   ESQLPositionalParamLiteral,
   ESQLOrderExpression,
   ESQLSource,
@@ -105,10 +107,12 @@ export namespace Builder {
   export namespace expression {
     export const query = (
       commands: ESQLAstQueryExpression['commands'] = [],
-      fromParser?: Partial<AstNodeParserFields>
+      fromParser?: Partial<AstNodeParserFields>,
+      header?: ESQLAstHeaderCommand[]
     ): ESQLAstQueryExpression => {
       return {
         ...Builder.parserFields(fromParser),
+        header,
         commands,
         type: 'query',
         name: '',
@@ -182,6 +186,18 @@ export namespace Builder {
         );
       };
     }
+
+    export const parens = (
+      child: ESQLAstExpression,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLParens => {
+      return {
+        type: 'parens',
+        name: '',
+        child,
+        ...Builder.parserFields(fromParser),
+      };
+    };
 
     export type ColumnTemplate = Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted' | 'parts'>;
 
@@ -304,10 +320,10 @@ export namespace Builder {
       export const binary = <Name extends BinaryExpressionOperator = BinaryExpressionOperator>(
         name: Name,
         args: [left: ESQLAstItem, right: ESQLAstItem],
-        template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+        template?: Omit<AstNodeTemplate<ESQLBinaryExpression<Name>>, 'subtype' | 'name' | 'args'>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLBinaryExpression<Name> => {
-        const operator = Builder.identifier({ name });
+        const operator = template?.operator ?? Builder.identifier({ name });
         return Builder.expression.func.node(
           { ...template, name, operator, args, subtype: 'binary-expression' },
           fromParser

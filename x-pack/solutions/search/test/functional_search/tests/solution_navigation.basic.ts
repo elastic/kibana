@@ -20,7 +20,9 @@ export default function searchSolutionNavigation({
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Elasticsearch Solution Navigation', () => {
+  describe('Elasticsearch Solution Navigation', function () {
+    this.tags('skipFIPS');
+
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -69,12 +71,11 @@ export default function searchSolutionNavigation({
           breadcrumbs: ['Dashboards'],
           pageTestSubject: 'noDataViewsPrompt',
         },
-        // TODO: enable when available
-        // {
-        //   link: { navId: 'agent_builder' },
-        //   breadcrumbs: [],
-        //   pageTestSubject: 'agentBuilderWrapper',
-        // },
+        {
+          link: { navId: 'agent_builder' },
+          breadcrumbs: [],
+          pageTestSubject: 'agentBuilderWrapper',
+        },
         {
           link: { deepLinkId: 'searchPlayground' },
           breadcrumbs: ['Build', 'Playground'],
@@ -107,7 +108,7 @@ export default function searchSolutionNavigation({
           'searchHomepage',
           'discover',
           'dashboards',
-          // 'agent_builder', enabled when available
+          'agent_builder',
           'searchPlayground',
           'machine_learning',
           'dev_tools',

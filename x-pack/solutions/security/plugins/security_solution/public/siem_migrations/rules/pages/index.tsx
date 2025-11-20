@@ -142,6 +142,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
         <EuiSkeletonLoading
+          key={migrationId}
           data-test-subj="migrationRulesPageLoading"
           isLoading={isLoading}
           loadingContent={

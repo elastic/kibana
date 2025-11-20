@@ -9,10 +9,15 @@ import { createWriteStream } from 'fs';
 import { mkdir } from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import Path from 'path';
-import fetch from 'node-fetch';
+import fetch, { type Response } from 'node-fetch';
 import { validatePath, validateMimeType, validateFileSignature, type MimeType } from './validators';
 
-export const download = async (fileUrl: string, filePath: string, expectedMimeType: MimeType) => {
+export const download = async (
+  fileUrl: string,
+  filePath: string,
+  expectedMimeType: MimeType,
+  abortController?: AbortController
+) => {
   validatePath(filePath);
 
   const dirPath = Path.dirname(filePath);
@@ -20,7 +25,19 @@ export const download = async (fileUrl: string, filePath: string, expectedMimeTy
   await mkdir(dirPath, { recursive: true });
   const writeStream = createWriteStream(filePath);
 
-  const res = await fetch(fileUrl);
+  let res: Response;
+
+  try {
+    res = await fetch(fileUrl, {
+      signal: abortController?.signal,
+    });
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      writeStream.destroy();
+      throw new Error('Download aborted');
+    }
+    throw err;
+  }
 
   if (!res.ok) {
     throw new Error(`Failed to download file: ${res.status} ${res.statusText}`);
@@ -32,7 +49,15 @@ export const download = async (fileUrl: string, filePath: string, expectedMimeTy
     throw new Error('Response body is null');
   }
 
-  await pipeline(res.body, writeStream);
+  try {
+    await pipeline(res.body, writeStream);
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      writeStream.destroy();
+      throw new Error('Download aborted during streaming');
+    }
+    throw err;
+  }
 
   await validateFileSignature(filePath, expectedMimeType);
 };

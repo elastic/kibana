@@ -11,7 +11,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useIsMutating } from '@tanstack/react-query';
+import { useIsMutating } from '@kbn/react-query';
 import dedent from 'dedent';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';

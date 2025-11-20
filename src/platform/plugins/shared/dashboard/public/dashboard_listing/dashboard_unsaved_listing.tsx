@@ -23,14 +23,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { DashboardAttributes } from '../../server/content_management';
+import type { DashboardState } from '../../server';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { findService } from '../dashboard_client';
 
 const unsavedItemStyles = {
   item: (euiThemeContext: UseEuiTheme) =>
@@ -130,7 +130,7 @@ const DashboardUnsavedItem = ({
 };
 
 interface UnsavedItemMap {
-  [key: string]: DashboardAttributes;
+  [key: string]: DashboardState;
 }
 
 export interface DashboardUnsavedListingProps {
@@ -172,34 +172,32 @@ export const DashboardUnsavedListing = ({
     const existingDashboardsWithUnsavedChanges = unsavedDashboardIds.filter(
       (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
     );
-    getDashboardContentManagementService()
-      .findDashboards.findByIds(existingDashboardsWithUnsavedChanges)
-      .then((results) => {
-        const dashboardMap = {};
-        if (canceled) {
-          return;
-        }
-        let hasError = false;
-        const newItems = results.reduce((map, result) => {
-          if (result.status === 'error') {
-            hasError = true;
-            if (result.error.statusCode === 404) {
-              // Save object not found error
-              dashboardBackupService.clearState(result.id);
-            }
-            return map;
+    findService.findByIds(existingDashboardsWithUnsavedChanges).then((results) => {
+      const dashboardMap = {};
+      if (canceled) {
+        return;
+      }
+      let hasError = false;
+      const newItems = results.reduce((map, result) => {
+        if (result.status === 'error') {
+          hasError = true;
+          if (result.error && result.notFound) {
+            // Save object not found error
+            dashboardBackupService.clearState(result.id);
           }
-          return {
-            ...map,
-            [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
-          };
-        }, dashboardMap);
-        if (hasError) {
-          refreshUnsavedDashboards();
-          return;
+          return map;
         }
-        setItems(newItems);
-      });
+        return {
+          ...map,
+          [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
+        };
+      }, dashboardMap);
+      if (hasError) {
+        refreshUnsavedDashboards();
+        return;
+      }
+      setItems(newItems);
+    });
 
     return () => {
       canceled = true;
@@ -209,6 +207,7 @@ export const DashboardUnsavedListing = ({
   return unsavedDashboardIds.length === 0 ? null : (
     <>
       <EuiCallOut
+        announceOnMount
         heading="h3"
         data-test-subj="unsavedDashboardsCallout"
         title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(

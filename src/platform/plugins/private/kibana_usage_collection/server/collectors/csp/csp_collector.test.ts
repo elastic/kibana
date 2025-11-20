@@ -34,6 +34,7 @@ describe('csp collector', () => {
       font_src: [],
       frame_src: [],
       img_src: [],
+      object_src: [],
       frame_ancestors: [],
       report_uri: [],
       report_to: [],

@@ -129,11 +129,13 @@ export class SearchService {
   private asScoped!: ISearchStart['asScoped'];
   private searchAsInternalUser!: ISearchStrategy;
   private rollupsEnabled: boolean = false;
+  private readonly isServerless: boolean;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
   ) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.sessionService = new SearchSessionService(
       logger,
       initializerContext.config.get(),
@@ -176,7 +178,9 @@ export class SearchService {
         this.initializerContext.config.legacy.globalConfig$,
         this.initializerContext.config.get().search,
         this.logger,
-        usage
+        usage,
+        false,
+        this.isServerless
       )
     );
     this.registerSearchStrategy(ESQL_SEARCH_STRATEGY, esqlSearchStrategyProvider(this.logger));
@@ -406,9 +410,7 @@ export class SearchService {
                     isStored: true,
                   });
                 } else {
-                  return from(
-                    deps.searchSessionsClient.trackId(request, response.id, options)
-                  ).pipe(
+                  return from(deps.searchSessionsClient.trackId(response.id, options)).pipe(
                     tap(() => {
                       isInternalSearchStored = true;
                     }),

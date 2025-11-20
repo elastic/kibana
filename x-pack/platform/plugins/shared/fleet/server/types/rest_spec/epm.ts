@@ -131,6 +131,7 @@ export const InstallationInfoSchema = schema.object({
   ),
   previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   rolled_back: schema.maybe(schema.boolean()),
+  is_rollback_ttl_expired: schema.maybe(schema.boolean()),
 });
 
 const PackageIconSchema = schema.object({
@@ -604,7 +605,11 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
 
 export const GetOneBulkOperationPackagesRequestSchema = {
   params: schema.object({
-    taskId: schema.string(),
+    taskId: schema.string({
+      meta: {
+        description: 'Task ID of the bulk operation',
+      },
+    }),
   }),
 };
 
@@ -640,7 +645,11 @@ export const BulkRollbackPackagesRequestSchema = {
   body: schema.object({
     packages: schema.arrayOf(
       schema.object({
-        name: schema.string(),
+        name: schema.string({
+          meta: {
+            description: 'Package name to rollback',
+          },
+        }),
       }),
       { minSize: 1 }
     ),
@@ -750,6 +759,8 @@ export const GetInputsRequestSchema = {
 
 export const RollbackPackageRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
+    pkgName: schema.string({
+      meta: { description: 'Package name to roll back' },
+    }),
   }),
 };

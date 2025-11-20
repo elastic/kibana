@@ -19,6 +19,11 @@ describe('classicNavigationFactory', function () {
       title: 'Home',
     },
     {
+      id: 'searchGettingStarted',
+      url: '/app/elasticsearch/getting_started',
+      title: 'Getting started',
+    },
+    {
       id: 'enterpriseSearchApplications:searchApplications',
       title: 'Search Applications',
       url: '/app/elasticsearch/content/search_applications',
@@ -165,6 +170,28 @@ describe('classicNavigationFactory', function () {
         id: 'unit-test',
         isSelected: false,
         name: 'Home',
+        onClick: expect.any(Function),
+      },
+    ]);
+  });
+
+  it('can render getting started nav item', () => {
+    const items: ClassicNavItem[] = [
+      {
+        id: 'getting-started-test',
+        deepLink: {
+          link: 'searchGettingStarted',
+        },
+      },
+    ];
+
+    const solutionNav = classicNavigationFactory(items, core, history);
+    expect(solutionNav!.items).toEqual([
+      {
+        href: '/app/elasticsearch/getting_started',
+        id: 'getting-started-test',
+        isSelected: false,
+        name: 'Getting started',
         onClick: expect.any(Function),
       },
     ]);

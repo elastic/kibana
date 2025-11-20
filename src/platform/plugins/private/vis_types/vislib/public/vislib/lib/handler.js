@@ -21,7 +21,15 @@ import { ChartTitle } from './chart_title';
 import { Axis } from './axis/axis';
 import { ChartGrid as Grid } from './chart_grid';
 import { Binder } from './binder';
-import { visContainerClassName } from '@kbn/visualizations-plugin/public';
+import { css as cssClassName } from '@emotion/css';
+
+const visContainerClassName = cssClassName(`
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  `);
 
 const markdownIt = new MarkdownIt({
   html: false,

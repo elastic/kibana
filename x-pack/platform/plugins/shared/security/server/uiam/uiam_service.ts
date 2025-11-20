@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '..';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getDetailedErrorMessage } from '../errors';
 import type { UserProfileGrant } from '../user_profile';
 
 /**
@@ -91,7 +91,7 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getUserProfileGrant}.
    */
-  getUserProfileGrant(accessToken: string) {
+  getUserProfileGrant(accessToken: string): UserProfileGrant {
     return {
       type: 'uiamAccessToken' as const,
       accessToken,
@@ -104,6 +104,8 @@ export class UiamService implements UiamServicePublic {
    */
   async refreshSessionTokens(refreshToken: string) {
     try {
+      this.#logger.debug('Attempting to refresh session tokens.');
+
       const tokens = await UiamService.#parseUiamResponse(
         await fetch(`${this.#config.url}/uiam/api/v1/tokens/_refresh`, {
           method: 'POST',
@@ -118,9 +120,9 @@ export class UiamService implements UiamServicePublic {
       );
       return { accessToken: tokens.access_token, refreshToken: tokens.refresh_token };
     } catch (err) {
-      // TODO: Temporarily rethrow all errors as `401` (UIAM service doesn't support token refresh yet).
       this.#logger.error(() => `Failed to refresh session tokens: ${getDetailedErrorMessage(err)}`);
-      throw Boom.unauthorized(`UIAM service doesn't support token refresh yet.`);
+
+      throw err;
     }
   }
 
@@ -128,40 +130,30 @@ export class UiamService implements UiamServicePublic {
    * See {@link UiamServicePublic.invalidateSessionTokens}.
    */
   async invalidateSessionTokens(accessToken: string, refreshToken: string) {
-    let invalidatedTokensCount;
     try {
-      invalidatedTokensCount = (
-        await UiamService.#parseUiamResponse(
-          await fetch(`${this.#config.url}/uiam/api/v1/tokens/_invalidate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-            body: JSON.stringify({ token: accessToken, refresh_token: refreshToken }),
-            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-            dispatcher: this.#dispatcher,
-          })
-        )
-      ).invalidated_tokens;
+      this.#logger.debug('Attempting to invalidate session tokens.');
+
+      await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/tokens/_invalidate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ tokens: [accessToken, refreshToken] }),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug('Successfully invalidated session tokens.');
     } catch (err) {
       this.#logger.error(
         () => `Failed to invalidate session tokens: ${getDetailedErrorMessage(err)}`
       );
 
-      // TODO: Temporarily swallow the 500 errors (UIAM service doesn't support token invalidation yet).
-      if (getErrorStatusCode(err) === 500) {
-        return;
-      }
-
       throw err;
-    }
-
-    if (invalidatedTokensCount === 0) {
-      this.#logger.debug('Session tokens were already invalidated.');
-    } else if (invalidatedTokensCount === 2) {
-      this.#logger.debug('All session tokens were successfully invalidated.');
-    } else {
-      this.#logger.warn(
-        `${invalidatedTokensCount} refresh tokens were invalidated, this is unexpected.`
-      );
     }
   }
 
@@ -188,6 +180,11 @@ export class UiamService implements UiamServicePublic {
     return new Agent({
       connect: {
         ca,
+        // The applications, including Kibana, running inside the MKI cluster should not need access to things like the
+        // root CA and should be able to work with the CAs related to that particular cluster. The trust bundle we
+        // currently deploy in the Kibana pods includes only the intermediate CA that is scoped to the application
+        // cluster. Therefore, we need to allow partial trust chain validation.
+        allowPartialTrustChain: true,
         rejectUnauthorized: verificationMode !== 'none',
         // By default, Node.js is checking the server identity to match SAN/CN in certificate.
         ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
@@ -196,20 +193,26 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
-   * Parses the UIAM service response as free-form JSON if it’s a successful response, otherwise throws a Boom error based on the error response from the UIAM service.
+   * Parses the UIAM service response as free-form JSON if it's a successful response, otherwise throws a Boom error based on the error response from the UIAM service.
    */
   static async #parseUiamResponse(response: Response) {
     if (response.ok) {
+      if (response.status === 204) {
+        return;
+      }
+
       return await response.json();
     }
 
     const payload = await response.json();
     const err = new Boom.Boom(payload?.error?.message || 'Unknown error');
+
     err.output = {
       statusCode: response.status,
       payload,
       headers: Object.fromEntries(response.headers.entries()),
     };
+
     throw err;
   }
 }

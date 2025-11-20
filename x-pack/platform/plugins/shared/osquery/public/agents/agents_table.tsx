@@ -15,11 +15,14 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 
 import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Agent } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { useAllAgents } from './use_all_agents';
 
@@ -29,6 +32,7 @@ import {
   generateAgentCheck,
   getNumOverlapped,
   generateAgentSelection,
+  getAgentOsqueryAvailability,
 } from './helpers';
 
 import {
@@ -38,10 +42,13 @@ import {
   AGENT_POLICY_LABEL,
   AGENT_SELECTION_LABEL,
   NO_AGENT_AVAILABLE_TITLE,
+  DEGRADED_AGENT_TOOLTIP,
+  DEGRADED_AGENTS_CALLOUT_TITLE,
+  DEGRADED_AGENTS_CALLOUT_DESCRIPTION,
 } from './translations';
 
-import type { GroupOption, AgentSelection } from './types';
-import { AGENT_GROUP_KEY } from './types';
+import type { GroupOption, AgentSelection, GroupOptionValue } from './types';
+import { AGENT_GROUP_KEY, AGENT_STATUS_COLORS } from './types';
 
 interface AgentsTableProps {
   agentSelection: AgentSelection;
@@ -51,6 +58,7 @@ interface AgentsTableProps {
 
 const perPage = 10;
 const DEBOUNCE_DELAY = 300; // ms
+const DEGRADED_ICON_STYLE = { marginLeft: '4px' };
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange, error }) => {
   const { docLinks } = useKibana().services;
@@ -82,6 +90,20 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
   const defaultValueInitialized = useRef(false);
+
+  const agentMap = useMemo(() => {
+    const map = new Map<string, Agent>();
+    if (agentList?.agents) {
+      (agentList.agents as Agent[]).forEach((agent) => {
+        const agentId = agent.local_metadata?.elastic?.agent?.id;
+        if (agentId) {
+          map.set(agentId, agent);
+        }
+      });
+    }
+
+    return map;
+  }, [agentList?.agents]);
 
   const numAgentsSelected = useMemo(() => {
     const { newAgentSelection, selectedAgents, selectedGroups } =
@@ -173,23 +195,67 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     }
   }, [agentList?.agents, agentList?.groups, agentList?.total, agentsFetched, searchValue]);
 
-  const renderOption = useCallback((option: any, searchVal: any, contentClassName: any) => {
-    const { label, value } = option;
+  const renderOption = useCallback(
+    (option: GroupOption, searchVal: string, contentClassName: string) => {
+      const { label, value } = option;
 
-    return value?.groupType === AGENT_GROUP_KEY.Agent ? (
-      <EuiHealth color={value?.status === 'online' ? 'success' : 'danger'}>
+      if (value?.groupType === AGENT_GROUP_KEY.Agent) {
+        let healthColor: 'success' | 'warning' | 'danger' = AGENT_STATUS_COLORS.UNAVAILABLE;
+        let availability: 'online' | 'degraded' | 'osquery_unavailable' | 'offline' = 'offline';
+
+        if (!value?.id) {
+          healthColor = AGENT_STATUS_COLORS.UNAVAILABLE;
+          availability = 'offline';
+        } else {
+          const agent: Agent | undefined = agentMap.get(value.id);
+
+          if (agent) {
+            availability = getAgentOsqueryAvailability(agent);
+            if (availability === 'online') {
+              healthColor = AGENT_STATUS_COLORS.ONLINE;
+            } else if (availability === 'degraded') {
+              healthColor = AGENT_STATUS_COLORS.DEGRADED;
+            } else {
+              healthColor = AGENT_STATUS_COLORS.UNAVAILABLE;
+            }
+          }
+        }
+
+        const healthContent = (
+          <EuiHealth color={healthColor}>
+            <span className={contentClassName}>
+              <EuiHighlight search={searchVal}>{label}</EuiHighlight>
+              {availability === 'degraded' && (
+                <span style={DEGRADED_ICON_STYLE}>
+                  <EuiIcon type="alert" size="s" color="warning" />
+                </span>
+              )}
+            </span>
+          </EuiHealth>
+        );
+
+        if (availability === 'degraded') {
+          return (
+            <EuiToolTip position="right" content={DEGRADED_AGENT_TOOLTIP}>
+              {healthContent}
+            </EuiToolTip>
+          );
+        }
+
+        return healthContent;
+      }
+
+      const groupValue = value as GroupOptionValue;
+
+      return (
         <span className={contentClassName}>
+          <span>[{groupValue?.size ?? 0}]</span>
           <EuiHighlight search={searchVal}>{label}</EuiHighlight>
         </span>
-      </EuiHealth>
-    ) : (
-      <span className={contentClassName}>
-        <span>[{value?.size ?? 0}]</span>
-        &nbsp;
-        <EuiHighlight search={searchVal}>{label}</EuiHighlight>
-      </span>
-    );
-  }, []);
+      );
+    },
+    [agentMap]
+  );
 
   const onSearchChange = useCallback((v: string) => {
     // set the typing flag and update the search value
@@ -201,7 +267,13 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     if (agentsFetched && agentList?.groups && !options.length) {
       return (
         <>
-          <EuiCallOut color="danger" size="s" iconType="warning" title={NO_AGENT_AVAILABLE_TITLE}>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            size="s"
+            iconType="warning"
+            title={NO_AGENT_AVAILABLE_TITLE}
+          >
             <FormattedMessage
               id="xpack.osquery.agents.noAgentAvailableDescription"
               defaultMessage="Before you can query agents, they must be enrolled in an agent policy with the Osquery integration installed. Refer to {docsLink} for more information."
@@ -229,11 +301,44 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     return null;
   };
 
+  // Memoize the check for degraded agents to avoid iterating on every render
+  const hasDegradedAgents = useMemo(() => {
+    if (!agentsFetched || !agentList?.agents || agentList.agents.length === 0) {
+      return false;
+    }
+
+    return (agentList.agents as Agent[]).some(
+      (agent) => getAgentOsqueryAvailability(agent) === 'degraded'
+    );
+  }, [agentsFetched, agentList?.agents]);
+
+  const renderAgentStatusInfo = () => {
+    // Only show if we have degraded agents (with healthy Osquery)
+    if (agentsFetched && hasDegradedAgents) {
+      return (
+        <>
+          <EuiCallOut
+            color="warning"
+            size="s"
+            iconType="alert"
+            title={DEGRADED_AGENTS_CALLOUT_TITLE}
+          >
+            <p>{DEGRADED_AGENTS_CALLOUT_DESCRIPTION}</p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div>
       <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth isInvalid={!!error} error={error}>
         <>
           {renderNoAgentAvailableWarning()}
+          {renderAgentStatusInfo()}
           <EuiComboBox
             data-test-subj="agentSelection"
             placeholder={SELECT_AGENT_LABEL}

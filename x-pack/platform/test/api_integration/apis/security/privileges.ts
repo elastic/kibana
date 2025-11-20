@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import util from 'util';
-import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
 import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { diff } from 'jest-diff';
+import { isEqual, isEqualWith } from 'lodash';
+import util from 'util';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -88,6 +88,19 @@ export default function ({ getService }: FtrProviderContext) {
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchQueryRules: ['all', 'read', 'minimal_all', 'minimal_read'],
+      workflowsManagement: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'workflow_create',
+        'workflow_update',
+        'workflow_delete',
+        'workflow_execute',
+        'workflow_read',
+        'workflow_execution_read',
+        'workflow_execution_cancel',
+      ],
       searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: [
         'all',
@@ -126,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
         'policy_management_read',
         'actions_log_management_all',
         'actions_log_management_read',
+        'soc_management_all',
         'host_isolation_all',
         'process_operations_all',
         'file_operations_all',
@@ -141,6 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint_list_read',
         'workflow_insights_all',
         'workflow_insights_read',
+        'soc_management_all',
         'global_artifact_management_all',
         'trusted_applications_all',
         'trusted_applications_read',
@@ -171,9 +186,12 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint_list_read',
         'workflow_insights_all',
         'workflow_insights_read',
+        'soc_management_all',
         'global_artifact_management_all',
         'trusted_applications_all',
         'trusted_applications_read',
+        'trusted_devices_all',
+        'trusted_devices_read',
         'host_isolation_exceptions_all',
         'host_isolation_exceptions_read',
         'blocklist_all',
@@ -201,9 +219,12 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint_list_read',
         'workflow_insights_all',
         'workflow_insights_read',
+        'soc_management_all',
         'global_artifact_management_all',
         'trusted_applications_all',
         'trusted_applications_read',
+        'trusted_devices_all',
+        'trusted_devices_read',
         'host_isolation_exceptions_all',
         'host_isolation_exceptions_read',
         'blocklist_all',
@@ -357,7 +378,6 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-      aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };

@@ -63,6 +63,28 @@ describe('commands.from.sources', () => {
         },
       ]);
     });
+
+    it('returns sources from subquery', () => {
+      const src = 'FROM index, (FROM subquery_index)';
+      const { root } = parse(src);
+      const list = [...commands.from.sources.list(root)];
+
+      expect(list.length).toBe(2);
+      expect(list).toMatchObject([
+        {
+          type: 'source',
+          index: {
+            valueUnquoted: 'index',
+          },
+        },
+        {
+          type: 'source',
+          index: {
+            valueUnquoted: 'subquery_index',
+          },
+        },
+      ]);
+    });
   });
 
   describe('.find()', () => {
@@ -114,6 +136,19 @@ describe('commands.from.sources', () => {
         },
       });
     });
+
+    it('can find a source inside subquery', () => {
+      const src = 'FROM index, (FROM subquery_index)';
+      const { root } = parse(src);
+      const source = commands.from.sources.find(root, 'subquery_index')!;
+
+      expect(source).toMatchObject({
+        type: 'source',
+        index: {
+          valueUnquoted: 'subquery_index',
+        },
+      });
+    });
   });
 
   describe('.remove()', () => {
@@ -143,6 +178,17 @@ describe('commands.from.sources', () => {
       const src3 = BasicPrettyPrinter.print(root);
 
       expect(src3).toBe('FROM a, b, c');
+    });
+
+    it('can remove a source from subquery', () => {
+      const src1 = 'FROM a, (FROM b, c)';
+      const { root } = parse(src1);
+
+      commands.from.sources.remove(root, 'c');
+
+      const src2 = BasicPrettyPrinter.print(root);
+
+      expect(src2).toBe('FROM a, (FROM b)');
     });
   });
 

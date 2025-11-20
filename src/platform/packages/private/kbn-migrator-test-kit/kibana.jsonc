@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/migrator-test-kit",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

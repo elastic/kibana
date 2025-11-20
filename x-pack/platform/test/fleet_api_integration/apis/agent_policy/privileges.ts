@@ -163,6 +163,27 @@ export default function (providerContext: FtrProviderContext) {
       scenarios: READ_SCENARIOS,
     },
     {
+      method: 'GET',
+      path: '/api/fleet/agent_policies/policy-test-privileges-1/download',
+      scenarios: READ_SCENARIOS.filter(
+        (scenario) => scenario.user.username !== testUsers.fleet_agents_read_only.username
+      ),
+    },
+    {
+      method: 'GET',
+      path: '/api/fleet/kubernetes',
+      scenarios: READ_SCENARIOS.filter(
+        (scenario) => scenario.user.username !== testUsers.fleet_agents_read_only.username
+      ),
+    },
+    {
+      method: 'GET',
+      path: '/api/fleet/kubernetes/download',
+      scenarios: READ_SCENARIOS.filter(
+        (scenario) => scenario.user.username !== testUsers.fleet_agents_read_only.username
+      ),
+    },
+    {
       method: 'POST',
       path: '/api/fleet/agent_policies/_bulk_get',
       scenarios: READ_SCENARIOS,

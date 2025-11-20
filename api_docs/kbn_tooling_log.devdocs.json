@@ -1075,7 +1075,7 @@
               "level/type of message"
             ],
             "signature": [
-              "\"error\" | \"info\" | \"success\" | \"warning\" | \"write\" | \"debug\" | \"verbose\""
+              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"write\" | \"verbose\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
             "deprecated": false,

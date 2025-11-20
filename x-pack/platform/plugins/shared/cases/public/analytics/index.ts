@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { CASE_PAGE_VIEW_EVENT_TYPE } from '../../common/constants';
+import { CASE_ATTACH_EVENTS_EVENT_TYPE, CASE_PAGE_VIEW_EVENT_TYPE } from '../../common/constants';
 
 export const registerAnalytics = ({
   analyticsService,
@@ -20,6 +20,26 @@ export const registerAnalytics = ({
         type: 'keyword',
         _meta: {
           description: 'The solution ID (owner) that rendered the Cases page',
+          optional: false,
+        },
+      },
+    },
+  });
+
+  analyticsService.registerEventType({
+    eventType: CASE_ATTACH_EVENTS_EVENT_TYPE,
+    schema: {
+      owner: {
+        type: 'keyword',
+        _meta: {
+          description: 'The solution ID (owner) that created event attachments',
+          optional: false,
+        },
+      },
+      attachment_source: {
+        type: 'keyword',
+        _meta: {
+          description: 'The exact place in the app where the attachment comes from',
           optional: false,
         },
       },

@@ -36,7 +36,7 @@ export async function getMetadataForDependency({
   const fields = asMutableArray([SPAN_TYPE, SPAN_SUBTYPE] as const);
   const sampleResponse = await apmEventClient.search('get_metadata_for_dependency', {
     apm: {
-      events: [ProcessorEvent.span],
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     track_total_hits: false,
     size: 1,

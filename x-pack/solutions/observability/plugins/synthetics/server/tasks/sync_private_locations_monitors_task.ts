@@ -42,7 +42,7 @@ import { SyntheticsPrivateLocation } from '../synthetics_service/private_locatio
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '10m';
+const TASK_SCHEDULE = '60m';
 
 interface TaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -85,6 +85,12 @@ export class SyncPrivateLocationMonitorsTask {
   }: {
     taskInstance: CustomTaskInstance;
   }): Promise<{ state: TaskState; error?: Error; schedule?: IntervalSchedule | RruleSchedule }> {
+    this.debugLog(
+      `Syncing private location monitors, current task state is ${JSON.stringify(
+        taskInstance.state
+      )}`
+    );
+
     const {
       coreStart: { savedObjects },
       encryptedSavedObjects,
@@ -95,8 +101,7 @@ export class SyncPrivateLocationMonitorsTask {
     const startedAt = taskInstance.startedAt || new Date();
 
     const taskState = {
-      lastStartedAt,
-      startedAt: startedAt.toISOString(),
+      lastStartedAt: startedAt.toISOString(),
       lastTotalParams: taskInstance.state.lastTotalParams || 0,
       lastTotalMWs: taskInstance.state.lastTotalMWs || 0,
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
@@ -104,9 +109,6 @@ export class SyncPrivateLocationMonitorsTask {
     };
 
     try {
-      this.debugLog(
-        `Syncing private location monitors, current task state is ${JSON.stringify(taskState)}`
-      );
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
@@ -117,6 +119,7 @@ export class SyncPrivateLocationMonitorsTask {
       const { hasDataChanged } = await this.hasAnyDataChanged({
         soClient,
         taskState,
+        lastStartedAt,
       });
 
       if (hasDataChanged || performSync) {
@@ -132,6 +135,8 @@ export class SyncPrivateLocationMonitorsTask {
             soClient,
             encryptedSavedObjects,
           });
+        } else {
+          this.debugLog(`No private locations found, skipping sync`);
         }
         this.debugLog(`Sync of private location monitors succeeded`);
       } else {
@@ -177,11 +182,13 @@ export class SyncPrivateLocationMonitorsTask {
   hasAnyDataChanged = async ({
     taskState,
     soClient,
+    lastStartedAt,
   }: {
     taskState: TaskState;
     soClient: SavedObjectsClientContract;
+    lastStartedAt: string;
   }) => {
-    const { lastTotalParams, lastTotalMWs, lastStartedAt } = taskState;
+    const { lastTotalParams, lastTotalMWs } = taskState;
 
     const { totalParams, hasParamsChanges } = await this.hasAnyParamChanged({
       soClient,
@@ -217,38 +224,40 @@ export class SyncPrivateLocationMonitorsTask {
         soClient,
       });
 
-    for (const spaceId of spaceIds) {
-      const privateConfigs: Array<{
-        config: HeartbeatConfig;
-        globalParams: Record<string, string>;
-      }> = [];
-      const monitors = configsBySpaces[spaceId];
-      this.debugLog(`Processing spaceId: ${spaceId}, monitors count: ${monitors?.length ?? 0}`);
-      if (!monitors) {
-        continue;
-      }
-      for (const monitor of monitors) {
-        const { privateLocations } = this.parseLocations(monitor);
+    return this.serverSetup.fleet.runWithCache(async () => {
+      for (const spaceId of spaceIds) {
+        const privateConfigs: Array<{
+          config: HeartbeatConfig;
+          globalParams: Record<string, string>;
+        }> = [];
+        const monitors = configsBySpaces[spaceId];
+        this.debugLog(`Processing spaceId: ${spaceId}, monitors count: ${monitors?.length ?? 0}`);
+        if (!monitors) {
+          continue;
+        }
+        for (const monitor of monitors) {
+          const { privateLocations } = this.parseLocations(monitor);
 
-        if (privateLocations.length > 0) {
-          privateConfigs.push({ config: monitor, globalParams: paramsBySpace[spaceId] });
+          if (privateLocations.length > 0) {
+            privateConfigs.push({ config: monitor, globalParams: paramsBySpace[spaceId] });
+          }
+        }
+        if (privateConfigs.length > 0) {
+          this.debugLog(
+            `Syncing private configs for spaceId: ${spaceId}, privateConfigs count: ${privateConfigs.length}`
+          );
+
+          await privateLocationAPI.editMonitors(
+            privateConfigs,
+            allPrivateLocations,
+            spaceId,
+            maintenanceWindows
+          );
+        } else {
+          this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
         }
       }
-      if (privateConfigs.length > 0) {
-        this.debugLog(
-          `Syncing private configs for spaceId: ${spaceId}, privateConfigs count: ${privateConfigs.length}`
-        );
-
-        await privateLocationAPI.editMonitors(
-          privateConfigs,
-          allPrivateLocations,
-          spaceId,
-          maintenanceWindows
-        );
-      } else {
-        this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
-      }
-    }
+    });
   }
 
   async getAllMonitorConfigs({

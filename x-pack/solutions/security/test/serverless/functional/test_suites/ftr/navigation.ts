@@ -18,6 +18,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const headerPage = getPageObject('header');
   const retry = getService('retry');
+  const common = getPageObject('common');
+  const solutionNavigation = getPageObject('solutionNavigation');
 
   describe('navigation', function () {
     before(async () => {
@@ -78,15 +80,42 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     it('navigates to maintenance windows', async () => {
       await svlCommonPage.loginAsAdmin();
       await svlSecNavigation.navigateToLandingPage();
-      await svlCommonNavigation.sidenav.openSection(
-        'security_solution_nav_footer.category-management'
-      );
       await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
       await svlCommonNavigation.sidenav.clickPanelLink('management:maintenanceWindows');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
-        'Stack Management',
-        'Maintenance Windows',
-      ]);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Maintenance Windows',
+      });
+    });
+
+    it('renders a feedback callout', async () => {
+      await svlCommonNavigation.sidenav.feedbackCallout.reset();
+      await svlCommonNavigation.sidenav.feedbackCallout.expectExists();
+      await svlCommonNavigation.sidenav.feedbackCallout.dismiss();
+      await svlCommonNavigation.sidenav.feedbackCallout.expectMissing();
+      await browser.refresh();
+      await svlCommonNavigation.sidenav.feedbackCallout.expectMissing();
+    });
+
+    it('renders tour', async () => {
+      await svlCommonNavigation.sidenav.tour.reset();
+      await svlCommonNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+      await svlCommonNavigation.sidenav.tour.nextStep();
+      // TODO: "more" step is currently flaky in security due to initial rendering without "more" button
+      // https://github.com/elastic/kibana/issues/239331
+      if (await svlCommonNavigation.sidenav.tour.isTourStepVisible('sidenav-more')) {
+        await svlCommonNavigation.sidenav.tour.nextStep();
+      }
+      await svlCommonNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+      await svlCommonNavigation.sidenav.tour.nextStep();
+      await svlCommonNavigation.sidenav.tour.expectHidden();
+      await browser.refresh();
+      await svlCommonNavigation.sidenav.tour.expectHidden();
+    });
+
+    it('opens panel on legacy management landing page', async () => {
+      await common.navigateToApp('management');
+      await testSubjects.exists('cards-navigation-page');
+      await solutionNavigation.sidenav.expectPanelExists('stack_management');
     });
   });
 }

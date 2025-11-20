@@ -167,7 +167,7 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
   alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
   observables: { enabled: true, autoExtract: false },
-  events: { enabled: true },
+  events: { enabled: false },
 });
 
 /**
@@ -295,4 +295,6 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
 /**
  * EBT events
  */
-export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view';
+export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view' as const;
+
+export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;

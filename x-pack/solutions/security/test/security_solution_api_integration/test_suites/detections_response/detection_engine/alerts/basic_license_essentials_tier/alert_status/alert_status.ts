@@ -18,11 +18,6 @@ import {
   type DetectionAlert,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
-  setAlertStatus,
-  getAlertUpdateByQueryEmptyResponse,
-  refreshIndex,
-} from '../../../../utils';
-import {
   createAlertsIndex,
   deleteAllAlerts,
   getQueryAlertIds,
@@ -32,7 +27,12 @@ import {
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import {
+  setAlertStatus,
+  getAlertUpdateByQueryEmptyResponse,
+  refreshIndex,
+} from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

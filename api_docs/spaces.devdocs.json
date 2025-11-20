@@ -4810,7 +4810,7 @@
         "label": "SolutionView",
         "description": [],
         "signature": [
-          "\"security\" | \"chat\" | \"oblt\" | \"es\" | \"classic\""
+          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | \"classic\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
         "deprecated": false,

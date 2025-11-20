@@ -66,7 +66,7 @@ export function App() {
               items={datatable.rows ?? []}
             />
           ) : (
-            <EuiCallOut color="success">
+            <EuiCallOut announceOnMount={false} color="success">
               <p>Click or press any key.</p>
             </EuiCallOut>
           )}

@@ -16,6 +16,10 @@ const REQUIRED: Array<[string, string]> = [['outDir', 'target/types']];
 export const requiredCompilerOptions = TsProjectRule.create('requiredCompilerOptions', {
   check({ tsProject }) {
     for (const [key, value] of REQUIRED) {
+      if (tsProject.pkg?.id === '@kbn/tsconfig-base') {
+        return undefined;
+      }
+
       if (tsProject.config.compilerOptions?.[key] !== value) {
         this.err(`the value of the compiler option "${key}" must be set to "${value}"`, {
           'tsconfig.json': (source) => setCompilerOption(source, key, value),

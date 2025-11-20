@@ -27,5 +27,14 @@ export function MachineLearningDataFrameAnalyticsMapProvider({ getService }: Ftr
         `Title for map should be '${expected}' (got '${actualTitle}')`
       );
     },
+    async openMlAnalyticsIdSelectionBadge(id: string) {
+      await testSubjects.click(`mlAnalyticsIdSelectionBadge-${id}`);
+    },
+    async assertAnalyticsJobDetailsFlyoutButtonExists(id: string) {
+      await testSubjects.existOrFail(`mlAnalyticsJobDetailsFlyoutButton-${id}`);
+    },
+    async openAnalyticsJobDetailsFlyout(id: string) {
+      await testSubjects.click(`mlAnalyticsJobDetailsFlyoutButton-${id}`);
+    },
   };
 }

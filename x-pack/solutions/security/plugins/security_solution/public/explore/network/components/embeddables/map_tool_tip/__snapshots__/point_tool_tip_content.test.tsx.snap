@@ -1,14 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PointToolTipContent renders correctly against snapshot 1`] = `
-.c0 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c0 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
 <dl
   class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
   data-type="row"
@@ -40,11 +32,10 @@ exports[`PointToolTipContent renders correctly against snapshot 1`] = `
               >
                 <div>
                   <div
-                    data-provider-id="draggableId.content.default-field-renderer-default-draggable-map-point-tooltip-contextId-host_name-testPropValue-host_name-testPropValue"
                     tabindex="-1"
                   >
                     <span
-                      class="c0"
+                      class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                       data-test-subj="render-content-host.name"
                     >
                       <span

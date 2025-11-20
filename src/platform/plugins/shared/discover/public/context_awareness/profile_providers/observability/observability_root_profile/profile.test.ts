@@ -8,12 +8,12 @@
  */
 
 import { SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityRootProfileProvider } from './profile';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('observabilityRootProfileProvider', () => {
   const observabilityRootProfileProvider = createObservabilityRootProfileProvider(mockServices);

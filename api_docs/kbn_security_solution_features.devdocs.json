@@ -1204,6 +1204,16 @@
           },
           "<",
           "SecuritySubFeatureId",
+          "> | undefined; ai_value_report?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<",
+          "SecuritySubFeatureId",
           "> | undefined; detections?: ",
           {
             "pluginId": "@kbn/security-solution-features",
@@ -1529,6 +1539,10 @@
           "<{ rule?: { all?: ",
           "AlertingKibanaPrivilege",
           " | undefined; read?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; enable?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; manual_run?: ",
           "AlertingKibanaPrivilege",
           " | undefined; } | undefined; alert?: { all?: ",
           "AlertingKibanaPrivilege",

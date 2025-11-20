@@ -202,7 +202,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             helpText={
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.proxyInputDescription"
-                defaultMessage="Proxy used for accessing the download source. Currently only the proxy URL is used, headers and certificates are not supported."
+                defaultMessage="Proxy used for accessing the download source. When selected, the SSL settings and headers from the proxy will be used."
               />
             }
           >

@@ -25,6 +25,18 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
   };
 });
 
+jest.mock('../../dashboard_client', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const defaultState = require('../default_dashboard_state');
+  return {
+    dashboardClient: {
+      get: jest.fn().mockResolvedValue({
+        data: { ...defaultState.DEFAULT_DASHBOARD_STATE },
+      }),
+    },
+  };
+});
+
 const lastSavedQuery = { query: 'memory:>220000', language: 'kuery' };
 
 describe('loadDashboardApi', () => {
@@ -38,16 +50,6 @@ describe('loadDashboardApi', () => {
       cleanUp: jest.fn(),
       internalApi: {},
     });
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/dashboard_content_management_service').getDashboardContentManagementService =
-      () => ({
-        loadDashboardState: () => ({
-          dashboardFound: true,
-          dashboardInput: DEFAULT_DASHBOARD_STATE,
-          references: [],
-        }),
-      });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../../services/dashboard_backup_service').getDashboardBackupService = () => ({
@@ -71,10 +73,7 @@ describe('loadDashboardApi', () => {
       });
       expect(getDashboardApiMock).toHaveBeenCalled();
       // @ts-ignore
-      expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
-        ...DEFAULT_DASHBOARD_STATE,
-        references: [],
-      });
+      expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual(DEFAULT_DASHBOARD_STATE);
     });
 
     test('should overwrite saved object state with unsaved state', async () => {
@@ -88,7 +87,6 @@ describe('loadDashboardApi', () => {
       // @ts-ignore
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
-        references: [],
         query: lastSavedQuery,
       });
     });
@@ -109,7 +107,6 @@ describe('loadDashboardApi', () => {
       // @ts-ignore
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
-        references: [],
         query: queryFromUrl,
       });
     });

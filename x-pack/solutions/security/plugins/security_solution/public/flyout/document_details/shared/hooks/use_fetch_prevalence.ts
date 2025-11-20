@@ -7,12 +7,12 @@
 
 import { buildEsQuery } from '@kbn/es-query';
 import type { IEsSearchRequest } from '@kbn/search-types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useSelector } from 'react-redux';
 import { createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 
@@ -104,7 +104,7 @@ export const useFetchPrevalence = ({
   } = useKibana();
 
   // retrieves detections and non-detections indices (for example, the alert security index from the current space and 'logs-*' indices)
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
     useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
   const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();

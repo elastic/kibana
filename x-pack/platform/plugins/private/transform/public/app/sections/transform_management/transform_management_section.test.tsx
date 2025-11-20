@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { TransformManagementSection } from './transform_management_section';
 

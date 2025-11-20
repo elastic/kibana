@@ -18,10 +18,7 @@ export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
   }
 
   public start(_core: CoreStart) {
-    const isEnabled = _core.featureFlags.getBooleanValue(
-      METRICS_EXPERIENCE_FEATURE_FLAG_KEY,
-      false
-    );
+    const isEnabled = _core.featureFlags.getBooleanValue(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, true);
 
     return {
       metricsExperienceClient: isEnabled ? createMetricsExperienceClient(_core) : undefined,

@@ -60,6 +60,12 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display, 
         iconType="refresh"
         onClick={onInstallKnowledgeBase}
         size="xs"
+        aria-label={i18n.translate(
+          'xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton',
+          {
+            defaultMessage: 'Setup Knowledge Base',
+          }
+        )}
         css={css`
           margin-left: 8px;
         `}

@@ -4302,19 +4302,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/request_context_factory.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
               }
             ]
           },
@@ -4489,6 +4489,10 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
+                "plugin": "observabilityAgent",
+                "path": "x-pack/solutions/observability/plugins/observability_agent/server/tools/search_knowledge_base/search_knowledge_base.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
               },
@@ -4525,12 +4529,12 @@
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
               {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
               }
             ]
           },

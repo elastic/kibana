@@ -35,14 +35,22 @@ const readOperations: Record<AlertingEntity, string[]> = {
   alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };
 
+const manualRunOperations: Record<AlertingEntity, string[]> = {
+  rule: ['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
+  alert: [],
+};
+
+const enableOperations: Record<AlertingEntity, string[]> = {
+  rule: ['enable', 'disable', 'bulkEnable', 'bulkDisable'],
+  alert: [],
+};
+
 const writeOperations: Record<AlertingEntity, string[]> = {
   rule: [
     'create',
     'delete',
     'update',
     'updateApiKey',
-    'enable',
-    'disable',
     'muteAll',
     'unmuteAll',
     'muteAlert',
@@ -50,18 +58,18 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'snooze',
     'bulkEdit',
     'bulkDelete',
-    'bulkEnable',
-    'bulkDisable',
     'unsnooze',
     'runSoon',
-    'scheduleBackfill',
-    'deleteBackfill',
-    'fillGaps',
   ],
   alert: ['update'],
 };
 const allOperations: Record<AlertingEntity, string[]> = {
-  rule: [...readOperations.rule, ...writeOperations.rule],
+  rule: [
+    ...readOperations.rule,
+    ...writeOperations.rule,
+    ...enableOperations.rule,
+    ...manualRunOperations.rule,
+  ],
   alert: [...readOperations.alert, ...writeOperations.alert],
 };
 
@@ -85,11 +93,15 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
 
     const getPrivilegesForEntity = (entity: AlertingEntity) => {
       const all = get(privilegeDefinition.alerting, `${entity}.all`) ?? [];
+      const enable = get(privilegeDefinition.alerting, `${entity}.enable`) ?? [];
+      const manualRun = get(privilegeDefinition.alerting, `${entity}.manual_run`) ?? [];
       const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
 
       return uniq([
         ...getAlertingPrivilege(allOperations[entity], all, entity),
         ...getAlertingPrivilege(readOperations[entity], read, entity),
+        ...getAlertingPrivilege(enableOperations[entity], enable, entity),
+        ...getAlertingPrivilege(manualRunOperations[entity], manualRun, entity),
       ]);
     };
 

@@ -65,7 +65,7 @@ const CloudFormationSetup = ({
 }) => {
   if (!hasCloudFormationTemplate) {
     return (
-      <EuiCallOut color="warning">
+      <EuiCallOut announceOnMount={false} color="warning">
         <FormattedMessage
           id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.notSupported"
           defaultMessage="CloudFormation is not supported on the current Integration version, please upgrade your integration to the latest version to use CloudFormation"
@@ -154,6 +154,17 @@ export const AwsCredentialsForm = ({
     isValid,
   });
 
+  // Ensure supports_cloud_connector is false for agent-based deployments
+  if (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+      },
+    });
+  }
+
   return (
     <>
       <AWSSetupInfoContent
@@ -211,7 +222,7 @@ export const AwsCredentialsForm = ({
             }}
           />
           <EuiSpacer size="m" />
-          {group.info}
+          {group?.info}
           <EuiSpacer size="m" />
           <ReadDocumentation url={elasticDocLink} />
           <EuiSpacer size="l" />

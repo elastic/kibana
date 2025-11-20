@@ -9,7 +9,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import type { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { NavigateToLensLayer as Layer } from '@kbn/lens-common';
 import { getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';

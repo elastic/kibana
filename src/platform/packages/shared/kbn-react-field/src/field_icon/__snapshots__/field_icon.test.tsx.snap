@@ -125,6 +125,16 @@ exports[`FieldIcon renders known field types double is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types exponential_histogram is rendered 1`] = `
+<EuiToken
+  aria-label="exponential_histogram"
+  className="kbnFieldIcon"
+  iconType="tokenHistogram"
+  size="s"
+  title="exponential_histogram"
+/>
+`;
+
 exports[`FieldIcon renders known field types flattened is rendered 1`] = `
 <EuiToken
   aria-label="flattened"
@@ -382,6 +392,16 @@ exports[`FieldIcon renders known field types string is rendered 1`] = `
   iconType="tokenString"
   size="s"
   title="string"
+/>
+`;
+
+exports[`FieldIcon renders known field types tdigest is rendered 1`] = `
+<EuiToken
+  aria-label="tdigest"
+  className="kbnFieldIcon"
+  iconType="tokenHistogram"
+  size="s"
+  title="tdigest"
 />
 `;
 

@@ -11,7 +11,7 @@ import { findFinalWord, findPreviousWord } from '../../../definitions/utils/auto
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { getOperatorSuggestions } from '../../../definitions/utils/operators';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
-import type { ESQLCommand, ESQLSource } from '../../../types';
+import type { ESQLAstAllCommands, ESQLSource } from '../../../types';
 import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
@@ -33,7 +33,7 @@ import {
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number

@@ -7,4 +7,6 @@
 
 export * from './data_tiers';
 
+export * from './use_phase_colors';
+
 export * from './rollover';

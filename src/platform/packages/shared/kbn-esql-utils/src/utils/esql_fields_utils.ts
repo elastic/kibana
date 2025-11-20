@@ -14,6 +14,7 @@ const SPATIAL_FIELDS = ['geo_point', 'geo_shape', 'point', 'shape'];
 const SOURCE_FIELD = '_source';
 const TSDB_COUNTER_FIELDS_PREFIX = 'counter_';
 const UNKNOWN_FIELD = 'unknown';
+const HISTOGRAM_FIELDS = ['exponential_histogram', 'tdigest'];
 
 /**
  * Check if a column is sortable.
@@ -49,6 +50,10 @@ const isGroupable = (type: string | undefined, esType: string | undefined): bool
   }
   // we don't allow grouping on tsdb counter fields
   if (esType && esType.indexOf(TSDB_COUNTER_FIELDS_PREFIX) !== -1) {
+    return false;
+  }
+  // we don't allow grouping on histogram fields (pre-aggregated data)
+  if (type && HISTOGRAM_FIELDS.includes(type)) {
     return false;
   }
   return true;

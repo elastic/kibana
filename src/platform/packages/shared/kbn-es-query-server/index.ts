@@ -9,14 +9,14 @@
 
 export { timeRangeSchema } from './src/time_range';
 export { querySchema } from './src/query';
-export { filterSchema } from './src/filter';
+export { asCodeFilterSchema } from './src/filter';
+export { storedFilterSchema } from './src/stored_filter';
 
 export type {
   TimeRange,
   AbsoluteTimeRange,
   RelativeTimeRange,
-  Filter,
-  FilterMeta,
   AggregateQuery,
   Query,
+  AsCodeFilter,
 } from './src/types';

@@ -58,6 +58,7 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
           <EuiFlexItem>
             <ResponseActionFileDownloadLink
               action={action}
+              agentId={agentId}
               buttonTitle={EXECUTE_FILE_LINK_TITLE}
               canAccessFileDownloadLink={canAccessFileDownloadLink}
               data-test-subj={`${dataTestSubj}-getExecuteLink`}

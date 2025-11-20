@@ -11,7 +11,7 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../../common/store/constants';
 
 import type { HostsModel, Queries } from './model';
-import { HostsTableType, HostsType } from './model';
+import { HostsTableType } from './model';
 
 export const setHostPageQueriesActivePageToZero = (state: HostsModel): Queries => ({
   ...state.page.queries,
@@ -52,15 +52,6 @@ export const setHostDetailsQueriesActivePageToZero = (state: HostsModel): Querie
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
 });
-
-export const setHostsQueriesActivePageToZero = (state: HostsModel, type: HostsType): Queries => {
-  if (type === HostsType.page) {
-    return setHostPageQueriesActivePageToZero(state);
-  } else if (type === HostsType.details) {
-    return setHostDetailsQueriesActivePageToZero(state);
-  }
-  throw new Error(`HostsType ${type} is unknown`);
-};
 
 export const generateSeverityFilter = (severitySelection: RiskSeverity[], entity: EntityType) =>
   severitySelection.length > 0

@@ -110,6 +110,7 @@ export const addObservable = async (
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: updatedObservables,
+        total_observables: updatedObservables.length,
       },
     });
 
@@ -199,6 +200,7 @@ export const updateObservable = async (
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: updatedObservables,
+        total_observables: updatedObservables.length,
       },
     });
 
@@ -267,7 +269,10 @@ export const deleteObservable = async (
     await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
-      updatedAttributes: { observables: updatedObservables },
+      updatedAttributes: {
+        observables: updatedObservables,
+        total_observables: updatedObservables.length,
+      },
     });
     await userActionService.creator.createUserAction({
       userAction: {
@@ -340,6 +345,7 @@ export const bulkAddObservables = async (
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: finalObservables,
+        total_observables: finalObservables.length,
       },
     });
 

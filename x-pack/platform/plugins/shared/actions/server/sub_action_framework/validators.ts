@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ActionTypeConfig, ActionTypeSecrets, ValidatorServices } from '../types';
 import type { SubActionConnectorType, ValidateFn, Validators } from './types';
@@ -33,8 +33,8 @@ export const buildValidators = <
       customValidator: secrets,
     },
     params: {
-      schema: schema.object({
-        subAction: schema.string(),
+      schema: z.object({
+        subAction: z.string(),
         /**
          * With this validation we enforce the subActionParams to be an object.
          * Each sub action has different parameters and they are validated inside the executor
@@ -42,7 +42,7 @@ export const buildValidators = <
          * we allow all unknowns at this level of validation as they are not known at this
          * time of execution.
          */
-        subActionParams: schema.object({}, { unknowns: 'allow' }),
+        subActionParams: z.object({}).passthrough().default({}),
       }),
     },
   };

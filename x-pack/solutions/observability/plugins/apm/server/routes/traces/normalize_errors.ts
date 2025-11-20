@@ -13,7 +13,8 @@ type UnifiedErrors = UnifiedTraceErrors['apmErrors'] | UnifiedTraceErrors['unpro
 
 export const normalizeErrors = (errors: UnifiedErrors): Error[] =>
   errors.map(
-    ({ error, timestamp }): Error => ({
+    ({ error, timestamp, eventName }): Error => ({
+      eventName,
       error: {
         ...error,
         exception: castArray(error?.exception)[0],

@@ -10,7 +10,7 @@
   "plugin": {
     "id": "imageEmbeddable",
     "browser": true,
-    "server": false,
+    "server": true,
     "requiredPlugins": [
       "embeddable",
       "files",

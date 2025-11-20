@@ -6,6 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import { getAlertIndexFilter } from './helpers';
 import type { ExtraOptions, LensAttributes } from '../../types';
 
 const xColumn0 = 'cost_columnX0';
@@ -20,12 +21,14 @@ export type MyGetLensAttributes = (params: {
   esql?: string;
   minutesPerAlert: number;
   analystHourlyRate: number;
+  signalIndexName: string;
 }) => LensAttributes;
 
 export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
   analystHourlyRate,
   extraOptions,
   minutesPerAlert,
+  signalIndexName,
 }) => {
   return {
     description: '',
@@ -128,7 +131,7 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
           },
         },
       },
-      filters: extraOptions?.filters ?? [],
+      filters: [getAlertIndexFilter(signalIndexName), ...(extraOptions?.filters ?? [])],
       internalReferences: [],
       query: {
         language: 'kuery',

@@ -971,7 +971,7 @@
             "label": "rrule",
             "description": [],
             "signature": [
-              "RruleMonthly | RruleWeekly | RruleDaily"
+              "RruleMonthly | RruleWeekly | RruleDaily | RruleHourly"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": false,

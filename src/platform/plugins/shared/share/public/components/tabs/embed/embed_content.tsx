@@ -27,8 +27,9 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import type { AnonymousAccessState } from '../../../../common';
 
-import type { IShareContext } from '../../context';
+import { useShareContext, type IShareContext } from '../../context';
 import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
+import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type EmbedProps = Pick<
   IShareContext,
@@ -49,6 +50,11 @@ interface UrlParams {
   };
 }
 
+const draftModeCalloutMessage = i18n.translate('share.embed.draftModeCallout.message', {
+  defaultMessage:
+    'This code might not work properly. Save your changes to ensure it works as expected.',
+});
+
 export const EmbedContent = ({
   shareableUrlForSavedObject,
   shareableUrl,
@@ -61,6 +67,7 @@ export const EmbedContent = ({
   anonymousAccess,
 }: EmbedProps) => {
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
+  const { onSave, isSaving } = useShareContext();
   const [isLoading, setIsLoading] = useState(false);
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
@@ -72,10 +79,11 @@ export const EmbedContent = ({
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
 
   const {
-    draftModeCallOut: DraftModeCallout,
+    draftModeCallOut,
     computeAnonymousCapabilities,
     embedUrlParamExtensions: urlParamExtensions,
   } = objectConfig;
+  const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   useEffect(() => {
     if (computeAnonymousCapabilities && anonymousAccess) {
@@ -308,10 +316,19 @@ export const EmbedContent = ({
         <EuiText size="s">{helpText}</EuiText>
         <EuiSpacer />
         {renderUrlParamExtensions()}
-        {isDirty && DraftModeCallout && (
+        {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            {DraftModeCallout}
+            <DraftModeCallout
+              message={draftModeCalloutMessage}
+              {...draftModeCalloutContent}
+              {...(onSave && {
+                saveButtonProps: {
+                  onSave,
+                  isSaving,
+                },
+              })}
+            />
           </>
         )}
         <EuiSpacer />

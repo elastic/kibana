@@ -24,8 +24,7 @@ import {
 } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SparkPlot } from '../../../spark_plot';
@@ -57,7 +56,7 @@ export function PreviewDataSparkPlot({
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    system: query.system,
+    feature: query.feature,
     kqlQuery: query.kql.query,
     timeState,
     isQueryValid,

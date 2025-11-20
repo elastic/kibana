@@ -6,12 +6,26 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { AssetImage } from '../../asset_image';
 import { CreateStepButton } from './create_step_button';
 
 export const RootStreamEmptyPrompt = () => {
+  const router = useStreamsAppRouter();
+  const {
+    path: { key: streamName },
+  } = useStreamsAppParams('/{key}/management/{tab}');
+
   return (
     <EuiEmptyPrompt
       aria-live="polite"
@@ -35,6 +49,23 @@ export const RootStreamEmptyPrompt = () => {
             }
           )}
         </p>
+      }
+      actions={
+        <EuiButton
+          href={router.link('/{key}/management/{tab}', {
+            path: {
+              key: streamName,
+              tab: 'partitioning',
+            },
+          })}
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.button',
+            {
+              defaultMessage: 'Open stream partitioning',
+            }
+          )}
+        </EuiButton>
       }
     />
   );

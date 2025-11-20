@@ -154,6 +154,21 @@ class TutorialDirectoryUi extends React.Component<
     _prevProps: TutorialDirectoryUiProps,
     prevState: Readonly<TutorialDirectoryUiState>
   ) {
+    // Update selected tab when URL changes (e.g., browser back/forward)
+    if (_prevProps.openTab !== this.props.openTab) {
+      const newTab = this.props.openTab;
+      // Validate that the tab exists
+      const tabExists = this.tabs.some((tab) => tab.id === newTab);
+      if (!tabExists) {
+        // If the tab does not exist, redirect to the default tab
+        getServices().history.push(`#/tutorial_directory/${SAMPLE_DATA_TAB_ID}`);
+      } else if (newTab !== this.state.selectedTabId) {
+        this.setState({
+          selectedTabId: newTab,
+        });
+      }
+    }
+
     if (prevState.selectedTabId !== this.state.selectedTabId) {
       this.setBreadcrumbs();
     }
@@ -186,6 +201,8 @@ class TutorialDirectoryUi extends React.Component<
     this.setState({
       selectedTabId: id,
     });
+    // Update URL to reflect the selected tab
+    getServices().history.push(`#/tutorial_directory/${id}`);
   };
 
   getTabs = () => {

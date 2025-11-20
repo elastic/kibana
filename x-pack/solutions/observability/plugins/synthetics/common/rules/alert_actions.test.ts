@@ -150,7 +150,7 @@ describe('Alert Actions factory', () => {
     ]);
   });
 
-  it('generate expected action for slack action connector', async () => {
+  it('generate expected action for slack webhook action connector', async () => {
     const resp = populateAlertActions({
       groupId: SYNTHETICS_MONITOR_STATUS.id,
       defaultActions: [
@@ -160,14 +160,10 @@ describe('Alert Actions factory', () => {
             summary: false,
             throttle: null,
           },
-          actionTypeId: '.pagerduty',
+          actionTypeId: '.slack',
           group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
           params: {
-            dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
-            eventAction: 'trigger',
-            severity: 'error',
-            summary:
-              'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}',
+            text: 'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}',
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
@@ -180,6 +176,7 @@ describe('Alert Actions factory', () => {
           SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
       },
     });
+
     expect(resp).toEqual([
       {
         frequency: {
@@ -190,9 +187,7 @@ describe('Alert Actions factory', () => {
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
-          dedupKey: expect.any(String),
-          eventAction: 'resolve',
-          summary:
+          message:
             'The alert for monitor "{{context.monitorName}}" from {{context.locationNames}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationNames}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
         },
       },
@@ -205,10 +200,77 @@ describe('Alert Actions factory', () => {
         group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
-          dedupKey: expect.any(String),
-          eventAction: 'trigger',
-          severity: 'error',
-          summary: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+          message: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+        },
+      },
+    ]);
+  });
+
+  it('generate expected action for slack webapi action connector', async () => {
+    const resp = populateAlertActions({
+      groupId: SYNTHETICS_MONITOR_STATUS.id,
+      defaultActions: [
+        {
+          frequency: {
+            notifyWhen: 'onActionGroupChange',
+            summary: false,
+            throttle: null,
+          },
+          actionTypeId: '.slack_api',
+          group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+          config: {
+            allowedChannels: [
+              { name: '#channel-name' },
+              { id: 'channel-id' },
+              { name: 'another-channel', id: 'another-id' },
+            ],
+          },
+          params: {
+            text: 'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}',
+          },
+          id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        },
+      ] as unknown as ActionConnector[],
+      translations: {
+        defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+        defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
+        defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
+        defaultRecoverySubjectMessage:
+          SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
+      },
+    });
+
+    expect(resp).toEqual([
+      {
+        frequency: {
+          notifyWhen: 'onActionGroupChange',
+          summary: false,
+          throttle: null,
+        },
+        group: 'recovered',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        params: {
+          subAction: 'postMessage',
+          subActionParams: {
+            channels: ['#channel-name', 'channel-id', 'another-channel', 'another-id'],
+            text: 'The alert for monitor "{{context.monitorName}}" from {{context.locationNames}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationNames}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+          },
+        },
+      },
+      {
+        frequency: {
+          notifyWhen: 'onActionGroupChange',
+          summary: false,
+          throttle: null,
+        },
+        group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        params: {
+          subAction: 'postMessage',
+          subActionParams: {
+            channels: ['#channel-name', 'channel-id', 'another-channel', 'another-id'],
+            text: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+          },
         },
       },
     ]);

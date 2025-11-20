@@ -428,26 +428,6 @@
           },
           {
             "parentPluginId": "console",
-            "id": "def-public.AppStartUIPluginDependencies.dataViews",
-            "type": "Object",
-            "tags": [],
-            "label": "dataViews",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "public",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-public.DataViewsServicePublic",
-                "text": "DataViewsServicePublic"
-              }
-            ],
-            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "console",
             "id": "def-public.AppStartUIPluginDependencies.data",
             "type": "Object",
             "tags": [],
@@ -856,16 +836,70 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "console",
+        "id": "def-server.SpecDefinitionsJson",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpecDefinitionsJson",
+        "description": [],
+        "path": "src/platform/plugins/shared/console/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "console",
+            "id": "def-server.SpecDefinitionsJson.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/plugins/shared/console/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-server.SpecDefinitionsJson.globals",
+            "type": "Object",
+            "tags": [],
+            "label": "globals",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/plugins/shared/console/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-server.SpecDefinitionsJson.endpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "endpoints",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/plugins/shared/console/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
-    "start": {
+    "setup": {
       "parentPluginId": "console",
-      "id": "def-server.ConsoleStart",
+      "id": "def-server.ConsoleSetup",
       "type": "Type",
       "tags": [],
-      "label": "ConsoleStart",
+      "label": "ConsoleSetup",
       "description": [],
       "signature": [
         "void"
@@ -873,6 +907,44 @@
       "path": "src/platform/plugins/shared/console/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "console",
+      "id": "def-server.ConsoleStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ConsoleStart",
+      "description": [],
+      "path": "src/platform/plugins/shared/console/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "console",
+          "id": "def-server.ConsoleStart.getSpecJson",
+          "type": "Function",
+          "tags": [],
+          "label": "getSpecJson",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "console",
+              "scope": "server",
+              "docId": "kibConsolePluginApi",
+              "section": "def-server.SpecDefinitionsJson",
+              "text": "SpecDefinitionsJson"
+            }
+          ],
+          "path": "src/platform/plugins/shared/console/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

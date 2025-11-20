@@ -42,3 +42,11 @@ export {
 export { FileReaderBase, MessageReader, NdjsonReader, TikaReader } from './src/file_reader';
 
 export { updatePipelineTimezone } from './src/utils';
+
+export { AbortError, isAbortError } from './src/abort_error';
+
+export {
+  registerFileUploadAnalyticsEvents,
+  FILE_UPLOAD_EVENT,
+  FileUploadTelemetryService,
+} from './src/telemetry';

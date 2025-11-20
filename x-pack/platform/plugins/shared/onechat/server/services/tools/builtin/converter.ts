@@ -14,15 +14,18 @@ import type {
   ToolDynamicPropsContext,
 } from '../tool_types/definitions';
 import { isBuiltinDefinition } from '../tool_types/definitions';
+import type { ToolAvailabilityCache } from './availability_cache';
 
 export const convertTool = ({
   tool,
   definition,
   context,
+  cache,
 }: {
   tool: StaticToolRegistration;
   definition: ToolTypeDefinition | BuiltinToolTypeDefinition;
   context: ToolDynamicPropsContext;
+  cache: ToolAvailabilityCache;
 }): InternalToolDefinition => {
   if (isBuiltinToolRegistration(tool)) {
     return {
@@ -32,6 +35,13 @@ export const convertTool = ({
       tags: tool.tags,
       configuration: {},
       readonly: true,
+      isAvailable: async (ctx) => {
+        if (tool.availability) {
+          return cache.getOrCompute(tool.id, tool.availability, ctx);
+        } else {
+          return { status: 'available' };
+        }
+      },
       getSchema: () => tool.schema,
       getHandler: () => tool.handler,
     };
@@ -50,6 +60,13 @@ export const convertTool = ({
       description: tool.description,
       tags: tool.tags,
       readonly: true,
+      isAvailable: (ctx) => {
+        if (tool.availability) {
+          return cache.getOrCompute(tool.id, tool.availability, ctx);
+        } else {
+          return { status: 'available' };
+        }
+      },
       getSchema: async () => {
         const props = await getDynamicProps();
         return props.getSchema();

@@ -9,8 +9,8 @@ import { findMinMaxByColumnId, getContrastColor, shouldColorByTerms } from './ut
 
 describe('getContrastColor', () => {
   it('should pick the light color when the passed one is dark', () => {
-    expect(getContrastColor('#000', true)).toBe('#ffffff');
-    expect(getContrastColor('#000', false)).toBe('#ffffff');
+    expect(getContrastColor('#000', true)).toBe('#FFFFFF');
+    expect(getContrastColor('#000', false)).toBe('#FFFFFF');
   });
 
   it('should pick the dark color when the passed one is light', () => {
@@ -19,13 +19,13 @@ describe('getContrastColor', () => {
   });
 
   it('should take into account background color if the primary color is opaque', () => {
-    expect(getContrastColor('rgba(0,0,0,0)', true)).toBe('#ffffff');
+    expect(getContrastColor('rgba(0,0,0,0)', true)).toBe('#FFFFFF');
     expect(getContrastColor('rgba(0,0,0,0)', false)).toBe('#000000');
-    expect(getContrastColor('#00000000', true)).toBe('#ffffff');
+    expect(getContrastColor('#00000000', true)).toBe('#FFFFFF');
     expect(getContrastColor('#00000000', false)).toBe('#000000');
-    expect(getContrastColor('#ffffff00', true)).toBe('#ffffff');
-    expect(getContrastColor('#ffffff00', false)).toBe('#000000');
-    expect(getContrastColor('rgba(255,255,255,0)', true)).toBe('#ffffff');
+    expect(getContrastColor('#FFFFFF00', true)).toBe('#FFFFFF');
+    expect(getContrastColor('#FFFFFF00', false)).toBe('#000000');
+    expect(getContrastColor('rgba(255,255,255,0)', true)).toBe('#FFFFFF');
     expect(getContrastColor('rgba(255,255,255,0)', false)).toBe('#000000');
   });
 });

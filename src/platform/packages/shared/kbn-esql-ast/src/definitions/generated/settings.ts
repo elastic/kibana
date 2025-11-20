@@ -16,6 +16,18 @@ const projectRouting = {
   snapshotOnly: true,
   description:
     'A project routing expression, used to define which projects to route the query to. Only supported if Cross-Project Search is enabled.',
+  ignoreAsSuggestion: false,
 };
 
-export const settings = [projectRouting];
+const timeZone = {
+  name: 'time_zone',
+  type: 'keyword',
+  serverlessOnly: false,
+  preview: true,
+  snapshotOnly: true,
+  description:
+    'The default timezone to be used in the query, by the functions and commands that require it. Defaults to UTC',
+  ignoreAsSuggestion: true,
+};
+
+export const settings = [projectRouting, timeZone];

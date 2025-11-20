@@ -308,14 +308,10 @@
                 "description": [],
                 "signature": [
                   "Record<string, ",
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<unknown>>"
+                  "ZodType",
+                  "<unknown, ",
+                  "ZodTypeDef",
+                  ", unknown>>"
                 ],
                 "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
@@ -2414,7 +2410,6 @@
             "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "actions",
@@ -2426,11 +2421,13 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/platform/plugins/shared/actions/server/action_type_registry.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2617,6 +2614,20 @@
             "description": [],
             "signature": [
               "\"endpointSecurity\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.isDeprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
@@ -3232,6 +3243,150 @@
             "label": "isSystemAction",
             "description": [],
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.Connector.isConnectorTypeDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isConnectorTypeDeprecated",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.ConnectorType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorType",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.enabledInConfig",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabledInConfig",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.enabledInLicense",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabledInLicense",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.minimumLicenseRequired",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "minimumLicenseRequired",
+            "description": [],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.supportedFeatureIds",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedFeatureIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.isSystemActionType",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSystemActionType",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.subFeature",
+            "type": "string",
+            "tags": [],
+            "label": "subFeature",
+            "description": [],
+            "signature": [
+              "\"endpointSecurity\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.isDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3857,7 +4012,7 @@
             "section": "def-server.ConnectorWithExtraFindData",
             "text": "ConnectorWithExtraFindData"
           },
-          "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
+          "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<(",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -3865,7 +4020,19 @@
             "section": "def-server.Connector",
             "text": "Connector"
           },
-          "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
+          " | ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.InMemoryConnector",
+            "text": "InMemoryConnector"
+          },
+          "<",
+          "ActionTypeConfig",
+          ", ",
+          "ActionTypeSecrets",
+          ">)[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
           ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
           "ExecuteOptions",
@@ -3874,7 +4041,13 @@
           ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
           "ListTypesParams",
           ") => Promise<",
-          "ConnectorType",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ConnectorType",
+            "text": "ConnectorType"
+          },
           "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
           {
             "pluginId": "actions",
@@ -4367,6 +4540,46 @@
           "trackAdoption": false,
           "returnComment": [],
           "children": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginStartContract.listTypes",
+          "type": "Function",
+          "tags": [],
+          "label": "listTypes",
+          "description": [],
+          "signature": [
+            "(featureId?: string | undefined) => ",
+            {
+              "pluginId": "actions",
+              "scope": "common",
+              "docId": "kibActionsPluginApi",
+              "section": "def-common.ActionType",
+              "text": "ActionType"
+            },
+            "[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginStartContract.listTypes.$1",
+              "type": "string",
+              "tags": [],
+              "label": "featureId",
+              "description": [],
+              "signature": [
+                "string | undefined"
+              ],
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "actions",
@@ -5244,6 +5457,33 @@
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionType.isDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionType.validate",
+            "type": "Object",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "{ params: ",
+              "PublicValidatorType",
+              "; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5900,21 +6140,6 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.ALERT_HISTORY_PREFIX",
-        "type": "string",
-        "tags": [],
-        "label": "ALERT_HISTORY_PREFIX",
-        "description": [],
-        "signature": [
-          "\"kibana-alert-history-\""
-        ],
-        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
         "id": "def-common.AlertHistoryDefaultIndexName",
         "type": "string",
         "tags": [],
@@ -6019,6 +6244,18 @@
           "\"cases\""
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_EMAIL_BODY_LENGTH",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_EMAIL_BODY_LENGTH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6175,6 +6412,18 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.MAX_EMAIL_BODY_LENGTH",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_EMAIL_BODY_LENGTH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.RewriteRequestCase",
         "type": "Type",
         "tags": [],
@@ -6308,6 +6557,21 @@
         "description": [],
         "signature": [
           "\"uptime\""
+        ],
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.WorkflowsConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "WorkflowsConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"workflows\""
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -6769,6 +7033,53 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.WorkflowsConnectorFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "WorkflowsConnectorFeature",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.WorkflowsConnectorFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.WorkflowsConnectorFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.WorkflowsConnectorFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",

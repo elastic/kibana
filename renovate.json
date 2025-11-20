@@ -19,9 +19,7 @@
     "main",
     "9.2",
     "9.1",
-    "9.0",
     "8.19",
-    "8.18",
     "7.17"
   ],
   "prConcurrentLimit": 0,
@@ -214,7 +212,6 @@
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
-        "@types/react-test-renderer",
         "babel-plugin-istanbul",
         "lighthouse",
         "nyc",
@@ -224,7 +221,6 @@
         "playwright",
         "pngjs",
         "qs",
-        "react-test-renderer",
         "rxjs-marbles",
         "sharp",
         "superagent",
@@ -515,9 +511,11 @@
         "prop-types",
         "react",
         "react-dom",
+        "react-test-renderer",
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
+        "@types/react-test-renderer",
         "csstype"
       ],
       "reviewers": [
@@ -711,6 +709,26 @@
       "groupName": "query-string",
       "matchDepNames": [
         "query-string"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "virtualized",
+      "matchDepNames": [
+        "@tanstack/react-table",
+        "@tanstack/react-virtual"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -1200,7 +1218,7 @@
         "@elastic/ecs"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -1208,7 +1226,7 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "Team:obs-ux-logs"
+        "Team:obs-onboarding"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1482,7 +1500,8 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
-        "@seriousme/openapi-schema-validator"
+        "ajv-draft-04",
+        "ajv-formats"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -1563,7 +1582,8 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "ci:bench-jest"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1916,6 +1936,25 @@
       ],
       "labels": [
         "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "liquidjs",
+      "matchDepNames": [
+        "liquidjs"
+      ],
+      "reviewers": [
+        "team:workflows-eng"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:One Workflow",
         "backport:all-open",
         "release_note:skip"
       ],
@@ -2388,7 +2427,7 @@
       "enabled": true
     },
     {
-      "groupName": "workchat gen-ai dependencies",
+      "groupName": "workplace_ai gen-ai dependencies",
       "matchDepNames": [
         "@a2a-js/sdk",
         "@modelcontextprotocol/sdk",
@@ -2794,7 +2833,6 @@
         "pdfmake"
       ],
       "reviewers": [
-        "team:kibana-presentation",
         "team:response-ops"
       ],
       "matchBaseBranches": [
@@ -3403,24 +3441,6 @@
       "enabled": true
     },
     {
-      "groupName": "p-timeout",
-      "matchDepNames": [
-        "p-timeout"
-      ],
-      "reviewers": [
-        "team:obs-ai-assistant"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "redux-actions",
       "matchDepNames": [
         "redux-actions",
@@ -3724,7 +3744,8 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "ci:bench-jest"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -3763,7 +3784,8 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "ci:bench-jest"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -4294,13 +4316,13 @@
         "@xstate/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4316,13 +4338,13 @@
         "@xstate5/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4336,13 +4358,13 @@
         "constate"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4355,13 +4377,13 @@
         "oniguruma-to-es"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4740,9 +4762,28 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:current-major"
+        "backport:previous-minor"
       ],
       "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "xml Format Util",
+      "matchDepNames": [
+        "xml-formatter"
+      ],
+      "reviewers": [
+        "team:security-threat-hunting"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Threat Hunting",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "60 days",
       "enabled": true
     }
   ],

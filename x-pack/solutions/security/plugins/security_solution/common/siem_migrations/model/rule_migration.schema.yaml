@@ -11,6 +11,7 @@ components:
       description: The original rule vendor identifier.
       enum:
         - splunk
+        - qradar
 
     OriginalRuleAnnotations:
       type: object
@@ -301,6 +302,7 @@ components:
       enum: # should match SiemMigrationRetryFilter enum at ../constants.ts
         - failed
         - not_fully_translated
+        - selected
 
     RuleMigrationAllIntegrationsStats:
       type: array

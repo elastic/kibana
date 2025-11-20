@@ -73,8 +73,10 @@ const optionListControlStyles = {
 
 export const OptionsListControl = ({
   controlPanelClassName,
+  disableMultiValueEmptySelection = false,
 }: {
   controlPanelClassName: string;
+  disableMultiValueEmptySelection?: boolean;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
   const { componentApi, displaySettings } = useOptionsListContext();
@@ -232,7 +234,7 @@ export const OptionsListControl = ({
           'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
         }}
       >
-        <OptionsListPopover />
+        <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
       </EuiInputPopover>
     </EuiFilterGroup>
   );

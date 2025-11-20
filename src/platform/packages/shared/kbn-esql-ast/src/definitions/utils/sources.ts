@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { IndexAutocompleteItem, ESQLSourceResult } from '@kbn/esql-types';
+import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLSource } from '../../types';
+import type { ESQLAstAllCommands, ESQLSource } from '../../types';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
@@ -49,27 +50,46 @@ function getSafeInsertSourceText(text: string) {
 }
 
 export const buildSourcesDefinitions = (
-  sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>
+  sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>,
+  queryString?: string
 ): ISuggestionItem[] =>
-  sources.map(({ name, isIntegration, title, type }) =>
-    withAutoSuggest({
+  sources.map(({ name, isIntegration, title, type }) => {
+    let text = getSafeInsertSourceText(name);
+    const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
+    let rangeToReplace: { start: number; end: number } | undefined;
+
+    // If this is a timeseries source we should replace FROM with TS
+    // With TS users can benefit from the timeseries optimizations
+    if (isTimeseries && queryString) {
+      text = `TS ${text}`;
+      rangeToReplace = {
+        start: 0,
+        end: queryString.length + 1,
+      };
+    }
+
+    return withAutoSuggest({
       label: title ?? name,
-      text: getSafeInsertSourceText(name),
+      text,
       asSnippet: isIntegration,
       kind: isIntegration ? 'Class' : 'Issue',
       detail: isIntegration
         ? i18n.translate('kbn-esql-ast.esql.autocomplete.integrationDefinition', {
-            defaultMessage: `Integration`,
+            defaultMessage: SOURCES_TYPES.INTEGRATION,
           })
         : i18n.translate('kbn-esql-ast.esql.autocomplete.sourceDefinition', {
             defaultMessage: '{type}',
             values: {
-              type: type ?? 'Index',
+              type: type ?? SOURCES_TYPES.INDEX,
             },
           }),
       sortText: 'A',
-    })
-  );
+      // with filterText we are explicitly telling the Monaco editor's filtering engine
+      //  to display the item when the text FROM  is present in the editor at the specified range,
+      // even though the label is different.
+      ...(rangeToReplace && { rangeToReplace, filterText: queryString }),
+    });
+  });
 
 /**
  * Checks if the source exists in the provided sources set.
@@ -101,7 +121,10 @@ export function sourceExists(index: string, sources: Set<string>) {
   return allExist;
 }
 
-export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
+export function getSourcesFromCommands(
+  commands: ESQLAstAllCommands[],
+  sourceType: 'index' | 'policy'
+) {
   const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   // the marker gets added in queries like "FROM "
@@ -110,14 +133,19 @@ export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'ind
   );
 }
 
-export function getSourceSuggestions(sources: ESQLSourceResult[], alreadyUsed: string[]) {
+export function getSourceSuggestions(
+  sources: ESQLSourceResult[],
+  alreadyUsed: string[],
+  queryString?: string
+) {
   // hide indexes that start with .
   return buildSourcesDefinitions(
     sources
       .filter(({ hidden, name }) => !hidden && !alreadyUsed.includes(name))
       .map(({ name, dataStreams, title, type }) => {
         return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
-      })
+      }),
+    queryString
   );
 }
 
@@ -153,6 +181,7 @@ export async function additionalSourcesSuggestions(
             filterText: fragment,
             text: fragment + ' | ',
             rangeToReplace,
+            sortText: '0',
           }),
           withAutoSuggest({
             ...commaCompleteItem,

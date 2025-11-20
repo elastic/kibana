@@ -18,6 +18,7 @@ export const createModelProviderMock = (): ModelProviderMock => {
   return {
     getDefaultModel: jest.fn(),
     getModel: jest.fn(),
+    getUsageStats: jest.fn(),
   };
 };
 

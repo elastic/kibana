@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 import {
+  ASSET_INVENTORY_APP_NAME,
   ASSET_INVENTORY_CRITICALITY_ASSIGNED_MANUAL,
   uiMetricService,
-  ASSET_INVENTORY_APP_NAME,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
@@ -106,7 +106,6 @@ export const GenericEntityFlyoutContent = ({
         field={insightsField}
         value={insightsValue}
         isPreviewMode={false}
-        isLinkEnabled={true}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
       />
       <ExpandableSection

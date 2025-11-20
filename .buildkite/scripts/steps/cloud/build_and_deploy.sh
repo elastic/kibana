@@ -11,6 +11,17 @@ export KBN_NP_PLUGINS_BUILT=true
 VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
 ECCTL_LOGS=$(mktemp --suffix ".json")
 
+KIBANA_MEMORY_SIZE=${KIBANA_MEMORY_SIZE:-2048}
+case "$KIBANA_MEMORY_SIZE" in
+  1024|2048|4096|8192)
+    echo "--- Kibana node memory size: ${KIBANA_MEMORY_SIZE}MB"
+    ;;
+  *)
+    echo "Error: KIBANA_MEMORY_SIZE must be one of: 1024, 2048, 4096, 8192. Got: $KIBANA_MEMORY_SIZE"
+    exit 1
+    ;;
+esac
+
 echo "--- Download Kibana Distribution"
 
 mkdir -p ./target
@@ -75,7 +86,8 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     .name = "'$CLOUD_DEPLOYMENT_NAME'" |
     .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
     .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'" |
-    .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'"
+    .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'" |
+    .resources.kibana[0].plan.cluster_topology[0].size.value = '$KIBANA_MEMORY_SIZE'
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
   echo "Creating deployment..."

@@ -134,7 +134,7 @@ const externals = {
   '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
-  '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
+  '@kbn/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
   '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
@@ -146,6 +146,7 @@ const externals = {
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
   '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
+  '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

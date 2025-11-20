@@ -65,7 +65,7 @@ export const tourSteps: TourStep[] = [
         </p>
       </EuiText>
     ),
-    target: `[data-test-subj~="projectSideNav"] [data-test-subj~="sideNavMoreMenuItem"]`,
+    target: `[data-test-subj~="projectSideNav"] [data-test-subj~="kbnChromeNav-moreMenuTrigger"]`,
   },
   {
     id: 'sidenav-manage-data',

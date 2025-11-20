@@ -30,13 +30,13 @@ export interface OpenFileUploadLiteContext {
   existingIndex?: string;
   initialIndexName?: string;
   flyoutContent?: FlyoutContent;
+  location: string;
 }
 
 export interface FlyoutContent {
   title?: string | ReactNode;
   description?: string | ReactNode;
   showFileContentPreview?: boolean;
-  showFileSummary?: boolean;
 }
 
 export interface InputOverrides {

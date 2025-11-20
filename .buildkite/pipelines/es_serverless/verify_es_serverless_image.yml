@@ -62,6 +62,26 @@ steps:
             - exit_status: '*'
               limit: 1
 
+      - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+        label: 'Scout Test Run Builder'
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          diskSizeGb: 115
+        key: build_scout_tests
+        timeout_in_minutes: 15
+        depends_on:
+          - build
+        env:
+          SERVERLESS_TESTS_ONLY: 'true'
+          SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
       - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
         label: 'Serverless Entity Analytics - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"

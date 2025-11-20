@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useKibana } from '../../hooks/use_kibana';
@@ -21,18 +21,18 @@ export const EditSignificantEventFlyout = ({
   isEditFlyoutOpen,
   setIsEditFlyoutOpen,
   initialFlow,
-  selectedSystems,
-  setSelectedSystems,
+  selectedFeatures,
+  setSelectedFeatures,
   setQueryToEdit,
-  systems,
+  features,
   refresh,
 }: {
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
-  selectedSystems: System[];
-  setSelectedSystems: React.Dispatch<React.SetStateAction<System[]>>;
-  systems: System[];
+  selectedFeatures: Feature[];
+  setSelectedFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
+  features: Feature[];
   queryToEdit?: StreamQueryKql;
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
@@ -119,11 +119,11 @@ export const EditSignificantEventFlyout = ({
       onClose={() => {
         setIsEditFlyoutOpen(false);
         setQueryToEdit(undefined);
-        setSelectedSystems([]);
+        setSelectedFeatures([]);
       }}
       initialFlow={initialFlow}
-      initialSelectedSystems={selectedSystems}
-      systems={systems}
+      initialSelectedFeatures={selectedFeatures}
+      features={features}
     />
   ) : null;
 };

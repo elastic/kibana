@@ -33,13 +33,15 @@ export const readStreamRoute = createServerRoute({
     path: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<Streams.all.GetResponse> => {
-    const { assetClient, streamsClient, scopedClusterClient } = await getScopedClients({
-      request,
-    });
+    const { assetClient, attachmentClient, streamsClient, scopedClusterClient } =
+      await getScopedClients({
+        request,
+      });
 
     const body = await readStream({
       name: params.path.name,
       assetClient,
+      attachmentClient,
       scopedClusterClient,
       streamsClient,
     });

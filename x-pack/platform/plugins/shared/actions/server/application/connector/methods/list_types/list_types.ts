@@ -23,7 +23,7 @@ export async function listTypes(
 
   const { featureId, includeSystemActionTypes } = options;
 
-  const connectorTypes = context.actionTypeRegistry.list(featureId);
+  const connectorTypes = context.actionTypeRegistry.list({ featureId });
 
   const filteredConnectorTypes = includeSystemActionTypes
     ? connectorTypes

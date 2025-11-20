@@ -11,6 +11,7 @@ import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugi
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { ScheduleType } from '@kbn/reporting-server';
+import { EXPORT_TYPE_SCHEDULED } from '@kbn/reporting-common';
 import type { ScheduledReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from '.';
 import { SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import type { SavedReport } from '../store';
@@ -27,6 +28,8 @@ type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: Omit<ScheduledReportTaskParams, 'schedule'>;
 };
 export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskParams> {
+  public readonly exportType = EXPORT_TYPE_SCHEDULED;
+
   public get TYPE() {
     return SCHEDULED_REPORTING_EXECUTE_TYPE;
   }

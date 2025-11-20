@@ -12,6 +12,7 @@ import {
   type KibanaPhoenixClient,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
+  selectEvaluators,
 } from '@kbn/evals';
 import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
@@ -84,14 +85,12 @@ export function createEvaluateDataset({
           metadata,
         }),
       ]);
-      const correctnessAnalysis = correctnessResult.metadata;
-      const groundednessAnalysis = groundednessResult.metadata;
 
       return {
         errors: response.errors,
         messages: response.messages,
-        correctnessAnalysis,
-        groundednessAnalysis,
+        correctnessAnalysis: correctnessResult?.metadata,
+        groundednessAnalysis: groundednessResult?.metadata,
       };
     };
 
@@ -100,7 +99,10 @@ export function createEvaluateDataset({
         dataset,
         task: callConverseAndEvaluate,
       },
-      [...createQuantitativeCorrectnessEvaluators(), createQuantitativeGroundednessEvaluator()]
+      selectEvaluators([
+        ...createQuantitativeCorrectnessEvaluators(),
+        createQuantitativeGroundednessEvaluator(),
+      ])
     );
   };
 }

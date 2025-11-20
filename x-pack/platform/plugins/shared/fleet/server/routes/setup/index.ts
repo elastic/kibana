@@ -65,12 +65,15 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetSetupResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             500: {
+              description: 'An internal server error occurred.',
               body: internalErrorResponse,
             },
           },
@@ -98,6 +101,7 @@ export const GetAgentsSetupResponseSchema = schema.object(
     package_verification_key_id: schema.maybe(schema.string()),
     is_space_awareness_enabled: schema.maybe(schema.boolean()),
     is_secrets_storage_enabled: schema.maybe(schema.boolean()),
+    is_action_secrets_storage_enabled: schema.maybe(schema.boolean()),
   },
   {
     meta: {
@@ -138,9 +142,11 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetSetupResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -180,9 +186,11 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentsSetupResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

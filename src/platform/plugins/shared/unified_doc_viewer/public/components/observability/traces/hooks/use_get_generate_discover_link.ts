@@ -50,16 +50,18 @@ export function useGetGenerateDiscoverLink({
       const paramKeysMap = new Map<string, string>();
       const params: Array<Record<string, any>> = [];
 
-      Object.keys(whereClause).forEach((key) => {
-        const paramKey = toESQLParamName(key);
-        paramKeysMap.set(key, paramKey);
-        params.push({ [paramKey]: whereClause[key] });
-      });
+      Object.keys(whereClause)
+        .filter((key) => whereClause[key] !== undefined)
+        .forEach((key) => {
+          const paramKey = toESQLParamName(key);
+          paramKeysMap.set(key, paramKey);
+          params.push({ [paramKey]: whereClause[key] });
+        });
 
       esql = _from
         .pipe(
           where(
-            Object.keys(whereClause)
+            Array.from(paramKeysMap.keys())
               .map((key) => `${key} == ?${paramKeysMap.get(key)}`)
               .join(' AND '),
             params

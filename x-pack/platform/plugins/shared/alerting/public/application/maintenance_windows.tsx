@@ -14,7 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MAINTENANCE_WINDOW_PATHS } from '../../common';
 import { useLicense } from '../hooks/use_license';
 import type { AlertingPluginStart } from '../plugin';

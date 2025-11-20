@@ -1,0 +1,220 @@
+openapi: 3.0.3
+info:
+  title: Automatic Import Integrations API endpoint
+  version: "1"
+paths:
+  /internal/automatic_import/integrations:
+    put:
+      summary: Creates a new integration with atleast one data stream.
+      operationId: CreateAutoImportIntegration
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Creates a new integration with atleast one data stream and returns the corresponding integration_id
+      tags:
+        - Automatic Import Integrations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - title
+                - description
+                - dataStreams
+              properties:
+                title:
+                  description: The title of the integration
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                description:
+                  description: The description of the integration
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                logo:
+                  description: The logo of the integration
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                  format: binary
+                dataStreams:
+                  description: The data streams of the integration
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - title
+                      - description
+                      - inputTypes
+                      - rawSamples
+                    properties:
+                      title:
+                        description: The title of the data stream
+                        $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                      description:
+                        description: The description of the data stream
+                        $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                      inputTypes:
+                        description: The input types of the data stream
+                        type: array
+                        minItems: 1
+                        items:
+                          $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/InputType"
+                      rawSamples:
+                        description: The raw samples of the data stream
+                        type: array
+                        minItems: 1
+                        items:
+                          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      responses:
+        200:
+          description: >-
+            The integration is created successfully and integration_id is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  integration_id:
+                    description: The integration id created in state.
+                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        400:
+          description: >-
+            The request is invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  error:
+                    description: The error message
+                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+    get:
+      summary: Retrieves all integrations.
+      operationId: GetAutoImportIntegrations
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Retrieves list of all integrations.
+      tags:
+        - Automatic Import Integrations
+      responses:
+        200:
+          description: >-
+            The list of all integrations is returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                additionalProperties: false
+                items:
+                  $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/Integration"
+  /internal/automatic_import/integrations/{integration_id}:
+    patch:
+      summary: Updates an existing integration.
+      operationId: UpdateAutoImportIntegration
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Updates integration settings and/or it's data streams.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                description:
+                  description: Integration description
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                logo:
+                  description: Integration logo image blob
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                  format: binary
+                dataStreams:
+                  description: The data streams of the integration
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      description:
+                        description: The description of the data stream
+                        $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                      inputTypes:
+                        description: The input types of the data stream
+                        type: array
+                        items:
+                          $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/InputType"
+                      rawSamples:
+                        description: The raw samples of the data stream
+                        type: array
+                        items:
+                          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      responses:
+        200:
+          description: Indicates integration has been updated correctly.
+        404:
+          description: Indicates the integration id was not found.
+    get:
+      summary: Retrieves an integration by its id.
+      operationId: GetAutoImportIntegration
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Retrieves an integration by its id.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      responses:
+        200:
+          description: >-
+            The integration is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - integration
+                properties:
+                  integration:
+                    $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/Integration"
+    delete:
+      summary: Deletes an integration by its id.
+      operationId: DeleteAutoImportIntegration
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Deletes an integration by its id.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      responses:
+        200:
+          description: The integration is deleted.
+        404:
+          description: The integration is not found.

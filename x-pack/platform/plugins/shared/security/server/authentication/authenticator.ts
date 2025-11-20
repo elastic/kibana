@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
+
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
@@ -44,6 +46,7 @@ import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } fro
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { securityTelemetry } from '../otel/instrumentation';
 import {
   getPrintableSessionId,
   type Session,
@@ -312,7 +315,7 @@ export class Authenticator {
 
     const { value: existingSessionValue } = await this.getSessionValue(request);
 
-    // Login attempt can target specific provider by its name (e.g. chosen at the Login Selector UI)
+    // Login attempt can target a specific provider by its name (e.g. chosen at the Login Selector UI)
     // or a group of providers with the specified type (e.g. in case of 3rd-party initiated login
     // attempts we may not know what provider exactly can handle that attempt and we have to try
     // every enabled provider of the specified type).
@@ -337,6 +340,7 @@ export class Authenticator {
     }
 
     for (const [providerName, provider] of providers) {
+      const startTime = performance.now();
       // Check if current session has been set by this provider.
       const ownsSession =
         existingSessionValue?.provider.name === providerName &&
@@ -347,6 +351,11 @@ export class Authenticator {
         attempt.value,
         ownsSession ? existingSessionValue!.state : null
       );
+
+      securityTelemetry.recordLoginDuration(performance.now() - startTime, {
+        providerType: provider.type,
+        outcome: authenticationResult.notHandled() ? 'failure' : 'success',
+      });
 
       if (!authenticationResult.notHandled()) {
         if (!ownsSession && existingSessionValue?.provider.name) {
@@ -359,6 +368,7 @@ export class Authenticator {
 
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          providerInstance: provider,
           authenticationResult,
           existingSessionValue,
         });
@@ -443,6 +453,7 @@ export class Authenticator {
 
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          providerInstance: provider,
           authenticationResult,
           existingSessionValue: existingSession.value,
         });
@@ -555,6 +566,7 @@ export class Authenticator {
     if (!authenticationResult.notHandled()) {
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
+        providerInstance: provider,
         authenticationResult,
         existingSessionValue,
       });
@@ -749,10 +761,12 @@ export class Authenticator {
     request: KibanaRequest,
     {
       provider,
+      providerInstance,
       authenticationResult,
       existingSessionValue,
     }: {
       provider: AuthenticationProvider;
+      providerInstance: BaseAuthenticationProvider;
       authenticationResult: AuthenticationResult;
       existingSessionValue: Readonly<SessionValue> | null;
     }
@@ -812,7 +826,6 @@ export class Authenticator {
 
     const isExistingSessionAuthenticated = isSessionAuthenticated(existingSessionValue);
     const isNewSessionAuthenticated = !!authenticationResult.user;
-
     const providerHasChanged = !!existingSessionValue && !ownsSession;
     const sessionHasBeenAuthenticated =
       !!existingSessionValue && !isExistingSessionAuthenticated && isNewSessionAuthenticated;
@@ -836,14 +849,23 @@ export class Authenticator {
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
-      this.logger.debug(
-        'Session is authenticated, existing unauthenticated session will be invalidated.'
-      );
-      await this.invalidateSessionValue({
-        request,
-        sessionValue: existingSessionValue,
-        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
-      });
+      if (
+        providerInstance.shouldInvalidateIntermediateSessionAfterLogin(existingSessionValue?.state)
+      ) {
+        this.logger.debug(
+          'Session is authenticated, existing unauthenticated session will be invalidated.'
+        );
+        await this.invalidateSessionValue({
+          request,
+          sessionValue: existingSessionValue,
+          skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
+        });
+      } else {
+        this.logger.info(
+          `Session is authenticated, but the existing unauthenticated session is still needed and won't be invalidated.`
+        );
+      }
+
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.warn('Username has changed, existing session will be invalidated.');
@@ -853,15 +875,25 @@ export class Authenticator {
 
     let userProfileId = existingSessionValue?.userProfileId;
 
-    // If authentication result includes user profile grant, we should try to activate user profile for this user and
+    // If the authentication result includes user profile grant, we should try to activate user profile for this user and
     // store user profile identifier in the session value.
     const shouldActivateProfile = authenticationResult.userProfileGrant;
 
     if (shouldActivateProfile) {
       this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
+
+      const startTime = performance.now();
+
       userProfileId = (
         await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
       ).uid;
+
+      const duration = performance.now() - startTime;
+
+      securityTelemetry.recordUserProfileActivationDuration(duration, {
+        providerType: provider.type,
+        outcome: 'success',
+      });
 
       if (
         existingSessionValue?.userProfileId &&
@@ -872,12 +904,22 @@ export class Authenticator {
     }
 
     let newSessionValue: Readonly<SessionValue> | null;
+
     if (!existingSessionValue) {
+      const startTime = performance.now();
+
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
         userProfileId,
         provider,
         state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+      });
+
+      const duration = performance.now() - startTime;
+
+      securityTelemetry.recordSessionCreationDuration(duration, {
+        providerType: provider.type,
+        outcome: 'success',
       });
 
       // Log successful `user_login` event if a new authenticated session was created or an existing session was overwritten and

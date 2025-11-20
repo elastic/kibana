@@ -86,6 +86,7 @@ export function registerPutDataStreamFailureStore({
   const bodySchema = schema.object({
     dataStreams: schema.arrayOf(schema.string()),
     dsFailureStore: schema.boolean(),
+    customRetentionPeriod: schema.maybe(schema.string()),
   });
 
   router.put(
@@ -100,21 +101,28 @@ export function registerPutDataStreamFailureStore({
       validate: { body: bodySchema },
     },
     async (context, request, response) => {
-      const { dataStreams, dsFailureStore } = request.body as TypeOf<typeof bodySchema>;
+      const { dataStreams, dsFailureStore, customRetentionPeriod } = request.body as TypeOf<
+        typeof bodySchema
+      >;
 
       const { client } = (await context.core).elasticsearch;
 
       try {
         // Configure failure store for each data stream
         const promises = dataStreams.map(async (dataStreamName) => {
-          const { headers } = await client.asCurrentUser.transport.request(
+          const { headers } = await client.asCurrentUser.indices.putDataStreamOptions(
             {
-              method: 'PUT',
-              path: `/_data_stream/${dataStreamName}/_options`,
-              body: {
-                failure_store: {
-                  enabled: dsFailureStore,
-                },
+              name: dataStreamName,
+              failure_store: {
+                enabled: dsFailureStore,
+                ...(customRetentionPeriod && dsFailureStore
+                  ? {
+                      lifecycle: {
+                        data_retention: customRetentionPeriod,
+                        enabled: true,
+                      },
+                    }
+                  : {}),
               },
             },
             { meta: true }

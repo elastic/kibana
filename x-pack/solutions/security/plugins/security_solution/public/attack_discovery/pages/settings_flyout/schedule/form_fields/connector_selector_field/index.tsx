@@ -37,6 +37,7 @@ export const ConnectorSelectorField: React.FC<Props> = React.memo(
           onConnectorSelected={noop}
           onConnectorIdSelected={onConnectorIdSelected}
           selectedConnectorId={connectorId}
+          explicitConnectorSelection={true}
         />
       </EuiFormRow>
     );

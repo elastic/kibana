@@ -295,7 +295,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".jira; fields: ({ issueType: string | null; priority: string | null; parent: string | null; } & { otherFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -517,7 +517,7 @@
               "section": "def-common.ConnectorTypes",
               "text": "ConnectorTypes"
             },
-            ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+            ".jira; fields: ({ issueType: string | null; priority: string | null; parent: string | null; } & { otherFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -587,7 +587,7 @@
               "section": "def-common.CaseStatuses",
               "text": "CaseStatuses"
             },
-            "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; } & { comments?: ((({ comment: string; type: ",
+            "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; total_observables: number | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; } & { comments?: ((({ comment: string; type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -1016,7 +1016,7 @@
           "label": "config",
           "description": [],
           "signature": [
-            "{ readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly incrementalId: Readonly<{} & { enabled: boolean; taskIntervalMinutes: number; taskStartDelayMinutes: number; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; readonly resilient: Readonly<{} & { additionalFields: Readonly<{} & { enabled: boolean; }>; }>; }"
+            "{ readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly incrementalId: Readonly<{} & { enabled: boolean; taskIntervalMinutes: number; taskStartDelayMinutes: number; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
           "deprecated": false,
@@ -1130,7 +1130,7 @@
           "label": "config",
           "description": [],
           "signature": [
-            "{ readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly incrementalId: Readonly<{} & { enabled: boolean; taskIntervalMinutes: number; taskStartDelayMinutes: number; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; readonly resilient: Readonly<{} & { additionalFields: Readonly<{} & { enabled: boolean; }>; }>; }"
+            "{ readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly incrementalId: Readonly<{} & { enabled: boolean; taskIntervalMinutes: number; taskStartDelayMinutes: number; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
           "deprecated": false,
@@ -2061,7 +2061,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".jira; fields: ({ issueType: string | null; priority: string | null; parent: string | null; } & { otherFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2131,7 +2131,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; } & { comments?: ((({ comment: string; type: ",
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; total_observables: number | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2273,7 +2273,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".jira; fields: ({ issueType: string | null; priority: string | null; parent: string | null; } & { otherFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2374,7 +2374,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".jira; fields: ({ issueType: string | null; priority: string | null; parent: string | null; } & { otherFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2467,7 +2467,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".jira; fields: ({ issueType: string | null; priority: string | null; parent: string | null; } & { otherFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2537,7 +2537,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; } & { comments?: ((({ comment: string; type: ",
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; total_observables: number | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2726,7 +2726,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".jira; fields: ({ issueType: string | null; priority: string | null; parent: string | null; } & { otherFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2796,7 +2796,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; } & { comments?: ((({ comment: string; type: ",
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; total_observables: number | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2923,7 +2923,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; name: string; } | { id: string; type: ",
+          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; otherFields?: string | null | undefined; } | null; name: string; } | { id: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2993,7 +2993,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; comments?: ({ comment: string; type: ",
+          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; totalObservables: number | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; comments?: ({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3141,7 +3141,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; name: string; } | { id: string; type: ",
+          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; otherFields?: string | null | undefined; } | null; name: string; } | { id: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3211,7 +3211,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; comments?: ({ comment: string; type: ",
+          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; totalObservables: number | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; totalEvents: number | undefined; version: string; comments?: ({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3645,7 +3645,7 @@
         "label": "UserActionFindResponse",
         "description": [],
         "signature": [
-          "{ userActions: (((({ type: \"description\"; payload: { description: string; }; } | { type: \"tags\"; payload: { tags: string[]; }; } | { type: \"title\"; payload: { title: string; }; } | { type: \"settings\"; payload: { settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; }; } | { type: \"status\"; payload: { status: ",
+          "{ userActions: (((({ type: \"description\"; payload: { description: string; }; } | { type: \"tags\"; payload: { tags: string[]; }; } | { type: \"title\"; payload: { title: string; }; } | { type: \"settings\"; payload: { settings: { syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; }; }; } | { type: \"status\"; payload: { status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -3779,7 +3779,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".jira; fields: ({ issueType: string | null; priority: string | null; parent: string | null; } & { otherFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3827,7 +3827,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
@@ -3849,7 +3849,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".jira; fields: ({ issueType: string | null; priority: string | null; parent: string | null; } & { otherFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",

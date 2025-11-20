@@ -257,6 +257,7 @@ export const SystemIndicesFlyout = ({
       <EuiFlyoutBody data-test-subj="flyoutDetails">
         {migrationStatus === 'NO_MIGRATION_NEEDED' && (
           <EuiCallOut
+            announceOnMount={false}
             title={i18nTexts.migrationNotNeeded}
             iconType="cheer"
             color="success"

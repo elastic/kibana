@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "strictNullChecks": false
@@ -45,6 +45,7 @@
     "@kbn/embeddable-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/css-utils",
+    "@kbn/visualizations-common",
   ],
   "exclude": [
     "target/**/*",

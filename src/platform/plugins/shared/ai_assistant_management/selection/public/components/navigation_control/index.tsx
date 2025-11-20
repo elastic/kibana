@@ -60,11 +60,11 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   const handleOpenModal = useCallback(() => setModalOpen(true), []);
   const handleSelect = useCallback((type: AIAssistantType) => setSelectedType(type), []);
 
-  const onApply = useCallback(() => {
+  const onApply = useCallback(async () => {
     setModalOpen(false);
-    coreStart.uiSettings.set(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, selectedType);
+    await coreStart.settings.client.set(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, selectedType);
     triggerOpenChat({ assistant: selectedType });
-  }, [selectedType, triggerOpenChat, coreStart.uiSettings]);
+  }, [selectedType, triggerOpenChat, coreStart.settings]);
 
   return (
     <>

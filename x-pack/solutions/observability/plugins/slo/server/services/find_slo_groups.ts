@@ -13,6 +13,7 @@ import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
+import { excludeStaleSummaryFilter } from './summary_utils';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -59,6 +60,7 @@ export class FindSLOGroups {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
+            ...excludeStaleSummaryFilter(settings, kqlQuery, true),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],

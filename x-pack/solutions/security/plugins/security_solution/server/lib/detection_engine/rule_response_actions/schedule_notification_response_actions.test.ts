@@ -42,8 +42,6 @@ describe('ScheduleNotificationResponseActions', () => {
   (endpointServiceMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(() => {
     return mockedResponseActionsClient;
   });
-  // @ts-expect-error assignment to readonly property
-  endpointServiceMock.experimentalFeatures.automatedProcessActionsEnabled = true;
 
   const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({
     osqueryCreateActionService: osqueryActionMock,
@@ -53,8 +51,6 @@ describe('ScheduleNotificationResponseActions', () => {
   describe('Osquery', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      // @ts-expect-error assignment to readonly property
-      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
     });
     const simpleQuery = 'select * from uptime';
     const defaultQueryParams = {
@@ -103,28 +99,6 @@ describe('ScheduleNotificationResponseActions', () => {
         expect.objectContaining({
           queries: expect.any(Array),
         }),
-        expect.objectContaining({
-          space: { id: DEFAULT_SPACE_ID },
-        })
-      );
-    });
-
-    it('should use default space id when space awareness is disabled', () => {
-      // @ts-expect-error assignment to readonly property
-      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-      const signals = getSignals();
-      scheduleNotificationResponseActions({
-        signals,
-        signalsCount: signals.length,
-        responseActions: [
-          {
-            actionTypeId: ResponseActionTypesEnum['.osquery'],
-            params: { ...defaultQueryParams, queries: [{ id: 'query-1', query: simpleQuery }] },
-          } as RuleResponseAction,
-        ],
-      });
-      expect(osqueryActionMock.create).toHaveBeenCalledWith(
-        expect.any(Object),
         expect.objectContaining({
           space: { id: DEFAULT_SPACE_ID },
         })
@@ -405,32 +379,7 @@ describe('ScheduleNotificationResponseActions', () => {
       expect(response).toBeUndefined();
     });
 
-    it('should use default space id when space awareness is disabled', async () => {
-      await scheduleNotificationResponseActions({
-        signals: getSignals(),
-        signalsCount: 2,
-        responseActions: [
-          {
-            actionTypeId: ResponseActionTypesEnum['.endpoint'],
-            params: {
-              command: 'isolate',
-              comment: 'test process comment',
-            },
-          },
-        ],
-      });
-
-      expect(endpointServiceMock.getInternalResponseActionsClient).toHaveBeenCalledWith(
-        expect.objectContaining({ spaceId: DEFAULT_SPACE_ID })
-      );
-    });
-
     describe('and when space awareness is enabled', () => {
-      beforeEach(() => {
-        // @ts-expect-error
-        endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
-      });
-
       it('should initialize a response action client with the alert space id when space awareness is enabled', async () => {
         const signals = getSignals();
         signals[0][SPACE_IDS] = ['foo'];

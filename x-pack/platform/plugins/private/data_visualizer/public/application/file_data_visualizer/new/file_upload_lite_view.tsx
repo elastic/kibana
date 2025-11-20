@@ -52,6 +52,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
     uploadStarted,
     onImportClick,
     canImport,
+    abortImport,
   } = useFileUploadContext();
 
   const existingIndexName = fileUploadManager.getExistingIndexName();
@@ -135,7 +136,6 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
                   index={i}
                   lite={true}
                   showFileContentPreview={flyoutContent?.showFileContentPreview}
-                  showFileSummary={flyoutContent?.showFileSummary}
                   showOverrideButton={false}
                 />
               ))}
@@ -163,6 +163,19 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
               <OverallUploadStatus />
 
               {uploadStatus.overallImportStatus === STATUS.FAILED ? <ImportErrors /> : null}
+
+              {uploadStatus.overallImportStatus === STATUS.STARTED ? (
+                <>
+                  <EuiSpacer />
+
+                  <EuiButton onClick={() => abortImport()}>
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.file.uploadView.cancelButton"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButton>
+                </>
+              ) : null}
             </>
           ) : null}
         </>

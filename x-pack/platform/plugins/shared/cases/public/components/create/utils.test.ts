@@ -15,6 +15,7 @@ import {
 import { ConnectorTypes, CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import { GENERAL_CASES_OWNER } from '../../../common';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('utils', () => {
   describe('getInitialCaseValue', () => {
@@ -194,16 +195,12 @@ describe('utils', () => {
       expect(
         createFormSerializer(
           [
-            {
+            createMockActionConnector({
               id: 'test',
               actionTypeId: '.test',
               name: 'My connector',
-              isDeprecated: false,
-              isPreconfigured: false,
               config: { foo: 'bar' },
-              isMissingSecrets: false,
-              isSystemAction: false,
-            },
+            }),
           ],
           casesConfigurationsMock,
           {

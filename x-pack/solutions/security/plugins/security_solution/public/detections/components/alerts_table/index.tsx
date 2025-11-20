@@ -23,6 +23,7 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
@@ -46,7 +47,6 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { CellValue, getColumns } from '../../configurations/security_solution_detections';
@@ -127,7 +127,7 @@ interface AlertTableProps
   extends SetOptional<SecurityAlertsTableProps, 'id' | 'ruleTypeIds' | 'query'> {
   inputFilters?: Filter[];
   tableType?: TableId;
-  sourcererScope?: SourcererScopeName;
+  sourcererScope?: PageScope;
   isLoading?: boolean;
   onRuleChange?: () => void;
   disableAdditionalToolbarControls?: boolean;
@@ -151,7 +151,7 @@ const emptyInputFilters: Filter[] = [];
 const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
-  sourcererScope = SourcererScopeName.detections,
+  sourcererScope = PageScope.alerts,
   isLoading,
   onRuleChange,
   disableAdditionalToolbarControls,
@@ -351,11 +351,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     ACTION_BUTTON_COUNT--;
   }
 
-  // remove space if add notes icon shouldn't be displayed
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-  if (!canReadNotes || securitySolutionNotesDisabled) {
+  if (!canReadNotes) {
     ACTION_BUTTON_COUNT--;
   }
 
@@ -383,7 +379,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   }, [alertsTableRef]);
 
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
-    SourcererScopeName.detections,
+    PageScope.alerts,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
@@ -462,10 +458,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     <FullWidthFlexGroupTable gutterSize="none">
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <EuiDataGridContainer hideLastPage={false}>
-          <AlertTableCellContextProvider
-            tableId={tableType}
-            sourcererScope={SourcererScopeName.detections}
-          >
+          <AlertTableCellContextProvider tableId={tableType} sourcererScope={PageScope.alerts}>
             <ResponseOpsAlertsTable<SecurityAlertsTableContext>
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table

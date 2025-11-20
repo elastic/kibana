@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Recognizer, RecognitionException } from 'antlr4';
-import { ErrorListener } from 'antlr4';
+import * as antlr4 from 'antlr4';
 import { getPosition } from './tokens';
 import type { EditorError } from '../types';
 
@@ -19,16 +18,17 @@ const SYNTAX_ERRORS_TO_IGNORE = [
 
 const REPLACE_DEV = /,{0,1}(?<!\s)\s*DEV_\w+\s*/g;
 const REPLACE_ORPHAN_COMMA = /{, /g;
-export class ESQLErrorListener extends ErrorListener<any> {
+
+export class ESQLErrorListener extends antlr4.ErrorListener<any> {
   protected errors: EditorError[] = [];
 
   syntaxError(
-    recognizer: Recognizer<any>,
+    recognizer: antlr4.Recognizer<any>,
     offendingSymbol: any,
     line: number,
     column: number,
     message: string,
-    error: RecognitionException | undefined
+    error: antlr4.RecognitionException | undefined
   ): void {
     // Remove any DEV_ tokens from the error message
     message = message.replace(REPLACE_DEV, '');

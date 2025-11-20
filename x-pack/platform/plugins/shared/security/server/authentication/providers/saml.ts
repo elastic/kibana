@@ -136,6 +136,30 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
+   * Determines whether the intermediate session state should be invalidated after a successful login.
+   *
+   * For SAML authentication, multiple login attempts can occur concurrently (e.g., when a user opens
+   * multiple tabs and each initiates a SAML handshake). Each login attempt generates a unique requestId
+   * that is stored in the `requestIdMap` within the provider state. When a SAML response is received
+   * and successfully processed, the corresponding requestId is removed from the map.
+   *
+   * If there are remaining requestIds in the state after a successful login, it indicates that other
+   * pending SAML login attempts are still in progress. In this case, the intermediate session should
+   * NOT be invalidated, as it needs to persist to handle the responses for those outstanding requests.
+   *
+   * Only when all requestIds have been processed and removed from the map (i.e., the map is empty or
+   * doesn't exist) should the intermediate session be invalidated.
+   *
+   * @param state Optional state object associated with the provider.
+   * @returns `true` if the intermediate session should be invalidated (no pending requests remain),
+   *          `false` if there are remaining requestIds and the session must be preserved.
+   */
+  public shouldInvalidateIntermediateSessionAfterLogin(state?: unknown) {
+    const samlState = state as ProviderState | undefined;
+    return !(samlState?.requestIdMap && Object.keys(samlState.requestIdMap).length > 0);
+  }
+
+  /**
    * Performs initial login request using SAMLResponse payload.
    * @param request Request instance.
    * @param attempt Login attempt description.
@@ -247,7 +271,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Invalidates SAML access token if it exists.
+   * Invalidates SAML/UIAM access token if it exists.
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
@@ -520,7 +544,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
   /**
    * Validates whether user retrieved using session is the same as the user defined in the SAML payload.
-   * If we can successfully exchange this SAML payload to access and refresh tokens, then we'll
+   * If we can successfully exchange this SAML payload for access and refresh tokens, then we'll
    * invalidate tokens from the existing session and use the new ones instead.
    *
    * The tokens are stored in the state and user is redirected to the default Kibana location, unless
@@ -599,6 +623,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       const user = await this.getUser(request, authHeaders);
+
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
@@ -625,8 +650,30 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     let refreshTokenResult: RefreshTokenResult;
+
     try {
-      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      if (this.useUiam && this.options.uiam) {
+        this.logger.debug('SAML provider is in UIAM mode, calling UIAM service to refresh tokens.');
+
+        const { accessToken, refreshToken } = await this.options.uiam?.refreshSessionTokens(
+          state.refreshToken
+        );
+
+        const uiamAuthenticatedUser = await this.getUser(
+          request,
+          this.options.uiam?.getAuthenticationHeaders(accessToken)!
+        );
+
+        this.logger.debug('SAML provider successfully refreshed tokens via UIAM service.');
+
+        refreshTokenResult = {
+          accessToken,
+          refreshToken,
+          authenticationInfo: uiamAuthenticatedUser,
+        };
+      } else {
+        refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      }
     } catch (err) {
       // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
       // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
@@ -656,6 +703,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
         },
+        ...(this.useUiam && {
+          userProfileGrant: this.options.uiam?.getUserProfileGrant(accessToken),
+        }),
         state: { accessToken, refreshToken, realm: this.realm || state.realm },
       }
     );

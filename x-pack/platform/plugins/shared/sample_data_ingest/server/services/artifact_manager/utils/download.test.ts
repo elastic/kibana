@@ -83,7 +83,7 @@ describe('download', () => {
     await download(mockFileUrl, mockFilePath, mockMimeType);
 
     expect(mkdir).toHaveBeenCalledWith(mockDirPath, { recursive: true });
-    expect(fetch).toHaveBeenCalledWith(mockFileUrl);
+    expect(fetch).toHaveBeenCalledWith(mockFileUrl, { signal: undefined });
     expect(createWriteStream).toHaveBeenCalledWith(mockFilePath);
     expect(pipeline).toHaveBeenCalledWith(mockResponseBody, expect.anything());
     expect(open).toHaveBeenCalledWith(mockFilePath, 'r');

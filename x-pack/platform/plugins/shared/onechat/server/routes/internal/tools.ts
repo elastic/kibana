@@ -169,7 +169,7 @@ export function registerInternalToolsRoutes({
       const currentSpace = (await ctx.onechat).spaces.getSpaceId();
 
       const { results } = await workflowsManagement.management.getWorkflows(
-        { page: request.query.page, limit: request.query.limit, enabled: [true] },
+        { page: request.query.page, size: request.query.limit, enabled: [true] },
         currentSpace
       );
 

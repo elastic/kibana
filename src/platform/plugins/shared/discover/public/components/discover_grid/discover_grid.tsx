@@ -31,6 +31,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
   query,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+  onFullScreenChange,
   ...props
 }) => {
   const { dataView, setExpandedDoc, renderDocumentView } = props;
@@ -85,6 +86,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
       paginationMode={paginationModeConfig.paginationMode}
       customGridColumnsConfiguration={customGridColumnsConfiguration}
+      shouldKeepAdHocDataViewImmutable
+      onFullScreenChange={onFullScreenChange}
       {...props}
     />
   );

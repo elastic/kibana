@@ -25,9 +25,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.spaces.defaultSolution=es', // Default to Search Solution
         `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
         `--uiSettings.overrides.agentBuilder:enabled=true`,
+        '--uiSettings.overrides.hideAnnouncements=true',
+        '--feature_flags.overrides.searchSolution.gettingStartedEnabled=true',
       ],
     },
     // load tests in the index file
     testFiles: [require.resolve('../index.feature_flags.ts')],
+    apps: {
+      ...searchFuncationalConfig.get('apps'),
+    },
   };
 }

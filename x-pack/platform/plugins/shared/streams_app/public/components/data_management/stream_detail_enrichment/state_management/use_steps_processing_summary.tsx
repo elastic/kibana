@@ -12,6 +12,7 @@ import {
   useStreamEnrichmentSelector,
 } from './stream_enrichment_state_machine';
 import { selectWhetherAnyProcessorBeforePersisted } from './stream_enrichment_state_machine/selectors';
+import { getActiveSimulationMode } from './stream_enrichment_state_machine/utils';
 
 export type StepsProcessingSummaryMap = Map<string, StepProcessingStatus>;
 type StepProcessingStatus =
@@ -21,7 +22,8 @@ type StepProcessingStatus =
   | 'successful'
   | 'disabled.processorBeforePersisted'
   | 'skipped.followsProcessorBeingEdited'
-  | 'skipped.createdInPreviousSimulation';
+  | 'skipped.createdInPreviousSimulation'
+  | 'condition';
 
 export const useStepsProcessingSummary = () => {
   const stepsContext = useStreamEnrichmentSelector((state) => {
@@ -44,8 +46,10 @@ export const useStepsProcessingSummary = () => {
     return snapshot.context.steps;
   });
 
-  const isAnyProcessorBeforePersisted = useStreamEnrichmentSelector((snapshot) =>
-    selectWhetherAnyProcessorBeforePersisted(snapshot.context)
+  const isAnyProcessorBeforePersisted = useStreamEnrichmentSelector(
+    (snapshot) =>
+      getActiveSimulationMode(snapshot.context) === 'partial' &&
+      selectWhetherAnyProcessorBeforePersisted(snapshot.context)
   );
 
   const stepsProcessingSummary = useMemo(() => {
@@ -77,6 +81,8 @@ export const useStepsProcessingSummary = () => {
         } else {
           summaryMap.set(stepId, 'successful');
         }
+      } else {
+        summaryMap.set(stepId, 'condition');
       }
     });
     return summaryMap;

@@ -33,7 +33,7 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
 
     /** for debug for now */
     sidebarWidth: 48,
-    footerHeight: 48,
+    footerHeight: 0,
     navigationWidth: 48,
   },
   project: {
@@ -46,7 +46,7 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
 
     /** for debug for now */
     sidebarWidth: 48,
-    footerHeight: 48,
+    footerHeight: 0,
     navigationWidth: 48,
   },
 };
@@ -72,14 +72,9 @@ export class GridLayout implements LayoutService {
     const chromeVisible$ = chrome.getIsVisible$();
     const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
-    const v2ProjectSideNavEnabled = this.params.projectSideNavVersion === 'v2';
 
     const classicChromeHeader = chrome.getClassicHeaderComponentForGridLayout();
-    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout({
-      // for v2 project side navigation we don't need to include the side navigation in the header,
-      // because it is rendered separately in the nav grid cell
-      includeSideNav: v2ProjectSideNavEnabled ? false : 'v1',
-    });
+    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout();
     const headerBanner = chrome.getHeaderBanner();
 
     // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
@@ -89,7 +84,9 @@ export class GridLayout implements LayoutService {
     const projectAppMenu = chrome.getProjectAppMenuComponent();
     const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
 
-    const projectSideNavigationV2 = chrome.getProjectSideNavV2ComponentForGridLayout();
+    const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
+
+    const footer$ = chrome.getGlobalFooter$();
 
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
@@ -97,6 +94,7 @@ export class GridLayout implements LayoutService {
       const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
       const chromeStyle = useObservable(chromeStyle$, 'classic');
       const hasAppMenu = useObservable(hasAppMenu$, false);
+      const footer: ReactNode = useObservable(footer$, null);
 
       const layoutConfig = layoutConfigs[chromeStyle];
 
@@ -107,7 +105,6 @@ export class GridLayout implements LayoutService {
       let applicationTopBar: ReactNode;
       // not implemented, just for debug
       let sidebar: ReactNode;
-      let footer: ReactNode;
 
       if (chromeVisible) {
         if (chromeStyle === 'classic') {
@@ -121,9 +118,7 @@ export class GridLayout implements LayoutService {
             applicationTopBar = projectAppMenu;
           }
 
-          if (v2ProjectSideNavEnabled) {
-            navigation = projectSideNavigationV2;
-          }
+          navigation = projectSideNavigation;
         }
       }
 
@@ -136,7 +131,6 @@ export class GridLayout implements LayoutService {
       if (debug) {
         if (chromeVisible) {
           if (!sidebar) sidebar = <SimpleDebugOverlay label="Debug Sidebar" />;
-          if (!footer) footer = <SimpleDebugOverlay label="Debug Footer" />;
           if (!navigation) {
             navigation = <SimpleDebugOverlay label="Debug Navigation" />;
           }

@@ -6,8 +6,12 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../../types';
-import type { State, XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from './types';
+import type {
+  TableSuggestionColumn,
+  VisualizationSuggestion,
+  TableSuggestion,
+} from '@kbn/lens-common';
+import type { XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from './types';
 import { visualizationSubtypes } from './types';
 import { generateId } from '../../id_generator';
 import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
@@ -79,7 +83,7 @@ describe('xy_suggestions', () => {
 
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
-  function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
+  function suggestionSubset(suggestion: VisualizationSuggestion<XYState>) {
     return (suggestion.state.layers as XYDataLayerConfig[]).map(
       ({ seriesType, splitAccessor, xAccessor, accessors }) => ({
         seriesType,

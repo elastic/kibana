@@ -342,7 +342,7 @@ beforeEach(() => {
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
 
-  taskManager.runSoon.mockResolvedValue({ id: '' });
+  taskManager.runSoon.mockResolvedValue({ id: '', forced: false });
   taskManager.schedule.mockResolvedValue({
     id: 'scheduled-task-id',
     scheduledAt: new Date(),

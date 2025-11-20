@@ -28,13 +28,13 @@ import {
   applyPaletteParams,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
-import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';

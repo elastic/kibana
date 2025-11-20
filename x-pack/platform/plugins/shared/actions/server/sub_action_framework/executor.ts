@@ -7,9 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { ZodError } from '@kbn/zod';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ExecutorType } from '../types';
 import type { ExecutorParams, SubActionConnectorType } from './types';
+import { formatZodError } from '../lib';
 
 const isFunction = (v: unknown): v is Function => {
   return typeof v === 'function';
@@ -89,10 +91,14 @@ export const buildExecutor = <
 
     if (action.schema) {
       try {
-        _subActionParams = action.schema.validate(subActionParams) as typeof subActionParams;
+        _subActionParams = action.schema.parse(subActionParams) as typeof subActionParams;
       } catch (reqValidationError) {
+        let errMessage = reqValidationError.message;
+        if (reqValidationError instanceof ZodError) {
+          errMessage = formatZodError(reqValidationError);
+        }
         throw createTaskRunError(
-          new Error(`Request validation failed (${reqValidationError})`),
+          new Error(`Request validation failed (${errMessage})`),
           TaskErrorSource.USER
         );
       }

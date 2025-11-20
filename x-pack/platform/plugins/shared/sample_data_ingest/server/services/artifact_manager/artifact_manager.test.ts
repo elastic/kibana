@@ -98,7 +98,8 @@ describe('ArtifactManager', () => {
       expect(downloadMock).toHaveBeenCalledWith(
         expectedArtifactUrl,
         expectedArtifactPath,
-        'application/zip'
+        'application/zip',
+        undefined
       );
       expect(openZipArchiveMock).toHaveBeenCalledWith(expectedArtifactPath);
       expect(validateArtifactArchiveMock).toHaveBeenCalledWith(mockArchive);
@@ -135,7 +136,8 @@ describe('ArtifactManager', () => {
       expect(downloadMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${expectedArtifactName}`,
         `${artifactsFolder}/${expectedArtifactName}`,
-        'application/zip'
+        'application/zip',
+        undefined
       );
     });
 

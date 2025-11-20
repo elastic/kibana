@@ -34,7 +34,7 @@ export const fetchDocuments = (
     scopedProfilesManager,
   }: CommonFetchParams
 ): Promise<RecordsFetchResponse> => {
-  const { sampleSize } = appStateContainer.getState();
+  const { sampleSize } = appStateContainer.get();
   searchSource.setField('size', getAllowedSampleSize(sampleSize, services.uiSettings));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);

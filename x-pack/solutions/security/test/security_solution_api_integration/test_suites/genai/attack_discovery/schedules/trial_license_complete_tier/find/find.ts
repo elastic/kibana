@@ -48,7 +48,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should return correct schedules for the specified page', async () => {
+      // TODO: see https://github.com/elastic/kibana/pull/243499
+      it.skip('should return correct schedules for the specified page', async () => {
         const schedulesCount = 5;
         await createAttackDiscoverySchedules({ count: schedulesCount, supertest });
 

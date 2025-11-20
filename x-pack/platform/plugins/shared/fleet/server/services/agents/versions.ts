@@ -68,6 +68,17 @@ export const getLatestAvailableAgentVersion = async ({
   return latestCompatibleVersion;
 };
 
+export const getLatestAgentAvailableDockerImageVersion = async ({
+  includeCurrentVersion = false,
+  ignoreCache = false,
+}: {
+  includeCurrentVersion?: boolean;
+  ignoreCache?: boolean;
+} = {}): Promise<string> => {
+  const fullVersion = await getLatestAvailableAgentVersion({ includeCurrentVersion, ignoreCache });
+  return fullVersion.replace('+', '.');
+};
+
 export const getAvailableVersions = async ({
   includeCurrentVersion,
   ignoreCache = false, // This is only here to allow us to ignore the cache in tests

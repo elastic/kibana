@@ -16,6 +16,7 @@ import { EditConnectorTabs } from '../../../../types';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -32,17 +33,13 @@ const executeConnectorResponse = {
   data: {},
 };
 
-const connector: ActionConnector = {
+const connector: ActionConnector = createMockActionConnector({
   id: '123',
   name: 'My test',
   actionTypeId: '.test',
   config: { testTextField: 'My text field' },
   secrets: { secretTextField: 'super secret' },
-  isDeprecated: false,
-  isPreconfigured: false,
-  isMissingSecrets: false,
-  isSystemAction: false,
-};
+});
 
 describe('EditConnectorFlyout', () => {
   let appMockRenderer: AppMockRenderer;

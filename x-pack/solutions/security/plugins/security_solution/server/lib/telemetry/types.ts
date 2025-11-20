@@ -523,6 +523,7 @@ export interface TelemetryConfiguration {
   ingest_pipelines_stats_config?: IngestPipelinesStatsConfiguration;
   health_diagnostic_config?: HealthDiagnosticConfiguration;
   query_config?: TelemetryQueryConfiguration;
+  encryption_public_keys?: Record<string, string>;
 }
 
 export interface IndicesMetadataConfiguration {

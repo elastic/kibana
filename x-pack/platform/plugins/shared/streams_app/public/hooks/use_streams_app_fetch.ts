@@ -113,6 +113,10 @@ export function showErrorToast(notifications: NotificationsStart, error: Error) 
     error.message = error.body.message;
   }
 
+  if (error instanceof AggregateError) {
+    error.message = error.errors.map((err) => err.message).join(', ');
+  }
+
   let requestUrl: string | undefined;
   if (
     'request' in error &&

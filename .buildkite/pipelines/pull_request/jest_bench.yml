@@ -1,0 +1,17 @@
+steps:
+  - command: .buildkite/scripts/steps/jest_bench.sh
+    label: 'Jest Bench'
+    agents:
+      machineType: n2-highmem-16
+      diskSizeGb: 100
+    key: jest_bench
+    timeout_in_minutes: 60
+    soft_fail: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot

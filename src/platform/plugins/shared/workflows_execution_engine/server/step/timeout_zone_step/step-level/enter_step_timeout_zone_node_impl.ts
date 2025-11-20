@@ -8,30 +8,28 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
-import type { NodeImplementation, MonitorableNode } from '../../node_implementation';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
 
 import { parseDuration } from '../../../utils';
-import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { MonitorableNode, NodeImplementation } from '../../node_implementation';
 
 export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private wfExecutionState: WorkflowExecutionState,
-    private stepContext: WorkflowContextManager
+    private stepExecutionRuntime: StepExecutionRuntime
   ) {}
 
   public async run(): Promise<void> {
-    await this.wfExecutionRuntimeManager.startStep();
-    this.wfExecutionRuntimeManager.enterScope();
+    await this.stepExecutionRuntime.startStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  public monitor(monitoredContext: WorkflowContextManager): Promise<void> {
+  public monitor(monitoredContext: StepExecutionRuntime): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
-    const stepExecution = this.wfExecutionState.getStepExecution(this.stepContext.stepExecutionId)!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const stepExecution = this.stepExecutionRuntime.stepExecution!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;

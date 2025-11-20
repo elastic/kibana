@@ -68,6 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
         total_alerts: -1,
         total_comments: -1,
         total_events: 0,
+        total_observables: 0,
         updated_at: '2023-04-19T08:14:18.693Z',
         updated_by: {
           email: null,

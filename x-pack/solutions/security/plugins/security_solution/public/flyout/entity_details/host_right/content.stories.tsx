@@ -43,7 +43,7 @@ export const Default = {
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 
@@ -73,7 +73,7 @@ export const NoObservedData = {
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 
@@ -103,7 +103,7 @@ export const Loading = {
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 

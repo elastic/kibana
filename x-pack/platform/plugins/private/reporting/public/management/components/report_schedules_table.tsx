@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Fragment, default as React, useCallback, useState } from 'react';
+import { Fragment, default as React, useCallback, useMemo, useState } from 'react';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiAvatar,
@@ -36,9 +36,12 @@ import { prettyPrintJobType } from '../../../common/job_utils';
 import { ReportScheduleIndicator } from './report_schedule_indicator';
 import { useBulkDisable } from '../hooks/use_bulk_disable';
 import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
-import { ScheduledReportFlyout } from './scheduled_report_flyout';
 import { TruncatedTitle } from './truncated_title';
-import { DisableReportConfirmationModal } from './disable_report_confirmation_modal';
+import { ReportDestructiveActionConfirmationModal } from './report_destructive_action_confirmation_modal';
+import { useBulkDelete } from '../hooks/use_bulk_delete';
+import { EditScheduledReportFlyout } from './edit_scheduled_report_flyout';
+import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
+import { ViewScheduledReportFlyout } from './view_scheduled_report_flyout';
 
 interface QueryParams {
   page: number;
@@ -46,12 +49,37 @@ interface QueryParams {
 }
 
 export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) => {
-  const { apiClient } = props;
-  const { http } = useKibana().services;
+  const {
+    application: { capabilities },
+    http,
+    userProfile: userProfileService,
+  } = useKibana().services;
+
+  const { data: userProfile } = useGetUserProfileQuery({
+    userProfileService,
+  });
+
+  const hasManageReportingPrivilege = useMemo(() => {
+    if (!capabilities) {
+      return false;
+    }
+    return capabilities.manageReporting.show === true;
+  }, [capabilities]);
+
+  const canEditSchedule = useCallback(
+    (item: ScheduledReportApiJSON) => {
+      if (hasManageReportingPrivilege) return true;
+
+      return item.created_by === userProfile?.user.username;
+    },
+    [hasManageReportingPrivilege, userProfile?.user.username]
+  );
 
   const [selectedReport, setSelectedReport] = useState<ScheduledReportApiJSON | null>(null);
   const [isConfigFlyOutOpen, setIsConfigFlyOutOpen] = useState<boolean>(false);
   const [isDisableModalConfirmationOpen, setIsDisableModalConfirmationOpen] =
+    useState<boolean>(false);
+  const [isDeleteModalConfirmationOpen, setIsDeleteModalConfirmationOpen] =
     useState<boolean>(false);
   const [queryParams, setQueryParams] = useState<QueryParams>({
     page: 1,
@@ -62,6 +90,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
   });
 
   const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable();
+  const { mutateAsync: bulkDeleteScheduledReports } = useBulkDelete();
 
   const sortedList = orderBy(scheduledList?.data || [], ['created_at'], ['desc']);
 
@@ -190,6 +219,19 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
       width: '8%',
       actions: [
         {
+          name: i18n.translate('xpack.reporting.schedules.table.editConfig.title', {
+            defaultMessage: 'Edit schedule config',
+          }),
+          description: i18n.translate('xpack.reporting.schedules.table.editConfig.description', {
+            defaultMessage: 'Edit schedule configuration details',
+          }),
+          'data-test-subj': (item) => `reportEditConfig-${item.id}`,
+          type: 'icon',
+          icon: 'calendar',
+          available: (item) => canEditSchedule(item),
+          onClick: (item) => setReportAndOpenConfigFlyout(item),
+        },
+        {
           name: i18n.translate('xpack.reporting.schedules.table.viewConfig.title', {
             defaultMessage: 'View schedule config',
           }),
@@ -199,6 +241,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           'data-test-subj': (item) => `reportViewConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
+          available: (item) => !canEditSchedule(item),
           onClick: (item) => setReportAndOpenConfigFlyout(item),
         },
         {
@@ -250,6 +293,21 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           icon: 'cross',
           onClick: (item) => setReportAndOpenDisableModal(item),
         },
+        {
+          name: i18n.translate('xpack.reporting.schedules.table.deleteSchedule.title', {
+            defaultMessage: 'Delete schedule',
+          }),
+          description: i18n.translate(
+            'xpack.reporting.schedules.table.deleteSchedule.description',
+            {
+              defaultMessage: 'Delete report schedule',
+            }
+          ),
+          'data-test-subj': (item) => `reportDeleteSchedule-${item.id}`,
+          type: 'icon',
+          icon: 'trash',
+          onClick: (item) => setReportAndOpenDeleteModal(item),
+        },
       ],
     },
   ];
@@ -275,19 +333,39 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     [setSelectedReport, setIsDisableModalConfirmationOpen]
   );
 
+  const setReportAndOpenDeleteModal = useCallback(
+    (report: ScheduledReportApiJSON) => {
+      setSelectedReport(report);
+      setIsDeleteModalConfirmationOpen(true);
+    },
+    [setSelectedReport]
+  );
+
   const unSetReportAndCloseDisableModal = useCallback(() => {
     setSelectedReport(null);
     setIsDisableModalConfirmationOpen(false);
   }, [setSelectedReport, setIsDisableModalConfirmationOpen]);
 
-  const onConfirm = useCallback(() => {
+  const unSetReportAndCloseDeleteModal = useCallback(() => {
+    setSelectedReport(null);
+    setIsDeleteModalConfirmationOpen(false);
+  }, [setSelectedReport, setIsDeleteModalConfirmationOpen]);
+
+  const onDisableConfirm = useCallback(() => {
     if (selectedReport) {
       bulkDisableScheduledReports({ ids: [selectedReport.id] });
     }
     unSetReportAndCloseDisableModal();
   }, [selectedReport, bulkDisableScheduledReports, unSetReportAndCloseDisableModal]);
 
-  const onCancel = useCallback(
+  const onDeleteConfirm = useCallback(() => {
+    if (selectedReport) {
+      bulkDeleteScheduledReports({ ids: [selectedReport.id] });
+    }
+    unSetReportAndCloseDeleteModal();
+  }, [selectedReport, unSetReportAndCloseDeleteModal, bulkDeleteScheduledReports]);
+
+  const onCancelDestructiveAction = useCallback(
     () => unSetReportAndCloseDisableModal(),
     [unSetReportAndCloseDisableModal]
   );
@@ -321,23 +399,37 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
         onChange={tableOnChangeCallback}
         rowProps={() => ({ 'data-test-subj': 'scheduledReportRow' })}
       />
-      {selectedReport && isConfigFlyOutOpen && (
-        <ScheduledReportFlyout
-          apiClient={apiClient}
-          onClose={() => {
-            unSetReportAndCloseConfigFlyout();
-          }}
-          scheduledReport={transformScheduledReport(selectedReport)}
-          availableReportTypes={[
-            {
-              id: selectedReport.jobtype,
-              label: prettyPrintJobType(selectedReport.jobtype),
-            },
-          ]}
-        />
-      )}
+      {selectedReport &&
+        isConfigFlyOutOpen &&
+        (canEditSchedule(selectedReport) ? (
+          <EditScheduledReportFlyout
+            onClose={() => {
+              unSetReportAndCloseConfigFlyout();
+            }}
+            scheduledReport={transformScheduledReport(selectedReport)}
+            availableReportTypes={[
+              {
+                id: selectedReport.jobtype,
+                label: prettyPrintJobType(selectedReport.jobtype),
+              },
+            ]}
+          />
+        ) : (
+          <ViewScheduledReportFlyout
+            onClose={() => {
+              unSetReportAndCloseConfigFlyout();
+            }}
+            scheduledReport={transformScheduledReport(selectedReport)}
+            availableReportTypes={[
+              {
+                id: selectedReport.jobtype,
+                label: prettyPrintJobType(selectedReport.jobtype),
+              },
+            ]}
+          />
+        ))}
       {selectedReport && isDisableModalConfirmationOpen ? (
-        <DisableReportConfirmationModal
+        <ReportDestructiveActionConfirmationModal
           title={i18n.translate('xpack.reporting.schedules.table.disableSchedule.modalTitle', {
             defaultMessage: 'Disable schedule',
           })}
@@ -345,8 +437,33 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
             defaultMessage:
               'Disabling this schedule will stop the generation of future exports. You will not be able to enable this schedule again.',
           })}
-          onCancel={onCancel}
-          onConfirm={onConfirm}
+          onCancel={onCancelDestructiveAction}
+          onConfirm={onDisableConfirm}
+          confirmButtonText={i18n.translate(
+            'xpack.reporting.schedules.table.disableSchedule.modalConfirmButtonText',
+            {
+              defaultMessage: 'Disable',
+            }
+          )}
+        />
+      ) : null}
+      {selectedReport && isDeleteModalConfirmationOpen ? (
+        <ReportDestructiveActionConfirmationModal
+          title={i18n.translate('xpack.reporting.schedules.table.deleteSchedule.modalTitle', {
+            defaultMessage: 'Delete schedule',
+          })}
+          message={i18n.translate('xpack.reporting.schedules.table.deleteSchedule.modalMessage', {
+            defaultMessage:
+              'Deleting this schedule will stop the generation of future exports. You will not be able to recover this schedule.',
+          })}
+          onCancel={onCancelDestructiveAction}
+          onConfirm={onDeleteConfirm}
+          confirmButtonText={i18n.translate(
+            'xpack.reporting.schedules.table.deleteSchedule.modalConfirmButtonText',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
         />
       ) : null}
     </Fragment>

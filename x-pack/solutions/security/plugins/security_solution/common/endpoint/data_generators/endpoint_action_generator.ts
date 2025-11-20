@@ -8,8 +8,12 @@
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { isProcessesAction } from '../service/response_actions/type_guards';
-import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
+import { isMemoryDumpAction, isProcessesAction } from '../service/response_actions/type_guards';
+import {
+  ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
+  ENDPOINT_ACTION_RESPONSES_DS,
+  ENDPOINT_ACTIONS_DS,
+} from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
 import {
   type ActionDetails,
@@ -313,6 +317,10 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             content: {
               code: 'ra_get-file_success',
               zip_size: 123,
+              downloadUri: ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(
+                `{action_id}`,
+                details.id
+              ).replace(`{file_id}`, agentId),
               contents: [
                 {
                   path: '/some/file/txt',
@@ -442,6 +450,24 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }, {} as Required<ActionDetails<GetProcessesActionOutputContent>>['outputs']);
     }
 
+    if (isMemoryDumpAction(details)) {
+      if (!details.outputs) {
+        details.outputs = {};
+      }
+
+      for (const agentId of details.agents) {
+        details.outputs[agentId] = {
+          type: 'json',
+          content: {
+            code: 'ra_memory-dump-success',
+            path: `/home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip`,
+            file_size: 23895729,
+            disk_free_space: 1234567000,
+          },
+        };
+      }
+    }
+
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<
       TOutputContent,
       TParameters
@@ -460,14 +486,17 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_get-file_error_upload-api-unreachable',
       'ra_get-file_error_upload-timeout',
       'ra_get-file_error_queue-timeout',
+      'ra_get-file_error_not-enough-free-space',
     ]);
   }
 
   randomScanFailureCode(): string {
     return this.randomChoice([
-      'ra_scan_error_scan-invalid-input',
+      'ra_scan_error_invalid-input',
       'ra_scan_error_not-found',
-      'ra_scan_error_scan-queue-quota',
+      'ra_scan_error_queue-quota',
+      'ra_scan_error_processing',
+      'ra_scan_error_processing-interrupted',
     ]);
   }
 

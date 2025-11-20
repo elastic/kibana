@@ -2022,6 +2022,22 @@
             "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.focusTrapProps",
+            "type": "Object",
+            "tags": [],
+            "label": "focusTrapProps",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "EuiFocusTrapProps",
+              ", \"shards\" | \"returnFocus\" | \"closeOnMouseup\"> | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2830,7 +2846,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"enabled\" | \"monitoring\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",

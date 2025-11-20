@@ -7,7 +7,8 @@
 
 import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, memo } from 'react';
+import { useGetActionDetails } from '../../../management/hooks/response_actions/use_get_action_details';
 import type {
   LogsEndpointActionWithHosts,
   ActionDetails,
@@ -65,9 +66,8 @@ export const EndpointResponseActionResults = ({
     >
       {canAccessEndpointActionsLogManagement ? (
         expandedAction ? (
-          <ActionsLogExpandedTray
-            action={expandedAction}
-            fromAlertWorkaround
+          <ResponseActionDetailsWorkaround
+            actionId={expandedAction.id}
             data-test-subj={`response-results-${hostName}`}
           />
         ) : (
@@ -93,3 +93,30 @@ const getCommentText = (action: ActionDetails): string => {
 
   return ENDPOINT_COMMANDS.tried(action.command);
 };
+
+// Tech Debt - see team internal issue #9822
+// This is a workaround to fix the issue where the action details record is missing critical fields.
+// Because Automated Response Actions started to use the same component used in the action history log
+// we need to ensure that the action details records is actually complete - thus we make an API call here
+// to retrieve it.
+// This should all be removed once issue 9822 is addressed and we have a single common `<ResponseActionDetails>`
+// component that should be used everywhere.
+const ResponseActionDetailsWorkaround = memo<{
+  actionId: string;
+  'data-test-subj'?: string;
+}>(({ actionId, 'data-test-subj': dataTestSubj }) => {
+  const { data: actionDetailsApiResult, isLoading } = useGetActionDetails(actionId);
+
+  if (isLoading) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (actionDetailsApiResult?.data) {
+    return (
+      <ActionsLogExpandedTray action={actionDetailsApiResult.data} data-test-subj={dataTestSubj} />
+    );
+  }
+
+  return null;
+});
+ResponseActionDetailsWorkaround.displayName = 'ResponseActionDetailsWorkaround';

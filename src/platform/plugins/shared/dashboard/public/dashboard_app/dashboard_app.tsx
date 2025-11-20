@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DashboardState } from '../../common/types';
 import type { DashboardApi, DashboardCreationOptions } from '..';
-import { DASHBOARD_APP_ID } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
@@ -69,7 +69,7 @@ export function DashboardApp({
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
-  const incomingEmbeddable = useMemo(() => {
+  const incomingEmbeddables = useMemo(() => {
     return embeddableService
       .getStateTransfer()
       .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
@@ -78,7 +78,7 @@ export function DashboardApp({
   useEffect(() => {
     let canceled = false;
     // show dashboard when there is an incoming embeddable
-    if (incomingEmbeddable) {
+    if (incomingEmbeddables) {
       return;
     }
 
@@ -95,7 +95,7 @@ export function DashboardApp({
     return () => {
       canceled = true;
     };
-  }, [incomingEmbeddable]);
+  }, [incomingEmbeddables]);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
 
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
@@ -174,7 +174,7 @@ export function DashboardApp({
     };
 
     return Promise.resolve<DashboardCreationOptions>({
-      getIncomingEmbeddable: () => incomingEmbeddable,
+      getIncomingEmbeddables: () => incomingEmbeddables,
 
       // integrations
       useSessionStorageIntegration: true,
@@ -210,7 +210,7 @@ export function DashboardApp({
     validateOutcome,
     getScopedHistory,
     kbnUrlStateStorage,
-    incomingEmbeddable,
+    incomingEmbeddables,
   ]);
 
   useEffect(() => {

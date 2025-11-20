@@ -392,8 +392,7 @@
             "section": "def-public.NoDataViewsPromptKibanaDependencies",
             "text": "NoDataViewsPromptKibanaDependencies"
           },
-          " & KibanaDependencies & ",
-          "RedirectAppLinksKibanaDependencies"
+          " & KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
         "deprecated": false,
@@ -433,8 +432,6 @@
             "section": "def-public.Services",
             "text": "Services"
           },
-          " & ",
-          "RedirectAppLinksServices",
           " & ",
           {
             "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",

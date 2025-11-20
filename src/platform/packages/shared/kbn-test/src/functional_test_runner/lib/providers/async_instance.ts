@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { instrumentProvider } from './instrument_provider';
+
 const INITIALIZING = Symbol('async instance initializing');
 const asyncInitFns = new WeakSet();
 
@@ -27,7 +29,12 @@ export const createAsyncInstance = <T>(
   const initPromise = promiseForValue.then((v) => (instance = v));
   const loadingTarget = {
     init() {
-      return initPromise;
+      return initPromise.then((val) => {
+        if (typeof val === 'object') {
+          instrumentProvider(name, val as object);
+        }
+        return val;
+      });
     },
   };
   asyncInitFns.add(loadingTarget.init);

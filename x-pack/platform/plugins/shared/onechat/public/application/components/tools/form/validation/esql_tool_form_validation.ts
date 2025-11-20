@@ -126,7 +126,7 @@ export const esqlFormValidationSchema = z
       .min(1, { message: esqlI18nMessages.esql.requiredError })
       .refine(
         async (esql) => {
-          const result = await validateQuery(esql, { ignoreOnMissingCallbacks: true });
+          const result = await validateQuery(esql);
           return result.errors.length === 0;
         },
         { message: esqlI18nMessages.esql.esqlError }

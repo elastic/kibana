@@ -41,3 +41,4 @@ export { getBasicAuthHeader, combineHeadersWithBasicAuthHeader } from './get_bas
 export { mergeConfigHeadersWithSecretHeaders } from './merge_config_headers_with_secret_headers';
 export { tryCatch } from './try_catch';
 export type { TelemetryMetadata } from './token_tracking/gen_ai_token_tracking';
+export { formatZodError } from './format_zod_error';

@@ -92,7 +92,12 @@ function ActiveTour({ state, tourManager }: { state: TourState; tourManager: Tou
           </EuiButton>
         ) : (
           [
-            <EuiButtonEmpty size="s" color="text" onClick={handleSkip}>
+            <EuiButtonEmpty
+              size="s"
+              color="text"
+              onClick={handleSkip}
+              data-test-subj="nav-tour-skip-button"
+            >
               <FormattedMessage
                 id="core.chrome.navigationTour.skipTourButton"
                 defaultMessage="Skip tour"

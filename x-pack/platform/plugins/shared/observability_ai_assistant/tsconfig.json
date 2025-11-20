@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -61,7 +61,8 @@
     "@kbn/llm-tasks-plugin",
     "@kbn/product-doc-base-plugin",
     "@kbn/inference-endpoint-plugin",
-    "@kbn/spaces-utils"
+    "@kbn/spaces-utils",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": ["target/**/*"]
 }

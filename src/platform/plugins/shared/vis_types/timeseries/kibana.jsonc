@@ -21,7 +21,8 @@
       "dataViews",
       "fieldFormats",
       "usageCollection",
-      "unifiedSearch"
+      "unifiedSearch",
+      "expressionXY",
     ],
     "optionalPlugins": [
       "home"

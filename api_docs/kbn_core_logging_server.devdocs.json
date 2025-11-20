@@ -191,7 +191,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\""
+              "\"error\" | \"info\" | \"all\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\""
             ],
             "path": "src/core/packages/logging/server/src/logger.ts",
             "deprecated": false,

@@ -135,8 +135,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const conversationIdToDelete = conversationIds[0];
       await onechat.deleteConversation(conversationIdToDelete);
 
-      // Assert the deleted conversation is no longer in history
-      expect(await onechat.isConversationInHistory(conversationIdToDelete)).to.be(false);
+      // Wait for the deleted conversation to disappear from history (wait for refetch to complete)
+      await retry.try(async () => {
+        const isInHistory = await onechat.isConversationInHistory(conversationIdToDelete);
+        expect(isInHistory).to.be(false);
+      });
 
       // Assert the remaining conversations are still in history
       expect(await onechat.isConversationInHistory(conversationIds[1])).to.be(true);

@@ -35,9 +35,15 @@ export const SampleDataActionButton = ({
   hasRequiredLicense = false,
 }: SampleDataActionButtonProps) => {
   const usageTracker = useUsageTracker();
-  const { ingestSampleData, isLoading } = useIngestSampleData();
+  const { ingestSampleData } = useIngestSampleData();
   const { share, uiSettings } = useKibana().services;
-  const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
+  const {
+    isInstalled,
+    indexName,
+    dashboardId,
+    isLoading: isStatusLoading,
+    isInstalling,
+  } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
   const isAgentBuilderAvailable = uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false);
 
@@ -173,7 +179,7 @@ export const SampleDataActionButton = ({
       iconType="download"
       size="s"
       data-test-subj="installSampleBtn"
-      isLoading={isLoading}
+      isLoading={isInstalling}
       disabled={!hasRequiredLicense}
       onClick={onInstallButtonClick}
     >

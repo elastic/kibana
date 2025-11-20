@@ -84,9 +84,9 @@ export const useCurrentTabContext = () => {
   return context;
 };
 
-export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector) => {
+export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector, equalityFn) => {
   const { currentTabId } = useCurrentTabContext();
-  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)));
+  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)), equalityFn);
 };
 
 export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(

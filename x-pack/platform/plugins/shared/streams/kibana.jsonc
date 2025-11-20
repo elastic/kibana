@@ -11,7 +11,9 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
+      "actions",
       "alerting",
+      "console",
       "data",
       "encryptedSavedObjects",
       "features",

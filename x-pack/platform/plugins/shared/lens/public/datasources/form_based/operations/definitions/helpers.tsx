@@ -10,24 +10,20 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
-import type { TextBasedLayerColumn } from '../../esql_layer/types';
-import type { IndexPattern, IndexPatternField } from '../../../../types';
-import {
-  type FieldBasedOperationErrorMessage,
-  type GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '.';
 import type {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
+  GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
-} from './column_types';
-import type {
-  FormBasedLayer,
-  FormBasedPersistedState,
+  TextBasedLayerColumn,
   FormulaIndexPatternColumn,
   LastValueIndexPatternColumn,
-} from '../../types';
+  FormBasedLayer,
+  FormBasedPersistedState,
+  IndexPattern,
+  IndexPatternField,
+} from '@kbn/lens-common';
+import { type FieldBasedOperationErrorMessage, operationDefinitionMap } from '.';
 import { hasField } from '../../pure_utils';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../../../../user_messages_ids';
 import { getReferencedColumnIds } from '../layer_helpers';

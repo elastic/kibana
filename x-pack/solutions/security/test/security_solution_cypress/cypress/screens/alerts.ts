@@ -57,8 +57,6 @@ export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
-export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
-
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
@@ -138,8 +136,6 @@ export const SHOW_TOP_N_DROPDOWN =
 export const SHOW_TOP_N_DROPDOWN_ALERT_OPTION = '[data-test-subj="option-alert"]';
 
 export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
-
-export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
 
 /**
  * Alerts KPIs
@@ -249,9 +245,6 @@ export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatar
 
 export const ALERT_ASIGNEES_COLUMN =
   '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.workflow_assignee_ids"]';
-
-export const ALERT_ASSIGNEES_COUNT_BADGE =
-  '[data-test-subj="securitySolutionUsersAvatarsCountBadge"]';
 
 export const FILTER_BY_ASSIGNEES_BUTTON = '[data-test-subj="filter-popover-button-assignees"]';
 

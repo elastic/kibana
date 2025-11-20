@@ -126,6 +126,7 @@ export const IndexSearchPattern: React.FC = () => {
           <EuiSpacer size="m" />
           {
             <EuiCallOut
+              announceOnMount
               size="s"
               title={i18n.translate('xpack.onechat.tools.indexPattern.pattern.matchSuccess', {
                 defaultMessage:

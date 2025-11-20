@@ -21,7 +21,7 @@ import { buildHostNamesFilter, type HostItem } from '../../../../common/search_s
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { hostIdRenderer } from '../../../timelines/components/field_renderers/field_renderers';
+import { hostIdRenderer } from '../../../explore/network/components/field_renderers/field_renderers';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,

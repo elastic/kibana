@@ -62,6 +62,24 @@ describe('"esql" tag query construction', () => {
     expect(query.print()).toBe('FROM index | WHERE foo > ?hole | LIMIT ?closure');
     expect(query.getParams()).toEqual({ hole: 42, closure: 10 });
   });
+
+  test('can construct a query with SET header instruction', () => {
+    const query = esql`SET a = 123; FROM index | LIMIT 10`;
+
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print('basic')).toBe('SET a = 123; FROM index | LIMIT 10');
+    expect(query.ast.header).toBeDefined();
+    expect(query.ast.header).toHaveLength(1);
+  });
+
+  test('can construct a query with multiple SET header instructions', () => {
+    const query = esql`SET a = 123; SET b = "test"; FROM index | WHERE field > ?a`;
+
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print('basic')).toContain('SET a = 123');
+    expect(query.print('basic')).toContain('SET b = "test"');
+    expect(query.ast.header).toHaveLength(2);
+  });
 });
 
 describe('query construction from string', () => {

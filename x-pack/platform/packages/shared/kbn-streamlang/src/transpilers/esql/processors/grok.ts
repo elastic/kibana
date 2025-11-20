@@ -11,6 +11,7 @@ import type { GrokProcessor } from '../../../../types/processors';
 import { parseMultiGrokPatterns } from '../../../../types/utils/grok_patterns';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, castFieldsToGrokTypes, buildWhereCondition } from './common';
+import { unwrapPatternDefinitions } from '../../../../types/utils/grok_pattern_definitions';
 
 /**
  * Converts a Streamlang GrokProcessor into a list of ES|QL AST commands.
@@ -56,13 +57,13 @@ import { buildIgnoreMissingFilter, castFieldsToGrokTypes, buildWhereCondition } 
 export function convertGrokProcessorToESQL(processor: GrokProcessor): ESQLAstCommand[] {
   const {
     from,
-    patterns, // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     ignore_missing = false, // default mirrors ingest grok behavior
     where,
   } = processor;
 
   const fromColumn = Builder.expression.column(from);
-  const primaryPattern = patterns[0];
+  const primaryPattern = unwrapPatternDefinitions(processor)[0];
   const grokCommand = buildGrokCommand(fromColumn, primaryPattern);
   const commands: ESQLAstCommand[] = [];
 

@@ -8,7 +8,7 @@
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-export type EventFilterItemAndAdvancedTrustedAppsEntries = Array<{
+export type ExceptionEntries = Array<{
   field: string;
   value: string;
   operator: 'included' | 'excluded';

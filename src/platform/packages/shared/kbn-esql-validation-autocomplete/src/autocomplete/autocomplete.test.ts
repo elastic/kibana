@@ -89,21 +89,22 @@ describe('autocomplete', () => {
   });
 
   const sourceCommands = ['row', 'from', 'show', 'ts'];
+  const headerCommands = ['set'];
 
-  describe('New command', () => {
-    const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-      'FROM logs*',
-      'dateField',
-      'textField'
-    );
-    testSuggestions('/', [
+  const getSourceAndHeaderCommands = () => {
+    return [
+      ...headerCommands.map((name) => name.toUpperCase() + ' '),
       ...sourceCommands.map((name) => name.toUpperCase() + ' '),
-      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
-      ...recommendedQuerySuggestions.map((q) => q.queryString),
-    ]);
-    const commands = esqlCommandRegistry
+    ];
+  };
+
+  const getNonSourceHeaderCommands = () => {
+    return esqlCommandRegistry
       ?.getAllCommands()
-      .filter(({ name, metadata }) => !sourceCommands.includes(name) && !metadata.hidden)
+      .filter(
+        ({ name, metadata }) =>
+          !sourceCommands.includes(name) && !headerCommands.includes(name) && !metadata.hidden
+      )
       .map(({ name, metadata }) => {
         if (metadata.types && metadata.types.length) {
           const cmds: string[] = [];
@@ -117,6 +118,21 @@ describe('autocomplete', () => {
         }
       })
       .flat();
+  };
+
+  describe('New command', () => {
+    const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+      'FROM logs*',
+      'dateField',
+      'textField'
+    );
+
+    testSuggestions('/', [
+      ...getSourceAndHeaderCommands(),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
+      ...recommendedQuerySuggestions.map((q) => q.queryString),
+    ]);
+    const commands = getNonSourceHeaderCommands();
 
     testSuggestions('from a | /', commands);
     testSuggestions('from a metadata _id | /', commands);
@@ -232,27 +248,12 @@ describe('autocomplete', () => {
       'textField'
     );
     testSuggestions('f/', [
-      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} `),
+      ...getSourceAndHeaderCommands().map(attachTriggerCommand),
       ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
-    const commands = esqlCommandRegistry
-      ?.getAllCommands()
-      .filter(({ name, metadata }) => !sourceCommands.includes(name) && !metadata.hidden)
-      .map(({ name, metadata }) => {
-        if (metadata.types && metadata.types.length) {
-          const cmds: string[] = [];
-          for (const type of metadata.types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
-            cmds.push(cmd);
-          }
-          return cmds;
-        } else {
-          return name.toUpperCase() + ' ';
-        }
-      })
-      .flat();
+    const commands = getNonSourceHeaderCommands();
 
     // pipe command
     testSuggestions('FROM k | E/', commands);
@@ -435,8 +436,9 @@ describe('autocomplete', () => {
         'boolean',
         {
           operators: true,
+          skipAssign: true,
         },
-        undefined,
+        ['keyword'],
         ['and', 'or', 'not']
       )
     );
@@ -473,27 +475,12 @@ describe('autocomplete', () => {
     );
     // Source command
     testSuggestions('F/', [
-      ...['FROM ', 'ROW ', 'SHOW ', 'TS '].map(attachTriggerCommand),
+      ...getSourceAndHeaderCommands().map(attachTriggerCommand),
       ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
-    const commands = esqlCommandRegistry
-      ?.getAllCommands()
-      .filter(({ name, metadata }) => !sourceCommands.includes(name) && !metadata.hidden)
-      .map(({ name, metadata }) => {
-        if (metadata.types && metadata.types.length) {
-          const cmds: string[] = [];
-          for (const type of metadata.types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
-            cmds.push(cmd);
-          }
-          return cmds;
-        } else {
-          return name.toUpperCase() + ' ';
-        }
-      })
-      .flat();
+    const commands = getNonSourceHeaderCommands();
 
     // Pipe command
     testSuggestions(
@@ -586,6 +573,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM /',
         [
+          withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
         ],
@@ -655,6 +643,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1, index2/',
         [
+          withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({
             text: 'index2 | ',
             filterText: 'index2',
@@ -865,7 +854,7 @@ describe('autocomplete', () => {
       ),
     ]);
 
-    // WHERE argument comparison
+    // WHERE argument comparison (keyword fields get only string operators)
     testSuggestions(
       'FROM a | WHERE keywordField /',
       getFunctionSignaturesByReturnType(
@@ -873,6 +862,7 @@ describe('autocomplete', () => {
         'boolean',
         {
           operators: true,
+          skipAssign: true,
         },
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
@@ -1052,6 +1042,10 @@ describe('autocomplete', () => {
         // );
       });
     });
+  });
+
+  describe('IN operator with lists', () => {
+    testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ', ' }]);
   });
 
   describe('Replacement ranges are attached when needed', () => {

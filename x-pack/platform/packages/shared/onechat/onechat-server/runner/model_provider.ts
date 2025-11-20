@@ -6,7 +6,11 @@
  */
 
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { BoundInferenceClient, InferenceConnector } from '@kbn/inference-common';
+import type {
+  BoundInferenceClient,
+  InferenceConnector,
+  ChatCompletionTokenCount,
+} from '@kbn/inference-common';
 
 /**
  * Represents a model that can be used within the onechat framework (e.g. tools).
@@ -33,10 +37,7 @@ export interface ScopedModel {
  */
 export interface ModelProvider {
   /**
-   * Returns the default model to be used for LLM tasks.
-   *
-   * Will use Elasticsearch LLMs by default if present, otherwise will pick
-   * the first GenAI compatible connector.
+   * Returns the model used for LLM tasks in the current round.
    */
   getDefaultModel: () => Promise<ScopedModel>;
   /**
@@ -46,4 +47,17 @@ export interface ModelProvider {
    * is not a GenAI connector.
    */
   getModel: (options: { connectorId: string }) => Promise<ScopedModel>;
+  /**
+   * Returns the current usage stats for the model provider.
+   */
+  getUsageStats: () => ModelProviderStats;
+}
+
+export interface ModelCallInfo {
+  connectorId: string;
+  tokens?: ChatCompletionTokenCount;
+}
+
+export interface ModelProviderStats {
+  calls: ModelCallInfo[];
 }

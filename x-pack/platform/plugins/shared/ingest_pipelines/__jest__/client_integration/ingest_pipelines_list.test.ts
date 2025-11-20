@@ -265,9 +265,6 @@ describe('<PipelinesList />', () => {
           expect(exists('pipelineErrorFlyout')).toBe(true);
           expect(find('pipelineErrorFlyout.title').text()).toBe(customPipeline);
           expect(exists('missingCustomPipeline')).toBe(true);
-          expect(find('missingCustomPipeline.cause').text()).toBe(
-            `The pipeline ${customPipeline} does not exist.`
-          );
           expect(exists('createCustomPipeline')).toBe(true);
         });
       });

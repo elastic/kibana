@@ -31,8 +31,10 @@ describe('Workflows Management UI Settings', () => {
         name: expect.any(String),
         schema: expect.any(Object),
         value: false,
-        readonly: true,
-        readonlyMode: 'ui',
+        readonly: false,
+        technicalPreview: true,
+        requiresPageReload: true,
+        category: expect.any(Array),
       },
     });
   });

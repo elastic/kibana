@@ -33,6 +33,7 @@ export interface TraceWaterfallContextProps {
   colorBy: WaterfallLegendType;
   showLegend: boolean;
   serviceName?: string;
+  message?: string;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -70,6 +71,7 @@ interface Props {
   isEmbeddable: boolean;
   showLegend: boolean;
   serviceName?: string;
+  isFiltered?: boolean;
 }
 
 export function TraceWaterfallContextProvider({
@@ -84,10 +86,12 @@ export function TraceWaterfallContextProvider({
   isEmbeddable,
   showLegend,
   serviceName,
+  isFiltered,
 }: Props) {
-  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
+  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState, message } =
     useTraceWaterfall({
       traceItems,
+      isFiltered,
     });
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
@@ -115,6 +119,7 @@ export function TraceWaterfallContextProvider({
         colorBy,
         showLegend,
         serviceName,
+        message,
       }}
     >
       {children}

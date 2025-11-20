@@ -194,7 +194,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(1)oa(1)'
       );
-      await alertsPage.flyout.assertPreviewPanelIsOpen('alert');
+      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      await alertsPage.flyout.assertPreviewPanelIsOpen('group');
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
     });
 
     it('show related alerts', async () => {
@@ -222,7 +224,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'a(admin6@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole2)oe(0)oa(0)'
       );
-      await alertsPage.flyout.assertPreviewPanelIsOpen('alert');
+      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      await alertsPage.flyout.assertPreviewPanelIsOpen('group');
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
   });
 }

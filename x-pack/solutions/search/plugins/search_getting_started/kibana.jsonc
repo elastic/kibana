@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-getting-started",
+  "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
+  "plugin": {
+    "id": "searchGettingStarted",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchGettingStarted"
+    ],
+    "requiredPlugins": [
+      "share"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "searchNavigation",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

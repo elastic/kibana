@@ -7,27 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { YAMLMap } from 'yaml';
+import { isMap, isScalar } from 'yaml';
+import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { monaco } from '@kbn/monaco';
-import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
+import { isEnhancedInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
-import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
 import { getAllConnectors } from '../../../../../common/schema';
+import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
 import type {
-  HoverContext,
   ActionContext,
   ActionInfo,
   ConnectorExamples,
+  HoverContext,
 } from '../monaco_providers/provider_interfaces';
-
-// Cache for connectors (they don't change during runtime)
-let allConnectorsCache: any[] | null = null;
-
-function getCachedAllConnectors(): any[] {
-  if (allConnectorsCache === null) {
-    allConnectorsCache = getAllConnectors(); // Now uses lazy loading with require()
-  }
-  return allConnectorsCache;
-}
 
 /**
  * Monaco connector handler for Elasticsearch APIs
@@ -35,14 +28,14 @@ function getCachedAllConnectors(): any[] {
  */
 export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   private readonly http?: HttpSetup;
-  private readonly notifications?: NotificationsSetup;
+  private readonly notifications?: NotificationsStart;
   // private readonly esHost?: string;
   // private readonly kibanaHost?: string;
 
   constructor(
     options: {
       http?: HttpSetup;
-      notifications?: NotificationsSetup;
+      notifications?: NotificationsStart;
       // esHost?: string;
       // kibanaHost?: string;
     } = {}
@@ -207,22 +200,27 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
   /**
    * Extract 'with' parameters from step node
    */
-  private extractWithParams(stepNode: any): Record<string, any> {
-    const withParams: Record<string, any> = {};
+  private extractWithParams(stepNode: YAMLMap): Record<string, unknown> {
+    const withParams: Record<string, unknown> = {};
 
     try {
-      if (stepNode?.items) {
-        for (const item of stepNode.items) {
-          if (item.key?.value === 'with' && item.value?.items) {
-            for (const withItem of item.value.items) {
-              if (withItem.key?.value) {
-                const key = withItem.key.value;
-                const value = withItem.value?.value || withItem.value?.toJSON?.() || withItem.value;
-                withParams[key] = value;
-              }
+      if (!stepNode.items) {
+        return withParams;
+      }
+
+      for (const item of stepNode.items) {
+        if (isScalar(item.key) && item.key.value === 'with' && isMap(item.value)) {
+          for (const withItem of item.value.items) {
+            if (isScalar(withItem.key) && withItem.key.value) {
+              const key = withItem.key.value;
+              const value =
+                (isScalar(withItem.value) && withItem.value.value) ||
+                (isMap(withItem.value) && withItem.value.toJSON?.()) ||
+                withItem.value;
+              withParams[key as string] = value;
             }
-            break;
           }
+          break;
         }
       }
     } catch (error) {
@@ -237,7 +235,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
    */
   private generateConsoleFormat(
     requestInfo: { method: string; url: string; data?: string[] },
-    withParams: Record<string, any>
+    withParams: Record<string, unknown>
   ): string {
     const lines = [`${requestInfo.method} ${requestInfo.url}`];
 
@@ -283,11 +281,18 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
    */
   private getDocumentationUrl(connectorType: string): string | null {
     try {
-      const allConnectors = getCachedAllConnectors();
-      if (!allConnectors) return null;
-      const connector = allConnectors.find((c: any) => c.type === connectorType);
+      const allConnectors = getAllConnectors();
+      if (!allConnectors) {
+        return null;
+      }
 
-      if (connector?.documentation) {
+      const connector = allConnectors.find((c) => c.type === connectorType);
+
+      if (!connector || !isEnhancedInternalConnector(connector)) {
+        return null;
+      }
+
+      if (connector.documentation) {
         // Similar to Console, replace version placeholders with current version
         let docUrl = connector.documentation;
 

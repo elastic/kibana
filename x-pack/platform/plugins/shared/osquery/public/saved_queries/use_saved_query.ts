@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { API_VERSIONS } from '../../common/constants';
 import { PLUGIN_ID } from '../../common';

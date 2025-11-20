@@ -1,0 +1,80 @@
+{
+  "id": "@kbn/cleanup-before-exit",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cleanup-before-exit",
+        "id": "def-server.cleanupBeforeExit",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanupBeforeExit",
+        "description": [
+          "\nRegister a cleanup callback. The callback is wrapped with lodash.once and a\nPromise.race that respects a timeout and the abort signal from\n`processExitController`."
+        ],
+        "signature": [
+          "(callback: CleanupCallback, options?: ",
+          "CleanupBeforeExitOptions",
+          ") => () => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-cleanup-before-exit/src/cleanup_before_exit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cleanup-before-exit",
+            "id": "def-server.cleanupBeforeExit.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "callback",
+            "description": [],
+            "signature": [
+              "() => void | Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-cleanup-before-exit/src/create_cleanup_before_exit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/cleanup-before-exit",
+            "id": "def-server.cleanupBeforeExit.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "CleanupBeforeExitOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-cleanup-before-exit/src/create_cleanup_before_exit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

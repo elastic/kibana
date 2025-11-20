@@ -8,27 +8,32 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
+
 import { dataService } from '../../services/kibana_services';
+import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 
 export function initializeSearchSessionManager(
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
-  incomingEmbeddable: EmbeddablePackageState | undefined,
+  incomingEmbeddables: EmbeddablePackageState[] | undefined,
   dashboardApi: Omit<DashboardApi, 'searchSessionId$'>,
   dashboardInternalApi: DashboardInternalApi
 ) {
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
 
   let stopSearchSessionIntegration: (() => void) | undefined;
+  let requestSearchSessionId: (() => Promise<string | undefined>) | undefined;
   if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
     // if this incoming embeddable has a session, continue it.
-    if (incomingEmbeddable?.searchSessionId) {
-      dataService.search.session.continue(incomingEmbeddable.searchSessionId);
-    }
+    incomingEmbeddables?.forEach((embeddablePackage) => {
+      if (embeddablePackage.searchSessionId) {
+        dataService.search.session.continue(embeddablePackage.searchSessionId);
+      }
+    });
     if (sessionIdToRestore) {
       dataService.search.session.restore(sessionIdToRestore);
     }
@@ -36,10 +41,24 @@ export function initializeSearchSessionManager(
 
     const initialSearchSessionId =
       sessionIdToRestore ??
-      (existingSession && incomingEmbeddable
+      (existingSession && incomingEmbeddables?.length
         ? existingSession
         : dataService.search.session.start());
     searchSessionId$.next(initialSearchSessionId);
+
+    // `requestSearchSessionId` should be used when you need to ensure that you have the up-to-date search session ID
+    const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(false);
+    requestSearchSessionId = async () => {
+      if (!searchSessionGenerationInProgress$.getValue()) return searchSessionId$.getValue();
+      return new Promise((resolve) => {
+        const subscription = searchSessionGenerationInProgress$.subscribe((inProgress) => {
+          if (!inProgress) {
+            resolve(searchSessionId$.getValue());
+            subscription.unsubscribe();
+          }
+        });
+      });
+    };
 
     stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
       {
@@ -48,12 +67,14 @@ export function initializeSearchSessionManager(
       },
       dashboardInternalApi,
       searchSessionSettings,
-      (searchSessionId: string) => searchSessionId$.next(searchSessionId)
+      (searchSessionId: string) => searchSessionId$.next(searchSessionId),
+      searchSessionGenerationInProgress$
     );
   }
   return {
     api: {
       searchSessionId$,
+      requestSearchSessionId,
     },
     cleanup: () => {
       stopSearchSessionIntegration?.();

@@ -7,10 +7,12 @@
 
 import type {
   AgentCapabilities,
+  Conversation,
   ConversationRound,
-  RoundInput,
-  ToolSelection,
+  RawRoundInput,
+  AgentConfiguration,
 } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentHandlerContext } from '@kbn/onechat-server';
 import { runDefaultAgentMode } from './default';
 
@@ -18,24 +20,19 @@ export interface RunAgentParams {
   /**
    * The next message in this conversation that the agent should respond to.
    */
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   /**
-   * Previous rounds of conversation.
+   * Current conversation.
    */
-  conversation?: ConversationRound[];
+  conversation?: Conversation;
   /**
-   * Optional custom instructions to add to the prompts.
+   * Configuration of the agent to run
    */
-  customInstructions?: string;
+  agentConfiguration: AgentConfiguration;
   /**
    * Capabilities to enable. if not specified will use the default capabilities.
    */
   capabilities?: AgentCapabilities;
-  /**
-   * Selection of tools which will be exposed to the agent.
-   * Defaults to exposing all available tools.
-   */
-  toolSelection?: ToolSelection[];
   /**
    * In case of nested calls (e.g calling from a tool), allows to define the runId.
    */
@@ -48,6 +45,10 @@ export interface RunAgentParams {
    * optional signal to abort the execution of the agent
    */
   abortSignal?: AbortSignal;
+  /**
+   * Browser API tools to make available to the agent
+   */
+  browserApiTools?: BrowserApiToolMetadata[];
 }
 
 export interface RunAgentResponse {

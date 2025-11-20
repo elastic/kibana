@@ -107,7 +107,6 @@ export default function ({ getService }: FtrProviderContext) {
             'filesManagement',
             'filesSharedImage',
             'advancedSettings',
-            'aiAssistantManagementSelection',
             'indexPatterns',
             'graph',
             'monitoring',
@@ -143,6 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
             'securitySolutionTimeline',
             'securitySolutionNotes',
             'securitySolutionSiemMigrations',
+            'workflowsManagement',
             'fleet',
             'fleetv2',
           ].sort()

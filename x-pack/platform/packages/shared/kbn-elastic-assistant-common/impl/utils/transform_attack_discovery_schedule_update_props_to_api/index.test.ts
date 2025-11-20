@@ -49,6 +49,20 @@ describe('transformAttackDiscoveryScheduleUpdatePropsToApi', () => {
           subject: 'Attack Discovery Alert',
         },
       },
+      {
+        actionTypeId: '.cases',
+        id: 'system-connector-.cases',
+        params: {
+          subAction: 'run',
+          subActionParams: {
+            groupingBy: [],
+            reopenClosedCases: false,
+            templateId: null,
+            timeWindow: '7d',
+          },
+        },
+        uuid: '2c749fe6-9ae0-4518-98c6-02add52a1fa6',
+      },
     ],
   };
 
@@ -103,6 +117,20 @@ describe('transformAttackDiscoveryScheduleUpdatePropsToApi', () => {
           alerts_filter: undefined,
           frequency: undefined,
         },
+        {
+          action_type_id: '.cases',
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              groupingBy: [],
+              reopenClosedCases: false,
+              templateId: null,
+              timeWindow: '7d',
+            },
+          },
+          uuid: '2c749fe6-9ae0-4518-98c6-02add52a1fa6',
+        },
       ],
     });
   });
@@ -126,7 +154,17 @@ describe('transformAttackDiscoveryScheduleUpdatePropsToApi', () => {
       updatePropsWithActionWithoutFrequency
     );
 
-    expect(result.actions[0].frequency).toBeUndefined();
+    expect(result.actions[0]).toEqual({
+      action_type_id: '.slack',
+      alerts_filter: undefined,
+      frequency: undefined,
+      group: 'default',
+      id: 'action1',
+      params: {
+        message: 'Test message',
+      },
+      uuid: undefined,
+    });
   });
 
   it('should handle minimal params', () => {

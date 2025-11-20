@@ -2,6 +2,7 @@
 
 exports[`Logs should render a link to filter by cluster uuid 1`] = `
 <EuiCallOut
+  announceOnMount={true}
   iconType="logsApp"
   size="m"
   title="Want to see more log entries?"
@@ -27,6 +28,7 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
 
 exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] = `
 <EuiCallOut
+  announceOnMount={true}
   iconType="logsApp"
   size="m"
   title="Want to see more log entries?"
@@ -52,6 +54,7 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
 
 exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] = `
 <EuiCallOut
+  announceOnMount={true}
   iconType="logsApp"
   size="m"
   title="Want to see more log entries?"
@@ -287,6 +290,7 @@ exports[`Logs should render normally 1`] = `
     size="m"
   />
   <EuiCallOut
+    announceOnMount={true}
     iconType="logsApp"
     size="m"
     title="Want to see more log entries?"

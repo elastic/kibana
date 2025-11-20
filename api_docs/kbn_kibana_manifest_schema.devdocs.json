@@ -1008,7 +1008,7 @@
                     "label": "enum",
                     "description": [],
                     "signature": [
-                      "readonly [\"platform\", \"observability\", \"security\", \"search\", \"chat\"]"
+                      "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplaceai\"]"
                     ],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
                     "deprecated": false,

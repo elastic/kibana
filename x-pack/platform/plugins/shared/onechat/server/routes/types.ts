@@ -14,6 +14,7 @@ import type {
 } from '../types';
 import type { InternalStartServices } from '../services';
 import type { OnechatRouter } from '../request_handler_context';
+import type { TrackingService } from '../telemetry/tracking_service';
 
 export interface RouteDependencies {
   router: OnechatRouter;
@@ -21,4 +22,5 @@ export interface RouteDependencies {
   coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>;
   getInternalServices: () => InternalStartServices;
   pluginsSetup: OnechatSetupDependencies;
+  trackingService?: TrackingService;
 }

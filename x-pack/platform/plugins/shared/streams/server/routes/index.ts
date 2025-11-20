@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { internalEsqlRoutes } from './internal/esql/route';
 import { dashboardRoutes } from './dashboards/route';
 import { crudRoutes } from './streams/crud/route';
 import { enablementRoutes } from './streams/enablement/route';
@@ -19,15 +18,16 @@ import { contentRoutes } from './content/route';
 import { internalDashboardRoutes } from './internal/dashboards/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
-import { systemRoutes as internalSystemsRoutes } from './internal/streams/systems/route';
+import { featureRoutes as internalFeaturesRoutes } from './internal/streams/features/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
 import { ruleRoutes } from './rules/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
+import { internalIngestRoutes } from './internal/streams/ingest/route';
+import { connectorRoutes } from './internal/connectors/route';
 
 export const streamsRouteRepository = {
   // internal APIs
-  ...internalEsqlRoutes,
   ...internalDashboardRoutes,
   ...internalCrudRoutes,
   ...internalManagementRoutes,
@@ -35,7 +35,9 @@ export const streamsRouteRepository = {
   ...internalLifecycleRoutes,
   ...internalProcessingRoutes,
   ...failureStoreRoutes,
-  ...internalSystemsRoutes,
+  ...internalFeaturesRoutes,
+  ...internalIngestRoutes,
+  ...connectorRoutes,
   // public APIs
   ...dashboardRoutes,
   ...crudRoutes,

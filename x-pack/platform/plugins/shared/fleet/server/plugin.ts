@@ -69,6 +69,8 @@ import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 
+import { runWithCache } from './services/epm/packages/cache';
+
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
@@ -256,6 +258,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  runWithCache: typeof runWithCache;
   agentPolicyService: AgentPolicyServiceInterface;
   cloudConnectorService: CloudConnectorServiceInterface;
   /**
@@ -355,7 +358,10 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
+    const experimentalFeatures = parseExperimentalConfigValue(
+      config.enableExperimental ?? [],
+      config.experimentalFeatures || {}
+    );
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {
@@ -738,7 +744,8 @@ export class FleetPlugin
       configInitialValue: this.configInitialValue,
       config$: this.config$,
       experimentalFeatures: parseExperimentalConfigValue(
-        this.configInitialValue.enableExperimental || []
+        this.configInitialValue.enableExperimental || [],
+        this.configInitialValue.experimentalFeatures || {}
       ),
       savedObjects: core.savedObjects,
       savedObjectsTagging: plugins.savedObjectsTagging,
@@ -793,7 +800,6 @@ export class FleetPlugin
 
     this.policyWatcher.start(licenseService);
 
-    // We only retry when this feature flag is enabled (Serverless)
     const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
 
     const fleetSetupPromise = (async () => {
@@ -843,7 +849,7 @@ export class FleetPlugin
             jitter: 'full',
             retry: (error: any, attemptCount: number) => {
               const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
-              logger.warn(summary, { error: { message: error } });
+              logger.warn(summary, { error });
 
               this.fleetStatus$.next({
                 level: ServiceStatusLevels.available,
@@ -867,7 +873,7 @@ export class FleetPlugin
         });
       } catch (error) {
         logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
-          error: { message: error },
+          error,
         });
 
         this.fleetStatus$.next({
@@ -920,11 +926,11 @@ export class FleetPlugin
       },
       getPackageSpecTagId,
       async createOutputClient(request: KibanaRequest) {
-        const soClient = appContextService.getSavedObjects().getScopedClient(request);
         const authz = await getAuthzFromRequest(request);
-        return new OutputClient(soClient, authz);
+        return new OutputClient(authz);
       },
       cloudConnectorService,
+      runWithCache,
     };
   }
 
@@ -986,7 +992,7 @@ export class FleetPlugin
     } catch (error) {
       appContextService
         .getLogger()
-        .error('Error happened during uninstall token generation.', { error: { message: error } });
+        .error('Error happened during uninstall token generation.', { error });
     }
 
     try {
@@ -994,7 +1000,7 @@ export class FleetPlugin
     } catch (error) {
       appContextService
         .getLogger()
-        .error('Error happened during uninstall token validation.', { error: { message: error } });
+        .error('Error happened during uninstall token validation.', { error });
     }
   }
 

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import moment from 'moment-timezone';
+import { z } from '@kbn/zod';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -78,7 +78,6 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
 /* --- Triggers --- */
 export const AlertRuleTriggerSchema = z.object({
   type: z.literal('alert'),
-  enabled: z.boolean().optional().default(true),
   with: z
     .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
     .optional(),
@@ -86,7 +85,6 @@ export const AlertRuleTriggerSchema = z.object({
 
 export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
-  enabled: z.boolean().optional().default(true),
   with: z.union([
     // New format: every: "5m", "2h", "1d", "30s"
     z.object({
@@ -111,7 +109,6 @@ export const ScheduledTriggerSchema = z.object({
 
 export const ManualTriggerSchema = z.object({
   type: z.literal('manual'),
-  enabled: z.boolean().optional().default(true),
 });
 
 export const TriggerSchema = z.discriminatedUnion('type', [
@@ -168,6 +165,16 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+// Fetcher configuration for HTTP request customization (shared across formats)
+export const FetcherConfigSchema = z
+  .object({
+    skip_ssl_verification: z.boolean().optional(),
+    follow_redirects: z.boolean().optional(),
+    max_redirects: z.number().optional(),
+    keep_alive: z.boolean().optional(),
+  })
+  .optional();
+
 export const HttpStepSchema = BaseStepSchema.extend({
   type: z.literal('http'),
   with: z.object({
@@ -179,6 +186,7 @@ export const HttpStepSchema = BaseStepSchema.extend({
       .default({}),
     body: z.any().optional(),
     timeout: z.string().optional().default('30s'),
+    fetcher: FetcherConfigSchema,
   }),
 })
   .merge(StepWithIfConditionSchema)
@@ -234,6 +242,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         body: z.any().optional(),
         headers: z.record(z.string(), z.string()).optional(),
       }),
+      fetcher: FetcherConfigSchema,
     }),
     // Sugar syntax for common Kibana operations
     z
@@ -254,6 +263,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         page: z.number().optional(),
         perPage: z.number().optional(),
         status: z.string().optional(),
+        fetcher: FetcherConfigSchema,
       })
       .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
   ]),
@@ -361,7 +371,7 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice']);
+export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
 const WorkflowInputBaseSchema = z.object({
   name: z.string(),
@@ -370,32 +380,40 @@ const WorkflowInputBaseSchema = z.object({
   required: z.boolean().optional(),
 });
 
-const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('string'),
   default: z.string().optional(),
 });
 
-const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('number'),
   default: z.number().optional(),
 });
 
-const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('boolean'),
   default: z.boolean().optional(),
 });
 
-const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('choice'),
   default: z.string().optional(),
   options: z.array(z.string()),
 });
 
-export const WorkflowInputSchema = z.discriminatedUnion('type', [
+export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('array'),
+  minItems: z.number().int().nonnegative().optional(),
+  maxItems: z.number().int().nonnegative().optional(),
+  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
+});
+
+export const WorkflowInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
+  WorkflowInputArraySchema,
 ]);
 
 /* --- Consts --- */
@@ -412,7 +430,7 @@ export const WorkflowConstsSchema = z.record(
 );
 
 const StepSchema = z.lazy(() =>
-  z.discriminatedUnion('type', [
+  z.union([
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
@@ -452,10 +470,33 @@ export const WorkflowSchema = z.object({
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
+// Schema is required for autocomplete because WorkflowGraph and WorkflowDefinition use it to build the autocomplete context.
+// The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
+export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
+  .extend({
+    triggers: z
+      .array(z.object({ type: z.string().catch('') }).passthrough())
+      .catch([])
+      .default([]),
+    steps: z
+      .array(
+        z
+          .object({
+            type: z.string().catch(''),
+            name: z.string().catch(''),
+          })
+          .passthrough()
+      )
+      .catch([])
+      .default([]),
+  })
+  .passthrough();
+
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),
   isTestRun: z.boolean(),
   startedAt: z.date(),
+  url: z.string(),
 });
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 
@@ -477,11 +518,6 @@ const AlertSchema = z.object({
   '@timestamp': z.string(),
 });
 
-const SummarizedAlertsChunkSchema = z.object({
-  count: z.number(),
-  data: z.array(z.union([AlertSchema, z.any()])),
-});
-
 const RuleSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -492,12 +528,7 @@ const RuleSchema = z.object({
 });
 
 export const EventSchema = z.object({
-  alerts: z.object({
-    new: SummarizedAlertsChunkSchema,
-    ongoing: SummarizedAlertsChunkSchema,
-    recovered: SummarizedAlertsChunkSchema,
-    all: SummarizedAlertsChunkSchema,
-  }),
+  alerts: z.array(z.union([AlertSchema, z.any()])),
   rule: RuleSchema,
   spaceId: z.string(),
   params: z.any(),
@@ -507,7 +538,17 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
-  inputs: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+  kibanaUrl: z.string(),
+  inputs: z
+    .record(
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });

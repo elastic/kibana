@@ -28,13 +28,11 @@ type DisableLoadSuggestionsUnusedState = Pick<
   OptionsListComponentState,
   'dataLoading' | 'requestSize' | 'runPastTimeout'
 >;
-type DisableMultiSelectUnusedState = Pick<OptionsListComponentState, 'singleSelect'>;
 type DisableInvalidSelectionsUnusedState = Pick<OptionsListComponentState, 'invalidSelections'>;
 
 export type OptionsListESQLUnusedState = HideExcludeUnusedState &
   HideExistsUnusedState &
   HideSortUnusedState &
   DisableLoadSuggestionsUnusedState &
-  DisableMultiSelectUnusedState &
   DisableInvalidSelectionsUnusedState &
   Pick<OptionsListComponentState, 'fieldName'>;

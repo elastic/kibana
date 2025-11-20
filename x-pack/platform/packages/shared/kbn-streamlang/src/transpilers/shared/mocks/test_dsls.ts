@@ -5,19 +5,52 @@
  * 2.0.
  */
 
-import type { StreamlangDSL } from '../../../../types/streamlang';
 import type {
-  RenameProcessor,
-  SetProcessor,
-  GrokProcessor,
+  AppendProcessor,
+  ConvertProcessor,
   DateProcessor,
   DissectProcessor,
+  GrokProcessor,
   ManualIngestPipelineProcessor,
-  AppendProcessor,
+  RenameProcessor,
+  SetProcessor,
+  DropDocumentProcessor,
+  ReplaceProcessor,
 } from '../../../../types/processors';
+import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'drop_document',
+      where: {
+        field: 'https.status_code',
+        eq: 200,
+      },
+    } as DropDocumentProcessor,
+    // Convert a field to a different type
+    {
+      action: 'convert',
+      from: 'http.status_code',
+      type: 'string',
+      to: 'http.status_code_str',
+      where: {
+        field: 'http.error',
+        eq: 404,
+      },
+    } as ConvertProcessor,
+    // Replace a string pattern
+    {
+      action: 'replace',
+      from: 'message',
+      pattern: 'error',
+      replacement: 'warning',
+      to: 'clean_message',
+      where: {
+        field: 'log_level',
+        eq: 'ERROR',
+      },
+    } as ReplaceProcessor,
     // Rename a field
     {
       action: 'rename',
@@ -171,6 +204,68 @@ export const notConditionsTestDSL: StreamlangDSL = {
         ],
       },
     },
+  ],
+};
+
+export const typeCoercionsTestDSL: StreamlangDSL = {
+  steps: [
+    // Boolean true coercion test (both eq and neq)
+    {
+      action: 'set',
+      to: 'attributes.boolean_true_test',
+      value: 'matched_true_test',
+      where: {
+        and: [
+          { field: 'attributes.is_active', eq: true },
+          { field: 'attributes.is_active_str', eq: 'true' },
+          { field: 'attributes.is_inactive', neq: true },
+          { field: 'attributes.is_inactive_str', neq: 'true' },
+        ],
+      },
+    } as SetProcessor,
+    // Boolean false coercion test (both eq and neq)
+    {
+      action: 'set',
+      to: 'attributes.boolean_false_test',
+      value: 'matched_false_test',
+      where: {
+        and: [
+          { field: 'attributes.is_disabled', eq: false },
+          { field: 'attributes.is_disabled_str', eq: 'false' },
+          { field: 'attributes.is_enabled', neq: false },
+          { field: 'attributes.is_enabled_str', neq: 'false' },
+        ],
+      },
+    } as SetProcessor,
+    // Numeric 450 coercion test (both eq and neq)
+    {
+      action: 'set',
+      to: 'attributes.numeric_450_test',
+      value: 'matched_450_test',
+      where: {
+        and: [
+          { field: 'attributes.status_code', eq: 450 },
+          { field: 'attributes.status_code_str', eq: '450' },
+          { field: 'attributes.other_code', neq: 450 },
+          { field: 'attributes.other_code_str', neq: '450' },
+        ],
+      },
+    } as SetProcessor,
+    // Mixed type coercion with range and comparisons
+    {
+      action: 'set',
+      to: 'attributes.mixed_coercion_test',
+      value: 'matched_mixed_coercion',
+      where: {
+        and: [
+          { field: 'attributes.response_time', gt: 100 },
+          { field: 'attributes.response_time_str', gt: '100' },
+          { field: 'attributes.port', range: { gte: '8000', lte: '9000' } },
+          { field: 'attributes.is_enabled', eq: true },
+          { field: 'attributes.count_str', eq: '42' },
+        ],
+      },
+    } as SetProcessor,
   ],
 };
 

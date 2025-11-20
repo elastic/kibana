@@ -8,9 +8,9 @@
  */
 
 import type { EnterContinueNode } from '@kbn/workflows/graph';
-import type { NodeWithErrorCatching, NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { NodeImplementation, NodeWithErrorCatching } from '../../node_implementation';
 
 export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorCatching {
   constructor(
@@ -20,7 +20,6 @@ export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorC
   ) {}
 
   public async run(): Promise<void> {
-    this.workflowRuntime.enterScope();
     this.workflowRuntime.navigateToNextNode();
   }
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useEffect } from 'react';
 
 import { SETUP_HEALTH_URL } from '../../../../../common/api/detection_engine/rule_monitoring';

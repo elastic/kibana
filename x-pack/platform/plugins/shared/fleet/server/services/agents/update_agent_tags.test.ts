@@ -180,7 +180,7 @@ describe('update_agent_tags', () => {
     expect(errorResults.operations[1].error).toEqual('error reason');
   });
 
-  it('should throw error on version conflicts', async () => {
+  it('should retry error on version conflicts', async () => {
     esClient.updateByQuery.mockReset();
     esClient.updateByQuery.mockResolvedValue({
       failures: [],
@@ -442,7 +442,7 @@ describe('update_agent_tags', () => {
         expect.objectContaining({
           batchSize: 10000,
           kuery:
-            '((namespaces:"default" or not namespaces:*)) AND (status:healthy OR status:offline) AND (tags:remove)',
+            '((namespaces:"default" or namespaces:"*" or not namespaces:*)) AND (status:healthy OR status:offline) AND (tags:remove)',
           tagsToAdd: [],
           tagsToRemove: ['remove'],
         }),
@@ -466,7 +466,8 @@ describe('update_agent_tags', () => {
         expect.anything(),
         expect.objectContaining({
           batchSize: 10000,
-          kuery: '(namespaces:(myspace)) AND (status:healthy OR status:offline) AND (tags:remove)',
+          kuery:
+            '(namespaces:(myspace) or namespaces:"*") AND (status:healthy OR status:offline) AND (tags:remove)',
           tagsToAdd: [],
           tagsToRemove: ['remove'],
         }),

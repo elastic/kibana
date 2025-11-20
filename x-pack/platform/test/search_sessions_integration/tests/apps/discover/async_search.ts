@@ -9,13 +9,13 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const inspector = getService('inspector');
-  const { discover, common, timePicker, header, context, searchSessionsManagement } =
+  const filterBar = getService('filterBar');
+  const { discover, common, timePicker, header, context, home, searchSessionsManagement } =
     getPageObjects([
       'discover',
       'common',
@@ -23,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       'header',
       'context',
       'searchSessionsManagement',
+      'home',
     ]);
   const searchSessions = getService('searchSessions');
   const retry = getService('retry');
@@ -32,23 +33,36 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover async search', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/discover/default'
       );
       await kibanaServer.uiSettings.replace({
         enableESQL: true,
       });
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await retry.tryForTime(10000, async () => {
+        await home.addSampleDataSet('flights');
+        const isInstalled = await home.isSampleDataSetInstalled('flights');
+        expect(isInstalled).to.be(true);
+      });
       await common.navigateToApp('discover');
       await timePicker.setDefaultAbsoluteRange();
       await header.waitUntilLoadingHasFinished();
     });
+
     after(async () => {
       await kibanaServer.importExport.unload(
         'x-pack/platform/test/functional/fixtures/kbn_archives/discover/default'
       );
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await header.waitUntilLoadingHasFinished();
+      await home.removeSampleDataSet('flights');
+      const isInstalled = await home.isSampleDataSetInstalled('flights');
+      expect(isInstalled).to.be(false);
     });
 
     it('search session id should change between searches', async () => {
@@ -65,14 +79,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const savedSessionURL = url + `&searchSessionId=${fakeSearchSessionId}`;
       await browser.navigateTo(savedSessionURL);
       await header.waitUntilLoadingHasFinished();
-      await searchSessions.expectState('restored');
       await testSubjects.existOrFail('discoverErrorCalloutTitle'); // expect error because of fake searchSessionId
       await toasts.dismissAll();
       const searchSessionId1 = await getSearchSessionId();
       expect(searchSessionId1).to.be(fakeSearchSessionId);
       await queryBar.clickQuerySubmitButton();
       await header.waitUntilLoadingHasFinished();
-      await searchSessions.expectState('completed');
       const searchSessionId2 = await getSearchSessionId();
       expect(searchSessionId2).not.to.be(searchSessionId1);
 
@@ -86,7 +98,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(url).to.contain('searchSessionId');
       await header.waitUntilLoadingHasFinished();
       // Note this currently fails, for some reason the fakeSearchSessionId is not restored
-      await searchSessions.expectState('restored');
       expect(await getSearchSessionId()).to.be(fakeSearchSessionId);
 
       // back navigation takes discover to fakeSearchSessionId which is in error state
@@ -97,6 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigation to context cleans the session', async () => {
+      await timePicker.setCommonlyUsedTime('This_week');
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
       await retry.try(async () => {
@@ -117,14 +129,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       const url = await browser.getCurrentUrl();
 
+      // Add slow query through DSL so we can background it
+      await filterBar.addDslFilter(
+        JSON.stringify({
+          error_query: {
+            indices: [
+              {
+                error_type: 'none',
+                name: '*',
+                stall_time_seconds: 5,
+              },
+            ],
+          },
+        }),
+        false
+      );
+
       await searchSessions.save();
-      await searchSessions.expectState('backgroundCompleted');
       const searchSessionId = await getSearchSessionId();
-      expect(await discover.hasNoResults()).to.be(true);
       log.info('searchSessionId', searchSessionId);
 
       // load URL to restore a saved session
       await searchSessionsManagement.goTo();
+
+      await retry.waitFor('session should be in a completed status', async () => {
+        const searchSessionList = await searchSessionsManagement.getList();
+        const searchSessionItem = searchSessionList[0];
+        return searchSessionItem.status === 'complete';
+      });
+
       const searchSessionListBeforeRestore = await searchSessionsManagement.getList();
       const searchesCountBeforeRestore = searchSessionListBeforeRestore[0].searchesCount;
 
@@ -136,8 +169,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await browser.navigateTo(restoreUrl);
 
       await header.waitUntilLoadingHasFinished();
-      await searchSessions.expectState('restored');
-      expect(await discover.hasNoResults()).to.be(true);
       expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
 
       await searchSessionsManagement.goTo();

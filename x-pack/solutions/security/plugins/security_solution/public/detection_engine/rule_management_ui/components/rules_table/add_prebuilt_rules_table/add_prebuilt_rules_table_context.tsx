@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useIsMutating } from '@tanstack/react-query';
+import { useIsMutating } from '@kbn/react-query';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';

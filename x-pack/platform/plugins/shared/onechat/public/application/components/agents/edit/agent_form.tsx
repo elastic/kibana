@@ -51,6 +51,7 @@ import { AgentAvatar } from '../agent_avatar';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -76,6 +77,7 @@ export type AgentFormData = Omit<AgentDefinition, 'type' | 'readonly'>;
 export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }) => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const { manageAgents } = useUiPrivileges();
   const { navigateToOnechatUrl } = useNavigation();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
   const deferNavigateToOnechatUrl = useCallback(
@@ -225,7 +227,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             control={control}
             formState={formState}
             isCreateMode={isCreateMode}
-            isFormDisabled={isFormDisabled}
+            isFormDisabled={isFormDisabled || !manageAgents}
           />
         ),
       },
@@ -239,7 +241,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             control={control}
             tools={tools}
             isLoading={isLoading}
-            isFormDisabled={isFormDisabled}
+            isFormDisabled={isFormDisabled || !manageAgents}
           />
         ),
         append: (
@@ -256,13 +258,30 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         ),
       },
     ],
-    [control, formState, isCreateMode, isFormDisabled, tools, isLoading, euiTheme, activeToolsCount]
+    [
+      control,
+      formState,
+      isCreateMode,
+      isFormDisabled,
+      tools,
+      isLoading,
+      euiTheme,
+      activeToolsCount,
+      manageAgents,
+    ]
   );
+
+  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+
+  const onTabClick = (tab: EuiTabbedContentTab) => {
+    setSelectedTabId(tab.id);
+  };
 
   const renderSaveButton = useCallback(
     ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
       const saveButton = (
         <EuiButton
+          data-test-subj="agentFormSaveButton"
           form={agentFormId}
           size={size}
           type="submit"
@@ -400,7 +419,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>{isCreateMode ? labels.agents.newAgent : agentName}</EuiFlexItem>
+            <EuiFlexItem data-test-subj="agentFormPageTitle">
+              {isCreateMode ? labels.agents.newAgent : agentName}
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         description={
@@ -435,7 +456,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           )
         }
         rightSideItems={[
-          ...(!isCreateMode
+          ...(!manageAgents
+            ? []
+            : !isCreateMode
             ? [
                 <EuiFlexGroup gutterSize="xs">
                   {renderSaveButton({ size: 'm' })}
@@ -477,7 +500,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               ]
             : [renderSaveButton({ size: 'm' })]),
           renderChatButton({ size: 'm' }),
-          ...(!isCreateMode
+          ...(!manageAgents
+            ? []
+            : !isCreateMode
             ? [
                 <EuiPopover
                   button={
@@ -541,10 +566,20 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           <EuiForm
             id={agentFormId}
             component="form"
-            onSubmit={handleSubmit((data) => handleSave(data))}
+            onSubmit={handleSubmit(
+              (data) => handleSave(data),
+              () => {
+                // Switch to first tab (settings) when validation fails
+                setSelectedTabId('settings');
+              }
+            )}
             fullWidth
           >
-            <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+            <EuiTabbedContent
+              tabs={tabs}
+              selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
+              onTabClick={onTabClick}
+            />
           </EuiForm>
         </FormProvider>
         <EuiSpacer
@@ -572,7 +607,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{renderChatButton()}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>
+          {manageAgents && <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>}
         </EuiFlexGroup>
       </KibanaPageTemplate.BottomBar>
     </KibanaPageTemplate>

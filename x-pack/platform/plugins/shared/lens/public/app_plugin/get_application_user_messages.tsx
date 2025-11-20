@@ -12,13 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Dispatch } from '@reduxjs/toolkit';
 import { partition } from 'lodash';
-import type { DatasourceState } from '../state_management';
-import {
-  updateDatasourceState,
-  type DataViewsState,
-  type VisualizationState,
-} from '../state_management';
 import type {
+  DataViewsState,
+  DatasourceState,
+  VisualizationState,
   AddUserMessages,
   Datasource,
   FramePublicAPI,
@@ -27,7 +24,9 @@ import type {
   UserMessagesDisplayLocationId,
   UserMessagesGetter,
   Visualization,
-} from '../types';
+  LensPublicCallbacks,
+} from '@kbn/lens-common';
+import { updateDatasourceState } from '../state_management';
 import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
 import {
   EDITOR_MISSING_DATAVIEW,
@@ -37,7 +36,6 @@ import {
   EDITOR_UNKNOWN_VIS_TYPE,
 } from '../user_messages_ids';
 import { nonNullable } from '../utils';
-import type { LensPublicCallbacks } from '../react_embeddable/types';
 
 export interface UserMessageGetterProps {
   visualizationType: string | null | undefined;

@@ -6,7 +6,7 @@
  */
 
 import type { GetSLOSettingsResponse } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../../common/constants';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 

@@ -22,7 +22,7 @@ export const mount =
     const preloadedVisualizationAttributes = history.location
       ?.state as TypedLensByValueInput['attributes'];
 
-    const dataView = await plugins.data.indexPatterns.getDefault();
+    const dataView = await plugins.data.dataViews.getDefault();
     const stateHelpers = await plugins.lens.stateHelperApi();
 
     const reactElement = (
@@ -44,6 +44,7 @@ export const mount =
           />
         ) : (
           <EuiCallOut
+            announceOnMount
             title="Please define a default index pattern to use this demo"
             color="danger"
             iconType="warning"

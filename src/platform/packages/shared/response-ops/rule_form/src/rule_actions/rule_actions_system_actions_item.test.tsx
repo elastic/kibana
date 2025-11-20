@@ -221,7 +221,10 @@ describe('ruleActionsSystemActionsItem', () => {
       payload: { uuid: 'uuid-action-1', value: { param: { paramKey: 'someValue' } } },
       type: 'setActionParams',
     });
-    expect(mockValidate).toHaveBeenCalledWith({ param: { paramKey: 'someValue' } });
+    expect(mockValidate).toHaveBeenCalledWith(
+      { param: { paramKey: 'someValue' } },
+      { config: 'config-1' }
+    );
   });
 
   test('should set warning and error if params have errors', async () => {

@@ -37,6 +37,7 @@ import {
   getHistoryItems,
   dateFormat,
   getStorageStats,
+  getTrimmedQuery,
 } from '../history_local_storage';
 import { type ESQLEditorDeps, HistoryTabId } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
@@ -54,26 +55,24 @@ export function QueryHistoryAction({
   isHistoryOpen: boolean;
   isSpaceReduced?: boolean;
 }) {
+  const toggleHistoryLabel = isHistoryOpen
+    ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
+        defaultMessage: 'Hide recent queries',
+      })
+    : i18n.translate('esqlEditor.query.showQueriesLabel', {
+        defaultMessage: 'Show recent queries',
+      });
+
   return (
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
-          <EuiToolTip
-            position="top"
-            content={
-              isHistoryOpen
-                ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                    defaultMessage: 'Hide recent queries',
-                  })
-                : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                    defaultMessage: 'Show recent queries',
-                  })
-            }
-          >
+          <EuiToolTip position="top" content={toggleHistoryLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               onClick={toggleHistory}
               iconType="clockCounter"
               data-test-subj="ESQLEditor-hide-queries-link"
+              aria-label={toggleHistoryLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -91,13 +90,7 @@ export function QueryHistoryAction({
             iconType="clockCounter"
             data-test-subj="ESQLEditor-toggle-query-history-button"
           >
-            {isHistoryOpen
-              ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                  defaultMessage: 'Hide recent queries',
-                })
-              : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                  defaultMessage: 'Show recent queries',
-                })}
+            {toggleHistoryLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
@@ -242,7 +235,7 @@ export function QueryList({
   listItems: QueryHistoryItem[];
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
-  onUpdateAndSubmit: (qs: string) => void;
+  onUpdateAndSubmit: (qs: string, isStarred: boolean) => void;
   height: number;
   starredQueriesService?: EsqlStarredQueriesService;
   tableCaption?: string;
@@ -291,6 +284,9 @@ export function QueryList({
     return [
       {
         render: (item: QueryHistoryItem) => {
+          const isStarred =
+            starredQueriesService?.checkIfQueryIsStarred(getTrimmedQuery(item.queryString)) ??
+            false;
           return (
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -309,7 +305,7 @@ export function QueryList({
                     data-test-subj="ESQLEditor-history-starred-queries-run-button"
                     role="button"
                     iconSize="m"
-                    onClick={() => onUpdateAndSubmit(item.queryString)}
+                    onClick={() => onUpdateAndSubmit(item.queryString, isStarred)}
                     css={css`
                       cursor: pointer;
                     `}
@@ -343,7 +339,7 @@ export function QueryList({
         },
       },
     ];
-  }, [onUpdateAndSubmit]);
+  }, [onUpdateAndSubmit, starredQueriesService]);
 
   const isOnReducedSpaceLayout = containerWidth < 560;
   const columns = useMemo(() => {
@@ -497,7 +493,7 @@ export function HistoryAndStarredQueriesTabs({
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
-  onUpdateAndSubmit: (qs: string) => void;
+  onUpdateAndSubmit: (qs: string, isStarred: boolean) => void;
   isSpaceReduced?: boolean;
   height: number;
 }) {

@@ -22,15 +22,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type {
+  FormBasedLayer,
+  PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
 import { nonNullable } from '../../../utils';
-import {
-  operationDefinitionMap,
-  type PercentileIndexPatternColumn,
-  type PercentileRanksIndexPatternColumn,
-  type TermsIndexPatternColumn,
-} from '../operations';
+import { operationDefinitionMap } from '../operations';
 import { isColumnOfType } from '../operations/definitions/helpers';
-import type { FormBasedLayer } from '../types';
 import { MAX_TERMS_OTHER_ENABLED } from '../operations/definitions/terms/constants';
 
 export const formulaOperationName = 'formula';
@@ -161,6 +161,7 @@ export const CalloutWarning = ({
     return (
       <>
         <EuiCallOut
+          announceOnMount={false}
           css={dimensionEditorWarningStyles(euiThemeContext)}
           size="s"
           title={i18n.translate('xpack.lens.indexPattern.staticValueWarning', {

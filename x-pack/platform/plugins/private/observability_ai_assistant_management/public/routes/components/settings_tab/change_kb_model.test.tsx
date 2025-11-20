@@ -23,7 +23,7 @@ import {
   elserDescription,
   elserTitle,
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('@kbn/ai-assistant/src/hooks', () => ({
   useInferenceEndpoints: () => ({

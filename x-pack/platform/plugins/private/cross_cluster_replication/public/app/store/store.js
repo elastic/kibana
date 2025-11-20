@@ -10,7 +10,7 @@ import thunk from 'redux-thunk';
 
 import { ccr } from './reducers';
 
-function createCrossClusterReplicationStore(initialState = {}) {
+export function createCrossClusterReplicationStore(initialState = {}) {
   const enhancers = [applyMiddleware(thunk)];
 
   if (window.__REDUX_DEVTOOLS_EXTENSION__) {
@@ -19,4 +19,5 @@ function createCrossClusterReplicationStore(initialState = {}) {
   return createStore(ccr, initialState, compose(...enhancers));
 }
 
+// Singleton for production use
 export const ccrStore = createCrossClusterReplicationStore();

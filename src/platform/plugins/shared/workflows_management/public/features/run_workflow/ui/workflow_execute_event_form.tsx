@@ -9,19 +9,21 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBasicTable,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
-  EuiBasicTable,
 } from '@elastic/eui';
-import React, { useEffect, useState, useCallback } from 'react';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { Query, TimeRange } from '@kbn/data-plugin/common';
+import React, { useCallback, useEffect, useState } from 'react';
 import { take } from 'rxjs';
+import type { Query, TimeRange } from '@kbn/data-plugin/common';
 import { buildEsQuery } from '@kbn/es-query';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Alert {
@@ -34,7 +36,7 @@ interface Alert {
     'kibana.alert.severity': string;
     'kibana.alert.status': string;
     'kibana.alert.reason': string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -44,34 +46,6 @@ interface WorkflowExecuteEventFormProps {
   errors: string | null;
   setErrors: (errors: string | null) => void;
 }
-
-const unflattenObject = (flatObject: Record<string, any>): Record<string, any> => {
-  const result: Record<string, any> = {};
-
-  for (const key of Object.keys(flatObject)) {
-    const keys = key.split('.');
-    let current = result;
-    for (let i = 0; i < keys.length; i++) {
-      const currentKey = keys[i];
-      if (i === keys.length - 1) {
-        const v = flatObject[key];
-        current[currentKey] = v && typeof v === 'object' ? { ...v } : v;
-      } else {
-        if (
-          current[currentKey] === undefined ||
-          typeof current[currentKey] !== 'object' ||
-          Array.isArray(current[currentKey]) ||
-          !Object.isExtensible(current[currentKey]) // add this
-        ) {
-          current[currentKey] = {};
-        }
-        current = current[currentKey];
-      }
-    }
-  }
-
-  return result;
-};
 
 export const WorkflowExecuteEventForm = ({
   value,
@@ -141,7 +115,6 @@ export const WorkflowExecuteEventForm = ({
             query: searchQuery,
             size: 50,
             sort: [{ '@timestamp': { order: 'desc' } }],
-            _source: [],
           },
         },
       };
@@ -174,20 +147,15 @@ export const WorkflowExecuteEventForm = ({
 
   const updateEventData = (selectedAlerts: Alert[]) => {
     if (selectedAlerts.length > 0) {
-      const alertEvents = selectedAlerts.map((alert: Alert) => {
-        const unflattenedAlert = unflattenObject(alert._source);
+      const alertIds: AlertSelection[] = selectedAlerts.map((alert: Alert) => ({
+        _id: alert._id,
+        _index: alert._index,
+      }));
 
-        return {
-          id: alert._id,
-          index: alert._index,
-          timestamp: alert._source['@timestamp'],
-          ...unflattenedAlert.kibana.alert,
-        };
-      });
-
-      const workflowEvent = {
+      const workflowEvent: AlertTriggerInput = {
         event: {
-          alerts: alertEvents,
+          alertIds,
+          triggerType: 'alert',
         },
       };
 
@@ -250,7 +218,11 @@ export const WorkflowExecuteEventForm = ({
               <EuiLoadingSpinner size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="s">Loading alerts...</EuiText>
+              <EuiText size="s">
+                {i18n.translate('workflows.workflowExecuteEventForm.loadingAlerts', {
+                  defaultMessage: 'Loading alerts...',
+                })}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
@@ -279,8 +251,10 @@ export const WorkflowExecuteEventForm = ({
           >
             <p>{errors}</p>
             <EuiText size="s">
-              Make sure you have the proper permissions to access security alerts, or manually enter
-              the event data below.
+              {i18n.translate('workflows.workflowExecuteEventForm.errorMessage', {
+                defaultMessage:
+                  'Make sure you have the proper permissions to access security alerts, or manually enter the event data below.',
+              })}
             </EuiText>
           </EuiCallOut>
         </EuiFlexItem>

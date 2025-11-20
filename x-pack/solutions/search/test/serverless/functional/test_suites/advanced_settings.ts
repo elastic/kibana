@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
+  AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
+  AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
@@ -18,6 +20,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 const READ_ONLY_SETTINGS: string[] = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
+  AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
 ];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

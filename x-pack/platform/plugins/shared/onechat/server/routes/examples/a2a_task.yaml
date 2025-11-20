@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         a2aTaskRequestExample:
-          description: "Example request for A2A Task Endpoint"
+          description: "WARNING: DO NOT USE THIS ENDPOINT VIA REST API. These examples are auto-generated and should not be run. Integrate with A2A using an A2A SDK or A2A Inspector instead."
           value:
             jsonrpc: "2.0"
             method: "complete"

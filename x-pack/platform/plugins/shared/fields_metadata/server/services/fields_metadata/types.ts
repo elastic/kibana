@@ -6,12 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type {
-  FieldName,
-  FieldMetadata,
-  FieldsMetadataDictionary,
-  FieldSource,
-} from '../../../common';
+import type { FieldMetadata } from '../../../common/fields_metadata/models/field_metadata';
+import type { FieldsMetadataDictionary } from '../../../common/fields_metadata/models/fields_metadata_dictionary';
+import type { FieldName, FieldSource } from '../../../common';
 import type {
   IntegrationFieldsExtractor,
   IntegrationFieldsSearchParams,

@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowLogEvent } from '../workflow_event_logger/workflow_event_logger';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { WorkflowLogEvent } from '../repositories/logs_repository';
 
+export interface ContextDependencies {
+  cloudSetup: CloudSetup | undefined;
+}
 /**
  * Interface for workflow context manager logging capabilities
  * Used by runtime manager to avoid circular dependencies

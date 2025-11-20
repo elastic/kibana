@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsClient, Connector } from '@kbn/actions-plugin/server';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -17,6 +17,7 @@ import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { getLlmType } from '../../../routes/utils';
 import { runDefendInsightsEvaluations } from './run_evaluations';
 import { evaluateDefendInsights } from '.';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('./run_evaluations');
 jest.mock('@kbn/langchain/server', () => ({
@@ -61,15 +62,10 @@ describe('evaluateDefendInsights', () => {
     ];
 
     const mockConnectors = [
-      {
+      createMockConnector({
         id: '1',
         name: 'Test Connector',
         actionTypeId: '.test',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-        config: {},
-        secrets: {},
         prompts: {
           default: 'default',
           refine: 'refine',
@@ -80,7 +76,7 @@ describe('evaluateDefendInsights', () => {
           eventsEndpointId: 'eventsEndpointId',
           eventsValue: 'eventsValue',
         },
-      },
+      } as unknown as Connector),
     ];
 
     const mockActionsClient = {} as unknown as PublicMethodsOf<ActionsClient>;

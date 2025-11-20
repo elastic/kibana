@@ -8,10 +8,10 @@
  */
 
 import { parseDocument } from 'yaml';
-import { insertTriggerSnippet } from './insert_trigger_snippet';
 import { monaco } from '@kbn/monaco';
 import * as generateTriggerSnippetModule from './generate_trigger_snippet';
-import { createMockModel } from '../../../../../common/mocks/monaco_model';
+import { insertTriggerSnippet } from './insert_trigger_snippet';
+import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
 
 describe('insertTriggerSnippet', () => {
   let generateTriggerSnippetSpy: jest.SpyInstance;
@@ -23,7 +23,7 @@ describe('insertTriggerSnippet', () => {
 
   it('should insert a trigger snippet after the last trigger', () => {
     const inputYaml = `triggers:\n  - type: alert\n`;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
 
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
@@ -46,7 +46,7 @@ describe('insertTriggerSnippet', () => {
           // we expect the snippet to be inserted at the third line after the alert trigger
           range: new monaco.Range(3, 1, 3, 1),
           // should have 2 spaces before the snippet
-          text: '  ' + expectedSnippet,
+          text: `  ${expectedSnippet}`,
         },
       ],
       expect.any(Function)
@@ -54,7 +54,7 @@ describe('insertTriggerSnippet', () => {
   });
   it('should not override existing trigger of the same type', () => {
     const inputYaml = `triggers:\n  - type: manual`;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
 
@@ -63,7 +63,7 @@ describe('insertTriggerSnippet', () => {
   });
   it('should add the triggers section if it does not exist', () => {
     const inputYaml = `steps:\n  - type: http`;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
 
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
@@ -89,7 +89,7 @@ describe('insertTriggerSnippet', () => {
 
   it('should call pushUndoStop when editor is provided', () => {
     const inputYaml = `steps:\n  - type: http`;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     const mockEditor = {
       pushUndoStop: jest.fn(),

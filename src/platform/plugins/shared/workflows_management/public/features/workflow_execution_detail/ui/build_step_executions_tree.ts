@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+
 import type { StackFrame, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -20,6 +23,7 @@ export interface StepListTreeItem {
 export interface StepExecutionTreeItem extends StepListTreeItem {
   status: ExecutionStatus | null;
   stepExecutionId: string | null;
+  isTriggerPseudoStep?: boolean;
   children: StepExecutionTreeItem[];
 }
 
@@ -80,7 +84,8 @@ export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
 }
 
 export function buildStepExecutionsTree(
-  stepExecutions: WorkflowStepExecutionDto[]
+  stepExecutions: WorkflowStepExecutionDto[],
+  executionContext?: Record<string, any>
 ): StepExecutionTreeItem[] {
   const root = {};
   const stepExecutionsMap: Map<string, WorkflowStepExecutionDto> = new Map();
@@ -100,7 +105,7 @@ export function buildStepExecutionsTree(
       });
     });
 
-  for (const { id } of stepExecutionsMap.values()) {
+  Array.from(stepExecutionsMap.values()).forEach(({ id }) => {
     const computedPath = computedPathsMap.get(id!)!;
 
     let current: any = root;
@@ -140,7 +145,7 @@ export function buildStepExecutionsTree(
       }
       current = (current[currentPart as keyof typeof current] as any).children;
     }
-  }
+  });
 
   function toArray(node: any): any {
     return Object.values(node).map((n: any) => ({
@@ -149,5 +154,38 @@ export function buildStepExecutionsTree(
     }));
   }
 
-  return toArray(root);
+  const regularSteps = toArray(root);
+  // Pseudo-steps are not real steps, an example is the trigger pseudo-step that is used to display the trigger context (the only pseudo step for now)
+  const pseudoSteps: StepExecutionTreeItem[] = [];
+
+  if (executionContext) {
+    const hasEvent = executionContext.event && Object.keys(executionContext.event).length > 0;
+    const hasInputs = executionContext.inputs && Object.keys(executionContext.inputs).length > 0;
+
+    if (hasEvent) {
+      pseudoSteps.push({
+        stepId: 'Event',
+        stepType: '__trigger',
+        executionIndex: 0,
+        stepExecutionId: '__pseudo_trigger__',
+        status: ExecutionStatus.COMPLETED,
+        isTriggerPseudoStep: true,
+        children: [],
+      });
+    }
+
+    if (hasInputs) {
+      pseudoSteps.push({
+        stepId: 'Inputs',
+        stepType: '__inputs',
+        executionIndex: 0,
+        stepExecutionId: '__pseudo_inputs__',
+        status: ExecutionStatus.COMPLETED,
+        isTriggerPseudoStep: true,
+        children: [],
+      });
+    }
+  }
+
+  return [...pseudoSteps, ...regularSteps];
 }

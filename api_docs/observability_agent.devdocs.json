@@ -1,0 +1,338 @@
+{
+  "id": "observabilityAgent",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "observabilityAgent",
+        "id": "def-server.ObservabilityAgentPluginSetupDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObservabilityAgentPluginSetupDependencies",
+        "description": [],
+        "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginSetupDependencies.onechat",
+            "type": "Object",
+            "tags": [],
+            "label": "onechat",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "onechat",
+                "scope": "server",
+                "docId": "kibOnechatPluginApi",
+                "section": "def-server.OnechatPluginSetup",
+                "text": "OnechatPluginSetup"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginSetupDependencies.apmDataAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "apmDataAccess",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "apmDataAccess",
+                "scope": "server",
+                "docId": "kibApmDataAccessPluginApi",
+                "section": "def-server.ApmDataAccessPluginSetup",
+                "text": "ApmDataAccessPluginSetup"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginSetupDependencies.logsDataAccess",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "logsDataAccess",
+            "description": [],
+            "signature": [
+              "void"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginSetupDependencies.metricsDataAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "metricsDataAccess",
+            "description": [],
+            "signature": [
+              "{ client: ",
+              {
+                "pluginId": "metricsDataAccess",
+                "scope": "server",
+                "docId": "kibMetricsDataAccessPluginApi",
+                "section": "def-server.MetricsDataClient",
+                "text": "MetricsDataClient"
+              },
+              "; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginSetupDependencies.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.SecurityPluginSetup",
+                "text": "SecurityPluginSetup"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgent",
+        "id": "def-server.ObservabilityAgentPluginStartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObservabilityAgentPluginStartDependencies",
+        "description": [],
+        "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.onechat",
+            "type": "Object",
+            "tags": [],
+            "label": "onechat",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "onechat",
+                "scope": "server",
+                "docId": "kibOnechatPluginApi",
+                "section": "def-server.OnechatPluginStart",
+                "text": "OnechatPluginStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.apmDataAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "apmDataAccess",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "apmDataAccess",
+                "scope": "server",
+                "docId": "kibApmDataAccessPluginApi",
+                "section": "def-server.ApmDataAccessPluginStart",
+                "text": "ApmDataAccessPluginStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.logsDataAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "logsDataAccess",
+            "description": [],
+            "signature": [
+              "{ services: { getLogsRatesService: ({ esClient, identifyingMetadata, serviceNames, timeFrom, timeTo, }: ",
+              "LogsRatesServiceParams",
+              ") => Promise<",
+              {
+                "pluginId": "logsDataAccess",
+                "scope": "server",
+                "docId": "kibLogsDataAccessPluginApi",
+                "section": "def-server.LogsRatesServiceReturnType",
+                "text": "LogsRatesServiceReturnType"
+              },
+              ">; getLogsRateTimeseries: ({ esClient, identifyingMetadata, serviceNames, timeFrom, timeTo, kuery, serviceEnvironmentQuery, }: ",
+              "LogsRateTimeseries",
+              ") => Promise<",
+              "LogsRateTimeseriesReturnType",
+              ">; getLogsErrorRateTimeseries: ({ esClient, identifyingMetadata, serviceNames, timeFrom, timeTo, kuery, serviceEnvironmentQuery, }: ",
+              "LogsErrorRateTimeseries",
+              ") => Promise<",
+              "LogsErrorRateTimeseriesReturnType",
+              ">; logSourcesServiceFactory: { getLogSourcesService(savedObjectsClient: ",
+              "SavedObjectsClientContract",
+              "): Promise<",
+              "LogSourcesService",
+              ">; getScopedLogSourcesService(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>): Promise<",
+              "LogSourcesService",
+              ">; }; }; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.metricsDataAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "metricsDataAccess",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.SecurityPluginStart",
+                "text": "SecurityPluginStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.ruleRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleRegistry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RuleRegistryPluginStartContract",
+                "text": "RuleRegistryPluginStartContract"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "server",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-server.DataViewsServerPluginStart",
+                "text": "DataViewsServerPluginStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "observabilityAgent",
+      "id": "def-server.ObservabilityAgentPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "ObservabilityAgentPluginSetup",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "observabilityAgent",
+      "id": "def-server.ObservabilityAgentPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ObservabilityAgentPluginStart",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

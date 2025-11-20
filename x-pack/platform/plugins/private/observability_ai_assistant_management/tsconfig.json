@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -31,7 +31,8 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/inference-common",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

@@ -26,7 +26,7 @@ export const QueryResultStep: React.FC<QueryResultStepProps> = ({ result: { data
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiCodeBlock css={codeBlockStyles} language="sql" isCopyable paddingSize="m">
+        <EuiCodeBlock css={codeBlockStyles} language="esql" isCopyable paddingSize="m">
           {data.esql}
         </EuiCodeBlock>
       </EuiFlexItem>

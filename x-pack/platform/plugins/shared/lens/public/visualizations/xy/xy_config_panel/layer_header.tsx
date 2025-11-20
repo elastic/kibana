@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { useEuiTheme, EuiIconTip } from '@elastic/eui';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { css } from '@emotion/react';
-import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
-} from '../../../types';
-import type { State, XYAnnotationLayerConfig } from '../types';
+} from '@kbn/lens-common';
+import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
+import type { XYState, XYAnnotationLayerConfig } from '../types';
 import { annotationLayerHasUnsavedChanges } from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import {
@@ -24,7 +24,7 @@ import {
   isReferenceLayer,
 } from '../visualization_helpers';
 
-export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
+export function LayerHeader(props: VisualizationLayerWidgetProps<XYState>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
   if (!layer) {
     return null;
@@ -43,7 +43,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   return null;
 }
 
-export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<State>) {
+export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<XYState>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
   if (layer && isAnnotationsLayer(layer)) {
     return <AnnotationLayerHeaderContent {...props} />;
@@ -106,7 +106,7 @@ function AnnotationLayerHeaderContent({
   state,
   layerId,
   onChangeIndexPattern,
-}: VisualizationLayerHeaderContentProps<State>) {
+}: VisualizationLayerHeaderContentProps<XYState>) {
   const { euiTheme } = useEuiTheme();
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',

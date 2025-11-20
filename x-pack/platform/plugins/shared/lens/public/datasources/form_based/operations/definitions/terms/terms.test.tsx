@@ -19,16 +19,20 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
-import type { TermsIndexPatternColumn } from '.';
-import type { GenericOperationDefinition, LastValueIndexPatternColumn } from '..';
+import type {
+  TermsIndexPatternColumn,
+  LastValueIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  FormBasedLayer,
+  FormBasedPrivateState,
+  IndexPattern,
+  FramePublicAPI,
+} from '@kbn/lens-common';
+import type { GenericOperationDefinition } from '..';
 import { termsOperation, operationDefinitionMap } from '..';
-import type { FormBasedLayer, FormBasedPrivateState } from '../../../types';
-import type { FramePublicAPI } from '../../../../../types';
-import type { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
-import type { IndexPattern } from '../../../../../types';
 import { IncludeExcludeRow } from './include_exclude_options';
 import { TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS } from '../../../../../user_messages_ids';
 
