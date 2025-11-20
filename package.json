@@ -238,6 +238,7 @@
     "@kbn/cloud": "link:src/platform/packages/shared/cloud",
     "@kbn/cloud-chat-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_chat",
     "@kbn/cloud-data-migration-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration",
+    "@kbn/cloud-defend-plugin": "link:x-pack/solutions/security/plugins/cloud_defend",
     "@kbn/cloud-experiments-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_experiments",
     "@kbn/cloud-full-story-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_full_story",
     "@kbn/cloud-integration-saml-provider-plugin": "link:x-pack/platform/test/cloud_integration/plugins/saml_provider",

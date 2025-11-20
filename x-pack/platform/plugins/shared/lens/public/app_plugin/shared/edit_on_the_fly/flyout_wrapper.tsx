@@ -99,7 +99,7 @@ export const FlyoutWrapper = ({
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
           {/* Header row 2: Edit in Lens and button groups */}
           {(navigateToLensEditor || toolbar) && (
             <>
