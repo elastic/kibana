@@ -47,8 +47,9 @@ export const useMessageEditor = (): MessageEditorInstance => {
       _internal: {
         ref,
         onChange: () => {
-          // If current value is a single line break tag, set to empty string
-          if (ref.current && ref.current.innerHTML === '<br>') {
+          // If current text content is empty clear innerHTML
+          // This is required so the :empty pseudo-class gets reset and the placeholder is shown
+          if (ref.current && ref.current.textContent === '') {
             ref.current.innerHTML = '';
           }
 
