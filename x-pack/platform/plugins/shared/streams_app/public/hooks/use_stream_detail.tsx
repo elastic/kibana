@@ -71,11 +71,14 @@ export function StreamDetailContextProvider({
             };
           }
 
-          if (Streams.GroupStream.GetResponse.is(response)) {
+          if (
+            Streams.GroupStream.GetResponse.is(response) ||
+            Streams.QueryStream.GetResponse.is(response)
+          ) {
             return response;
           }
 
-          throw new Error('Stream detail only supports Ingest streams and Group streams.');
+          throw new Error('Stream detail only supports Ingest, Query and Group streams.');
         });
     },
     [streamsRepositoryClient, name, canManage]

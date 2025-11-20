@@ -17,7 +17,7 @@ export const FieldStatusBadge = ({
 }: {
   status: FieldStatus;
   uncommitted?: boolean;
-  streamType?: 'wired' | 'classic' | 'unknown';
+  streamType?: 'wired' | 'classic' | 'query' | 'unknown';
 }) => {
   // Determine the display status - for classic streams, show "dynamic" instead of "unmapped"
   const displayStatus = status === 'unmapped' && streamType === 'classic' ? 'dynamic' : status;

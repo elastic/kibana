@@ -49,7 +49,7 @@ import {
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
-import { DiscoverBadgeButton } from '../stream_badges';
+import { DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 
 const datePickerStyle = css`
   .euiFormControlLayout {
@@ -300,11 +300,7 @@ export function StreamsTreeTable({
                 </EuiFlexItem>
                 {Streams.QueryStream.Definition.is(item.stream) && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color={euiTheme.colors.backgroundLightAccent}>
-                      {i18n.translate('xpack.streams.streamsTreeTable.queryStreamBadge', {
-                        defaultMessage: 'Query stream',
-                      })}
-                    </EuiBadge>
+                    <QueryStreamBadge />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

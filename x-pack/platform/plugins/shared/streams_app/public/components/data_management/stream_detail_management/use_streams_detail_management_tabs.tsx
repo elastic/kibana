@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { StreamDetailSignificantEventsView } from '../../stream_detail_significant_events_view';
@@ -16,7 +16,7 @@ export function useStreamsDetailManagementTabs({
   definition,
   refreshDefinition,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -28,14 +28,21 @@ export function useStreamsDetailManagementTabs({
 
   return {
     isLoading,
-    processing: {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
-        defaultMessage: 'Processing',
-      }),
-    },
+    ...(Streams.ingest.all.GetResponse.is(definition)
+      ? {
+          processing: {
+            content: (
+              <StreamDetailEnrichment
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
+            ),
+            label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+              defaultMessage: 'Processing',
+            }),
+          },
+        }
+      : {}),
     ...(groupStreams?.enabled
       ? {
           references: {

@@ -17,11 +17,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { AddAttachmentFlyout } from './add_attachment_flyout';
 import { AttachmentsTable } from './attachment_table';
 
-export function StreamDetailAttachments({
-  definition,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-}) {
+export function StreamDetailAttachments({ definition }: { definition: Streams.all.GetResponse }) {
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);

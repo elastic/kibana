@@ -61,7 +61,7 @@ export function WiredStreamDetailManagement({
     features: { attachments },
   } = useStreamsPrivileges();
 
-  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
+  const { isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
@@ -130,7 +130,6 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Partitioning',
       }),
     },
-    processing,
     schema: {
       content: (
         <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />

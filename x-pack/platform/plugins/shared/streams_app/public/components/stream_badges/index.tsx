@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiLink, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
@@ -91,6 +91,17 @@ export function WiredStreamBadge() {
   );
 }
 
+export function QueryStreamBadge() {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiBadge color={euiTheme.colors.backgroundLightAccent}>
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.queryBadgeLabel', {
+        defaultMessage: 'Query stream',
+      })}
+    </EuiBadge>
+  );
+}
+
 export function LifecycleBadge({
   lifecycle,
   dataTestSubj,
@@ -166,10 +177,10 @@ export function LifecycleBadge({
 
 export function DiscoverBadgeButton({
   stream,
-  hasDataStream,
+  hasDataStream = false,
 }: {
   stream: Streams.all.Definition;
-  hasDataStream: boolean;
+  hasDataStream?: boolean;
 }) {
   const {
     dependencies: {
