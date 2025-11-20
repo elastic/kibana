@@ -12,9 +12,8 @@ import IconDarkSVG from './icon_dark.svg';
 
 export const IconAnnouncementBadge = React.memo<Omit<EuiIconProps, 'type'>>((props) => {
   const isDark = useKibanaIsDarkMode();
-  if (isDark) {
-    return <EuiIcon type={IconDarkSVG} {...props} />;
-  }
-  return <EuiIcon type={IconSVG} {...props} />;
+  const Icon = isDark ? IconDarkSVG : IconSVG;
+
+  return <EuiIcon type={Icon} {...props} />;
 });
 IconAnnouncementBadge.displayName = 'IconAnnouncementBadge';
