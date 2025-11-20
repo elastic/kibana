@@ -70,7 +70,7 @@ describe('<PrevalenceOverview />', () => {
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
     expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Time range applied');
   });
 
   it('should render link without icon if isPreviewMode is true', () => {

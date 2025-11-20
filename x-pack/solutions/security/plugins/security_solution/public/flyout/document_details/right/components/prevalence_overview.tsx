@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
@@ -37,7 +37,7 @@ const DEFAULT_TO = 'now';
  */
 export const PrevalenceOverview: FC = () => {
   const { storage } = useKibana().services;
-  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_INTERVAL);
+  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE);
 
   const { dataFormattedForFieldBrowser, investigationFields, isPreviewMode } =
     useDocumentDetailsContext();
@@ -93,15 +93,21 @@ export const PrevalenceOverview: FC = () => {
         link,
         iconType: !isPreviewMode ? 'arrowStart' : undefined,
         headerContent: (
-          <EuiIconTip
+          <EuiToolTip
             content={
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.prevalence.timeT"
-                defaultMessage="The prevalence is calculated from a specific time interval. To change that interval, go to the Prevalence tab in the flyout expanded view and use the date picker."
+                id="xpack.securitySolution.flyout.right.insights.prevalence.custom-time-range-applied-tooltip"
+                defaultMessage="The prevalence is calculated from a specific time range. To change it, click on the Prevalence title (to the left) and use the date picker."
               />
             }
-            type="info"
-          />
+          >
+            <EuiBadge color="hollow" iconSide="left" iconType="clock" tabIndex={0}>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.prevalence.custom-time-range-applied-badge-label"
+                defaultMessage="Time range applied"
+              />
+            </EuiBadge>
+          </EuiToolTip>
         ),
       }}
       content={{ loading, error }}

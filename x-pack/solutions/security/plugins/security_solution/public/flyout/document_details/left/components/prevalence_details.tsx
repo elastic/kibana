@@ -355,7 +355,7 @@ export const PrevalenceDetails: React.FC = () => {
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
-  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_INTERVAL);
+  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE);
 
   // these two are used by the usePrevalence hook to fetch the data
   const [start, setStart] = useState(timeSavedInLocalStorage?.start || DEFAULT_FROM);
@@ -375,7 +375,7 @@ export const PrevalenceDetails: React.FC = () => {
   const onTimeChange = ({ start: s, end: e, isInvalid }: OnTimeChangeProps) => {
     if (isInvalid) return;
 
-    storage.set(FLYOUT_STORAGE_KEYS.PREVALENCE_INTERVAL, { start: s, end: e });
+    storage.set(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE, { start: s, end: e });
 
     setStart(s);
     setEnd(e);
