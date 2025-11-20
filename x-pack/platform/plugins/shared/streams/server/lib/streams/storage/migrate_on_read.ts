@@ -137,7 +137,6 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     const streamName = migratedDefinition.name;
 
     if (
-      isObject(migratedDefinition.ingest) &&
       'wired' in migratedDefinition.ingest &&
       typeof streamName === 'string' &&
       isRoot(streamName)

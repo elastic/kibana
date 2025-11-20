@@ -82,10 +82,7 @@ export function findInheritedFailureStore(
     throw new Error('Unable to find inherited failure store configuration');
   }
 
-  if (
-    !originDefinition.ingest.failure_store ||
-    isInheritFailureStore(originDefinition.ingest.failure_store)
-  ) {
+  if (isInheritFailureStore(originDefinition.ingest.failure_store)) {
     throw new Error('Wired streams can only inherit a defined failure store');
   }
 

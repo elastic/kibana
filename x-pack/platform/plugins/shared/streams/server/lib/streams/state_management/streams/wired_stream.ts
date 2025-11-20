@@ -549,10 +549,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const ancestors = getAncestorsAndSelf(this._definition.name).map(
       (id) => desiredState.get(id)!.definition as Streams.WiredStream.Definition
     );
-    const lifecycle = findInheritedLifecycle(this._definition, ancestors);
+    const { from: _lifecycleOrigin, ...lifecycle } = findInheritedLifecycle(
+      this._definition,
+      ancestors
+    );
     const { existsAsManagedDataStream } = await this.getMatchingDataStream();
     const settings = getInheritedSettings(ancestors);
-    const { from: _from, ...failureStore } = findInheritedFailureStore(this._definition, ancestors);
+    const { from: _fsOrigin, ...failureStore } = findInheritedFailureStore(
+      this._definition,
+      ancestors
+    );
 
     return [
       {

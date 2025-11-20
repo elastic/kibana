@@ -18,7 +18,10 @@ import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
-import { isDisabledLifecycleFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import {
+  isDisabledLifecycleFailureStore,
+  isInheritFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { StatusError } from '../../errors/status_error';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
@@ -271,10 +274,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       });
     }
 
-    if (
-      this._definition.ingest.failure_store &&
-      !('inherit' in this._definition.ingest.failure_store)
-    ) {
+    if (!isInheritFailureStore(this._definition.ingest.failure_store)) {
       actions.push({
         type: 'update_failure_store',
         request: {
@@ -316,6 +316,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   public getFailureStore(): FailureStore {
     return this._definition.ingest.failure_store;
   }
+
   protected async doDetermineUpdateActions(
     desiredState: State,
     startingState: State,
