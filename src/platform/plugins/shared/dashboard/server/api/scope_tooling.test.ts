@@ -89,6 +89,7 @@ describe('stripUnmappedKeys', () => {
             y: 0,
           },
           type: 'typeWithoutSchema',
+          uid: '12345',
         },
       ],
     };
@@ -99,7 +100,7 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped panel undefined, panel schema not available for panel type: typeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
+          "Dropped panel 12345, panel schema not available for panel type: typeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
         ],
       }
     `);
