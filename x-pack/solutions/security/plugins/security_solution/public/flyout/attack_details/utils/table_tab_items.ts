@@ -4,35 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { sortBy } from 'lodash/fp';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import type { AttacksDetailsItem } from './table_tab_columns';
-
-export type ItemsProvider = ({ attack }: { attack: AttackDiscoveryAlert }) => AttacksDetailsItem[];
+interface GetTableTabItemsProps {
+  /**
+   * Array of data formatted for field browser
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  /**
+   * Object of fields by name
+   */
+  fieldsByName: { [fieldName: string]: Partial<FieldSpec> };
+}
 
 /**
- * Returns the items for the table tab
+ * Returns the sorted items for the table tab
  */
-export const getTableTabItems: ItemsProvider = ({ attack }) => {
-  const HIDDEN_FIELDS: (keyof AttackDiscoveryAlert)[] = [
-    'replacements',
-    'users',
-    'entitySummaryMarkdown',
-    'detailsMarkdown',
-  ];
+export const getTableTabItems: (props: GetTableTabItemsProps) => TimelineEventsDetailsItem[] = ({
+  dataFormattedForFieldBrowser,
+  fieldsByName,
+}: GetTableTabItemsProps) => {
+  const sortedItems = sortBy(['field'], dataFormattedForFieldBrowser).map((item, i) => ({
+    ...item,
+    ...fieldsByName[item.field],
+    valuesConcatenated: item.values != null ? item.values.join() : '',
+    ariaRowindex: i + 1,
+  }));
 
-  const items: AttacksDetailsItem[] = Object.entries(attack)
-    // remove hidden fields
-    .filter(([field]) => !HIDDEN_FIELDS.includes(field as keyof AttackDiscoveryAlert))
-
-    // remove undefined / null values
-    .filter(([_, value]) => value !== undefined && value !== null)
-
-    // format to AttacksDetailsItem[]
-    .map(([field, value]) => ({
-      field,
-      values: (Array.isArray(value) ? value : String(value)) as AttacksDetailsItem['values'],
-    }));
-
-  return items;
+  return sortedItems;
 };

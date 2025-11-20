@@ -12,24 +12,23 @@ import userEvent from '@testing-library/user-event';
 import { TableTab } from './table_tab';
 import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
-const mockAttack = {
-  id: 'attack-1',
-  title: 'Test attack title',
-  summaryMarkdown: 'Some summary',
-  detailsMarkdown: 'Some details',
-  connectorId: 'connector-1',
-  connectorName: 'Test connector',
-  alertIds: ['alert-1'],
-  generationUuid: 'gen-1',
-  timestamp: '2024-01-01T00:00:00.000Z',
-} as AttackDiscoveryAlert;
-
+// mock context to return browserFields + dataFormattedForFieldBrowser
 jest.mock('../context', () => ({
   useAttackDetailsContext: () => ({
-    attack: mockAttack,
+    browserFields: {},
+    dataFormattedForFieldBrowser: [],
   }),
+}));
+
+// mock getTableTabItems
+jest.mock('../utils/table_tab_items', () => ({
+  getTableTabItems: jest.fn().mockReturnValue([
+    {
+      field: 'title',
+      values: 'Test attack title',
+    },
+  ]),
 }));
 
 describe('<TableTab /> (attack details)', () => {
@@ -50,10 +49,11 @@ describe('<TableTab /> (attack details)', () => {
       </TestProviders>
     );
 
-    // headers from your getTableTabColumns()
+    // headers from getTableTabColumns()
     expect(getByText('Field')).toBeInTheDocument();
     expect(getByText('Value')).toBeInTheDocument();
 
+    // row from mocked getTableTabItems
     expect(getByText('title')).toBeInTheDocument();
     expect(getByText('Test attack title')).toBeInTheDocument();
   });
