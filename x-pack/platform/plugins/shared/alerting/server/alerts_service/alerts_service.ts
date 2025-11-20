@@ -544,7 +544,6 @@ export class AlertsService implements IAlertsService {
           error.message
         }`
       );
-      console.log('------->error:', error);
       throw error;
     }
   }

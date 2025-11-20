@@ -76,18 +76,11 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
   const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
 
   if (indices && indices.length > 0) {
-    try {
-      await context.alertsService?.muteAllAlerts({
-        ruleId: id,
-        indices,
-        logger: context.logger,
-      });
-    } catch (error) {
-      context.logger.error(
-        `Failed to mute all alerts for rule ${id} in Elasticsearch: ${error.message}`
-      );
-      throw error;
-    }
+    await context.alertsService?.muteAllAlerts({
+      ruleId: id,
+      indices,
+      logger: context.logger,
+    });
   }
 
   const updateAttributes = updateMetaAttributes(context, {
