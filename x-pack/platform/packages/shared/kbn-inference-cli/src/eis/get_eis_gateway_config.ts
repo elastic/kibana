@@ -42,6 +42,11 @@ interface AccessControlListConfig {
     serverless: {
       mode: 'allow' | 'deny';
       organizations: string[];
+      allow_all_for_project_type: {
+        elasticsearch: boolean;
+        observability: boolean;
+        security: boolean;
+      };
     };
     task_types: string[];
   };
@@ -60,6 +65,9 @@ export async function getEisGatewayConfig({
 
   const { version } = await getServiceConfigurationFromYaml<{}>('eis-gateway');
 
+  // This file is meant for LOCAL DEVELOPMENT ONLY!
+  // We have different versions of this in serverless-gitops via the
+  // Helm value `acl` and the ConfigMap in helm/templates/acl.yaml.
   const aclContents: AccessControlListConfig = {
     [EIS_CHAT_MODEL_NAME]: {
       allow_cloud_trials: true,
@@ -70,8 +78,47 @@ export async function getEisGatewayConfig({
       serverless: {
         mode: 'deny',
         organizations: [],
+        allow_all_for_project_type: {
+          elasticsearch: false,
+          observability: false,
+          security: false,
+        },
       },
       task_types: ['chat'],
+    },
+    elser_model_2: {
+      allow_cloud_trials: true,
+      hosted: {
+        mode: 'deny',
+        accounts: [],
+      },
+      serverless: {
+        mode: 'deny',
+        organizations: [],
+        allow_all_for_project_type: {
+          elasticsearch: false,
+          observability: false,
+          security: false,
+        },
+      },
+      task_types: ['embed/text/sparse'],
+    },
+    'jina-embeddings-v3': {
+      allow_cloud_trials: true,
+      hosted: {
+        mode: 'deny',
+        accounts: [],
+      },
+      serverless: {
+        mode: 'deny',
+        organizations: [],
+        allow_all_for_project_type: {
+          elasticsearch: false,
+          observability: false,
+          security: false,
+        },
+      },
+      task_types: ['embed/text/dense'],
     },
   };
 

@@ -19,9 +19,8 @@
  * MVP implementation focusing on core threat intelligence actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
-import { UISchemas } from '../connector_spec_ui';
 
 export const VirusTotalConnector: ConnectorSpec = {
   metadata: {
@@ -32,14 +31,14 @@ export const VirusTotalConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  schema: z.discriminatedUnion('method', [
-    z.object({
-      method: z.literal('headers'),
-      headers: z.object({
-        'x-apikey': UISchemas.secret('vt-...').describe('API Key'),
-      }),
-    }),
-  ]),
+  authTypes: [
+    {
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'x-apikey',
+      },
+    },
+  ],
 
   actions: {
     scanFileHash: {
@@ -63,7 +62,7 @@ export const VirusTotalConnector: ConnectorSpec = {
     scanUrl: {
       isTool: true,
       input: z.object({
-        url: z.string().url().describe('URL to scan'),
+        url: z.url().describe('URL to scan'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { url: string };
@@ -112,7 +111,7 @@ export const VirusTotalConnector: ConnectorSpec = {
     getIpReport: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
