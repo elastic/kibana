@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+
 import { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL } from '../../../../../common/constants';
-import { buildSiemResponse } from '../utils';
-import { searchAlerts } from '../signals/utils/search_alerts';
+import { searchAlertsHandler } from '../common/search_alerts_handler';
 
 export const searchUnifiedAlertsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -39,51 +38,17 @@ export const searchUnifiedAlertsRoute = (
         },
       },
       async (context, request, response) => {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
-        const {
-          query,
-          aggs,
-          _source,
-          fields,
-          track_total_hits: trackTotalHits,
-          size,
-          sort,
-        } = request.body;
-        const siemResponse = buildSiemResponse(response);
-        if (
-          query == null &&
-          aggs == null &&
-          _source == null &&
-          fields == null &&
-          trackTotalHits == null &&
-          size == null &&
-          sort == null
-        ) {
-          return siemResponse.error({
-            statusCode: 400,
-            body: '"value" must have at least 1 children',
-          });
-        }
-        try {
+        const getIndexPattern = async () => {
           const spaceId = (await context.securitySolution).getSpaceId();
           const alertsIndex = ruleDataClient?.indexNameWithNamespace(spaceId);
           const indexPattern = [
             ...(alertsIndex ? [alertsIndex] : []), // Detection alerts
             `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Attack alerts
           ];
+          return indexPattern;
+        };
 
-          const result = await searchAlerts({ esClient, queryParams: request.body, indexPattern });
-
-          return response.ok({ body: result });
-        } catch (err) {
-          // error while getting or updating signal with id: id in signal index .siem-signals
-          const error = transformError(err);
-          return siemResponse.error({
-            body: error.message,
-            statusCode: error.statusCode,
-          });
-        }
+        return searchAlertsHandler({ context, request, response, getIndexPattern });
       }
     );
 };

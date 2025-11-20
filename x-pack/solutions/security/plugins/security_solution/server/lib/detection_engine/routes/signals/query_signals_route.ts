@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+
 import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
-import { buildSiemResponse } from '../utils';
-import { searchAlerts } from './utils/search_alerts';
+import { searchAlertsHandler } from '../common/search_alerts_handler';
 
 export const querySignalsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -38,47 +37,13 @@ export const querySignalsRoute = (
         },
       },
       async (context, request, response) => {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
-        const {
-          query,
-          aggs,
-          _source,
-          fields,
-          track_total_hits: trackTotalHits,
-          size,
-          sort,
-        } = request.body;
-        const siemResponse = buildSiemResponse(response);
-        if (
-          query == null &&
-          aggs == null &&
-          _source == null &&
-          fields == null &&
-          trackTotalHits == null &&
-          size == null &&
-          sort == null
-        ) {
-          return siemResponse.error({
-            statusCode: 400,
-            body: '"value" must have at least 1 children',
-          });
-        }
-        try {
+        const getIndexPattern = async () => {
           const spaceId = (await context.securitySolution).getSpaceId();
           const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
+          return indexPattern;
+        };
 
-          const result = await searchAlerts({ esClient, queryParams: request.body, indexPattern });
-
-          return response.ok({ body: result });
-        } catch (err) {
-          // error while getting or updating signal with id: id in signal index .siem-signals
-          const error = transformError(err);
-          return siemResponse.error({
-            body: error.message,
-            statusCode: error.statusCode,
-          });
-        }
+        return searchAlertsHandler({ context, request, response, getIndexPattern });
       }
     );
 };
