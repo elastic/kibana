@@ -84,7 +84,12 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
                   <ContentWithInspectCta
                     textSize="xs"
                     content={result.sloName}
-                    url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
+                    url={paths.sloDetails(
+                      result.sloId,
+                      result.sloInstanceId,
+                      undefined,
+                      'overview'
+                    )}
                   />
                 </li>
               ))}
