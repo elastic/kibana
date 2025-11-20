@@ -294,7 +294,7 @@ export class JobImportService {
     };
   }
 
-  public async validateDatafeeds(jobs: ImportedAdJob[]): Promise<DatafeedValidationResult[]> {
+  private async validateDatafeeds(jobs: ImportedAdJob[]): Promise<DatafeedValidationResult[]> {
     const results = await Promise.all(
       jobs.map(async ({ job, datafeed }) => {
         try {

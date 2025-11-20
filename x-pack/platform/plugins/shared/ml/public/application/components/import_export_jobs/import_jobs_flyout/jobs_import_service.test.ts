@@ -351,157 +351,158 @@ describe('JobImportService', () => {
         ]);
         expect(mockEsSearch).not.toHaveBeenCalled();
       });
-    });
-  });
 
-  describe('validateDatafeeds', () => {
-    it('should return warning for job with mixed patterns and named indices that are missing', async () => {
-      const jobs: ImportedAdJob[] = [
-        createBaseAdJob({
-          indices: ['logs-*', 'missing-index', 'metrics-*'],
-        }),
-      ];
+      it('should validate datafeeds and include warnings in results', async () => {
+        const jobs: ImportedAdJob[] = [createBaseAdJob({ jobId: 'ad-job-1' })];
 
-      const errorMessage =
-        'datafeed datafeed-1 cannot retrieve data because index missing-index does not exist';
-
-      mockValidateDatafeedPreview.mockResolvedValue({
-        valid: false,
-        documentsFound: false,
-        error: errorMessage,
-      });
-
-      const result = await jobImportService.validateDatafeeds(jobs);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].jobId).toBe('test-job-1');
-      expect(result[0].hasWarning).toBe(true);
-      expect(result[0].warningMessage).toContain(errorMessage);
-    });
-
-    it('should return no warnings for valid datafeeds', async () => {
-      const jobs: ImportedAdJob[] = [createBaseAdJob()];
-
-      mockValidateDatafeedPreview.mockResolvedValue({
-        valid: true,
-        documentsFound: true,
-      });
-
-      const result = await jobImportService.validateDatafeeds(jobs);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].jobId).toBe('test-job-1');
-      expect(result[0].hasWarning).toBe(false);
-      expect(result[0].warningMessage).toBeUndefined();
-    });
-
-    it('should return warning when datafeed preview returns error', async () => {
-      const jobs: ImportedAdJob[] = [createBaseAdJob()];
-
-      const errorMessage = `datafeed ${jobs[0].datafeed.datafeed_id} cannot retrieve data because index ${jobs[0].datafeed.indices[0]} does not exist`;
-
-      mockValidateDatafeedPreview.mockResolvedValue({
-        valid: false,
-        documentsFound: false,
-        error: errorMessage,
-      });
-
-      const result = await jobImportService.validateDatafeeds(jobs);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].jobId).toBe('test-job-1');
-      expect(result[0].hasWarning).toBe(true);
-      expect(result[0].warningMessage).toContain(errorMessage);
-    });
-
-    it('should return warning when datafeed preview is invalid', async () => {
-      const jobs: ImportedAdJob[] = [createBaseAdJob()];
-
-      mockValidateDatafeedPreview.mockResolvedValue({
-        valid: false,
-        documentsFound: true,
-      });
-
-      const result = await jobImportService.validateDatafeeds(jobs);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].jobId).toBe('test-job-1');
-      expect(result[0].hasWarning).toBe(true);
-      expect(result[0].warningMessage).toContain('Datafeed preview failed');
-    });
-
-    it('should return warning when no documents found', async () => {
-      const jobs: ImportedAdJob[] = [createBaseAdJob()];
-
-      mockValidateDatafeedPreview.mockResolvedValue({
-        valid: true,
-        documentsFound: false,
-      });
-
-      const result = await jobImportService.validateDatafeeds(jobs);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].jobId).toBe('test-job-1');
-      expect(result[0].hasWarning).toBe(true);
-      expect(result[0].warningMessage).toContain('Datafeed preview returned no data');
-    });
-
-    it('should handle validation errors gracefully', async () => {
-      const jobs: ImportedAdJob[] = [createBaseAdJob()];
-
-      mockValidateDatafeedPreview.mockRejectedValue(new Error('Network error'));
-
-      const result = await jobImportService.validateDatafeeds(jobs);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].jobId).toBe('test-job-1');
-      expect(result[0].hasWarning).toBe(true);
-      expect(result[0].warningMessage).toContain('Unable to validate datafeed preview');
-      expect(result[0].warningMessage).toContain('Network error');
-    });
-
-    it('should validate multiple jobs in parallel with mixed results', async () => {
-      const jobs: ImportedAdJob[] = [
-        createBaseAdJob({ jobId: 'test-job-1' }),
-        createBaseAdJob({ jobId: 'test-job-2' }),
-        createBaseAdJob({ jobId: 'test-job-3' }),
-      ];
-
-      mockValidateDatafeedPreview
-        .mockResolvedValueOnce({
+        mockValidateDatafeedPreview.mockResolvedValue({
           valid: true,
           documentsFound: true,
-        })
-        .mockResolvedValueOnce({
+        });
+
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
+
+        expect(result.jobs).toHaveLength(1);
+        expect(result.jobs[0].jobId).toBe('ad-job-1');
+        expect(result.datafeedValidations.size).toBe(1);
+        expect(result.datafeedValidations.get('ad-job-1')?.hasWarning).toBe(false);
+      });
+
+      it('should include datafeed warnings for jobs with missing indices', async () => {
+        const jobs: ImportedAdJob[] = [
+          createBaseAdJob({
+            jobId: 'ad-job-1',
+            indices: ['logs-*', 'missing-index', 'metrics-*'],
+          }),
+        ];
+
+        const errorMessage =
+          'datafeed datafeed-1 cannot retrieve data because index missing-index does not exist';
+
+        mockValidateDatafeedPreview.mockResolvedValue({
           valid: false,
           documentsFound: false,
-          error: 'Validation failed',
-        })
-        .mockResolvedValueOnce({
+          error: errorMessage,
+        });
+
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
+
+        expect(result.jobs).toHaveLength(1);
+        expect(result.datafeedValidations.size).toBe(1);
+        const validation = result.datafeedValidations.get('ad-job-1');
+        expect(validation?.hasWarning).toBe(true);
+        expect(validation?.warningMessage).toContain(errorMessage);
+      });
+
+      it('should include datafeed warning when preview returns error', async () => {
+        const jobs: ImportedAdJob[] = [createBaseAdJob({ jobId: 'ad-job-1' })];
+
+        const errorMessage = `datafeed ${jobs[0].datafeed.datafeed_id} cannot retrieve data because index ${jobs[0].datafeed.indices[0]} does not exist`;
+
+        mockValidateDatafeedPreview.mockResolvedValue({
+          valid: false,
+          documentsFound: false,
+          error: errorMessage,
+        });
+
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
+
+        expect(result.jobs).toHaveLength(1);
+        const validation = result.datafeedValidations.get('ad-job-1');
+        expect(validation?.hasWarning).toBe(true);
+        expect(validation?.warningMessage).toContain(errorMessage);
+      });
+
+      it('should include datafeed warning when preview is invalid', async () => {
+        const jobs: ImportedAdJob[] = [createBaseAdJob({ jobId: 'ad-job-1' })];
+
+        mockValidateDatafeedPreview.mockResolvedValue({
+          valid: false,
+          documentsFound: true,
+        });
+
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
+
+        expect(result.jobs).toHaveLength(1);
+        const validation = result.datafeedValidations.get('ad-job-1');
+        expect(validation?.hasWarning).toBe(true);
+        expect(validation?.warningMessage).toContain('Datafeed preview failed');
+      });
+
+      it('should include datafeed warning when no documents found', async () => {
+        const jobs: ImportedAdJob[] = [createBaseAdJob({ jobId: 'ad-job-1' })];
+
+        mockValidateDatafeedPreview.mockResolvedValue({
           valid: true,
           documentsFound: false,
         });
 
-      const result = await jobImportService.validateDatafeeds(jobs);
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
 
-      expect(result).toHaveLength(3);
-      expect(mockValidateDatafeedPreview).toHaveBeenCalledTimes(3);
+        expect(result.jobs).toHaveLength(1);
+        const validation = result.datafeedValidations.get('ad-job-1');
+        expect(validation?.hasWarning).toBe(true);
+        expect(validation?.warningMessage).toContain('Datafeed preview returned no data');
+      });
 
-      // First job: valid, no warnings
-      expect(result[0].jobId).toBe('test-job-1');
-      expect(result[0].hasWarning).toBe(false);
-      expect(result[0].warningMessage).toBeUndefined();
+      it('should handle datafeed validation errors gracefully', async () => {
+        const jobs: ImportedAdJob[] = [createBaseAdJob({ jobId: 'ad-job-1' })];
 
-      // Second job: validation error
-      expect(result[1].jobId).toBe('test-job-2');
-      expect(result[1].hasWarning).toBe(true);
-      expect(result[1].warningMessage).toContain('Unable to validate datafeed preview');
-      expect(result[1].warningMessage).toContain('Validation failed');
+        mockValidateDatafeedPreview.mockRejectedValue(new Error('Network error'));
 
-      // Third job: no documents found
-      expect(result[2].jobId).toBe('test-job-3');
-      expect(result[2].hasWarning).toBe(true);
-      expect(result[2].warningMessage).toContain('Datafeed preview returned no data');
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
+
+        expect(result.jobs).toHaveLength(1);
+        const validation = result.datafeedValidations.get('ad-job-1');
+        expect(validation?.hasWarning).toBe(true);
+        expect(validation?.warningMessage).toContain('Unable to validate datafeed preview');
+        expect(validation?.warningMessage).toContain('Network error');
+      });
+
+      it('should validate multiple AD jobs with mixed datafeed results', async () => {
+        const jobs: ImportedAdJob[] = [
+          createBaseAdJob({ jobId: 'ad-job-1' }),
+          createBaseAdJob({ jobId: 'ad-job-2' }),
+          createBaseAdJob({ jobId: 'ad-job-3' }),
+        ];
+
+        mockValidateDatafeedPreview
+          .mockResolvedValueOnce({
+            valid: true,
+            documentsFound: true,
+          })
+          .mockResolvedValueOnce({
+            valid: false,
+            documentsFound: false,
+            error: 'Validation failed',
+          })
+          .mockResolvedValueOnce({
+            valid: true,
+            documentsFound: false,
+          });
+
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
+
+        expect(result.jobs).toHaveLength(3);
+        expect(result.datafeedValidations.size).toBe(3);
+        expect(mockValidateDatafeedPreview).toHaveBeenCalledTimes(3);
+
+        // First job: valid, no warnings
+        const validation1 = result.datafeedValidations.get('ad-job-1');
+        expect(validation1?.hasWarning).toBe(false);
+        expect(validation1?.warningMessage).toBeUndefined();
+
+        // Second job: validation error
+        const validation2 = result.datafeedValidations.get('ad-job-2');
+        expect(validation2?.hasWarning).toBe(true);
+        expect(validation2?.warningMessage).toContain('Unable to validate datafeed preview');
+        expect(validation2?.warningMessage).toContain('Validation failed');
+
+        // Third job: no documents found
+        const validation3 = result.datafeedValidations.get('ad-job-3');
+        expect(validation3?.hasWarning).toBe(true);
+        expect(validation3?.warningMessage).toContain('Datafeed preview returned no data');
+      });
     });
   });
 });
