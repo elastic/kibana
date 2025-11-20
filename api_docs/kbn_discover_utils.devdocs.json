@@ -1734,6 +1734,39 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getAvailableResourceFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getAvailableResourceFields",
+        "description": [],
+        "signature": [
+          "(resourceDoc: Record<string, unknown>) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_available_resource_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getAvailableResourceFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "resourceDoc",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_available_resource_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.getDefaultSort",
         "type": "Function",
         "tags": [],
@@ -2331,7 +2364,7 @@
             "section": "def-common.LogDocumentOverview",
             "text": "LogDocumentOverview"
           },
-          ") => { field: \"processor.event\" | \"event_name\"; value: string | undefined; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
+          ") => { field: string; value: string; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_event_type_field_with_fallback.ts",
         "deprecated": false,
@@ -2531,7 +2564,7 @@
             "section": "def-common.LogDocumentOverview",
             "text": "LogDocumentOverview"
           },
-          ") => { field: \"log.level\" | \"error.log.level\"; value: string | undefined; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
+          ") => { field: string; value: string; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_level_field_with_fallback.ts",
         "deprecated": false,
@@ -2570,7 +2603,7 @@
         "label": "getMessageFieldWithFallbacks",
         "description": [],
         "signature": [
-          "(doc: ",
+          "(doc: Record<string, unknown> | ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -2578,7 +2611,7 @@
             "section": "def-common.LogDocumentOverview",
             "text": "LogDocumentOverview"
           },
-          ", { includeFormattedValue }?: { includeFormattedValue?: boolean | undefined; }) => { field: \"message\" | \"event.original\" | \"error.message\" | \"exception.message\" | \"error.exception.message\" | \"attributes.exception.message\"; value: string | undefined; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
+          ", { includeFormattedValue }?: { includeFormattedValue?: boolean | undefined; }) => { field: string; value: string; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
         "deprecated": false,
@@ -2587,11 +2620,12 @@
           {
             "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.getMessageFieldWithFallbacks.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "doc",
             "description": [],
             "signature": [
+              "Record<string, unknown> | ",
               {
                 "pluginId": "@kbn/discover-utils",
                 "scope": "common",
@@ -5217,7 +5251,7 @@
             "signature": [
               "() => { getDimensions: (params: { dimensions: string; indices?: string | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
               "MetricField",
-              "[]; total: number; page: number; }>; searchFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; kuery?: string | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
+              "[]; total: number; page: number; }>; searchFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; filters?: Record<string, string[]> | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
               "MetricField",
               "[]; total: number; page: number; }>; } | undefined"
             ],
@@ -7581,6 +7615,21 @@
         "description": [],
         "signature": [
           "\"links.trace_id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_MESSAGE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_MESSAGE_FIELD",
+        "description": [],
+        "signature": [
+          "\"body.text\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
