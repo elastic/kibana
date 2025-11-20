@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { metricStateSchema } from './charts/metric';
 import { legacyMetricStateSchema } from './charts/legacy_metric';
 import { gaugeStateSchema } from './charts/gauge';
+import { heatmapStateSchema } from './charts/heatmap';
 import type { LensApiAllMetricOperations } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
 
@@ -19,6 +20,7 @@ export const lensApiStateSchema = schema.oneOf([
   metricStateSchema,
   legacyMetricStateSchema,
   gaugeStateSchema,
+  heatmapStateSchema,
 ]);
 
 export type LensApiState = TypeOf<typeof lensApiStateSchema>;
@@ -26,6 +28,7 @@ export type LensApiState = TypeOf<typeof lensApiStateSchema>;
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
+export type { HeatmapState, heatmapStateSchemaNoESQL } from './charts/heatmap';
 
 export type NarrowByType<T, U> = T extends { type: U } ? T : never;
 

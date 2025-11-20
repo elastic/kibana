@@ -29,6 +29,10 @@ import {
   fromAPItoLensState as fromGaugeAPItoLensState,
   fromLensStateToAPI as fromGaugeLensStateToAPI,
 } from './transforms/charts/gauge';
+import {
+  fromAPItoLensState as fromHeatmapAPItoLensState,
+  fromLensStateToAPI as fromHeatmapLensStateToAPI,
+} from './transforms/charts/heatmap';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
@@ -37,6 +41,7 @@ const compatibilityMap: Record<string, string> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
   lnsGauge: 'gauge',
+  lnsHeatmap: 'heatmap',
 };
 
 /**
@@ -73,6 +78,10 @@ export class LensConfigBuilder {
     gauge: {
       fromAPItoLensState: fromGaugeAPItoLensState,
       fromLensStateToAPI: fromGaugeLensStateToAPI,
+    },
+    heatmap: {
+      fromAPItoLensState: fromHeatmapAPItoLensState,
+      fromLensStateToAPI: fromHeatmapLensStateToAPI,
     },
   } as const;
   private dataViewsAPI: DataViewsCommon | undefined;
@@ -168,7 +177,7 @@ export class LensConfigBuilder {
 
   toAPIFormat(config: LensAttributes): LensApiState {
     const visType = config.visualizationType;
-    const type = compatibilityMap[visType];
+    const type = compatibilityMap[visType] ?? visType;
 
     if (!type || !(type in this.apiConvertersByChart)) {
       throw new Error(`No API converter found for chart type: ${visType}`);
