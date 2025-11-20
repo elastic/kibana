@@ -137,7 +137,7 @@ export const WorkflowYAMLEditor = ({
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useKibana().services;
 
-  const saveYaml = useSaveYaml();
+  const [saveYaml, { isLoading: isSaving }] = useSaveYaml();
   const dispatch = useDispatch();
   const onChange = useCallback(
     (yaml: string) => {
@@ -160,6 +160,10 @@ export const WorkflowYAMLEditor = ({
   const stepExecutions = useSelector(selectStepExecutions);
   const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
   stepExecutionsRef.current = stepExecutions;
+
+  // Ref to track saving state for keyboard handlers
+  const isSavingRef = useRef<boolean>(false);
+  isSavingRef.current = isSaving;
 
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
@@ -245,9 +249,19 @@ export const WorkflowYAMLEditor = ({
   // they should not have any dependencies, so they are not affected by the changes in the component
   const keyboardHandlers = useMemo(
     () => ({
-      save: () => saveYaml(),
+      save: () => {
+        if (isSavingRef.current) {
+          return;
+        }
+        saveYaml();
+      },
       run: () => dispatch(setIsTestModalOpen(true)),
-      saveAndRun: () => saveYaml().then(() => dispatch(setIsTestModalOpen(true))),
+      saveAndRun: () => {
+        if (isSavingRef.current) {
+          return;
+        }
+        saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
+      },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []

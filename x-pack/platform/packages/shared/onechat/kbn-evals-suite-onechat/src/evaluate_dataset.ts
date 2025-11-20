@@ -12,6 +12,7 @@ import {
   type KibanaPhoenixClient,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
+  selectEvaluators,
   withEvaluateExampleSpan,
   withEvaluatorSpan,
 } from '@kbn/evals';
@@ -93,15 +94,13 @@ export function createEvaluateDataset({
           })
         ),
       ]);
-      const correctnessAnalysis = correctnessResult.metadata;
-      const groundednessAnalysis = groundednessResult.metadata;
 
       return {
         errors: response.errors,
         messages: response.messages,
-        correctnessAnalysis,
-        groundednessAnalysis,
         traceId: response.traceId,
+        correctnessAnalysis: correctnessResult?.metadata,
+        groundednessAnalysis: groundednessResult?.metadata,
       };
     };
 
@@ -110,11 +109,11 @@ export function createEvaluateDataset({
         dataset,
         task: callConverseAndEvaluate,
       },
-      [
+      selectEvaluators([
         ...createQuantitativeCorrectnessEvaluators(),
         createQuantitativeGroundednessEvaluator(),
         ...Object.values(evaluators.traceBasedEvaluators),
-      ]
+      ])
     );
   };
 }

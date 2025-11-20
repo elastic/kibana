@@ -106,9 +106,18 @@ node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kb
 # Run with specific connector
 node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts --project="my-connector"
 
-# Run with trace collection from separate cluster and LLM-as-a-judge
+# Run with LLM-as-a-judge for consistent evaluation results
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+
+# Run only selected evaluators
+SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+
+
+# Retrieve traces from another (monitoring) closter
 TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+
 ```
+
 
 ### Run Evaluation Comparisons
 
