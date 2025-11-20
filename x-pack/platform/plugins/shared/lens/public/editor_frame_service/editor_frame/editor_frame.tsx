@@ -187,8 +187,6 @@ export function EditorFrame(props: EditorFrameProps) {
                 <LayerTabsWrapper
                   coreStart={props.core}
                   framePublicAPI={framePublicAPI}
-                  setIsInlineFlyoutVisible={() => {}}
-                  dataViews={props.plugins.dataViews}
                   uiActions={props.plugins.uiActions}
                 />
                 <ConfigPanelWrapper

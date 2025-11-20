@@ -301,10 +301,8 @@ export function LensEditConfigurationFlyout({
     <LayerTabsWrapper
       attributes={attributes}
       coreStart={coreStart}
-      dataViews={startDependencies.dataViews}
       uiActions={startDependencies.uiActions}
       framePublicAPI={framePublicAPI}
-      setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
     />
   );
 

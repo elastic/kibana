@@ -60,8 +60,6 @@ export function LayerTabs({
   attributes,
   coreStart,
   framePublicAPI,
-  setIsInlineFlyoutVisible,
-  dataViews,
   uiActions,
 }: LayerTabsProps & {
   activeVisualization: Visualization;

@@ -123,7 +123,5 @@ export interface LayerTabsProps {
   attributes?: TypedLensSerializedState['attributes'];
   coreStart: CoreStart;
   framePublicAPI: FramePublicAPI;
-  setIsInlineFlyoutVisible: (flag: boolean) => void;
-  dataViews: LensPluginStartDependencies['dataViews'];
   uiActions: LensPluginStartDependencies['uiActions'];
 }

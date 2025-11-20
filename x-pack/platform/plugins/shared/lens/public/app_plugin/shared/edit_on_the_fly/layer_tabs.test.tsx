@@ -182,9 +182,7 @@ describe('LayerTabs', () => {
       datasourceMap,
       framePublicAPI: frame,
       coreStart: coreMock.createStart(),
-      dataViews: mockStartDependencies.dataViews,
       uiActions: mockStartDependencies.uiActions,
-      setIsInlineFlyoutVisible: jest.fn(),
     };
   }
 
