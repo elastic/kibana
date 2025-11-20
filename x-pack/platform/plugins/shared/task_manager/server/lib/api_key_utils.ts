@@ -39,6 +39,11 @@ export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
   return user?.authentication_type === 'api_key';
 };
 
+export const requestHasApiKey = (security: SecurityServiceStart, request: KibanaRequest) => {
+  const user = security.authc.getCurrentUser(request);
+  return (user && isRequestApiKeyType(user)) || request.isFakeRequest;
+};
+
 export const getApiKeyFromRequest = (request: KibanaRequest) => {
   const credentials = getCredentialsFromRequest(request);
   if (credentials) {
@@ -66,7 +71,7 @@ export const createApiKey = async (
   const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
 
   // If the user passed in their own API key or the request is a fake request, use the API key from the request
-  if ((user && isRequestApiKeyType(user)) || request.isFakeRequest) {
+  if (requestHasApiKey(security, request)) {
     const apiKeyCreateResult = getApiKeyFromRequest(request);
 
     if (!apiKeyCreateResult) {
@@ -130,7 +135,6 @@ export const getApiKeyAndUserScope = async (
   basePath: IBasePath
 ): Promise<Map<string, ApiKeyAndUserScope>> => {
   const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security);
-  const user = security.authc.getCurrentUser(request);
 
   const requestBasePath = basePath.get(request);
   const space = getSpaceIdFromPath(requestBasePath, basePath.serverBasePath);
@@ -145,9 +149,9 @@ export const getApiKeyAndUserScope = async (
         userScope: {
           apiKeyId: encodedApiKeyResult.apiKeyId,
           spaceId: space?.spaceId || 'default',
-          // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
+          // Set apiKeyCreatedByUser to true if the request includes its own API key, since we do
           // not want to invalidate a specific API key that was not created by the task manager
-          apiKeyCreatedByUser: isRequestApiKeyType(user),
+          apiKeyCreatedByUser: requestHasApiKey(security, request),
         },
       });
     }
