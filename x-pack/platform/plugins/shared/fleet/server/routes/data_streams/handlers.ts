@@ -265,7 +265,7 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
 
     const DEPRECATED_ILM_POLICY_TYPES = ['logs', 'metrics', 'synthetics'];
 
-    // Fetch all ILM policies (includes in_use_by.composable_templates metadata)
+    // Fetch all ILM policies
     const ilmResponse = await esClient.ilm.getLifecycle();
 
     // Check each deprecated policy type to see if we should show a callout
@@ -282,40 +282,49 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
       const deprecatedPolicy = ilmResponse[deprecatedPolicyName];
       const lifecyclePolicy = ilmResponse[lifecyclePolicyName];
 
-      // Get Fleet-managed component templates using this deprecated policy
-      // Filter for templates ending with @package (Fleet-managed)
-      const allComposableTemplates =
-        (deprecatedPolicy as any)?.in_use_by?.composable_templates || [];
-      const fleetManagedTemplates = allComposableTemplates.filter((templateName: string) =>
-        templateName.endsWith('@package')
-      );
+      // Skip if deprecated policy doesn't exist
+      if (!deprecatedPolicy) {
+        continue;
+      }
 
-      // If no Fleet-managed component templates are using this policy, skip
+      // Fetch Fleet-managed component templates for this policy type
+      const componentTemplateResponse = await esClient.cluster.getComponentTemplate({
+        name: `${policyType}-*@package`,
+      });
+
+      // Filter component templates that actually use the deprecated policy
+      const fleetManagedTemplates = componentTemplateResponse.component_templates
+        .filter((template) => {
+          const ilmPolicyName =
+            template.component_template?.template?.settings?.index?.lifecycle?.name;
+          return ilmPolicyName === deprecatedPolicyName;
+        })
+        .map((template) => template.name);
+
+      // If no Fleet-managed component templates are using this deprecated policy, skip
       if (fleetManagedTemplates.length === 0) {
         continue;
       }
 
       // Case 1: Using deprecated policy but @lifecycle doesn't exist → show callout
       if (!lifecyclePolicy) {
-        if (deprecatedPolicy) {
-          deprecatedILMPolicies.push({
-            policyName: deprecatedPolicyName,
-            version: deprecatedPolicy.version,
-            componentTemplates: fleetManagedTemplates,
-          });
-        }
+        deprecatedILMPolicies.push({
+          policyName: deprecatedPolicyName,
+          version: deprecatedPolicy.version,
+          componentTemplates: fleetManagedTemplates,
+        });
         continue;
       }
 
       // Case 2: Both policies exist
       // Don't show callout if both are unmodified (version 1) - auto-migration will happen
-      if (deprecatedPolicy && deprecatedPolicy.version === 1 && lifecyclePolicy.version === 1) {
+      if (deprecatedPolicy.version === 1 && lifecyclePolicy.version === 1) {
         // Both unmodified, auto-migration will handle this, skip
         continue;
       }
 
       // Case 3: At least one policy is modified (version > 1) → show callout
-      if (deprecatedPolicy && (deprecatedPolicy.version > 1 || lifecyclePolicy.version > 1)) {
+      if (deprecatedPolicy.version > 1 || lifecyclePolicy.version > 1) {
         deprecatedILMPolicies.push({
           policyName: deprecatedPolicyName,
           version: deprecatedPolicy.version,

@@ -37,27 +37,16 @@ describe('getDeprecatedILMCheckHandler', () => {
 
   it('should return empty array when no Fleet-managed templates use deprecated ILM policies', async () => {
     mockEsClient.ilm.getLifecycle.mockResolvedValue({
-      logs: {
-        version: 1,
-        modified_date: '',
-        policy: { phases: {} },
-        in_use_by: { composable_templates: [] },
-      } as any,
+      logs: { version: 1, modified_date: '', policy: { phases: {} } },
       'logs@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
-      metrics: {
-        version: 1,
-        modified_date: '',
-        policy: { phases: {} },
-        in_use_by: { composable_templates: [] },
-      } as any,
+      metrics: { version: 1, modified_date: '', policy: { phases: {} } },
       'metrics@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
-      synthetics: {
-        version: 1,
-        modified_date: '',
-        policy: { phases: {} },
-        in_use_by: { composable_templates: [] },
-      } as any,
+      synthetics: { version: 1, modified_date: '', policy: { phases: {} } },
       'synthetics@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
+    });
+
+    mockEsClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [],
     });
 
     await getDeprecatedILMCheckHandler(context, request, response);
@@ -71,17 +60,31 @@ describe('getDeprecatedILMCheckHandler', () => {
 
   it('should return empty array when both deprecated and @lifecycle policies are unmodified (version 1)', async () => {
     mockEsClient.ilm.getLifecycle.mockResolvedValue({
-      logs: {
-        version: 1,
-        modified_date: '',
-        policy: { phases: {} },
-        in_use_by: { composable_templates: ['logs-test@package'] },
-      } as any,
+      logs: { version: 1, modified_date: '', policy: { phases: {} } },
       'logs@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
       metrics: { version: 1, modified_date: '', policy: { phases: {} } },
       'metrics@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
       synthetics: { version: 1, modified_date: '', policy: { phases: {} } },
       'synthetics@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
+    });
+
+    mockEsClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        {
+          name: 'logs-test@package',
+          component_template: {
+            template: {
+              settings: {
+                index: {
+                  lifecycle: {
+                    name: 'logs',
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
     });
 
     await getDeprecatedILMCheckHandler(context, request, response);
@@ -96,15 +99,29 @@ describe('getDeprecatedILMCheckHandler', () => {
 
   it('should return deprecated policy when using deprecated policy without @lifecycle existing', async () => {
     mockEsClient.ilm.getLifecycle.mockResolvedValue({
-      logs: {
-        version: 1,
-        modified_date: '',
-        policy: { phases: {} },
-        in_use_by: { composable_templates: ['logs-test@package'] },
-      } as any,
+      logs: { version: 1, modified_date: '', policy: { phases: {} } },
       metrics: { version: 1, modified_date: '', policy: { phases: {} } },
       synthetics: { version: 1, modified_date: '', policy: { phases: {} } },
       // No @lifecycle policies exist
+    });
+
+    mockEsClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        {
+          name: 'logs-test@package',
+          component_template: {
+            template: {
+              settings: {
+                index: {
+                  lifecycle: {
+                    name: 'logs',
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
     });
 
     await getDeprecatedILMCheckHandler(context, request, response);
@@ -124,17 +141,31 @@ describe('getDeprecatedILMCheckHandler', () => {
 
   it('should return deprecated policy when deprecated policy is modified (version > 1)', async () => {
     mockEsClient.ilm.getLifecycle.mockResolvedValue({
-      logs: {
-        version: 2,
-        modified_date: '',
-        policy: { phases: {} },
-        in_use_by: { composable_templates: ['logs-test@package'] },
-      } as any,
+      logs: { version: 2, modified_date: '', policy: { phases: {} } },
       'logs@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
       metrics: { version: 1, modified_date: '', policy: { phases: {} } },
       'metrics@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
       synthetics: { version: 1, modified_date: '', policy: { phases: {} } },
       'synthetics@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
+    });
+
+    mockEsClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        {
+          name: 'logs-test@package',
+          component_template: {
+            template: {
+              settings: {
+                index: {
+                  lifecycle: {
+                    name: 'logs',
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
     });
 
     await getDeprecatedILMCheckHandler(context, request, response);
@@ -154,17 +185,31 @@ describe('getDeprecatedILMCheckHandler', () => {
 
   it('should return deprecated policy when @lifecycle policy is modified (version > 1)', async () => {
     mockEsClient.ilm.getLifecycle.mockResolvedValue({
-      logs: {
-        version: 1,
-        modified_date: '',
-        policy: { phases: {} },
-        in_use_by: { composable_templates: ['logs-test@package'] },
-      } as any,
+      logs: { version: 1, modified_date: '', policy: { phases: {} } },
       'logs@lifecycle': { version: 2, modified_date: '', policy: { phases: {} } },
       metrics: { version: 1, modified_date: '', policy: { phases: {} } },
       'metrics@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
       synthetics: { version: 1, modified_date: '', policy: { phases: {} } },
       'synthetics@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
+    });
+
+    mockEsClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        {
+          name: 'logs-test@package',
+          component_template: {
+            template: {
+              settings: {
+                index: {
+                  lifecycle: {
+                    name: 'logs',
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
     });
 
     await getDeprecatedILMCheckHandler(context, request, response);
@@ -184,22 +229,55 @@ describe('getDeprecatedILMCheckHandler', () => {
 
   it('should handle multiple deprecated policies across different types', async () => {
     mockEsClient.ilm.getLifecycle.mockResolvedValue({
-      logs: {
-        version: 2,
-        modified_date: '',
-        policy: { phases: {} },
-        in_use_by: { composable_templates: ['logs-test@package'] },
-      } as any,
+      logs: { version: 2, modified_date: '', policy: { phases: {} } },
       'logs@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
-      metrics: {
-        version: 1,
-        modified_date: '',
-        policy: { phases: {} },
-        in_use_by: { composable_templates: ['metrics-test@package'] },
-      } as any,
+      metrics: { version: 1, modified_date: '', policy: { phases: {} } },
       // metrics@lifecycle doesn't exist
       synthetics: { version: 1, modified_date: '', policy: { phases: {} } },
       'synthetics@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
+    });
+
+    mockEsClient.cluster.getComponentTemplate.mockImplementation((params: any) => {
+      if (params.name === 'logs-*@package') {
+        return Promise.resolve({
+          component_templates: [
+            {
+              name: 'logs-test@package',
+              component_template: {
+                template: {
+                  settings: {
+                    index: {
+                      lifecycle: {
+                        name: 'logs',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        });
+      } else if (params.name === 'metrics-*@package') {
+        return Promise.resolve({
+          component_templates: [
+            {
+              name: 'metrics-test@package',
+              component_template: {
+                template: {
+                  settings: {
+                    index: {
+                      lifecycle: {
+                        name: 'metrics',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        });
+      }
+      return Promise.resolve({ component_templates: [] });
     });
 
     await getDeprecatedILMCheckHandler(context, request, response);
@@ -224,18 +302,30 @@ describe('getDeprecatedILMCheckHandler', () => {
 
   it('should only consider Fleet-managed component templates (with @package suffix)', async () => {
     mockEsClient.ilm.getLifecycle.mockResolvedValue({
-      logs: {
-        version: 2,
-        modified_date: '',
-        policy: { phases: {} },
-        // Has both Fleet-managed and non-Fleet-managed templates
-        in_use_by: {
-          composable_templates: ['logs-test@package', 'logs-custom-template', 'logs-other'],
-        },
-      } as any,
+      logs: { version: 2, modified_date: '', policy: { phases: {} } },
       'logs@lifecycle': { version: 1, modified_date: '', policy: { phases: {} } },
       metrics: { version: 1, modified_date: '', policy: { phases: {} } },
       synthetics: { version: 1, modified_date: '', policy: { phases: {} } },
+    });
+
+    // getComponentTemplate with name='logs-*@package' will only return @package templates
+    mockEsClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        {
+          name: 'logs-test@package',
+          component_template: {
+            template: {
+              settings: {
+                index: {
+                  lifecycle: {
+                    name: 'logs',
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
     });
 
     await getDeprecatedILMCheckHandler(context, request, response);
