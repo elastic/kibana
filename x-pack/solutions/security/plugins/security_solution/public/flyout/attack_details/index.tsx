@@ -8,10 +8,8 @@ import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { AttackDetailsProps } from './types';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
-import { FlyoutHeader } from '../shared/components/flyout_header';
 
 import { PanelFooter } from './footer';
-import { HeaderTitle } from './components/header_title';
 import { PanelContent } from './content';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 import { AttackDetailsRightPanelKey } from './constants/panel_keys';
@@ -20,6 +18,7 @@ import { useKibana } from '../../common/lib/kibana';
 
 import { useTabs } from './hooks/use_tabs';
 import { useAttackDetailsContext } from './context';
+import { PanelHeader } from './header';
 
 export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
 
@@ -49,15 +48,12 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <FlyoutHeader>
-        <HeaderTitle />
-      </FlyoutHeader>
-
-      <PanelContent
-        tabs={tabsDisplayed}
+      <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}
+        tabs={tabsDisplayed}
       />
+      <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
       <PanelFooter />
     </>
   );

@@ -6,15 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
-import { EuiTab, EuiTabs } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { memo, useMemo } from 'react';
 import type { AttackDetailsPanelTabType } from './tabs';
 import { FlyoutBody } from '../shared/components/flyout_body';
 
 import type { AttackDetailsPanelPaths } from '.';
 import { FLYOUT_BODY_TEST_ID } from './constants/test_ids';
-import { FlexGroup, FlexItem } from '../../explore/components/stat_items/utils';
 
 export interface PanelContentProps {
   /**
@@ -25,56 +22,19 @@ export interface PanelContentProps {
    * Tabs display below the flyout's header
    */
   tabs: AttackDetailsPanelTabType[];
-  /**
-   * Callback to set the selected tab id in the parent component
-   * @param selected
-   */
-  setSelectedTabId: (selected: AttackDetailsPanelPaths) => void;
 }
 
 /**
  * Attack details expandable flyout section, that will display the content
  * of the overview, table and json tabs.
  */
-export const PanelContent: FC<PanelContentProps> = memo(
-  ({ selectedTabId, tabs, setSelectedTabId }) => {
-    const selectedTabContent = useMemo(
-      () => tabs.find((tab) => tab.id === selectedTabId)?.content,
-      [selectedTabId, tabs]
-    );
+export const PanelContent: FC<PanelContentProps> = memo(({ selectedTabId, tabs }) => {
+  const selectedTabContent = useMemo(
+    () => tabs.find((tab) => tab.id === selectedTabId)?.content,
+    [selectedTabId, tabs]
+  );
 
-    const onSelectedTabChanged = useCallback(
-      (id: AttackDetailsPanelPaths) => setSelectedTabId(id),
-      [setSelectedTabId]
-    );
-
-    return (
-      <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
-        <FlexGroup
-          css={css`
-            margin-bottom: 16px;
-          `}
-        >
-          <FlexItem>
-            <EuiTabs size="l" expand>
-              {tabs.map((tab, index) => (
-                <EuiTab
-                  onClick={() => onSelectedTabChanged(tab.id)}
-                  isSelected={tab.id === selectedTabId}
-                  key={index}
-                  data-test-subj={tab['data-test-subj']}
-                >
-                  {tab.name}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-          </FlexItem>
-        </FlexGroup>
-
-        {selectedTabContent}
-      </FlyoutBody>
-    );
-  }
-);
+  return <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>{selectedTabContent}</FlyoutBody>;
+});
 
 PanelContent.displayName = 'PanelContent';
