@@ -23,7 +23,7 @@
  *   node scripts/workflows_import_export.js import --dir=./my-workflows --overwrite
  */
 
-require('../src/setup_node_env');
+require('@kbn/setup-node-env');
 
 const fs = require('fs');
 const path = require('path');
