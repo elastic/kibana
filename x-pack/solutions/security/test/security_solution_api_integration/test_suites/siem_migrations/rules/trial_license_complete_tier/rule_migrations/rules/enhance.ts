@@ -245,7 +245,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Error cases', () => {
-      const { mockQradarXml } = getMockQRadarXml(['some rule']);
       it('should return error when no rules are found for update', async () => {
         const enhancePayload: EnhanceRulesParams['payload'] = {
           vendor: 'qradar',
