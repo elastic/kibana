@@ -26,19 +26,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Features', function () {
     const STREAM_NAME = 'logs.features-test';
 
-    const createFeature = async (body: Feature) => {
-      return await apiClient.fetch(
-        'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
-        {
-          params: {
-            path: { name: STREAM_NAME, featureType: body.type, featureName: body.name },
-            body,
-          },
-        }
-      );
-    };
-
-    const updateFeature = async (body: Feature) => {
+    const upsertFeature = async (body: Feature) => {
       return await apiClient.fetch(
         'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
         {
@@ -113,7 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('single feature lifecycle', () => {
       beforeEach(async () => {
-        const resp = await createFeature({
+        const resp = await upsertFeature({
           name: 'feature-a',
           type: 'system',
           description: 'Initial description',
@@ -153,7 +141,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('cannot create a feature with a name starting with an underscore', async () => {
-        const resp = await createFeature({
+        const resp = await upsertFeature({
           name: '_invalid-feature',
           type: 'system',
           description: 'A feature with an invalid name',
@@ -163,7 +151,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('cannot create a feature with a name starting with a dot', async () => {
-        const resp = await createFeature({
+        const resp = await upsertFeature({
           name: '.invalid-feature',
           type: 'system',
           description: 'A feature with an invalid name',
@@ -174,7 +162,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('after update', () => {
         beforeEach(async () => {
-          const resp = await updateFeature({
+          const resp = await upsertFeature({
             name: 'feature-a',
             type: 'system',
             description: 'Updated description',
@@ -356,7 +344,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             params: {
               path: { name: STREAM_NAME, featureType: 'system', featureName: 'nope' },
-              body: { description: 'x', filter: { always: {} } },
+              body: { type: 'system', name: 'nope', description: 'x', filter: { always: {} } },
             },
           }
         );
