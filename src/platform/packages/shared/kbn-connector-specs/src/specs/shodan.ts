@@ -19,9 +19,8 @@
  * MVP implementation focusing on core asset discovery actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
-import { UISchemas } from '../connector_spec_ui';
 
 export const ShodanConnector: ConnectorSpec = {
   metadata: {
@@ -29,17 +28,17 @@ export const ShodanConnector: ConnectorSpec = {
     displayName: 'Shodan',
     description: 'Internet-wide asset discovery and vulnerability scanning',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['alerting', 'siem'],
+    supportedFeatureIds: ['workflows'],
   },
 
-  schema: z.discriminatedUnion('method', [
-    z.object({
-      method: z.literal('headers'),
-      headers: z.object({
-        'X-Api-Key': UISchemas.secret().describe('API Key'),
-      }),
-    }),
-  ]),
+  authTypes: [
+    {
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'X-Api-Key',
+      },
+    },
+  ],
 
   actions: {
     searchHosts: {
@@ -50,6 +49,7 @@ export const ShodanConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; page?: number };
+        // const apiKey = ctx.secrets['X-Api-Key'] || '';
         const apiKey = ctx.auth.method === 'headers' ? ctx.auth.headers['X-Api-Key'] : '';
         const response = await ctx.client.get('https://api.shodan.io/shodan/host/search', {
           params: {
@@ -69,7 +69,7 @@ export const ShodanConnector: ConnectorSpec = {
     getHostInfo: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
