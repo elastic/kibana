@@ -1464,11 +1464,11 @@
           },
           {
             "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_attachments/to_reference_list.ts"
           },
           {
             "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_attachments/to_reference_list.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1595,6 +1595,10 @@
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
           },
@@ -1631,6 +1635,42 @@
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
           },
           {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/legacy_metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/legacy_metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/legacy_metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/gauge.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/gauge.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/gauge.ts"
+          },
+          {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
           },
@@ -1709,30 +1749,6 @@
           {
             "plugin": "controls",
             "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
-          },
-          {
-            "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
-          },
-          {
-            "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
-          },
-          {
-            "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
-          },
-          {
-            "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/legacy_metric.ts"
-          },
-          {
-            "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/legacy_metric.ts"
-          },
-          {
-            "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/legacy_metric.ts"
           },
           {
             "plugin": "canvas",

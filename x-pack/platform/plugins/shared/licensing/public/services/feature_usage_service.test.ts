@@ -29,8 +29,8 @@ describe('FeatureUsageService', () => {
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/licensing/feature_usage/register', {
           body: JSON.stringify([
-            { featureName: 'my-feature', licenseType: 'platinum' },
-            { featureName: 'my-other-feature', licenseType: 'gold' },
+            { featureId: 'my-feature', licenseType: 'platinum' },
+            { featureId: 'my-other-feature', licenseType: 'gold' },
           ]),
         });
       });
@@ -61,7 +61,7 @@ describe('FeatureUsageService', () => {
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/licensing/feature_usage/notify', {
           body: JSON.stringify({
-            featureName: 'my-feature',
+            featureId: 'my-feature',
             lastUsed: 42,
           }),
         });
@@ -78,7 +78,7 @@ describe('FeatureUsageService', () => {
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/licensing/feature_usage/notify', {
           body: JSON.stringify({
-            featureName: 'my-feature',
+            featureId: 'my-feature',
             lastUsed: now.getTime(),
           }),
         });

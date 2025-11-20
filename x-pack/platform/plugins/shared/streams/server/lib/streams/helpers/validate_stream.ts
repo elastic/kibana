@@ -7,7 +7,7 @@
 
 import { Streams } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import { isEqual, noop } from 'lodash';
 import type {
   AppendProcessor,
   Condition,
@@ -16,7 +16,10 @@ import type {
   DissectProcessor,
   GrokProcessor,
   ProcessorType,
+  RemoveByPrefixProcessor,
+  RemoveProcessor,
   RenameProcessor,
+  ReplaceProcessor,
   SetProcessor,
   StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
@@ -124,17 +127,34 @@ const actionStepValidators: {
       checkFieldName(step.copy_from);
     }
   },
+  remove_by_prefix: (step: RemoveByPrefixProcessor) => checkFieldName(step.from),
+  remove: (step: RemoveProcessor) => checkFieldName(step.from),
+  drop_document: noop, // 'where' condition is already validated in validateSteps function
+  replace: (step: ReplaceProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation
   manual_ingest_pipeline: () => {},
 };
 
-function validateSteps(steps: StreamlangStep[]) {
+function validateSteps(steps: StreamlangStep[], isWithinWhereBlock = false) {
   for (const step of steps) {
     if ('where' in step && step.where && 'steps' in step.where) {
       validateCondition(step.where as Condition);
-      validateSteps(step.where.steps);
+      // Nested steps are within a where block
+      validateSteps(step.where.steps, true);
     } else if (isActionBlock(step)) {
+      // Check if remove_by_prefix is being used within a where block
+      if (step.action === 'remove_by_prefix' && isWithinWhereBlock) {
+        throw new MalformedStreamError(
+          'remove_by_prefix processor cannot be used within a where block. Use it at the root level or use the remove processor with a condition instead.'
+        );
+      }
+
       if ('where' in step && step.where) {
         validateCondition(step.where);
       }

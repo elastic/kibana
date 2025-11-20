@@ -19,6 +19,7 @@ const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResul
 describe('conversation model converters', () => {
   const creationDate = '2024-09-04T06:44:17.944Z';
   const updateDate = '2025-08-04T06:44:19.123Z';
+  const roundCreationDate = '2025-08-04T07:42:20.789Z';
 
   beforeEach(() => {
     getToolResultIdMock.mockReturnValue('some-result-id');
@@ -44,6 +45,15 @@ describe('conversation model converters', () => {
                 message: 'some response',
               },
               steps: [],
+              started_at: roundCreationDate,
+              time_to_first_token: 42,
+              time_to_last_token: 100,
+              model_usage: {
+                connector_id: 'unknown',
+                llm_calls: 1,
+                input_tokens: 12,
+                output_tokens: 42,
+              },
             },
           ],
           created_at: creationDate,
@@ -77,6 +87,15 @@ describe('conversation model converters', () => {
               message: 'some response',
             },
             steps: [],
+            started_at: roundCreationDate,
+            time_to_first_token: 42,
+            time_to_last_token: 100,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
       });
@@ -96,6 +115,15 @@ describe('conversation model converters', () => {
             message: 'legacy response',
           },
           steps: [],
+          started_at: roundCreationDate,
+          time_to_first_token: 0,
+          time_to_last_token: 0,
+          model_usage: {
+            connector_id: 'unknown',
+            llm_calls: 1,
+            input_tokens: 12,
+            output_tokens: 42,
+          },
         },
       ];
 
@@ -121,6 +149,15 @@ describe('conversation model converters', () => {
               message: 'legacy response',
             },
             steps: [],
+            started_at: roundCreationDate,
+            time_to_first_token: 0,
+            time_to_last_token: 0,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
       });
@@ -218,6 +255,15 @@ describe('conversation model converters', () => {
             response: {
               message: 'some response',
             },
+            started_at: roundCreationDate,
+            time_to_first_token: 42,
+            time_to_last_token: 100,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
       };
@@ -243,6 +289,15 @@ describe('conversation model converters', () => {
               message: 'some response',
             },
             steps: [],
+            started_at: roundCreationDate,
+            time_to_first_token: 42,
+            time_to_last_token: 100,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
         created_at: creationDate,

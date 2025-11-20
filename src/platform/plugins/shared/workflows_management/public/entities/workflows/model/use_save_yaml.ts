@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useAsyncThunk } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
-import { saveYamlThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/save_yaml_thunk';
+import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { saveYamlThunk } from '../store/workflow_detail/thunks/save_yaml_thunk';
 
-export const useSaveYaml = () => useAsyncThunk(saveYamlThunk);
+export const useSaveYaml = () => useAsyncThunkState(saveYamlThunk);

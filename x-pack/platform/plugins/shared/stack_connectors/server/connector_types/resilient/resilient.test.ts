@@ -11,8 +11,7 @@ import { resilientFields, incidentTypes, severity } from './mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ResilientConnector } from './resilient';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { RESILIENT_CONNECTOR_ID } from './constants';
-import { PushToServiceIncidentSchema } from './schema';
+import { CONNECTOR_ID, PushToServiceIncidentSchema } from '@kbn/connector-schemas/resilient';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 jest.mock('axios');
@@ -90,7 +89,7 @@ describe('IBM Resilient connector', () => {
   const logger = loggingSystemMock.createLogger();
   const connector = new ResilientConnector(
     {
-      connector: { id: '1', type: RESILIENT_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       configurationUtilities: actionsConfigMock.create(),
       logger,
       services: actionsMock.createServices(),

@@ -24,6 +24,7 @@ const inferenceEndpointSchema = schema.object({
     provider: schema.string(),
     taskType: schema.string(),
     providerConfig: schema.any(),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
   secrets: schema.object({
     providerSecrets: schema.any(),

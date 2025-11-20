@@ -3505,7 +3505,6 @@ Object {
               },
             },
             "required": Array [
-              "id",
               "name",
             ],
             "type": "object",
@@ -3589,6 +3588,15 @@ Object {
                   "maxItems": 1,
                   "type": "array",
                 },
+                "channelNames": Object {
+                  "items": Object {
+                    "maxLength": 200,
+                    "minLength": 2,
+                    "type": "string",
+                  },
+                  "maxItems": 1,
+                  "type": "array",
+                },
                 "channels": Object {
                   "items": Object {
                     "type": "string",
@@ -3624,6 +3632,13 @@ Object {
               "additionalProperties": false,
               "properties": Object {
                 "channelIds": Object {
+                  "items": Object {
+                    "type": "string",
+                  },
+                  "maxItems": 1,
+                  "type": "array",
+                },
+                "channelNames": Object {
                   "items": Object {
                     "type": "string",
                   },

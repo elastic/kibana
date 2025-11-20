@@ -13,8 +13,8 @@ import type {
   UpdateIncidentRequest,
   CreateIncidentData,
   Incident,
-} from './types';
-import type { ResilientFieldMeta } from './schema';
+  ResilientFieldMeta,
+} from '@kbn/connector-schemas/resilient';
 
 const getValueFromOldField = (
   fieldMeta: ResilientFieldMeta,

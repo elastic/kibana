@@ -348,7 +348,7 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: ScheduleOptions) => {
     // ...
   },
-  runSoon: (taskId: string) =>  {
+  runSoon: (taskId: string, force?: boolean) =>  {
     // ...
   },
   bulkEnable: (taskIds: string[], runSoon: boolean = true) => {
@@ -466,7 +466,7 @@ The only exception to this is if you use `ensureScheduled` to schedule a task wi
 
 #### runSoon
 
-Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`.
+Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`. The default behavior is to throw an error if the task is already in the `Running` or `Claiming` phase. Set the `force` flag to `true` to reset a task in the `Running` phase back to `Idle`. We allow this for manual resets of tasks with long timeouts that may get stuck with a `Running` status during Kibana upgrades and restarts but are not actually running. Please use caution when setting this flag! This does not cancel in-progress task runs if they are still running.
 
 ```js
 export class Plugin {

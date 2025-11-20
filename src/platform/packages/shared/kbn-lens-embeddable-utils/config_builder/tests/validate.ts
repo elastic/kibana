@@ -98,5 +98,5 @@ export function validateAPIConverter(
   const filteredApiConfig = structuredClone(apiConfig);
   excludedFields?.forEach((fieldPath) => unset(filteredApiConfig, fieldPath));
 
-  expect(newApiConfig).toEqual(expect.objectContaining(filteredApiConfig));
+  expect(newApiConfig).toMatchObject(filteredApiConfig);
 }

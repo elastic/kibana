@@ -19,7 +19,7 @@ export const OverallUploadStatus: FC = () => {
   const generateStatus = (statuses: STATUS[]): EuiStepStatus => {
     if (statuses.includes(STATUS.STARTED)) {
       return 'current';
-    } else if (statuses.includes(STATUS.FAILED)) {
+    } else if (statuses.includes(STATUS.FAILED) || statuses.includes(STATUS.ABORTED)) {
       return 'danger';
     } else if (statuses.every((status) => status === STATUS.COMPLETED)) {
       return 'complete';
@@ -63,7 +63,11 @@ export const OverallUploadStatus: FC = () => {
             }),
             children: <></>,
             status: generateStatus([
-              uploadStatus.indexSearchable ? STATUS.COMPLETED : STATUS.NOT_STARTED,
+              uploadStatus.indexSearchable
+                ? STATUS.COMPLETED
+                : uploadStatus.overallImportStatus === STATUS.ABORTED
+                ? STATUS.ABORTED
+                : STATUS.NOT_STARTED,
             ]),
           },
         ]
@@ -110,7 +114,13 @@ export const OverallUploadStatus: FC = () => {
         defaultMessage: 'Upload complete',
       }),
       children: <></>,
-      status: uploadStatus.overallImportStatus === STATUS.COMPLETED ? 'complete' : 'incomplete',
+      status: generateStatus([
+        uploadStatus.overallImportStatus === STATUS.ABORTED
+          ? STATUS.ABORTED
+          : uploadStatus.overallImportStatus === STATUS.COMPLETED
+          ? STATUS.COMPLETED
+          : STATUS.NOT_STARTED,
+      ]),
     },
     {
       title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.allDocsSearchable', {
@@ -118,7 +128,11 @@ export const OverallUploadStatus: FC = () => {
       }),
       children: <></>,
       status: generateStatus([
-        uploadStatus.allDocsSearchable ? STATUS.COMPLETED : STATUS.NOT_STARTED,
+        uploadStatus.overallImportStatus === STATUS.ABORTED
+          ? STATUS.ABORTED
+          : uploadStatus.allDocsSearchable
+          ? STATUS.COMPLETED
+          : STATUS.NOT_STARTED,
       ]),
     },
   ];
