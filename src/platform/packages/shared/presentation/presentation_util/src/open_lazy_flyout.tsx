@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { htmlIdGenerator } from '@elastic/eui';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
 import { skip, take } from 'rxjs';
@@ -28,7 +28,10 @@ interface OpenLazyFlyoutParams {
   core: CoreStart;
   parentApi?: unknown;
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
-  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
+  flyoutProps?: Partial<OverlaySystemFlyoutOpenOptions> & {
+    triggerId?: string;
+    focusedPanelId?: string;
+  };
 }
 
 /**
@@ -46,7 +49,7 @@ interface OpenLazyFlyoutParams {
  * @param params.loadContent - Async function that loads the flyout content. Must return a valid React element.
  *                             If it resolves to `null` or `undefined`, the flyout will close automatically.
  * @param params.flyoutProps - Optional props passed to `openFlyout` (e.g. size, className, etc).
- *                             Supports `OverlayFlyoutOpenOptions`.
+ *                             Supports `OverlaySystemFlyoutOpenOptions`.
  * @param params.parentApi - Optional parent API to track opened overlays (e.g. dashboardsApi).
  *
  * @returns A handle to the opened flyout (`OverlayRef`).
@@ -74,27 +77,26 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     onClose();
   });
 
-  const flyoutRef = core.overlays.openFlyout(
-    toMountPoint(
-      <LazyFlyout
-        closeFlyout={onClose}
-        loadContent={loadContent}
-        core={core}
-        ariaLabelledBy={ariaLabelledBy}
-      />,
-      core
-    ),
+  const flyoutRef = core.overlays.openSystemFlyout(
+    <LazyFlyout
+      closeFlyout={onClose}
+      loadContent={loadContent}
+      core={core}
+      ariaLabelledBy={ariaLabelledBy}
+    />,
     {
+      session: 'start',
       size: 500,
       type: 'push',
       paddingSize: 'm',
       maxWidth: 800,
+      resizable: true,
       ownFocus: true,
-      isResizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazyFlyout',
       'aria-labelledby': ariaLabelledBy,
       onClose,
+      title: 'title placeholder',
       ...flyoutProps,
     }
   );
