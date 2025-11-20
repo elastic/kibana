@@ -27,7 +27,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 import { dataViewRouteHelpersFactory } from '../utils';
-import { inspect } from 'util';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -1155,9 +1154,9 @@ export default function (providerContext: FtrProviderContext) {
               expect(response.body).to.have.property('edges').length(2);
               expect(response.body).not.to.have.property('messages');
               // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
-            const actorNode = response.body.nodes.find(
-              (node: EntityNodeDataModel) => node.id === 'admin@example.com'
-            ) as EntityNodeDataModel;
+              const actorNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'admin@example.com'
+              ) as EntityNodeDataModel;
 
               // Verify entity enrichment
               expect(actorNode).not.to.be(undefined);
