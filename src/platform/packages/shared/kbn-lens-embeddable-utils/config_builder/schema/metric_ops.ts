@@ -273,3 +273,15 @@ export type LensApiCumulativeSumOperation = typeof cumulativeSumOperationSchema.
 export type LensApiCounterRateOperation = typeof counterRateOperationSchema.type;
 export type LensApiFormulaOperation = typeof formulaOperationDefinitionSchema.type;
 export type LensApiStaticValueOperation = typeof staticOperationDefinitionSchema.type;
+
+export type LensApiFieldMetricOrFormulaOperation =
+  | LensApiFieldMetricOperations
+  | LensApiFormulaOperation;
+
+export type LensApiAllMetricOrFormulaOperations =
+  | LensApiFieldMetricOperations
+  | LensApiFormulaOperation
+  | LensApiDifferencesOperation
+  | LensApiMovingAverageOperation
+  | LensApiCumulativeSumOperation
+  | LensApiCounterRateOperation;

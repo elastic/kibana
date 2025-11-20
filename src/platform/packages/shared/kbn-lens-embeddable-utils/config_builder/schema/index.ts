@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { metricStateSchema } from './charts/metric';
 import { legacyMetricStateSchema } from './charts/legacy_metric';
 import { gaugeStateSchema } from './charts/gauge';
+import { tagcloudStateSchema } from './charts/tagcloud';
 import type { LensApiAllMetricOperations } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
 import { xyStateSchema } from './charts/xy';
@@ -21,6 +22,7 @@ export const lensApiStateSchema = schema.oneOf([
   legacyMetricStateSchema,
   xyStateSchema,
   gaugeStateSchema,
+  tagcloudStateSchema,
 ]);
 
 export type LensApiState = TypeOf<typeof lensApiStateSchema>;
@@ -29,6 +31,14 @@ export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
 export type { XYState } from './charts/xy';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
+export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
+export { tagcloudStateSchema } from './charts/tagcloud';
+
+export type {
+  LensApiFieldMetricOrFormulaOperation,
+  LensApiAllMetricOrFormulaOperations,
+} from './metric_ops';
+export type { LensApiBucketOperations } from './bucket_ops';
 
 export type NarrowByType<T, U> = T extends { type?: U } ? T : never;
 

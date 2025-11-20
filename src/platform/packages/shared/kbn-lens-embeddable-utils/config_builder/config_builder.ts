@@ -33,6 +33,10 @@ import {
   fromAPItoLensState as fromGaugeAPItoLensState,
   fromLensStateToAPI as fromGaugeLensStateToAPI,
 } from './transforms/charts/gauge';
+import {
+  fromAPItoLensState as fromTagcloudAPItoLensState,
+  fromLensStateToAPI as fromTagcloudLensStateToAPI,
+} from './transforms/charts/tagcloud';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
@@ -42,6 +46,7 @@ const compatibilityMap: Record<string, string> = {
   lnsLegacyMetric: 'legacy_metric',
   lnsXY: 'xy',
   lnsGauge: 'gauge',
+  lnsTagcloud: 'tagcloud',
 };
 
 /**
@@ -68,6 +73,10 @@ const apiConvertersByChart = {
     fromAPItoLensState: fromGaugeAPItoLensState,
     fromLensStateToAPI: fromGaugeLensStateToAPI,
   },
+  tagcloud: {
+      fromAPItoLensState: fromTagcloudAPItoLensState,
+      fromLensStateToAPI: fromTagcloudLensStateToAPI,
+    },
 } as const;
 
 export const isSOChartTYpeSupported = (chartType?: string | null): boolean =>
