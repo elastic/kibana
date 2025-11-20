@@ -31,6 +31,7 @@ export function getDockerComposeYaml({
           - "8051:8051"
         volumes:
           - "${config.eisGateway.mount.acl}:/app/acl/acl.yaml:ro"
+          - "${config.eisGateway.mount.metadata}:/app/endpoint-metadata/endpoint_metadata.yaml:ro"
           - "${config.eisGateway.mount.tls.cert}:/certs/tls/tls.crt:ro"
           - "${config.eisGateway.mount.tls.key}:/certs/tls/tls.key:ro"
           - "${config.eisGateway.mount.ca.cert}:/certs/ca/ca.crt:ro"
@@ -42,6 +43,7 @@ ${credentials
   })
   .join('\n')}
           ACL_FILE_PATH: "/app/acl/acl.yaml"
+          ENDPOINT_METADATA_FILE_PATH: "/app/endpoint-metadata/endpoint_metadata.yaml"
           ENTITLEMENTS_SKIP_CHECK: "true"
           TELEMETRY_EXPORTER_TYPE: "none"
           TLS_VERIFY_CLIENT_CERTS: "false"
