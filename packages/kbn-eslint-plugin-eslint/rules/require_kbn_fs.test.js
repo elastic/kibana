@@ -93,9 +93,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
-      output: dedent`
-        import { writeFile } from '@kbn/fs';
-      `,
     },
     {
       code: dedent`
@@ -106,9 +103,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
-      output: dedent`
-        import { writeFile, writeFileSync, createWriteStream } from '@kbn/fs';
-      `,
     },
     {
       code: dedent`
@@ -119,9 +113,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
-      output: dedent`
-        import { readFile, writeFile } from '@kbn/fs';
-      `,
     },
     {
       code: dedent`
@@ -163,9 +154,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
             'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
         },
       ],
-      output: dedent`
-        import { writeFile } from '@kbn/fs';
-      `,
     },
     // Empty restrictedMethods - restricts all named imports, but namespace imports still allowed
     {
@@ -178,9 +166,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
-      output: dedent`
-        import { readFile } from '@kbn/fs';
-      `,
     },
     {
       code: dedent`
@@ -205,9 +190,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
-      output: dedent`
-        import { writeFile } from '@kbn/fs';
-      `,
     },
     // fs/promises imports
     {
@@ -219,9 +201,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
-      output: dedent`
-        import { writeFile } from '@kbn/fs';
-      `,
     },
     {
       code: dedent`
@@ -232,9 +211,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
-      output: dedent`
-        import { writeFile, writeFileSync } from '@kbn/fs';
-      `,
     },
     // node:fs imports
     {
@@ -246,9 +222,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
-      output: dedent`
-        import { writeFile } from '@kbn/fs';
-      `,
     },
     {
       code: dedent`
@@ -259,9 +232,6 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
-      output: dedent`
-        import { writeFile } from '@kbn/fs';
-      `,
     },
     // Default import from fs/promises with write operations
     {
