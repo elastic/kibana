@@ -70,8 +70,8 @@ describe('When rendering the command list (help output)', () => {
 
       expect(renderResult.getByTestId('test-commandList-helpfulTips')).toHaveTextContent(
         'Helpful tips:' +
-          'Double consecutive dashes (--) for anything other than to reference a command argument must be escaped as \\-\\-. ' +
-          'Without escaping them, the console will interpret it as an argument and attempt to process it as such.' +
+          'Escape values with double dashes (--) as \\-\\-, unless they are command arguments; ' +
+          'otherwise the console interprets them as arguments.' +
           'You can enter consecutive response actions — no need to wait for previous actions to complete.' +
           'Leaving the response console does not terminate any actions that have been submitted.' +
           'Learn more(external, opens in a new tab or window) about response actions and using the console.'
