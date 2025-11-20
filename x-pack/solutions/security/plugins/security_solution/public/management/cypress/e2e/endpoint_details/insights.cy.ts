@@ -81,8 +81,7 @@ describe(
       addConnectorButtonExists();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/242402
-    describe.skip('Workflow Insights first visit', () => {
+    describe('Workflow Insights first visit', () => {
       let connectorId: string | undefined;
       beforeEach(() => {
         createBedrockAIConnector(connectorName).then((response) => {
