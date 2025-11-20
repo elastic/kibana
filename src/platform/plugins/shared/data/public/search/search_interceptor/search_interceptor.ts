@@ -445,15 +445,29 @@ export class SearchInterceptor {
    * @throws `AbortError` | `ErrorLike`
    */
   private runSearch(
-    { params, ...request }: IKibanaSearchRequest,
+    request: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
-    const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
+    const requestHash = request.params
+      ? createRequestHashForBackgroundSearches(request.params)
+      : undefined;
+
+    if (request.id) {
+      // just polling an existing search, no need to send the body, just the hash
+
+      const { params, ...requestWithoutParams } = request;
+      if (params) {
+        const { body, ...paramsWithoutBody } = params;
+        request = {
+          ...requestWithoutParams,
+          params: paramsWithoutBody,
+        };
+      }
+    }
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
-
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
         `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
@@ -462,7 +476,7 @@ export class SearchInterceptor {
           signal: abortSignal,
           context: this.deps.executionContext.withGlobalContext(executionContext),
           body: JSON.stringify({
-            ...(request.id ? request : { params, ...request }),
+            ...request,
             ...searchOptions,
             requestHash,
             stream:
