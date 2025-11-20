@@ -325,11 +325,8 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const clearLayerAction = useMemo(() => {
     // Only show clear layer button for single layer visualizations
-    // Multi-layer visualizations have this action in the tabs
-    // isOnlyLayer already accounts for hidden layers via getRemoveOperation
-    const supportsMultipleLayers = Boolean(activeVisualization.getAddLayerButtonComponent);
-
-    if (supportsMultipleLayers || !isOnlyLayer) {
+    // or if it's the only layer in a multi-layer visualization.
+    if (!isOnlyLayer) {
       return null;
     }
 

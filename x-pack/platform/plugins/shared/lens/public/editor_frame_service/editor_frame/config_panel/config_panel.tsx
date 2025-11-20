@@ -38,7 +38,6 @@ import {
   selectSelectedLayerId,
   registerLibraryAnnotationGroup,
 } from '../../../state_management';
-import { getRemoveOperation } from '../../../utils';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 
@@ -273,6 +272,23 @@ export function ConfigPanel(
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
+  const isOnlyLayer = useMemo(() => {
+    if (layerIds.length === 1) {
+      return true;
+    }
+
+    const visibleLayerIds = layerIds.filter((id) => {
+      const config = activeVisualization.getConfiguration({
+        layerId: id,
+        frame: props.framePublicAPI,
+        state: visualization.state,
+      });
+      return !config.hidden;
+    });
+
+    return visibleLayerIds.length === 1;
+  }, [activeVisualization, props.framePublicAPI, visualization.state, layerIds]);
+
   const layerConfig = useMemo(() => {
     if (!selectedLayerId) return;
 
@@ -327,14 +343,7 @@ export function ConfigPanel(
         }}
         updateAll={updateAll}
         addLayer={addLayer}
-        isOnlyLayer={
-          getRemoveOperation(
-            activeVisualization,
-            visualization.state,
-            selectedLayerId,
-            layerIds.length
-          ) === 'clear'
-        }
+        isOnlyLayer={isOnlyLayer}
         onEmptyDimensionAdd={(columnId, { groupId }) => {
           // avoid state update if the datasource does not support initializeDimension
           if (
