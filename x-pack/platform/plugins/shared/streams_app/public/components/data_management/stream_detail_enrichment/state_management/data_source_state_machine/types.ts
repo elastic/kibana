@@ -24,6 +24,7 @@ export type DataSourceToParentEvent =
 export interface DataSourceInput {
   parentRef: DataSourceParentActor;
   streamName: string;
+  streamProcessingUpdatedAt: string;
   dataSource: EnrichmentDataSourceWithUIAttributes;
 }
 
@@ -34,6 +35,7 @@ export type DataSourceSimulationMode = 'partial' | 'complete';
 export interface DataSourceContext {
   parentRef: DataSourceParentActor;
   streamName: string;
+  streamProcessingUpdatedAt: string;
   dataSource: EnrichmentDataSourceWithUIAttributes;
   data: SampleDocument[];
   simulationMode: DataSourceSimulationMode;
@@ -44,4 +46,5 @@ export type DataSourceEvent =
   | { type: 'dataSource.delete' }
   | { type: 'dataSource.refresh' }
   | { type: 'dataSource.enable' }
-  | { type: 'dataSource.disable' };
+  | { type: 'dataSource.disable' }
+  | { type: 'dataSource.setStreamProcessingUpdatedAt'; streamProcessingUpdatedAt: string };

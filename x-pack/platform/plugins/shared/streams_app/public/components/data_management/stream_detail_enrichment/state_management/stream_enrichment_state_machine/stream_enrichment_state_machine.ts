@@ -300,6 +300,14 @@ export const streamEnrichmentMachine = setup({
       samples: getActiveDataSourceSamples(context),
     })),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
+    sendStreamProcessingUpdatedAtToDataSources: ({ context }) => {
+      context.dataSourcesRefs.forEach((dataSourceRef) =>
+        dataSourceRef.send({
+          type: 'dataSource.setStreamProcessingUpdatedAt',
+          streamProcessingUpdatedAt: context.definition.stream.ingest.processing.updated_at,
+        })
+      );
+    },
   },
   guards: {
     hasStagedChanges: ({ context }) => {
@@ -388,6 +396,7 @@ export const streamEnrichmentMachine = setup({
           actions: [
             { type: 'storeDefinition', params: ({ event }) => event },
             { type: 'sendResetEventToSimulator' },
+            { type: 'sendStreamProcessingUpdatedAtToDataSources' },
           ],
           reenter: true,
         },

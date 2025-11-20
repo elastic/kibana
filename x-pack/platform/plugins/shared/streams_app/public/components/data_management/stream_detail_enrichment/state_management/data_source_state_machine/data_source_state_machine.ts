@@ -82,6 +82,9 @@ export const dataSourceMachine = setup({
         id: context.dataSource.id,
       })
     ),
+    storeStreamProcessingUpdatedAt: assign((_, params: { streamProcessingUpdatedAt: string }) => ({
+      streamProcessingUpdatedAt: params.streamProcessingUpdatedAt,
+    })),
   },
   guards: {
     isEnabled: ({ context }) => context.dataSource.enabled,
@@ -104,8 +107,14 @@ export const dataSourceMachine = setup({
     data: [],
     dataSource: input.dataSource,
     streamName: input.streamName,
+    streamProcessingUpdatedAt: input.streamProcessingUpdatedAt,
     simulationMode: getSimulationModeByDataSourceType(input.dataSource.type),
   }),
+  on: {
+    'dataSource.setStreamProcessingUpdatedAt': {
+      actions: [{ type: 'storeStreamProcessingUpdatedAt', params: ({ event }) => event }],
+    },
+  },
   initial: 'determining',
   states: {
     determining: {

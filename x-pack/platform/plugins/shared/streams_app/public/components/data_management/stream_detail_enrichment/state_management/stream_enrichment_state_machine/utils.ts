@@ -193,6 +193,7 @@ export const spawnDataSource = <
     input: {
       parentRef: self,
       streamName: context.definition.stream.name,
+      streamProcessingUpdatedAt: context.definition.stream.ingest.processing.updated_at,
       dataSource: dataSourceWithUIAttributes,
     },
   });
