@@ -60,7 +60,7 @@ export const getCorrectColumnsFromMappingNode = ({
       }
 
       if (outputJson.corrections_made && outputJson.corrections_made.length > 0) {
-        logger.info(`Column corrections made: ${outputJson.corrections_made.join(', ')}`);
+        logger.debug(`Column corrections made: ${outputJson.corrections_made.join(', ')}`);
       }
 
       return {
