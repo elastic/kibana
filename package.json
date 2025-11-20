@@ -1462,6 +1462,7 @@
     "@babel/generator": "^7.24.7",
     "@babel/helper-plugin-utils": "^7.24.7",
     "@babel/parser": "^7.24.7",
+    "@babel/plugin-bugfix-firefox-class-in-computed-class-key": "^7.28.5",
     "@babel/plugin-proposal-decorators": "^7.24.7",
     "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",

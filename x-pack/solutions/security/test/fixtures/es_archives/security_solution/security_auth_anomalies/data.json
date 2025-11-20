@@ -1,0 +1,593 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "auth_rare_source_ip_for_a_user_record_1761555600000_3600_0_1",
+    "source": {
+      "job_id": "auth_rare_source_ip_for_a_user",
+      "result_type": "record",
+      "probability": 0.001,
+      "record_score": 85.5,
+      "initial_record_score": 85.5,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "user.name",
+      "partition_field_value": "svc-account-1",
+      "function": "rare",
+      "function_description": "rare",
+      "field_name": "source.ip",
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "svc-account-1"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "203.0.113.45"
+          ]
+        },
+        {
+          "influencer_field_name": "source.geo.country_iso_code",
+          "influencer_field_values": [
+            "CN"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "web-server-01"
+          ]
+        }
+      ],
+      "user.name": [
+        "svc-account-1"
+      ],
+      "source.ip": [
+        "203.0.113.45"
+      ],
+      "source.geo.country_iso_code": [
+        "CN"
+      ],
+      "source.geo.region_name": [
+        "Beijing"
+      ],
+      "source.geo.city_name": [
+        "Beijing"
+      ],
+      "host.name": [
+        "web-server-01"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "auth_rare_source_ip_for_a_user_record_1761555600000_3600_0_2",
+    "source": {
+      "job_id": "auth_rare_source_ip_for_a_user",
+      "result_type": "record",
+      "probability": 0.001,
+      "record_score": 82.3,
+      "initial_record_score": 82.3,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "user.name",
+      "partition_field_value": "svc-account-2",
+      "function": "rare",
+      "function_description": "rare",
+      "field_name": "source.ip",
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "svc-account-2"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "198.51.100.23"
+          ]
+        },
+        {
+          "influencer_field_name": "source.geo.country_iso_code",
+          "influencer_field_values": [
+            "RU"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "db-server-02"
+          ]
+        }
+      ],
+      "user.name": [
+        "svc-account-2"
+      ],
+      "source.ip": [
+        "198.51.100.23"
+      ],
+      "source.geo.country_iso_code": [
+        "RU"
+      ],
+      "source.geo.region_name": [
+        "Moscow"
+      ],
+      "source.geo.city_name": [
+        "Moscow"
+      ],
+      "host.name": [
+        "db-server-02"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "suspicious_login_activity_record_1761555600000_3600_0_3",
+    "source": {
+      "job_id": "suspicious_login_activity",
+      "result_type": "record",
+      "probability": 0.002,
+      "record_score": 90.1,
+      "initial_record_score": 90.1,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "host.name",
+      "partition_field_value": "web-server-prod-01",
+      "function": "high_non_zero_count",
+      "function_description": "high_non_zero_count",
+      "typical": [
+        12.0
+      ],
+      "actual": [
+        247.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "web-server-prod-01"
+          ]
+        },
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "admin-user-1",
+            "service-account-xyz",
+            "backup-user"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "192.0.2.1",
+            "192.0.2.2",
+            "192.0.2.3"
+          ]
+        }
+      ],
+      "host.name": [
+        "web-server-prod-01"
+      ],
+      "user.name": [
+        "admin-user-1",
+        "service-account-xyz",
+        "backup-user"
+      ],
+      "source.ip": [
+        "192.0.2.1",
+        "192.0.2.2",
+        "192.0.2.3"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "suspicious_login_activity_record_1761555600000_3600_0_4",
+    "source": {
+      "job_id": "suspicious_login_activity",
+      "result_type": "record",
+      "probability": 0.003,
+      "record_score": 88.7,
+      "initial_record_score": 88.7,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "host.name",
+      "partition_field_value": "app-server-staging-02",
+      "function": "high_non_zero_count",
+      "function_description": "high_non_zero_count",
+      "typical": [
+        8.0
+      ],
+      "actual": [
+        189.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "app-server-staging-02"
+          ]
+        },
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "user-suspicious-1",
+            "test-user-abc"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "10.0.0.1",
+            "10.0.0.2"
+          ]
+        }
+      ],
+      "host.name": [
+        "app-server-staging-02"
+      ],
+      "user.name": [
+        "user-suspicious-1",
+        "test-user-abc"
+      ],
+      "source.ip": [
+        "10.0.0.1",
+        "10.0.0.2"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "auth_rare_user_record_1761555600000_3600_0_6",
+    "source": {
+      "job_id": "auth_rare_user",
+      "result_type": "record",
+      "probability": 0.0008,
+      "record_score": 92.4,
+      "initial_record_score": 92.4,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "by_field_name": "user.name",
+      "by_field_value": "dormant-admin-account",
+      "partition_field_name": "user.name",
+      "partition_field_value": "dormant-admin-account",
+      "function": "rare",
+      "function_description": "rare",
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "dormant-admin-account"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "172.16.0.45"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "critical-db-server-01"
+          ]
+        }
+      ],
+      "user.name": [
+        "dormant-admin-account"
+      ],
+      "source.ip": [
+        "172.16.0.45"
+      ],
+      "host.name": [
+        "critical-db-server-01"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "auth_rare_user_record_1761555600000_3600_0_7",
+    "source": {
+      "job_id": "auth_rare_user",
+      "result_type": "record",
+      "probability": 0.0012,
+      "record_score": 89.6,
+      "initial_record_score": 89.6,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "by_field_name": "user.name",
+      "by_field_value": "former-employee-2020",
+      "partition_field_name": "user.name",
+      "partition_field_value": "former-employee-2020",
+      "function": "rare",
+      "function_description": "rare",
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "former-employee-2020"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "203.0.113.78"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "file-server-03"
+          ]
+        },
+        {
+          "influencer_field_name": "source.geo.country_iso_code",
+          "influencer_field_values": [
+            "BR"
+          ]
+        }
+      ],
+      "user.name": [
+        "former-employee-2020"
+      ],
+      "source.ip": [
+        "203.0.113.78"
+      ],
+      "host.name": [
+        "file-server-03"
+      ],
+      "source.geo.country_iso_code": [
+        "BR"
+      ],
+      "source.geo.region_name": [
+        "São Paulo"
+      ],
+      "source.geo.city_name": [
+        "São Paulo"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "auth_high_count_logon_events_record_1761555600000_3600_0_5",
+    "source": {
+      "job_id": "auth_high_count_logon_events",
+      "result_type": "record",
+      "probability": 0.001,
+      "record_score": 75.2,
+      "initial_record_score": 75.2,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "function": "count",
+      "function_description": "count",
+      "typical": [
+        5.0
+      ],
+      "actual": [
+        150.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "privileged-account-1"
+          ]
+        }
+      ],
+      "user.name": [
+        "privileged-account-1"
+      ],
+      "host.name": [
+        "auth-server-01"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "v3_windows_anomalous_service_record_1761555600000_900_0_8",
+    "source": {
+      "job_id": "v3_windows_anomalous_service",
+      "result_type": "record",
+      "probability": 0.0005,
+      "record_score": 94.2,
+      "initial_record_score": 94.2,
+      "bucket_span": 900,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "by_field_name": "winlog.event_data.ServiceName",
+      "by_field_value": "UpdateServiceX",
+      "function": "rare",
+      "function_description": "rare",
+      "influencers": [
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "win-dc-01"
+          ]
+        },
+        {
+          "influencer_field_name": "winlog.event_data.ServiceName",
+          "influencer_field_values": [
+            "UpdateServiceX"
+          ]
+        }
+      ],
+      "host.name": [
+        "win-dc-01"
+      ],
+      "winlog.event_data.ServiceName": [
+        "UpdateServiceX"
+      ],
+      "winlog.event_data.ImagePath": [
+        "C:\\Windows\\System32\\svchost.exe -k UpdateServiceX"
+      ],
+      "winlog.event_data.ServiceType": [
+        "0x10"
+      ],
+      "winlog.event_data.StartType": [
+        "2"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "v3_windows_anomalous_service_record_1761555600000_900_0_9",
+    "source": {
+      "job_id": "v3_windows_anomalous_service",
+      "result_type": "record",
+      "probability": 0.0003,
+      "record_score": 96.8,
+      "initial_record_score": 96.8,
+      "bucket_span": 900,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "by_field_name": "winlog.event_data.ServiceName",
+      "by_field_value": "SystemHealthMonitor",
+      "function": "rare",
+      "function_description": "rare",
+      "influencers": [
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "win-file-server-02"
+          ]
+        },
+        {
+          "influencer_field_name": "winlog.event_data.ServiceName",
+          "influencer_field_values": [
+            "SystemHealthMonitor"
+          ]
+        }
+      ],
+      "host.name": [
+        "win-file-server-02"
+      ],
+      "winlog.event_data.ServiceName": [
+        "SystemHealthMonitor"
+      ],
+      "winlog.event_data.ImagePath": [
+        "C:\\Program Files\\SystemHealthMonitor\\shm.exe"
+      ],
+      "winlog.event_data.ServiceType": [
+        "0x10"
+      ],
+      "winlog.event_data.StartType": [
+        "2"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "v3_windows_anomalous_service_record_1761555600000_900_0_10",
+    "source": {
+      "job_id": "v3_windows_anomalous_service",
+      "result_type": "record",
+      "probability": 0.0007,
+      "record_score": 91.5,
+      "initial_record_score": 91.5,
+      "bucket_span": 900,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "by_field_name": "winlog.event_data.ServiceName",
+      "by_field_value": "NetFrameworkDataProvider",
+      "function": "rare",
+      "function_description": "rare",
+      "influencers": [
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "win-app-server-03"
+          ]
+        },
+        {
+          "influencer_field_name": "winlog.event_data.ServiceName",
+          "influencer_field_values": [
+            "NetFrameworkDataProvider"
+          ]
+        }
+      ],
+      "host.name": [
+        "win-app-server-03"
+      ],
+      "winlog.event_data.ServiceName": [
+        "NetFrameworkDataProvider"
+      ],
+      "winlog.event_data.ImagePath": [
+        "C:\\Windows\\Temp\\NetFrameworkDataProvider.exe"
+      ],
+      "winlog.event_data.ServiceType": [
+        "0x10"
+      ],
+      "winlog.event_data.StartType": [
+        "3"
+      ]
+    },
+    "type": "_doc"
+  }
+}

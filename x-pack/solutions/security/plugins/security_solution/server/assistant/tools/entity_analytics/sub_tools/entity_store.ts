@@ -26,8 +26,14 @@ export const getEntityStoreSubTool: EntityAnalyticsSubTool = async (
     return {
       message: `
         This is a set of rules that you must follow strictly:
-        * When searching the entity store for '${entityType}' you **MUST ALWAYS** filter by: 'where entity.EngineMetadata.Type == "${entityType}" OR entity.type == "${entityType}"'.`,
+        * Use the latest entity store index pattern: ${getEntitiesIndexName(
+          entityType,
+          spaceId
+        )} when answering questions about the current entity store of entities. It has only one entry per entity. You **MUST NOT** run aggregations/STATS queries on it for data about one entity on this index.
+        * When searching the entity store for '${entityType}' you **MUST ALWAYS** filter by: 'where entity.EngineMetadata.Type == "${entityType}" OR entity.type == "${entityType}"'.
+        * Do not use the following field entity.behaviors and entity.relationships to answer questions about the entity store.`,
       index: getEntitiesIndexName(entityType, spaceId),
+      // TODO: for when historical index is implemented: Use the history index pattern: ${getEntitiesSnapshotIndexPattern(entityType, spaceId)} when answering questions about historical data.
     };
   } else {
     return {

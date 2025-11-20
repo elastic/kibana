@@ -1,0 +1,138 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".ml-anomalies-pad",
+    "aliases": {
+      ".ml-anomalies-.write-pad_linux_rare_process_executed_by_user": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-pad_linux_rare_process_executed_by_user": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "value": "pad_linux_rare_process_executed_by_user"
+            }
+          }
+        },
+        "is_hidden": true
+      }
+    },
+    "mappings": {
+      "_meta": {
+        "managed_index_mappings_version": 1,
+        "version": "8.11.0"
+      },
+      "dynamic_templates": [
+        {
+          "map_objects": {
+            "match_mapping_type": "object",
+            "mapping": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "non_objects_as_keywords": {
+            "match": "*",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "alias",
+          "path": "timestamp"
+        },
+        "job_id": {
+          "type": "keyword"
+        },
+        "result_type": {
+          "type": "keyword"
+        },
+        "record_score": {
+          "type": "double"
+        },
+        "timestamp": {
+          "type": "date"
+        },
+        "user": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "process": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "command_line": {
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "action": {
+              "type": "keyword"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "winlog": {
+          "properties": {
+            "event_data": {
+              "properties": {
+                "PrivilegeList": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "destination": {
+          "properties": {
+            "domain": {
+              "type": "keyword"
+            }
+          }
+        },
+        "influencers": {
+          "type": "nested",
+          "properties": {
+            "influencer_field_name": {
+              "type": "keyword"
+            },
+            "influencer_field_values": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "routing": {
+          "allocation": {
+            "include": {
+              "_tier_preference": "data_content"
+            }
+          }
+        },
+        "hidden": "true",
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0"
+      }
+    }
+  }
+}

@@ -31,10 +31,12 @@ export const executeSetupModuleRequest = async ({
   module,
   rspCode,
   supertest,
+  indexPatternName = 'auditbeat-*',
 }: {
   module: string;
   rspCode: number;
   supertest: SuperTest.Agent;
+  indexPatternName?: string;
 }): Promise<{ jobs: ModuleJob[] }> => {
   const { body } = await supertest
     .post(`/internal/ml/modules/setup/${module}`)
@@ -42,7 +44,7 @@ export const executeSetupModuleRequest = async ({
     .send({
       prefix: '',
       groups: [ML_GROUP_ID],
-      indexPatternName: 'auditbeat-*',
+      indexPatternName,
       startDatafeed: false,
       useDedicatedIndex: true,
       applyToAllSpaces: true,
@@ -56,10 +58,12 @@ export const setupMlModulesWithRetry = ({
   module,
   supertest,
   retries = 5,
+  indexPatternName,
 }: {
   module: string;
   supertest: supertest.Agent;
   retries?: number;
+  indexPatternName?: string;
 }) =>
   pRetry(
     async () => {
@@ -67,6 +71,7 @@ export const setupMlModulesWithRetry = ({
         module,
         rspCode: 200,
         supertest,
+        indexPatternName,
       });
 
       const allJobsSucceeded = response?.jobs.every((job) => {
@@ -98,7 +103,8 @@ export const forceStartDatafeeds = async ({
     .set(getCommonRequestHeader('1'))
     .send({
       datafeedIds: jobIds.map((jobId) => `datafeed-${jobId}`),
-      start: new Date().getUTCMilliseconds(),
+      start: Date.now(), // Use Date.now() to get full Unix timestamp in milliseconds
+      // TODO: check if we need to use date.now().getutcMilliseconds()
     })
     .expect(rspCode);
 

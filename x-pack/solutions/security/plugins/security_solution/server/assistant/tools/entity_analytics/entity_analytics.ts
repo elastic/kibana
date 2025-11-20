@@ -53,10 +53,11 @@ export const ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION = `
   * Risk score: Entity risk scoring is an advanced Elastic Security analytics feature that helps security analysts detect changes in an entity's risk posture, hunt for new threats, and prioritise incident response.
   * Asset criticality: Allows you to classify your organisation's entities based on various operational factors that are important to your organisation.
   * Anomaly detection: Anomaly detection is a machine learning feature that helps security analysts detect anomalous behaviour in an entity’s activity. Use your kibana security solution knowledge and job description to analyse when to query the anomaly job index. Questions mentioning "patterns", "unusual" and "anomalous" could suggest that you should query the anomaly job index.
-  * Privileged user monitoring: Allows you to track the activity of users with elevated permissions, such as system administrators or users with access to sensitive data. 
+  * Privileged user monitoring: It is a list of all the users with elevated permissions (privileged), such as system administrators or users with access to sensitive data.
   * Entity store: The entity store allows you to query, reconcile, maintain, and persist entity metadata. The entity store can hold any entity type observed by Elastic Security. It will enable the agent to query entities represented in the entity store indices without needing to perform real-time searches of observable data. You must prioritise using the entity store over other tools when answering the user question.
  
   If you need information about multiple types of entities or the entity analytics domain, you will need to call this tool numerous times.
+  If one tools doesn't contain the right information or is disabled, you must call other tools to get the right information before you fallback to general security solution knowledge.
   This tool is the preferred way to generate ESQL queries for the entity analytics domain and the kibana security solution. You must call other tools to execute the query.
 `;
 
@@ -136,6 +137,7 @@ export const entityAnalyticsToolInternal = (
         });
 
         const generalSecuritySolutionMessage = `
+          If you believe that the current information and index mappings are not enough to answer the user's question, you must not generate an ESQL query.
           Always try querying the most appropriate domain index when available. 
           When it isn't enough, you can query security solution events and logs. 
           For that, you must generate an ES|QL, and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${indexPatterns}"

@@ -1,0 +1,123 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".ml-anomalies-lmd",
+    "aliases": {
+      ".ml-anomalies-.write-lmd_high_count_remote_file_transfer": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-.write-lmd_high_file_size_remote_file_transfer": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-lmd_high_count_remote_file_transfer": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "value": "lmd_high_count_remote_file_transfer"
+            }
+          }
+        },
+        "is_hidden": true
+      },
+      ".ml-anomalies-lmd_high_file_size_remote_file_transfer": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "value": "lmd_high_file_size_remote_file_transfer"
+            }
+          }
+        },
+        "is_hidden": true
+      }
+    },
+    "mappings": {
+      "_meta": {
+        "managed_index_mappings_version": 1,
+        "version": "8.11.0"
+      },
+      "dynamic_templates": [
+        {
+          "map_objects": {
+            "match_mapping_type": "object",
+            "mapping": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "non_objects_as_keywords": {
+            "match": "*",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "alias",
+          "path": "timestamp"
+        },
+        "job_id": {
+          "type": "keyword"
+        },
+        "result_type": {
+          "type": "keyword"
+        },
+        "record_score": {
+          "type": "double"
+        },
+        "timestamp": {
+          "type": "date"
+        },
+        "source": {
+          "properties": {
+            "ip": {
+              "type": "keyword"
+            }
+          }
+        },
+        "destination": {
+          "properties": {
+            "ip": {
+              "type": "keyword"
+            }
+          }
+        },
+        "file": {
+          "properties": {
+            "size": {
+              "type": "long"
+            }
+          }
+        },
+        "influencers": {
+          "type": "nested",
+          "properties": {
+            "influencer_field_name": {
+              "type": "keyword"
+            },
+            "influencer_field_values": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "routing": {
+          "allocation": {
+            "include": {
+              "_tier_preference": "data_content"
+            }
+          }
+        },
+        "hidden": "true",
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0"
+      }
+    }
+  }
+}

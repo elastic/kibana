@@ -99,9 +99,9 @@ export const evaluate = base.extend<
       });
 
       // Teardown: unload all loaded archivers
-      for (const archive of loadedArchivers) {
-        await esArchiver.unload(archive);
-      }
+      // for (const archive of loadedArchivers) {
+      //   await esArchiver.unload(archive);
+      // }
     },
     { scope: 'worker' },
   ],

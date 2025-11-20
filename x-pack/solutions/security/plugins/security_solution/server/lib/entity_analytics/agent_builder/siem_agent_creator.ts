@@ -20,8 +20,8 @@ const RESPONSE_FORMATTING_GUIDELINES = `
 
 const RESEARCH_PROMPT = `
 * Always call the 'entity-analytics-tool' first to get information about the security solution, entity analytics indices, and data.
+If the response from the 'entity-analytics-tool' for a domain doesn't contain the right information or the engine is disabled, you must call 'entity-analytics-tool' for another domains until you are sure it can't answer the question.
 * After calling the 'entity-analytics-tool', if it returns a query, you must call the 'execute_esql' tool to generate an ES|QL.
-
 **Do not generate event/logs query if there is a domain index or anomaly job that could answer the question**
 `;
 

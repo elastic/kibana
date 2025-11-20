@@ -24,36 +24,40 @@ export const getAnomalyDetectionSubTool: EntityAnalyticsSubTool = async (
   const anomalyScore = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
   const mlModulesProvider = ml?.modulesProvider(request, soClient);
   const modules = await mlModulesProvider?.listModules?.();
-  const moduleJobs = modules?.flatMap((module) => module.jobs) ?? [];
-  const securityJobs = moduleJobs.filter(isSecurityJob);
+
   const jobServiceProvider = ml?.jobServiceProvider(request, soClient);
   const allJobsWithStatus = await jobServiceProvider?.jobsSummary();
 
-  // get all installed security jobs (with any statuses)
-  const securityJobsFormatted = securityJobs.map(
-    ({ config: { description, analysis_config: analysisConfig }, id }: ModuleJob) => {
-      const jobStatus = allJobsWithStatus?.find((job) => job.id === id);
+  const formattedModulesJobs = modules?.map((module) => {
+    return {
+      moduleTitle: module.title,
+      moduleDescription: module.description,
+      moduleJobs: module.jobs.filter(isSecurityJob).map((job) => {
+        const jobStatus = allJobsWithStatus?.find(({ id }) => id === job.id);
 
-      return {
-        id,
-        description,
-        influencers: analysisConfig.influencers,
-        isJobStarted: jobStatus ? isJobStarted(jobStatus.jobState, jobStatus.datafeedState) : false,
-      };
-    }
-  );
+        return {
+          id: job.id,
+          description: job.config.description,
+          influencers: job.config.analysis_config.influencers,
+          isJobStarted: jobStatus
+            ? isJobStarted(jobStatus.jobState, jobStatus.datafeedState)
+            : false,
+        };
+      }),
+    };
+  });
 
   const model = await modelProvider.getDefaultModel();
   const recommendedJobsResp = await model.inferenceClient.output({
     id: 'entity_analytics_threat_hunting_ml_anomaly_filter',
     input: `
       You are a capable security solution analyst who must filter a list of ML jobs and return only the ones that can satisfy the user's prompt.
-      Carefully consider the job description and influencers to determine if the job can help answer the user prompt.
+      Carefully consider the module title, description and job description and influencers to determine if the job can help answer the user prompt.
       Return only the list of job IDs that can be used to answer the user prompt for the given entity type.
-
+          
       User prompt: "${prompt}""
       Entity type: "${entityType}"
-      Available jobs: ${JSON.stringify(securityJobsFormatted)}`,
+      Available Modules and Jobs: ${JSON.stringify(formattedModulesJobs)}`,
     schema: {
       type: 'object',
       properties: {
@@ -68,6 +72,7 @@ export const getAnomalyDetectionSubTool: EntityAnalyticsSubTool = async (
   });
 
   const recommendedJobIds = recommendedJobsResp.output.filteredJobIds as string[];
+  const securityJobsFormatted = formattedModulesJobs?.flatMap((module) => module.moduleJobs) ?? [];
   const recommendedJobs = securityJobsFormatted.filter((job) => recommendedJobIds.includes(job.id));
   const recommendedStartedJobIds = recommendedJobs
     .filter((job) => job.isJobStarted)
