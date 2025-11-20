@@ -7,4 +7,3 @@
 
 export { MessageEditor } from './message_editor';
 export { useMessageEditor } from './use_message_editor';
-export type { MessageEditorInstance } from './use_message_editor';
