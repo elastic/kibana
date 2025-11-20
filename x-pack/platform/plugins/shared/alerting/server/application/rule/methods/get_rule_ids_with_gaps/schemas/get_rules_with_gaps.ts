@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { aggregatedGapStatus, gapStatus } from '../../../../../../common';
+import { gapFillStatus, gapStatus } from '../../../../../../common';
 
 export const getRuleIdsWithGapsParamsSchema = schema.object({
   start: schema.maybe(schema.string()),
@@ -23,9 +23,9 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
   aggregatedStatuses: schema.maybe(
     schema.arrayOf(
       schema.oneOf([
-        schema.literal(aggregatedGapStatus.UNFILLED),
-        schema.literal(aggregatedGapStatus.IN_PROGRESS),
-        schema.literal(aggregatedGapStatus.FILLED),
+        schema.literal(gapFillStatus.UNFILLED),
+        schema.literal(gapFillStatus.IN_PROGRESS),
+        schema.literal(gapFillStatus.FILLED),
       ])
     )
   ),

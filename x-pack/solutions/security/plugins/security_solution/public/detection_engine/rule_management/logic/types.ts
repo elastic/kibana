@@ -7,7 +7,7 @@
 
 import * as z from '@kbn/zod';
 
-import type { RuleSnooze, AggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import type { RuleSnooze, GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -102,7 +102,7 @@ export interface FilterOptions {
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
   ruleSource?: RuleCustomizationStatus[]; // undefined is to display all the rules
-  gapFillStatuses?: AggregatedGapStatus[];
+  gapFillStatuses?: GapFillStatus[];
   includeRuleTypes?: Type[];
 }
 

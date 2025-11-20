@@ -26,7 +26,7 @@ import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connect
 import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { aggregatedGapStatus, gapStatus } from '../../../../../common';
+import { gapFillStatus, gapStatus } from '../../../../../common';
 
 describe('getRuleIdsWithGaps', () => {
   let rulesClient: RulesClient;
@@ -50,7 +50,7 @@ describe('getRuleIdsWithGaps', () => {
     start: '2024-01-01T00:00:00.000Z',
     end: '2024-01-02T00:00:00.000Z',
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-    aggregatedStatuses: [aggregatedGapStatus.UNFILLED, aggregatedGapStatus.IN_PROGRESS],
+    aggregatedStatuses: [gapFillStatus.UNFILLED, gapFillStatus.IN_PROGRESS],
   };
 
   const filter = { type: 'mock_filter' };

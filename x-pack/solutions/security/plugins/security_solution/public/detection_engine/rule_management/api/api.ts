@@ -13,7 +13,7 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
-import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   GetPrebuiltRuleBaseVersionRequest,
@@ -363,7 +363,7 @@ export type QueryOrIds =
       query: string;
       ids?: undefined;
       gapRange?: { start: string; end: string };
-      gapFillStatuses?: AggregatedGapStatus[];
+      gapFillStatuses?: GapFillStatus[];
     }
   | { query?: undefined; ids: string[] };
 

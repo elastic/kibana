@@ -15,9 +15,9 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { aggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
@@ -500,7 +500,7 @@ export const useGapStatusColumn = (): TableColumn => {
               total_unfilled_duration_ms: number;
               total_in_progress_duration_ms: number;
               total_filled_duration_ms: number;
-              status?: AggregatedGapStatus;
+              status?: GapFillStatus;
             }
           | undefined
       ) => {
@@ -518,16 +518,16 @@ export const useGapStatusColumn = (): TableColumn => {
         let color;
         let label;
 
-        const byStatus: Record<AggregatedGapStatus, { color: string; label: string }> = {
-          [aggregatedGapStatus.IN_PROGRESS]: {
+        const byStatus: Record<GapFillStatus, { color: string; label: string }> = {
+          [gapFillStatus.IN_PROGRESS]: {
             color: euiTheme.colors.backgroundBaseWarning,
             label: GAP_STATUS_IN_PROGRESS_LABEL,
           },
-          [aggregatedGapStatus.UNFILLED]: {
+          [gapFillStatus.UNFILLED]: {
             color: euiTheme.colors.backgroundBaseDanger,
             label: GAP_STATUS_UNFILLED_LABEL,
           },
-          [aggregatedGapStatus.FILLED]: {
+          [gapFillStatus.FILLED]: {
             color: euiTheme.colors.backgroundBaseSuccess,
             label: GAP_STATUS_FILLED_LABEL,
           },

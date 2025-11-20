@@ -2902,7 +2902,7 @@ paths:
           name: gap_status
           required: false
           schema:
-            $ref: '#/components/schemas/AggregatedGapStatus'
+            $ref: '#/components/schemas/GapFillStatus'
       responses:
         '200':
           content:
@@ -3729,7 +3729,7 @@ paths:
         - Tags API
 components:
   schemas:
-    AggregatedGapStatus:
+    GapFillStatus:
       enum:
         - unfilled
         - in_progress
@@ -4146,7 +4146,7 @@ components:
             - delete
           type: string
         gap_status:
-          $ref: '#/components/schemas/AggregatedGapStatus'
+          $ref: '#/components/schemas/GapFillStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
@@ -4179,7 +4179,7 @@ components:
             - disable
           type: string
         gap_status:
-          $ref: '#/components/schemas/AggregatedGapStatus'
+          $ref: '#/components/schemas/GapFillStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
@@ -4225,7 +4225,7 @@ components:
             - include_exceptions
             - include_expired_exceptions
         gap_status:
-          $ref: '#/components/schemas/AggregatedGapStatus'
+          $ref: '#/components/schemas/GapFillStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
@@ -4338,7 +4338,7 @@ components:
           minItems: 1
           type: array
         gap_status:
-          $ref: '#/components/schemas/AggregatedGapStatus'
+          $ref: '#/components/schemas/GapFillStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
@@ -4376,7 +4376,7 @@ components:
             - enable
           type: string
         gap_status:
-          $ref: '#/components/schemas/AggregatedGapStatus'
+          $ref: '#/components/schemas/GapFillStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
@@ -4411,7 +4411,7 @@ components:
             - export
           type: string
         gap_status:
-          $ref: '#/components/schemas/AggregatedGapStatus'
+          $ref: '#/components/schemas/GapFillStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
@@ -4463,7 +4463,7 @@ components:
             - start_date
             - end_date
         gap_status:
-          $ref: '#/components/schemas/AggregatedGapStatus'
+          $ref: '#/components/schemas/GapFillStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
@@ -4497,7 +4497,7 @@ components:
             - run
           type: string
         gap_status:
-          $ref: '#/components/schemas/AggregatedGapStatus'
+          $ref: '#/components/schemas/GapFillStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).

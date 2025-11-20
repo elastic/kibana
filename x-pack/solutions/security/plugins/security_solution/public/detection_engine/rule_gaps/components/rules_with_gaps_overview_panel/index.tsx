@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiToolTip, EuiBadge } from '@elastic/eui';
 
-import { aggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import * as i18n from './translations';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
@@ -21,14 +21,14 @@ export const RulesWithGapsOverviewPanel = () => {
   // Total rules with gaps: unfilled or in progress
   const { data: totalRulesWithGaps, refetch: refetchGetRuleIdsWithGaps } = useGetRuleIdsWithGaps({
     gapRange: defaultRangeValue,
-    aggregatedStatuses: [aggregatedGapStatus.UNFILLED, aggregatedGapStatus.IN_PROGRESS],
+    aggregatedStatuses: [gapFillStatus.UNFILLED, gapFillStatus.IN_PROGRESS],
   });
 
   // Rules with in-progress gaps
   const { data: inProgressRulesWithGaps, refetch: refetchGetRuleIdsWithGapsInProgressIntervals } =
     useGetRuleIdsWithGaps({
       gapRange: defaultRangeValue,
-      aggregatedStatuses: [aggregatedGapStatus.IN_PROGRESS],
+      aggregatedStatuses: [gapFillStatus.IN_PROGRESS],
     });
 
   useEffect(() => {

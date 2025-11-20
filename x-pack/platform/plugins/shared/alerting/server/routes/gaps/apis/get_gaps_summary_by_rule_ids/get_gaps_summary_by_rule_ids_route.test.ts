@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { getGapsSummaryByRuleIdsRoute } from './get_gaps_summary_by_rule_ids_route';
-import { aggregatedGapStatus } from '../../../../../common';
+import { gapFillStatus } from '../../../../../common';
 
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
@@ -34,7 +34,7 @@ describe('getGapsSummaryByRuleIdsRoute', () => {
     data: [
       {
         ruleId: 'rule-1',
-        status: aggregatedGapStatus.UNFILLED,
+        status: gapFillStatus.UNFILLED,
         totalUnfilledDurationMs: 3600000,
         totalInProgressDurationMs: 0,
         totalFilledDurationMs: 82800000,
@@ -66,7 +66,7 @@ describe('getGapsSummaryByRuleIdsRoute', () => {
         data: [
           {
             rule_id: 'rule-1',
-            status: aggregatedGapStatus.UNFILLED,
+            status: gapFillStatus.UNFILLED,
             total_unfilled_duration_ms: 3600000,
             total_in_progress_duration_ms: 0,
             total_filled_duration_ms: 82800000,

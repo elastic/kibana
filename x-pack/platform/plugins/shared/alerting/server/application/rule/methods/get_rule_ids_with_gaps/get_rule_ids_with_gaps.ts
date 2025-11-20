@@ -16,7 +16,7 @@ import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './typ
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   extractGapDurationSums,
-  calculateAggregatedGapStatus,
+  calculateGapFillStatus,
   COMMON_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from './utils';
@@ -103,7 +103,7 @@ export async function getRuleIdsWithGaps(
     if (aggregatedStatuses?.length ?? 0 > 0) {
       for (const b of buckets) {
         const sums = extractGapDurationSums(b);
-        const aggregatedStatus = calculateAggregatedGapStatus(sums);
+        const aggregatedStatus = calculateGapFillStatus(sums);
         if (aggregatedStatus && aggregatedStatuses?.includes(aggregatedStatus)) ruleIds.push(b.key);
       }
     } else {

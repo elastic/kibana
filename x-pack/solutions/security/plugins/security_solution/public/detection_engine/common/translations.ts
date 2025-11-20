@@ -973,7 +973,7 @@ export const RULE_EXECUTION_STATUS_FILTER = i18n.translate(
 export const GAP_FILL_STATUS_FILTER_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.label',
   {
-    defaultMessage: 'Gap status',
+    defaultMessage: 'Gap fill status',
   }
 );
 

@@ -8,7 +8,7 @@
 import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import styled from 'styled-components';
 import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
@@ -98,7 +98,7 @@ const RulesTableFiltersComponent = () => {
   );
 
   const handleSelectedGapStatuses = useCallback(
-    (newStatuses: AggregatedGapStatus[]) => {
+    (newStatuses: GapFillStatus[]) => {
       const currentStatuses = gapFillStatuses ?? [];
       if (!isEqual(newStatuses, currentStatuses)) {
         startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });

@@ -9,8 +9,8 @@ import React, { useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
-import { aggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import {
   GAP_FILL_STATUS_FILTER_LABEL,
   GAP_FILL_STATUS_FILLED,
@@ -19,8 +19,8 @@ import {
 } from '../../../../common/translations';
 
 interface GapFillStatusSelectorProps {
-  selectedStatuses: AggregatedGapStatus[];
-  onSelectedStatusesChanged: (newStatuses: AggregatedGapStatus[]) => void;
+  selectedStatuses: GapFillStatus[];
+  onSelectedStatusesChanged: (newStatuses: GapFillStatus[]) => void;
 }
 
 export const GapFillStatusSelector = ({
@@ -33,18 +33,18 @@ export const GapFillStatusSelector = ({
     () => [
       {
         label: GAP_FILL_STATUS_IN_PROGRESS,
-        data: { status: aggregatedGapStatus.IN_PROGRESS as AggregatedGapStatus },
-        checked: selectedStatuses.includes(aggregatedGapStatus.IN_PROGRESS) ? 'on' : undefined,
+        data: { status: gapFillStatus.IN_PROGRESS as GapFillStatus },
+        checked: selectedStatuses.includes(gapFillStatus.IN_PROGRESS) ? 'on' : undefined,
       },
       {
         label: GAP_FILL_STATUS_UNFILLED,
-        data: { status: aggregatedGapStatus.UNFILLED as AggregatedGapStatus },
-        checked: selectedStatuses.includes(aggregatedGapStatus.UNFILLED) ? 'on' : undefined,
+        data: { status: gapFillStatus.UNFILLED as GapFillStatus },
+        checked: selectedStatuses.includes(gapFillStatus.UNFILLED) ? 'on' : undefined,
       },
       {
         label: GAP_FILL_STATUS_FILLED,
-        data: { status: aggregatedGapStatus.FILLED as AggregatedGapStatus },
-        checked: selectedStatuses.includes(aggregatedGapStatus.FILLED) ? 'on' : undefined,
+        data: { status: gapFillStatus.FILLED as GapFillStatus },
+        checked: selectedStatuses.includes(gapFillStatus.FILLED) ? 'on' : undefined,
       },
     ],
     [selectedStatuses]
@@ -53,8 +53,8 @@ export const GapFillStatusSelector = ({
   const onChange = (newOptions: EuiSelectableOption[]) => {
     const statuses = newOptions
       .filter((option) => option.checked === 'on')
-      .map((option) => (option.data as { status?: AggregatedGapStatus } | undefined)?.status)
-      .filter((status): status is AggregatedGapStatus => status != null);
+      .map((option) => (option.data as { status?: GapFillStatus } | undefined)?.status)
+      .filter((status): status is GapFillStatus => status != null);
     onSelectedStatusesChanged(statuses);
   };
 

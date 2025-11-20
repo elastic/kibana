@@ -787,8 +787,8 @@ components:
       required:
         - groupBy
 
-    # Gap status used in aggregated rule gap summaries
-    AggregatedGapStatus:
+    # Gap fill status used in aggregated rule gap summaries
+    GapFillStatus:
       type: string
       enum:
         - unfilled

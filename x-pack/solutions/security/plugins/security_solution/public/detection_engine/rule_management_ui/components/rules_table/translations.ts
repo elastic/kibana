@@ -47,7 +47,7 @@ export const RULE_UPDATES_TAB = i18n.translate(
 export const GAP_STATUS_HEADER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.header',
   {
-    defaultMessage: 'Gap status',
+    defaultMessage: 'Gap fill status',
   }
 );
 

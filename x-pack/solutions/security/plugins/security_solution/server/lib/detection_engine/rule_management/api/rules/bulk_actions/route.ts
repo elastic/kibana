@@ -9,7 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { BulkActionSkipResult, AggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -191,7 +191,7 @@ export const performBulkActionRoute = (
 
           const query = body.query !== '' ? body.query : undefined;
           let gapRange;
-          let gapFillStatuses: AggregatedGapStatus[] | undefined;
+          let gapFillStatuses: GapFillStatus[] | undefined;
           const hasGapStatuses =
             Array.isArray(body.gap_fill_statuses) && body.gap_fill_statuses.length > 0;
 

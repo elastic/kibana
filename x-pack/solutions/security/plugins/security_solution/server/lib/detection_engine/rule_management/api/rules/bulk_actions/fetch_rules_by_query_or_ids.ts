@@ -7,7 +7,7 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import { findRules } from '../../../logic/search/find_rules';
@@ -25,7 +25,7 @@ export const fetchRulesByQueryOrIds = async ({
   rulesClient: RulesClient;
   maxRules: number;
   gapRange?: { start: string; end: string };
-  gapFillStatuses?: AggregatedGapStatus[];
+  gapFillStatuses?: GapFillStatus[];
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
     const fallbackErrorMessage = 'Error resolving the rule';

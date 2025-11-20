@@ -13,7 +13,7 @@ import {
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
-import { aggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -47,7 +47,7 @@ export const RuleGapsCallout = () => {
 
   const { data } = useGetRuleIdsWithGaps({
     gapRange: GapRangeValue.LAST_24_H,
-    aggregatedStatuses: [aggregatedGapStatus.UNFILLED],
+    aggregatedStatuses: [gapFillStatus.UNFILLED],
   });
 
   useEffect(() => {
