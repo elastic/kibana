@@ -6,6 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { ScriptsLibraryClient } from '../../services/scripts_library';
+import { errorHandler } from '../error_handler';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -30,7 +32,22 @@ export const getCreateScriptRequestHandler = (
   return async (context, req, res) => {
     logger.debug(`creating new script [${req.body.name}]`);
 
-    return res.noContent();
+    try {
+      const spaceId = (await context.securitySolution).getSpaceId();
+      const user = (await context.core).security.authc.getCurrentUser();
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+      const scriptsClient = new ScriptsLibraryClient({
+        spaceId,
+        username: user?.username || 'unknown',
+        endpointService: endpointAppServices,
+        esClient,
+      });
+
+      return res.ok({ body: { data: await scriptsClient.create(req.body) } });
+    } catch (err) {
+      return errorHandler(logger, res, err);
+    }
   };
 };
 

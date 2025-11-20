@@ -13,6 +13,7 @@ import type { IBasePath, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
 import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../../lib/reference_data';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
@@ -86,7 +87,7 @@ export class SavedObjectsClientFactory {
       this.createFakeHttpRequest(spaceId),
       {
         excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [REFERENCE_DATA_SAVED_OBJECT_TYPE],
+        includedHiddenTypes: [REFERENCE_DATA_SAVED_OBJECT_TYPE, SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE],
       }
     );
 
@@ -106,7 +107,7 @@ export class SavedObjectsClientFactory {
   createInternalUnscopedSoClient(readonly: boolean = true): SavedObjectsClientContract {
     const soClient = this.savedObjectsServiceStart.getScopedClient(this.createFakeHttpRequest(), {
       excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
-      includedHiddenTypes: [REFERENCE_DATA_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [REFERENCE_DATA_SAVED_OBJECT_TYPE, SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE],
     });
 
     if (readonly) {
