@@ -9,9 +9,9 @@
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import {
-  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+  CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
+  SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
   MicrosoftDefenderEndpointIsolateHostParams,
@@ -22,7 +22,7 @@ import type {
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointRunScriptParams,
   MicrosoftDefenderGetLibraryFilesResponse,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { groupBy } from 'lodash';
 import { Writable, type Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';

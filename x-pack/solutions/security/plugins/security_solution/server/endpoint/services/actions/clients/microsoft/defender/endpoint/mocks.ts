@@ -8,9 +8,9 @@
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import {
-  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+  CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
+  SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import type {
   MicrosoftDefenderEndpointAgentListResponse,
   MicrosoftDefenderEndpointGetActionResultsResponse,
@@ -20,7 +20,7 @@ import type {
   MicrosoftDefenderGetLibraryFilesResponse,
   MicrosoftDefenderEndpointRunScriptParams,
   MicrosoftDefenderEndpointGetActionsParams,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { merge } from 'lodash';
 import { applyEsClientSearchMock } from '../../../../../../mocks/utils.mock';
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
