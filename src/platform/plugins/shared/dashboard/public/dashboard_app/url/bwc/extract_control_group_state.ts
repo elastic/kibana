@@ -80,27 +80,49 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   const controlState = get(state, pathToState);
   let autoApplySelections: boolean | undefined;
   if (controlState !== null && typeof controlState === 'object') {
+    let useGlobalFilters = DEFAULT_USE_GLOBAL_FILTERS;
+    let ignoreValidations = DEFAULT_IGNORE_VALIDATIONS;
+    // >9.3 control group `ignoreParentSettings` gets translated to individual control settings
     if (
       'ignoreParentSettings' in controlState &&
       typeof controlState.ignoreParentSettings === 'object'
     ) {
-      // >9.3 control group `ignoreParentSettings` gets translated to individual control settings and/or dashboard settings
       const ignoreParentSettings = controlState.ignoreParentSettings ?? {};
-      const legacyUseGlobalFilters = Boolean(
+      const legacyIgnoreFilters = Boolean(
         ('ignoreFilters' in ignoreParentSettings && ignoreParentSettings.ignoreFilters) ||
           ('ignoreQuery' in ignoreParentSettings && ignoreParentSettings.ignoreQuery)
-        // controlGroupInput.chainingSystem === 'NONE' // if
       );
-      standardizedControls.map((control) => ({
-        ...control,
-        useGlobalFilters: !('useGlobalFilters' in control)
-          ? legacyUseGlobalFilters
-          : DEFAULT_USE_GLOBAL_FILTERS,
-        ignoreValidations:
-          'ignoreValidations' in ignoreParentSettings
-            ? ignoreParentSettings.ignoreValidations
-            : DEFAULT_IGNORE_VALIDATIONS,
-      }));
+      useGlobalFilters = !legacyIgnoreFilters;
+      ignoreValidations = Boolean(
+        'ignoreValidations' in ignoreParentSettings && ignoreParentSettings.ignoreValidations
+      );
+    }
+
+    // >9.3 non-default control group `chainingSystem` gets translated to `useGlobalFilters`
+    if (
+      'chainingSystem' in controlState &&
+      typeof controlState.chainingSystem === 'string' &&
+      controlState.chainingSystem === 'NONE'
+    ) {
+      useGlobalFilters = false;
+    }
+
+    if (
+      useGlobalFilters !== DEFAULT_USE_GLOBAL_FILTERS ||
+      ignoreValidations !== DEFAULT_IGNORE_VALIDATIONS
+    ) {
+      standardizedControls = standardizedControls.map((control) => {
+        if (control.type === 'timeSlider' || control.type === 'esqlControl') return control;
+        // these settings are only relevant for data controls
+        return {
+          ...control,
+          config: {
+            useGlobalFilters,
+            ignoreValidations,
+            ...control.config,
+          },
+        };
+      });
     }
 
     // >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting

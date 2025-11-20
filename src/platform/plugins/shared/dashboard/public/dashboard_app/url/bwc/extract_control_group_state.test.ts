@@ -74,13 +74,148 @@ describe('extractDashboardState', () => {
         },
       ]);
     });
+
+    test('should set `useGlobalFilters` via `ignoreParentSettings`', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          ignoreParentSettings: {
+            ignoreQuery: true,
+          },
+          controls: [
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+              },
+              type: 'optionsListControl',
+            },
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'name.keyword',
+              },
+              type: 'optionsListControl',
+            },
+          ],
+        },
+      });
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          type: 'optionsListControl',
+        },
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'name.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          type: 'optionsListControl',
+        },
+      ]);
+    });
+
+    test('should set `useGlobalFilters` via `chainingSystem', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          chainingSystem: 'NONE',
+          controls: [
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+              },
+              type: 'optionsListControl',
+            },
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'name.keyword',
+              },
+              type: 'optionsListControl',
+            },
+          ],
+        },
+      });
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          type: 'optionsListControl',
+        },
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'name.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          type: 'optionsListControl',
+        },
+      ]);
+    });
+
+    test('should set `ignoreValidations` via `ignoreParentSettings`', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          ignoreParentSettings: {
+            ignoreValidations: true,
+          },
+          controls: [
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+              },
+              type: 'optionsListControl',
+            },
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'name.keyword',
+              },
+              type: 'optionsListControl',
+            },
+          ],
+        },
+      });
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            useGlobalFilters: true,
+            ignoreValidations: true,
+          },
+          type: 'optionsListControl',
+        },
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'name.keyword',
+            useGlobalFilters: true,
+            ignoreValidations: true,
+          },
+          type: 'optionsListControl',
+        },
+      ]);
+    });
   });
 
   describe('>= 8.16 to < 8.19 state', () => {
     test('should convert controlGroupState to controlGroupInput and preserve order', () => {
       const dashboardState = extractDashboardState({
         controlGroupState: {
-          autoApplySelections: false,
           initialChildControlState: {
             ['6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693']: {
               dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -128,6 +263,45 @@ describe('extractDashboardState', () => {
         },
       ]);
     });
+
+    test('should recieve proper `autoApplyFilters` value', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          autoApplySelections: false,
+        },
+      });
+      expect(dashboardState.options?.autoApplyFilters).toEqual(false);
+    });
+
+    test('should set `useGlobalFilters`', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupState: {
+          ignoreParentSettings: {
+            ignoreFilters: true,
+          },
+          initialChildControlState: {
+            ['6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693']: {
+              dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              fieldName: 'machine.os.keyword',
+              type: 'optionsListControl',
+              order: 1,
+            },
+          },
+        },
+      });
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          uid: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
+          type: 'optionsListControl',
+        },
+      ]);
+    });
   });
 
   describe('< 8.16 state', () => {
@@ -161,6 +335,15 @@ describe('extractDashboardState', () => {
           width: 'small',
         },
       ]);
+    });
+
+    test('should recieve proper `autoApplyFilters` value', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          showApplySelections: true,
+        },
+      });
+      expect(dashboardState.options?.autoApplyFilters).toEqual(false);
     });
   });
 });
