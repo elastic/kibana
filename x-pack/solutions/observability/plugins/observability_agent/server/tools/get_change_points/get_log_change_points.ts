@@ -15,7 +15,6 @@ import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
 import type {
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
@@ -23,6 +22,7 @@ import type {
 } from '../../types';
 import { getFilters, dateHistogram } from './common';
 import { getTypedSearch } from '../../utils/get_typed_search';
+import { getLogsIndices } from '../../utils/get_logs_indices';
 
 export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_log_change_points';
 
@@ -193,22 +193,12 @@ export function createObservabilityGetLogChangePointsTool({
           throw new Error('No logs found');
         }
 
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        const savedObjectsClient = new SavedObjectsClient(
-          coreStart.savedObjects.createInternalRepository()
-        );
-
-        const logSourcesService =
-          await pluginsStart.logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
-            savedObjectsClient
-          );
-
-        const logsIndexPattern = await logSourcesService.getFlattenedLogSources();
+        const logIndexPatterns = await getLogsIndices({ core, logger });
 
         const logChangePoints = await Promise.all([
           ...logs.map(async (log) => {
             const changePoints = await getLogChangePoint({
-              index: log.index || logsIndexPattern,
+              index: log.index || logIndexPatterns.join(','),
               esClient,
               filters: getFilters({ start, end, kqlFilter: log.kqlFilter }),
               field: log.field ?? 'message',
@@ -228,9 +218,9 @@ export function createObservabilityGetLogChangePointsTool({
           results: [
             {
               type: ToolResultType.other,
-                data: {
-                  changePoints: {
-                    logs: allLogChangePoints,
+              data: {
+                changePoints: {
+                  logs: allLogChangePoints,
                 },
               },
             },

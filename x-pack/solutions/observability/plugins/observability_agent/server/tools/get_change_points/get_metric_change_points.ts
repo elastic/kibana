@@ -20,6 +20,7 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from '../../types';
 import { dateHistogram, getFilters } from './common';
+import { getMetricsIndices } from '../../utils/get_metrics_indices';
 
 export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
   'observability.get_metric_change_points';
@@ -219,10 +220,10 @@ const getMetricChangePointsSchema = z.object({
     .array(
       z.object({
         name: z.string().describe('The name of the set of metrics'),
-        index: z.string().describe('The index or index pattern to find the metrics'),
+        index: z.string().describe('The index or index pattern to find the metrics').optional(),
         kqlFilter: z
           .string()
-          .describe('A KQL filter to filter the log documents, e.g.: my_field:foo')
+          .describe('A KQL filter to filter the metric documents, e.g.: my_field:foo')
           .optional(),
         field: z
           .string()
@@ -266,10 +267,12 @@ export function createObservabilityGetMetricChangePointsTool({
           throw new Error('No metrics found');
         }
 
+        const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
+
         const metricChangePoints = await Promise.all([
           ...metrics.map(async (metric) => {
             const changePoints = await getMetricChangePoints({
-              index: metric.index,
+              index: metric.index || metricIndexPatterns.join(','),
               esClient,
               filters: getFilters({ start, end, kqlFilter: metric.kqlFilter }),
               groupBy: metric.groupBy ?? [],
