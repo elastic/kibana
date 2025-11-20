@@ -114,6 +114,7 @@ export const ORPHAN_ACTIONS_SPACE_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/actio
 
 /** Scripts Library */
 export const SCRIPTS_LIBRARY_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scripts_library`;
+export const SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE = `${SCRIPTS_LIBRARY_ROUTE}/{script_id}/download`;
 
 /** Endpoint Agent Routes */
 export const AGENT_STATUS_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/agent_status`;
