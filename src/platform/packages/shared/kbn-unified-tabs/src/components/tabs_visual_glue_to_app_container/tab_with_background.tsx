@@ -37,7 +37,9 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
             ? euiTheme.colors.backgroundBasePlain
             : euiTheme.colors.lightestShade};
           transition: background ${euiTheme.animation.fast};
-          margin-right: ${euiTheme.size.xs};
+          margin: ${euiTheme.size.xs};
+          margin-bottom: 0;
+          padding-bottom: ${euiTheme.size.xs};
 
           ${isDragging
             ? `
@@ -55,15 +57,28 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
                       drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.04));
             `
             : `
-            &:hover {
-              background-color: ${euiTheme.colors.lightShade};
-            }
+
         `}
         `}
       >
-        {children}
-        {isSelected && !isDragging && <Accent direction="left" />}
-        {isSelected && !isDragging && <Accent direction="right" />}
+        <div
+          css={css`
+            ${!isSelected &&
+            `
+            &:hover {
+              background-color: ${euiTheme.colors.lightShade};
+              border-radius: ${euiTheme.border.radius.small};
+            }`}
+          `}
+        >
+          {children}
+        </div>
+        {isSelected && !isDragging && (
+          <>
+            <Accent direction="left" />
+            <Accent direction="right" />
+          </>
+        )}
       </div>
     );
   }
