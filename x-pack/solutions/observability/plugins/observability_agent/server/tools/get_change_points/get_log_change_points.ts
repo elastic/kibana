@@ -142,16 +142,22 @@ export async function getLogChangePoint({
 const getLogChangePointsSchema = z.object({
   start: z
     .string()
-    .describe('The beginning of the time range, in datemath, like now-24h, or an ISO timestamp'),
-  end: z.string().describe('The end of the time range, in datemath, like now, or an ISO timestamp'),
+    .describe(
+      'The beginning of the time range, in Elasticsearch datemath, like `now-24h`, or an ISO timestamp'
+    ),
+  end: z
+    .string()
+    .describe(
+      'The end of the time range, in Elasticsearch datemath, like `now`, or an ISO timestamp'
+    ),
   logs: z
     .array(
       z.object({
-        name: z.string().describe('The name of this set of logs'),
-        index: z.string().describe('The index or index pattern where to find the logs').optional(),
+        name: z.string().describe('The name of the set of logs'),
+        index: z.string().describe('The index or index pattern to find the logs').optional(),
         kqlFilter: z
           .string()
-          .describe('A KQL filter to filter the log documents by, e.g. my_field:foo')
+          .describe('A KQL filter to filter the log documents, e.g.: my_field:foo')
           .optional(),
         field: z
           .string()
@@ -178,13 +184,13 @@ export function createObservabilityGetLogChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogChangePointsSchema> = {
     id: OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
-    description: 'Returns change points like spikes and dips for logs.',
+    description: 'Return change points such as spikes and dips for logs.',
     schema: getLogChangePointsSchema,
-    tags: ['observability'],
+    tags: ['observability', 'logs'],
     handler: async ({ start, end, logs = [] }, { esClient }) => {
       try {
         if (logs.length === 0) {
-          throw new Error('No logs were defined');
+          throw new Error('No logs found');
         }
 
         const [coreStart, pluginsStart] = await core.getStartServices();
