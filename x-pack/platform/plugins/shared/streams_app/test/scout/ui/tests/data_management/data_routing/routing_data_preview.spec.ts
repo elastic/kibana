@@ -24,6 +24,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await browserAuth.loginAsAdmin();
     await pageObjects.streams.gotoPartitioningTab('logs');
     await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
+    await pageObjects.streams.switchToColumnsView();
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
