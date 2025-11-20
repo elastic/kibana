@@ -79,6 +79,10 @@ export interface AppMenuExtensionParams {
      * @param adHocDataViews The new ad hoc data views to set
      */
     updateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+    /**
+     * Opens a new tab in Discover
+     */
+    openInNewTabExtPointAction?: (params: OpenInNewTabExtPointAction) => void;
   };
   /**
    * True if Discover is in ESQL mode
@@ -229,6 +233,10 @@ export interface RowControlsExtensionParams {
    */
   actions: {
     /**
+     * Opens a new tab in Discover
+     */
+    openInNewTabExtPointAction?: (params: OpenInNewTabExtPointAction) => void;
+    /**
      * Updates the current ES|QL query
      */
     updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
@@ -329,6 +337,15 @@ export interface AdditionalCellAction {
    * @param context The current cell action context
    */
   execute: (context: AdditionalCellActionContext) => void | Promise<void>;
+}
+
+/**
+ * Parameters passed to the openInNewTab extension point action
+ */
+export interface OpenInNewTabExtPointAction {
+  query?: DiscoverAppState['query'];
+  tabLabel?: string;
+  timeRange?: TimeRange;
 }
 
 /**

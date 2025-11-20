@@ -35,7 +35,6 @@ export {
   type TabState,
   type TabStateGlobalState,
   type InternalStateDataRequestParams,
-  type OpenInNewTabExtPointAction,
 } from './types';
 
 export { DEFAULT_TAB_STATE } from './constants';
