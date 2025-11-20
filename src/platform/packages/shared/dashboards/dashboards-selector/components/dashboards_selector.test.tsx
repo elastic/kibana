@@ -21,33 +21,39 @@ const MOCK_PLACEHOLDER = 'Select a dashboard';
 
 const MOCK_FIRST_DASHBOARD = {
   id: MOCK_FIRST_DASHBOARD_ID,
-  attributes: { title: MOCK_FIRST_DASHBOARD_TITLE },
+  isManaged: false,
+  title: MOCK_FIRST_DASHBOARD_TITLE,
 };
 
 const MOCK_SECOND_DASHBOARD = {
   id: MOCK_SECOND_DASHBOARD_ID,
-  attributes: { title: MOCK_SECOND_DASHBOARD_TITLE },
+  isManaged: false,
+  title: MOCK_SECOND_DASHBOARD_TITLE,
 };
 
-const mockFetchDashboard = jest.fn();
-const mockFetchDashboards = jest
-  .fn()
-  .mockResolvedValue([MOCK_FIRST_DASHBOARD, MOCK_SECOND_DASHBOARD]);
+const mockExecute = jest.fn((context: any) => {
+  if (context.onResults) {
+    context.onResults([MOCK_FIRST_DASHBOARD, MOCK_SECOND_DASHBOARD]);
+  }
+});
 
-// Mock the dashboard service
-jest.mock('../services/dashboard_service', () => ({
-  dashboardServiceProvider: jest.fn(() => ({
-    fetchDashboards: (options: { search?: string; limit?: number }) => mockFetchDashboards(options),
-    fetchDashboard: (id: string) => mockFetchDashboard(id),
-  })),
-}));
+const mockSearchAction = {
+  execute: mockExecute,
+};
+
+const mockGetAction = jest.fn().mockResolvedValue(mockSearchAction);
 
 const mockOnChange = jest.fn();
 
 describe('DashboardsSelector', () => {
   beforeEach(() => {
-    mockFetchDashboard.mockResolvedValueOnce(MOCK_FIRST_DASHBOARD);
-    mockFetchDashboard.mockResolvedValueOnce(MOCK_SECOND_DASHBOARD);
+    jest.clearAllMocks();
+    mockGetAction.mockResolvedValue(mockSearchAction);
+    mockExecute.mockImplementation((context: any) => {
+      if (context.onResults) {
+        context.onResults([MOCK_FIRST_DASHBOARD, MOCK_SECOND_DASHBOARD]);
+      }
+    });
   });
 
   afterEach(() => {
@@ -55,7 +61,7 @@ describe('DashboardsSelector', () => {
   });
 
   const mockUiActions = {
-    getAction: jest.fn(),
+    getAction: mockGetAction,
   } as unknown as UiActionsPublicStart;
 
   it('renders the component', () => {
@@ -89,9 +95,8 @@ describe('DashboardsSelector', () => {
       expect(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE)).toBeInTheDocument();
     });
 
-    // Verify that fetchDashboard was called for each dashboard ID
-    expect(mockFetchDashboard).toHaveBeenCalledWith(MOCK_FIRST_DASHBOARD_ID);
-    expect(mockFetchDashboard).toHaveBeenCalledWith(MOCK_SECOND_DASHBOARD_ID);
+    // Verify that searchDashboards was called to fetch all dashboards
+    expect(mockGetAction).toHaveBeenCalledWith('searchDashboardAction');
   });
 
   it('debounces and triggers dashboard search with user input in the ComboBox', async () => {
@@ -107,13 +112,19 @@ describe('DashboardsSelector', () => {
     const searchInput = screen.getByPlaceholderText(MOCK_PLACEHOLDER);
     await userEvent.type(searchInput, MOCK_FIRST_DASHBOARD_TITLE);
 
-    // Assert that fetchDashboards was called with the correct search value
+    // Assert that searchDashboards was called with the correct search value
     // Wait for the next tick to allow state update and effect to run
     await waitFor(() => {
       expect(searchInput).toHaveValue(MOCK_FIRST_DASHBOARD_TITLE);
 
-      expect(mockFetchDashboards).toHaveBeenCalledWith(
-        expect.objectContaining({ search: MOCK_FIRST_DASHBOARD_TITLE, limit: 100 })
+      expect(mockExecute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: {
+            search: MOCK_FIRST_DASHBOARD_TITLE,
+            per_page: 100,
+          },
+          trigger: { id: 'searchDashboards' },
+        })
       );
 
       expect(screen.getByText(MOCK_FIRST_DASHBOARD_TITLE)).toBeInTheDocument();
@@ -133,7 +144,14 @@ describe('DashboardsSelector', () => {
     fireEvent.focus(searchInput);
 
     await waitFor(() => {
-      expect(mockFetchDashboards).toHaveBeenCalledWith(expect.objectContaining({ limit: 100 }));
+      expect(mockExecute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: {
+            search: undefined,
+            per_page: 100,
+          },
+        })
+      );
     });
   });
 
@@ -147,7 +165,7 @@ describe('DashboardsSelector', () => {
       />
     );
 
-    expect(mockFetchDashboards).not.toHaveBeenCalled();
+    expect(mockExecute).not.toHaveBeenCalled();
   });
 
   it('dispatches selected dashboards on change', async () => {
@@ -166,11 +184,17 @@ describe('DashboardsSelector', () => {
 
     // Wait for the dropdown to open and options to load
     await waitFor(() => {
-      expect(mockFetchDashboards).toHaveBeenCalled();
+      expect(mockExecute).toHaveBeenCalled();
       // When search value is empty, search should be undefined
-      const lastCall = mockFetchDashboards.mock.calls[mockFetchDashboards.mock.calls.length - 1];
-      expect(lastCall[0]).toEqual(expect.objectContaining({ limit: 100 }));
-      expect(lastCall[0].search).toBeUndefined();
+      const lastCall = mockExecute.mock.calls[mockExecute.mock.calls.length - 1];
+      expect(lastCall[0]).toEqual(
+        expect.objectContaining({
+          search: {
+            search: undefined,
+            per_page: 100,
+          },
+        })
+      );
     });
 
     // Wait for the second dashboard option to appear in the dropdown

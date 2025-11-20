@@ -8,15 +8,41 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import { dashboardServiceProvider, type DashboardItem } from '../services/dashboard_service';
 
 interface DashboardOption {
   value: string;
   label: string;
+}
+
+interface Dashboard {
+  id: string;
+  isManaged: boolean;
+  title: string;
+}
+
+async function searchDashboards(
+  uiActions: UiActionsPublicStart,
+  search?: string,
+  perPage: number = 100
+): Promise<Dashboard[]> {
+  const searchAction = await uiActions.getAction('searchDashboardAction');
+  return new Promise(function (resolve) {
+    searchAction.execute({
+      onResults(dashboards: Dashboard[]) {
+        resolve(dashboards);
+      },
+      search: {
+        search,
+        per_page: perPage,
+      },
+      trigger: { id: 'searchDashboards' },
+    } as ActionExecutionContext);
+  });
 }
 
 export function DashboardsSelector({
@@ -46,33 +72,22 @@ export function DashboardsSelector({
     }
 
     try {
-      const dashboardService = dashboardServiceProvider(uiActions);
-      const dashboardPromises = dashboardsFormData.map(async (dashboard) => {
-        try {
-          const fetchedDashboard = await dashboardService.fetchDashboard(dashboard.id);
+      // Fetch all dashboards and filter by the IDs we need
+      const allDashboards = await searchDashboards(uiActions, undefined, 1000);
+      const dashboardMap = new Map(allDashboards.map((d) => [d.id, d]));
 
-          // Only return the dashboard if it exists and has a title
-          if (fetchedDashboard && fetchedDashboard.attributes?.title) {
+      const validDashboards = dashboardsFormData
+        .map((dashboard) => {
+          const foundDashboard = dashboardMap.get(dashboard.id);
+          if (foundDashboard && foundDashboard.title) {
             return {
-              label: fetchedDashboard.attributes.title,
+              label: foundDashboard.title,
               value: dashboard.id,
             };
           }
-          // Return null if dashboard doesn't have required data
           return null;
-        } catch (dashboardError) {
-          /**
-           * Swallow the error that is thrown, since this just means the selected dashboard was deleted
-           * Return null when dashboard fetch fails
-           */
-          return null;
-        }
-      });
-
-      const results = await Promise.all(dashboardPromises);
-
-      // Filter out null results and cast to the expected type
-      const validDashboards = results.filter(Boolean) as Array<EuiComboBoxOptionOption<string>>;
+        })
+        .filter(Boolean) as Array<EuiComboBoxOptionOption<string>>;
 
       setSelectedDashboards(validDashboards);
     } catch (error) {
@@ -100,23 +115,19 @@ export function DashboardsSelector({
     []
   );
 
-  const getDashboardItem = (dashboard: DashboardItem) => ({
-    value: dashboard.id,
-    label: dashboard.attributes.title,
-  });
-
   const loadDashboards = useCallback(async () => {
     if (uiActions) {
       setLoading(true);
       try {
-        const dashboardService = dashboardServiceProvider(uiActions);
-        const dashboards = await dashboardService.fetchDashboards({
-          search: searchValue.trim() || undefined,
-          limit: 100,
-        });
-        const dashboardOptions = dashboards.map((dashboard: DashboardItem) =>
-          getDashboardItem(dashboard)
+        const dashboards = await searchDashboards(
+          uiActions,
+          searchValue.trim() || undefined,
+          100
         );
+        const dashboardOptions = dashboards.map((dashboard) => ({
+          value: dashboard.id,
+          label: dashboard.title,
+        }));
         setDashboardList(dashboardOptions);
       } catch (error) {
         console.error('Error loading dashboards:', error);
