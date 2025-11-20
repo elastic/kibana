@@ -28,6 +28,7 @@ import {
   generateApiLayer,
   generateLayer,
   getAdhocDataviews,
+  getDataSourceLayer,
   operationFromColumn,
 } from '../utils';
 import {
@@ -256,17 +257,7 @@ export function fromLensStateToAPI(
 ): Extract<LensApiState, { type: 'gauge' }> {
   const { state } = config;
   const visualization = state.visualization as GaugeVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-
-  // Layers can be in any order, so make sure to get the main one
-  const [layerId, layer] = Object.entries(layers).find(
-    ([, l]) => !('linkToLayers' in l) || l.linkToLayers == null
-  )!;
+  const [layerId, layer] = getDataSourceLayer(state);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),

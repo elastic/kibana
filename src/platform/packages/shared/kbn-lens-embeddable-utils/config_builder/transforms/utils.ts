@@ -501,6 +501,20 @@ export const filtersAndQueryToLensState = (state: LensApiState) => {
   };
 };
 
+export const getDataSourceLayer = <T extends TypedLensSerializedState['attributes']['state']>(
+  state: T
+): [layerId: string, layer: FormBasedLayer | TextBasedLayer] => {
+  const layers =
+    state.datasourceStates.formBased?.layers ??
+    state.datasourceStates.textBased?.layers ??
+    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
+    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
+    [];
+
+  // Layers can be in any order, so make sure to get the main one
+  return Object.entries(layers).find(([, l]) => !('linkToLayers' in l) || l.linkToLayers == null)!;
+};
+
 export type DeepMutable<T> = T extends (...args: never[]) => unknown
   ? T // don't mutate functions
   : T extends ReadonlyArray<infer U>

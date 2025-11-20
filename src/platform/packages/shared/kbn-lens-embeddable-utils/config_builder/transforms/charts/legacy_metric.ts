@@ -24,6 +24,7 @@ import {
   buildReferences,
   generateApiLayer,
   getAdhocDataviews,
+  getDataSourceLayer,
   operationFromColumn,
 } from '../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
@@ -171,14 +172,7 @@ export function fromLensStateToAPI(
 ): Extract<LensApiState, { type: 'legacy_metric' }> {
   const { state } = config;
   const visualization = state.visualization as LegacyMetricVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-
-  const [layerId, layer] = Object.entries(layers)[0];
+  const [layerId, layer] = getDataSourceLayer(state);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
