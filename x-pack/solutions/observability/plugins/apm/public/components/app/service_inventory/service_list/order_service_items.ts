@@ -47,7 +47,12 @@ export function orderServiceItems({
   tiebreakerField: ServiceInventoryFieldName;
   sortDirection: 'asc' | 'desc';
 }): ServiceListItem[] {
-  // For healthStatus, sort items by healthStatus first, then by tie-breaker
+  // Priority sort: services with SLOs or Alerts first
+  const hasSloOrAlert = (item: ServiceListItem) => {
+    const hasSlo = (item.slosCount ?? 0) > 0;
+    const hasAlert = (item.alertsCount ?? 0) > 0;
+    return hasSlo || hasAlert ? 0 : 1; // 0 = has SLO/Alert (first), 1 = doesn't have (last)
+  };
 
   const sortFn = sorts[primarySortField as ServiceInventoryFieldName];
 
@@ -59,7 +64,11 @@ export function orderServiceItems({
 
     const tiebreakerSortFn = sorts[tiebreakerField];
 
-    return orderBy(items, [sortFn, tiebreakerSortFn], [sortDirection, tiebreakerSortDirection]);
+    return orderBy(
+      items,
+      [hasSloOrAlert, sortFn, tiebreakerSortFn],
+      ['asc', sortDirection, tiebreakerSortDirection]
+    );
   }
-  return orderBy(items, [sortFn], [sortDirection]);
+  return orderBy(items, [hasSloOrAlert, sortFn], ['asc', sortDirection]);
 }

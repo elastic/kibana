@@ -189,7 +189,7 @@ export function ServiceInventory() {
   );
 
   const displaySlos = mainStatisticsData.items.some(
-    (item) => ServiceInventoryFieldName.SlosCount in item
+    (item) => item.slosCount && item.slosCount >= 1
   );
 
   const tiebreakerField = ServiceInventoryFieldName.Throughput;
