@@ -77,6 +77,44 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
   ],
 };
 
+const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent',
+  privileges: [
+    {
+      id: 'can_read_params',
+      name: i18n.translate('xpack.synthetics.features.canReadParams.label', {
+        defaultMessage: 'Read Global Parameters',
+      }),
+      includeIn: 'none', // This ensures it is not granted by default
+      savedObject: {
+        all: [],
+        read: [syntheticsParamType],
+      },
+      ui: ['canReadParams'],
+      api: [], // Access is controlled via saved object permissions
+    },
+  ],
+};
+
+const canWriteParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent',
+  privileges: [
+    {
+      id: 'can_write_params',
+      name: i18n.translate('xpack.synthetics.features.canWriteParams.label', {
+        defaultMessage: 'Write Global Parameters',
+      }),
+      includeIn: 'all',
+      savedObject: {
+        all: [syntheticsParamType],
+        read: [],
+      },
+      ui: ['canWriteParams'],
+      api: [], // Access is controlled via saved object permissions
+    },
+  ],
+};
+
 export const syntheticsFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,
@@ -171,6 +209,24 @@ export const syntheticsFeature = {
           'This feature allows you to manage your private locations, for example adding, or deleting them.',
       }),
       privilegeGroups: [canManagePrivateLocationsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.params', {
+        defaultMessage: 'Global Parameters',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.params.description', {
+        defaultMessage: 'This feature allows you to grant read-only access to Global Parameters.',
+      }),
+      privilegeGroups: [canReadParamsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.writeParams', {
+        defaultMessage: 'Write Global Parameters',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.writeParams.description', {
+        defaultMessage: 'This feature allows you to grant write access to Global Parameters.',
+      }),
+      privilegeGroups: [canWriteParamsPrivilege],
     },
   ],
 };
