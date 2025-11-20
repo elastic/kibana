@@ -8,16 +8,15 @@
  */
 
 import type { ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
-import { EsqlQuery, esqlCommandRegistry, walk, Builder } from '@kbn/esql-ast';
+import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
   ICommandCallbacks,
-  ESQLColumnData,
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
-import type { ESQLAstAllCommands, ESQLAstQueryExpression } from '@kbn/esql-ast/src/types';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
@@ -129,26 +128,14 @@ async function validateAst(
   for (const subquery of subqueries) {
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
-    let subqueryForColumns: ESQLAstQueryExpression;
-    if (currentCommand.name === 'join') {
-      subqueryForColumns = subquery;
-    } else {
-      const truncatedCommands = subquery.commands.slice(0, -1);
-      subqueryForColumns = Builder.expression.query(truncatedCommands);
-    }
+    const subqueryForColumns =
+      currentCommand.name === 'join'
+        ? subquery
+        : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
-    let columns: Map<string, ESQLColumnData>;
-    if (shouldValidateCallback(callbacks, 'getColumnsFor')) {
-      const queryColumnsInstance = new QueryColumns(
-        subqueryForColumns,
-        queryString,
-        callbacks,
-        options
-      );
-      columns = await queryColumnsInstance.asMap();
-    } else {
-      columns = new Map();
-    }
+    const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
+      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
+      : new Map();
 
     const references: ReferenceMaps = {
       sources,
