@@ -16,7 +16,7 @@ import {
 } from './mock';
 import {
   fetchQueryAlerts,
-  fetchQueryExtendedAlerts,
+  fetchQueryUnifiedAlerts,
   getSignalIndex,
   getUserPrivilege,
   createSignalIndex,
@@ -62,16 +62,16 @@ describe('Detections Alerts API', () => {
     });
   });
 
-  describe('fetchQueryExtendedAlerts', () => {
+  describe('fetchQueryUnifiedAlerts', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(alertsMock);
     });
 
     test('check parameter url, body', async () => {
-      await fetchQueryExtendedAlerts({ query: mockAlertsQuery, signal: abortCtrl.signal });
+      await fetchQueryUnifiedAlerts({ query: mockAlertsQuery, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(
-        '/internal/detection_engine/extended_alerts/search',
+        '/internal/detection_engine/unified_alerts/search',
         expect.objectContaining({
           body: '{"aggs":{"alertsByGrouping":{"terms":{"field":"signal.rule.risk_score","missing":"All others","order":{"_count":"desc"},"size":10},"aggs":{"alerts":{"date_histogram":{"field":"@timestamp","fixed_interval":"81000000ms","min_doc_count":0,"extended_bounds":{"min":1579644343954,"max":1582236343955}}}}}},"query":{"bool":{"filter":[{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}},{"range":{"@timestamp":{"gte":1579644343954,"lte":1582236343955}}}]}}}',
           method: 'POST',
@@ -81,7 +81,7 @@ describe('Detections Alerts API', () => {
     });
 
     test('happy path', async () => {
-      const signalsResp = await fetchQueryExtendedAlerts({
+      const signalsResp = await fetchQueryUnifiedAlerts({
         query: mockAlertsQuery,
         signal: abortCtrl.signal,
       });

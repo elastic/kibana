@@ -30,6 +30,7 @@ import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_
 import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
 import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
+import { searchUnifiedAlertsRoute } from '../lib/detection_engine/routes/unified_alerts/search_route';
 
 import type { SetupPlugins, StartPlugins } from '../plugin';
 import type { ConfigType } from '../config';
@@ -52,7 +53,6 @@ import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
-import { queryExtendedAlertsRoute } from '../lib/detection_engine/routes/signals/extended_alerts/query_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -108,8 +108,8 @@ export const initRoutes = (
   deleteSignalsMigrationRoute(router, docLinks);
   suggestUserProfilesRoute(router, getStartServices);
 
-  // Detection Engine Extended Alerts routes that have the REST endpoints of /internal/detection_engine/extended_alerts
-  queryExtendedAlertsRoute(router, ruleDataClient);
+  // Detection Engine Extended Alerts routes that have the REST endpoints of /internal/detection_engine/unified_alerts
+  searchUnifiedAlertsRoute(router, ruleDataClient);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './query/query_route.gen';
+export * from './search/search_route.gen';

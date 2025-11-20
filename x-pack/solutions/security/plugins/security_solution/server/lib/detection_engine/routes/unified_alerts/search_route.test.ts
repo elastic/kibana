@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL } from '../../../../../../common/constants';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
+
+import { DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL } from '../../../../../common/constants';
 import {
   getSignalsQueryRequest,
   getSignalsAggsQueryRequest,
@@ -13,15 +17,12 @@ import {
   typicalSignalsQueryAggs,
   getSignalsAggsAndQueryRequest,
   getEmptySignalsResponse,
-} from '../../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../../__mocks__';
-import { queryExtendedAlertsRoute } from './query_route';
-import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
-import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
+} from '../__mocks__/request_responses';
+import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { searchUnifiedAlertsRoute } from './search_route';
 
-describe('query for extended alerts', () => {
+describe('search for unified alerts', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
   let ruleDataClient: RuleDataClientMock;
@@ -39,7 +40,7 @@ describe('query for extended alerts', () => {
     );
     ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
-    queryExtendedAlertsRoute(server.router, ruleDataClient);
+    searchUnifiedAlertsRoute(server.router, ruleDataClient);
   });
 
   afterEach(() => {
@@ -47,8 +48,8 @@ describe('query for extended alerts', () => {
     jest.restoreAllMocks();
   });
 
-  describe('query and agg on signals index', () => {
-    test('returns 200 when using single query', async () => {
+  describe('search and agg on signals index', () => {
+    test('returns 200 when using single search', async () => {
       const response = await server.inject(
         getSignalsQueryRequest(),
         requestContextMock.convertContext(context)
@@ -89,7 +90,7 @@ describe('query for extended alerts', () => {
       );
     });
 
-    test('returns 200 when using aggs and query together', async () => {
+    test('returns 200 when using aggs and search together', async () => {
       const response = await server.inject(
         getSignalsAggsAndQueryRequest(),
         requestContextMock.convertContext(context)
@@ -104,7 +105,7 @@ describe('query for extended alerts', () => {
       );
     });
 
-    test('catches error if query throws error', async () => {
+    test('catches error if search throws error', async () => {
       context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
         new Error('Test error')
       );
@@ -121,10 +122,10 @@ describe('query for extended alerts', () => {
   });
 
   describe('request validation', () => {
-    test('allows when query present', async () => {
+    test('allows when search present', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
+        path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
         body: typicalSignalsQuery(),
       });
       const result = server.validate(request);
@@ -135,7 +136,7 @@ describe('query for extended alerts', () => {
     test('allows when aggs present', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
+        path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
         body: typicalSignalsQueryAggs(),
       });
       const result = server.validate(request);
@@ -143,11 +144,11 @@ describe('query for extended alerts', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
-    test('allows when aggs and query present', async () => {
+    test('allows when aggs and search present', async () => {
       const body = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
+        path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
         body,
       });
       const result = server.validate(request);
@@ -155,10 +156,10 @@ describe('query for extended alerts', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
-    test('rejects when missing aggs and query', async () => {
+    test('rejects when missing aggs and search', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
+        path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
         body: {},
       });
       const response = await server.inject(request, requestContextMock.convertContext(context));

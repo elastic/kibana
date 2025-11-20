@@ -1,17 +1,17 @@
 openapi: 3.0.0
 info:
-  title: Extended alerts (detection and attack alerts) search API endpoint
+  title: Unified alerts (detection and attack alerts) search API endpoint
   version: '1'
 paths:
-  /internal/detection_engine/extended_alerts/search:
+  /internal/detection_engine/unified_alerts/search:
     post:
       x-labels: [serverless, ess]
-      operationId: SearchExtendedAlerts
+      operationId: SearchUnifiedAlerts
       x-codegen-enabled: true
       summary: Find and/or aggregate detection and attack alerts
       description: Find and/or aggregate detection and attack alerts that match the given query.
       tags:
-        - Extended Alerts API
+        - Unified Alerts API
       requestBody:
         description: Search and/or aggregation query
         required: true

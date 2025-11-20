@@ -27,7 +27,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL_FIND,
   DETECTION_ENGINE_RULES_IMPORT_URL,
-  DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
+  DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
 } from '../../../../../common/constants';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
@@ -314,24 +314,24 @@ export const getSignalsAggsAndQueryRequest = () =>
     body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
   });
 
-export const getExtendedAlertsQueryRequest = () =>
+export const getUnifiedAlertsQueryRequest = () =>
   requestMock.create({
     method: 'post',
-    path: DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
+    path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
     body: typicalSignalsQuery(),
   });
 
-export const getExtendedAlertsAggsQueryRequest = () =>
+export const getUnifiedAlertsAggsQueryRequest = () =>
   requestMock.create({
     method: 'post',
-    path: DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
+    path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
     body: typicalSignalsQueryAggs(),
   });
 
-export const getExtendedAlertsAggsAndQueryRequest = () =>
+export const getUnifiedAlertsAggsAndQueryRequest = () =>
   requestMock.create({
     method: 'post',
-    path: DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
+    path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
     body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
   });
 

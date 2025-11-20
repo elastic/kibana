@@ -312,10 +312,10 @@ export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
 /**
  * Extended alerts routes
  */
-export const DETECTION_ENGINE_EXTENDED_ALERTS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/extended_alerts` as const;
-export const DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL =
-  `${DETECTION_ENGINE_EXTENDED_ALERTS_URL}/search` as const;
+export const DETECTION_ENGINE_UNIFIED_ALERTS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/unified_alerts` as const;
+export const DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/search` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
