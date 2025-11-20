@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
@@ -89,32 +90,7 @@ export function savedObjectsRoutes(
           },
         },
         options: {
-          oasOperationObject: () => ({
-            responses: {
-              200: {
-                content: {
-                  'application/json': {
-                    examples: {
-                      successSyncResponse: {
-                        value: {
-                          savedObjectsCreated: {
-                            'anomaly-detector': {
-                              'test-job': {
-                                success: true,
-                              },
-                            },
-                          },
-                          savedObjectsDeleted: {},
-                          datafeedsAdded: {},
-                          datafeedsRemoved: {},
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          }),
+          oasOperationObject: () => path.resolve(__dirname, './schemas/sync_saved_objects.yml'),
         },
       },
       routeGuard.fullLicenseAPIGuard(
@@ -288,58 +264,7 @@ export function savedObjectsRoutes(
           },
         },
         options: {
-          oasOperationObject: () => ({
-            requestBody: {
-              content: {
-                'application/json': {
-                  examples: {
-                    updateADJobSpacesRequest: {
-                      value: {
-                        jobType: 'anomaly-detector',
-                        jobIds: ['test-job'],
-                        spacesToAdd: ['default'],
-                        spacesToRemove: ['*'],
-                      },
-                    },
-                    updateDFAJobSpacesRequest: {
-                      value: {
-                        jobType: 'data-frame-analytics',
-                        jobIds: ['test-job'],
-                        spacesToAdd: ['default'],
-                        spacesToRemove: ['*'],
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            responses: {
-              200: {
-                content: {
-                  'application/json': {
-                    examples: {
-                      successADResponse: {
-                        value: {
-                          'test-job': {
-                            success: true,
-                            type: 'anomaly-detector',
-                          },
-                        },
-                      },
-                      successDFAResponse: {
-                        value: {
-                          'test-job': {
-                            success: true,
-                            type: 'data-frame-analytics',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          }),
+          oasOperationObject: () => path.resolve(__dirname, './schemas/update_job_spaces.yml'),
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {

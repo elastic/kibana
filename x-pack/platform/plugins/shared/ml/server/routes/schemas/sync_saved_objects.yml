@@ -1,0 +1,14 @@
+responses:
+  '200':
+    content:
+      application/json:
+        examples:
+          successSyncResponse:
+            value:
+              savedObjectsCreated:
+                'anomaly-detector':
+                  'test-job':
+                    success: true
+              savedObjectsDeleted: {}
+              datafeedsAdded: {}
+              datafeedsRemoved: {}

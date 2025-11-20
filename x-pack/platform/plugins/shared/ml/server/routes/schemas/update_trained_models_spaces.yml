@@ -1,0 +1,32 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateADJobSpacesRequest:
+          value:
+            jobType: 'anomaly-detector'
+            jobIds: ['test-job']
+            spacesToAdd: ['default']
+            spacesToRemove: ['*']
+        updateDFAJobSpacesRequest:
+          value:
+            jobType: 'data-frame-analytics'
+            jobIds: ['test-job']
+            spacesToAdd: ['default']
+            spacesToRemove: ['*']
+
+responses:
+  '200':
+    content:
+      application/json:
+        examples:
+          successADResponse:
+            value:
+              'test-job':
+                success: true
+                type: 'anomaly-detector'
+          successDFAResponse:
+            value:
+              'test-job':
+                success: true
+                type: 'data-frame-analytics'
