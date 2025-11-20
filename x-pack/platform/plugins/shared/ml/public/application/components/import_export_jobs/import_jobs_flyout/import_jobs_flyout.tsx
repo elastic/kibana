@@ -72,8 +72,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
   } = useMlKibana();
 
   const jobImportService = useMemo(
-    () => new JobImportService(esSearch, validateDatafeedPreview),
-    [esSearch, validateDatafeedPreview]
+    () => new JobImportService(esSearch, validateDatafeedPreview, getFilters),
+    [esSearch, validateDatafeedPreview, getFilters]
   );
 
   const [showFlyout, setShowFlyout] = useState(false);
@@ -151,8 +151,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
 
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
-        loadedFile.jobType,
-        getFilters
+        loadedFile.jobType
       );
 
       const datafeedValidationMap = new Map<string, DatafeedValidationInfo>();

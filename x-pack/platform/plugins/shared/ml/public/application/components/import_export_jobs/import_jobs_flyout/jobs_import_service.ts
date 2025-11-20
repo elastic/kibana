@@ -75,13 +75,16 @@ function isDataFrameAnalyticsConfigs(obj: any): obj is DataFrameAnalyticsConfig[
 export class JobImportService {
   private esSearch: MlApi['esSearch'];
   private validateDatafeedPreview: MlApi['validateDatafeedPreview'];
+  private getFilters: () => Promise<Filter[]>;
 
   constructor(
     esSearch: MlApi['esSearch'],
-    validateDatafeedPreview: MlApi['validateDatafeedPreview']
+    validateDatafeedPreview: MlApi['validateDatafeedPreview'],
+    getFilters: () => Promise<Filter[]>
   ) {
     this.esSearch = esSearch;
     this.validateDatafeedPreview = validateDatafeedPreview;
+    this.getFilters = getFilters;
   }
 
   private _readFile(file: File) {
@@ -232,12 +235,8 @@ export class JobImportService {
     });
   }
 
-  public async validateJobs(
-    jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
-    type: JobType,
-    getFilters: () => Promise<Filter[]>
-  ) {
-    const existingFilters = new Set((await getFilters()).map((f) => f.filter_id));
+  public async validateJobs(jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[], type: JobType) {
+    const existingFilters = new Set((await this.getFilters()).map((f) => f.filter_id));
     const tempJobs: Array<{ jobId: string; destIndex?: string }> = [];
     const skippedJobs: SkippedJobs[] = [];
 

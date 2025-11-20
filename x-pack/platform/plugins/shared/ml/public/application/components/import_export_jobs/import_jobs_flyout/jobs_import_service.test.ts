@@ -69,7 +69,11 @@ describe('JobImportService', () => {
     mockEsSearch = jest.fn();
     mockValidateDatafeedPreview = jest.fn();
     mockGetFilters = jest.fn().mockResolvedValue([]);
-    jobImportService = new JobImportService(mockEsSearch, mockValidateDatafeedPreview);
+    jobImportService = new JobImportService(
+      mockEsSearch,
+      mockValidateDatafeedPreview,
+      mockGetFilters
+    );
   });
 
   describe('validateJobs', () => {
@@ -81,11 +85,7 @@ describe('JobImportService', () => {
           _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
         });
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'data-frame-analytics',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'data-frame-analytics');
 
         expect(result.jobs).toHaveLength(1);
         expect(result.jobs[0].jobId).toBe('test-job-1');
@@ -104,11 +104,7 @@ describe('JobImportService', () => {
 
         mockEsSearch.mockRejectedValue(createIndexNotFoundError('missing-index'));
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'data-frame-analytics',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'data-frame-analytics');
 
         expect(result.jobs).toHaveLength(0);
         expect(result.skippedJobs).toHaveLength(1);
@@ -127,11 +123,7 @@ describe('JobImportService', () => {
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
         });
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'data-frame-analytics',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'data-frame-analytics');
 
         expect(result.jobs).toHaveLength(0);
         expect(result.skippedJobs).toHaveLength(1);
@@ -146,11 +138,7 @@ describe('JobImportService', () => {
       it('should skip jobs with empty source indices array', async () => {
         const jobs: DataFrameAnalyticsConfig[] = [createBaseDfaJob({ sourceIndices: [] })];
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'data-frame-analytics',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'data-frame-analytics');
 
         expect(result.jobs).toHaveLength(0);
         expect(result.skippedJobs).toHaveLength(1);
@@ -179,11 +167,7 @@ describe('JobImportService', () => {
           })
           .mockRejectedValueOnce(createIndexNotFoundError('invalid-index'));
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'data-frame-analytics',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'data-frame-analytics');
 
         expect(result.jobs).toHaveLength(1);
         expect(result.jobs[0].jobId).toBe('test-job-1');
@@ -205,11 +189,7 @@ describe('JobImportService', () => {
           })
           .mockRejectedValueOnce(createIndexNotFoundError('missing-index'));
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'data-frame-analytics',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'data-frame-analytics');
 
         expect(result.jobs).toHaveLength(0);
         expect(result.skippedJobs).toHaveLength(1);
@@ -228,11 +208,7 @@ describe('JobImportService', () => {
             _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
           });
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'data-frame-analytics',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'data-frame-analytics');
 
         expect(result.jobs).toHaveLength(0);
         expect(result.skippedJobs).toHaveLength(1);
@@ -252,11 +228,7 @@ describe('JobImportService', () => {
       it('should validate AD jobs with valid indices', async () => {
         const jobs: ImportedAdJob[] = [createBaseAdJob({ jobId: 'ad-job-1' })];
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'anomaly-detector',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
 
         expect(result.jobs).toHaveLength(1);
         expect(result.jobs[0].jobId).toBe('ad-job-1');
@@ -268,11 +240,7 @@ describe('JobImportService', () => {
         const jobs: ImportedAdJob[] = [
           createBaseAdJob({ jobId: 'ad-job-1', indices: ['some-index'] }),
         ];
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'anomaly-detector',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
 
         expect(result.jobs).toHaveLength(1);
         expect(result.jobs[0].jobId).toBe('ad-job-1');
@@ -305,11 +273,7 @@ describe('JobImportService', () => {
 
         mockGetFilters.mockResolvedValue([{ filter_id: 'existing-filter' }]);
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'anomaly-detector',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
 
         expect(result.jobs).toHaveLength(0);
         expect(result.skippedJobs).toHaveLength(1);
@@ -375,11 +339,7 @@ describe('JobImportService', () => {
 
         mockGetFilters.mockResolvedValue([{ filter_id: 'existing-filter' }]);
 
-        const result = await jobImportService.validateJobs(
-          jobs,
-          'anomaly-detector',
-          mockGetFilters
-        );
+        const result = await jobImportService.validateJobs(jobs, 'anomaly-detector');
 
         expect(result.jobs).toHaveLength(0);
         expect(result.skippedJobs).toHaveLength(1);
