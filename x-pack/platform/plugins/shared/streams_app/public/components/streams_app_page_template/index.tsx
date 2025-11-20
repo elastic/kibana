@@ -12,14 +12,7 @@ import { css } from '@emotion/css';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
-    <EuiPageTemplate
-      offset={0}
-      minHeight={0}
-      restrictWidth={false}
-      className={css`
-        max-height: 100%;
-      `}
-    >
+    <EuiPageTemplate offset={0} minHeight={0} restrictWidth={false}>
       {children}
     </EuiPageTemplate>
   );
