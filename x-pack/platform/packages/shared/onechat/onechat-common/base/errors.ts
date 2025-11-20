@@ -6,7 +6,8 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import type { AgentExecutionErrorCode, ExecutionErrorMetaOf } from '../agents/execution_errors';
+import { AgentExecutionErrorCode } from '../agents/execution_errors';
+import type { ExecutionErrorMetaOf } from '../agents/execution_errors';
 
 /**
  * Code to identify onechat errors
