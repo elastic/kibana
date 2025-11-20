@@ -83,33 +83,6 @@ describe('loadDashboardApi', () => {
       expect(getDashboardApiMock).toHaveBeenCalled();
       // @ts-ignore
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual(DEFAULT_DASHBOARD_STATE);
-
-      expect(window.performance.getEntriesByName).toHaveBeenCalledWith(
-        DASHBOARD_DURATION_START_MARK,
-        'mark'
-      );
-      expect(startQueryPerformanceTracking).toHaveBeenCalledWith(expect.any(Object), {
-        firstLoad: true,
-        creationStartTime: 12345,
-      });
-    });
-
-    test('should start performance tracking on load', async () => {
-      await loadDashboardApi({
-        getCreationOptions: async () => ({
-          useSessionStorageIntegration: false,
-        }),
-        savedObjectId: '12345',
-      });
-
-      expect(window.performance.getEntriesByName).toHaveBeenCalledWith(
-        DASHBOARD_DURATION_START_MARK,
-        'mark'
-      );
-      expect(startQueryPerformanceTracking).toHaveBeenCalledWith(expect.any(Object), {
-        firstLoad: true,
-        creationStartTime: 12345,
-      });
     });
 
     test('should overwrite saved object state with unsaved state', async () => {
@@ -144,6 +117,26 @@ describe('loadDashboardApi', () => {
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
         query: queryFromUrl,
+      });
+    });
+  });
+
+  describe('performance monitoring', () => {
+    test('should start performance tracking on load', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+
+      expect(window.performance.getEntriesByName).toHaveBeenCalledWith(
+        DASHBOARD_DURATION_START_MARK,
+        'mark'
+      );
+      expect(startQueryPerformanceTracking).toHaveBeenCalledWith(expect.any(Object), {
+        firstLoad: true,
+        creationStartTime: 12345,
       });
     });
   });
