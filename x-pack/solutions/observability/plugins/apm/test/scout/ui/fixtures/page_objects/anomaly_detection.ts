@@ -63,6 +63,6 @@ export class AnomalyDetectionPage {
     await allActionsButton.click();
     await this.page.testSubj.locator('mlActionButtonDeleteJob').click();
     await this.page.testSubj.locator('mlDeleteJobConfirmModalButton').click();
-    this.page.getByText('deleted successfully');
+    await expect(this.page.getByText('deleted successfully')).toBeVisible();
   }
 }
