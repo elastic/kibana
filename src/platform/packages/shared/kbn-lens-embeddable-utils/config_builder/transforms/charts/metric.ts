@@ -195,9 +195,6 @@ function reverseBuildVisualizationState(
   adhocReferences?: SavedObjectReference[]
 ): MetricState {
   const metricAccessor = getMetricAccessor(visualization);
-  if (metricAccessor == null) {
-    throw new Error('Metric accessor is missing in the visualization state');
-  }
 
   const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
 
