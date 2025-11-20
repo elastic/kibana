@@ -9,6 +9,7 @@ import type { Threat } from '../../../../../../common/api/detection_engine';
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
 import type { QradarRule } from '../../../../../../common/siem_migrations/parsers/qradar/types';
+import { TACTICS_BASE_URL, TECHNIQUES_BASE_URL } from './constants';
 
 /**
  * Transforms QRadar MITRE mapping to Elastic Threat format
@@ -33,7 +34,7 @@ export function transformMitreMapping(mitreMapping: QRadarMitreMappingsData[stri
         framework: 'MITRE ATT&CK',
         tactic: {
           id: tacticId,
-          reference: `https://attack.mitre.org/tactics/${tacticId}/`,
+          reference: `${TACTICS_BASE_URL}${tacticId}/`,
           name: tactic.name,
         },
         technique: techniques,
@@ -44,7 +45,7 @@ export function transformMitreMapping(mitreMapping: QRadarMitreMappingsData[stri
         if (technique.enabled && technique.id) {
           techniques.push({
             id: technique.id,
-            reference: `https://attack.mitre.org/techniques/${technique.id}/`,
+            reference: `${TECHNIQUES_BASE_URL}${technique.id}/`,
             name: technique.id, // QRadar doesn't provide technique names
           });
         }

@@ -30,12 +30,12 @@ import {
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type {
   CreateQRadarRuleMigrationRulesRequestBody,
-  EnhanceRuleMigrationsResponse,
+  RuleMigrationEnhanceRuleResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   type CreateRuleMigrationRequestBody,
   type CreateRuleMigrationResponse,
-  type EnhanceRuleMigrationsRequestBodyInput,
+  type RuleMigrationEnhanceRuleRequestBodyInput,
   type GetAllStatsRuleMigrationResponse,
   type GetRuleMigrationIntegrationsResponse,
   type GetRuleMigrationPrebuiltRulesResponse,
@@ -102,7 +102,7 @@ export type StartMigrationRuleParams = MigrationRequestParams & {
 };
 
 export interface EnhanceRulesParams extends MigrationRequestParams {
-  payload: EnhanceRuleMigrationsRequestBodyInput;
+  payload: RuleMigrationEnhanceRuleRequestBodyInput;
 }
 
 export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => {
@@ -410,7 +410,7 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
       migrationId,
       payload,
       expectStatusCode = 200,
-    }: EnhanceRulesParams): Promise<{ body: EnhanceRuleMigrationsResponse }> => {
+    }: EnhanceRulesParams): Promise<{ body: RuleMigrationEnhanceRuleResponse }> => {
       const route = replaceParams(SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH, {
         migration_id: migrationId,
       });

@@ -240,8 +240,8 @@ export default ({ getService }: FtrProviderContext) => {
       const enhancedRule = rulesResponse.data[0];
       const tactic = enhancedRule.original_rule?.threat?.[0];
       expect(tactic).toBeDefined();
-      expect(tactic.tactic.id).toBe('TA0004');
-      expect(tactic.technique).toHaveLength(0);
+      expect(tactic?.tactic.id).toBe('TA0004');
+      expect(tactic?.technique).toHaveLength(0);
     });
 
     describe('Error cases', () => {
