@@ -27,9 +27,10 @@ interface Item {
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
+  abortSignal?: AbortSignal;
 }
 
-interface SLOHealth {
+export interface SLOHealth {
   sloId: string;
   sloInstanceId: string;
   sloRevision: number;
@@ -67,22 +68,25 @@ export async function computeHealth(list: Item[], deps: Dependencies): Promise<S
 }
 
 async function getSummaryDocsById(list: Item[], deps: Dependencies) {
-  const summaryDocs = await deps.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>({
-    index: SUMMARY_DESTINATION_INDEX_PATTERN,
-    query: {
-      bool: {
-        should: list.map((item) => ({
-          bool: {
-            must: [
-              { term: { 'slo.id': item.id } },
-              { term: { 'slo.instanceId': item.instanceId } },
-              { term: { 'slo.revision': item.revision } },
-            ],
-          },
-        })),
+  const summaryDocs = await deps.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>(
+    {
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      query: {
+        bool: {
+          should: list.map((item) => ({
+            bool: {
+              must: [
+                { term: { 'slo.id': item.id } },
+                { term: { 'slo.instanceId': item.instanceId } },
+                { term: { 'slo.revision': item.revision } },
+              ],
+            },
+          })),
+        },
       },
     },
-  });
+    { signal: deps.abortSignal }
+  );
 
   const summaryDocsById = groupBy(
     summaryDocs.hits.hits.map((hit) => hit._source!),
@@ -101,7 +105,7 @@ async function getTransformStats(
       allow_no_match: true,
       size: list.length * 2,
     },
-    { ignore: [404] }
+    { ignore: [404], signal: deps.abortSignal }
   );
 
   return keyBy(stats.transforms, (transform) => transform.id);
