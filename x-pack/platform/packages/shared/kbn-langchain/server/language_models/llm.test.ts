@@ -91,7 +91,11 @@ describe('ActionsClientLlm', () => {
       await actionsClientLlm._call(prompt);
 
       const executeCalls = actionsClient.execute.mock.calls[0][0];
-      const subActionParams = executeCalls.params.subActionParams;
+      const subActionParams = executeCalls.params.subActionParams as {
+        messages?: unknown[];
+        n?: number;
+        temperature?: number;
+      };
 
       // Verify temperature is not in the params
       expect(subActionParams).not.toHaveProperty('temperature');
@@ -110,7 +114,9 @@ describe('ActionsClientLlm', () => {
       await actionsClientLlm._call(prompt);
 
       const executeCalls = actionsClient.execute.mock.calls[0][0];
-      const subActionParams = executeCalls.params.subActionParams;
+      const subActionParams = executeCalls.params.subActionParams as {
+        temperature?: number;
+      };
 
       // Verify temperature: 0 is included
       expect(subActionParams.temperature).toBe(0);
@@ -126,7 +132,9 @@ describe('ActionsClientLlm', () => {
       await actionsClientLlm._call(prompt);
 
       const executeCalls = actionsClient.execute.mock.calls[0][0];
-      const subActionParams = executeCalls.params.subActionParams;
+      const subActionParams = executeCalls.params.subActionParams as {
+        temperature?: number;
+      };
 
       // Verify temperature is included
       expect(subActionParams.temperature).toBe(0.7);
@@ -142,7 +150,9 @@ describe('ActionsClientLlm', () => {
       await actionsClientLlm._call(prompt);
 
       const executeCalls = actionsClient.execute.mock.calls[0][0];
-      const subActionParams = executeCalls.params.subActionParams;
+      const subActionParams = executeCalls.params.subActionParams as {
+        temperature?: number;
+      };
 
       // Verify temperature is not in the params
       expect(subActionParams).not.toHaveProperty('temperature');
