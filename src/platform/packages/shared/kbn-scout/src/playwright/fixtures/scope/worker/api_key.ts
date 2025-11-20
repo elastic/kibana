@@ -75,7 +75,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           `Creating API key for ${roleName} with privileges: ${JSON.stringify(roleDescriptors)}`
         );
 
-        const apiKeyName = `myTestApiKey-${generatedApiKeys.length}-worker-${
+        const apiKeyName = `myTestApiKey-${generatedApiKeys.length}-${roleName}-worker-${
           workerInfo.parallelIndex + 1
         }`;
 
