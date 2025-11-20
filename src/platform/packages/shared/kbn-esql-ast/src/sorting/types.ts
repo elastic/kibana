@@ -7,34 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SuggestionCategory = {
-  CRITICAL_ACTION: 'critical_action',
-  KEYWORD_CLAUSE: 'keyword_clause', // BY, WHERE, ON, WITH, AS
-  CONSTANT_VALUE: 'constant_value', // Prompt text, query text constants
-  USER_DEFINED_COLUMN: 'user_defined_column',
-  TIME_PARAM: 'time_param',
-  RECOMMENDED_FIELD: 'recommended_field',
-  ECS_FIELD: 'ecs_field',
-  TIME_FIELD: 'time_field',
-  FIELD: 'field',
+export enum SuggestionCategory {
+  CRITICAL_ACTION = 'critical_action',
+  KEYWORD_CLAUSE = 'keyword_clause', // BY, WHERE, ON, WITH, AS
+  CONSTANT_VALUE = 'constant_value', // Prompt text, query text constants
+  USER_DEFINED_COLUMN = 'user_defined_column',
+  TIME_PARAM = 'time_param',
+  RECOMMENDED_FIELD = 'recommended_field',
+  ECS_FIELD = 'ecs_field',
+  TIME_FIELD = 'time_field',
+  FIELD = 'field',
 
-  OPERATOR: 'operator', // All operators
+  OPERATOR = 'operator', // All operators
 
-  FUNCTION_TIME_SERIES_AGG: 'function_ts_agg',
-  FUNCTION_AGG: 'function_agg',
-  FUNCTION_SCALAR: 'function_scalar',
+  FUNCTION_TIME_SERIES_AGG = 'function_ts_agg',
+  FUNCTION_AGG = 'function_agg',
+  FUNCTION_SCALAR = 'function_scalar',
 
-  RECOMMENDED_QUERY_SEARCH: 'recommended_query_search', // Search query (highest priority recommended query)
-  RECOMMENDED_QUERY: 'recommended_query',
+  RECOMMENDED_QUERY_SEARCH = 'recommended_query_search', // Search query (highest priority recommended query)
+  RECOMMENDED_QUERY = 'recommended_query',
 
-  KEYWORD: 'keyword', // METADATA, settings, special keywords
-  PIPE: 'pipe',
-  COMMA: 'comma',
-  UNKNOWN: 'unknown',
-} as const;
-
-export type SuggestionCategory = (typeof SuggestionCategory)[keyof typeof SuggestionCategory];
+  KEYWORD = 'keyword', // METADATA, settings, special keywords
+  PIPE = 'pipe',
+  COMMA = 'comma',
+  UNKNOWN = 'unknown',
+}
 
 export interface SortingContext {
   command: string;
+  /** Optional specific location/clause within the command (e.g., 'BY' for STATS BY clause) */
+  location?: string;
 }

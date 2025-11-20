@@ -43,9 +43,10 @@ const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
 };
 
 // Context-specific priority adjustments (negative = boost up, positive = push down)
+// Structure: { 'COMMAND' } or { 'COMMAND:LOCATION' } for more specific contexts
 const CONTEXT_BOOSTS: Record<string, Partial<Record<SuggestionCategory, number>>> = {
-  STATS: {
-    //  example: [SuggestionCategory.FUNCTION_SCALAR]: +380, // Push down scalar functions in STATS
+  'STATS:BY': {
+    [SuggestionCategory.USER_DEFINED_COLUMN]: -300, // From 300 to 0
   },
 };
 
@@ -57,8 +58,13 @@ export function calculatePriority(item: ISuggestionItem, context: SortingContext
     CATEGORY_PRIORITIES[category] ?? CATEGORY_PRIORITIES[SuggestionCategory.UNKNOWN];
 
   // Step 2: Apply context-specific boosts
-  const commandBoosts = CONTEXT_BOOSTS[context.command.toUpperCase()];
-  const contextBoost = commandBoosts?.[category] ?? 0;
+  const commandKey = context.command.toUpperCase();
+  const locationKey = context.location?.toUpperCase();
+
+  // Try specific location first (e.g., "STATS:BY"), then fall back to command only
+  const contextKey = locationKey ? `${commandKey}:${locationKey}` : commandKey;
+  const contextBoost =
+    CONTEXT_BOOSTS[contextKey]?.[category] ?? CONTEXT_BOOSTS[commandKey]?.[category] ?? 0;
 
   // Final priority = base + context boost
   return basePriority + contextBoost;

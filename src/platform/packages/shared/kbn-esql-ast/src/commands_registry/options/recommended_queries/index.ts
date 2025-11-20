@@ -11,7 +11,7 @@ import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
 import { METADATA_FIELDS } from '../metadata';
 import { prettifyQueryTemplate, prettifyQuery } from './utils';
-import type { SuggestionCategory } from '../../../sorting/types';
+import { SuggestionCategory } from '../../../sorting/types';
 
 export interface EditorExtensions {
   recommendedQueries: RecommendedQuery[];
@@ -47,7 +47,7 @@ export const getRecommendedQueriesTemplates = ({
       }),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
       sortText: 'D',
-      category: 'recommended_query_search',
+      category: SuggestionCategory.RECOMMENDED_QUERY_SEARCH,
     },
     {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.aggregateExample.label', {
@@ -211,7 +211,7 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       kind: 'Issue',
       detail: query.description,
       sortText: query?.sortText ?? 'E',
-      category: query.category ?? 'recommended_query',
+      category: query.category ?? SuggestionCategory.RECOMMENDED_QUERY,
       command: {
         id: 'esql.recommendedQuery.accept',
         title: 'Accept recommended query',

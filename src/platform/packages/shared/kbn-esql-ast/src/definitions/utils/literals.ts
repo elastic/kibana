@@ -14,7 +14,7 @@ import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
 import type { FunctionParameterType, SupportedDataType } from '../types';
 import { commaCompleteItem } from '../../commands_registry/complete_items';
-import type { SuggestionCategory } from '../../sorting/types';
+import { SuggestionCategory } from '../../sorting/types';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
@@ -74,7 +74,7 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
       i18n.translate('kbn-esql-ast.esql.autocomplete.timeNamedParamDoc', {
         defaultMessage: `Use the \`?_tstart\` and \`?_tend\` parameters to bind a custom timestamp field to Kibana's time filter.`,
       }),
-      'time_param'
+      SuggestionCategory.TIME_PARAM
     ),
     {
       label: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePickerLabel', {
@@ -86,7 +86,7 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
         defaultMessage: 'Click to choose',
       }),
       sortText: '1A',
-      category: 'time_param',
+      category: SuggestionCategory.TIME_PARAM,
       command: {
         id: 'esql.timepicker.choose',
         title: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePicker', {

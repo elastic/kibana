@@ -45,6 +45,7 @@ import {
 import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
+import { SuggestionCategory } from '../../../sorting/types';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
@@ -207,7 +208,14 @@ export async function autocomplete(
 
       if (!lastWord) {
         suggestions.push({
-          ...buildConstantsDefinitions([promptSnippetText], '', '1', undefined, undefined, 'constant_value')[0],
+          ...buildConstantsDefinitions(
+            [promptSnippetText],
+            '',
+            '1',
+            undefined,
+            undefined,
+            SuggestionCategory.CONSTANT_VALUE
+          )[0],
           label: promptText,
           asSnippet: true,
         });

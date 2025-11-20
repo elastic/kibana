@@ -32,7 +32,7 @@ import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../ast/is';
-import type { SuggestionCategory } from '../../sorting/types';
+import { SuggestionCategory } from '../../sorting/types';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -77,7 +77,7 @@ export const buildFieldsDefinitions = (
         defaultMessage: `Field specified by the input table`,
       }),
       sortText: 'D',
-      category: 'field',
+      category: SuggestionCategory.FIELD,
     };
     return openSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
@@ -285,11 +285,11 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   // Determine function category explicitly
   let category: SuggestionCategory;
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
-    category = 'function_ts_agg';
+    category = SuggestionCategory.FUNCTION_TIME_SERIES_AGG;
   } else if (fn.type === FunctionDefinitionTypes.AGG) {
-    category = 'function_agg';
+    category = SuggestionCategory.FUNCTION_AGG;
   } else {
-    category = 'function_scalar';
+    category = SuggestionCategory.FUNCTION_SCALAR;
   }
 
   return withAutoSuggest({
@@ -427,15 +427,15 @@ export const buildColumnSuggestions = (
     // Determine the category explicitly based on column properties
     let category: SuggestionCategory;
     if (column.userDefined) {
-      category = 'user_defined_column';
+      category = SuggestionCategory.USER_DEFINED_COLUMN;
     } else if (fieldIsRecommended) {
-      category = 'recommended_field';
+      category = SuggestionCategory.RECOMMENDED_FIELD;
     } else if (column.type === 'date' || column.type === 'date_nanos') {
-      category = 'time_field';
+      category = SuggestionCategory.TIME_FIELD;
     } else if (column.isEcs) {
-      category = 'ecs_field';
+      category = SuggestionCategory.ECS_FIELD;
     } else {
-      category = 'field';
+      category = SuggestionCategory.FIELD;
     }
 
     const suggestion: ISuggestionItem = {

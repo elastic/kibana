@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../commands_registry/types';
+import { SuggestionCategory } from '../../sorting/types';
 
 export const buildValueDefinitions = (
   values: string[],
@@ -24,7 +25,7 @@ export const buildValueDefinitions = (
         defaultMessage: 'Literal value',
       }),
       kind: 'Value',
-      category: 'keyword',
+      category: SuggestionCategory.KEYWORD,
     };
 
     return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;

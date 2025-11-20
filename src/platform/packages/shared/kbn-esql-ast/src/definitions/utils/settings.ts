@@ -9,6 +9,7 @@
 
 import { withAutoSuggest } from '../../..';
 import type { ISuggestionItem } from '../../commands_registry/types';
+import { SuggestionCategory } from '../../sorting/types';
 import { settings } from '../generated/settings';
 
 export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {
@@ -25,7 +26,7 @@ export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionI
           kind: 'Reference',
           detail: setting.description,
           sortText: '1',
-          category: 'keyword',
+          category: SuggestionCategory.KEYWORD,
         })
       )
   );

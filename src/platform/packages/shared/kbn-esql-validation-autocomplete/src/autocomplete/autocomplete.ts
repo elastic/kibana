@@ -267,6 +267,7 @@ async function getSuggestionsWithinCommandExpression(
   // Apply context-aware ordering
   const orderedSuggestions = orderingEngine.sort(suggestions, {
     command: astContext.command.name.toUpperCase(),
+    location: astContext.option?.name.toUpperCase(),
   });
 
   return orderedSuggestions;

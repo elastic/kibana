@@ -14,6 +14,7 @@ import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { isColumn, isOptionNode } from '../../../ast/is';
+import { SuggestionCategory } from '../../../sorting/types';
 
 export const METADATA_FIELDS = [
   '_version',
@@ -33,7 +34,7 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
     defaultMessage: 'Metadata',
   }),
   sortText: 'C',
-  category: 'keyword',
+  category: SuggestionCategory.KEYWORD,
 });
 
 export const getMetadataSuggestions = (command: ESQLAstAllCommands, queryText: string) => {

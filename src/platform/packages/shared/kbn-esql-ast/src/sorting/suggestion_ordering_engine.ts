@@ -43,7 +43,10 @@ export class SuggestionOrderingEngine {
         return diff;
       }
 
-      return a.suggestion.label.localeCompare(b.suggestion.label);
+      // Case-insensitive alphabetical sorting for items with same priority
+      return a.suggestion.label.localeCompare(b.suggestion.label, undefined, {
+        sensitivity: 'base',
+      });
     });
 
     return withPriorities.map(({ suggestion }, index) => {
