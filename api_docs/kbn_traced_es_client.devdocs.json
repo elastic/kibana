@@ -19,7 +19,7 @@
         "label": "createTracedEsClient",
         "description": [],
         "signature": [
-          "({\n  client,\n  logger,\n  plugin,\n  labels,\n}: { client: ",
+          "({\n  client,\n  abortSignal,\n  logger,\n  plugin,\n  labels,\n}: { client: ",
           "ElasticsearchClient",
           "; logger: ",
           {
@@ -29,7 +29,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; plugin?: string | undefined; labels?: Record<string, string> | undefined; }) => ",
+          "; abortSignal?: AbortSignal | undefined; plugin?: string | undefined; labels?: Record<string, string> | undefined; }) => ",
           {
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
@@ -47,7 +47,7 @@
             "id": "def-server.createTracedEsClient.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  logger,\n  plugin,\n  labels,\n}",
+            "label": "{\n  client,\n  abortSignal,\n  logger,\n  plugin,\n  labels,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
             "deprecated": false,
@@ -1068,6 +1068,20 @@
                     "section": "def-common.Logger",
                     "text": "Logger"
                   }
+                ],
+                "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/traced-es-client",
+                "id": "def-server.createTracedEsClient.$1.abortSignal",
+                "type": "Object",
+                "tags": [],
+                "label": "abortSignal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
                 "deprecated": false,
@@ -2610,16 +2624,16 @@
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
             "docId": "kibKbnTracedEsClientPluginApi",
-            "section": "def-server.UnparsedEsqlResponse",
-            "text": "UnparsedEsqlResponse"
+            "section": "def-server.ParsedEsqlResponse",
+            "text": "ParsedEsqlResponse"
           },
           " | ",
           {
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
             "docId": "kibKbnTracedEsClientPluginApi",
-            "section": "def-server.ParsedEsqlResponse",
-            "text": "ParsedEsqlResponse"
+            "section": "def-server.UnparsedEsqlResponse",
+            "text": "UnparsedEsqlResponse"
           }
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",

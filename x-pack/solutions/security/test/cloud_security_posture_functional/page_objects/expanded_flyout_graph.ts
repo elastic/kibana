@@ -33,6 +33,7 @@ const {
   GRAPH_IPS_POPOVER_CONTENT_ID,
   GRAPH_IPS_POPOVER_IP_ID,
   PREVIEW_SECTION_BANNER_PANEL,
+  GRAPH_GROUPED_NODE_TEST_ID,
 } = testSubjectIds;
 
 type Filter = Parameters<FilterBarService['addFilter']>[0];
@@ -58,8 +59,25 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     expect(nodes.length).to.be(expected);
   }
 
+  async assertGraphGroupNodesNumber(expected: number): Promise<void> {
+    await this.waitGraphIsLoaded();
+    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+    await graph.scrollIntoView();
+    const nodes = await graph.findAllByTestSubject(GRAPH_GROUPED_NODE_TEST_ID);
+    expect(nodes.length).to.be(expected);
+  }
+
   async toggleSearchBar(): Promise<void> {
     await this.testSubjects.click(GRAPH_ACTIONS_TOGGLE_SEARCH_ID);
+  }
+
+  async showSearchBar(): Promise<void> {
+    const isSearchBarVisible = await this.testSubjects.exists(
+      `${GRAPH_INVESTIGATION_TEST_ID} > addFilter`
+    );
+    if (!isSearchBarVisible) {
+      await this.testSubjects.click(GRAPH_ACTIONS_TOGGLE_SEARCH_ID);
+    }
   }
 
   async selectNode(nodeId: string): Promise<WebElementWrapper> {

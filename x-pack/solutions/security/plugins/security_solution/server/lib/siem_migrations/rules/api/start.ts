@@ -52,6 +52,7 @@ export const registerSiemRuleMigrationsStartRoute = (
                 skip_prebuilt_rules_matching: skipPrebuiltRulesMatching = false,
               },
               retry,
+              selection,
             } = req.body;
 
             const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
@@ -74,10 +75,17 @@ export const registerSiemRuleMigrationsStartRoute = (
 
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
               if (retry) {
-                const { updated } = await ruleMigrationsClient.task.updateToRetry(
-                  migrationId,
-                  getRetryFilter(retry)
-                );
+                let retryFilters = {};
+                try {
+                  retryFilters = getRetryFilter(retry, selection);
+                } catch (e) {
+                  return res.badRequest({
+                    body: e.message,
+                  });
+                }
+                const { updated } = await ruleMigrationsClient.task.updateToRetry(migrationId, {
+                  ...retryFilters,
+                });
                 if (!updated) {
                   return res.ok({ body: { started: false } });
                 }

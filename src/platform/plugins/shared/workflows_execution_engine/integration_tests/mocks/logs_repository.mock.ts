@@ -12,7 +12,7 @@ import type {
   LogSearchResult,
   LogsRepository,
   WorkflowLogEvent,
-} from '../../server/repositories/logs_repository/logs_repository';
+} from '../../server/repositories/logs_repository';
 
 export class LogsRepositoryMock implements Required<LogsRepository> {
   public logs = new Map<string, WorkflowLogEvent>();

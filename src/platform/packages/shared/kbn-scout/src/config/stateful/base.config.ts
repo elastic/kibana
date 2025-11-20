@@ -10,17 +10,17 @@
 import { join, resolve } from 'path';
 import { format as formatUrl } from 'url';
 
+import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import {
-  MOCK_IDP_ENTITY_ID,
-  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
-  MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
+  MOCK_IDP_ATTRIBUTE_ROLES,
+  MOCK_IDP_ENTITY_ID,
+  MOCK_IDP_REALM_NAME,
 } from '@kbn/mock-idp-utils';
-import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
+import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
 import type { ScoutServerConfig } from '../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../constants';
 
@@ -178,6 +178,27 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.cache.enabled=false',
       '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
+      '--xpack.profiling.enabled=true',
+      // Fleet configuration
+      `--xpack.fleet.fleetServerHosts=${JSON.stringify([
+        {
+          id: 'default-fleet-server',
+          name: 'Default Fleet Server',
+          is_default: true,
+          host_urls: ['https://localhost:8220'],
+        },
+      ])}`,
+      `--xpack.fleet.outputs=${JSON.stringify([
+        {
+          id: 'es-default-output',
+          name: 'Default Output',
+          type: 'elasticsearch',
+          is_default: true,
+          is_default_monitoring: true,
+          hosts: ['https://localhost:9200'],
+        },
+      ])}`,
+      // Agent policies are now created via Fleet API using the helper function from @kbn-scout
       // SAML configuration
       ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
       // This ensures that we register the Security SAML API endpoints.

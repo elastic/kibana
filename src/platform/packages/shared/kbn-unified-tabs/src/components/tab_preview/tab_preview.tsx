@@ -148,48 +148,77 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         <EuiSplitPanel.Outer
           grow
           css={getPreviewContainerCss(euiTheme, showPreview, tabPosition)}
-          data-test-subj={`unifiedTabs_tabPreview_${tabItem.id}`}
+          data-test-subj={`unifiedTabs_tabPreview_outerPanel_${tabItem.id}`}
         >
           {showPreview && !!tabPreviewData && (
-            <>
-              <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
-                <EuiCodeBlock
-                  language={getQueryLanguage(tabPreviewData)}
-                  transparentBackground
-                  paddingSize="none"
-                  css={codeBlockCss}
-                  data-test-subj={`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`}
-                >
-                  {getPreviewQuery(tabPreviewData)}
-                </EuiCodeBlock>
-              </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner
-                grow={false}
-                color="subdued"
-                paddingSize="none"
-                className="eui-textBreakWord"
-                css={getSplitPanelCss(euiTheme)}
-              >
-                {tabPreviewData.status === TabStatus.RUNNING ? (
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiLoadingSpinner />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">{tabItem.label}</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <EuiHealth color={tabPreviewData.status} textSize="s">
-                    {tabItem.label}
-                  </EuiHealth>
-                )}
-              </EuiSplitPanel.Inner>
-            </>
+            <TabPreviewInner tabItem={tabItem} tabPreviewData={tabPreviewData} />
           )}
         </EuiSplitPanel.Outer>
       </EuiPortal>
     </div>
+  );
+};
+
+const TabPreviewInner: React.FC<{
+  tabItem: TabPreviewProps['tabItem'];
+  tabPreviewData: TabPreviewData;
+}> = ({ tabItem, tabPreviewData }) => {
+  const { euiTheme } = useEuiTheme();
+  const previewQuery = getPreviewQuery(tabPreviewData);
+
+  return (
+    <>
+      <EuiSplitPanel.Inner
+        paddingSize="none"
+        css={getSplitPanelCss(euiTheme)}
+        data-test-subj="unifiedTabs_tabPreview_contentPanel"
+      >
+        {tabPreviewData.title ? (
+          <EuiText
+            size="xs"
+            className="eui-textBreakWord"
+            css={getPreviewTitleCss(euiTheme, Boolean(previewQuery))}
+            data-test-subj={`unifiedTabs_tabPreview_title_${tabItem.id}`}
+          >
+            {tabPreviewData.title}
+          </EuiText>
+        ) : null}
+        {previewQuery ? (
+          <EuiCodeBlock
+            language={getQueryLanguage(tabPreviewData)}
+            transparentBackground
+            paddingSize="none"
+            css={codeBlockCss}
+            data-test-subj={`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`}
+          >
+            {previewQuery}
+          </EuiCodeBlock>
+        ) : null}
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner
+        grow={false}
+        color="subdued"
+        paddingSize="none"
+        className="eui-textBreakWord"
+        css={getSplitPanelCss(euiTheme)}
+        data-test-subj={`unifiedTabs_tabPreview_label_${tabItem.id}`}
+      >
+        {tabPreviewData.status === TabStatus.RUNNING ? (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">{tabItem.label}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiHealth color={tabPreviewData.status} textSize="s">
+            {tabItem.label}
+          </EuiHealth>
+        )}
+      </EuiSplitPanel.Inner>
+    </>
   );
 };
 
@@ -207,6 +236,13 @@ const getPreviewContainerCss = (
     width: ${PREVIEW_WIDTH}px;
     opacity: ${showPreview ? 1 : 0};
     transition: opacity ${euiTheme.animation.normal} ease;
+  `;
+};
+
+const getPreviewTitleCss = (euiTheme: EuiThemeComputed, hasQuery: boolean) => {
+  return css`
+    margin-bottom: ${hasQuery ? euiTheme.size.s : 0};
+    font-family: ${euiTheme.font.familyCode};
   `;
 };
 

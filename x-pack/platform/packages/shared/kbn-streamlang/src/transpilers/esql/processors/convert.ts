@@ -91,7 +91,7 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
    *    ```
    */
 
-  if ('where' in processor) {
+  if ('where' in processor && processor.where) {
     const evalCommandWithCondition = Builder.command({
       name: 'eval',
       args: [

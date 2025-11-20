@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { NonEmptyOrWhitespaceString, NonEmptyString } from '@kbn/zod-helpers';
 import { createIsNarrowSchema } from '@kbn/zod-helpers';
 import type { Condition } from '../conditions';
 import { conditionSchema } from '../conditions';
@@ -105,6 +105,7 @@ export interface GrokProcessor extends ProcessorBaseWithWhere {
   action: 'grok';
   from: string;
   patterns: string[];
+  pattern_definitions?: Record<string, string>;
   ignore_missing?: boolean;
 }
 
@@ -116,6 +117,7 @@ export const grokProcessorSchema = processorBaseWithWhereSchema
       .array(NonEmptyString)
       .nonempty()
       .describe('Grok patterns applied in order to extract fields'),
+    pattern_definitions: z.optional(z.record(z.string())),
     ignore_missing: z
       .optional(z.boolean())
       .describe('Skip processing when source field is missing'),
@@ -162,6 +164,8 @@ export interface DateProcessor extends ProcessorBaseWithWhere {
   to?: string;
   formats: string[];
   output_format?: string;
+  timezone?: string;
+  locale?: string;
 }
 
 export const dateProcessorSchema = processorBaseWithWhereSchema
@@ -175,6 +179,8 @@ export const dateProcessorSchema = processorBaseWithWhereSchema
     output_format: z
       .optional(NonEmptyString)
       .describe('Optional output format for storing the parsed date as text'),
+    timezone: z.optional(NonEmptyString).describe('Optional timezone for date parsing'),
+    locale: z.optional(NonEmptyString).describe('Optional locale for date parsing'),
   })
   .describe(
     'Date processor - Parse dates from strings using one or more expected formats'
@@ -285,20 +291,25 @@ export type ConvertProcessor = BaseConvertProcessor &
       }
   );
 
-export const convertProcessorSchema = processorBaseWithWhereSchema
-  .extend({
-    action: z.literal('convert'),
-    from: StreamlangSourceField.describe('Source field to convert to a different data type'),
-    to: z
-      .optional(StreamlangTargetField)
-      .describe('Target field for the converted value (defaults to source)'),
-    type: z
-      .enum(convertTypes)
-      .describe('Target data type: integer, long, double, boolean, or string'),
-    ignore_missing: z
-      .optional(z.boolean())
-      .describe('Skip processing when source field is missing'),
-  })
+export const baseConvertProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('convert'),
+  from: StreamlangSourceField.describe('Source field to convert to a different data type'),
+  to: z
+    .optional(StreamlangTargetField)
+    .describe('Target field for the converted value (defaults to source)'),
+  type: z
+    .enum(convertTypes)
+    .describe('Target data type: integer, long, double, boolean, or string'),
+  ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
+}) satisfies z.Schema<BaseConvertProcessor>;
+
+export const convertProcessorSchema = z
+  .union([
+    baseConvertProcessorSchema.extend({
+      where: z.optional(z.undefined()),
+    }),
+    baseConvertProcessorSchema.required({ to: true, where: true }),
+  ])
   .refine((obj) => (obj.where && obj.to && obj.from !== obj.to) || !obj.where, {
     message:
       'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
@@ -348,9 +359,48 @@ export const removeProcessorSchema = processorBaseWithWhereSchema
     'Remove processor - Delete one or more fields from the document'
   ) satisfies z.Schema<RemoveProcessor>;
 
+/**
+ * Drop processor
+ */
+
+export interface DropDocumentProcessor extends ProcessorBaseWithWhere {
+  action: 'drop_document';
+}
+
+export const dropDocumentProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('drop_document'),
+  })
+  .refine((schema) => schema.where !== undefined, {
+    message: 'where clause is required in drop_document.',
+  }) satisfies z.Schema<DropDocumentProcessor>;
+
+/**
+ * Replace processor
+ */
+
+export interface ReplaceProcessor extends ProcessorBaseWithWhere {
+  action: 'replace';
+  from: string;
+  pattern: string;
+  replacement: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('replace'),
+  from: StreamlangSourceField,
+  pattern: NonEmptyOrWhitespaceString, // Allows space " " as valid pattern
+  replacement: z.string(), // Required, should be '' for empty replacement
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<ReplaceProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
+  | DropDocumentProcessor
   | GrokProcessor
   | RenameProcessor
   | SetProcessor
@@ -358,17 +408,20 @@ export type StreamlangProcessorDefinition =
   | ConvertProcessor
   | RemoveByPrefixProcessor
   | RemoveProcessor
+  | ReplaceProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
+  dropDocumentProcessorSchema,
   renameProcessorSchema,
   setProcessorSchema,
   appendProcessorSchema,
   removeByPrefixProcessorSchema,
   removeProcessorSchema,
+  replaceProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
@@ -385,6 +438,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     grokProcessorSchema,
     dissectProcessorSchema,
     convertProcessorSchema,
+    replaceProcessorSchema,
   ])
 );
 
@@ -413,11 +467,18 @@ export type ProcessorType = StreamlangProcessorDefinition['action'];
  */
 export const processorTypes: ProcessorType[] = (
   streamlangProcessorSchema._def.options as Array<
-    z.ZodObject<any, any, any, any, any> | z.ZodEffects<any, any, any>
+    z.ZodObject<any, any, any, any, any> | z.ZodEffects<any, any, any> | z.ZodUnion<any>
   >
 ).map((schema) => {
   // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
-  const baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+  let baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+
+  // Handle ZodUnion (from z.union()) by getting the first option's action
+  // All options in the union should have the same action value
+  if ('_def' in baseSchema && 'options' in baseSchema._def) {
+    baseSchema = baseSchema._def.options[0];
+  }
+
   return baseSchema.shape.action.value;
 }) as ProcessorType[];
 

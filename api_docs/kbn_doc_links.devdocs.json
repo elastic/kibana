@@ -554,7 +554,7 @@
             "label": "server",
             "description": [],
             "signature": [
-              "{ readonly protocol: string; readonly publicBaseUrl: string; }"
+              "{ readonly protocol: string; readonly publicBaseUrl: string; readonly troubleshootServerNotReady: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,

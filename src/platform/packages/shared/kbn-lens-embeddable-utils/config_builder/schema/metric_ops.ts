@@ -58,6 +58,14 @@ export const formulaOperationDefinitionSchema = schema.object({
       description: 'Formula',
     },
   }),
+  /**
+   * Filter
+   */
+  filter: schema.maybe(filterSchema),
+  /**
+   * Reduced time range
+   */
+  reduced_time_range: schema.maybe(schema.string({ meta: { description: 'Reduced time range' } })),
 });
 
 export const esqlColumnSchema = schema.object({
@@ -256,3 +264,15 @@ export type LensApiCumulativeSumOperation = typeof cumulativeSumOperationSchema.
 export type LensApiCounterRateOperation = typeof counterRateOperationSchema.type;
 export type LensApiFormulaOperation = typeof formulaOperationDefinitionSchema.type;
 export type LensApiStaticValueOperation = typeof staticOperationDefinitionSchema.type;
+
+export type LensApiFieldMetricOrFormulaOperation =
+  | LensApiFieldMetricOperations
+  | LensApiFormulaOperation;
+
+export type LensApiAllMetricOrFormulaOperations =
+  | LensApiFieldMetricOperations
+  | LensApiFormulaOperation
+  | LensApiDifferencesOperation
+  | LensApiMovingAverageOperation
+  | LensApiCumulativeSumOperation
+  | LensApiCounterRateOperation;
