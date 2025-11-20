@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { NestedView } from '../../nested_view';
@@ -39,6 +39,7 @@ import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_c
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
+import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
@@ -78,17 +79,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
-  const suggestionsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (suggestionsRef.current && suggestions) {
-      suggestionsRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-        inline: 'nearest',
-      });
-    }
-  }, [suggestions]);
+  const scrollToSuggestions = useScrollToActive(!!suggestions);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -225,7 +216,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
         </EuiDragDropContext>
 
         {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
-          <div ref={suggestionsRef}>
+          <div ref={scrollToSuggestions}>
             <EuiSpacer size="m" />
             {suggestions ? (
               isEmpty(suggestions) ? (
