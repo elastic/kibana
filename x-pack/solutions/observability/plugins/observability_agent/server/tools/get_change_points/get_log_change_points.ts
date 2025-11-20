@@ -22,14 +22,9 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from '../../types';
 import { getFilters, dateHistogram } from './common';
+import { getTypedSearch } from '../../utils/get_typed_search';
 
 export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_log_change_points';
-
-interface DateHistogramBucket {
-  key: string | number;
-  key_as_string?: string;
-  doc_count: number;
-}
 
 interface ChangePointResult {
   type: {
@@ -42,42 +37,6 @@ interface ChangePointResult {
   };
 }
 
-interface CategorizeTextBucket {
-  key: string;
-  doc_count: number;
-  regex: string;
-  over_time: {
-    buckets: DateHistogramBucket[];
-  };
-  changes: ChangePointResult;
-}
-
-interface SamplerAggregation {
-  groups?: {
-    buckets: CategorizeTextBucket[];
-  };
-}
-
-interface LogChangesAggregations {
-  sampler?: SamplerAggregation;
-}
-
-interface LogChangePoint {
-  time: string;
-  type: string;
-  [key: string]: any;
-}
-
-interface LogChangeResult {
-  key: string;
-  pattern: string;
-  over_time: Array<{
-    x: number;
-    y: number;
-  }>;
-  changes: { type: ChangePointType } | LogChangePoint;
-}
-
 export async function getLogChangePoint({
   index,
   filters,
@@ -88,7 +47,7 @@ export async function getLogChangePoint({
   filters: QueryDslQueryContainer[];
   field: string;
   esClient: IScopedClusterClient;
-}): Promise<LogChangeResult[]> {
+}) {
   const countDocumentsResponse = await esClient.asCurrentUser.search({
     size: 0,
     track_total_hits: true,
@@ -111,7 +70,9 @@ export async function getLogChangePoint({
 
   const probability = Math.min(1, 500_000 / totalHits);
 
-  const response = await esClient.asCurrentUser.search<unknown, LogChangesAggregations>({
+  const search = getTypedSearch(esClient.asCurrentUser);
+
+  const response = await search({
     index,
     size: 0,
     track_total_hits: false,
@@ -154,8 +115,8 @@ export async function getLogChangePoint({
     return [];
   }
 
-  return buckets.map((group: CategorizeTextBucket): LogChangeResult => {
-    const changes = group.changes;
+  return buckets.map((group) => {
+    const changes = group.changes as ChangePointResult;
 
     const isIndeterminable =
       !changes || changes.type?.indeterminable === true || !changes.bucket?.key;
@@ -163,7 +124,7 @@ export async function getLogChangePoint({
     return {
       key: group.key,
       pattern: group.regex,
-      over_time: group.over_time.buckets.map((bucket: DateHistogramBucket) => ({
+      over_time: group.over_time.buckets.map((bucket) => ({
         x: new Date(bucket.key).getTime(),
         y: bucket.doc_count,
       })),
