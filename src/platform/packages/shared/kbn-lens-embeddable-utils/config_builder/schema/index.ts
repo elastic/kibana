@@ -15,6 +15,7 @@ import type { LegacyMetricState } from './charts/legacy_metric';
 import { legacyMetricStateSchema } from './charts/legacy_metric';
 import type { GaugeState } from './charts/gauge';
 import { gaugeStateSchema } from './charts/gauge';
+import type { TagcloudState } from './charts/tagcloud';
 import { tagcloudStateSchema } from './charts/tagcloud';
 import type { LensApiAllMetricOperations } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
@@ -34,7 +35,7 @@ export const _lensApiStateSchema: any = schema.oneOf([
   tagcloudStateSchema,
 ]);
 
-export type LensApiState = MetricState | LegacyMetricState | GaugeState;
+export type LensApiState = MetricState | LegacyMetricState | GaugeState | TagcloudState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
