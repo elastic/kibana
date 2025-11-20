@@ -13,6 +13,7 @@ import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/ty
 import type { Streams } from '@kbn/streams-schema';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
 import type { StreamsSupertestRepositoryClient } from './repository_client';
 
@@ -230,6 +231,101 @@ export async function getDashboardSuggestions(options: {
   const response = await apiClient.fetch('POST /internal/streams/{name}/dashboards/_suggestions', {
     params: { path: { name: stream }, body: { tags }, query: { query } },
   });
+  expect(response.status).to.be(200);
+
+  return response.body;
+}
+
+export async function linkAttachment(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  type: AttachmentType,
+  id: string
+) {
+  const response = await apiClient.fetch(
+    'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
+    {
+      params: { path: { streamName: stream, attachmentType: type, attachmentId: id } },
+    }
+  );
+
+  expect(response.status).to.be(200);
+  return response.body;
+}
+
+export async function unlinkAttachment(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  type: AttachmentType,
+  id: string
+) {
+  const response = await apiClient.fetch(
+    'DELETE /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
+    {
+      params: { path: { streamName: stream, attachmentType: type, attachmentId: id } },
+    }
+  );
+
+  expect(response.status).to.be(200);
+  return response.body;
+}
+
+export async function getAttachments(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  type?: AttachmentType
+) {
+  const response = await apiClient.fetch('GET /api/streams/{streamName}/attachments 2023-10-31', {
+    params: {
+      path: { streamName: stream },
+      query: type ? { attachmentType: type } : {},
+    },
+  });
+
+  expect(response.status).to.be(200);
+  return response.body;
+}
+
+export async function bulkAttachments(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  operations: Array<
+    | { index: { type: AttachmentType; id: string } }
+    | { delete: { type: AttachmentType; id: string } }
+  >
+) {
+  const response = await apiClient.fetch(
+    'POST /api/streams/{streamName}/attachments/_bulk 2023-10-31',
+    {
+      params: {
+        path: { streamName: stream },
+        body: { operations },
+      },
+    }
+  );
+
+  expect(response.status).to.be(200);
+  return response.body;
+}
+
+export async function getAttachmentSuggestions(options: {
+  apiClient: StreamsSupertestRepositoryClient;
+  stream: string;
+  type?: AttachmentType;
+  tags: string[];
+  query?: string;
+}) {
+  const { apiClient, stream, type, tags, query = '' } = options;
+  const response = await apiClient.fetch(
+    'POST /internal/streams/{streamName}/attachments/_suggestions',
+    {
+      params: {
+        path: { streamName: stream },
+        body: { tags },
+        query: { query, ...(type ? { attachmentType: type } : {}) },
+      },
+    }
+  );
   expect(response.status).to.be(200);
 
   return response.body;

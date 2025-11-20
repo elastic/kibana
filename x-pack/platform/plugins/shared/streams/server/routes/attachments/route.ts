@@ -11,16 +11,17 @@ import { internal } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import type { Attachment } from '../../lib/streams/attachments/types';
+import { ATTACHMENT_TYPES } from '../../lib/streams/attachments/types';
 
-export interface ListDashboardsResponse {
-  dashboards: Attachment[];
+export interface ListAttachmentsResponse {
+  attachments: Attachment[];
 }
 
-export interface LinkDashboardResponse {
+export interface LinkAttachmentResponse {
   acknowledged: boolean;
 }
 
-export interface UnlinkDashboardResponse {
+export interface UnlinkAttachmentResponse {
   acknowledged: boolean;
 }
 
@@ -30,54 +31,56 @@ export type BulkUpdateAttachmentsResponse =
     }
   | { errors: ErrorCause[] };
 
-const listDashboardsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/dashboards 2023-10-31',
+const attachmentTypeSchema = z.enum(ATTACHMENT_TYPES);
+
+const listAttachmentsRoute = createServerRoute({
+  endpoint: 'GET /api/streams/{streamName}/attachments 2023-10-31',
   options: {
     access: 'public',
-    summary: 'Get stream dashboards',
+    summary: 'Get stream attachments',
     description:
-      'Fetches all dashboards linked to a stream that are visible to the current user in the current space.',
+      'Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment type.',
     availability: {
       stability: 'experimental',
     },
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      streamName: z.string(),
     }),
+    query: z
+      .object({
+        attachmentType: z.optional(attachmentTypeSchema),
+      })
+      .optional(),
   }),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {
+  async handler({ params, request, getScopedClients }): Promise<ListAttachmentsResponse> {
     const { attachmentClient, streamsClient } = await getScopedClients({ request });
-    await streamsClient.ensureStream(params.path.name);
+    await streamsClient.ensureStream(params.path.streamName);
 
     const {
-      path: { name: streamName },
+      path: { streamName },
+      query,
     } = params;
 
-    function isDashboard(attachment: Attachment) {
-      return attachment.type === 'dashboard';
-    }
-
     return {
-      dashboards: (await attachmentClient.getAttachments(streamName, 'dashboard')).filter(
-        isDashboard
-      ),
+      attachments: await attachmentClient.getAttachments(streamName, query?.attachmentType),
     };
   },
 });
 
-const linkDashboardRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+const linkAttachmentRoute = createServerRoute({
+  endpoint: 'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
   options: {
     access: 'public',
-    summary: 'Link a dashboard to a stream',
+    summary: 'Link an attachment to a stream',
     description:
-      'Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.',
+      'Links an attachment to a stream. Noop if the attachment is already linked to the stream.',
     availability: {
       stability: 'experimental',
     },
@@ -89,21 +92,22 @@ const linkDashboardRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      dashboardId: z.string(),
+      streamName: z.string(),
+      attachmentType: attachmentTypeSchema,
+      attachmentId: z.string(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<LinkDashboardResponse> => {
+  handler: async ({ params, request, getScopedClients }): Promise<LinkAttachmentResponse> => {
     const { attachmentClient, streamsClient } = await getScopedClients({ request });
     const {
-      path: { dashboardId, name: streamName },
+      path: { attachmentId, attachmentType, streamName },
     } = params;
 
     await streamsClient.ensureStream(streamName);
 
     await attachmentClient.linkAttachment(streamName, {
-      type: 'dashboard',
-      id: dashboardId,
+      id: attachmentId,
+      type: attachmentType,
     });
 
     return {
@@ -112,13 +116,14 @@ const linkDashboardRoute = createServerRoute({
   },
 });
 
-const unlinkDashboardRoute = createServerRoute({
-  endpoint: 'DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+const unlinkAttachmentRoute = createServerRoute({
+  endpoint:
+    'DELETE /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
   options: {
     access: 'public',
-    summary: 'Unlink a dashboard from a stream',
+    summary: 'Unlink an attachment from a stream',
     description:
-      'Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.',
+      'Unlinks an attachment from a stream. Noop if the attachment is not linked to the stream.',
     availability: {
       stability: 'experimental',
     },
@@ -130,22 +135,23 @@ const unlinkDashboardRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      dashboardId: z.string(),
+      streamName: z.string(),
+      attachmentType: attachmentTypeSchema,
+      attachmentId: z.string(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<UnlinkDashboardResponse> => {
+  handler: async ({ params, request, getScopedClients }): Promise<UnlinkAttachmentResponse> => {
     const { attachmentClient, streamsClient } = await getScopedClients({ request });
 
-    await streamsClient.ensureStream(params.path.name);
+    await streamsClient.ensureStream(params.path.streamName);
 
     const {
-      path: { dashboardId, name: streamName },
+      path: { attachmentId, attachmentType, streamName },
     } = params;
 
     await attachmentClient.unlinkAttachment(streamName, {
-      type: 'dashboard',
-      id: dashboardId,
+      id: attachmentId,
+      type: attachmentType,
     });
 
     return {
@@ -154,17 +160,18 @@ const unlinkDashboardRoute = createServerRoute({
   },
 });
 
-const dashboardSchema = z.object({
+const attachmentSchema = z.object({
   id: z.string(),
+  type: attachmentTypeSchema,
 });
 
-const bulkDashboardsRoute = createServerRoute({
-  endpoint: `POST /api/streams/{name}/dashboards/_bulk 2023-10-31`,
+const bulkAttachmentsRoute = createServerRoute({
+  endpoint: `POST /api/streams/{streamName}/attachments/_bulk 2023-10-31`,
   options: {
     access: 'public',
-    summary: 'Bulk update dashboards',
+    summary: 'Bulk update attachments',
     description:
-      'Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.',
+      'Bulk update attachments linked to a stream. Can link new attachments and delete existing ones. Supports mixed attachment types in a single request.',
     availability: {
       stability: 'experimental',
     },
@@ -176,16 +183,16 @@ const bulkDashboardsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      streamName: z.string(),
     }),
     body: z.object({
       operations: z.array(
         z.union([
           z.object({
-            index: dashboardSchema,
+            index: attachmentSchema,
           }),
           z.object({
-            delete: dashboardSchema,
+            delete: attachmentSchema,
           }),
         ])
       ),
@@ -200,7 +207,7 @@ const bulkDashboardsRoute = createServerRoute({
     const { attachmentClient, streamsClient } = await getScopedClients({ request });
 
     const {
-      path: { name: streamName },
+      path: { streamName },
       body: { operations },
     } = params;
 
@@ -213,7 +220,7 @@ const bulkDashboardsRoute = createServerRoute({
           return {
             index: {
               attachment: {
-                type: 'dashboard',
+                type: operation.index.type,
                 id: operation.index.id,
               },
             },
@@ -222,7 +229,7 @@ const bulkDashboardsRoute = createServerRoute({
         return {
           delete: {
             attachment: {
-              type: 'dashboard',
+              type: operation.delete.type,
               id: operation.delete.id,
             },
           },
@@ -239,9 +246,9 @@ const bulkDashboardsRoute = createServerRoute({
   },
 });
 
-export const dashboardRoutes = {
-  ...listDashboardsRoute,
-  ...linkDashboardRoute,
-  ...unlinkDashboardRoute,
-  ...bulkDashboardsRoute,
+export const attachmentRoutes = {
+  ...listAttachmentsRoute,
+  ...linkAttachmentRoute,
+  ...unlinkAttachmentRoute,
+  ...bulkAttachmentsRoute,
 };
