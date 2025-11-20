@@ -10,11 +10,15 @@ import { css } from '@emotion/react';
 import { useEuiTheme, keys, useGeneratedHtmlId } from '@elastic/eui';
 import type { MessageEditorInstance } from './use_message_editor';
 
+const EDITOR_MAX_HEIGHT = 240;
+
 const useEditorStyles = (editorId: string) => {
   const { euiTheme } = useEuiTheme();
   const escapedId = CSS.escape(editorId);
   const editorStyles = css`
     height: 100%;
+    max-height: ${EDITOR_MAX_HEIGHT}px;
+    overflow-y: auto;
     padding: 0;
 
     &#${escapedId} {
@@ -55,13 +59,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
   const editorStyles = useEditorStyles(editorId);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!event.shiftKey && event.key === keys.ENTER) {
-      event.preventDefault();
-      onSubmit();
-    }
-  };
-
   return (
     <div
       ref={ref}
@@ -78,8 +75,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       onInput={() => {
         onChange?.();
       }}
-      onKeyDown={handleKeyDown}
-      suppressContentEditableWarning={true}
+      onKeyDown={(event) => {
+        if (!event.shiftKey && event.key === keys.ENTER) {
+          event.preventDefault();
+          onSubmit();
+        }
+      }}
     />
   );
 };
