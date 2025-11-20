@@ -94,8 +94,8 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
   });
 
   test('should show the correct hit count', async ({ pageObjects }) => {
-    const expectedHitCount = 14004;
-    expect(await pageObjects.discover.getHitCountInt()).toBe(expectedHitCount);
+    const totalHitCount = 14004;
+    expect(await pageObjects.discover.getHitCountInt()).toBe(totalHitCount);
   });
 
   test('should show correct time range string in chart', async ({ pageObjects }) => {
@@ -202,8 +202,11 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
   });
 
   test('type a search query and execute a search', async ({ pageObjects }) => {
+    const filteredHitCount = 12891;
     pageObjects.discover.writeSearchQuery('response:200');
-    await expect.poll(async () => await pageObjects.discover.getHitCountInt()).toBe(12891);
+    await expect
+      .poll(async () => await pageObjects.discover.getHitCountInt())
+      .toBe(filteredHitCount);
   });
 
   test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
@@ -214,11 +217,13 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
   });
 
   test('navigate to Lens from field statistics', async ({ page, pageObjects }) => {
-    page.testSubj.locator('dscViewModeFieldStatsButton').click({ timeout: 10000 });
+    page.testSubj.locator('dscViewModeFieldStatsButton').click();
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
     const viewLensButton = await pageObjects.discover.getFirstViewLensButtonFromFieldStatistics();
     await viewLensButton.click();
     // Verify we're now on the Lens page
     expect(page.url()).toContain('/app/lens');
   });
+
+  // Click on Patterns works with sample data, tbd once pipeline is in place
 });
