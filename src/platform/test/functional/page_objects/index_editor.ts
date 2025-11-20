@@ -16,6 +16,7 @@ export class IndexEditorObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly es = this.ctx.getService('es');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   public async getColumnNames(): Promise<string[]> {
     const columnHeaders = await this.testSubjects.findAll('indexEditorindexEditorColumnNameButton');
@@ -33,13 +34,15 @@ export class IndexEditorObject extends FtrService {
     return columnNames;
   }
 
-  public async setColumnName(name: string, columnIndex: number) {
+  public async setColumn(name: string, type: string, columnIndex: number) {
     const columnHeaders = await this.testSubjects.findAll('indexEditorindexEditorColumnNameButton');
     const columnHeader = columnHeaders[columnIndex];
 
     expect(columnHeader).to.not.be(undefined);
 
     await columnHeader.click();
+
+    await this.comboBox.set('indexEditorindexEditorColumnTypeSelect', type);
     await this.testSubjects.setValue('indexEditorindexEditorColumnNameInput', name);
     await this.common.pressEnterKey();
   }

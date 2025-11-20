@@ -189,7 +189,11 @@ export const ColumnHeaderPopover = ({
             defaultMessage: `You won't be able to change the type after saving it.`,
           })}
         >
-          <FieldSelect selectedType={columnType || null} onTypeChange={setColumnType} />
+          <FieldSelect
+            selectedType={columnType || null}
+            onTypeChange={setColumnType}
+            data-test-subj="indexEditorindexEditorColumnTypeSelect"
+          />
         </EuiFormRow>
         {columnType && (
           <EuiPopoverFooter>
