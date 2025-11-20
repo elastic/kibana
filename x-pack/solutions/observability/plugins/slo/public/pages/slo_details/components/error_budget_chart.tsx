@@ -55,14 +55,28 @@ export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, o
       errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0
     );
   }
+
+  const observedValue = data.slice(-1)[0]?.value;
+
   return (
     <>
-      {!hideMetadata && (
-        <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
+      <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleColor={isSloFailed ? 'danger' : 'success'}
+            title={numeral(observedValue).format(percentFormat)}
+            titleSize="s"
+            description={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.remaining', {
+              defaultMessage: 'Remaining',
+            })}
+            reverse
+          />
+        </EuiFlexItem>
+        {!hideMetadata && errorBudgetTimeRemainingFormatted ? (
           <EuiFlexItem grow={false}>
             <EuiStat
               titleColor={isSloFailed ? 'danger' : 'success'}
-              title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
+              title={errorBudgetTimeRemainingFormatted}
               titleSize="s"
               description={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.remaining', {
                 defaultMessage: 'Remaining',
@@ -70,24 +84,8 @@ export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, o
               reverse
             />
           </EuiFlexItem>
-          {errorBudgetTimeRemainingFormatted ? (
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                titleColor={isSloFailed ? 'danger' : 'success'}
-                title={errorBudgetTimeRemainingFormatted}
-                titleSize="s"
-                description={i18n.translate(
-                  'xpack.slo.sloDetails.errorBudgetChartPanel.remaining',
-                  {
-                    defaultMessage: 'Remaining',
-                  }
-                )}
-                reverse
-              />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      )}
+        ) : null}
+      </EuiFlexGroup>
 
       <EuiFlexItem>
         <WideChart

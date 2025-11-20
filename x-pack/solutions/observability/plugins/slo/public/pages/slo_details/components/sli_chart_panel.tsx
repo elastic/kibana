@@ -29,6 +29,8 @@ export function SliChartPanel({ data, isLoading, slo, hideMetadata = false, onBr
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
+  const observedValue = data.slice(-1)[0]?.value;
+
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
   const hasNoData = slo.summary.status === 'NO_DATA';
 
@@ -59,31 +61,29 @@ export function SliChartPanel({ data, isLoading, slo, hideMetadata = false, onBr
           )}
         </EuiFlexGroup>
 
-        {!hideMetadata && (
-          <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                titleColor={isSloFailed ? 'danger' : 'success'}
-                title={hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat)}
-                titleSize="s"
-                description={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.current', {
-                  defaultMessage: 'Observed value',
-                })}
-                reverse
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                title={numeral(slo.objective.target).format(percentFormat)}
-                titleSize="s"
-                description={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.objective', {
-                  defaultMessage: 'Objective',
-                })}
-                reverse
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+        <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              titleColor={isSloFailed ? 'danger' : 'success'}
+              title={hasNoData ? '-' : numeral(observedValue).format(percentFormat)}
+              titleSize="s"
+              description={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.current', {
+                defaultMessage: 'Observed value',
+              })}
+              reverse
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              title={numeral(slo.objective.target).format(percentFormat)}
+              titleSize="s"
+              description={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.objective', {
+                defaultMessage: 'Objective',
+              })}
+              reverse
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiFlexItem>
           <WideChart
