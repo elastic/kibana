@@ -236,7 +236,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
               .send({
                 start: searchStart,
                 end: searchEnd,
-                aggregated_statuses: ['unfilled'],
+                highest_priority_gap_fill_statuses: ['unfilled'],
               });
 
             switch (scenario.id) {

@@ -202,14 +202,14 @@ describe('getGapsSummaryByRuleIds', () => {
           totalUnfilledDurationMs: 1000,
           totalInProgressDurationMs: 2000,
           totalFilledDurationMs: 3000,
-          status: 'unfilled',
+          gapFillStatus: 'unfilled',
         },
         {
           ruleId: '2',
           totalUnfilledDurationMs: 4000,
           totalInProgressDurationMs: 5000,
           totalFilledDurationMs: 6000,
-          status: 'unfilled',
+          gapFillStatus: 'unfilled',
         },
       ],
     });

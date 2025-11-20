@@ -34,7 +34,7 @@ describe('getGapsSummaryByRuleIdsRoute', () => {
     data: [
       {
         ruleId: 'rule-1',
-        status: gapFillStatus.UNFILLED,
+        gapFillStatus: gapFillStatus.UNFILLED,
         totalUnfilledDurationMs: 3600000,
         totalInProgressDurationMs: 0,
         totalFilledDurationMs: 82800000,
@@ -66,7 +66,7 @@ describe('getGapsSummaryByRuleIdsRoute', () => {
         data: [
           {
             rule_id: 'rule-1',
-            status: gapFillStatus.UNFILLED,
+            gap_fill_status: gapFillStatus.UNFILLED,
             total_unfilled_duration_ms: 3600000,
             total_in_progress_duration_ms: 0,
             total_filled_duration_ms: 82800000,

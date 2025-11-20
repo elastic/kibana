@@ -143,13 +143,13 @@ export async function getGapsSummaryByRuleIds(
     const result: GetGapsSummaryByRuleIdsResponse = {
       data: resultBuckets.map((bucket) => {
         const sums = extractGapDurationSums(bucket);
-        const status = calculateHighestPriorityGapFillStatus(sums) ?? undefined;
+        const gapFillStatus = calculateHighestPriorityGapFillStatus(sums) ?? undefined;
         return {
           ruleId: bucket.key,
           totalUnfilledDurationMs: sums.totalUnfilledDurationMs,
           totalInProgressDurationMs: sums.totalInProgressDurationMs,
           totalFilledDurationMs: sums.totalFilledDurationMs,
-          ...(status ? { status } : {}),
+          ...(gapFillStatus ? { gapFillStatus } : {}),
         };
       }),
     };

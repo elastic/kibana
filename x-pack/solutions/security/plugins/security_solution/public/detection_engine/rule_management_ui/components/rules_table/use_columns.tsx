@@ -500,11 +500,11 @@ export const useGapStatusColumn = (): TableColumn => {
               total_unfilled_duration_ms: number;
               total_in_progress_duration_ms: number;
               total_filled_duration_ms: number;
-              status?: GapFillStatus;
+              gap_fill_status?: GapFillStatus;
             }
           | undefined
       ) => {
-        const status = gapInfo?.status;
+        const status = gapInfo?.gap_fill_status;
         if (!gapInfo || !status) return getEmptyTagValue();
 
         const totalInProgressDurationMs = gapInfo.total_in_progress_duration_ms;
