@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
@@ -28,6 +29,7 @@ export class WorkflowTaskManager {
     try {
       const task = await this.taskManager.schedule(
         {
+          id: v4(),
           taskType: 'workflow:resume',
           params: {
             workflowRunId: workflowExecution.id,
