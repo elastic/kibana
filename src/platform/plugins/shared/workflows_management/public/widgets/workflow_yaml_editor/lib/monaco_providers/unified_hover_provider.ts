@@ -186,6 +186,14 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         return null;
       }
 
+      // Second: check for decorations at this position, e.g. we don't want to show generic hover content over variables (valid or invalid)
+      const decorations = model
+        .getLineDecorations(position.lineNumber)
+        .filter((decoration) => decoration.options.hoverMessage);
+      if (decorations.length > 0) {
+        return null;
+      }
+
       // Get YAML document
       const yamlDocument = this.getYamlDocument();
       if (!yamlDocument) {
