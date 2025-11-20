@@ -25,7 +25,7 @@
 
 - wait
 
-- command: .buildkite/scripts/steps/checks/verify_fips_enabled.sh
+- command: .buildkite/pipelines/fips/verify_fips_enabled.sh
   label: 'Verify FIPS Enabled'
   depends_on: build
   timeout_in_minutes: 10
