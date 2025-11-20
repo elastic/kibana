@@ -38,6 +38,9 @@ export interface AlertsQueryParams {
    * The query name is used for performance monitoring with APM
    */
   queryName: AlertsQueryName;
+  /**
+   * The unique query id which will be used to identify the query
+   */
   uniqueQueryId?: string | null;
 }
 

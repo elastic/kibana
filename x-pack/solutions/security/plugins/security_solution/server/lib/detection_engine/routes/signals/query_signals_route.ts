@@ -65,29 +65,18 @@ export const querySignalsRoute = (
         try {
           const spaceId = (await context.securitySolution).getSpaceId();
           const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
-
-          // Capture unique-query-id header for logging correlation
-          // Prepare transport options with unique-query-id header for ES cloud logs correlation
-          const uniqueQueryId = (request.headers['unique-query-id'] as string) || null;
-          const transportOptions = uniqueQueryId
-            ? { headers: { 'unique-query-id': uniqueQueryId } }
-            : {};
-
-          const result = await esClient.search(
-            {
-              index: indexPattern,
-              query,
-              aggs: aggs as Record<string, AggregationsAggregationContainer>,
-              _source,
-              fields,
-              track_total_hits,
-              size,
-              runtime_mappings: runtime_mappings as MappingRuntimeFields,
-              sort: sort as Sort,
-              ignore_unavailable: true,
-            },
-            transportOptions
-          );
+          const result = await esClient.search({
+            index: indexPattern,
+            query,
+            aggs: aggs as Record<string, AggregationsAggregationContainer>,
+            _source,
+            fields,
+            track_total_hits,
+            size,
+            runtime_mappings: runtime_mappings as MappingRuntimeFields,
+            sort: sort as Sort,
+            ignore_unavailable: true,
+          });
           return response.ok({ body: result });
         } catch (err) {
           // error while getting or updating signal with id: id in signal index .siem-signals

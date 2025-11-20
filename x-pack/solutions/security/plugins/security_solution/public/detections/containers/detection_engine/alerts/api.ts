@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { ResponseActionApiResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
@@ -46,6 +47,14 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
   signal,
   uniqueQueryId,
 }: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
+  const executionContext: KibanaExecutionContext | undefined = uniqueQueryId
+    ? {
+        type: 'security_solution',
+        name: 'query',
+        id: uniqueQueryId,
+      }
+    : undefined;
+
   return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
     DETECTION_ENGINE_QUERY_SIGNALS_URL,
     {
@@ -53,19 +62,7 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
       method: 'POST',
       body: JSON.stringify(query),
       signal,
-      headers: uniqueQueryId
-        ? {
-            'unique-query-id': uniqueQueryId,
-          }
-        : undefined,
-      context: uniqueQueryId
-        ? {
-            type: 'security_solution',
-            name: 'detection_engine_fetch_query_alerts',
-            description: 'Fetch detection engine alerts by query',
-            id: `testme-secengprod-${uniqueQueryId}`,
-          }
-        : undefined,
+      context: executionContext,
     }
   );
 };
