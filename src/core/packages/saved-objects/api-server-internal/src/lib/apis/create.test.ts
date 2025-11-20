@@ -867,7 +867,7 @@ describe('#create', () => {
           })
         ).rejects.toThrowError(
           createBadRequestErrorPayload(
-            `The \"accessMode\" field is not supported for saved objects of type \"multiNamespaceType\".`
+            `Cannot create a saved object of type multiNamespaceType with an access mode because the type does not support access control`
           )
         );
         expect(client.create).not.toHaveBeenCalled();
@@ -920,7 +920,7 @@ describe('#create', () => {
           })
         ).rejects.toThrowError(
           createBadRequestErrorPayload(
-            `Unable to create \"write_restricted\" \"accessControlType\" saved object. User profile ID not found.`
+            `Cannot create a saved object of type accessControlType with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
           )
         );
         expect(client.create).not.toHaveBeenCalled();

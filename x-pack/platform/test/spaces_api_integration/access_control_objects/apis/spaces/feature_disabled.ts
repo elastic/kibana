@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('error', 'Bad Request');
         expect(response.body.message).to.contain(
-          `The "accessMode" field is not supported for saved objects of type "${ACCESS_CONTROL_TYPE}".: Bad Request`
+          `Cannot create a saved object of type ${ACCESS_CONTROL_TYPE} with an access mode because the type does not support access control: Bad Request`
         );
       });
 
@@ -228,7 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.saved_objects[1]).to.have.property('error');
         expect(response.body.saved_objects[1].error).to.have.property(
           'message',
-          `Cannot create a saved object of type "${ACCESS_CONTROL_TYPE}" with an access mode because the type does not support access control.: Bad Request`
+          `Cannot create a saved object of type ${ACCESS_CONTROL_TYPE} with an access mode because the type does not support access control: Bad Request`
         );
         expect(response.body.saved_objects[1].error).to.have.property('statusCode', 400);
         expect(response.body.saved_objects[1].error).to.have.property('error', 'Bad Request');

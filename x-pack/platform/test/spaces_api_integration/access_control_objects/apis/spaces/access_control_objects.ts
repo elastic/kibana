@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain(
-          `Unable to create "write_restricted" "${ACCESS_CONTROL_TYPE}" saved object. User profile ID not found.: Bad Request`
+          `Cannot create a saved object of type ${ACCESS_CONTROL_TYPE} with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile: Bad Request`
         );
       });
 
