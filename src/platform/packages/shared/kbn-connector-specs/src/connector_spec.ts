@@ -20,13 +20,12 @@
  * - Zod for validation and UI derivation
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosInstance } from 'axios';
-import { withUIMeta } from './connector_spec_ui';
 
-export { withUIMeta, UISchemas } from './connector_spec_ui';
+export { UISchemas } from './connector_spec_ui';
 
 // ============================================================================
 // INTERNATIONALIZATION
@@ -59,12 +58,12 @@ export interface ConnectorMetadata {
     | 'alerting'
     | 'cases'
     | 'uptime'
-    | 'security'
     | 'siem'
     | 'generativeAIForSecurity'
     | 'generativeAIForObservability'
     | 'generativeAIForSearchPlayground'
     | 'endpointSecurity'
+    | 'workflows'
   >;
 }
 
@@ -91,7 +90,7 @@ export const BasicAuthSchema = z.object({
   method: z.literal('basic'),
   credentials: z.object({
     username: z.string().describe('Username'),
-    password: withUIMeta(z.string(), { sensitive: true }).describe('Password'),
+    password: z.string().meta({ sensitive: true }).describe('Password'),
   }),
 });
 
@@ -101,7 +100,7 @@ export const BasicAuthSchema = z.object({
  */
 export const BearerAuthSchema = z.object({
   method: z.literal('bearer'),
-  token: withUIMeta(z.string(), { sensitive: true }).describe('Bearer Token'),
+  token: z.string().meta({ sensitive: true }).describe('Bearer Token'),
 });
 
 // ============================================================================

@@ -10,7 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { TestProviders } from '../../../common/mock';
-import { CALLOUT_TEST_DATA_ID, MovingAttacksCallout } from '.';
+import { CALLOUT_TEST_DATA_ID, HIDE_BUTTON_TEST_DATA_ID, MovingAttacksCallout } from '.';
 import { useMovingAttacksCallout } from './use_moving_attacks_callout';
 import { mockUseMovingAttacksCallout } from './use_moving_attacks_callout.mock';
 
@@ -49,6 +49,12 @@ describe('MovingAttacksCallout', () => {
     expect(screen.getByTestId(CALLOUT_TEST_DATA_ID)).toBeInTheDocument();
   });
 
+  it('renders the hide callout button when isMovingAttacksCalloutVisible is true', () => {
+    renderCallout();
+
+    expect(screen.getByTestId(HIDE_BUTTON_TEST_DATA_ID)).toBeInTheDocument();
+  });
+
   it('calls hideCallout when the callout is dismissed', async () => {
     const mockHideCallout = jest.fn();
 
@@ -61,7 +67,7 @@ describe('MovingAttacksCallout', () => {
 
     renderCallout();
 
-    await userEvent.click(screen.getByRole('button', { name: /dismiss/i }));
+    await userEvent.click(screen.getByTestId(HIDE_BUTTON_TEST_DATA_ID));
 
     await waitFor(() => {
       expect(mockHideCallout).toHaveBeenCalled();
