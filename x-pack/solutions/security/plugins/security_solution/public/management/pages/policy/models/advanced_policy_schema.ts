@@ -2573,6 +2573,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.mitigations.policies.redirection_guard',
+    first_supported_version: '8.19.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.mitigations.policies.redirection_guard',
+      {
+        defaultMessage:
+          'Set to false to opt out of Windows Redirection Guard on Win10/Win11 21H2 and later. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.agent.orphaned_remediation',
     first_supported_version: '9.2',
     documentation: i18n.translate(
