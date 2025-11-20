@@ -18,9 +18,6 @@ export const plugin = async (initContext: PluginInitializerContext) => {
 
 export const config: PluginConfigDescriptor<MaintenanceWindowsConfig> = {
   schema: configSchema,
-  exposeToBrowser: {
-    enabled: true,
-  },
 };
 
 export type {

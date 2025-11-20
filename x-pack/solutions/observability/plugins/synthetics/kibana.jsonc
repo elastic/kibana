@@ -37,8 +37,7 @@
       "unifiedSearch",
       "presentationUtil",
       "charts",
-      "fieldsMetadata",
-      "maintenanceWindows"
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "cases",
@@ -53,7 +52,8 @@
       "telemetry",
       "licenseManagement",
       "observabilityAIAssistant",
-      "embeddableEnhanced"
+      "embeddableEnhanced",
+      "maintenanceWindows"
     ],
     "requiredBundles": [
       "data",

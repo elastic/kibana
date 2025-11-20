@@ -24,16 +24,17 @@
       "management",
       "esUiShared",
       "unifiedSearch",
-      "embeddable",
-      "maintenanceWindows"
+      "embeddable"
     ],
     "optionalPlugins": [
       "usageCollection",
       "security",
       "monitoringCollection",
       "spaces",
-      "serverless"
+      "serverless",
+      "maintenanceWindows"
     ],
+    "requiredBundles": ["maintenanceWindows"],
     "extraPublicDirs": ["common", "common/parse_duration"]
   }
 }

@@ -15,6 +15,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import { MAINTENANCE_WINDOWS_APP_ID } from '@kbn/maintenance-windows-plugin/common';
+import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 import type { AlertNavigationHandler } from './alert_navigation_registry';
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
@@ -65,6 +66,7 @@ export interface PluginStartContract {
 }
 export interface AlertingPluginSetup {
   management: ManagementSetup;
+  maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 
 export interface AlertingPluginStart {
@@ -117,7 +119,7 @@ export class AlertingPublicPlugin
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
 
-    if (this.config.maintenanceWindow?.enabled) {
+    if (plugins.maintenanceWindows && this.config.maintenanceWindow?.enabled) {
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: MAINTENANCE_WINDOWS_APP_ID,
         title: i18n.translate('xpack.alerting.management.section.title', {
