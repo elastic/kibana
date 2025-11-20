@@ -16,6 +16,7 @@ import type { EntityType } from '../../../common/entity_analytics/types';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from '../constants';
+import { ESSENTIAL_ALERT_FIELDS } from './alert_fields';
 
 const entityRiskScoreSchema = z.object({
   identifierType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
@@ -48,34 +49,7 @@ const getAlertsById = async ({
     ignore_unavailable: true,
     allow_no_indices: true,
     size: ids.length,
-    _source: [
-      '@timestamp',
-      'kibana.alert.uuid',
-      'kibana.alert.risk_score',
-      'kibana.alert.severity',
-      'kibana.alert.start',
-      'kibana.alert.workflow_status',
-      'kibana.alert.reason',
-      'kibana.alert.rule.name',
-      'kibana.alert.rule.rule_id',
-      'kibana.alert.rule.description',
-      'kibana.alert.rule.category',
-      'message',
-      'host.name',
-      'host.ip',
-      'user.name',
-      'user.domain',
-      'source.ip',
-      'destination.ip',
-      'event.category',
-      'event.action',
-      'event.type',
-      'event.code',
-      'process.name',
-      'process.executable',
-      'process.command_line',
-      'process.pid',
-    ],
+    _source: ESSENTIAL_ALERT_FIELDS,
     query: {
       bool: {
         filter: [{ terms: { _id: ids } }],
