@@ -286,8 +286,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.waitFor(
           'Dashboard selector to be visible',
-          async () => await testSubjects.exists('dashboardsSelector'),
-          { timeout: 10000 }
+          async () => await testSubjects.exists('dashboardsSelector')
         );
 
         const optionsText = await comboBox.getOptionsList('dashboardsSelector');
@@ -317,8 +316,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.waitFor(
           'Dashboard selector to be visible',
-          async () => await testSubjects.exists('dashboardsSelector'),
-          { timeout: 10000 }
+          async () => await testSubjects.exists('dashboardsSelector')
         );
 
         await comboBox.set('dashboardsSelector', testDashboardTitle);
