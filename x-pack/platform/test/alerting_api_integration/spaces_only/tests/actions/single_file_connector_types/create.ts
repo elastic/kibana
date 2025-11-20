@@ -23,6 +23,23 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
       expect(connectorTypeIds.includes('test.single_file_connector')).to.be(true);
     });
 
+    it('should successfully create test single file connector with no auth', async () => {
+      await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A single file connector - using basic auth',
+          connector_type_id: 'test.single_file_connector',
+          config: {
+            apiUrl: 'https://example.com/api',
+          },
+          secrets: {
+            authType: 'none',
+          },
+        })
+        .expect(200);
+    });
+
     it('should successfully create test single file connector with basic auth', async () => {
       await supertest
         .post('/api/actions/connector')

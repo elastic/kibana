@@ -18,6 +18,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
   },
 
   authTypes: [
+    'none',
     'basic',
     {
       type: 'api_key_header',
