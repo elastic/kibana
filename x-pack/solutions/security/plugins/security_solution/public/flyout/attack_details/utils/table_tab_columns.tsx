@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
-import type { Maybe } from '@kbn/apm-types-shared';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
 export const FIELD = i18n.translate(
   'xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel',
@@ -20,12 +20,7 @@ const VALUE = i18n.translate('xpack.securitySolution.attackDetailsFlyout.table.v
   defaultMessage: 'Value',
 });
 
-export interface AttacksDetailsItem {
-  field: string;
-  values?: Maybe<string | string[]>;
-}
-
-export type ColumnsProvider = () => Array<EuiBasicTableColumn<AttacksDetailsItem>>;
+export type ColumnsProvider = () => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
 
 /**
  * Returns the columns for the table tab
