@@ -47,7 +47,13 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
             : ''}
 
           ${isSelected
-            ? ''
+            ? `
+              position: relative;
+              border-bottom-left-radius: 0;
+              border-bottom-right-radius: 0;
+              filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.06))
+                      drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.04));
+            `
             : `
             &:hover {
               background-color: ${euiTheme.colors.lightShade};
@@ -56,7 +62,34 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         `}
       >
         {children}
+        {isSelected && !isDragging && <Accent direction="left" />}
+        {isSelected && !isDragging && <Accent direction="right" />}
       </div>
     );
   }
 );
+
+const Accent = ({ direction }: { direction: 'left' | 'right' }) => {
+  return (
+    <svg
+      css={css`
+        height: 8px;
+        width: 8px;
+        position: absolute;
+        bottom: 0;
+        ${direction === 'left' ? 'left: -8px;' : 'right: -8px;'};
+        ${direction === 'left' ? 'transform: scaleX(-1);' : ''};
+      `}
+      xmlns="http://www.w3.org/2000/svg"
+      width="8"
+      height="8"
+      viewBox="0 0 8 8"
+      fill="none"
+    >
+      <path
+        d="M8 7.92676C7.67329 7.97351 7.33964 8 7 8H8V7.92676ZM0 8H7C3.13401 8 0 4.86599 0 1C0 0.660412 0.0255308 0.326664 0.0722656 0H0V8Z"
+        fill="white"
+      />
+    </svg>
+  );
+};

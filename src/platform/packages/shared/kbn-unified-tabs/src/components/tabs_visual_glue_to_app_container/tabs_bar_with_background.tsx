@@ -55,7 +55,7 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
       css={css`
         // tabs bar background
         background: ${euiTheme.colors.lightestShade};
-        padding-block: ${euiTheme.size.xs};
+        padding-top: ${euiTheme.size.xs};
         padding-inline: ${euiTheme.size.s};
       `}
     >
