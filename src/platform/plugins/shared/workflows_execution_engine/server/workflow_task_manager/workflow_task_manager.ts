@@ -25,23 +25,27 @@ export class WorkflowTaskManager {
     resumeAt: Date;
     fakeRequest: KibanaRequest;
   }): Promise<{ taskId: string }> {
-    const task = await this.taskManager.schedule(
-      {
-        taskType: 'workflow:resume',
-        params: {
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-        } as ResumeWorkflowExecutionParams,
-        state: {},
-        runAt: resumeAt,
-        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
-      },
-      { request: fakeRequest }
-    );
+    try {
+      const task = await this.taskManager.schedule(
+        {
+          taskType: 'workflow:resume',
+          params: {
+            workflowRunId: workflowExecution.id,
+            spaceId: workflowExecution.spaceId,
+          } as ResumeWorkflowExecutionParams,
+          state: {},
+          runAt: resumeAt,
+          scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+        },
+        { request: fakeRequest }
+      );
 
-    return {
-      taskId: task.id,
-    };
+      return {
+        taskId: task.id,
+      };
+    } catch (error) {
+      throw new Error(`Task scheduling failed: ${(error as Error).message}`);
+    }
   }
 
   async forceRunIdleTasks(workflowExecutionId: string): Promise<void> {
