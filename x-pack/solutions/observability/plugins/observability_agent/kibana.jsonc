@@ -8,7 +8,15 @@
     "id": "observabilityAgent",
     "browser": false,
     "server": true,
-    "requiredPlugins": ["onechat", "apmDataAccess", "logsDataAccess", "security"],
+    "requiredPlugins": [
+      "onechat",
+      "apmDataAccess",
+      "logsDataAccess",
+      "security",
+      "ruleRegistry",
+      "dataViews",
+      "metricsDataAccess"
+    ],
     "optionalPlugins": [],
     "requiredBundles": [],
     "extraPublicDirs": []

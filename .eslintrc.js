@@ -1848,6 +1848,12 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': 'error',
       },
     },
+    {
+      files: ['src/platform/packages/shared/kbn-connector-specs/src/icons/**/*.{ts,tsx}'],
+      rules: {
+        'import/no-default-export': 'off',
+      },
+    },
 
     /**
      * Lens overrides

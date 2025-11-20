@@ -39,7 +39,7 @@ export const createToolResultStoreMock = (): ToolResultStoreMock => {
 export const createAttachmentsServiceMock = (): AttachmentsServiceMock => {
   return {
     validate: jest.fn(),
-    format: jest.fn(),
+    getTypeDefinition: jest.fn(),
   };
 };
 
