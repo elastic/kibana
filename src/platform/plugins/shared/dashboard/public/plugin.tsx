@@ -292,6 +292,11 @@ export class DashboardPlugin
       return searchAction;
     });
 
+    plugins.uiActions.registerActionAsync('getDashboardByIdAction', async () => {
+      const { getDashboardByIdAction } = await import('./dashboard_client');
+      return getDashboardByIdAction;
+    });
+
     return {
       registerDashboardPanelSettings,
       findDashboardsService: async () => {

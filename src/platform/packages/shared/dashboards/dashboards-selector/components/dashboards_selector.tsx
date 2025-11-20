@@ -44,6 +44,22 @@ async function searchDashboards(
   });
 }
 
+async function getDashboardsById(uiActions: UiActionsStart, ids: string[]): Promise<Dashboard[]> {
+  if (!ids.length) {
+    return [];
+  }
+  const getDashboardByIdAction = await uiActions.getAction('getDashboardByIdAction');
+  return new Promise(function (resolve) {
+    getDashboardByIdAction.execute({
+      onResults(dashboards: Dashboard[]) {
+        resolve(dashboards);
+      },
+      ids,
+      trigger: { id: 'getDashboardsById' },
+    } as ActionExecutionContext);
+  });
+}
+
 export function DashboardsSelector({
   uiActions,
   dashboardsFormData,
@@ -71,22 +87,14 @@ export function DashboardsSelector({
     }
 
     try {
-      // Fetch all dashboards and filter by the IDs we need
-      const allDashboards = await searchDashboards(uiActions, { perPage: 1000 });
-      const dashboardMap = new Map(allDashboards.map((d) => [d.id, d]));
+      // Fetch dashboards by their IDs directly instead of fetching all dashboards
+      const dashboardIds = dashboardsFormData.map((dashboard) => dashboard.id);
+      const dashboards = await getDashboardsById(uiActions, dashboardIds);
 
-      const validDashboards = dashboardsFormData
-        .map((dashboard) => {
-          const foundDashboard = dashboardMap.get(dashboard.id);
-          if (foundDashboard) {
-            return {
-              label: foundDashboard.title,
-              value: dashboard.id,
-            };
-          }
-          return null;
-        })
-        .filter(Boolean) as Array<EuiComboBoxOptionOption<string>>;
+      const validDashboards = dashboards.map((dashboard) => ({
+        label: dashboard.title,
+        value: dashboard.id,
+      }));
 
       setSelectedDashboards(validDashboards);
     } catch (error) {
