@@ -221,7 +221,7 @@ describe('evaluateDefendInsights', () => {
     expect(ActionsClientLlm).toHaveBeenCalled();
 
     // Get all calls to ActionsClientLlm
-    const actionsClientLlmCalls = (ActionsClientLlm as jest.Mock).mock.calls;
+    const actionsClientLlmCalls = (ActionsClientLlm as unknown as jest.Mock).mock.calls;
 
     // Find the call for the experiment connector (not the evaluator)
     // The evaluator LLM is created separately via getEvaluatorLlm
