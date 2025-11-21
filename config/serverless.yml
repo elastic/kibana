@@ -248,7 +248,7 @@ xpack.cases.stack.enabled: false
 xpack.alerting.rules.run.actions.max: 3000
 xpack.alerting.rules.run.timeout: 1m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
-xpack.alerting.rules.maxScheduledPerMinute: 400
+xpack.alerting.rules.maxScheduledPerMinute: 5000
 xpack.actions.run.maxAttempts: 10
 xpack.actions.queued.max: 10000
 
