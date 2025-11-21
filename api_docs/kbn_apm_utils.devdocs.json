@@ -21,6 +21,103 @@
     "functions": [
       {
         "parentPluginId": "@kbn/apm-utils",
+        "id": "def-common.instrumentAsyncMethods",
+        "type": "Function",
+        "tags": [],
+        "label": "instrumentAsyncMethods",
+        "description": [
+          "\nWrap each async method on a class instance or plain object in a withSpan() call using the method name.\nMutates the target (and its prototype chain) in-place."
+        ],
+        "signature": [
+          "(name: string, instance: object, getSpanOptions: ((prevSpanOptions: ",
+          {
+            "pluginId": "@kbn/apm-utils",
+            "scope": "common",
+            "docId": "kibKbnApmUtilsPluginApi",
+            "section": "def-common.SpanOptions",
+            "text": "SpanOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/apm-utils",
+            "scope": "common",
+            "docId": "kibKbnApmUtilsPluginApi",
+            "section": "def-common.SpanOptions",
+            "text": "SpanOptions"
+          },
+          ") | undefined) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-utils/src/instrument_async_methods.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-common.instrumentAsyncMethods.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/instrument_async_methods.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-common.instrumentAsyncMethods.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "instance",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/instrument_async_methods.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-common.instrumentAsyncMethods.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "getSpanOptions",
+            "description": [],
+            "signature": [
+              "((prevSpanOptions: ",
+              {
+                "pluginId": "@kbn/apm-utils",
+                "scope": "common",
+                "docId": "kibKbnApmUtilsPluginApi",
+                "section": "def-common.SpanOptions",
+                "text": "SpanOptions"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/apm-utils",
+                "scope": "common",
+                "docId": "kibKbnApmUtilsPluginApi",
+                "section": "def-common.SpanOptions",
+                "text": "SpanOptions"
+              },
+              ") | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/instrument_async_methods.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-utils",
         "id": "def-common.parseSpanOptions",
         "type": "Function",
         "tags": [],
@@ -44,7 +141,7 @@
             "text": "SpanOptions"
           }
         ],
-        "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -65,7 +162,7 @@
                 "text": "SpanOptions"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,7 +193,7 @@
           "Logger",
           " | undefined) => Promise<T>"
         ],
-        "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,7 +214,7 @@
                 "text": "SpanOptions"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -134,7 +231,7 @@
               "Span",
               " | undefined) => Promise<T>"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -150,7 +247,7 @@
               "Logger",
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -168,7 +265,7 @@
         "tags": [],
         "label": "SpanOptions",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,7 +276,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,7 +290,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -207,7 +304,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -221,7 +318,7 @@
             "signature": [
               "Record<string, string> | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -235,7 +332,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-utils/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
             "deprecated": false,
             "trackAdoption": false
           }

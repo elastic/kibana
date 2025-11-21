@@ -19,11 +19,9 @@ import { useEditorFrameService } from '../editor_frame_service_context';
 export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
   framePublicAPI,
   isInlineEditing = false,
-  enableFlyoutToolbar = true,
 }: {
   framePublicAPI: FramePublicAPI;
   isInlineEditing?: boolean;
-  enableFlyoutToolbar?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
   const lensVisualization = useLensSelector(selectVisualization);
@@ -54,18 +52,13 @@ export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
     return null;
   }
 
-  const { FlyoutToolbarComponent, ToolbarComponent: RegularToolbarComponent } =
-    activeVisualization ?? {};
+  const { FlyoutToolbarComponent } = activeVisualization;
 
-  const ToolbarComponent = enableFlyoutToolbar
-    ? FlyoutToolbarComponent ?? RegularToolbarComponent
-    : RegularToolbarComponent;
-
-  if (!ToolbarComponent) {
+  if (!FlyoutToolbarComponent) {
     return null;
   }
 
-  return ToolbarComponent({
+  return FlyoutToolbarComponent({
     frame: framePublicAPI,
     state: visualizationState.state,
     setState: setVisualizationState,

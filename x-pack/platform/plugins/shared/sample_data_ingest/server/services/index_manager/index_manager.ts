@@ -28,6 +28,7 @@ interface CreateAndPopulateIndexOpts {
   manifest: any;
   archive: ZipArchive;
   esClient: ElasticsearchClient;
+  abortController?: AbortController;
 }
 
 export class IndexManager {
@@ -47,6 +48,7 @@ export class IndexManager {
     manifest,
     archive,
     esClient,
+    abortController,
   }: CreateAndPopulateIndexOpts): Promise<void> {
     if (this.elserInferenceId === defaultInferenceEndpoints.ELSER) {
       await ensureDefaultElserDeployed({
@@ -58,6 +60,7 @@ export class IndexManager {
       indexName,
       legacySemanticText: isLegacySemanticTextVersion(manifest.formatVersion),
       esClient,
+      abortController,
       elserInferenceId: this.elserInferenceId,
       log: this.log,
     };

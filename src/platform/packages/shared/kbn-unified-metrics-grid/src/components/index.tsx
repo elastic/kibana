@@ -36,17 +36,25 @@ const InternalUnifiedMetricsExperienceGrid = (
 
   return (
     <MetricsExperienceClientProvider value={{ client: props.client }}>
-      <MetricsExperienceStateProvider>
-        <QueryClientProvider client={queryClient}>
-          <MetricsExperienceGrid {...props} />
-        </QueryClientProvider>
-      </MetricsExperienceStateProvider>
+      <QueryClientProvider client={queryClient}>
+        <MetricsExperienceGrid {...props} />
+      </QueryClientProvider>
     </MetricsExperienceClientProvider>
   );
 };
 
+const InternalUnifiedMetricsExperienceGridWithState = (
+  props: ChartSectionProps & { client?: MetricsExperienceClient }
+) => {
+  return (
+    <MetricsExperienceStateProvider>
+      <InternalUnifiedMetricsExperienceGrid {...props} />
+    </MetricsExperienceStateProvider>
+  );
+};
+
 const UnifiedMetricsExperienceGridWithRestorableState = withRestorableState(
-  InternalUnifiedMetricsExperienceGrid
+  InternalUnifiedMetricsExperienceGridWithState
 );
 
 // eslint-disable-next-line import/no-default-export

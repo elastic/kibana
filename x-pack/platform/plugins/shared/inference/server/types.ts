@@ -17,6 +17,7 @@ import type {
   InferenceConnector,
 } from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
+import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -41,6 +42,10 @@ export interface InferenceUnboundClientCreateOptions {
    * The request to scope the client to.
    */
   request: KibanaRequest;
+  /**
+   * Callbacks to be used by the client to report lifecycle events.
+   */
+  callbacks?: InferenceCallbacks;
 }
 
 /**
@@ -154,6 +159,10 @@ export interface CreateChatModelOptions {
    * The id of the GenAI connector to use.
    */
   connectorId: string;
+  /**
+   * Callback to be used by the client to report lifecycle events.
+   */
+  callbacks?: InferenceCallbacks;
   /**
    * Additional parameters to be passed down to the model constructor.
    */
