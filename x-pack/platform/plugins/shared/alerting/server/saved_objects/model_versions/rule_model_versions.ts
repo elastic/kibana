@@ -77,20 +77,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '7': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          flapping: {
-            properties: {
-              enabled: {
-                type: 'boolean',
-              },
-            },
-          },
-        },
-      },
-    ],
+    changes: [],
     schemas: {
       forwardCompatibility: rawRuleSchemaV7.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV7,

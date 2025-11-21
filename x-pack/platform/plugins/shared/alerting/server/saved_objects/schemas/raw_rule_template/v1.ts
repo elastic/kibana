@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { rawRuleSchema } from '../raw_rule/v6';
+import { rawRuleSchema } from '../raw_rule/v7';
 
 export const rawRuleTemplateSchema = schema.object({
   name: rawRuleSchema.getPropSchemas().name,
