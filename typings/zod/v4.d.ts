@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module 'zod' {
-  export * from 'zod/v4';
+declare module 'zod/v4' {
+  export * from 'zod/v4/index.d.cts';
 }
