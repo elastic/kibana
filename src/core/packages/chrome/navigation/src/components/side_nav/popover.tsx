@@ -17,9 +17,10 @@ import type {
   KeyboardEvent,
   Ref,
 } from 'react';
-import { EuiPopover, useEuiTheme } from '@elastic/eui';
+import { EuiPopover, EuiScreenReaderOnly, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
+import { i18n } from '@kbn/i18n';
 
 import {
   BOTTOM_POPOVER_GAP,
@@ -37,8 +38,16 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useHoverTimeout } from '../../hooks/use_hover_timeout';
 import { useScroll } from '../../hooks/use_scroll';
 
+export interface PopoverIds {
+  popoverNavigationInstructionsId: string;
+}
+
+export type PopoverChildren =
+  | ReactNode
+  | ((closePopover: () => void, ids?: PopoverIds) => ReactNode);
+
 export interface PopoverProps {
-  children?: ReactNode | ((closePopover: () => void) => ReactNode);
+  children?: PopoverChildren;
   container?: HTMLElement;
   hasContent: boolean;
   isSidePanelOpen: boolean;
@@ -78,8 +87,12 @@ export const Popover = ({
 }: PopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { setHoverTimeout, clearHoverTimeout } = useHoverTimeout();
-  const popoverEnterAndExitInstructionsId = 'popover-enter-exit-instructions';
-  const popoverNavigationInstructionsId = 'popover-navigation-instructions';
+  const popoverEnterAndExitInstructionsId = useGeneratedHtmlId({
+    prefix: 'popover-enter-exit-instructions',
+  });
+  const popoverNavigationInstructionsId = useGeneratedHtmlId({
+    prefix: 'popover-navigation-instructions',
+  });
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
@@ -218,19 +231,24 @@ export const Popover = ({
   }, [clearHoverTimeout, handleClose]);
 
   const enhancedTrigger = useMemo(
-    () =>
-      cloneElement(trigger, {
+    () => {
+      const existingDescribedBy = trigger.props['aria-describedby'];
+      const popoverDescribedBy =
+        hasContent && !isSidePanelOpen ? popoverEnterAndExitInstructionsId : undefined;
+      const finalDescribedBy = [existingDescribedBy, popoverDescribedBy].filter(Boolean).join(' ');
+
+      return cloneElement(trigger, {
         ref: triggerRef,
         'aria-haspopup': hasContent,
         'aria-expanded': hasContent ? isOpen : undefined,
-        'aria-describedby':
-          hasContent && !isSidePanelOpen ? popoverEnterAndExitInstructionsId : undefined,
+        'aria-describedby': finalDescribedBy || undefined,
         onClick: (e: MouseEvent) => {
           trigger.props.onClick?.(e);
           handleTriggerClick();
         },
         onKeyDown: handleTriggerKeyDown,
-      }),
+      });
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [trigger, hasContent, isOpen, popoverEnterAndExitInstructionsId, handleTriggerKeyDown]
   );
@@ -259,7 +277,17 @@ export const Popover = ({
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
       onBlur={handleBlur}
+      role="none"
     >
+      {hasContent && !isSidePanelOpen && (
+        <EuiScreenReaderOnly>
+          <span id={popoverEnterAndExitInstructionsId}>
+            {i18n.translate('core.ui.chrome.sideNavigation.popoverInstruction', {
+              defaultMessage: 'Press Enter to go to the submenu.',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      )}
       <EuiPopover
         aria-label={label}
         anchorPosition="rightUp"
@@ -287,18 +315,6 @@ export const Popover = ({
               const elements = getFocusableElements(ref);
               updateTabIndices(elements);
 
-              // Add aria-describedby to the first focusable element only
-              if (elements.length > 0) {
-                const firstElement = elements[0];
-                const existingDescribedBy = firstElement.getAttribute('aria-describedby');
-                if (!existingDescribedBy?.includes(popoverNavigationInstructionsId)) {
-                  const enhancedDescribedBy = existingDescribedBy
-                    ? `${popoverNavigationInstructionsId} ${existingDescribedBy}`
-                    : popoverNavigationInstructionsId;
-                  firstElement.setAttribute('aria-describedby', enhancedDescribedBy);
-                }
-              }
-
               if (shouldFocusOnOpen) {
                 focusFirstElement(popoverRef);
                 setShouldFocusOnOpen(false);
@@ -308,7 +324,20 @@ export const Popover = ({
           onKeyDown={handlePopoverKeyDown}
           css={popoverContentStyles}
         >
-          {typeof children === 'function' ? children(handleClose) : children}
+          <EuiScreenReaderOnly>
+            <p id={popoverNavigationInstructionsId}>
+              {i18n.translate('core.ui.chrome.sideNavigation.popoverNavigationInstructions', {
+                defaultMessage:
+                  'You are in the {label} secondary menu dialog. Use Up and Down arrow keys to navigate the menu. Press Escape to exit to the menu trigger.',
+                values: {
+                  label,
+                },
+              })}
+            </p>
+          </EuiScreenReaderOnly>
+          {typeof children === 'function'
+            ? children(handleClose, { popoverNavigationInstructionsId })
+            : children}
         </div>
       </EuiPopover>
       {persistent && isOpenedByClick && isOpen && (

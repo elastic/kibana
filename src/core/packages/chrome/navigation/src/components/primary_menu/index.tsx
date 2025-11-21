@@ -33,8 +33,14 @@ const getPrimaryMenuStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boole
   min-height: 0;
 `;
 
+export interface PrimaryMenuIds {
+  mainNavigationInstructionsId: string;
+}
+
+export type PrimaryMenuChildren = ReactNode | ((ids: PrimaryMenuIds) => ReactNode);
+
 export interface PrimaryMenuProps {
-  children: ReactNode;
+  children: PrimaryMenuChildren;
   isCollapsed: boolean;
 }
 
@@ -49,8 +55,6 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
     const mainNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'main-navigation-instructions',
     });
-    const popoverEnterAndExitInstructionsId = 'popover-enter-exit-instructions';
-    const popoverNavigationInstructionsId = 'popover-navigation-instructions';
 
     const styles = useMemo(
       () => getPrimaryMenuStyles(euiTheme, isCollapsed),
@@ -61,22 +65,17 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
       if (node) {
         const elements = getFocusableElements(node);
         updateTabIndices(elements);
-
-        // Add aria-describedby with keyboard navigation instructions to the first focusable element only
-        if (elements.length > 0) {
-          const firstElement = elements[0];
-          const existingDescribedBy = firstElement.getAttribute('aria-describedby');
-          if (!existingDescribedBy?.includes(mainNavigationInstructionsId)) {
-            const enhancedDescribedBy = existingDescribedBy
-              ? `${mainNavigationInstructionsId} ${existingDescribedBy}`
-              : mainNavigationInstructionsId;
-            firstElement.setAttribute('aria-describedby', enhancedDescribedBy);
-          }
-        }
       }
 
       if (typeof ref === 'function') ref(node);
       else if (ref && 'current' in ref) ref.current = node;
+    };
+
+    const renderChildren = () => {
+      if (typeof children === 'function') {
+        return children({ mainNavigationInstructionsId });
+      }
+      return children;
     };
 
     return (
@@ -85,27 +84,10 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
           <p id={mainNavigationInstructionsId}>
             {i18n.translate('core.ui.chrome.sideNavigation.primaryMenuInstructions', {
               defaultMessage:
-                'You are focused on a primary menu. Use up and down arrow keys to navigate between items and press Enter to activate',
+                'You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu',
             })}
           </p>
         </EuiScreenReaderOnly>
-        {/* Rendered once for all popovers */}
-        <EuiScreenReaderOnly>
-          <span id={popoverEnterAndExitInstructionsId}>
-            {i18n.translate('core.ui.chrome.sideNavigation.popoverInstruction', {
-              defaultMessage: 'Press Enter to go to the submenu and Escape to exit',
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-        <EuiScreenReaderOnly>
-          <p id={popoverNavigationInstructionsId}>
-            {i18n.translate('core.ui.chrome.sideNavigation.popoverNavigationInstructions', {
-              defaultMessage: 'Use up and down arrow keys to navigate and press Enter to activate',
-            })}
-          </p>
-        </EuiScreenReaderOnly>
-        {/* The nav itself is not interactive but the children are */}
-        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <nav
           aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
             defaultMessage: 'Main',
@@ -115,8 +97,11 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
           data-test-subj={PRIMARY_NAVIGATION_ID}
           onKeyDown={handleRovingIndex}
           ref={handleRef}
+          // The nav itself is not interactive but the children are
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
+          role="menu"
         >
-          {children}
+          {renderChildren()}
         </nav>
       </>
     );

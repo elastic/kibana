@@ -43,6 +43,7 @@ export const Header: FC<HeaderProps> = ({ title }) => {
         color="text"
         iconType="arrowLeft"
         onClick={goBack}
+        role="menuitem"
       />
       {title && (
         <EuiTitle size="xs">

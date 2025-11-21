@@ -539,11 +539,8 @@ describe('Both modes', () => {
 
         const morePopover = await screen.findByTestId(morePopoverId);
 
-        // We can have both `link` and `button` in the "More" menu
         securityMock.navItems.primaryItems.slice(11).forEach((item) => {
-          // `button` -> item with a submenu, `link` -> item without a submenu
-          const role = !!item.sections?.length ? 'button' : 'link';
-          const element = within(morePopover).getByRole(role, {
+          const element = within(morePopover).getByRole('menuitem', {
             name: item.label,
           });
 
@@ -1456,7 +1453,7 @@ describe('Both modes', () => {
         // Open the "Machine learning" nested panel
         await user.keyboard('{Enter}');
 
-        const goBackButton = within(popover).getByRole('button', { name: 'Go back' });
+        const goBackButton = within(popover).getByRole('menuitem', { name: 'Go back' });
 
         expect(goBackButton).toHaveFocus();
       });
@@ -1516,7 +1513,7 @@ describe('Both modes', () => {
         // Move focus to the "Go back" button in the nested panel
         await user.keyboard('{Home}');
 
-        const goBackButton = within(popover).getByRole('button', { name: 'Go back' });
+        const goBackButton = within(popover).getByRole('menuitem', { name: 'Go back' });
 
         expect(goBackButton).toHaveFocus();
       });
@@ -1551,7 +1548,7 @@ describe('Both modes', () => {
         // Open the "Machine learning" nested panel
         await user.keyboard('{Enter}');
 
-        const goBackButton = within(popover).getByRole('button', { name: 'Go back' });
+        const goBackButton = within(popover).getByRole('menuitem', { name: 'Go back' });
 
         expect(goBackButton).toHaveFocus();
 

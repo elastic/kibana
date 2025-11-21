@@ -34,8 +34,14 @@ const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) 
   padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
 `;
 
+export interface FooterIds {
+  footerNavigationInstructionsId: string;
+}
+
+export type FooterChildren = ReactNode | ((ids: FooterIds) => ReactNode);
+
 export interface FooterProps {
-  children: ReactNode;
+  children: FooterChildren;
   isCollapsed: boolean;
 }
 
@@ -80,13 +86,20 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(({ children, isCollapsed
     [euiTheme, isCollapsed]
   );
 
+  const renderChildren = () => {
+    if (typeof children === 'function') {
+      return children({ footerNavigationInstructionsId });
+    }
+    return children;
+  };
+
   return (
     <>
       <EuiScreenReaderOnly>
         <p id={footerNavigationInstructionsId}>
           {i18n.translate('core.ui.chrome.sideNavigation.footerInstructions', {
             defaultMessage:
-              'You are focused on a footer menu. Use up and down arrow keys to navigate between items and press Enter to activate',
+              'You are in the main navigation footer menu. Use Up and Down arrow keys to navigate the menu.',
           })}
         </p>
       </EuiScreenReaderOnly>
@@ -101,7 +114,7 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(({ children, isCollapsed
         ref={handleRef}
         data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
       >
-        {children}
+        {renderChildren()}
       </footer>
     </>
   );

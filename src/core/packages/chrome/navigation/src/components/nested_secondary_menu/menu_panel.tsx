@@ -63,7 +63,7 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
   }
 
   return (
-    <div data-test-subj={nestedPanelTestSubj} ref={panelRef}>
+    <div data-test-subj={nestedPanelTestSubj} ref={panelRef} role="menu">
       {children}
     </div>
   );

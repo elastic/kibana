@@ -58,7 +58,7 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
             {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
           </div>
         </EuiTitle>
-        {children}
+        <div role="menu">{children}</div>
       </div>
     );
   }

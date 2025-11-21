@@ -43,34 +43,23 @@ exports[`Expanded mode should render the side navigation 1`] = `
         class="emotion-euiScreenReaderOnly"
         id="main-navigation-instructions_generated-id"
       >
-        You are focused on a primary menu. Use up and down arrow keys to navigate between items and press Enter to activate
-      </p>
-      <span
-        class="emotion-euiScreenReaderOnly"
-        id="popover-enter-exit-instructions"
-      >
-        Press Enter to go to the submenu and Escape to exit
-      </span>
-      <p
-        class="emotion-euiScreenReaderOnly"
-        id="popover-navigation-instructions"
-      >
-        Use up and down arrow keys to navigate and press Enter to activate
+        You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu
       </p>
       <nav
         aria-label="Main"
         class="css-175v8l8-getPrimaryMenuStyles"
         data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
+        role="menu"
       >
         <div
           class="css-1y7bpvk-wrapperStyles"
+          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
           >
             <a
-              aria-describedby="main-navigation-instructions_generated-id"
               aria-haspopup="false"
               class="css-12vu9wt-buttonStyles"
               data-highlighted="false"
@@ -79,6 +68,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               href="/dashboards"
               id="dashboards"
               label="Dashboards"
+              role="menuitem"
               tabindex="0"
             >
               <div
@@ -100,6 +90,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
+          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -113,6 +104,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               href="/discover"
               id="discover"
               label="Discover"
+              role="menuitem"
               tabindex="-1"
             >
               <div
@@ -134,12 +126,19 @@ exports[`Expanded mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
+          role="none"
         >
+          <span
+            class="emotion-euiScreenReaderOnly"
+            id="popover-enter-exit-instructions_generated-id"
+          >
+            Press Enter to go to the submenu.
+          </span>
           <div
             class="euiPopover emotion-euiPopover-block"
           >
             <a
-              aria-describedby="popover-enter-exit-instructions"
+              aria-describedby="popover-enter-exit-instructions_generated-id"
               aria-expanded="false"
               aria-haspopup="true"
               class="css-12vu9wt-buttonStyles"
@@ -149,6 +148,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               href="/apps_overview"
               id="apps_overview"
               label="Apps"
+              role="menuitem"
               tabindex="-1"
             >
               <div
@@ -173,7 +173,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
         class="emotion-euiScreenReaderOnly"
         id="footer-navigation-instructions_generated-id"
       >
-        You are focused on a footer menu. Use up and down arrow keys to navigate between items and press Enter to activate
+        You are in the main navigation footer menu. Use Up and Down arrow keys to navigate the menu.
       </p>
       <footer
         aria-label="Side navigation"
@@ -182,6 +182,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
       >
         <div
           class="css-1y7bpvk-wrapperStyles"
+          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -199,6 +200,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-getting_started"
                 href="/getting-started"
                 rel="noreferrer"
+                role="menuitem"
                 tabindex="0"
               >
                 <span
@@ -213,6 +215,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
+          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -229,6 +232,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-developer_tools"
                 href="/developer-tools"
                 rel="noreferrer"
+                role="menuitem"
                 tabindex="-1"
               >
                 <span
@@ -243,7 +247,14 @@ exports[`Expanded mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
+          role="none"
         >
+          <span
+            class="emotion-euiScreenReaderOnly"
+            id="popover-enter-exit-instructions_generated-id"
+          >
+            Press Enter to go to the submenu.
+          </span>
           <div
             class="euiPopover emotion-euiPopover-block"
           >
@@ -251,7 +262,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               class="css-1g7fa48-wrapperStyles"
             >
               <a
-                aria-describedby="popover-enter-exit-instructions"
+                aria-describedby="popover-enter-exit-instructions_generated-id"
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-label="Settings"
@@ -261,6 +272,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-integrations"
                 href="/integrations"
                 rel="noreferrer"
+                role="menuitem"
                 tabindex="-1"
               >
                 <span
@@ -275,6 +287,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
+          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -291,6 +304,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-fourth_item"
                 href="/fourth-item"
                 rel="noreferrer"
+                role="menuitem"
                 tabindex="-1"
               >
                 <span
@@ -305,6 +319,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
+          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -321,6 +336,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-fifth_item"
                 href="/fourth-item"
                 rel="noreferrer"
+                role="menuitem"
                 tabindex="-1"
               >
                 <span

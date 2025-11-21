@@ -40,8 +40,14 @@ const getWrapperStyles = (theme: UseEuiTheme['euiTheme']) => css`
   width: ${SIDE_PANEL_WIDTH}px;
 `;
 
+export interface SidePanelIds {
+  secondaryNavigationInstructionsId: string;
+}
+
+export type SidePanelChildren = ReactNode | ((ids: SidePanelIds) => ReactNode);
+
 export interface SidePanelProps {
-  children: ReactNode;
+  children: SidePanelChildren;
   footer?: ReactNode;
   openerNode: MenuItem;
 }
@@ -62,18 +68,6 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
     if (ref) {
       const elements = getFocusableElements(ref);
       updateTabIndices(elements);
-
-      // Add aria-describedby with keyboard navigation instructions to the first focusable element only
-      if (elements.length > 0) {
-        const firstElement = elements[0];
-        const existingDescribedBy = firstElement.getAttribute('aria-describedby');
-        if (!existingDescribedBy?.includes(secondaryNavigationInstructionsId)) {
-          const enhancedDescribedBy = existingDescribedBy
-            ? `${secondaryNavigationInstructionsId} ${existingDescribedBy}`
-            : secondaryNavigationInstructionsId;
-          firstElement.setAttribute('aria-describedby', enhancedDescribedBy);
-        }
-      }
     }
   };
 
@@ -86,12 +80,23 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
 
   const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
 
+  const renderChildren = () => {
+    if (typeof children === 'function') {
+      return children({ secondaryNavigationInstructionsId });
+    }
+    return children;
+  };
+
   return (
     <>
       <EuiScreenReaderOnly>
         <p id={secondaryNavigationInstructionsId}>
           {i18n.translate('core.ui.chrome.sideNavigation.sidePanelInstructions', {
-            defaultMessage: 'Use up and down arrow keys to navigate and press Enter to activate',
+            defaultMessage:
+              'You are in the {label} secondary menu side panel. Use Up and Down arrow keys to navigate the menu.',
+            values: {
+              label: openerNode.label,
+            },
           })}
         </p>
       </EuiScreenReaderOnly>
@@ -118,7 +123,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
           panelRef={panelRef}
           paddingSize="none"
         >
-          {children}
+          {renderChildren()}
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner
           color="subdued"
