@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import { enhanceKibanaConnectorsWithFetcher } from './connector_utils';
+import { z } from '@kbn/zod/v4';
+import { enhanceKibanaConnectorsWithFetcher } from './enhance_kibana_connectors_with_fetcher';
 import type { InternalConnectorContract } from '../types/v1';
 
 describe('enhanceKibanaConnectorsWithFetcher', () => {
@@ -68,7 +68,7 @@ describe('enhanceKibanaConnectorsWithFetcher', () => {
         },
         paramsSchema: z.intersection(
           z.object({
-            config: z.record(z.any()),
+            config: z.record(z.string(), z.any()),
           }),
           z.object({
             id: z.string(),

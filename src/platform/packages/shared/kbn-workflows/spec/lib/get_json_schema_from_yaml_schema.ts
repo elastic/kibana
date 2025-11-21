@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { z } from '@kbn/zod/v4';
+import type { JSONSchema } from '@kbn/zod/v4/core';
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type | null {
+export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JSONSchema.JSONSchema | null {
   try {
-    return z.toJSONSchema(yamlSchema);
+    return z.toJSONSchema(yamlSchema, {
+      target: 'draft-7',
+    });
   } catch (error) {
     // console.error('Error generating JSON schema from YAML schema:', error);
     return null;

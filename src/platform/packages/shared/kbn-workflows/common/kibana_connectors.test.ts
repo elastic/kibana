@@ -8,10 +8,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { GENERATED_KIBANA_CONNECTORS, KIBANA_CONNECTOR_COUNT } from './kibana_connectors';
-import type { InternalConnectorContract } from '../../types/v1';
-import { generateYamlSchemaFromConnectors } from '../../spec/lib/generate_yaml_schema_from_connectors';
-import { getJsonSchemaFromYamlSchema } from '../../spec/lib/get_json_schema_from_yaml_schema';
+import { GENERATED_KIBANA_CONNECTORS } from './generated/kibana_connectors_v2.gen';
+import { generateYamlSchemaFromConnectors } from '../spec/lib/generate_yaml_schema_from_connectors';
+import { getJsonSchemaFromYamlSchema } from '../spec/lib/get_json_schema_from_yaml_schema';
+import type { InternalConnectorContract } from '../types/v1';
+
+const KIBANA_CONNECTOR_COUNT = GENERATED_KIBANA_CONNECTORS.length;
 
 describe('Generated Kibana Connectors', () => {
   // SANITY TEST: Critical test to ensure no runtime errors are introduced
@@ -21,13 +23,11 @@ describe('Generated Kibana Connectors', () => {
       // without throwing any runtime errors, which was the original issue
       expect(() => {
         // Re-import to test the actual import process
-        const connectors = require('./kibana_connectors');
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const connectors = require('./generated/kibana_connectors_v2.gen');
         expect(connectors.GENERATED_KIBANA_CONNECTORS).toBeDefined();
-        expect(connectors.KIBANA_CONNECTOR_COUNT).toBeDefined();
         expect(Array.isArray(connectors.GENERATED_KIBANA_CONNECTORS)).toBe(true);
         expect(connectors.GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(0);
-        expect(typeof connectors.KIBANA_CONNECTOR_COUNT).toBe('number');
-        expect(connectors.KIBANA_CONNECTOR_COUNT).toBeGreaterThan(0);
       }).not.toThrow();
     });
 

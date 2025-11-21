@@ -163,8 +163,8 @@ describe('addFetcherToKibanaConnectors', () => {
     const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
 
     // Navigate to the step schema in the JSON schema
-    const fallbackItems = (jsonSchema as any).definitions.WorkflowSchema.properties.settings
-      .properties['on-failure'].properties.fallback.items;
+    const fallbackItems = (jsonSchema as any).properties.settings.properties['on-failure']
+      .properties.fallback.items;
 
     expect(fallbackItems).toBeDefined();
     expect(fallbackItems.anyOf).toBeDefined();
@@ -226,8 +226,8 @@ describe('addFetcherToKibanaConnectors', () => {
     const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
 
     // Navigate to the step schema in the JSON schema
-    const fallbackItems = (jsonSchema as any).definitions.WorkflowSchema.properties.settings
-      .properties['on-failure'].properties.fallback.items;
+    const fallbackItems = (jsonSchema as any).properties.settings.properties['on-failure']
+      .properties.fallback.items;
 
     expect(fallbackItems).toBeDefined();
     expect(fallbackItems.anyOf).toBeDefined();
@@ -288,8 +288,8 @@ describe('addFetcherToKibanaConnectors', () => {
     const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
 
     // Navigate to the step schemas
-    const fallbackItems = (jsonSchema as any).definitions.WorkflowSchema.properties.settings
-      .properties['on-failure'].properties.fallback.items;
+    const fallbackItems = (jsonSchema as any).properties.settings.properties['on-failure']
+      .properties.fallback.items;
 
     expect(fallbackItems).toBeDefined();
     expect(fallbackItems.anyOf).toBeDefined();
@@ -350,8 +350,8 @@ describe('addFetcherToKibanaConnectors', () => {
     const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors);
     const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
 
-    const fallbackItems = (jsonSchema as any).definitions.WorkflowSchema.properties.settings
-      .properties['on-failure'].properties.fallback.items;
+    const fallbackItems = (jsonSchema as any).properties.settings.properties['on-failure']
+      .properties.fallback.items;
 
     expect(fallbackItems).toBeDefined();
     expect(fallbackItems.anyOf).toBeDefined();

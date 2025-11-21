@@ -16,7 +16,7 @@ export * from './common/constants';
 export * from './common/privileges';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
-export * from './common/connector_utils';
+export * from './common/enhance_kibana_connectors_with_fetcher';
 export * from './server/constants';
 export * from './server/repositories/workflow_repository';
 

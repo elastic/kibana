@@ -109,6 +109,8 @@ describe('WorkflowSchemaForAutocomplete', () => {
         ],
       }).data
     ).toEqual({
+      version: '1',
+      enabled: true,
       triggers: [
         {
           type: '',
