@@ -28,12 +28,12 @@ import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import { findGapsById } from '../../../../lib/rule_gaps/find_gaps_by_id';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
-import { getRule } from '../get/get_rule';
+import { getRule } from '../../../rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 jest.mock('../../../../lib/rule_gaps/find_gaps_by_id');
 jest.mock('../../../backfill/methods/schedule');
-jest.mock('../get/get_rule');
+jest.mock('../../../rule/methods/get/get_rule');
 
 describe('fillGapById', () => {
   let rulesClient: RulesClient;
