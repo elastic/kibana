@@ -263,6 +263,18 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
     const { elasticsearch } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
 
+    //  Before doing anything, check if the ILM policies are disabled and return early if they are
+    const isILMPolicyDisabled =
+      appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+
+    if (isILMPolicyDisabled) {
+      return response.ok({
+        body: {
+          deprecatedILMPolicies: [],
+        },
+      });
+    }
+
     const DEPRECATED_ILM_POLICY_TYPES = ['logs', 'metrics', 'synthetics'];
 
     // Fetch all ILM policies
@@ -288,22 +300,18 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
       }
 
       // Fetch Fleet-managed component templates for this policy type
-      let componentTemplateResponse;
-      try {
-        componentTemplateResponse = await esClient.cluster.getComponentTemplate({
+      const componentTemplateResponse = await esClient.cluster.getComponentTemplate(
+        {
           name: `${policyType}-*@package`,
           filter_path: [
             'component_templates.*.name',
             'component_templates.*.component_template.template.settings.index.lifecycle.name',
           ],
-        });
-      } catch (err) {
-        // If no templates match the pattern, continue to next policy type
-        if (err instanceof errors.ResponseError && err.statusCode === 404) {
-          continue;
+        },
+        {
+          ignore: [404],
         }
-        throw err;
-      }
+      );
 
       // Filter component templates that actually use the deprecated policy
       const fleetManagedTemplates = (componentTemplateResponse.component_templates || [])

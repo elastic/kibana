@@ -96,7 +96,7 @@ describe('schema validation', () => {
 
   it('deprecated ILM check should return valid response when no deprecated policies', async () => {
     const expectedResponse = {
-      deprecatedPolicies: [],
+      deprecatedILMPolicies: [],
     };
     getDeprecatedILMCheckHandlerMock.mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
