@@ -86,7 +86,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     ).toBeEnabled();
   });
 
-  test.only('should disable saving the pipeline while one is in progress', async ({
+  test('should disable saving the pipeline while one is in progress', async ({
     page,
     pageObjects,
   }) => {
