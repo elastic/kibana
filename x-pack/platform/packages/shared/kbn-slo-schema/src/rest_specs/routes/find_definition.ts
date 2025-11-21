@@ -19,21 +19,15 @@ const findSloDefinitionsParamsSchema = t.partial({
   }),
 });
 
-const healthMetadataSchema = t.type({
-  overall: transformHealthSchema,
-  rollup: healthStatusSchema,
-  summary: healthStatusSchema,
+const healthMetadataSchema = t.partial({
+  health: t.type({
+    overall: transformHealthSchema,
+    rollup: healthStatusSchema,
+    summary: healthStatusSchema,
+  }),
 });
 
-const sloDefinitionResponseSchema = t.intersection([
-  sloDefinitionSchema,
-  t.partial({ health: healthMetadataSchema }),
-]);
-
-const sloDefinitionWithHealthResponseSchema = t.intersection([
-  sloDefinitionSchema,
-  t.type({ health: healthMetadataSchema }),
-]);
+const sloDefinitionResponseSchema = t.intersection([sloDefinitionSchema, healthMetadataSchema]);
 
 const findSloDefinitionsResponseSchema = t.type({
   page: t.number,
@@ -46,17 +40,10 @@ type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.p
 type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
 
 type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionResponseSchema>;
-type SLODefinitionWithHealthResponse = t.OutputOf<typeof sloDefinitionWithHealthResponseSchema>;
 
 export {
   findSloDefinitionsParamsSchema,
   findSloDefinitionsResponseSchema,
   sloDefinitionResponseSchema,
-  sloDefinitionWithHealthResponseSchema,
 };
-export type {
-  FindSLODefinitionsParams,
-  FindSLODefinitionsResponse,
-  SLODefinitionResponse,
-  SLODefinitionWithHealthResponse,
-};
+export type { FindSLODefinitionsParams, FindSLODefinitionsResponse, SLODefinitionResponse };

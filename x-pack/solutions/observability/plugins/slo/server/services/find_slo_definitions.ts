@@ -42,10 +42,9 @@ export class FindSLODefinitions {
       });
 
       const healthBySloId = keyBy(healthResults, 'sloId');
-      const resultsWithHealth = definitions.map((definition) => {
+      const definitionsWithHealth = definitions.map((definition) => {
         return {
           ...definition,
-          statE: 'foo',
           health: healthBySloId[definition.id]?.health,
         };
       });
@@ -54,7 +53,7 @@ export class FindSLODefinitions {
         page: result.page,
         perPage: result.perPage,
         total: result.total,
-        results: resultsWithHealth,
+        results: definitionsWithHealth,
       });
     }
 

@@ -76,7 +76,7 @@ async function getSummaryDocsById(list: Item[], deps: Dependencies) {
           bool: {
             must: [
               { term: { 'slo.id': item.id } },
-              { term: { 'slo.instanceId': item.instanceId } },
+              { term: { 'slo.instanceId': item.instanceId ?? ALL_VALUE } },
               { term: { 'slo.revision': item.revision } },
             ],
           },
