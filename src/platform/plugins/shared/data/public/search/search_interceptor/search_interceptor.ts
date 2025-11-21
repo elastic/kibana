@@ -454,6 +454,11 @@ export class SearchInterceptor {
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
 
+    // FIXME: the dropNullColumns param shouldn't be needed during polling
+    // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
+    // at that point, exclude all params when request.id is defined (polling phase)
+    const paramsToUse = request.id ? { dropNullColumns: params.dropNullColumns } : params || {};
+
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
         `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
@@ -462,7 +467,7 @@ export class SearchInterceptor {
           signal: abortSignal,
           context: this.deps.executionContext.withGlobalContext(executionContext),
           body: JSON.stringify({
-            ...(request.id ? request : { params, ...request }),
+            ...{ ...request, params: paramsToUse },
             ...searchOptions,
             requestHash,
             stream:
