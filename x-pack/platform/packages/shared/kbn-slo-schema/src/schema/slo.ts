@@ -99,7 +99,7 @@ const sloDefinitionSchema = t.intersection([
     createdBy: t.string,
     updatedBy: t.string,
   }),
-});
+]);
 
 export {
   budgetingMethodSchema,
