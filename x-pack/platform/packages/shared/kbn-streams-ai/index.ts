@@ -7,6 +7,7 @@
 
 export { generateStreamDescription } from './src/description/generate_description';
 export {
+  identifyInfrastructureFeatures,
   identifySystemFeatures,
   type IdentifyFeaturesOptions,
 } from './src/features/identify_features';

@@ -10,13 +10,14 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import {
+  InfrastructureFeature,
   isFeatureWithFilter,
   type Feature,
   type Streams,
   type SystemFeature,
 } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import { IdentifySystemsPrompt } from './prompt';
+import { IdentifyInfrastructurePrompt, IdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { generateStreamDescription } from '../description/generate_description';
@@ -156,6 +157,58 @@ export async function identifySystemFeatures({
             description,
           };
         })
+    ),
+  };
+}
+
+export async function identifyInfrastructureFeatures({
+  stream,
+  inferenceClient,
+  signal,
+  analysis,
+  dropUnmapped = false,
+  maxSteps: initialMaxSteps,
+}: IdentifyFeaturesOptions & {
+  dropUnmapped?: boolean;
+  maxSteps?: number;
+}): Promise<{ features: InfrastructureFeature[] }> {
+  const response = await executeAsReasoningAgent({
+    maxSteps: initialMaxSteps,
+    input: {
+      stream: {
+        name: stream.name,
+        description: stream.description || 'This stream has no description.',
+      },
+      dataset_analysis: JSON.stringify(
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
+      ),
+    },
+    prompt: IdentifyInfrastructurePrompt,
+    inferenceClient,
+    finalToolChoice: {
+      function: 'finalize_infrastructure',
+    },
+    toolCallbacks: {
+      finalize_infrastructure: async (toolCall) => {
+        return {
+          response: {},
+        };
+      },
+    },
+    abortSignal: signal,
+  });
+
+  return {
+    features: await Promise.all(
+      response.toolCalls.flatMap((toolCall) =>
+        toolCall.function.arguments.infrastructure.map((args) => {
+          const feature = {
+            ...args,
+            type: 'infrastructure' as const,
+          };
+          return feature;
+        })
+      )
     ),
   };
 }

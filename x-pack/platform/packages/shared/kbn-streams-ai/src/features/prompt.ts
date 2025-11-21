@@ -8,6 +8,7 @@ import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
 import { merge } from 'lodash';
 import systemPromptTemplate from './system_prompt.text';
+import infrastructurePromptTemplate from './infrastructure_prompt.text';
 import userPromptTemplate from './user_prompt.text';
 
 const systemsSchemaBase = {
@@ -43,6 +44,33 @@ const systemsSchema = merge({}, systemsSchemaBase, {
 } as const);
 
 const finalSystemsSchema = merge({}, systemsSchema);
+
+const infrastructureSchema = {
+  type: 'object',
+  properties: {
+    infrastructure: {
+      type: 'array',
+      items: {
+        required: ['name', 'description'],
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          description: {
+            type: 'string',
+          },
+          provider: {
+            type: 'string',
+          },
+        },
+      },
+    },
+  },
+  required: ['infrastructure'],
+} as const;
+
+const finalInfrastructureSchema = merge({}, infrastructureSchema);
 
 export interface ValidateSystemsResponse {
   systems: Array<{
@@ -90,6 +118,36 @@ export const IdentifySystemsPrompt = createPrompt({
       finalize_systems: {
         description: 'Finalize system identification',
         schema: finalSystemsSchema,
+      },
+    },
+  })
+  .get();
+
+export const IdentifyInfrastructurePrompt = createPrompt({
+  name: 'identify_infrastructure',
+  input: z.object({
+    stream: z.object({
+      name: z.string(),
+      description: z.string(),
+    }),
+    dataset_analysis: z.string(),
+  }),
+})
+  .version({
+    system: {
+      mustache: {
+        template: infrastructurePromptTemplate,
+      },
+    },
+    template: {
+      mustache: {
+        template: userPromptTemplate,
+      },
+    },
+    tools: {
+      finalize_infrastructure: {
+        description: 'Finalize infrastructure identification',
+        schema: finalInfrastructureSchema,
       },
     },
   })

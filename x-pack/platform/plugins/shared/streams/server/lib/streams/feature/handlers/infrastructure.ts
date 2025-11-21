@@ -6,7 +6,7 @@
  */
 
 import type { InfrastructureFeature } from '@kbn/streams-schema';
-import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
+import { identifyInfrastructureFeatures, type IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import { FeatureTypeHandler } from '../feature_type_handler';
 import type { StoredFeature } from '../stored_feature';
 import {
@@ -44,16 +44,6 @@ export class InfrastructureFeatureHandler extends FeatureTypeHandler<Infrastruct
   identifyFeatures(
     options: IdentifyFeaturesOptions
   ): Promise<{ features: InfrastructureFeature[] }> {
-    return Promise.resolve({
-      features: [
-        {
-          type: 'infrastructure',
-          name: 'AWS EC2',
-          description:
-            'AWS EC2 is a web service that allows you to launch and manage virtual machines in the cloud.',
-          provider: 'AWS',
-        },
-      ],
-    });
+    return identifyInfrastructureFeatures({ ...options, dropUnmapped: false });
   }
 }
