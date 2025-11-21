@@ -27,6 +27,7 @@ export interface GDriveStep extends BaseStep {
     fileId?: string;
     fileName?: string;
     fileContent?: string;
+    fileIds?: string[];
     folderId?: string;
     mimeType?: string;
     subject?: string;
@@ -42,6 +43,7 @@ interface GDriveOperationInput {
   fileId?: string;
   fileName?: string;
   fileContent?: string;
+  fileIds?: string[];
   folderId?: string;
   mimeType?: string;
   subject?: string;
@@ -106,6 +108,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       accessToken,
       operation,
       fileId,
+      fileIds,
       folderId,
       subject,
       query,
@@ -117,6 +120,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       accessToken,
       operation: operation || 'list',
       fileId,
+      fileIds,
       folderId,
       subject,
       query,
@@ -138,7 +142,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       await this.stepExecutionRuntime.contextManager.resolveSecretsInValue<GDriveOperationInput>(
         input
       );
-    const { operation = 'list', fileId, folderId, subject, query, doc_limit, service_credential, accessToken } = resolvedInput;
+    const { operation = 'list', fileId, fileIds, folderId, subject, query, doc_limit, service_credential, accessToken } = resolvedInput;
 
     if (!service_credential && !accessToken) {
       throw new Error(
@@ -187,10 +191,18 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
         break;
 
       case 'download':
-        if (!fileId) {
-          throw new Error('fileId is required for download operation');
+        if (!fileId && !fileIds) {
+          throw new Error('fileId or fileIds is required for download operation');
         }
-        output = await this.handleDownload(fileId);
+        if (fileIds && fileIds.length > 0) {
+          // Batch download multiple files
+          output = await this.handleBatchDownload(fileIds);
+        } else if (fileId) {
+          // Single file download
+          output = await this.handleDownload(fileId);
+        } else {
+          throw new Error('fileId or fileIds is required for download operation');
+        }
         break;
 
       default:
@@ -279,8 +291,11 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       }
     } while (pageToken);
 
+    // Trim results to the specified limit
+    const limitedFiles = limit && allFiles.length > limit ? allFiles.slice(0, limit) : allFiles;
+
     this.workflowLogger.logInfo(
-      `Completed fetching all Google Drive files: ${allFiles.length} files across ${pageCount} page(s)`,
+      `Completed fetching all Google Drive files: ${limitedFiles.length} files across ${pageCount} page(s)`,
       {
         workflow: { step_id: this.step.name },
         event: { action: 'gdrive_list_complete', outcome: 'success' },
@@ -289,8 +304,8 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     );
 
     return {
-      files: allFiles,
-      count: allFiles.length,
+      files: limitedFiles,
+      count: limitedFiles.length,
       pages: pageCount,
       incompleteSearch,
     };
@@ -351,8 +366,11 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       }
     } while (pageToken);
 
+    // Trim results to the specified limit
+    const limitedFiles = limit && allFiles.length > limit ? allFiles.slice(0, limit) : allFiles;
+
     this.workflowLogger.logInfo(
-      `Completed fetching all Google Drive files: ${allFiles.length} files across ${pageCount} page(s)`,
+      `Completed fetching all Google Drive files: ${limitedFiles.length} files across ${pageCount} page(s)`,
       {
         workflow: { step_id: this.step.name },
         event: { action: 'gdrive_list_complete', outcome: 'success' },
@@ -361,8 +379,8 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     );
 
     return {
-      files: allFiles,
-      count: allFiles.length,
+      files: limitedFiles,
+      count: limitedFiles.length,
       pages: pageCount,
       incompleteSearch,
     };
@@ -394,7 +412,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     const downloadedFile = await this.driveClient.downloadFile(fileId);
 
     this.workflowLogger.logInfo(
-      `Successfully downloaded file: ${fileMetadata.name} (${downloadedFile.size} bytes)`,
+      `Successfully downloaded file: ${fileMetadata.name} (${downloadedFile.length} bytes)`,
       {
         workflow: { step_id: this.step.name },
         event: { action: 'gdrive_download', outcome: 'success' },
@@ -408,7 +426,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       fileId: fileMetadata.id,
       fileName: fileMetadata.name,
       mimeType: fileMetadata.mimeType,
-      size: 999,
+      size: downloadedFile.length,
       content: fileContent,
       contentEncoding: 'utf8',
       metadata: {
@@ -420,30 +438,85 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     };
   }
 
+  private async handleBatchDownload(fileIds: string[]): Promise<any> {
+    if (!this.driveClient) {
+      throw new Error('Google Drive client not initialized');
+    }
+
+    this.workflowLogger.logInfo(`Batch downloading ${fileIds.length} files`, {
+      workflow: { step_id: this.step.name },
+      event: { action: 'gdrive_batch_download', outcome: 'unknown' },
+      tags: ['gdrive', 'download', 'batch'],
+    });
+
+    const results = [];
+    const errors = [];
+
+    for (let i = 0; i < fileIds.length; i++) {
+      const fileId = fileIds[i];
+      try {
+        this.workflowLogger.logInfo(`Downloading file ${i + 1}/${fileIds.length}: ${fileId}`, {
+          workflow: { step_id: this.step.name },
+          event: { action: 'gdrive_batch_download_file', outcome: 'unknown' },
+          tags: ['gdrive', 'download', 'batch'],
+        });
+
+        const result = await this.handleDownload(fileId);
+        results.push(result);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.workflowLogger.logError(
+          `Failed to download file ${fileId}: ${errorMessage}`,
+          error instanceof Error ? error : new Error(errorMessage),
+          {
+            workflow: { step_id: this.step.name },
+            event: { action: 'gdrive_batch_download_file', outcome: 'failure' },
+            tags: ['gdrive', 'download', 'batch', 'error'],
+          }
+        );
+        errors.push({
+          fileId,
+          error: errorMessage,
+        });
+      }
+    }
+
+    this.workflowLogger.logInfo(
+      `Batch download completed: ${results.length} succeeded, ${errors.length} failed`,
+      {
+        workflow: { step_id: this.step.name },
+        event: { action: 'gdrive_batch_download', outcome: 'success' },
+        tags: ['gdrive', 'download', 'batch'],
+      }
+    );
+
+    return {
+      files: results,
+      successCount: results.length,
+      errorCount: errors.length,
+      errors: errors.length > 0 ? errors : undefined,
+    };
+  }
+
   private async extractContent(
     buffer: Buffer,
     fileName: string,
-    contentType: string
+    _contentType: string
   ): Promise<string> {
-    try {
-      console.log(`Downloading the file ${fileName} with content type {contentType}`);
+    console.log(`Downloading the file ${fileName} with content type ${_contentType}`);
 
-      const extractedFileContentResponse = await axios.put(
-        'http://localhost:8090/extract_text/',
-        buffer,
-        {
-          headers: { 'Content-Type': 'application/octet-stream' },
-        }
-      );
+    const extractedFileContentResponse = await axios.put(
+      'http://localhost:8090/extract_text/',
+      buffer,
+      {
+        headers: { 'Content-Type': 'application/octet-stream' },
+      }
+    );
 
-      console.log(`Subextracted:`);
-      console.log(extractedFileContentResponse);
+    console.log(`Subextracted:`);
+    console.log(extractedFileContentResponse);
 
-      return extractedFileContentResponse.data.extracted_text;
-    } catch (error) {
-      throw new Error(`Content extraction failed: ${error.message}. Make sure Extraction Service is running.`);
-    }
-    return '';
+    return extractedFileContentResponse.data.extracted_text;
   }
 
   protected async handleFailure(

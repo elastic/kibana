@@ -205,7 +205,8 @@ export const GDriveStepSchema = BaseStepSchema.extend({
     // Operation to perform
     operation: z.enum(['list', 'get', 'download', 'ping', 'search']).optional().default('list'),
     // File operations
-    fileId: z.string().optional(), // Required for get, download, delete
+    fileId: z.string().optional(), // Required for get, download (single file)
+    fileIds: z.array(z.string()).optional(), // For batch download operations
     fileName: z.string().optional(), // Required for upload
     fileContent: z.string().optional(), // Required for upload (can be base64 or plain text)
     folderId: z.string().optional(), // Optional folder filter for list, target folder for upload

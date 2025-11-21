@@ -34,6 +34,9 @@ export interface RerankStep extends BaseStep {
     recency_biased: boolean;
     date_range_filter?: [string, string] | null;
     max_results?: number;
+    rerank_horizon?: number; // How many results to retrieve before final RERANK (default: 20)
+    use_semantic_search?: boolean; // Enable semantic_text indexing and semantic search (default: true)
+    use_rerank?: boolean; // Enable cross-encoder RERANK operation (default: true)
   };
 }
 
@@ -88,6 +91,9 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
         recency_biased,
         date_range_filter,
         max_results = 10,
+        rerank_horizon = 20,
+        use_semantic_search = true,
+        use_rerank = true,
       } = input;
 
 
@@ -97,32 +103,22 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
       });
 
       // Step 1: Create dynamic index
-      this.workflowLogger.logInfo('Creating dynamic index...', {
-        event: { action: 'create-index-start', outcome: 'unknown' },
-        tags: ['rerank', 'debug'],
-      });
-      const indexName = await this.createDynamicIndex(data_mapping, language_code);
-      this.workflowLogger.logInfo(`Index created: ${indexName}`, {
-        event: { action: 'create-index-complete', outcome: 'success' },
-        tags: ['rerank', 'debug'],
-      });
+      const startCreateIndex = Date.now();
+      console.log(`[RERANK] Creating dynamic index (semantic: ${use_semantic_search})...`);
+      const indexName = await this.createDynamicIndex(data_mapping, language_code, use_semantic_search);
+      const createIndexTime = Date.now() - startCreateIndex;
+      console.log(`[RERANK] Index created: ${indexName} (took ${createIndexTime}ms)`);
 
       // Step 2: Index documents
-      this.workflowLogger.logInfo('Indexing documents...', {
-        event: { action: 'index-docs-start', outcome: 'unknown' },
-        tags: ['rerank', 'debug'],
-      });
-      const docIdMap = await this.indexDocuments(data, data_mapping, indexName);
-      this.workflowLogger.logInfo('Documents indexed', {
-        event: { action: 'index-docs-complete', outcome: 'success' },
-        tags: ['rerank', 'debug'],
-      });
+      const startIndexDocs = Date.now();
+      console.log(`[RERANK] Indexing ${data.length} documents...`);
+      const docIdMap = await this.indexDocuments(data, data_mapping, indexName, use_semantic_search);
+      const indexDocsTime = Date.now() - startIndexDocs;
+      console.log(`[RERANK] Documents indexed: ${data.length} docs (took ${indexDocsTime}ms)`);
 
       // Step 3: Execute multi-strategy search with FORK/FUSE
-      this.workflowLogger.logInfo('Executing multi-strategy search...', {
-        event: { action: 'search-start', outcome: 'unknown' },
-        tags: ['rerank', 'debug'],
-      });
+      const startSearch = Date.now();
+      console.log(`[RERANK] Executing multi-strategy search (semantic: ${use_semantic_search}, rerank: ${use_rerank})...`);
       const rerankedData = await this.executeMultiStrategySearch(
         indexName,
         user_question,
@@ -132,15 +128,23 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
         date_range_filter,
         data,
         docIdMap,
-        max_results
+        max_results,
+        rerank_horizon,
+        use_semantic_search,
+        use_rerank
       );
-      this.workflowLogger.logInfo('Search completed', {
-        event: { action: 'search-complete', outcome: 'success' },
-        tags: ['rerank', 'debug'],
-      });
+      const searchTime = Date.now() - startSearch;
+      console.log(`[RERANK] Search completed: returned ${rerankedData.length} results (took ${searchTime}ms)`);
+
+      // Log before/after comparison
+      this.logBeforeAfterComparison(data, rerankedData, data_mapping);
 
       // Step 4: Cleanup index
+      const startCleanup = Date.now();
+      console.log(`[RERANK] Cleaning up index: ${indexName}`);
       await this.cleanupIndex(indexName);
+      const cleanupTime = Date.now() - startCleanup;
+      console.log(`[RERANK] Index cleanup completed (took ${cleanupTime}ms)`);
 
       this.workflowLogger.logInfo('Automatic relevance reranking completed', {
         event: { action: 'rerank-complete', outcome: 'success' },
@@ -164,7 +168,8 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
 
   private async createDynamicIndex(
     fieldMappings: FieldMapping[],
-    languageCode: string
+    languageCode: string,
+    useSemanticSearch: boolean
   ): Promise<string> {
     const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
 
@@ -181,10 +186,42 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
       tags: ['rerank', 'elasticsearch', 'index'],
     });
 
+    // Clean up any leftover temporary indices matching the pattern
+    const tempIndexPattern = `temp-index-${stepName}-${workflowId}-*`;
+    console.log(`[RERANK] Checking for leftover temp indices matching: ${tempIndexPattern}`);
+    try {
+      const existingIndices = await esClient.cat.indices({
+        index: tempIndexPattern,
+        format: 'json',
+      });
+
+      if (existingIndices && Array.isArray(existingIndices) && existingIndices.length > 0) {
+        const indexNames = existingIndices.map((idx: any) => idx.index);
+        console.log(`[RERANK] Found ${indexNames.length} leftover temp indices: ${indexNames.join(', ')}`);
+
+        for (const oldIndex of indexNames) {
+          try {
+            await esClient.indices.delete({ index: oldIndex });
+            console.log(`[RERANK] Deleted leftover temp index: ${oldIndex}`);
+          } catch (deleteError) {
+            console.log(`[RERANK] Failed to delete temp index ${oldIndex}:`, deleteError);
+          }
+        }
+      } else {
+        console.log(`[RERANK] No leftover temp indices found`);
+      }
+    } catch (error) {
+      // Index pattern doesn't exist or other error - that's fine, continue
+      console.log(`[RERANK] No temp indices to clean up (pattern not found)`);
+    }
+
     // Build analyzer settings based on language
+    const startBuildSettings = Date.now();
     const analyzerSettings = this.buildAnalyzerSettings(languageCode);
+    console.log(`[RERANK] Built analyzer settings (took ${Date.now() - startBuildSettings}ms)`);
 
     // Build dynamic mappings
+    const startBuildMappings = Date.now();
     const properties: any = {};
     for (const field of fieldMappings) {
       properties[field.alias] = this.buildFieldMapping(field.type, languageCode);
@@ -199,12 +236,18 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
           type: 'text',
           analyzer: 'lang_trigram_analyzer',
         };
-        properties[`${field.alias}_semantic`] = {
-          type: 'semantic_text',
-        };
+        // Only add semantic_text field if semantic search is enabled
+        if (useSemanticSearch) {
+          properties[`${field.alias}_semantic`] = {
+            type: 'semantic_text',
+          };
+        }
       }
     }
+    console.log(`[RERANK] Built field mappings (took ${Date.now() - startBuildMappings}ms)`);
 
+    const startCreateIndexCall = Date.now();
+    console.log('[RERANK] Calling ES indices.create API...');
     await esClient.indices.create({
       index: indexName,
       settings: {
@@ -214,6 +257,7 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
         properties,
       },
     });
+    console.log(`[RERANK] ES indices.create completed (took ${Date.now() - startCreateIndexCall}ms)`);
 
     this.workflowLogger.logInfo(`Index created successfully: ${indexName}`, {
       event: { action: 'create-index', outcome: 'success' },
@@ -304,7 +348,8 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
       case 'filter_field':
         return { type: 'keyword' };
       case 'date_field':
-        return { type: 'date', format: 'epoch_second' };
+        // Support multiple date formats: epoch_second, epoch_millis, and ISO 8601
+        return { type: 'date', format: 'epoch_second||epoch_millis||strict_date_optional_time||yyyy-MM-dd HH:mm:ss' };
       case 'numeric_field':
         return { type: 'float' };
       default:
@@ -315,7 +360,8 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
   private async indexDocuments(
     data: any[],
     fieldMappings: FieldMapping[],
-    indexName: string
+    indexName: string,
+    useSemanticSearch: boolean
   ): Promise<Map<string, number>> {
     const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
 
@@ -328,6 +374,7 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
     const docIdToOriginalIndex = new Map<string, number>();
 
     // Build bulk index operations
+    const startBuildBulk = Date.now();
     const bulkOperations: any[] = [];
     for (let i = 0; i < data.length; i++) {
       const record = data[i];
@@ -346,17 +393,39 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
         if (field.type === 'text_field' && typeof value === 'string') {
           doc[`${field.alias}_bigram`] = value;
           doc[`${field.alias}_trigram`] = value;
-          doc[`${field.alias}_semantic`] = value;
+          // Only add semantic field if semantic search is enabled
+          if (useSemanticSearch) {
+            doc[`${field.alias}_semantic`] = value;
+          }
         }
       }
 
       bulkOperations.push(doc);
     }
+    console.log(`[RERANK] Built bulk operations (took ${Date.now() - startBuildBulk}ms)`);
 
-    await esClient.bulk({
-      refresh: true,
-      operations: bulkOperations,
-    });
+    const startBulkCall = Date.now();
+    console.log(`[RERANK] Calling ES bulk API with ${bulkOperations.length / 2} documents... (timeout: 5m)`);
+    try {
+      const bulkResponse = await esClient.bulk({
+        refresh: true,
+        operations: bulkOperations,
+        timeout: '5m',
+      }, {
+        requestTimeout: 300000, // 5 minute client-level timeout (default is 30s)
+      });
+      console.log(`[RERANK] ES bulk call completed (took ${Date.now() - startBulkCall}ms)`);
+      console.log(`[RERANK] Bulk response errors: ${bulkResponse.errors}, items: ${bulkResponse.items?.length || 0}`);
+
+      if (bulkResponse.errors) {
+        const errorItems = bulkResponse.items?.filter((item: any) => item.index?.error || item.create?.error);
+        console.log(`[RERANK] Bulk errors found: ${JSON.stringify(errorItems?.slice(0, 3), null, 2)}`);
+      }
+    } catch (error) {
+      console.log(`[RERANK] ES bulk call FAILED after ${Date.now() - startBulkCall}ms`);
+      console.log(`[RERANK] Bulk error:`, error);
+      throw error;
+    }
 
     this.workflowLogger.logInfo(`Successfully indexed ${data.length} documents`, {
       event: { action: 'bulk-index', outcome: 'success' },
@@ -387,7 +456,10 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
     dateRangeFilter: [string, string] | null | undefined,
     originalData: any[],
     docIdMap: Map<string, number>,
-    maxResults: number
+    maxResults: number,
+    rerankHorizon: number,
+    useSemanticSearch: boolean,
+    useRerank: boolean
   ): Promise<any[]> {
     const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
 
@@ -425,9 +497,15 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
       `(WHERE ${textFields.map(f => `${f}_bigram: "${userQuestion}"`).join(' OR ')} | SORT _score DESC)`,
       // Trigram search across all fields
       `(WHERE ${textFields.map(f => `${f}_trigram: "${userQuestion}"`).join(' OR ')} | SORT _score DESC)`,
-      // Semantic search across all fields
-      `(WHERE ${textFields.map(f => `match(${f}_semantic, "${userQuestion}")`).join(' OR ')} | SORT _score DESC)`,
     ];
+
+    // Only add semantic search branch if enabled
+    if (useSemanticSearch) {
+      forkBranches.push(
+        // Semantic search across all fields
+        `(WHERE ${textFields.map(f => `match(${f}_semantic, "${userQuestion}")`).join(' OR ')} | SORT _score DESC)`
+      );
+    }
 
     // Track the number of main search strategy branches (before entity branches)
     const numMainBranches = forkBranches.length;
@@ -494,24 +572,40 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
       esqlQuery += `\n| SORT _score DESC`;
     }
 
-    // First limit to 100 results for initial retrieval
-    esqlQuery += `\n| LIMIT 100`;
+    // Limit to rerank_horizon first (these are candidates for reranking)
+    esqlQuery += `\n| LIMIT ${rerankHorizon}`;
 
-    // Apply semantic RERANK across all searchable fields (text + filter/keyword) for final refinement
-    const allRerankFields = fieldMappings
-      .filter((f) => f.type === 'text_field' || f.type === 'filter_field')
-      .map((f) => f.alias);
-    esqlQuery += `\n| RERANK rerank_score = "${userQuestion}" ON ${allRerankFields.join(', ')}`;
+    // Apply RERANK operation if enabled
+    if (useRerank) {
+      // Apply semantic RERANK across all searchable fields (text + filter/keyword) for final refinement
+      const allRerankFields = fieldMappings
+        .filter((f) => f.type === 'text_field' || f.type === 'filter_field')
+        .map((f) => f.alias);
+      esqlQuery += `\n| RERANK rerank_score = "${userQuestion}" ON ${allRerankFields.join(', ')}`;
 
-    // Sort by rerank score and limit to final max_results
-    esqlQuery += `\n| SORT rerank_score DESC`;
-    esqlQuery += `\n| LIMIT ${maxResults}`;
+      // Sort by rerank score (we'll prune to max_results later in code)
+      esqlQuery += `\n| SORT rerank_score DESC`;
 
-    // Build KEEP clause to return relevant fields including _id for mapping back to original data
-    const keepFields = fieldMappings
-      .filter((f) => f.type !== 'numeric_field')
-      .map((f) => f.alias);
-    esqlQuery += `\n| KEEP ${keepFields.join(', ')}, _score, rerank_score, _id`;
+      // Build KEEP clause to return relevant fields including _id for mapping back to original data
+      const keepFields = fieldMappings
+        .filter((f) => f.type !== 'numeric_field')
+        .map((f) => f.alias);
+      esqlQuery += `\n| KEEP ${keepFields.join(', ')}, _score, rerank_score, _id`;
+    } else {
+      // Without RERANK, already sorted and limited above
+      // Build KEEP clause without rerank_score
+      const keepFields = fieldMappings
+        .filter((f) => f.type !== 'numeric_field')
+        .map((f) => f.alias);
+      esqlQuery += `\n| KEEP ${keepFields.join(', ')}, _score, _id`;
+    }
+
+    // Print ES|QL query to console for debugging
+    console.log('========================================');
+    console.log('🔍 RERANK STEP: ES|QL QUERY');
+    console.log('========================================');
+    console.log(esqlQuery);
+    console.log('========================================');
 
     this.workflowLogger.logInfo(`Executing ES|QL query:\n${esqlQuery}`, {
       event: { action: 'multi-strategy-search', outcome: 'unknown' },
@@ -531,23 +625,25 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
 
     let response;
     const queryStartTime = Date.now();
+    console.log('[RERANK] Executing ES|QL transport.request... (timeout: 5m)');
     try {
       response = await esClient.transport.request({
         method: 'POST',
         path: '/_query?format=json',
         body: requestBody,
       }, {
-        requestTimeout: 120000, // 120 second timeout for rerank operations
+        requestTimeout: 300000, // 5 minute timeout for rerank operations (includes RERANK inference time)
       });
       const queryEndTime = Date.now();
       const queryTime = queryEndTime - queryStartTime;
       const esqlResponse = response as any;
 
-
-      this.workflowLogger.logInfo(`ES|QL response received: ${JSON.stringify(response, null, 2)}`, {
-        event: { action: 'multi-strategy-search', outcome: 'success' },
-        tags: ['rerank', 'elasticsearch', 'esql', 'debug'],
-      });
+      console.log(`[RERANK] ES|QL query completed (took ${queryTime}ms)`);
+      console.log('========================================');
+      console.log('🔍 RERANK STEP: ES|QL RESPONSE');
+      console.log('========================================');
+      console.log(JSON.stringify(esqlResponse, null, 2));
+      console.log('========================================');
     } catch (error) {
       this.workflowLogger.logError(`ES|QL request failed`, error as Error, {
         event: { action: 'multi-strategy-search', outcome: 'failure' },
@@ -596,14 +692,15 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
       return originalData;
     }
 
-    // Map each result row to the original data object
-
-    const rerankedData = esqlResponse.values
+    // Map each result row to the original data object and track which indices were used
+    const usedIndices = new Set<number>();
+    const esResults = esqlResponse.values
       .map((row: any[], idx: number) => {
         const docId = row[idColumnIndex];
         const originalIndex = docIdMap.get(docId);
 
         if (originalIndex !== undefined) {
+          usedIndices.add(originalIndex);
           const originalItem = originalData[originalIndex];
           return originalItem;
         }
@@ -611,12 +708,79 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
       })
       .filter((item: any) => item !== null);
 
-    this.workflowLogger.logInfo(`Reranked ${rerankedData.length} documents`, {
+    console.log(`[RERANK] ES|QL returned ${esResults.length} results, need ${maxResults} total`);
+
+    // If we got fewer results than max_results, backfill with unused items from original data
+    let finalResults = [...esResults];
+
+    if (finalResults.length < maxResults) {
+      console.log(`[RERANK] Backfilling ${maxResults - finalResults.length} items from original data`);
+
+      // Get items that weren't in the ES results (in original order)
+      const unusedItems = originalData.filter((_item, index) => !usedIndices.has(index));
+
+      // Add unused items until we reach max_results
+      const itemsNeeded = maxResults - finalResults.length;
+      const backfillItems = unusedItems.slice(0, itemsNeeded);
+
+      console.log(`[RERANK] Adding ${backfillItems.length} backfill items`);
+      finalResults = [...finalResults, ...backfillItems];
+    }
+
+    // Ensure we don't exceed max_results
+    finalResults = finalResults.slice(0, maxResults);
+
+    this.workflowLogger.logInfo(`Final result: ${finalResults.length} documents (${esResults.length} from ES, ${finalResults.length - esResults.length} backfilled)`, {
       event: { action: 'multi-strategy-search', outcome: 'success' },
       tags: ['rerank', 'elasticsearch', 'esql'],
     });
 
-    return rerankedData;
+    return finalResults;
+  }
+
+  private logBeforeAfterComparison(
+    originalData: any[],
+    rerankedData: any[],
+    fieldMappings: FieldMapping[]
+  ): void {
+    console.log('========================================');
+    console.log('📊 RERANK COMPARISON: TOP 3 BEFORE vs AFTER');
+    console.log('========================================');
+
+    // Find text fields to display
+    const textFields = fieldMappings
+      .filter((f) => f.type === 'text_field')
+      .map((f) => f.alias);
+
+    // Show top 3 from original data
+    console.log('\n🔵 BEFORE RERANKING (Original Order):');
+    const top3Before = originalData.slice(0, 3);
+    top3Before.forEach((item, idx) => {
+      console.log(`\n  ${idx + 1}.`);
+      textFields.forEach((field) => {
+        const value = this.extractFieldValue(item, fieldMappings.find(f => f.alias === field)?.path || []);
+        const preview = typeof value === 'string' && value.length > 100
+          ? value.substring(0, 100) + '...'
+          : value;
+        console.log(`     ${field}: ${preview}`);
+      });
+    });
+
+    // Show top 3 from reranked data
+    console.log('\n\n🟢 AFTER RERANKING (ES|QL Multi-Strategy):');
+    const top3After = rerankedData.slice(0, 3);
+    top3After.forEach((item, idx) => {
+      console.log(`\n  ${idx + 1}.`);
+      textFields.forEach((field) => {
+        const value = this.extractFieldValue(item, fieldMappings.find(f => f.alias === field)?.path || []);
+        const preview = typeof value === 'string' && value.length > 100
+          ? value.substring(0, 100) + '...'
+          : value;
+        console.log(`     ${field}: ${preview}`);
+      });
+    });
+
+    console.log('\n========================================\n');
   }
 
   private async cleanupIndex(indexName: string): Promise<void> {
@@ -628,7 +792,10 @@ export class RerankStepImpl extends BaseAtomicNodeImplementation<RerankStep> {
     });
 
     try {
+      const startDeleteCall = Date.now();
+      console.log('[RERANK] Calling ES indices.delete API...');
       await esClient.indices.delete({ index: indexName });
+      console.log(`[RERANK] ES indices.delete completed (took ${Date.now() - startDeleteCall}ms)`);
       this.workflowLogger.logInfo(`Index deleted successfully: ${indexName}`, {
         event: { action: 'cleanup-index', outcome: 'success' },
         tags: ['rerank', 'elasticsearch', 'cleanup'],
