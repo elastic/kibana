@@ -42,8 +42,8 @@ export class IndexEditorObject extends FtrService {
 
     await columnHeader.click();
 
-    await this.comboBox.set('indexEditorindexEditorColumnTypeSelect', type);
-    await this.testSubjects.setValue('indexEditorindexEditorColumnNameInput', name);
+    await this.comboBox.set('indexEditorColumnTypeSelect', type);
+    await this.testSubjects.setValue('indexEditorColumnNameInput', name);
     await this.common.pressEnterKey();
   }
 
@@ -53,7 +53,7 @@ export class IndexEditorObject extends FtrService {
 
   public async deleteColumn(name: string): Promise<void> {
     await this.dataGrid.openColMenuByField(name);
-    await this.testSubjects.click('indexEditorindexEditorDeleteColumnButton');
+    await this.testSubjects.click('indexEditorDeleteColumnButton');
   }
 
   public async setCellValue(rowIndex: number, columnIndex: number, value: string): Promise<void> {

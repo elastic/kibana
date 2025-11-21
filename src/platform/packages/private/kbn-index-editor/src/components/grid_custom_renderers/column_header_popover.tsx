@@ -137,7 +137,7 @@ export const ColumnHeaderPopover = ({
     // eslint-disable-next-line @elastic/eui/accessible-interactive-element
     <EuiButtonEmpty
       data-test-subj="indexEditorColumnNameButton"
-      aria-label={i18n.translate('indexEditor.columnHeaderEdit.aria', {
+      aria-label={i18n.translate('indexEditor.columnHeaderEdit.ariaLabel', {
         defaultMessage: 'Edit column',
       })}
       css={{
@@ -194,7 +194,7 @@ export const ColumnHeaderPopover = ({
           <FieldSelect
             selectedType={columnType || null}
             onTypeChange={setColumnType}
-            data-test-subj="indexEditorindexEditorColumnTypeSelect"
+            data-test-subj="indexEditorColumnTypeSelect"
           />
         </EuiFormRow>
         {columnType && (
@@ -208,7 +208,7 @@ export const ColumnHeaderPopover = ({
             >
               <EuiFieldText
                 isInvalid={!!errorMessage}
-                data-test-subj="indexEditorindexEditorColumnNameInput"
+                data-test-subj="indexEditorColumnNameInput"
                 value={columnName}
                 placeholder={i18n.translate('indexEditor.columnHeaderEdit.columnNamePlaceholder', {
                   defaultMessage: 'Choose the name of the field',
@@ -235,7 +235,7 @@ export const ColumnHeaderPopover = ({
                 </EuiText>
               </EuiButton>
               <EuiButton
-                data-test-subj="indexEditorindexEditorColumnNameAcceptButton"
+                data-test-subj="indexEditorColumnNameAcceptButton"
                 fill
                 type="submit"
                 disabled={!canSubmit}

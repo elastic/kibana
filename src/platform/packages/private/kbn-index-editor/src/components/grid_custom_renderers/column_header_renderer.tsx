@@ -52,7 +52,7 @@ export const getColumnHeaderRenderer = (
       additional: !isSavedColumn
         ? [
             {
-              'data-test-subj': 'indexEditorindexEditorEditColumnButton',
+              'data-test-subj': 'indexEditorEditColumnButton',
               label: (
                 <FormattedMessage
                   id="indexEditor.flyout.grid.columnHeader.editAction"
@@ -66,7 +66,7 @@ export const getColumnHeaderRenderer = (
               },
             },
             {
-              'data-test-subj': 'indexEditorindexEditorDeleteColumnButton',
+              'data-test-subj': 'indexEditorDeleteColumnButton',
               label: (
                 <FormattedMessage
                   id="indexEditor.flyout.grid.columnHeader.deleteAction"
