@@ -48,6 +48,13 @@ export const useItemsAction = <T,>({
     return isEqual(originalItems, itemsToUpdate);
   };
 
+  const updateAlerts = useCallback(
+    (payload: AlertsUpdateRequest, options: { onSuccess: () => void }) => {
+      // TODO: Implement logic to update alerts
+    },
+    []
+  );
+
   const onSaveItems = useCallback(
     (itemsSelection: ItemsSelectionState) => {
       onAction();
@@ -82,24 +89,23 @@ export const useItemsAction = <T,>({
         ];
       }, [] as AlertsUpdateRequest[]);
 
-      // updateAlerts(
-      //   {
-      //     Alerts: alertsToUpdate,
-      //     successToasterTitle: successToasterTitle(selectedAlertsToEdit.length),
-      //   },
-      //   { onSuccess: onActionSuccess }
-      // );
+      const payload = {
+        Alerts: alertsToUpdate,
+        successToasterTitle: successToasterTitle(selectedAlertsToEdit.length),
+      };
+
+      updateAlerts(payload, { onSuccess: onActionSuccess });
     },
     [
       fieldKey,
       fieldSelector,
       itemsTransformer,
       onAction,
-      // onActionSuccess,
+      onActionSuccess,
       onFlyoutClosed,
       selectedAlertsToEdit,
-      // successToasterTitle,
-      // updateAlerts,
+      successToasterTitle,
+      updateAlerts,
     ]
   );
 
