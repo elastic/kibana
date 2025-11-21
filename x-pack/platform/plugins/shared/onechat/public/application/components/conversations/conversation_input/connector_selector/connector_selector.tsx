@@ -14,9 +14,9 @@ import {
   type ConnectorSelectableComponentProps,
 } from '@kbn/ai-assistant-connector-selector-action';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
-import { useNavigation } from '../../hooks/use_navigation';
-import { useKibana } from '../../hooks/use_kibana';
-import { useDefaultConnector } from '../../hooks/chat/use_default_connector';
+import { useNavigation } from '../../../../hooks/use_navigation';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useDefaultConnector } from '../../../../hooks/chat/use_default_connector';
 
 const connectorSelectorButtonAriaLabel = i18n.translate(
   'xpack.onechat.connectorSelector.selectConnector',

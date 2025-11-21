@@ -10,7 +10,7 @@ import React from 'react';
 import { ConversationAgentSelector } from './conversation_agent_selector';
 import { ConversationActionButton } from './conversation_action_button';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
-import { ConnectorSelector } from '../../connector_selector';
+import { ConnectorSelector } from './connector_selector';
 
 interface ConversationInputActionsProps {
   onSubmit: () => void;
