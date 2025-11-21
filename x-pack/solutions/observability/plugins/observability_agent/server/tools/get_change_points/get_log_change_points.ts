@@ -37,6 +37,11 @@ interface ChangePointResult {
   };
 }
 
+function getProbability(totalHits: number): number {
+  const probability = Math.min(1, 500_000 / totalHits);
+  return probability > 0.5 ? 1 : probability;
+}
+
 export async function getLogChangePoint({
   index,
   filters,
@@ -66,8 +71,6 @@ export async function getLogChangePoint({
       return [];
     }
 
-    const probability = Math.min(1, 500_000 / totalHits);
-
     const search = getTypedSearch(esClient.asCurrentUser);
 
     const response = await search({
@@ -82,7 +85,7 @@ export async function getLogChangePoint({
       aggs: {
         sampler: {
           random_sampler: {
-            probability: probability > 0.5 ? 1 : probability,
+            probability: getProbability(totalHits),
           },
           aggs: {
             groups: {
