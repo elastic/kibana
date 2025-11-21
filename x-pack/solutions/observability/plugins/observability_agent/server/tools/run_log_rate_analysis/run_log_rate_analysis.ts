@@ -61,8 +61,7 @@ export function createRunLogRateAnalysisTool({
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {
     id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Explain log spikes or dips by comparing two time windows (baseline vs deviation) and letting Kibana\'s log rate analysis surface the most significant field/value cohorts and categorized messages.\nUse this whenever you need to answer "what changed in the logs?" for a given index.',
+    description: `Identify significant changes in log rates for a given index between two time windows (baseline vs deviation) to help explain spikes or dips in log volume.`,
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
     handler: async ({ index, timeFieldName = '@timestamp', baseline, deviation }, context) => {
@@ -82,9 +81,7 @@ export function createRunLogRateAnalysisTool({
             index,
             windowParameters,
             timefield: timeFieldName,
-            searchQuery: {
-              match_all: {},
-            },
+            searchQuery: { match_all: {} },
           },
         });
         logger.debug(
@@ -103,14 +100,14 @@ export function createRunLogRateAnalysisTool({
           ],
         };
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        logger.error(`Log rate analysis tool failed: ${message}`);
+        logger.error(`Log rate analysis tool failed: ${error.message}`);
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message,
+                message: error.message,
+                stack: error.stack,
               },
             },
           ],
