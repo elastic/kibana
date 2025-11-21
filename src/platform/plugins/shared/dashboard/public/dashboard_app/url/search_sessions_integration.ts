@@ -83,8 +83,6 @@ function getLocatorParams({
     DashboardLocatorParams,
     'panels' | 'controlGroupInput' | 'references'
   >;
-  const combinedReferences = [...(references ?? [])] as unknown as DashboardState['references'] &
-    SerializableRecord;
 
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
@@ -107,6 +105,6 @@ function getLocatorParams({
       : undefined,
     controlGroupInput,
     panels,
-    references: combinedReferences,
+    references: (references ?? []) as unknown as DashboardState['references'] & SerializableRecord,
   };
 }
