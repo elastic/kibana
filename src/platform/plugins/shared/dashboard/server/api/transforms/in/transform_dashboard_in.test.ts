@@ -66,7 +66,7 @@ describe('transformDashboardIn', () => {
       },
     };
 
-    const output = transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -106,7 +106,7 @@ describe('transformDashboardIn', () => {
       options: DEFAULT_DASHBOARD_OPTIONS,
     };
 
-    const output = transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {

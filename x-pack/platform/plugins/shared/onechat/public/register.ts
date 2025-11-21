@@ -62,14 +62,21 @@ export const registerApp = ({
         }),
       },
     ],
-    async mount({ element, history }: AppMountParameters) {
+    async mount({ element, history, onAppLeave }: AppMountParameters) {
       const { mountApp } = await import('./application');
       const [coreStart, startDependencies] = await core.getStartServices();
 
       coreStart.chrome.docTitle.change(AGENT_BUILDER_FULL_TITLE);
       const services = getServices();
 
-      return mountApp({ core: coreStart, services, element, history, plugins: startDependencies });
+      return mountApp({
+        core: coreStart,
+        services,
+        element,
+        history,
+        plugins: startDependencies,
+        onAppLeave,
+      });
     },
   });
 };
