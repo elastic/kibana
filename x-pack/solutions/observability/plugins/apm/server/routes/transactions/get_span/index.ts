@@ -75,7 +75,7 @@ export async function getSpan({
   const { links, ...rest } = span ?? {};
 
   return {
-    span: event
+    span: hit
       ? merge(event, { span: rest }, spanFromSource, {
           processor: { event: 'span' as const, name: 'transaction' as const },
         })
