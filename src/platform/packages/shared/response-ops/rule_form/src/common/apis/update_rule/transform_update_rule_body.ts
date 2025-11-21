@@ -17,7 +17,6 @@ const transformUpdateRuleFlapping = (flapping: Rule['flapping']) => {
   }
 
   return {
-    enabled: flapping.enabled,
     look_back_window: flapping.lookBackWindow,
     status_change_threshold: flapping.statusChangeThreshold,
   };
