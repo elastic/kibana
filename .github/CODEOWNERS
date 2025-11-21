@@ -12,8 +12,6 @@ src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
-x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
-x-pack/platform/packages/shared/ai-assistant-default-llm-setting @elastic/security-generative-ai
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
@@ -444,7 +442,7 @@ x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
-src/platform/packages/shared/kbn-es-archiver @elastic/appex-qa
+src/platform/packages/shared/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
@@ -1017,6 +1015,7 @@ src/platform/packages/private/kbn-test-eui-helpers @elastic/kibana-visualization
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
+x-pack/test_serverless
 src/platform/test
 x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
@@ -1044,7 +1043,6 @@ src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
-packages/kbn-tsconfig/base @elastic/kibana-operations
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-ui-actions-browser @elastic/appex-sharedux
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
@@ -1235,7 +1233,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/**/test_suites/common/reporting/ @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/group3/reporting.ts @elastic/appex-sharedux
 /x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
-/x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 
 ### Global Experience Tagging
 /x-pack/platform/test/saved_object_tagging/ @elastic/appex-sharedux
