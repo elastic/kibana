@@ -43,7 +43,7 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerRoutes } from './api';
+import { registerRoutes, create, read, update, deleteDashboard } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
@@ -173,6 +173,12 @@ export class DashboardPlugin
         };
       },
       scanDashboards,
+      client: {
+        create,
+        read,
+        update,
+        delete: deleteDashboard,
+      },
     };
   }
 
