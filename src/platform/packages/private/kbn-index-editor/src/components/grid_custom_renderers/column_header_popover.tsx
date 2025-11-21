@@ -59,7 +59,10 @@ export const ColumnHeaderPopover = ({
   const { columnType, setColumnType, columnName, setColumnName, saveColumn, validationError } =
     useAddColumnName(initialColumnName, initialColumnType);
 
-  const canSubmit = useMemo(() => columnType && columnName.length > 0 && !validationError, [columnType, columnName, validationError]);
+  const canSubmit = useMemo(
+    () => columnType && columnName.length > 0 && !validationError,
+    [columnType, columnName, validationError]
+  );
 
   const onSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -93,8 +96,7 @@ export const ColumnHeaderPopover = ({
           color="warning"
           size="m"
           content={i18n.translate('indexEditor.columnHeader.unsupportedWarning', {
-            defaultMessage:
-              '{unsupportedType} type has partial suport, editions you do will be saved but will not be visible in this editor after closing it.',
+            defaultMessage: `ES|QL doesn't support the {unsupportedType} data type yet. You can still set columns of this index to this type and save them, but Discover won't display them and they will be hidden from this view if you open it again later.`,
             values: { unsupportedType: initialColumnType },
           })}
           className="fieldWarningTip"
