@@ -128,7 +128,7 @@ export const ContextMenu = ({
         }),
       });
 
-      return;
+      throw new Error('Kibana requests can only be copied as curl');
     }
 
     const { data: requestsAsCode, error: requestError } = await convertRequestToLanguage({
@@ -147,7 +147,7 @@ export const ContextMenu = ({
         }),
       });
 
-      return;
+      throw new Error('Failed to convert request to language');
     }
 
     notifications.toasts.addSuccess({
@@ -173,18 +173,17 @@ export const ContextMenu = ({
     // Show loading spinner
     setRequestConverterLoading(true);
 
-    // When copying as worked as expected, close the context menu popover
-    copyAs(withLanguage)
-      .then(() => {
-        setIsPopoverOpen(false);
-      })
-      .finally(() => {
-        // Delay hiding the spinner to avoid flickering between the spinner and
-        // the change language button
-        setTimeout(() => {
-          setRequestConverterLoading(false);
-        }, DELAY_FOR_HIDING_SPINNER);
-      });
+    try {
+      // When copying as worked as expected, close the context menu popover
+      await copyAs(withLanguage);
+      setIsPopoverOpen(false);
+    } finally {
+      // Delay hiding the spinner to avoid flickering between the spinner and
+      // the change language button
+      setTimeout(() => {
+        setRequestConverterLoading(false);
+      }, DELAY_FOR_HIDING_SPINNER);
+    }
   };
 
   const changeDefaultLanguage = (language: string) => {
