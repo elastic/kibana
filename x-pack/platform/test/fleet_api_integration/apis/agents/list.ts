@@ -6,7 +6,7 @@
  */
 
 import type * as http from 'http';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
