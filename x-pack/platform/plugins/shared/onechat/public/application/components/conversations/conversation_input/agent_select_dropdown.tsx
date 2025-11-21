@@ -36,6 +36,7 @@ interface AgentSelectButtonProps {
 const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName, onClick }) => (
   <EuiButtonEmpty
     iconSide="right"
+    flush="both"
     iconType="arrowDown"
     onClick={onClick}
     aria-haspopup="menu"
