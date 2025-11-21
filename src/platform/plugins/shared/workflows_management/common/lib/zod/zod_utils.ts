@@ -195,8 +195,12 @@ export function inferZodType(
   return z.unknown();
 }
 
+const options: Parameters<typeof z.toJSONSchema>[1] = {
+  target: 'draft-7',
+  unrepresentable: 'any',
+};
 export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
-  expect(z.toJSONSchema(a)).toEqual(z.toJSONSchema(b));
+  expect(z.toJSONSchema(a, options)).toEqual(z.toJSONSchema(b, options));
 }
 
 export function getArrayDescription(arraySchema: z.ZodArray, depth: number = 0): string {

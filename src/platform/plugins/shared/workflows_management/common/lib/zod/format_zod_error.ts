@@ -51,14 +51,13 @@ export function formatZodError(
       // Try generic union error message as fallback
       else {
         const genericUnionMessage = getGenericUnionErrorMessage(issue);
-        if (genericUnionMessage) {
-          formattedMessage = genericUnionMessage;
-        }
         // Handle discriminated union errors for type field
-        else if (issue.code === 'invalid_union' && issue.path.includes('triggers')) {
+        if (issue.code === 'invalid_union' && issue.path.includes('triggers')) {
           formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
         } else if (issue.code === 'invalid_union' && issue.path.includes('type')) {
           formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+        } else if (genericUnionMessage) {
+          formattedMessage = genericUnionMessage;
         }
         // Handle literal type errors for type field (avoid listing all 1000+ options)
         else if (issue.code === 'invalid_literal' && issue.path?.includes('type')) {

@@ -56,7 +56,7 @@ describe('getWorkflowContextSchema', () => {
           test: z.string(),
           test2: z.number(),
           test3: z.boolean(),
-          test4: z.enum(['option1', 'option2']),
+          test4: z.union([z.literal('option1'), z.literal('option2')]),
           test5: z.union([
             z.array(z.string()).min(1),
             z.array(z.number()).min(1),

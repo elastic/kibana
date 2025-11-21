@@ -105,7 +105,7 @@ export function getBuiltInTriggerTypesFromSchema(): Array<{
   const triggerTypes = triggerSchemas.map(({ schema, description, icon }) => {
     // Extract the literal type value from the Zod schema
     const typeField = schema.shape.type;
-    const triggerType = typeField._def.value; // Get the literal value from z.literal()
+    const triggerType = typeField.def.values[0]; // Get the literal value from z.literal()
 
     return {
       type: triggerType,

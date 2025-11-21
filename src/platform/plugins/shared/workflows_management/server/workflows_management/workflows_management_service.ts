@@ -255,6 +255,7 @@ export class WorkflowsService {
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
+  // eslint-disable-next-line complexity
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
@@ -328,7 +329,9 @@ export class WorkflowsService {
           shouldUpdateScheduler = true;
         } else {
           // Validate step name uniqueness
-          const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+          const stepValidation = validateStepNameUniqueness(
+            parsedYaml.data as unknown as WorkflowYaml
+          );
           if (!stepValidation.isValid) {
             updatedData.definition = undefined;
             updatedData.enabled = false;
@@ -337,7 +340,7 @@ export class WorkflowsService {
             shouldUpdateScheduler = true;
           } else {
             const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
-              parsedYaml.data as WorkflowYaml
+              parsedYaml.data as unknown as WorkflowYaml
             );
             // Update all fields from the transformed YAML, not just definition
             updatedData.definition = workflowDef.definition;
