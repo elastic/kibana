@@ -69,9 +69,7 @@ class McpClient {
       return await this.client.listTools();
     }
 
-    return {
-      error: 'MCP client not connected',
-    };
+    throw new Error('MCP client not connected');
   }
 
   async call_tool(params: { name: string, arguments: Record<string, unknown> }) {
@@ -82,8 +80,6 @@ class McpClient {
       })
     }
 
-    return {
-      error: 'MCP client not connected',
-    };
+    throw new Error('MCP client not connected');
   }
 }
