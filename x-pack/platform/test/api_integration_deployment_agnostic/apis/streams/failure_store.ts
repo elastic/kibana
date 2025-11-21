@@ -45,7 +45,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const request: Streams.WiredStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
-          description: '',
+          description: parsedDef.stream.description || '',
           ingest: {
             ...parsedDef.stream.ingest,
             failure_store: failureStore,
@@ -57,7 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const request: Streams.ClassicStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
-          description: '',
+          description: parsedDef.stream.description || '',
           ingest: {
             ...parsedDef.stream.ingest,
             failure_store: failureStore,
@@ -399,8 +399,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('disables lifecycle on failure store', async () => {
+      it('disables lifecycle on failure store only for not serverless', async () => {
         const streamName = 'logs.fs-disabled-lifecycle';
+
+        if (isServerless) {
+          // In serverless, disabling failure store lifecycle is not allowed
+          await putStream(
+            apiClient,
+            streamName,
+            {
+              ...emptyAssets,
+              stream: {
+                description: '',
+                ingest: {
+                  ...wiredPutBody.stream.ingest,
+                  wired: {
+                    fields: {},
+                    routing: [],
+                  },
+                  failure_store: {
+                    lifecycle: { disabled: {} },
+                  },
+                },
+              },
+            },
+            400
+          );
+          return;
+        }
+
         await putStream(apiClient, streamName, {
           ...emptyAssets,
           stream: {
@@ -431,9 +458,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(dataStreams.data_streams[0].failure_store?.enabled).to.eql(true);
       });
 
-      it('inherits disabled lifecycle from parent', async () => {
+      it('inherits disabled lifecycle from parent only for not serverless', async () => {
         const parentStream = 'logs.parent-disabled-lifecycle';
         const childStream = 'logs.parent-disabled-lifecycle.child';
+
+        if (isServerless) {
+          // In serverless, disabling failure store lifecycle is not allowed
+          await putStream(
+            apiClient,
+            parentStream,
+            {
+              ...emptyAssets,
+              stream: {
+                description: '',
+                ingest: {
+                  ...wiredPutBody.stream.ingest,
+                  wired: {
+                    fields: {},
+                    routing: [
+                      {
+                        destination: childStream,
+                        where: { never: {} },
+                        status: 'disabled',
+                      },
+                    ],
+                  },
+                  failure_store: {
+                    lifecycle: { disabled: {} },
+                  },
+                },
+              },
+            },
+            400
+          );
+          return;
+        }
 
         // Create parent with disabled lifecycle
         await putStream(apiClient, parentStream, {
@@ -657,6 +716,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const indexName = 'classic-stream-disabled-lifecycle';
         await createDataStream(indexName, true, '30d');
 
+        if (isServerless) {
+          // In serverless, disabling failure store lifecycle is not allowed
+          await putStream(
+            apiClient,
+            indexName,
+            {
+              ...emptyAssets,
+              stream: {
+                description: '',
+                ingest: {
+                  ...classicPutBody.stream.ingest,
+                  failure_store: {
+                    lifecycle: { disabled: {} },
+                  },
+                },
+              },
+            },
+            400
+          );
+          return;
+        }
+
         await putStream(apiClient, indexName, {
           ...emptyAssets,
           stream: {
@@ -673,25 +754,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const definition = await getStream(apiClient, indexName);
         const parsedDefinition = Streams.ClassicStream.GetResponse.parse(definition);
 
-        if (isServerless) {
-          expect(parsedDefinition.effective_failure_store).to.eql({
-            lifecycle: { enabled: {} },
-          });
-        } else {
-          expect(parsedDefinition.effective_failure_store).to.eql({
-            lifecycle: { disabled: {} },
-          });
-        }
+        expect(parsedDefinition.effective_failure_store).to.eql({
+          lifecycle: { disabled: {} },
+        });
 
-        // Verify failure store is enabled but lifecycle is disabled if not serverless
+        // Verify failure store is enabled but lifecycle is disabled
         const dataStreams = await esClient.indices.getDataStream({ name: [indexName] });
-        if (isServerless) {
-          // @ts-expect-error IndicesDataStream not correctly typed
-          expect(dataStreams.data_streams[0].failure_store?.lifecycle?.enabled).to.eql(true);
-        } else {
-          // @ts-expect-error IndicesDataStream not correctly typed
-          expect(dataStreams.data_streams[0].failure_store?.lifecycle?.enabled).to.eql(false);
-        }
+        // @ts-expect-error IndicesDataStream not correctly typed
+        expect(dataStreams.data_streams[0].failure_store?.lifecycle?.enabled).to.eql(false);
       });
     });
 
@@ -720,8 +790,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('allows disabling lifecycle on root stream failure store', async () => {
+      it('allows disabling lifecycle on root stream failure store only for not serverless', async () => {
         const rootDefinition = await getStream(apiClient, 'logs');
+
+        if (isServerless) {
+          // In serverless, disabling failure store lifecycle is not allowed
+          await putStream(
+            apiClient,
+            'logs',
+            {
+              ...emptyAssets,
+              stream: {
+                description: '',
+                ingest: {
+                  ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+                  failure_store: {
+                    lifecycle: { disabled: {} },
+                  },
+                },
+              },
+            },
+            400
+          );
+          return;
+        }
 
         await putStream(apiClient, 'logs', {
           ...emptyAssets,
