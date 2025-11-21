@@ -9,13 +9,13 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getAllConnectors } from '../../../../common/schema';
+import { getConnectorsCache } from '../../../../common/connectors_contracts/cache';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import type { ActionConnectorGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
 
 export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
-  const connectors = getAllConnectors();
+  const connectors = getConnectorsCache().list;
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
     iconColor: euiTheme.colors.vis.euiColorVis6,

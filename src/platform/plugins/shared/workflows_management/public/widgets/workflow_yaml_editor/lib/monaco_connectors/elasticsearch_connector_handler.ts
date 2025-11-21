@@ -13,7 +13,7 @@ import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { monaco } from '@kbn/monaco';
 import { isEnhancedInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
-import { getAllConnectors } from '../../../../../common/schema';
+import { getConnectorsCache } from '../../../../../common/connectors_contracts/cache';
 import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
 import type {
   ActionContext,
@@ -281,12 +281,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
    */
   private getDocumentationUrl(connectorType: string): string | null {
     try {
-      const allConnectors = getAllConnectors();
-      if (!allConnectors) {
-        return null;
-      }
-
-      const connector = allConnectors.find((c) => c.type === connectorType);
+      const connector = getConnectorsCache().map.get(connectorType);
 
       if (!connector || !isEnhancedInternalConnector(connector)) {
         return null;

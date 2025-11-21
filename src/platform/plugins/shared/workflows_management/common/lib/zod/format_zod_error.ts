@@ -13,7 +13,7 @@ import type { ZodError } from '@kbn/zod';
 import { z } from '@kbn/zod';
 import { getCompactTypeDescription, getDetailedTypeDescription } from './zod_type_description';
 import { getSchemaAtPath } from './zod_utils';
-import { getAllConnectors } from '../../schema';
+import { getConnectorsCache } from '../../connectors_contracts/cache';
 import type { FormattedZodError, MockZodError } from '../errors/invalid_yaml_schema';
 
 interface FormatZodErrorResult {
@@ -642,10 +642,8 @@ function getStepTypeFromYaml(yamlDocument: any, stepIndex: number): string | nul
  */
 function getConnectorParamsSchema(stepType: string): z.ZodType | null {
   try {
-    const allConnectors = getAllConnectors();
-
     // Find the connector definition for this step type
-    const connector = allConnectors.find((c: any) => c.type === stepType);
+    const connector = getConnectorsCache().map.get(stepType);
     if (!connector) {
       return null;
     }

@@ -17,7 +17,7 @@ import {
   isEnhancedInternalConnector,
 } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
-import { getAllConnectors } from '../../../../../common/schema';
+import { getConnectorsCache } from '../../../../../common/connectors_contracts/cache';
 import type {
   ActionContext,
   ActionInfo,
@@ -244,12 +244,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
    */
   private getConnectorInfo(connectorType: string): ConnectorContractUnion | null {
     try {
-      const allConnectors = getAllConnectors();
-      if (!allConnectors) {
-        return null;
-      }
-
-      return allConnectors.find((c) => c.type === connectorType) ?? null;
+      return getConnectorsCache().map.get(connectorType) ?? null;
     } catch (error) {
       // console.warn('KibanaMonacoConnectorHandler: Error getting connector info', error);
       return null;
