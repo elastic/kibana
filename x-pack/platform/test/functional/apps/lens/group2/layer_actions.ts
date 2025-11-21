@@ -11,6 +11,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const retry = getService('retry');
 
   describe('lens layer actions tests', () => {
@@ -27,6 +28,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('lnsLayerRemove--0');
       // clone button should be available
       await testSubjects.existOrFail('lnsLayerClone--0');
+
+      // with a second layer the tabs become visible
+      await lens.createLayer('data');
+      await lens.assertLayerCount(2);
+      await lens.openLayerContextMenu(0);
+
+      // should be 2 actions available
+      expect(
+        (await find.allByCssSelector('[data-test-subj=lnsLayerActionsMenu] button')).length
+      ).to.eql(2);
     });
 
     it('should open layer settings for a data layer and set a sampling rate', async () => {
