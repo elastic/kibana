@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField } from './text_field';
+import { TextWidget } from './text_widget';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -25,7 +25,7 @@ const TestFormWrapper = ({ children }: { children: React.ReactNode }) => {
   return <Form form={form}>{children}</Form>;
 };
 
-describe('TextField', () => {
+describe('TextWidget', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -33,7 +33,7 @@ describe('TextField', () => {
   it('renders with label and placeholder', () => {
     render(
       <TestFormWrapper>
-        <TextField
+        <TextWidget
           formConfig={{}}
           path="username"
           schema={z.string()}
@@ -64,7 +64,7 @@ describe('TextField', () => {
       const { form } = useForm({ defaultValue: { username: 'testuser' } });
       return (
         <Form form={form}>
-          <TextField
+          <TextWidget
             formConfig={{}}
             path="username"
             schema={z.string()}
@@ -92,7 +92,7 @@ describe('TextField', () => {
       const { form } = useForm();
       return (
         <Form form={form}>
-          <TextField
+          <TextWidget
             formConfig={{}}
             path="username"
             schema={z.string()}
@@ -123,7 +123,7 @@ describe('TextField', () => {
       const { form } = useForm();
       return (
         <Form form={form}>
-          <TextField
+          <TextWidget
             formConfig={{}}
             path="username"
             schema={z.string().min(3, 'Username must be at least 3 characters')}
@@ -161,7 +161,7 @@ describe('TextField', () => {
       const { form } = useForm();
       return (
         <Form form={form}>
-          <TextField
+          <TextWidget
             formConfig={{}}
             path="username"
             schema={z.string().min(1, 'Username is required')}

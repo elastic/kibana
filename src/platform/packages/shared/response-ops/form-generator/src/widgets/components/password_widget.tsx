@@ -16,7 +16,7 @@ import type { BaseWidgetProps } from '../types';
 
 type PasswordWidgetProps = BaseWidgetProps<z.ZodString, EuiFieldPasswordProps>;
 
-export const PasswordField: React.FC<PasswordWidgetProps> = ({
+export const PasswordWidget: React.FC<PasswordWidgetProps> = ({
   path,
   schema,
   fieldProps,

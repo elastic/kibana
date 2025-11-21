@@ -25,7 +25,7 @@ export const getOptions = (schema: z.ZodEnum): EuiSelectProps['options'] => {
   });
 };
 
-export const SelectField: React.FC<SelectWidgetProps> = ({
+export const SelectWidget: React.FC<SelectWidgetProps> = ({
   path,
   schema,
   fieldProps,
@@ -33,7 +33,7 @@ export const SelectField: React.FC<SelectWidgetProps> = ({
   formConfig,
 }) => {
   if (!(schema instanceof z.ZodEnum)) {
-    throw new Error('SelectField requires a ZodEnum schema');
+    throw new Error('SelectWidget requires a ZodEnum schema');
   }
 
   const options = getOptions(schema) ?? [];

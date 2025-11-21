@@ -16,7 +16,7 @@ import type { BaseWidgetProps } from '../types';
 
 type TextWidgetProps = BaseWidgetProps<z.ZodString, EuiFieldTextProps>;
 
-export const TextField: React.FC<TextWidgetProps> = ({
+export const TextWidget: React.FC<TextWidgetProps> = ({
   path,
   schema,
   fieldProps,

@@ -11,18 +11,18 @@ import { z } from '@kbn/zod/v4';
 import type { BaseWidgetProps } from './types';
 import { WidgetType } from './types';
 import { addMeta, getMeta } from '../schema_connector_metadata';
-import { TextField } from './fields/text_field';
-import { SelectField } from './fields/select_field';
-import { PasswordField } from './fields/password_field';
-import { DiscriminatedUnionField } from './fields/discriminated_union_field';
-import { HiddenField } from './fields/hidden';
+import { TextWidget } from './components/text_widget';
+import { SelectWidget } from './components/select_widget';
+import { PasswordWidget } from './components/password_widget';
+import { DiscriminatedUnionWidget } from './components/discriminated_union_widget';
+import { HiddenWidget } from './components/hidden_widget';
 
 const WIDGET_REGISTRY = {
-  [WidgetType.Text]: TextField,
-  [WidgetType.Password]: PasswordField,
-  [WidgetType.Select]: SelectField,
-  [WidgetType.FormFieldset]: DiscriminatedUnionField,
-  [WidgetType.Hidden]: HiddenField,
+  [WidgetType.Text]: TextWidget,
+  [WidgetType.Password]: PasswordWidget,
+  [WidgetType.Select]: SelectWidget,
+  [WidgetType.FormFieldset]: DiscriminatedUnionWidget,
+  [WidgetType.Hidden]: HiddenWidget,
 };
 
 const getDefaultWidgetForSchema = (schema: z.ZodType) => {

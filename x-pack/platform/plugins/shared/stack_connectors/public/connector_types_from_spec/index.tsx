@@ -10,8 +10,7 @@ import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { z } from '@kbn/zod/v4';
-import React from 'react';
-import { FormGenerator } from '@kbn/response-ops-form-generator';
+import { generateFormFields } from '@kbn/response-ops-form-generator';
 import { getIcon } from './get_icon';
 
 export function registerConnectorTypesFromSpecs({
@@ -51,14 +50,16 @@ const createConnectorTypeFromSpec = (spec: ConnectorSpec): ActionTypeModel => ({
   selectMessage: spec.metadata.description,
   iconClass: getIcon(spec),
   // TODO: Implement the rest of the properties
-  actionConnectorFields: (props) => {
-    return (
-      <FormGenerator
-        schema={schema}
-        formConfig={{ readOnly: props.readOnly, isEdit: props.isEdit }}
-      />
-    );
-  },
+  actionConnectorFields: lazy(() =>
+    Promise.resolve({
+      default: (props) => {
+        return generateFormFields({
+          schema,
+          formConfig: { readOnly: props.readOnly, isEdit: props.isEdit },
+        });
+      },
+    })
+  ),
   actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
   validateParams: async () => ({ errors: {} }),
 });

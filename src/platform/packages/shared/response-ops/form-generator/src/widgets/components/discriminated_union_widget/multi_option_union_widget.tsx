@@ -12,16 +12,40 @@ import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic
 import { getMeta } from '../../../schema_connector_metadata';
 import {
   getDiscriminatorFieldValue,
-  type DiscriminatedUnionWithProps,
-} from './discriminated_union_field';
-import { SingleOptionUnionField } from './single_option_field';
+  type DiscriminatedUnionWidgetProps,
+} from './discriminated_union_widget';
+import { SingleOptionUnionWidget } from './single_option_union_widget';
 
+/* This widget represents the whole discriminated union. For example:
+ * z.discriminatedUnion('type', [
+ *   z.object({ type: z.literal('none') }),
+ *   z.object({ type: z.literal('basic'), token: z.string() })
+ * ]).default({ type: 'basic', token: 'my-default-token' })
+ *
+ * in this MultiOptionUnionWidget component,
+ *   options: [
+ *     z.object({ type: z.literal('none') }),
+ *     z.object({ type: z.literal('basic'), token: z.string() })
+ *   ]
+ *   discriminatorKey: 'type'
+ *   defaultValue: { type: 'basic', token: 'my-default-token' }
+ */
+
+/*
+ * Gets the default option from the discriminated union options based on the fieldConfig defaultValue.
+ * If no matching defaultValue is found, returns the first option.
+ *
+ * @param options - The array of discriminated union options
+ * @param discriminatorKey - The key used to discriminate between options
+ * @param fieldConfig - The field configuration which may contain a defaultValue
+ * @returns The default option object
+ */
 const getDefaultOption = (
-  options: DiscriminatedUnionWithProps['options'],
+  options: DiscriminatedUnionWidgetProps['options'],
   discriminatorKey: string,
-  fieldConfig: DiscriminatedUnionWithProps['fieldConfig']
+  fieldConfig: DiscriminatedUnionWidgetProps['fieldConfig']
 ) => {
-  if (fieldConfig?.defaultValue && typeof fieldConfig.defaultValue === 'object') {
+  if (fieldConfig.defaultValue && typeof fieldConfig.defaultValue === 'object') {
     const defaultValue = fieldConfig.defaultValue as Record<string, any>;
     const defaultOption = options.find(
       (option) =>
@@ -34,7 +58,21 @@ const getDefaultOption = (
   return options[0];
 };
 
-export const MultiOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
+/*
+ * MultiOptionUnionWidget component renders a set of checkable cards for each option in a discriminated union.
+ * When an option is selected, it renders the corresponding SingleOptionUnionWidget for that option.
+ *
+ * @param props - DiscriminatedUnionWidgetProps
+ * @param props.path - The root path for the form fields
+ * @param props.options - The array of discriminated union options
+ * @param props.discriminatorKey - The key used to discriminate between options
+ * @param props.schema - The overall schema containing the discriminated union
+ * @param props.fieldConfig - Configuration for the field, including default values
+ * @param props.fieldProps - Additional properties for the field, such as label
+ * @param props.formConfig - Configuration for the form, such as read-only state
+ * @returns React element representing the multi-option union widget
+ */
+export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = ({
   path: rootPath,
   options,
   discriminatorKey,
@@ -74,7 +112,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
               data-test-subj={`form-generator-field-${rootPath}-${discriminatorValue}`}
             >
               {isChecked && (
-                <SingleOptionUnionField
+                <SingleOptionUnionWidget
                   options={[option]}
                   path={rootPath}
                   schema={schema}

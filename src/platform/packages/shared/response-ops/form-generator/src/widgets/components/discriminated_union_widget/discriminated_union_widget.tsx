@@ -10,13 +10,13 @@
 import React from 'react';
 import type { z } from '@kbn/zod/v4';
 import type { EuiFormFieldsetProps } from '@elastic/eui';
-import { SingleOptionUnionField } from './single_option_field';
+import { SingleOptionUnionWidget } from './single_option_union_widget';
 import type { BaseWidgetPropsWithOptions } from '../../types';
-import { MultiOptionUnionField } from './multi_option_field';
+import { MultiOptionUnionWidget } from './multi_option_union_widget';
 
 type DiscriminatedUnionSchemaType = z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
 
-export type DiscriminatedUnionWithProps = BaseWidgetPropsWithOptions<
+export type DiscriminatedUnionWidgetProps = BaseWidgetPropsWithOptions<
   DiscriminatedUnionSchemaType,
   EuiFormFieldsetProps,
   z.ZodObject<z.ZodRawShape>
@@ -35,19 +35,19 @@ export const getDiscriminatorFieldValue = (
   return (schema.shape[discriminatorKey] as z.ZodLiteral).value;
 };
 
-export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWithProps> = (props) => {
+export const DiscriminatedUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (props) => {
   const { schema, path } = props;
   const options = schema.options;
 
   if (!options) {
-    throw new Error(`DiscriminatedUnionField requires options in schema at path: ${path}`);
+    throw new Error(`DiscriminatedUnionWidget requires options in schema at path: ${path}`);
   }
 
   const discriminatorKey = getDiscriminatorKey(schema);
 
   return options.length === 1 ? (
-    <SingleOptionUnionField {...props} options={options} discriminatorKey={discriminatorKey} />
+    <SingleOptionUnionWidget {...props} options={options} discriminatorKey={discriminatorKey} />
   ) : (
-    <MultiOptionUnionField {...props} options={options} discriminatorKey={discriminatorKey} />
+    <MultiOptionUnionWidget {...props} options={options} discriminatorKey={discriminatorKey} />
   );
 };

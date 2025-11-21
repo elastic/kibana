@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { DiscriminatedUnionField } from './discriminated_union_field';
+import { DiscriminatedUnionWidget } from './discriminated_union_widget';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -30,7 +30,7 @@ const TestFormWrapper = ({
   return <Form form={form}>{children}</Form>;
 };
 
-describe('DiscriminatedUnionField', () => {
+describe('DiscriminatedUnionWidget', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -54,7 +54,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -101,7 +101,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -148,7 +148,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper defaultValue={{ auth: { type: 'basic', username: '', password: '' } }}>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -195,7 +195,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -237,7 +237,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -276,7 +276,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -318,7 +318,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -360,7 +360,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -406,7 +406,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -452,7 +452,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -507,7 +507,7 @@ describe('DiscriminatedUnionField', () => {
 
     render(
       <TestFormWrapper>
-        <DiscriminatedUnionField
+        <DiscriminatedUnionWidget
           formConfig={{}}
           path="auth"
           schema={schema}

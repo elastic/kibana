@@ -14,9 +14,9 @@ import type { z } from '@kbn/zod/v4';
 import { HiddenField as FormHiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { BaseWidgetProps } from '../types';
 
-type TextWidgetProps = BaseWidgetProps<z.ZodString, EuiFieldTextProps>;
+type HiddenWidgetProps = BaseWidgetProps<z.ZodString, EuiFieldTextProps>;
 
-export const HiddenField: React.FC<TextWidgetProps> = ({
+export const HiddenWidget: React.FC<HiddenWidgetProps> = ({
   path,
   schema,
   fieldProps,

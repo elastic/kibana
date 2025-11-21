@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { PasswordField } from './password_field';
+import { PasswordWidget } from './password_widget';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -24,7 +24,7 @@ const TestFormWrapper = ({ children }: { children: React.ReactNode }) => {
   return <Form form={form}>{children}</Form>;
 };
 
-describe('PasswordField', () => {
+describe('PasswordWidget', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -32,7 +32,7 @@ describe('PasswordField', () => {
   it('renders with label and placeholder', () => {
     render(
       <TestFormWrapper>
-        <PasswordField
+        <PasswordWidget
           formConfig={{}}
           path="password"
           schema={z.string()}
@@ -63,7 +63,7 @@ describe('PasswordField', () => {
       const { form } = useForm({ defaultValue: { password: 'secret123' } });
       return (
         <Form form={form}>
-          <PasswordField
+          <PasswordWidget
             formConfig={{}}
             path="password"
             schema={z.string()}
@@ -95,7 +95,7 @@ describe('PasswordField', () => {
       const { form } = useForm();
       return (
         <Form form={form}>
-          <PasswordField
+          <PasswordWidget
             formConfig={{}}
             path="password"
             schema={z.string()}
@@ -129,7 +129,7 @@ describe('PasswordField', () => {
       const { form } = useForm();
       return (
         <Form form={form}>
-          <PasswordField
+          <PasswordWidget
             formConfig={{}}
             path="password"
             schema={z.string().min(6, 'Password must be at least 6 characters')}
@@ -170,7 +170,7 @@ describe('PasswordField', () => {
       const { form } = useForm();
       return (
         <Form form={form}>
-          <PasswordField
+          <PasswordWidget
             formConfig={{}}
             path="password"
             schema={z.string().min(1, 'Password is required')}
@@ -208,7 +208,7 @@ describe('PasswordField', () => {
   it('renders as password field type', () => {
     render(
       <TestFormWrapper>
-        <PasswordField
+        <PasswordWidget
           formConfig={{}}
           path="password"
           schema={z.string()}

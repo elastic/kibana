@@ -10,8 +10,8 @@
 import type React from 'react';
 import type { z } from '@kbn/zod/v4';
 import { addMeta } from '@kbn/connector-specs/src/connector_spec_ui';
-import { type DiscriminatedUnionWithProps } from './discriminated_union_field';
-import { getFieldsFromSchema, renderFieldComponent } from '../../../form';
+import { type DiscriminatedUnionWidgetProps } from './discriminated_union_widget';
+import { getFieldsFromSchema, renderField } from '../../../field_builder';
 
 // This widget represents an object inside a discriminated union. For example, given an initial schema like:
 // z.discriminatedUnion('type', [
@@ -19,10 +19,10 @@ import { getFieldsFromSchema, renderFieldComponent } from '../../../form';
 //   z.object({ type: z.literal('basic'), token: z.string() })
 // ])
 //
-// in SingleOptionUnionField component,
+// in SingleOptionUnionWidget component,
 //   the options prop will be either `z.object({ type: z.literal('none') })` or `z.object({ type: z.literal('basic'), token: z.string() })`
 
-export const SingleOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
+export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = ({
   path: rootPath,
   options,
   discriminatorKey,
@@ -33,7 +33,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
   const optionSchema = options[0];
 
   if (!optionSchema) {
-    throw new Error(`SingleOptionUnionField requires an option in schema at path: ${rootPath}`);
+    throw new Error(`SingleOptionUnionWidget requires an option in schema at path: ${rootPath}`);
   }
 
   // Hide the discriminator field since its value is implied by the selected option
@@ -49,5 +49,5 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
     formConfig,
   });
 
-  return fields.map((field) => renderFieldComponent({ field }));
+  return fields.map((field) => renderField({ field }));
 };

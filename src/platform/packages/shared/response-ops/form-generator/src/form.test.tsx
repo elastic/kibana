@@ -13,7 +13,7 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { FormGenerator } from './form';
+import { generateFormFields } from './form';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -35,7 +35,7 @@ const TestFormWrapper = ({ schema, onSubmit }: TestFormWrapperProps) => {
 
   return (
     <Form form={form}>
-      <FormGenerator schema={schema} />
+      {generateFormFields({ schema })}
       <EuiButton onClick={form.submit} isLoading={form.isSubmitting}>
         Submit
       </EuiButton>

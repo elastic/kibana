@@ -12,21 +12,21 @@ import type { StoryObj } from '@storybook/react';
 import { z } from '@kbn/zod/v4';
 import { EuiButton } from '@elastic/eui';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { FormGenerator } from './form';
+import { generateFormFields } from './form';
 
 interface StoryArgs {
   readOnly?: boolean;
 }
 
 const meta = {
-  title: 'Form Generator',
+  title: 'Form Field Generator',
   args: {
     readOnly: false,
   },
   argTypes: {
     readOnly: {
       control: 'boolean',
-      description: 'Whether the form is in read-only mode',
+      description: 'Whether the form fields are in read-only mode',
     },
   },
 };
@@ -56,7 +56,7 @@ const FormWrapper = ({ schema, onSubmit, readOnly = false }: FormWrapperProps) =
 
   return (
     <Form form={form}>
-      <FormGenerator schema={schema} formConfig={{ readOnly }} />
+      {generateFormFields({ schema, formConfig: { readOnly } })}
       <EuiButton onClick={form.submit} isLoading={form.isSubmitting}>
         Submit
       </EuiButton>

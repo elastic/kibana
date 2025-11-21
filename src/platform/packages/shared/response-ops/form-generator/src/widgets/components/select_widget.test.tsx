@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { SelectField } from './select_field';
+import { SelectWidget } from './select_widget';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -24,7 +24,7 @@ const TestFormWrapper = ({ children }: { children: React.ReactNode }) => {
   return <Form form={form}>{children}</Form>;
 };
 
-describe('SelectField', () => {
+describe('SelectWidget', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -32,7 +32,7 @@ describe('SelectField', () => {
   it('renders with label from props', () => {
     render(
       <TestFormWrapper>
-        <SelectField
+        <SelectWidget
           formConfig={{}}
           path="country"
           schema={z.enum(['option1', 'option2', 'option3'])}
@@ -58,7 +58,7 @@ describe('SelectField', () => {
   it('renders options from z.enum schema', () => {
     render(
       <TestFormWrapper>
-        <SelectField
+        <SelectWidget
           formConfig={{}}
           path="country"
           schema={z.enum(['US', 'UK', 'CA'])}
@@ -88,7 +88,7 @@ describe('SelectField', () => {
   it('renders options from explicit options prop', () => {
     render(
       <TestFormWrapper>
-        <SelectField
+        <SelectWidget
           formConfig={{}}
           path="role"
           schema={z.enum(['admin', 'user', 'guest'])}
@@ -120,7 +120,7 @@ describe('SelectField', () => {
       const { form } = useForm({ defaultValue: { choice: 'option2' } });
       return (
         <Form form={form}>
-          <SelectField
+          <SelectWidget
             formConfig={{}}
             path="choice"
             schema={z.enum(['option1', 'option2', 'option3'])}
@@ -150,7 +150,7 @@ describe('SelectField', () => {
     const user = userEvent.setup();
     render(
       <TestFormWrapper>
-        <SelectField
+        <SelectWidget
           formConfig={{}}
           path="choice"
           schema={z.enum(['option1', 'option2', 'option3'])}
@@ -180,7 +180,7 @@ describe('SelectField', () => {
     const user = userEvent.setup();
     render(
       <TestFormWrapper>
-        <SelectField
+        <SelectWidget
           formConfig={{}}
           path="choice"
           schema={z.enum(['option1', 'option2', 'option3'])}
@@ -214,7 +214,7 @@ describe('SelectField', () => {
       const { form } = useForm();
       return (
         <Form form={form}>
-          <SelectField
+          <SelectWidget
             formConfig={{}}
             path="choice"
             schema={z.enum(['option1', 'option2', 'option3'])}
@@ -255,7 +255,7 @@ describe('SelectField', () => {
     expect(() => {
       render(
         <TestFormWrapper>
-          <SelectField
+          <SelectWidget
             formConfig={{}}
             path="choice"
             schema={z.string() as any}
@@ -274,7 +274,7 @@ describe('SelectField', () => {
         </TestFormWrapper>,
         { wrapper }
       );
-    }).toThrow('SelectField requires a ZodEnum schema');
+    }).toThrow('SelectWidget requires a ZodEnum schema');
 
     consoleError.mockRestore();
   });

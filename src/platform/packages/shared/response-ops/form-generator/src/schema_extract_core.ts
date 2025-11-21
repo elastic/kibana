@@ -24,8 +24,11 @@ const isUnwrappable = (schema: z.ZodType): schema is z.ZodType & HasUnwrap => {
   );
 };
 
-// Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
-// In the process, we also extract the default value if any
+/* Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
+ * In the process, we also extract the default value if any
+ * @param schema - The Zod schema to extract from
+ * @returns An object containing the unwrapped schema and any default value
+ */
 export const extractSchemaCore = (schema: z.ZodType) => {
   let current = schema;
   let defaultValue: unknown;

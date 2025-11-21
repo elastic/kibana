@@ -25,9 +25,13 @@ export interface BaseWidgetProps<
   TEuiFieldProps = Record<string, unknown>,
   TOption = unknown
 > {
+  /* The dot-notated path to the field within the form data */
   path: string;
+  /* The Zod schema for the field */
   schema: TSchema;
+  /* Global form configuration */
   formConfig: FormConfig;
+  /* Configuration specific to the field */
   fieldConfig: {
     validations: [
       {
@@ -38,7 +42,9 @@ export interface BaseWidgetProps<
     ];
     defaultValue?: z.infer<TSchema>;
   } & Record<string, unknown>;
+  /* Props to be passed to the underlying EUI field component */
   fieldProps: { euiFieldProps: TEuiFieldProps } & Record<string, unknown>;
+  /* Options for fields like select dropdowns */
   options?: TOption[];
 }
 
