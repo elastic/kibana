@@ -28,8 +28,10 @@ export interface TelemetryQuerySubmittedProps {
 export enum ControlTriggerSource {
   SMART_SUGGESTION = 'smart_suggestion',
   QUESTION_MARK = 'question_mark',
+  ADD_CONTROL_BTN = 'add_control_btn',
 }
 
 export enum TelemetryControlCancelledReason {
   CANCEL_BUTTON = 'cancel_button',
+  CLOSE_BUTTON = 'close_button',
 }
