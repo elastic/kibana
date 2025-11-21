@@ -98,7 +98,7 @@ const ContextExceededError: React.FC<{ onRetry: () => void }> = ({ onRetry }) =>
             <p>
               <FormattedMessage
                 id="xpack.onechat.round.error.contextExceeded.description"
-                defaultMessage="This conversation exceeded the maximum context size. This typically occurs when tools return too many results or result content is very large. See {docsLink} for approaches to address this issue."
+                defaultMessage="This conversation exceeded the maximum context length. This typically occurs when tools return a very large response. Try again with a different request or start a new conversation. {docsLink}."
                 values={{
                   docsLink: (
                     <EuiLink
@@ -108,7 +108,7 @@ const ContextExceededError: React.FC<{ onRetry: () => void }> = ({ onRetry }) =>
                     >
                       <FormattedMessage
                         id="xpack.onechat.round.error.contextExceeded.docsLink"
-                        defaultMessage="documentation"
+                        defaultMessage="Learn more"
                       />
                     </EuiLink>
                   ),
