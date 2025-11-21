@@ -116,14 +116,14 @@ export function isPhrasesFilter(storedFilter: StoredFilter): boolean {
 
 /**
  * Type guard for combined filter format
- * Validates that params is a non-empty array of Filter objects (not primitives like strings)
+ * Validates that params is a non-empty array of Filter objects (not primitives)
  */
 export function isCombinedFilter(storedFilter: StoredFilter): boolean {
   return (
     storedFilter.meta?.type === 'combined' &&
     Array.isArray(storedFilter.meta.params) &&
     storedFilter.meta.params.length > 0 &&
-    !storedFilter.meta.params.some((p) => typeof p === 'string')
+    !storedFilter.meta.params.some((p) => typeof p !== 'object' || p === null)
   );
 }
 

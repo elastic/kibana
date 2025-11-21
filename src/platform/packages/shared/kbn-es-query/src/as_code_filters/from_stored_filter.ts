@@ -64,12 +64,10 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
     // Cast to StoredFilter for type-safe access
     const filter = storedFilter as StoredFilter;
 
-    // Migrate legacy filter formats to modern format only if needed
     const normalizedFilter = (
       isLegacyFilter(filter) ? migrateFilter(filter) : filter
     ) as StoredFilter;
 
-    // Extract base properties from stored filter
     const baseProperties = extractBaseProperties(normalizedFilter);
 
     // TYPE-FIRST ROUTING: Use meta.type when available
@@ -99,10 +97,7 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
         case FILTERS.MATCH_ALL:
         case FILTERS.QUERY_STRING:
         case FILTERS.SPATIAL_FILTER:
-          return convertToDSLFilter(normalizedFilter, baseProperties);
-
         default:
-          // Unknown type - fall back to DSL
           return convertToDSLFilter(normalizedFilter, baseProperties);
       }
     }
@@ -271,8 +266,11 @@ function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['gr
  * Preserves original query structure to prevent data loss
  */
 function convertToRawDSL(storedFilter: StoredFilter): AsCodeDSLFilter['dsl'] {
+  if (!storedFilter.query) {
+    throw new FilterConversionError('Cannot convert to DSL: filter has no query property');
+  }
   return {
-    query: storedFilter.query || storedFilter,
+    query: storedFilter.query,
   };
 }
 
@@ -454,15 +452,15 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
 
   return {
     disabled: meta?.disabled === true ? true : meta?.disabled === false ? false : undefined,
-    controlledBy: meta?.controlledBy || undefined,
-    dataViewId: meta?.index || undefined,
+    controlledBy: meta?.controlledBy ?? undefined,
+    dataViewId: meta?.index ?? undefined,
     negate: meta?.negate === true ? true : meta?.negate === false ? false : undefined,
-    label: meta?.alias || undefined,
+    label: meta?.alias ?? undefined,
     isMultiIndex:
       meta?.isMultiIndex === true ? true : meta?.isMultiIndex === false ? false : undefined,
-    filterType: meta?.type || undefined,
-    key: meta?.key || undefined,
-    value: meta?.value || undefined,
+    filterType: meta?.type ?? undefined,
+    key: meta?.key ?? undefined,
+    value: meta?.value ?? undefined,
   };
 }
 
