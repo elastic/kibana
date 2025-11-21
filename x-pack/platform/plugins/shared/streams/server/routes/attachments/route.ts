@@ -42,11 +42,11 @@ const listAttachmentsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      streamName: z.string(),
+      streamName: z.string().describe('The name of the stream'),
     }),
     query: z
       .object({
-        attachmentType: z.optional(attachmentTypeSchema),
+        attachmentType: z.optional(attachmentTypeSchema).describe('Filter by attachment type'),
       })
       .optional(),
   }),
@@ -88,9 +88,9 @@ const linkAttachmentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      streamName: z.string(),
-      attachmentType: attachmentTypeSchema,
-      attachmentId: z.string(),
+      streamName: z.string().describe('The name of the stream'),
+      attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
+      attachmentId: z.string().describe('The ID of the attachment'),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkAttachmentResponse> => {
@@ -131,9 +131,9 @@ const unlinkAttachmentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      streamName: z.string(),
-      attachmentType: attachmentTypeSchema,
-      attachmentId: z.string(),
+      streamName: z.string().describe('The name of the stream'),
+      attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
+      attachmentId: z.string().describe('The ID of the attachment'),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkAttachmentResponse> => {
@@ -179,7 +179,7 @@ const bulkAttachmentsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      streamName: z.string(),
+      streamName: z.string().describe('The name of the stream'),
     }),
     body: z.object({
       operations: z.array(
