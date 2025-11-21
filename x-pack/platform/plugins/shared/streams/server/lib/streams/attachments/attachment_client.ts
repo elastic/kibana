@@ -148,13 +148,13 @@ export class AttachmentClient {
    * @returns A promise that resolves with an array of full attachment details
    */
   private async fetchAttachments(attachmentLinks: AttachmentLink[]): Promise<Attachment[]> {
-    // Group attachment IDs by type using lodash groupBy
-    const attachmentIdsByType = groupBy(attachmentLinks, 'type');
+    // Group attachment links by type using lodash groupBy
+    const attachmentLinksByType = groupBy(attachmentLinks, 'type');
 
     // Fetch attachments for each type and flatten results
     const attachments: Attachment[] = (
       await Promise.all(
-        Object.entries(attachmentIdsByType).map(async ([type, links]) => {
+        Object.entries(attachmentLinksByType).map(async ([type, links]) => {
           const ids = links.map((link) => link.id);
           return this.getAttachmentEntitiesMap[type as AttachmentType](ids);
         })
