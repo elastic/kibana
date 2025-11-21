@@ -29,7 +29,7 @@ import type { Alert } from '@kbn/alerting-types';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import * as i18n from './translations';
 import type { ItemsSelectionState } from './items/types';
-// import { useFocusButtonTrap } from '../../use_focus_button';
+import { useFocusButtonTrap } from './use_focus_button';
 
 interface Props {
   selectedAlerts: Alert[];
@@ -71,6 +71,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({
   });
 
   const onSave = useCallback(() => onSaveTags(tagsSelection), [onSaveTags, tagsSelection]);
+  const focusTrapProps = useFocusButtonTrap(focusButtonRef);
 
   const headerSubtitle =
     selectedAlerts.length > 1
@@ -85,6 +86,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({
       data-test-subj="alerts-edit-tags-flyout"
       size="s"
       paddingSize="m"
+      focusTrapProps={focusTrapProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
