@@ -16,7 +16,9 @@ export const DEFAULT_CACHE_INTERVAL_MS = 60000; // 1 minute cache
 
 interface MaintenanceWindowServiceOpts {
   cacheInterval?: number;
-  getMaintenanceWindowClientWithRequest: (request: KibanaRequest) => MaintenanceWindowClient;
+  getMaintenanceWindowClientInternal: (
+    request: KibanaRequest
+  ) => MaintenanceWindowClient | undefined;
   logger: Logger;
 }
 
@@ -133,10 +135,10 @@ export class MaintenanceWindowsService {
     now: number
   ): Promise<MaintenanceWindow[]> {
     return await withAlertingSpan('alerting:load-maintenance-windows', async () => {
-      const maintenanceWindowClient = this.options.getMaintenanceWindowClientWithRequest(request);
-      const activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows(
-        this.cacheIntervalMs
-      );
+      const maintenanceWindowClient = this.options.getMaintenanceWindowClientInternal(request);
+      const activeMaintenanceWindows = maintenanceWindowClient
+        ? await maintenanceWindowClient.getActiveMaintenanceWindows(this.cacheIntervalMs)
+        : [];
       this.windows.set(spaceId, {
         lastUpdated: now,
         activeMaintenanceWindows,

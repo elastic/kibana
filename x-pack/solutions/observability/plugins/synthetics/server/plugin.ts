@@ -106,8 +106,12 @@ export class Plugin implements PluginType {
       coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
     );
 
-    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
-      return pluginsStart.maintenanceWindows!.getMaintenanceWindowClientWithRequest(request);
+    const getMaintenanceWindowClientInternal = (request: KibanaRequest) => {
+      if (!pluginsStart.maintenanceWindows) {
+        return;
+      }
+
+      return pluginsStart.maintenanceWindows?.getMaintenanceWindowClientInternal(request);
     };
 
     if (this.server) {
@@ -119,7 +123,7 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
       this.server.spaces = pluginsStart.spaces;
       this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
-      this.server.getMaintenanceWindowClientWithRequest = getMaintenanceWindowClientWithRequest;
+      this.server.getMaintenanceWindowClientInternal = getMaintenanceWindowClientInternal;
     }
     this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
       this.logger.error('Failed to start sync private location monitors task', { error: e });

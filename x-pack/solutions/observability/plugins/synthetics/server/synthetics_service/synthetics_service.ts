@@ -648,9 +648,13 @@ export class SyntheticsService {
   }
 
   async getMaintenanceWindows() {
-    const maintenanceWindowClient = this.server.getMaintenanceWindowClientWithRequest(
+    const maintenanceWindowClient = this.server.getMaintenanceWindowClientInternal(
       {} as KibanaRequest
     );
+
+    if (!maintenanceWindowClient) {
+      return [];
+    }
 
     const mws = await maintenanceWindowClient.find({
       page: 0,

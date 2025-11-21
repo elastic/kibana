@@ -205,7 +205,7 @@ export interface AlertingPluginsStart {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
-  maintenanceWindows: MaintenanceWindowsServerStart;
+  maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 
 export class AlertingPlugin {
@@ -650,8 +650,11 @@ export class AlertingPlugin {
       return rulesSettingsClientFactory!.create(request);
     };
 
-    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
-      return plugins.maintenanceWindows!.getMaintenanceWindowClientWithRequest(request);
+    const getMaintenanceWindowClientInternal = (request: KibanaRequest) => {
+      if (!plugins.maintenanceWindows) {
+        return;
+      }
+      return plugins.maintenanceWindows.getMaintenanceWindowClientInternal(request);
     };
 
     taskRunnerFactory.initialize({
@@ -673,7 +676,7 @@ export class AlertingPlugin {
       maintenanceWindowsService: new MaintenanceWindowsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
         logger,
-        getMaintenanceWindowClientWithRequest,
+        getMaintenanceWindowClientInternal,
       }),
       maxAlerts: this.config.rules.run.alerts.max,
       ruleTypeRegistry: this.ruleTypeRegistry!,

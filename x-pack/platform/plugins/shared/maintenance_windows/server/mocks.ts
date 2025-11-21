@@ -11,7 +11,10 @@ import { maintenanceWindowClientMock } from './maintenance_window_client.mock';
 
 const createStartMock = () => {
   const mock: jest.Mocked<MaintenanceWindowsServerStart> = lazyObject({
-    getMaintenanceWindowClientWithRequest: jest
+    getMaintenanceWindowClientInternal: jest
+      .fn()
+      .mockResolvedValue(maintenanceWindowClientMock.create()),
+    getMaintenanceWindowClientWithAuth: jest
       .fn()
       .mockResolvedValue(maintenanceWindowClientMock.create()),
   });

@@ -38,5 +38,6 @@ export interface MaintenanceWindowsServerStartDependencies {
 }
 
 export interface MaintenanceWindowsServerStart {
-  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
+  getMaintenanceWindowClientInternal(request: KibanaRequest): MaintenanceWindowClientApi;
+  getMaintenanceWindowClientWithAuth(request: KibanaRequest): MaintenanceWindowClientApi;
 }

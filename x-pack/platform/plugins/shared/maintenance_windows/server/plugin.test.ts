@@ -64,7 +64,7 @@ describe('Maintenance Windows Plugin', () => {
   });
 
   describe('start()', () => {
-    test(`exposes getMaintenanceWindowClientWithRequest()`, async () => {
+    test(`exposes getMaintenanceWindowClientWithAuth()`, async () => {
       const context =
         coreMock.createPluginInitializerContext<MaintenanceWindowsConfig>(maintenanceWindowsConfig);
       const plugin = new MaintenanceWindowsPlugin(context);
@@ -95,7 +95,42 @@ describe('Maintenance Windows Plugin', () => {
         getSavedObjectsClient: jest.fn(),
       } as unknown as KibanaRequest;
 
-      const client = startContract.getMaintenanceWindowClientWithRequest(fakeRequest);
+      const client = startContract.getMaintenanceWindowClientWithAuth(fakeRequest);
+      expect(client).toBeDefined();
+    });
+
+    test(`exposes getMaintenanceWindowClientInternal()`, async () => {
+      const context =
+        coreMock.createPluginInitializerContext<MaintenanceWindowsConfig>(maintenanceWindowsConfig);
+      const plugin = new MaintenanceWindowsPlugin(context);
+
+      plugin.setup(coreMock.createSetup(), {
+        licensing: licensingMock.createSetup(),
+        taskManager: taskManagerMock.createSetup(),
+        features: featuresPluginMock.createSetup(),
+      });
+
+      const startContract = plugin.start(coreMock.createStart(), {
+        taskManager: taskManagerMock.createStart(),
+      });
+
+      const fakeRequest = {
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: {
+          href: '/',
+        },
+        raw: {
+          req: {
+            url: '/',
+          },
+        },
+        getSavedObjectsClient: jest.fn(),
+      } as unknown as KibanaRequest;
+
+      const client = startContract.getMaintenanceWindowClientInternal(fakeRequest);
       expect(client).toBeDefined();
     });
   });

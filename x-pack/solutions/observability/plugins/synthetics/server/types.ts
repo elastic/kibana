@@ -65,7 +65,9 @@ export interface SyntheticsServerSetup {
   alerting: AlertingServerSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
   isElasticsearchServerless: boolean;
-  getMaintenanceWindowClientWithRequest: (request: KibanaRequest) => MaintenanceWindowClient;
+  getMaintenanceWindowClientInternal: (
+    request: KibanaRequest
+  ) => MaintenanceWindowClient | undefined;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
@@ -91,7 +93,7 @@ export interface SyntheticsPluginsStartDependencies {
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
   alerting: AlertingServerStart;
-  maintenanceWindows: MaintenanceWindowsServerStart;
+  maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 
 export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{
