@@ -49,7 +49,7 @@ export const URLVoidConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { domain: string };
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.urlvoid.com/api1000/${apiKey}/host/${typedInput.domain}`
         );
@@ -70,7 +70,7 @@ export const URLVoidConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { url: string };
         const domain = new URL(typedInput.url).hostname;
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.urlvoid.com/api1000/${apiKey}/host/${domain}`
         );
@@ -91,7 +91,7 @@ export const URLVoidConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { domain: string };
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.urlvoid.com/api1000/${apiKey}/host/${typedInput.domain}`
         );
@@ -111,7 +111,7 @@ export const URLVoidConnector: ConnectorSpec = {
       isTool: true,
       input: z.object({}),
       handler: async (ctx) => {
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.urlvoid.com/api1000/${apiKey}/stats/remained`
         );
@@ -127,7 +127,7 @@ export const URLVoidConnector: ConnectorSpec = {
   test: {
     handler: async (ctx) => {
       try {
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         await ctx.client.get(`https://api.urlvoid.com/api1000/${apiKey}/stats/remained`);
         return {
           ok: true,

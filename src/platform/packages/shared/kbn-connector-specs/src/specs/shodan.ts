@@ -49,8 +49,7 @@ export const ShodanConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; page?: number };
-        // const apiKey = ctx.secrets['X-Api-Key'] || '';
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get('https://api.shodan.io/shodan/host/search', {
           params: {
             query: typedInput.query,
@@ -73,7 +72,7 @@ export const ShodanConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.shodan.io/shodan/host/${typedInput.ip}`,
           {
@@ -100,7 +99,7 @@ export const ShodanConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; facets?: string };
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get('https://api.shodan.io/shodan/host/count', {
           params: {
             query: typedInput.query,
@@ -119,7 +118,7 @@ export const ShodanConnector: ConnectorSpec = {
       isTool: true,
       input: z.object({}),
       handler: async (ctx) => {
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get('https://api.shodan.io/shodan/services', {
           params: { key: apiKey },
         });
@@ -133,7 +132,7 @@ export const ShodanConnector: ConnectorSpec = {
   test: {
     handler: async (ctx) => {
       try {
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets?.key : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         await ctx.client.get('https://api.shodan.io/shodan/host/8.8.8.8', {
           params: { key: apiKey },
         });
