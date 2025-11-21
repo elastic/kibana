@@ -18,7 +18,7 @@ import {
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { IllegalArgumentError } from '../errors';
 import type { SLORepository } from './slo_repository';
-import { GetSLOHealth } from './get_slo_health';
+import { computeHealth, getTransformStatsForSLO } from './slo_transform_health';
 
 const MAX_PER_PAGE = 1000;
 const DEFAULT_PER_PAGE = 100;
@@ -41,31 +41,30 @@ export class FindSLODefinitions {
     });
 
     if (params.includeHealth) {
-      const getSLOHealth = new GetSLOHealth(this.scopedClusterClient, this.repository);
-
-      const healthResponses = await getSLOHealth.execute({
-        list: result.results.map((item) => ({
-          sloId: item.id,
-          sloInstanceId: '*',
-          sloRevision: item.revision,
-          sloName: item.name,
-          sloEnabled: item.enabled,
-        })),
-      });
-
-      const resultsWithHealth = result.results.map((slo) => {
-        const healthInfo = healthResponses.find((health) => health.sloId === slo.id);
-        return {
-          ...slo,
-          health: healthInfo?.health,
-        };
-      });
+      const healthResults = await Promise.all(
+        result.results.map(async (slo) => {
+          const transformStatsById = await getTransformStatsForSLO(this.scopedClusterClient, {
+            sloId: slo.id,
+            sloRevision: slo.revision,
+          });
+          const health = computeHealth(transformStatsById, {
+            sloId: slo.id,
+            sloInstanceId: '*',
+            sloRevision: slo.revision,
+            enabled: slo.enabled,
+          });
+          return {
+            ...slo,
+            health,
+          };
+        })
+      );
 
       return findSloDefinitionsWithHealthResponseSchema.encode({
         page: result.page,
         perPage: result.perPage,
         total: result.total,
-        results: resultsWithHealth,
+        results: healthResults,
       });
     }
 

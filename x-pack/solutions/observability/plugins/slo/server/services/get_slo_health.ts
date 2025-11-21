@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
 import { type Dictionary, groupBy, keyBy } from 'lodash';
 import moment from 'moment';
-import {
-  SUMMARY_DESTINATION_INDEX_PATTERN,
-  getSLOSummaryTransformId,
-  getSLOTransformId,
-} from '../../common/constants';
-import type { HealthStatus, State } from '../domain/models/health';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import type { State } from '../domain/models/health';
 import type { SLORepository } from './slo_repository';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import { computeHealth, getTransformStatsForSLO } from './slo_transform_health';
 
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
@@ -49,7 +45,7 @@ export class GetSLOHealth {
 
     const results = await Promise.all(
       filteredList.map(async (item) => {
-        const transformStatsById = await this.getTransformStatsForSLO(item);
+        const transformStatsById = await getTransformStatsForSLO(this.scopedClusterClient, item);
         const health = computeHealth(transformStatsById, item);
         const state = computeState(summaryDocsById, item);
 
@@ -104,38 +100,6 @@ export class GetSLOHealth {
     );
     return summaryDocsById;
   }
-
-  private async getTransformStatsForSLO(item: {
-    sloId: string;
-    sloRevision: number;
-  }): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
-    const rollupTransformStats =
-      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-        {
-          transform_id: getSLOTransformId(item.sloId, item.sloRevision),
-          allow_no_match: true,
-          size: 1,
-        },
-        { ignore: [404] }
-      );
-
-    const summaryTransformStats =
-      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-        {
-          transform_id: getSLOSummaryTransformId(item.sloId, item.sloRevision),
-          allow_no_match: true,
-          size: 1,
-        },
-        { ignore: [404] }
-      );
-
-    const allTransforms = [
-      ...(rollupTransformStats.transforms || []),
-      ...(summaryTransformStats.transforms || []),
-    ];
-
-    return keyBy(allTransforms, (transform) => transform.id);
-  }
 }
 
 function buildSummaryKey(id: string, instanceId: string) {
@@ -174,56 +138,4 @@ function computeState(
     }
   }
   return state;
-}
-
-function getTransformHealth(
-  id: string,
-  sloEnabled: boolean | undefined,
-  transformStat?: TransformGetTransformStatsTransformStats
-): HealthStatus {
-  if (!transformStat) {
-    return {
-      id,
-      status: 'missing',
-      match: false,
-    };
-  }
-
-  const transformState = transformStat.state?.toLowerCase() as HealthStatus['transformState'];
-  const match =
-    (transformState === 'started' && sloEnabled) || (transformState === 'stopped' && !sloEnabled)
-      ? true
-      : false;
-  const status = transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
-  return {
-    id,
-    status,
-    transformState,
-    match,
-  };
-}
-
-function computeHealth(
-  transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number; enabled?: boolean }
-): {
-  overall: 'healthy' | 'unhealthy';
-  rollup: HealthStatus;
-  summary: HealthStatus;
-  enabled: boolean | undefined;
-} {
-  const rollupId = getSLOTransformId(item.sloId, item.sloRevision);
-  const summaryId = getSLOSummaryTransformId(item.sloId, item.sloRevision);
-
-  const rollup = getTransformHealth(rollupId, item.enabled, transformStatsById[rollupId]);
-  const summary = getTransformHealth(summaryId, item.enabled, transformStatsById[summaryId]);
-
-  const stateMatch = rollup.match && summary.match;
-
-  const overallTransformHealth: 'healthy' | 'unhealthy' =
-    rollup.status === 'healthy' && summary.status === 'healthy' ? 'healthy' : 'unhealthy';
-
-  const overall = stateMatch ? overallTransformHealth : 'unhealthy';
-
-  return { overall, rollup, summary, enabled: item.enabled };
 }

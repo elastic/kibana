@@ -11,7 +11,12 @@ import { allOrAnyString } from '../../schema';
 const repairParamsSchema = t.type({
   body: t.type({
     list: t.array(
-      t.type({ sloId: sloIdSchema, sloInstanceId: allOrAnyString, sloEnabled: t.boolean })
+      t.type({
+        sloId: sloIdSchema,
+        sloInstanceId: allOrAnyString,
+        sloRevision: t.number,
+        sloEnabled: t.boolean,
+      })
     ),
   }),
 });

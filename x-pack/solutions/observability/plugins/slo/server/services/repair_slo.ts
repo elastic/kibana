@@ -13,8 +13,8 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { RepairParams } from '@kbn/slo-schema';
 import pLimit from 'p-limit';
-import { GetSLOHealth } from './get_slo_health';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
+import { computeHealth, getTransformStatsForSLO } from './slo_transform_health';
 import { getSLOTransformId, getSLOSummaryTransformId } from '../../common/constants';
 import { DefaultTransformManager } from './transform_manager';
 import { DefaultSummaryTransformManager } from './summay_transform_manager';
@@ -41,25 +41,28 @@ export class RepairSLO {
 
   public async execute(params: RepairParams): Promise<unknown> {
     try {
-      const repository = new KibanaSavedObjectsSLORepository(this.internalSoClient, this.logger);
-      const sloHealth = new GetSLOHealth(this.scopedClusterClient, repository);
-      const healthResponse = await sloHealth.execute({
-        list: params.list || [],
-      });
-
-      const repairActions = this.identifyRepairActions(
-        healthResponse as Array<{
-          sloId: string;
-          sloRevision: number;
-          sloEnabled?: boolean;
-          health: {
-            overall: 'healthy' | 'unhealthy' | 'missing';
-            rollup: { status: string; transformState?: string; match: boolean | undefined };
-            summary: { status: string; transformState?: string; match: boolean | undefined };
-            sloEnabled?: boolean;
+      const healthData = await Promise.all(
+        params.list.map(async (item) => {
+          const transformStatsById = await getTransformStatsForSLO(this.scopedClusterClient, {
+            sloId: item.sloId,
+            sloRevision: item.sloRevision,
+          });
+          const health = computeHealth(transformStatsById, {
+            sloId: item.sloId,
+            sloInstanceId: item.sloInstanceId || '*',
+            sloRevision: item.sloRevision,
+            enabled: item.sloEnabled,
+          });
+          return {
+            sloId: item.sloId,
+            sloRevision: item.sloRevision,
+            sloEnabled: item.sloEnabled,
+            health,
           };
-        }>
+        })
       );
+
+      const repairActions = this.identifyRepairActions(healthData);
       this.logger.debug(`Identified ${repairActions.length} repair actions needed`);
 
       if (repairActions.length === 0) {
@@ -179,14 +182,14 @@ export class RepairSLO {
       }
 
       this.logger.info(
-        `Auto-reset task completed: ${successCount} successful repairs, ${errorCount} errors`
+        `Repair task completed: ${successCount} successful repairs, ${errorCount} errors`
       );
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
         this.logger.warn(`Request aborted due to timeout: ${err}`);
         return;
       }
-      this.logger.error(`Error in auto-reset task: ${err}`);
+      this.logger.error(`Error in Repair task: ${err}`);
     }
   }
 
