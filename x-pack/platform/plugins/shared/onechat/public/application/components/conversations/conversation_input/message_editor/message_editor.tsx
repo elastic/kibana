@@ -21,11 +21,7 @@ const heightStyles = css`
 `;
 const resetStyles = (id: string) => css`
   &#${CSS.escape(id)} {
-    border-style: none;
-    box-shadow: none;
     outline-style: none;
-    background-image: none;
-    padding: 0;
   }
 `;
 const disabledStyles = css`
