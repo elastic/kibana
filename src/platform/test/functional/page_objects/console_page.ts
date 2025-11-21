@@ -516,14 +516,14 @@ export class ConsolePageObject extends FtrService {
 
     // Wait for the modal to open
     await this.retry.waitFor('language selector modal to open', async () => {
-      return await this.testSubjects.exists(`changeDefaultLanguageTo-${language}`);
+      return await this.testSubjects.exists(`languageOption-${language}`);
     });
 
-    // Click "Set as default" link for the selected language
-    await this.testSubjects.click(`changeDefaultLanguageTo-${language}`);
+    // Select the language option
+    await this.testSubjects.click(`languageOption-${language}`);
 
-    // Close the modal
-    await this.testSubjects.click('closeCopyAsModal');
+    // Click "Set as default" button
+    await this.testSubjects.click('setAsDefaultLanguage');
   }
 
   public async clickCopyToLanguageButton() {

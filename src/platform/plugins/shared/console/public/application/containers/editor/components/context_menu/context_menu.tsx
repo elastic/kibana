@@ -244,7 +244,7 @@ export const ContextMenu = ({
             data-test-subj="consoleMenuCopyAsButton"
             id="copyAs"
             disabled={!window.navigator?.clipboard}
-            onClick={onCopyAsSubmit}
+            onClick={() => onCopyAsSubmit()}
             icon="copyClipboard"
             css={styles.button}
           >
