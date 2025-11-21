@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSchemaForAuthType() correctly returns schema for auth type definition when defaults are provided 1`] = `
+Object {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": Object {
+    "authType": Object {
+      "const": "api_key_header",
+      "type": "string",
+    },
+    "custom-api-key-field": Object {
+      "description": "API Key",
+      "sensitive": true,
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "custom-api-key-field",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`getSchemaForAuthType() correctly returns schema for auth type definition when only type ID is provided 1`] = `
+Object {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": Object {
+    "authType": Object {
+      "const": "basic",
+      "type": "string",
+    },
+    "password": Object {
+      "description": "Password",
+      "sensitive": true,
+      "type": "string",
+    },
+    "username": Object {
+      "description": "Username",
+      "sensitive": true,
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "username",
+    "password",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`getSchemaForAuthType() ignores defaults for key that is not in auth type schema 1`] = `
+Object {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": Object {
+    "Api-Key": Object {
+      "description": "API Key",
+      "sensitive": true,
+      "type": "string",
+    },
+    "authType": Object {
+      "const": "api_key_header",
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "Api-Key",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
