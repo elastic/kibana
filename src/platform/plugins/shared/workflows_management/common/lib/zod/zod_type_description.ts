@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getZodSchemaType } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
+import { getLiteralDescription, getZodTypeName } from './zod_utils';
 
 export interface TypeDescriptionOptions {
   /** Maximum depth for nested objects */
@@ -52,13 +52,8 @@ export function getDetailedTypeDescription(
       indentSpacesNumber,
     });
   } else {
-    return getZodSchemaType(schema);
+    return getZodTypeName(schema);
   }
-}
-
-function handleZodLiteral(schema: z.ZodLiteral): string {
-  const literalValue = schema.value;
-  return typeof literalValue === 'string' ? `"${literalValue}"` : String(literalValue);
 }
 
 /**
@@ -135,7 +130,7 @@ function generateDetailedDescription(
     singleLine = false,
   } = opts;
   if (currentDepth >= maxDepth) {
-    return getZodSchemaType(schema);
+    return getZodTypeName(schema);
   }
 
   const def = schema.def;
@@ -149,7 +144,7 @@ function generateDetailedDescription(
 
   switch (def.type) {
     case 'literal': {
-      return handleZodLiteral(schema as z.ZodLiteral);
+      return getLiteralDescription(schema as z.ZodLiteral);
     }
     case 'object':
       return handleZodObject(
@@ -224,7 +219,7 @@ function generateDetailedDescription(
     }
 
     default:
-      return `${getZodSchemaType(schema)}${descriptionSuffix}`;
+      return `${getZodTypeName(schema)}${descriptionSuffix}`;
   }
 }
 

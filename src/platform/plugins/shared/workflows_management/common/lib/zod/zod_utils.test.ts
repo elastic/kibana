@@ -141,20 +141,20 @@ describe('getZodTypeName', () => {
     expect(getZodTypeName(z.string())).toBe('string');
     expect(getZodTypeName(z.number())).toBe('number');
     expect(getZodTypeName(z.boolean())).toBe('boolean');
-    expect(getZodTypeName(z.array(z.string()))).toBe('array');
+    expect(getZodTypeName(z.array(z.string()))).toBe('string[]');
     expect(getZodTypeName(z.object({}))).toBe('object');
     expect(getZodTypeName(z.date())).toBe('date');
     expect(getZodTypeName(z.any())).toBe('any');
     expect(getZodTypeName(z.null())).toBe('null');
     expect(getZodTypeName(z.unknown())).toBe('unknown');
-    expect(getZodTypeName(z.literal('test'))).toBe('literal');
+    expect(getZodTypeName(z.literal('test'))).toBe('"test"');
   });
 
   it('should unwrap ZodDefault wrappers', () => {
     expect(getZodTypeName(z.string().default('hello'))).toBe('string');
     expect(getZodTypeName(z.number().default(42))).toBe('number');
     expect(getZodTypeName(z.boolean().default(true))).toBe('boolean');
-    expect(getZodTypeName(z.array(z.string()).default(['a', 'b']))).toBe('array');
+    expect(getZodTypeName(z.array(z.string()).default(['a', 'b']))).toBe('string[]');
     expect(getZodTypeName(z.object({}).default({}))).toBe('object');
   });
 
@@ -162,14 +162,14 @@ describe('getZodTypeName', () => {
     expect(getZodTypeName(z.string().optional())).toBe('string');
     expect(getZodTypeName(z.number().optional())).toBe('number');
     expect(getZodTypeName(z.boolean().optional())).toBe('boolean');
-    expect(getZodTypeName(z.array(z.string()).optional())).toBe('array');
+    expect(getZodTypeName(z.array(z.string()).optional())).toBe('string[]');
     expect(getZodTypeName(z.object({}).optional())).toBe('object');
   });
 
   it('should unwrap both ZodDefault and ZodOptional wrappers', () => {
     expect(getZodTypeName(z.string().default('hello').optional())).toBe('string');
     expect(getZodTypeName(z.number().default(42).optional())).toBe('number');
-    expect(getZodTypeName(z.array(z.string()).default(['a']).optional())).toBe('array');
+    expect(getZodTypeName(z.array(z.string()).default(['a']).optional())).toBe('string[]');
   });
 
   it('should handle nested wrappers correctly', () => {

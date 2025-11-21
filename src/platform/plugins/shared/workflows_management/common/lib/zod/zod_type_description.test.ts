@@ -221,7 +221,7 @@ describe('zod_type_description', () => {
 
         const result = getDetailedTypeDescription(schema);
         const expected = `{
-  item: discriminatedUnion<type>({
+  item: ({
   type: "text";
   content: string
 } | {
@@ -308,7 +308,7 @@ describe('zod_type_description', () => {
             z.object({
               id: z.string(),
               type: z.enum(['action', 'condition']),
-              config: z.record(z.any()),
+              config: z.record(z.string(), z.any()),
             })
           ),
         }),
@@ -335,13 +335,10 @@ describe('zod_type_description', () => {
     });
 
     it('should return compact descriptions for complex types', () => {
-      const complexSchema = z.union([
-        z.object({ type: z.literal('a') }),
-        z.object({ type: z.literal('b') }),
-      ]);
+      const complexSchema = z.union([z.object({ type: z.literal('a') }), z.array(z.string())]);
 
       const result = getCompactTypeDescription(complexSchema);
-      expect(result).toBe('(object | object)');
+      expect(result).toBe('(object | string[])');
     });
   });
 
@@ -435,8 +432,8 @@ describe('zod_type_description', () => {
 
     it('should handle objects with record types', () => {
       const schema = z.object({
-        metadata: z.record(z.string()),
-        config: z.record(z.any()),
+        metadata: z.record(z.string(), z.any()),
+        config: z.record(z.string(), z.any()),
       });
 
       const result = getDetailedTypeDescription(schema);
@@ -515,16 +512,16 @@ describe('zod_type_description', () => {
   });
 
   describe('Union array type detection', () => {
-    it('should detect union of arrays as array type', () => {
+    it('should unwrap union of arrays as array type', () => {
       const schema = z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]);
       const result = getZodTypeName(schema);
-      expect(result).toBe('array');
+      expect(result).toBe('(string[] | number[] | boolean[])');
     });
 
     it('should detect mixed union as union type', () => {
       const schema = z.union([z.string(), z.number(), z.boolean()]);
       const result = getZodTypeName(schema);
-      expect(result).toBe('union');
+      expect(result).toBe('(string | number | boolean)');
     });
   });
 });

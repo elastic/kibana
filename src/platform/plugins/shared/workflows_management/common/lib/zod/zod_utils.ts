@@ -9,6 +9,7 @@
 
 import type { ZodType } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
+import type { $ZodCheckLengthEqualsDef, $ZodCheckMaxLengthDef } from '@kbn/zod/v4/core';
 
 export function parsePath(path: string) {
   const segments = path
@@ -85,14 +86,29 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
 
-        // TODO: find out if zodv4 has a way to get the max length of an array
+        // Check for array length constraints in Zod v4
+        // Array constraints are stored in the checks array
+        let maxLength: number | undefined;
+
+        if (current.def.checks) {
+          for (const check of current.def.checks) {
+            if (check._zod?.def) {
+              const checkDef = check._zod.def;
+              if (checkDef.check === 'max_length') {
+                maxLength = (checkDef as $ZodCheckMaxLengthDef).maximum;
+              } else if (checkDef.check === 'length_equals') {
+                maxLength = (checkDef as $ZodCheckLengthEqualsDef).length;
+              }
+            }
+          }
+        }
+
         // Only enforce bounds checking for arrays with explicit length constraints
-        // const maxLength = current._def.maxLength?.value ?? current._def.exactLength?.value;
-        // if (maxLength !== undefined && arrayIndex >= maxLength) {
-        //   return partial
-        //     ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
-        //     : { schema: null, scopedToPath: null };
-        // }
+        if (maxLength !== undefined && arrayIndex >= maxLength) {
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
+        }
 
         // For unconstrained arrays, we allow any non-negative index for schema introspection
         // This is because we're validating schema paths, not runtime data
@@ -183,6 +199,35 @@ export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
   expect(z.toJSONSchema(a)).toEqual(z.toJSONSchema(b));
 }
 
+export function getArrayDescription(arraySchema: z.ZodArray, depth: number = 0): string {
+  const elementType = getZodTypeName(arraySchema.element as z.ZodType);
+  if (elementType === 'array') {
+    if (depth > 10) {
+      return 'array[][]';
+    }
+    return getArrayDescription(arraySchema.element as z.ZodArray, depth + 1);
+  }
+  return `${elementType}[]`;
+}
+
+export function getUnionDescription(unionSchema: z.ZodUnion): string {
+  // Check if all union members are arrays - if so, treat as array type
+  const optionsTypes = unionSchema.options.map((option) => getZodTypeName(option as z.ZodType));
+  if (new Set(optionsTypes).size === 1) {
+    return optionsTypes[0];
+  }
+  return `(${optionsTypes.join(' | ')})`;
+}
+
+export function getEnumDescription(schema: z.ZodEnum): string {
+  return schema.options.map((o) => `"${o}"`).join(' | ');
+}
+
+export function getLiteralDescription(schema: z.ZodLiteral): string {
+  const literalValue = schema.value;
+  return typeof literalValue === 'string' ? `"${literalValue}"` : String(literalValue);
+}
+
 /**
  * Get the string representation of the zod schema type
  * @param schema - The zod schema to get the name of.
@@ -199,17 +244,14 @@ function getZodTypeNameRecursively(schema: z.ZodType, depth: number = 0) {
   }
   const def = schema.def;
   switch (def.type) {
-    case 'union': {
-      // Check if all union members are arrays - if so, treat as array type
-      const unionSchema = schema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
-      const allMembersAreArrays = unionSchema.options.every(
-        (option: z.ZodType) => option instanceof z.ZodArray
-      );
-      if (allMembersAreArrays) {
-        return 'array';
-      }
-      return 'union';
-    }
+    case 'array':
+      return getArrayDescription(schema as z.ZodArray, depth + 1);
+    case 'union':
+      return getUnionDescription(schema as z.ZodUnion);
+    case 'enum':
+      return getEnumDescription(schema as z.ZodEnum);
+    case 'literal':
+      return getLiteralDescription(schema as z.ZodLiteral);
     default:
       return def.type;
   }
