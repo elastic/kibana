@@ -40,9 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Dataset quality table', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/243760
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
@@ -247,8 +244,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click(failureStoreModalSaveButton);
         await testSubjects.missingOrFail(editFailureStoreModal);
 
-        const updatedLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
-        expect(updatedLinks.length).to.be.lessThan(originalLinks.length);
+        await retry.try(async () => {
+          const updatedLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
+          expect(updatedLinks.length).to.be.lessThan(originalLinks.length);
+        });
       });
     });
   });
