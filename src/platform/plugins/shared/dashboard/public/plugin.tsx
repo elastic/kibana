@@ -292,9 +292,9 @@ export class DashboardPlugin
       return searchAction;
     });
 
-    plugins.uiActions.registerActionAsync('getDashboardByIdAction', async () => {
-      const { getDashboardByIdAction } = await import('./dashboard_client');
-      return getDashboardByIdAction;
+    plugins.uiActions.registerActionAsync('getDashboardsByIdsAction', async () => {
+      const { getDashboardsByIdsAction } = await import('./dashboard_client');
+      return getDashboardsByIdsAction;
     });
 
     return {

@@ -54,13 +54,13 @@ const mockSearchAction = {
   execute: mockSearchExecute,
 };
 
-const mockGetDashboardByIdAction = {
+const mockGetDashboardsByIdsAction = {
   execute: mockGetByIdExecute,
 };
 
 const mockGetAction = jest.fn((actionId: string) => {
-  if (actionId === 'getDashboardByIdAction') {
-    return Promise.resolve(mockGetDashboardByIdAction);
+  if (actionId === 'getDashboardsByIdsAction') {
+    return Promise.resolve(mockGetDashboardsByIdsAction);
   }
   return Promise.resolve(mockSearchAction);
 });
@@ -71,8 +71,8 @@ describe('DashboardsSelector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetAction.mockImplementation((actionId: string) => {
-      if (actionId === 'getDashboardByIdAction') {
-        return Promise.resolve(mockGetDashboardByIdAction);
+      if (actionId === 'getDashboardsByIdsAction') {
+        return Promise.resolve(mockGetDashboardsByIdsAction);
       }
       return Promise.resolve(mockSearchAction);
     });
@@ -132,7 +132,7 @@ describe('DashboardsSelector', () => {
       expect(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE)).toBeInTheDocument();
     });
 
-    expect(mockGetAction).toHaveBeenCalledWith('getDashboardByIdAction');
+    expect(mockGetAction).toHaveBeenCalledWith('getDashboardsByIdsAction');
   });
 
   it('debounces and triggers dashboard search with user input in the ComboBox', async () => {

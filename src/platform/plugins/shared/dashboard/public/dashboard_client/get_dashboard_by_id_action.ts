@@ -15,8 +15,8 @@ interface Context {
   ids: string[];
 }
 
-export const getDashboardByIdAction: ActionDefinition<Context> = {
-  id: 'getDashboardByIdAction',
+export const getDashboardsByIdsAction: ActionDefinition<Context> = {
+  id: 'getDashboardsByIdsAction',
   execute: async (context: Context) => {
     const dashboards = await Promise.all(
       context.ids.map(async (id) => {

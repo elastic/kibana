@@ -48,9 +48,9 @@ async function getDashboardsById(uiActions: UiActionsStart, ids: string[]): Prom
   if (!ids.length) {
     return [];
   }
-  const getDashboardByIdAction = await uiActions.getAction('getDashboardByIdAction');
+  const getDashboardsByIdsAction = await uiActions.getAction('getDashboardsByIdsAction');
   return new Promise(function (resolve) {
-    getDashboardByIdAction.execute({
+    getDashboardsByIdsAction.execute({
       onResults(dashboards: Dashboard[]) {
         resolve(dashboards);
       },
