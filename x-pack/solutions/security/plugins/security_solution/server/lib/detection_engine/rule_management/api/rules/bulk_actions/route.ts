@@ -99,6 +99,36 @@ const validateBulkAction = (
   return undefined;
 };
 
+const getGapParams = ({
+  gapFillStatuses,
+  gapsRangeStart,
+  gapsRangeEnd,
+}: {
+  gapFillStatuses: GapFillStatus[] | undefined;
+  gapsRangeStart: string | undefined;
+  gapsRangeEnd: string | undefined;
+}): {
+  gapRange: { start: string; end: string } | undefined;
+  gapFillStatuses: GapFillStatus[] | undefined;
+} => {
+  const hasGapStatuses = Array.isArray(gapFillStatuses) && gapFillStatuses.length > 0;
+
+  if (gapsRangeStart && gapsRangeEnd && hasGapStatuses) {
+    return {
+      gapRange: {
+        start: gapsRangeStart,
+        end: gapsRangeEnd,
+      },
+      gapFillStatuses,
+    };
+  }
+
+  return {
+    gapRange: undefined,
+    gapFillStatuses: undefined,
+  };
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
@@ -130,7 +160,6 @@ export const performBulkActionRoute = (
           },
         },
       },
-      // eslint-disable-next-line complexity
       async (
         context,
         request,
@@ -189,20 +218,11 @@ export const performBulkActionRoute = (
           });
 
           const query = body.query !== '' ? body.query : undefined;
-          let gapRange;
-          let gapFillStatuses: GapFillStatus[] | undefined;
-          const hasGapStatuses =
-            Array.isArray(body.gap_fill_statuses) && body.gap_fill_statuses.length > 0;
-
-          // If gap range params are present, set up the gap range parameter
-          if (body.gaps_range_start && body.gaps_range_end && hasGapStatuses) {
-            gapRange = {
-              start: body.gaps_range_start,
-              end: body.gaps_range_end,
-            };
-            gapFillStatuses = body.gap_fill_statuses;
-          }
-
+          const gapParams = getGapParams({
+            gapFillStatuses: body.gap_fill_statuses,
+            gapsRangeStart: body.gaps_range_start,
+            gapsRangeEnd: body.gaps_range_end,
+          });
           const fetchRulesOutcome = await fetchRulesByQueryOrIds({
             rulesClient,
             query,
@@ -211,8 +231,8 @@ export const performBulkActionRoute = (
               body.action === BulkActionTypeEnum.edit
                 ? MAX_RULES_TO_BULK_EDIT
                 : MAX_RULES_TO_PROCESS_TOTAL,
-            gapRange,
-            gapFillStatuses,
+            gapRange: gapParams.gapRange,
+            gapFillStatuses: gapParams.gapFillStatuses,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
