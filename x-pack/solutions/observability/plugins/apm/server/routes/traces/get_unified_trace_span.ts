@@ -38,7 +38,7 @@ export async function getUnifiedTraceSpan({
     query: {
       bool: {
         filter: [
-          ...(spanId ? termQuery(SPAN_ID, spanId) : []),
+          ...termQuery(SPAN_ID, spanId),
           ...termQuery(TRACE_ID, traceId),
           ...rangeQuery(start, end),
         ],
