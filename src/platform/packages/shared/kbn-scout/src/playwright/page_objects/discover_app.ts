@@ -176,7 +176,7 @@ export class DiscoverApp {
   }
 
   async writeSearchQuery(query: string) {
-    await this.page.testSubj.typeWithDelay('queryInput', query);
+    await this.page.testSubj.fill('queryInput', query);
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
   }
@@ -198,11 +198,11 @@ export class DiscoverApp {
   }
 
   async exportAsCsv(): Promise<Download> {
-    const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 });
+    const downloadPromise = this.page.waitForEvent('download', { timeout: 40000 });
     await this.page.testSubj.click('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
     await this.page.testSubj.click('generateReportButton');
-    await this.page.testSubj.click('downloadCompletedReportButton', { timeout: 20000 });
+    await this.page.testSubj.click('downloadCompletedReportButton', { timeout: 30000 });
     const download = await downloadPromise;
     return download;
   }

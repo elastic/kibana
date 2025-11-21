@@ -199,7 +199,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     expect(page.url()).toContain('/app/lens');
   });
 
-  test('drag and drop field to grid', async ({ page, pageObjects }) => {
+  test('drag and drop fields to grid', async ({ page, pageObjects }) => {
     // Verify chart is initially visible
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
     const fields = ['@message', '@tags'];
@@ -208,8 +208,10 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     // Verify the field was added to the grid
     const columnTextArray = await pageObjects.discover.getTheColumnFromGrid();
     expect(columnTextArray).toStrictEqual(fields);
+    // Move @message field to the right
     await pageObjects.discover.moveColumn('@message', 'right');
     const updatedColumnTextArray = await pageObjects.discover.getTheColumnFromGrid();
+    // Verify the columns were reordered
     expect(updatedColumnTextArray).toStrictEqual(fields.reverse());
   });
 
