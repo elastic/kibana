@@ -3270,6 +3270,9 @@
     "properties": {
       "createdBy": {
         "type": "keyword"
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
