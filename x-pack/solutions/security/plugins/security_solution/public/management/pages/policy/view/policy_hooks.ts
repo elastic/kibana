@@ -8,12 +8,7 @@
 import { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
 import type { State } from '../../../../common/store';
 import {
@@ -53,7 +48,7 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
   const { state } = useLocation();
   const getPath = useCallback(
     (args: Partial<PolicyDetailsArtifactsPageLocation>) => {
-      if (listId === ENDPOINT_TRUSTED_APPS_LIST_ID) {
+      if (listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id) {
         return getPolicyDetailsArtifactsListPath(policyId, {
           ...location,
           ...args,
@@ -63,12 +58,12 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
           ...location,
           ...args,
         });
-      } else if (listId === ENDPOINT_EVENT_FILTERS_LIST_ID) {
+      } else if (listId === ENDPOINT_ARTIFACT_LISTS.eventFilters.id) {
         return getPolicyEventFiltersPath(policyId, {
           ...location,
           ...args,
         });
-      } else if (listId === ENDPOINT_BLOCKLISTS_LIST_ID) {
+      } else if (listId === ENDPOINT_ARTIFACT_LISTS.blocklists.id) {
         return getPolicyBlocklistsPath(policyId, {
           ...location,
           ...args,
