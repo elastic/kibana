@@ -678,7 +678,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           const gap: Gap = buildGap(
             'rule-1',
             '2024-01-01T00:00:00.000Z',
-
+            '2024-01-01T01:00:00.000Z',
             gapStatus.UNFILLED
           );
 
