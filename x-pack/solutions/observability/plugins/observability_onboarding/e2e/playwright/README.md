@@ -9,7 +9,7 @@ Playwright tests are only responsible for UI checks and do not automate onboardi
 1. Run ES and Kibana
 2. Create a `.env` file in the `./x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/` directory with the following content (adjust the values according to your local setup):
 ```bash
-KIBANA_BASE_URL = "http://localhost:5601/ftw"
+KIBANA_BASE_URL = "http://localhost:5601"
 ELASTICSEARCH_HOST = "http://localhost:9200"
 KIBANA_USERNAME = "elastic"
 KIBANA_PASSWORD = "changeme"
