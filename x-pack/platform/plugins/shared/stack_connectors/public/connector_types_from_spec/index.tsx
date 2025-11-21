@@ -51,7 +51,14 @@ const createConnectorTypeFromSpec = (spec: ConnectorSpec): ActionTypeModel => ({
   selectMessage: spec.metadata.description,
   iconClass: getIcon(spec),
   // TODO: Implement the rest of the properties
-  actionConnectorFields: () => <FormGenerator schema={schema} />,
+  actionConnectorFields: (props) => {
+    return (
+      <FormGenerator
+        schema={schema}
+        formConfig={{ readOnly: props.readOnly, isEdit: props.isEdit }}
+      />
+    );
+  },
   actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
   validateParams: async () => ({ errors: {} }),
 });

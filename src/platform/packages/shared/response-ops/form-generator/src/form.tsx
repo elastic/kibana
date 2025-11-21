@@ -19,6 +19,8 @@ import { unwrap } from './schema_unwrap';
 
 export interface FormConfig {
   readOnly?: boolean;
+  // Indicated wheter we are editing an existing record or creating a new one
+  isEdit?: boolean;
 }
 
 export interface FieldDefinition {
