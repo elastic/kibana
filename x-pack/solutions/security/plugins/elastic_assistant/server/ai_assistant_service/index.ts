@@ -31,10 +31,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
-import {
-  hasAIAssistantLicense,
-  type AnonymizationFieldResponse,
-} from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { ESSearchRequest } from '@kbn/es-types';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
@@ -70,6 +67,7 @@ import {
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
+import { hasAIAssistantLicense } from '../routes/helpers';
 import type { CreateAttackDiscoveryScheduleDataClientParams } from '../lib/attack_discovery/schedules/data_client';
 import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
 import {

@@ -170,9 +170,3 @@ export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
 
 export const ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG =
   'securitySolution.assistantInterruptsEnabled' as const;
-
-/**
- * Upgrade license message
- */
-export const UPGRADE_LICENSE_MESSAGE =
-  'Your license does not support AI Assistant. Please upgrade your license.';

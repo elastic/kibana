@@ -29,9 +29,8 @@ import type {
 import {
   replaceAnonymizedValuesWithOriginalValues,
   DEFEND_INSIGHTS_ID,
-  hasAIAssistantLicense,
-  UPGRADE_LICENSE_MESSAGE,
 } from '@kbn/elastic-assistant-common';
+import type { ILicense } from '@kbn/licensing-types';
 import { i18n } from '@kbn/i18n';
 import type { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -45,6 +44,7 @@ import type { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_cl
 import type { FindResponse } from '../ai_assistant_data_clients/find';
 import type { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import type { AIAssistantDataClient } from '../ai_assistant_data_clients';
+import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 import { SECURITY_LABS_RESOURCE, SECURITY_LABS_LOADED_QUERY } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import type {
@@ -136,6 +136,12 @@ export const getMessageFromRawResponse = ({
     };
   }
 };
+
+export const hasAIAssistantLicense = (license: ILicense): boolean =>
+  license.hasAtLeast(MINIMUM_AI_ASSISTANT_LICENSE);
+
+export const UPGRADE_LICENSE_MESSAGE =
+  'Your license does not support AI Assistant. Please upgrade your license.';
 
 export interface GetSystemPromptFromUserConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
