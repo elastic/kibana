@@ -2631,10 +2631,10 @@
     semver "^7.6.3"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.5.0":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.5.0.tgz#99ca807edeb157baf38fef9e39fd031f19b702a5"
-  integrity sha512-dW6U7N4HAdSst+Iqhaw1In8zxT8rE4AMnIJIN6C/vNM8XDKmFyzkw/AddpvW5oZHdV0D7+3w/VI9petN4RnWBQ==
+"@elastic/eslint-plugin-eui@2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.6.0.tgz#e1d72f3969049dd07ca96736119c08e7ac24f748"
+  integrity sha512-XWCgM8TkpMDcX8OX8v0ocm0zI2cuxbRrGVtMcSFqLN8VWP/7JjVuw8Dg1Jo3cvMqXK/2YbfcREgzuCqvPD28+w==
 
 "@elastic/eui-theme-borealis@5.0.0":
   version "5.0.0"
@@ -2650,10 +2650,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@109.0.0":
-  version "109.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-109.0.0.tgz#6ae5abe802dcd0649c4230b7204cad60f1fdbdcf"
-  integrity sha512-mPclhFKSzGyJC21rNvmCkY3maKbPVNgBEQa1NdI2Faz9lzna1bMrC0VSEjVKNSGrPeq54ZubVx3krIsF8HxoIg==
+"@elastic/eui@109.1.0":
+  version "109.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-109.1.0.tgz#d4d6896d574277e6aa96e2c566b0eb1627271159"
+  integrity sha512-V34RKiM8v0b8ken4HK+bl0lEjbrw7tGLv+5srBlqrH2OmfP2bIh5qcB7pxnRD6cuTgXoolJYE+JhTIiQC679+w==
   dependencies:
     "@elastic/eui-theme-common" "7.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -6343,6 +6343,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dissect-heuristics@link:x-pack/platform/packages/shared/kbn-dissect-heuristics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/doc-links@link:src/platform/packages/shared/kbn-doc-links":
   version "0.0.0"
   uid ""
@@ -7500,6 +7504,10 @@
   uid ""
 
 "@kbn/monitoring-plugin@link:x-pack/platform/plugins/private/monitoring":
+  version "0.0.0"
+  uid ""
+
+"@kbn/moon@link:packages/kbn-moon":
   version "0.0.0"
   uid ""
 
@@ -9012,6 +9020,10 @@
   uid ""
 
 "@kbn/tooling-log@link:src/platform/packages/shared/kbn-tooling-log":
+  version "0.0.0"
+  uid ""
+
+"@kbn/tour-queue@link:src/platform/packages/shared/kbn-tour-queue":
   version "0.0.0"
   uid ""
 
@@ -18137,10 +18149,10 @@ create-require@^1.1.0, create-require@^1.1.1:
   resolved "https://registry.yarnpkg.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
   integrity sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==
 
-cronstrue@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-3.3.0.tgz#0567a70e42ccf18c8877d52986775927b292cf1c"
-  integrity sha512-iwJytzJph1hosXC09zY8F5ACDJKerr0h3/2mOxg9+5uuFObYlgK0m35uUPk4GCvhHc2abK7NfnR9oMqY0qZFAg==
+cronstrue@^3.9.0:
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-3.9.0.tgz#a3c3ae3e218235a123c80de8db95a93e45a9d8ba"
+  integrity sha512-T3S35zmD0Ai2B4ko6+mEM+k9C6tipe2nB9RLiGT6QL2Wn0Vsn2cCZAC8Oeuf4CaE00GZWVdpYitbpWCNlIWqdA==
 
 cross-fetch@^3.1.5:
   version "3.2.0"
@@ -32305,10 +32317,10 @@ tar-stream@^3.0.0, tar-stream@^3.1.5:
     fast-fifo "^1.2.0"
     streamx "^2.15.0"
 
-tar@^7.5.1:
-  version "7.5.1"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-7.5.1.tgz#750a8bd63b7c44c1848e7bf982260a083cf747c9"
-  integrity sha512-nlGpxf+hv0v7GkWBK2V9spgactGOp0qvfWRxUMjqHyzrt3SgwE48DIv/FhqPHJYLHpgW1opq3nERbz5Anq7n1g==
+tar@^7.5.2:
+  version "7.5.2"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-7.5.2.tgz#115c061495ec51ff3c6745ff8f6d0871c5b1dedc"
+  integrity sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==
   dependencies:
     "@isaacs/fs-minipass" "^4.0.0"
     chownr "^3.0.0"
