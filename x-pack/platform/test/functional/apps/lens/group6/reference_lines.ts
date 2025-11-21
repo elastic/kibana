@@ -67,6 +67,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add a new group to the reference layer when a right axis is enabled', async () => {
+      // switch to data layer tab
+      await lens.ensureLayerTabIsActive(0);
+
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
@@ -77,6 +80,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.changeAxisSide('right');
 
       await lens.closeDimensionEditor();
+
+      // switch back to reference line layer tab
+      await lens.ensureLayerTabIsActive(1);
 
       await testSubjects.existOrFail('lnsXY_yReferenceLineRightPanel > lns-empty-dimension');
     });
