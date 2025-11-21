@@ -83,7 +83,7 @@ import {
   USING_ADVANCED_MODE_DESCRIPTION,
   TRUSTED_APP_PROCESS_DESCENDANTS,
   TRUSTED_APPLICATIONS,
-  TRUSTED_APP_PROCESS_DESCENDANTS_INFO,
+  TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS,
 } from '../translations';
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
@@ -112,6 +112,7 @@ import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';
 import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
 import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import { ProcessDescendantsIconTip } from '../../../../components/process_descendant_icontip';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -717,15 +718,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           label: (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiText size="s">{TRUSTED_APP_PROCESS_DESCENDANTS}</EuiText>
-              <EuiIconTip
-                content={
-                  <EuiText size="s">
-                    <p>{TRUSTED_APP_PROCESS_DESCENDANTS_INFO}</p>
-                  </EuiText>
-                }
+              <ProcessDescendantsIconTip
+                tooltipText={TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS.tooltipText}
+                versionInfo={TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS.versionInfo}
                 data-test-subj="trustedAppsProcessDescendantsTooltip"
-                iconProps={{ 'data-test-subj': 'trustedAppsProcessDescendantsTooltipIcon' }}
-                type="info"
               />
             </EuiFlexGroup>
           ),

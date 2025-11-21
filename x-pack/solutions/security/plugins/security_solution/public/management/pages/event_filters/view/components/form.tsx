@@ -80,6 +80,7 @@ import { ExceptionItemComments } from '../../../../../detection_engine/rule_exce
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from '../translations';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -427,6 +428,8 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
               </EuiText>
               <ProcessDescendantsIconTip
                 data-test-subj={getTestId('filterProcessDescendantsTooltip')}
+                tooltipText={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS.tooltipText}
+                versionInfo={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS.versionInfo}
               />
             </EuiFlexGroup>
           ),

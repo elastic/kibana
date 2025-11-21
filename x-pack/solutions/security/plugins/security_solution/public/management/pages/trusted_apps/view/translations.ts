@@ -85,13 +85,27 @@ export const TRUSTED_APPLICATIONS = i18n.translate(
   }
 );
 
-export const TRUSTED_APP_PROCESS_DESCENDANTS_INFO = i18n.translate(
-  'xpack.securitySolution.trustedApps.processDescendants.info',
-  {
-    defaultMessage:
-      'When enabled, all child processes of a trusted parent process also become Trusted Applications. Supported by Elastic Agent v9.2+.',
-  }
-);
+export const TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS = {
+  title: i18n.translate(
+    'xpack.securitySolution.trustedApps.cardDecorator.title',
+    {
+      defaultMessage: 'Trusting descendants of process',
+    }
+  ),
+  tooltipText: i18n.translate(
+    'xpack.securitySolution.trustedApps.cardDecorator.tooltipText',
+    {
+      defaultMessage:
+        'When enabled, all child processes of a trusted parent process also become Trusted Applications.',
+    }
+  ),
+  versionInfo: i18n.translate(
+    'xpack.securitySolution.trustedApps.cardDecorator.versionInfo',
+    {
+      defaultMessage: 'Supported by Elastic Agent v9.2+.',
+    }
+  ),
+};
 
 export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
   [ConditionEntryField.HASH]: i18n.translate(

@@ -19,7 +19,10 @@ import { TrustedAppsApiClient } from '../service';
 import { TrustedAppsForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { TrustedAppsArtifactsDocsLink } from './components/artifacts_docs_link';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ProcessDescendantsIndicator } from '../../../components/artifact_entry_card/components/card_decorators/process_descendants_indicator';
+import { ArtifactEntryCardDecoratorProps } from '../../../components/artifact_entry_card/artifact_entry_card';
+import { TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS } from './translations';
 
 const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedApps.pageTitle', {
@@ -115,10 +118,19 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
 };
 
+const TrustedAppCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item }) => {
+
+  return <ProcessDescendantsIndicator item={item} labels={TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS} />;
+});
+TrustedAppCardDecorator.displayName = 'TrustedAppCardDecorator';
+
 export const TrustedAppsList = memo(() => {
   const { canWriteTrustedApplications } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
   const trustedAppsApiClient = TrustedAppsApiClient.getInstance(http);
+  const isProcessDescendantsFeatureForTrustedAppsEnabled = useIsExperimentalFeatureEnabled(
+    'filterProcessDescendantsForTrustedAppsEnabled'
+  );
 
   return (
     <ArtifactListPage
@@ -132,7 +144,7 @@ export const TrustedAppsList = memo(() => {
       allowCardDeleteAction={canWriteTrustedApplications}
       allowCardEditAction={canWriteTrustedApplications}
       allowCardCreateAction={canWriteTrustedApplications}
-      CardDecorator={ProcessDescendantsIndicator}
+      CardDecorator={isProcessDescendantsFeatureForTrustedAppsEnabled ? TrustedAppCardDecorator : undefined}
     />
   );
 });

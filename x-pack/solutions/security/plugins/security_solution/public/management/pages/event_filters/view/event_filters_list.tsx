@@ -19,6 +19,8 @@ import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { ProcessDescendantsIndicator } from '../../../components/artifact_entry_card/components/card_decorators/process_descendants_indicator';
+import { ArtifactEntryCardDecoratorProps } from '../../../components/artifact_entry_card/artifact_entry_card';
+import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from './translations';
 
 export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
   defaultMessage:
@@ -140,6 +142,13 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
 };
 
+const EventFiltersCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item }) => {
+
+  return <ProcessDescendantsIndicator item={item} labels={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS} />;
+});
+EventFiltersCardDecorator.displayName = 'EventFiltersCardDecorator';
+
+
 export const EventFiltersList = memo(() => {
   const { canWriteEventFilters } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
@@ -156,7 +165,7 @@ export const EventFiltersList = memo(() => {
       allowCardCreateAction={canWriteEventFilters}
       allowCardEditAction={canWriteEventFilters}
       allowCardDeleteAction={canWriteEventFilters}
-      CardDecorator={ProcessDescendantsIndicator}
+      CardDecorator={EventFiltersCardDecorator}
     />
   );
 });
