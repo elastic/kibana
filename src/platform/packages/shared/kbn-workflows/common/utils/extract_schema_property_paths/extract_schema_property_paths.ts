@@ -10,59 +10,14 @@
 import { isZod } from '@kbn/zod';
 import type { ZodType } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-
-type ZodTypeKind =
-  | 'string'
-  | 'number'
-  | 'int'
-  | 'boolean'
-  | 'bigint'
-  | 'symbol'
-  | 'null'
-  | 'undefined'
-  | 'void'
-  | 'never'
-  | 'any'
-  | 'unknown'
-  | 'date'
-  | 'object'
-  | 'record'
-  | 'file'
-  | 'array'
-  | 'tuple'
-  | 'union'
-  | 'intersection'
-  | 'map'
-  | 'set'
-  | 'enum'
-  | 'literal'
-  | 'nullable'
-  | 'optional'
-  | 'nonoptional'
-  | 'success'
-  | 'transform'
-  | 'default'
-  | 'prefault'
-  | 'catch'
-  | 'nan'
-  | 'pipe'
-  | 'readonly'
-  | 'template_literal'
-  | 'promise'
-  | 'lazy'
-  | 'custom';
+import {
+  getZodSchemaType as getSchemaType,
+  type ZodTypeKind,
+} from '../get_zod_schema_type/get_zod_schema_type';
 
 export interface ExtractedSchemaPropertyPath {
   path: string;
   type: ZodTypeKind;
-}
-
-function getSchemaType(schema: ZodType): ZodTypeKind {
-  if (!schema || !schema.def) {
-    return 'unknown';
-  }
-
-  return schema.def.type;
 }
 
 function extractSchemaPropertyPathsRecursive(

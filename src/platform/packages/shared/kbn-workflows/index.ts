@@ -14,6 +14,7 @@ export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
 export * from './common/privileges';
+export * from './common/utils';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
 export * from './common/enhance_kibana_connectors_with_fetcher';

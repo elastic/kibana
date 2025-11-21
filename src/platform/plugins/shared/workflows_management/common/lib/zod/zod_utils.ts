@@ -183,38 +183,25 @@ export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
   expect(z.toJSONSchema(a)).toEqual(z.toJSONSchema(b));
 }
 
-export function getZodTypeName(schema: z.ZodType) {
-  // Unwrap ZodOptional and ZodDefault to get the actual schema type
-  let unwrappedSchema = schema;
-  if (unwrappedSchema instanceof z.ZodOptional || unwrappedSchema instanceof z.ZodDefault) {
-    unwrappedSchema = unwrappedSchema.unwrap() as ZodType;
+/**
+ * Get the string representation of the zod schema type
+ * @param schema - The zod schema to get the name of.
+ * @param depth - The depth of the schema.
+ * @returns String representation of the zod schema type, unwrapping optional and default wrappers and resolving literals to their value.
+ * @private
+ */
+function getZodTypeNameRecursively(schema: z.ZodType, depth: number = 0) {
+  if (depth > 10) {
+    return 'unknown';
   }
-
-  const def = unwrappedSchema.def;
+  if (schema instanceof z.ZodOptional || schema instanceof z.ZodDefault) {
+    return getZodTypeNameRecursively(schema.unwrap() as ZodType, depth + 1);
+  }
+  const def = schema.def;
   switch (def.type) {
-    case 'string':
-      return 'string';
-    case 'number':
-      return 'number';
-    case 'boolean':
-      return 'boolean';
-    case 'array':
-      return 'array';
-    case 'object':
-      return 'object';
-    case 'date':
-      return 'date';
-    case 'any':
-      return 'any';
-    case 'null':
-      return 'null';
-    case 'unknown':
-      return 'unknown';
-    case 'literal':
-      return 'literal';
     case 'union': {
       // Check if all union members are arrays - if so, treat as array type
-      const unionSchema = unwrappedSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
+      const unionSchema = schema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
       const allMembersAreArrays = unionSchema.options.every(
         (option: z.ZodType) => option instanceof z.ZodArray
       );
@@ -224,6 +211,10 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'union';
     }
     default:
-      return 'unknown';
+      return def.type;
   }
+}
+
+export function getZodTypeName(schema: z.ZodType): string {
+  return getZodTypeNameRecursively(schema);
 }

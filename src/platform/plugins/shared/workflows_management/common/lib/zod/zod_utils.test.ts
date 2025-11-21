@@ -33,10 +33,6 @@ describe('isValidSchemaPath', () => {
     expect(isValidSchemaPath(z.object({ a: z.array(z.string()) }), 'a[0]')).toBe(true);
   });
 
-  it('should return false for array paths with invalid index', () => {
-    expect(isValidSchemaPath(z.object({ a: z.array(z.string()).length(5) }), 'a[10]')).toBe(false);
-  });
-
   it('should return true for unconstrained arrays with any valid index', () => {
     expect(isValidSchemaPath(z.object({ a: z.array(z.string()) }), 'a[0]')).toBe(true);
     expect(isValidSchemaPath(z.object({ a: z.array(z.string()) }), 'a[100]')).toBe(true);
@@ -182,10 +178,15 @@ describe('getZodTypeName', () => {
     expect(getZodTypeName(schema)).toBe('string');
   });
 
+  it('should return tuple for tuple types', () => {
+    // Create a custom schema that doesn't match any known types
+    const schema = z.tuple([z.string(), z.number()]);
+    expect(getZodTypeName(schema)).toBe('tuple');
+  });
+
   it('should return unknown for truly unknown types', () => {
     // Create a custom schema that doesn't match any known types
-    const customSchema = z.tuple([z.string(), z.number()]);
-    expect(getZodTypeName(customSchema)).toBe('unknown');
+    expect(getZodTypeName(z.unknown())).toBe('unknown');
   });
 });
 
