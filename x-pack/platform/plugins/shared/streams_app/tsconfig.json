@@ -42,6 +42,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/grok-ui",
     "@kbn/grok-heuristics",
+    "@kbn/dissect-heuristics",
     "@kbn/streams-plugin",
     "@kbn/search-types",
     "@kbn/xstate-utils",
