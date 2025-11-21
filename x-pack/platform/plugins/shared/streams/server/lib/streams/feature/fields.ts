@@ -13,3 +13,4 @@ export const FEATURE_TYPE = 'system.type';
 export const FEATURE_DESCRIPTION = 'system.description';
 export const FEATURE_NAME = 'system.name';
 export const FEATURE_FILTER = 'system.filter';
+export const FEATURE_META = 'system.meta';

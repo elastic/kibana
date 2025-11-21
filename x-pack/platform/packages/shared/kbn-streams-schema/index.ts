@@ -121,6 +121,7 @@ export { emptyAssets } from './src/helpers/empty_assets';
 export {
   type Feature,
   type SystemFeature,
+  type InfrastructureFeature,
   type FeatureWithFilter,
   type FeatureType,
   featureSchema,

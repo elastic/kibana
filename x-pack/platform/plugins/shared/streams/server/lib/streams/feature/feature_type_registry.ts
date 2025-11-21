@@ -10,8 +10,9 @@ import { describeDataset } from '@kbn/ai-tools';
 import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import type { FeatureTypeHandler } from './feature_type_handler';
 import type { StoredFeature } from './stored_feature';
-import { SystemFeatureHandler } from './handlers/system';
 import { FEATURE_TYPE } from './fields';
+import { SystemFeatureHandler } from './handlers/system';
+import { InfrastructureFeatureHandler } from './handlers/infrastructure';
 
 export class FeatureTypeRegistry {
   private handlers = new Map<string, FeatureTypeHandler>();
@@ -80,6 +81,7 @@ export class FeatureTypeRegistry {
 
 const defaultRegistry = new FeatureTypeRegistry();
 defaultRegistry.register(new SystemFeatureHandler());
+defaultRegistry.register(new InfrastructureFeatureHandler());
 
 export function getDefaultFeatureRegistry() {
   return defaultRegistry;

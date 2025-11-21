@@ -26,7 +26,9 @@ export const FeatureDetailExpanded = ({
   };
 
   const handleConditionChange = (newFilter: Condition) => {
-    setFeature({ ...feature, filter: newFilter });
+    if (isFeatureWithFilter(feature)) {
+      setFeature({ ...feature, filter: newFilter });
+    }
   };
 
   const handleDescriptionChange = (newDescription: string) => {
@@ -79,6 +81,7 @@ export const FeatureDetailExpanded = ({
               )}
             />
           </EuiFlexGroup>
+
           <EditableConditionPanel
             condition={feature.filter}
             isEditingCondition={isEditingCondition}

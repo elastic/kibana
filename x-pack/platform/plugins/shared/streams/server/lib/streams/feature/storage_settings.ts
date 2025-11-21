@@ -14,6 +14,7 @@ import {
   FEATURE_NAME,
   FEATURE_TYPE,
   FEATURE_UUID,
+  FEATURE_META,
 } from './fields';
 
 export const featureStorageSettings = {
@@ -27,6 +28,7 @@ export const featureStorageSettings = {
       [FEATURE_NAME]: types.keyword(),
       [FEATURE_DESCRIPTION]: types.text(),
       [FEATURE_FILTER]: types.object({ enabled: false }),
+      [FEATURE_META]: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;

@@ -40,21 +40,27 @@ export const StreamFeatureDetailsFlyout = ({
   closeFlyout: () => void;
   refreshFeatures: () => void;
 }) => {
+  const hasFilter = isFeatureWithFilter(feature);
+
   const [featureDescription, setFeatureDescription] = React.useState(feature.description);
   const { upsertQuery } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
-  const [featureFilter, setFeatureFilter] = React.useState<Condition>(feature.filter);
+  const [featureFilter, setFeatureFilter] = React.useState<Condition | undefined>(
+    hasFilter ? feature.filter : undefined
+  );
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
     setIsUpdating(true);
-    upsertQuery({ ...feature, description: featureDescription, filter: featureFilter }).finally(
-      () => {
-        setIsUpdating(false);
-        refreshFeatures();
-        closeFlyout();
-      }
-    );
+    upsertQuery({
+      ...feature,
+      description: featureDescription,
+      ...(hasFilter ? { filter: featureFilter } : {}),
+    }).finally(() => {
+      setIsUpdating(false);
+      refreshFeatures();
+      closeFlyout();
+    });
   };
 
   return (
@@ -97,36 +103,44 @@ export const StreamFeatureDetailsFlyout = ({
             initialViewMode="viewing"
           />
           <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
-              <EuiTitle size="xs">
-                <h3>
-                  {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
-                    defaultMessage: 'Filter',
-                  })}
-                </h3>
-              </EuiTitle>
-              <EuiButtonIcon
-                iconType="pencil"
-                onClick={toggleIsEditingCondition}
-                aria-label={i18n.translate(
-                  'xpack.streams.streamDetailView.featureDetailExpanded.filter.edit',
-                  {
-                    defaultMessage: 'Edit filter',
-                  }
+
+          {hasFilter && (
+            <>
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
+                  <EuiTitle size="xs">
+                    <h3>
+                      {i18n.translate(
+                        'xpack.streams.streamDetailView.featureDetailExpanded.filter',
+                        {
+                          defaultMessage: 'Filter',
+                        }
+                      )}
+                    </h3>
+                  </EuiTitle>
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    onClick={toggleIsEditingCondition}
+                    aria-label={i18n.translate(
+                      'xpack.streams.streamDetailView.featureDetailExpanded.filter.edit',
+                      {
+                        defaultMessage: 'Edit filter',
+                      }
+                    )}
+                  />
+                </EuiFlexGroup>
+                {featureFilter && (
+                  <EditableConditionPanel
+                    condition={featureFilter}
+                    isEditingCondition={isEditingCondition}
+                    setCondition={setFeatureFilter}
+                  />
                 )}
-              />
-            </EuiFlexGroup>
-            {featureFilter && (
-              <EditableConditionPanel
-                condition={featureFilter}
-                isEditingCondition={isEditingCondition}
-                setCondition={setFeatureFilter}
-              />
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          {isFeatureWithFilter(feature) && <FeatureEventsData feature={feature} />}
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <FeatureEventsData feature={feature} />
+            </>
+          )}
         </div>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
