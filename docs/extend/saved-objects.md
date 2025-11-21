@@ -213,6 +213,49 @@ identify this reference. This guarantees that the id the reference points to alw
  visualization id was directly stored in `dashboard.panels[0].visualization` there is a risk that this id gets updated without
  updating the reference in the references array.
 
+## Model versions
+
+The modelVersion API is a new way to define transformations (*"migrations"*) for your savedObject types, and will
+replace the "old" migration API after Kibana version `8.10.0` (where it will no longer be possible to register
+migrations using the old system).
+
+The main purpose of this API is to address two problems of the old migration system regarding managed ("serverless") deployments:
+
+* savedObjects model versioning is coupled to the stack versioning (migrations are registered per stack version)
+* migration functions are not safe in regard to our BWC and ZDT requirements (Kibana N and N+1 running at the same time during upgrade)
+
+This API also intend to address minor DX issues of the old migration system, by having a more explicit definition of saved Objects "versions".
+
+### 1. SO type versioning was tightly coupled to stack versioning
+
+With the previous migration system, migrations were defined per stack version, meaning that the "granularity" for defining
+migrations was the stack version. You couldn't for example, add 2 consecutive migrations on `8.6.0` (to be executed at different points in time).
+
+It was fine for on-prem distributions, given there is no way to upgrade Kibana to something else than a "fixed" stack version.
+
+For our managed offering however, where we're planning on decoupling deployments and upgrades from stack versions
+(deploying more often, so more than once per stack release), it would have been an issue, as it wouldn't have been possible
+to add a new migration in-between 2 stack versions.
+
+![multiple migration per stack version schema](images/model_versions.png)
+
+We needed a way to decouple SO versioning from the stack versioning to support this, and model versions do by design.
+
+### 2. The current migrations API is unsafe for the zero-downtime and backward-compatible requirements
+
+On traditional deployments (on-prem/non-managed cloud), upgrading Kibana is done with downtime.
+The upgrade process requires shutting down all the nodes of the prior version before deploying the new one.
+That way, there is always a single version of Kibana running at a given time, which avoids all risks of data incompatibility
+between version (e.g the new version introduces a migration that changes the shape of the document in a way that breaks compatibility
+with the previous version)
+
+For serverless however, the same process can't be used, as we need to be able to upgrade Kibana without interruption of service.
+Which means that the old and new version of Kibana will have to cohabitate for a time.
+
+This leads to a lot of constraints regarding what can, or cannot, be done with data transformations (migrations) during an upgrade.
+And, unsurprisingly, the existing migration API (which allows to register any kind of *(doc) => doc* transformations) was way too permissive and
+unsafe given our backward compatibility requirements.
+
 ## Defining model versions [defining-model-versions]
 
 Saved Objects support changes using `modelVersions`. The modelVersion API is a new way to define transformations (*'migrations'*) for your savedObject types, and replaces the legacy migration API after {{kib}} version `8.10.0`. The legacy migration API has been deprecated, meaning it is no longer possible to register migrations using the legacy system.
