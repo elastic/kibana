@@ -21,10 +21,7 @@ import { Globals } from '../../static_globals';
  * @return {Promise} A promise containing an array of clusters.
  */
 export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
-  return (
-    fetchClusterStats(req, clusterUuid, ccs)
-      .then((response) => handleClusterStats(response))
-  );
+  return fetchClusterStats(req, clusterUuid, ccs).then((response) => handleClusterStats(response));
 }
 
 /**
