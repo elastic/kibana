@@ -7,6 +7,7 @@
 
 import { expect, test } from '@kbn/scout';
 import fs from 'fs';
+import os from 'os';
 import Papa from 'papaparse';
 
 const defaultSettings = {
@@ -20,6 +21,7 @@ const queryName1 = 'Query # 1';
 const queryName2 = 'Query # 2';
 const queryName3 = 'CSV Export Test';
 const totalHitCount = 14004;
+let downloadedFilePath: string | null = null;
 
 test.describe('Discover app', { tag: ['@ess'] }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
@@ -39,6 +41,13 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
       to: defaultEndTime,
     });
     await pageObjects.discover.goto();
+  });
+
+  test.afterEach(async () => {
+    if (downloadedFilePath && fs.existsSync(downloadedFilePath)) {
+      fs.unlinkSync(downloadedFilePath);
+      downloadedFilePath = null;
+    }
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -206,21 +215,21 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
 
   test('type a search query and execute a search', async ({ pageObjects }) => {
     const filteredHitCount = 12891;
-    pageObjects.discover.writeSearchQuery('response:200');
+    await pageObjects.discover.writeSearchQuery('response:200');
     await expect
       .poll(async () => await pageObjects.discover.getHitCountInt())
       .toBe(filteredHitCount);
   });
 
   test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
-    page.testSubj.locator('dscViewModeFieldStatsButton').click();
+    await page.testSubj.locator('dscViewModeFieldStatsButton').click();
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
-    page.testSubj.locator('dataVisualizerDetailsToggle-@message.raw-arrowRight').click();
+    await page.testSubj.locator('dataVisualizerDetailsToggle-@message.raw-arrowRight').click();
     await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
   });
 
   test('navigate to Lens from field statistics', async ({ page, pageObjects }) => {
-    page.testSubj.locator('dscViewModeFieldStatsButton').click();
+    await page.testSubj.locator('dscViewModeFieldStatsButton').click();
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
     const viewLensButton = await pageObjects.discover.getFirstViewLensButtonFromFieldStatistics();
     await viewLensButton.click();
@@ -234,11 +243,11 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await page.testSubj.click('toastCloseButton'); // close toast to avoid obstruction
     // Wait for download
     const download = await pageObjects.discover.exportAsCsv();
-    const filePath = `/tmp/${download.suggestedFilename()}`;
-    await download.saveAs(filePath);
+    downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;
+    await download.saveAs(downloadedFilePath);
 
     // Validate
-    const content = fs.readFileSync(filePath, 'utf-8');
+    const content = fs.readFileSync(downloadedFilePath, 'utf-8');
     // Parse CSV using papaparse
     const parseResult = Papa.parse(content, {
       header: false,
@@ -246,9 +255,6 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     });
     const rows = parseResult.data as string[][];
     expect(rows).toHaveLength(totalHitCount + 1); // +1 for header row
-
-    // Cleanup
-    fs.unlinkSync(filePath);
   });
   // Click on Patterns works with sample data, tbd once pipeline is in place
 });
