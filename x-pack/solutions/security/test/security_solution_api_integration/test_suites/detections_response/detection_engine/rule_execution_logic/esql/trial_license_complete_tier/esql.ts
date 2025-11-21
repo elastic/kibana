@@ -1711,7 +1711,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(alertsResponse.hits.hits).toHaveLength(4);
         });
 
-        it('should generate alerts over multiple pages from different indices but same event id for mv_expand when number alerts exceeds max signal', async () => {
+        // flaky test: https://github.com/elastic/kibana/issues/235895
+        it.skip('should generate alerts over multiple pages from different indices but same event id for mv_expand when number alerts exceeds max signal', async () => {
           const id = uuidv4();
           const rule: EsqlRuleCreateProps = {
             ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
