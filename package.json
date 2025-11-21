@@ -1252,7 +1252,7 @@
     "commander": "^4.1.1",
     "constate": "^3.3.3",
     "copy-to-clipboard": "^3.3.3",
-    "core-js": "^3.45.1",
+    "core-js": "^3.46.0",
     "cronstrue": "^3.3.0",
     "css-box-model": "^1.2.1",
     "css.escape": "^1.5.1",
