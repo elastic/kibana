@@ -41,9 +41,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.breadcrumbs.expectExists();
 
         // check side nav links
-        // First visit redirects to getting started page
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'searchGettingStarted',
+          deepLinkId: 'searchHomepage',
         });
 
         if (isV2) {
@@ -109,10 +108,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
         await solutionNavigation.sidenav.tour.nextStep();
         await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible(
-          'sidenav-search-getting-started'
-        );
         await solutionNavigation.sidenav.tour.nextStep();
         await solutionNavigation.sidenav.tour.expectHidden();
         await browser.refresh();
