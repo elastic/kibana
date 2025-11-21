@@ -138,8 +138,9 @@ describe('Create Default Policy tests ', () => {
       windows: PolicyConfig['windows']['events'];
     } => ({
       linux: {
-        process: false,
+        dns: false,
         file: false,
+        process: false,
         network: false,
         session_data: false,
         tty_io: false,
