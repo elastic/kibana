@@ -10,15 +10,13 @@
 import { useEffect, useState } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 
-import type { StickyControlState } from '@kbn/controls-schemas';
-
 import type { ControlGroupRendererProps } from './control_group_renderer';
 import { controlGroupStateBuilder } from './control_group_state_builder';
 import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 
 export const useInitialControlGroupState = (
   getCreationOptions: ControlGroupRendererProps['getCreationOptions'],
-  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
+  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ) => {
   const [initialState, setInitialState] = useState<ControlGroupCreationOptions | undefined>();
 

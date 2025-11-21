@@ -79,18 +79,10 @@ function getLocatorParams({
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
 
-  const panels = dashboardInternalApi.serializeLayout() as Pick<
+  const { panels, controlGroupInput, references } = dashboardInternalApi.serializeLayout() as Pick<
     DashboardLocatorParams,
-    'panels' | 'references'
+    'panels' | 'controlGroupInput' | 'references'
   >;
-
-  // TODO Update serializing controls https://github.com/elastic/kibana/issues/242768
-  // const { controlGroupInput, controlGroupReferences } = dashboardInternalApi.serializeControls();
-
-  const combinedReferences = [
-    ...(panels?.references ?? []),
-    // ...(controlGroupReferences ?? []),
-  ] as unknown as DashboardState['references'] & SerializableRecord;
 
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
@@ -111,8 +103,8 @@ function getLocatorParams({
           value: 0,
         }
       : undefined,
-    // controlGroupInput,
-    panels: panels?.panels,
-    references: combinedReferences,
+    controlGroupInput,
+    panels,
+    references: (references ?? []) as unknown as DashboardState['references'] & SerializableRecord,
   };
 }

@@ -19,7 +19,6 @@ import {
 } from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
-import type { StickyControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -73,7 +72,7 @@ export const ControlGroupRenderer = ({
     uiActions: UiActionsStart;
   }>();
 
-  const lastSavedState$Ref = useRef(new BehaviorSubject<{ [id: string]: StickyControlState }>({}));
+  const lastSavedState$Ref = useRef(new BehaviorSubject<ControlPanelsState>({}));
 
   /** Creation options management */
   const initialState = useInitialControlGroupState(getCreationOptions, lastSavedState$Ref);

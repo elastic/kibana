@@ -12,7 +12,7 @@ import { omit } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 
-import type { StickyControlState, TimeSlice } from '@kbn/controls-schemas';
+import type { TimeSlice } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import {
@@ -34,11 +34,11 @@ import {
   type SerializedPanelState,
 } from '@kbn/presentation-publishing';
 
-import type { ControlGroupCreationOptions } from './types';
+import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 
 export const useChildrenApi = (
   state: ControlGroupCreationOptions | undefined,
-  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
+  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ) => {
   const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));
   const currentChildState$Ref = useRef(

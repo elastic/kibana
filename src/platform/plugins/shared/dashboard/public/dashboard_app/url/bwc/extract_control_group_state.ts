@@ -7,95 +7,146 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlWidth } from '@kbn/controls-schemas';
-import type { DashboardState, DashboardControlsState } from '../../../../common';
+import { get } from 'lodash';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import {
+  DEFAULT_AUTO_APPLY_SELECTIONS,
+  DEFAULT_IGNORE_VALIDATIONS,
+  DEFAULT_USE_GLOBAL_FILTERS,
+} from '@kbn/controls-constants';
+import type { DashboardState } from '../../../../common';
 
-interface State816To819 {
-  controlGroupState: {
-    initialChildControlState: Record<
-      string,
-      object & {
-        grow: boolean;
-        order: number;
-        type: string;
-        width: ControlWidth;
+export function extractControlGroupState(state: { [key: string]: unknown }): {
+  controlGroupState?: DashboardState['controlGroupInput'];
+  autoApplyFilters?: boolean;
+} {
+  let pathToState = 'controlGroupInput';
+  let pathToControls: string | undefined;
+  if (state.controlGroupState && typeof state.controlGroupState === 'object') {
+    // >8.16 to <=8.18 passed control group runtime state in with controlGroupState key
+    pathToState = 'controlGroupState';
+    pathToControls = 'controlGroupState.initialChildControlState';
+  } else if (state.controlGroupInput && typeof state.controlGroupInput === 'object') {
+    if ('panels' in state.controlGroupInput) {
+      // <8.16 controls exported as panels
+      pathToControls = 'controlGroupInput.panels';
+    } else if ('controls' in state.controlGroupInput) {
+      // >8.18 controls exported as controls
+      pathToControls = 'controlGroupInput.controls';
+    }
+  }
+
+  const controls = pathToControls ? get(state, pathToControls) : undefined;
+  let standardizedControls: ControlsGroupState['controls'] = [];
+  if (Array.isArray(controls)) {
+    // >8.18 controls are exported as an array without order
+    standardizedControls = controls.map((control) => {
+      if ('controlConfig' in control) {
+        // >8.18 to <9.3 controls had `config` stored under `controlConfig`
+        const { controlConfig, ...rest } = control;
+        return { ...rest, config: controlConfig };
       }
-    >;
-  };
-}
-
-const isState816To819 = (state: unknown): state is State816To819 =>
-  Boolean((state as State816To819).controlGroupState?.initialChildControlState);
-
-export function extractControlGroupState(state: {
-  [key: string]: unknown;
-}): DashboardState['controlGroupInput'] {
-  if (isState816To819(state)) {
-    // URL state created in 8.16 through 8.18 passed control group runtime state in with controlGroupState key
-    return {
-      controls: Object.entries(state.controlGroupState.initialChildControlState).map(
-        ([controlId, value]) => {
-          const { grow, order, type, width, ...controlConfig } = value;
+      return control; // otherwise, we are dealing with state >=9.3
+    });
+  } else if (controls !== null && typeof controls === 'object') {
+    // <=8.18 controls were exported as an object with order
+    standardizedControls = Object.entries(controls)
+      .sort(([, controlA], [, controlB]) => {
+        return controlA.order - controlB.order;
+      })
+      .map(([controlId, control]) => {
+        // <8.16 controls were exported with `explicitInput` instead of `config`
+        if ('explicitInput' in control) {
+          const { explicitInput, order, ...restOfControlState } = control;
           return {
-            id: controlId,
-            grow,
-            order,
+            uid: controlId,
+            ...restOfControlState,
+            config: explicitInput,
+          };
+        } else {
+          // >=8.16 to <=8.18 controls were exported as flat objects for all configs
+          const { grow, order, type, width, ...config } = control;
+          return {
+            uid: controlId,
             type,
-            width,
-            controlConfig,
+            ...(grow !== undefined && { grow }),
+            ...(width !== undefined && { width }),
+            config,
           };
         }
-      ) as DashboardControlsState,
-    };
+      }) as ControlsGroupState['controls'];
   }
 
-  if (!state.controlGroupInput || typeof state.controlGroupInput !== 'object') return;
+  const controlState = get(state, pathToState);
+  let autoApplySelections: boolean | undefined;
+  if (controlState !== null && typeof controlState === 'object') {
+    let useGlobalFilters = DEFAULT_USE_GLOBAL_FILTERS;
+    let ignoreValidations = DEFAULT_IGNORE_VALIDATIONS;
+    // >9.3 control group `ignoreParentSettings` gets translated to individual control settings
+    if (
+      'ignoreParentSettings' in controlState &&
+      typeof controlState.ignoreParentSettings === 'object'
+    ) {
+      const ignoreParentSettings = controlState.ignoreParentSettings ?? {};
+      const legacyIgnoreFilters = Boolean(
+        ('ignoreFilters' in ignoreParentSettings && ignoreParentSettings.ignoreFilters) ||
+          ('ignoreQuery' in ignoreParentSettings && ignoreParentSettings.ignoreQuery)
+      );
+      useGlobalFilters = !legacyIgnoreFilters;
+      ignoreValidations = Boolean(
+        'ignoreValidations' in ignoreParentSettings && ignoreParentSettings.ignoreValidations
+      );
+    }
 
-  const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };
+    // >9.3 non-default control group `chainingSystem` gets translated to `useGlobalFilters`
+    if (
+      'chainingSystem' in controlState &&
+      typeof controlState.chainingSystem === 'string' &&
+      controlState.chainingSystem === 'NONE'
+    ) {
+      useGlobalFilters = false;
+    }
 
-  // TODO: Update bwc for autoApplySelections
+    if (
+      useGlobalFilters !== DEFAULT_USE_GLOBAL_FILTERS ||
+      ignoreValidations !== DEFAULT_IGNORE_VALIDATIONS
+    ) {
+      standardizedControls = standardizedControls.map((control) => {
+        if (control.type === 'timeSlider' || control.type === 'esqlControl') return control;
+        // these settings are only relevant for data controls
+        return {
+          ...control,
+          config: {
+            useGlobalFilters,
+            ignoreValidations,
+            ...control.config,
+          },
+        };
+      });
+    }
 
-  // let autoApplySelections: ControlsGroupState['autoApplySelections'] =
-  //   DEFAULT_AUTO_APPLY_SELECTIONS;
-  // if (typeof controlGroupInput.autoApplySelections === 'boolean') {
-  //   autoApplySelections = controlGroupInput.autoApplySelections;
-  // } else if (typeof controlGroupInput.showApplySelections === 'boolean') {
-  //   // <8.16 autoApplySelections exported as !showApplySelections
-  //   autoApplySelections = !controlGroupInput.showApplySelections;
-  // }
-
-  let controls: DashboardControlsState = [];
-  if (Array.isArray(controlGroupInput.controls)) {
-    controls = controlGroupInput.controls;
-  } else if (controlGroupInput.panels && typeof controlGroupInput.panels === 'object') {
-    // <8.16 controls exported as panels
-    const panels = controlGroupInput.panels as {
-      [key: string]:
-        | { [key: string]: unknown; explicitInput?: { [key: string]: unknown } }
-        | undefined;
-    };
-    controls = Object.keys(controlGroupInput.panels).map((controlId) => {
-      const { explicitInput, ...restOfControlState } = panels[controlId] ?? {};
-      return {
-        ...restOfControlState,
-        ...(explicitInput ? { controlConfig: explicitInput } : {}),
-      };
-    }) as DashboardControlsState;
+    // >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
+    if (
+      'autoApplySelections' in controlState &&
+      typeof controlState.autoApplySelections === 'boolean'
+    ) {
+      autoApplySelections = controlState.autoApplySelections;
+    } else if (
+      'showApplySelections' in controlState &&
+      typeof controlState.showApplySelections === 'boolean'
+    ) {
+      // <8.16 autoApplySelections exported as !showApplySelections
+      autoApplySelections = !controlState.showApplySelections;
+    }
   }
-
-  // TODO: Update bwc for labelPosition
-
-  // let labelPosition: ControlsGroupState['labelPosition'] = DEFAULT_CONTROLS_LABEL_POSITION;
-  // if (typeof controlGroupInput.labelPosition === 'string') {
-  //   labelPosition = controlGroupInput.labelPosition as ControlsGroupState['labelPosition'];
-  // } else if (typeof controlGroupInput.controlStyle === 'string') {
-  //   // <8.16 labelPosition exported as controlStyle
-  //   labelPosition = controlGroupInput.controlStyle as ControlsGroupState['labelPosition'];
-  // }
 
   return {
-    // autoApplySelections,
-    controls,
-    // labelPosition,
+    autoApplyFilters:
+      autoApplySelections !== DEFAULT_AUTO_APPLY_SELECTIONS ? autoApplySelections : undefined,
+    controlGroupState: standardizedControls.length
+      ? {
+          controls: standardizedControls,
+        }
+      : undefined,
   };
 }

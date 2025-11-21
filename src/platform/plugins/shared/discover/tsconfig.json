@@ -119,7 +119,8 @@
     "@kbn/unified-metrics-grid",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/control-group-renderer",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/controls-schemas"
   ],
   "exclude": ["target/**/*"]
 }

@@ -26,12 +26,16 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import type { ControlGroupRuntimeState, ControlPanelState } from './types';
+import type {
+  ControlGroupRuntimeState,
+  ControlPanelState,
+  FlattenedStickyControlState,
+} from './types';
 
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<DataControlState & StickyControlState, 'type'>,
+    controlState: Omit<DataControlState & FlattenedStickyControlState, 'type'>,
     uiActionsService: UiActionsStart,
     controlId?: string
   ) => {
@@ -58,7 +62,8 @@ export const controlGroupStateBuilder = {
   addOptionsListControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
-      Omit<StickyControlState, keyof OptionsListDSLControlState> & OptionsListDSLControlState,
+      Omit<StickyControlState, keyof OptionsListDSLControlState | 'config'> &
+        OptionsListDSLControlState,
       'type'
     >,
     controlId?: string
