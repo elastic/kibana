@@ -329,7 +329,7 @@ export function getControlSuggestion(
         defaultMessage: 'Click to create',
       }),
       sortText: '1',
-      category: SuggestionCategory.CRITICAL_ACTION,
+      category: SuggestionCategory.CUSTOM_ACTION,
       command: {
         id: `esql.control.${type}.create`,
         title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
@@ -525,7 +525,7 @@ export function createInferenceEndpointToCompletionItem(
     label: inferenceEndpoint.inference_id,
     sortText: '1',
     text: inferenceEndpoint.inference_id,
-    category: SuggestionCategory.KEYWORD,
+    category: SuggestionCategory.VALUE,
   };
 }
 

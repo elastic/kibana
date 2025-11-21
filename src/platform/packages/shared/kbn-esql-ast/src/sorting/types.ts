@@ -8,8 +8,8 @@
  */
 
 export enum SuggestionCategory {
-  CRITICAL_ACTION = 'critical_action',
-  KEYWORD_CLAUSE = 'keyword_clause', // BY, WHERE, ON, WITH, AS
+  CUSTOM_ACTION = 'custom_action',
+  LANGUAGE_KEYWORD = 'language_keyword', // BY, WHERE, ON, WITH, AS
   CONSTANT_VALUE = 'constant_value', // Prompt text, query text constants
   USER_DEFINED_COLUMN = 'user_defined_column',
   TIME_PARAM = 'time_param',
@@ -27,7 +27,7 @@ export enum SuggestionCategory {
   RECOMMENDED_QUERY_SEARCH = 'recommended_query_search', // Search query (highest priority recommended query)
   RECOMMENDED_QUERY = 'recommended_query',
 
-  KEYWORD = 'keyword', // METADATA, settings, special keywords
+  VALUE = 'value', // METADATA, settings, special keywords
   PIPE = 'pipe',
   COMMA = 'comma',
   UNKNOWN = 'unknown',

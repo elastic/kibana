@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
+import { SuggestionCategory } from '@kbn/esql-ast';
 import { setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
@@ -39,7 +40,7 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.values.create',
           title: 'Click to create',
         },
-        category: 'critical_action',
+        category: SuggestionCategory.CUSTOM_ACTION,
         sortText: '0000',
       });
 
@@ -75,7 +76,7 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.functions.create',
           title: 'Click to create',
         },
-        category: 'critical_action',
+        category: SuggestionCategory.CUSTOM_ACTION,
         sortText: '0000',
       });
     });
@@ -130,7 +131,7 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.fields.create',
           title: 'Click to create',
         },
-        category: 'critical_action',
+        category: SuggestionCategory.CUSTOM_ACTION,
         sortText: '0002',
       });
     });
@@ -246,7 +247,7 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.values.create',
           title: 'Click to create',
         },
-        category: 'critical_action',
+        category: SuggestionCategory.CUSTOM_ACTION,
         sortText: '0000',
       });
     });
@@ -273,7 +274,7 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.values.create',
           title: 'Click to create',
         },
-        category: 'critical_action',
+        category: SuggestionCategory.CUSTOM_ACTION,
         sortText: '0000',
       });
     });
@@ -328,7 +329,7 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.values.create',
           title: 'Click to create',
         },
-        category: 'critical_action',
+        category: SuggestionCategory.CUSTOM_ACTION,
         sortText: '0000',
       });
     });

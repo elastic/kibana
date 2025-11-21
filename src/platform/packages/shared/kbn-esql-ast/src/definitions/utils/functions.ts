@@ -398,6 +398,29 @@ const getVariablePrefix = (variableType: ESQLVariableType) =>
     ? '??'
     : '?';
 
+function getColumnSuggestionCategory(
+  column: ESQLColumnData,
+  fieldIsRecommended: boolean
+): SuggestionCategory {
+  if (column.userDefined) {
+    return SuggestionCategory.USER_DEFINED_COLUMN;
+  }
+
+  if (fieldIsRecommended) {
+    return SuggestionCategory.RECOMMENDED_FIELD;
+  }
+
+  if (column.type === 'date' || column.type === 'date_nanos') {
+    return SuggestionCategory.TIME_FIELD;
+  }
+
+  if (column.isEcs) {
+    return SuggestionCategory.ECS_FIELD;
+  }
+
+  return SuggestionCategory.FIELD;
+}
+
 export const buildColumnSuggestions = (
   columns: ESQLColumnData[],
   recommendedFieldsFromExtensions: RecommendedField[] = [],
@@ -424,19 +447,8 @@ export const buildColumnSuggestions = (
       !column.userDefined && Boolean(column.isEcs),
       Boolean(fieldIsRecommended)
     );
-    // Determine the category explicitly based on column properties
-    let category: SuggestionCategory;
-    if (column.userDefined) {
-      category = SuggestionCategory.USER_DEFINED_COLUMN;
-    } else if (fieldIsRecommended) {
-      category = SuggestionCategory.RECOMMENDED_FIELD;
-    } else if (column.type === 'date' || column.type === 'date_nanos') {
-      category = SuggestionCategory.TIME_FIELD;
-    } else if (column.isEcs) {
-      category = SuggestionCategory.ECS_FIELD;
-    } else {
-      category = SuggestionCategory.FIELD;
-    }
+
+    const category = getColumnSuggestionCategory(column, fieldIsRecommended);
 
     const suggestion: ISuggestionItem = {
       label: column.name,

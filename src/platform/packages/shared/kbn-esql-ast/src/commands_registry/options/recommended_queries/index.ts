@@ -18,14 +18,6 @@ export interface EditorExtensions {
   recommendedFields: RecommendedField[];
 }
 
-interface QueryTemplate {
-  label: string;
-  description: string;
-  queryString: string;
-  sortText?: string;
-  category?: SuggestionCategory;
-}
-
 // Order starts with the simple ones and goes to more complex ones
 
 export const getRecommendedQueriesTemplates = ({
@@ -37,7 +29,7 @@ export const getRecommendedQueriesTemplates = ({
   timeField?: string;
   categorizationField?: string;
 }) => {
-  const queries: QueryTemplate[] = [
+  const queries = [
     {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.label', {
         defaultMessage: 'Search all fields',
@@ -47,7 +39,6 @@ export const getRecommendedQueriesTemplates = ({
       }),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
       sortText: 'D',
-      category: SuggestionCategory.RECOMMENDED_QUERY_SEARCH,
     },
     {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.aggregateExample.label', {
@@ -211,7 +202,10 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       kind: 'Issue',
       detail: query.description,
       sortText: query?.sortText ?? 'E',
-      category: query.category ?? SuggestionCategory.RECOMMENDED_QUERY,
+      category:
+        query.sortText === 'D'
+          ? SuggestionCategory.RECOMMENDED_QUERY_SEARCH
+          : SuggestionCategory.RECOMMENDED_QUERY,
       command: {
         id: 'esql.recommendedQuery.accept',
         title: 'Accept recommended query',
@@ -250,6 +244,7 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
           : {}),
         kind: 'Issue',
         sortText: 'D',
+        category: SuggestionCategory.RECOMMENDED_QUERY_SEARCH,
       };
     }
   );

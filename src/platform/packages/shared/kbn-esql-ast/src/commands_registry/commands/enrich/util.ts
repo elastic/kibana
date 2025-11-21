@@ -124,7 +124,7 @@ export const noPoliciesAvailableSuggestion: ISuggestionItem = {
     defaultMessage: 'Click to create',
   }),
   sortText: 'D',
-  category: SuggestionCategory.CRITICAL_ACTION,
+  category: SuggestionCategory.CUSTOM_ACTION,
   command: {
     id: 'esql.policies.create',
     title: i18n.translate('kbn-esql-ast.esql.autocomplete.createNewPolicy', {

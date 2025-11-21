@@ -34,7 +34,7 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
     defaultMessage: 'Metadata',
   }),
   sortText: 'C',
-  category: SuggestionCategory.KEYWORD,
+  category: SuggestionCategory.VALUE,
 });
 
 export const getMetadataSuggestions = (command: ESQLAstAllCommands, queryText: string) => {
