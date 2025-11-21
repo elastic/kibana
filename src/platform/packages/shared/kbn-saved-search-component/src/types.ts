@@ -13,6 +13,9 @@ import type { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/common';
 import type { CSSProperties } from 'react';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { DataGridDensity } from '@kbn/unified-data-table';
 
 export interface SavedSearchComponentDependencies {
   embeddable: EmbeddableStart;
@@ -20,7 +23,24 @@ export interface SavedSearchComponentDependencies {
   dataViews: DataViewsContract;
 }
 
-export interface SavedSearchComponentProps {
+/**
+ * Represents the table configuration of the saved search component
+ * that can be persisted externally (e.g., in URL params or local storage)
+ *
+ * This includes user customizations related to how the data table is displayed:
+ * columns selection, sorting, grid layout and row display options.
+ */
+export interface SavedSearchTableConfig {
+  columns?: string[];
+  sort?: SortOrder[];
+  grid?: DiscoverGridSettings;
+  rowHeight?: number;
+  rowsPerPage?: number;
+  density?: DataGridDensity;
+  inTableSearchTerm?: string;
+}
+
+export interface SavedSearchComponentProps extends SavedSearchTableConfig {
   dependencies: SavedSearchComponentDependencies;
   index: string;
   timeRange?: TimeRange;
@@ -33,7 +53,7 @@ export interface SavedSearchComponentProps {
    */
   nonHighlightingFilters?: Filter[];
   timestampField?: string;
-  columns?: string[];
   height?: CSSProperties['height'];
   displayOptions?: NonPersistedDisplayOptions;
+  onTableConfigChange?: (config: SavedSearchTableConfig) => void;
 }
