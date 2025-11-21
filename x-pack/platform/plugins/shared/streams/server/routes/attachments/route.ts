@@ -64,6 +64,8 @@ const listAttachmentsRoute = createServerRoute({
                       {
                         id: 'dashboard-123',
                         type: 'dashboard',
+                        title: 'My Dashboard',
+                        tags: ['monitoring', 'production'],
                       },
                     ],
                   },
