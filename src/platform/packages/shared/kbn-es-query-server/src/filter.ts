@@ -96,6 +96,7 @@ const commonBasePropertiesSchema = schema.object({
       meta: {
         description:
           'Filter type from legacy filters (e.g., "spatial_filter", "query_string") for backwards compatibility',
+        deprecated: true,
       },
     })
   ),
@@ -103,6 +104,7 @@ const commonBasePropertiesSchema = schema.object({
     schema.string({
       meta: {
         description: 'Field name metadata from legacy filters for backwards compatibility',
+        deprecated: true,
       },
     })
   ),
@@ -110,6 +112,7 @@ const commonBasePropertiesSchema = schema.object({
     schema.string({
       meta: {
         description: 'Value metadata from legacy filters for backwards compatibility',
+        deprecated: true,
       },
     })
   ),
@@ -269,7 +272,8 @@ export const asCodeDSLFilterSchema = basePropertiesWithNegateSchema.extends({
     schema.string({
       meta: {
         description:
-          'Field name from filter metadata (meta.field). Critical for scripted filters where field cannot be extracted from query.',
+          'Field name metadata. Critical for backwards compatibility in legacy scripted filters where field cannot be extracted from query.',
+        deprecated: true,
       },
     })
   ),
@@ -277,7 +281,8 @@ export const asCodeDSLFilterSchema = basePropertiesWithNegateSchema.extends({
     schema.any({
       meta: {
         description:
-          'Filter parameters from metadata (meta.params). Preserves display values, formats, and script parameters.',
+          'Filter parameters metadata. Preserves display values, formats, and script parameters in legacy filters for backwards compatibility.',
+        deprecated: true,
       },
     })
   ),
