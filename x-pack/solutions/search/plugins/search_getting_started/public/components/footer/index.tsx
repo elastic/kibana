@@ -52,7 +52,7 @@ export const GettingStartedFooter = () => {
       }),
       description: i18n.translate('xpack.gettingStarted.elasticTraining.description', {
         defaultMessage:
-          'Unlock the full potential of Elastic through expert-led training, interactive labs, comprehensive certification programs, and flexible on-demand learning.',
+          'Access expert-led trainings, interactive labs, comprehensive certification programs, and flexible self-paced learning courses.',
       }),
       buttonLabel: i18n.translate('xpack.gettingStarted.elasticTraining.buttonText', {
         defaultMessage: 'Elastic Training',
