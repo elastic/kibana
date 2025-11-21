@@ -114,7 +114,10 @@ describe('getRuleIdsWithGaps', () => {
     it('should get authorization filter with correct parameters', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
         aggregations: {
-          unique_rule_ids: {
+          latest_gap_timestamp: {
+            value: null,
+          },
+          by_rule: {
             buckets: [],
           },
         },
@@ -242,7 +245,7 @@ describe('getRuleIdsWithGaps', () => {
       expect(result).toEqual({
         total: 0,
         ruleIds: [],
-        latestGapTimestamp: null,
+        latestGapTimestamp: undefined,
       });
     });
 
@@ -251,6 +254,15 @@ describe('getRuleIdsWithGaps', () => {
         start: params.start,
         end: params.end,
       };
+
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          by_rule: { buckets: [] },
+          latest_gap_timestamp: {
+            value: null,
+          },
+        },
+      });
 
       await rulesClient.getRuleIdsWithGaps(paramsWithoutStatuses);
 

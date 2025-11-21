@@ -508,7 +508,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             }
           });
 
-          it('should return null latest gap timestamp when no gaps exist', async () => {
+          it('should not return latest gap timestamp when no gaps exist', async () => {
             // Create a rule without gaps
             const ruleResponse = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
@@ -541,7 +541,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                 expect(response.statusCode).to.eql(200);
                 expect(response.body.total).to.eql(0);
                 expect(response.body.rule_ids).to.eql([]);
-                expect(response.body.latest_gap_timestamp).to.eql(null);
+                expect(response.body.latest_gap_timestamp).to.eql(undefined);
                 break;
 
               default:
