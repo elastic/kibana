@@ -76,7 +76,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
               {isChecked && (
                 <SingleOptionUnionField
                   options={[option]}
-                  path={`${rootPath}.${discriminatorValue}`}
+                  path={rootPath}
                   schema={schema}
                   discriminatorKey={discriminatorKey}
                   fieldConfig={fieldConfig}

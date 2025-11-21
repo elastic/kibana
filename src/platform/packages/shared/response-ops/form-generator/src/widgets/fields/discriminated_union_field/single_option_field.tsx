@@ -8,6 +8,8 @@
  */
 
 import type React from 'react';
+import { addMeta } from '@kbn/connector-specs/src/connector_spec_ui';
+import type { z } from '@kbn/zod/v4';
 import { type DiscriminatedUnionWithProps } from './discriminated_union_field';
 import { getFieldsFromSchema, renderFieldComponent } from '../../../form';
 
@@ -28,12 +30,15 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
   fieldProps,
   formConfig,
 }) => {
-  const option = options[0];
-  const optionSchema = option.omit({ [discriminatorKey]: true });
+  const optionSchema = options[0];
 
   if (!optionSchema) {
     throw new Error(`SingleOptionUnionField requires an option in schema at path: ${rootPath}`);
   }
+
+  addMeta(optionSchema.shape[discriminatorKey] as z.ZodType, {
+    hidden: true,
+  });
 
   const fields = getFieldsFromSchema({
     schema: optionSchema,

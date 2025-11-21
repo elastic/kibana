@@ -15,16 +15,21 @@ import { TextField } from './fields/text_field';
 import { SelectField } from './fields/select_field';
 import { PasswordField } from './fields/password_field';
 import { DiscriminatedUnionField } from './fields/discriminated_union_field';
+import { HiddenField } from './fields/hidden';
 
 const WIDGET_REGISTRY = {
   [WidgetType.Text]: TextField,
   [WidgetType.Password]: PasswordField,
   [WidgetType.Select]: SelectField,
   [WidgetType.FormFieldset]: DiscriminatedUnionField,
+  [WidgetType.Hidden]: HiddenField,
 };
 
 const getDefaultWidgetForSchema = (schema: z.ZodType) => {
-  if (schema instanceof z.ZodString) {
+  const meta = getMeta(schema);
+  if (meta.hidden) {
+    return WidgetType.Hidden;
+  } else if (schema instanceof z.ZodString) {
     const metaInfo = getMeta(schema);
     if (metaInfo?.sensitive) {
       return WidgetType.Password;

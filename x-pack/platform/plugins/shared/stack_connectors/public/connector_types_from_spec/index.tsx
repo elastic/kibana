@@ -31,9 +31,9 @@ export function registerConnectorTypesFromSpecs({
 }
 
 const schema = z.object({
-  authType: z.discriminatedUnion('authTypes', [
+  secrets: z.discriminatedUnion('authType', [
     z.object({
-      authTypes: z.literal('api_key_header'),
+      authType: z.literal('api_key_header'),
       'X-OTX-API-KEY': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
         label: 'API Key',
         sensitive: true,

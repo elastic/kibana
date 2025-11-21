@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 import { getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -59,7 +59,7 @@ export const getFieldFromSchema = ({ schema, path, formConfig }: GetFieldFromSch
         });
 
         if (errors.length > 0) {
-          return { code: 'ERR_FIELD_MISSING', path: formPath, message: errors.join(', ') };
+          return { path: formPath, message: errors.join(', ') };
         }
       }
     },
@@ -94,7 +94,11 @@ export const renderFieldComponent = ({ field }: RenderFieldComponentProps) => {
   const { schema: outerSchema, validate, path, formConfig } = field;
 
   // Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
-  const { schema, defaultValue } = unwrap(outerSchema);
+  const { schema, defaultValue: zodDefault } = unwrap(outerSchema);
+  let defaultValue: unknown;
+  if (schema instanceof z.ZodLiteral) {
+    defaultValue = schema.value;
+  }
   const meta = getMeta(schema);
   const WidgetComponent = getWidgetComponent(schema);
 
@@ -106,7 +110,7 @@ export const renderFieldComponent = ({ field }: RenderFieldComponentProps) => {
         schema={schema}
         formConfig={formConfig}
         fieldConfig={{
-          defaultValue: defaultValue ?? meta.default,
+          defaultValue: zodDefault || defaultValue,
           validations: [
             {
               validator: validate,

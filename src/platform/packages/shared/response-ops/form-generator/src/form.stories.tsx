@@ -129,14 +129,14 @@ const webhookConnectorFormSchema = z.object({
     label: 'Method',
   }),
   url: z.url().meta({ widget: 'text', label: 'URL', placeholder: 'https://...' }),
-  authType: z
-    .discriminatedUnion('type', [
-      z.object({ type: z.literal('none') }).meta({
+  secrets: z
+    .discriminatedUnion('authType', [
+      z.object({ authType: z.literal('none').meta({ hidden: true }) }).meta({
         label: 'None',
       }),
       z
         .object({
-          type: z.literal('basic'),
+          authType: z.literal('basic'),
           username: z.string().min(1, { message: 'Username cannot be empty' }).meta({
             label: 'Username',
           }),
@@ -148,7 +148,7 @@ const webhookConnectorFormSchema = z.object({
         .meta({ label: 'Basic Authentication' }),
       z
         .object({
-          type: z.literal('bearer'),
+          authType: z.literal('bearer'),
           token: z.string().min(1, { message: 'Token cannot be empty' }).meta({
             label: 'Token',
           }),
@@ -158,14 +158,14 @@ const webhookConnectorFormSchema = z.object({
     .meta({
       label: 'Authentication',
     })
-    .default({ type: 'basic', username: '', password: '' }),
+    .default({ authType: 'basic', username: '', password: '' }),
 });
 
 const abuseIPDBConnectorSchema = z.object({
-  authType: z.discriminatedUnion('type', [
+  secrets: z.discriminatedUnion('authType', [
     z
       .object({
-        type: z.literal('apiKey'),
+        authType: z.literal('api_key_header'),
         Key: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
           widget: 'password',
           label: 'API Key',
@@ -179,9 +179,9 @@ const abuseIPDBConnectorSchema = z.object({
 });
 
 const alienVaultOTXConnectorSchema = z.object({
-  authType: z.discriminatedUnion('authTypes', [
+  secrets: z.discriminatedUnion('authType', [
     z.object({
-      authTypes: z.literal('api_key_header'),
+      authType: z.literal('api_key_header'),
       'X-OTX-API-KEY': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
         label: 'API Key',
         sensitive: true,
@@ -192,10 +192,10 @@ const alienVaultOTXConnectorSchema = z.object({
 });
 
 const GreyNoiseConnectorSchema = z.object({
-  authType: z.discriminatedUnion('authTypes', [
+  secrets: z.discriminatedUnion('authType', [
     z
       .object({
-        authTypes: z.literal('apiKey'),
+        authType: z.literal('api_key_header'),
         key: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
           widget: 'password',
           label: 'API Key',
@@ -208,10 +208,10 @@ const GreyNoiseConnectorSchema = z.object({
 });
 
 const ShodanConnectorSchema = z.object({
-  authType: z.discriminatedUnion('type', [
+  secrets: z.discriminatedUnion('authType', [
     z
       .object({
-        type: z.literal('apiKey'),
+        authType: z.literal('api_key_header'),
         'X-Api-Key': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
           widget: 'password',
           label: 'API Key',
@@ -224,10 +224,10 @@ const ShodanConnectorSchema = z.object({
 });
 
 const UrlVoidConnectorSchema = z.object({
-  authType: z.discriminatedUnion('type', [
+  secrets: z.discriminatedUnion('authType', [
     z
       .object({
-        type: z.literal('apiKey'),
+        authType: z.literal('api_key_header'),
         'X-Api-Key': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
           widget: 'password',
           label: 'API Key',
@@ -240,11 +240,11 @@ const UrlVoidConnectorSchema = z.object({
 });
 
 const VirusTotalConnectorSchema = z.object({
-  authType: z
-    .discriminatedUnion('type', [
+  secrets: z
+    .discriminatedUnion('authType', [
       z
         .object({
-          type: z.literal('apiKey'),
+          authType: z.literal('api_key_header'),
           'x-apikey': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
             widget: 'password',
             label: 'API Key',
