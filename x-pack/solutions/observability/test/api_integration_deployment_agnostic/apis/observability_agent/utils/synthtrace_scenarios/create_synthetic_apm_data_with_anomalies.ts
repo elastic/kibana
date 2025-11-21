@@ -61,8 +61,8 @@ export const createSyntheticApmDataWithAnomalies = async ({
           // create some overlapping transactions to simulate real world load
           service
             .transaction('GET /api/cart', 'request')
-            .timestamp(timestamp + Math.random() * 100)
-            .duration(traceDuration * Math.random())
+            .timestamp(timestamp + 50)
+            .duration(traceDuration * 0.5)
             .outcome('success'),
         ];
 
