@@ -15,12 +15,13 @@
  *
  * Key principles:
  * - Single schema (config + secrets together)
+ * - Standard auth types
  * - Secrets marked with meta.sensitive
  * - Standard auth schemas (reusable)
  * - Zod for validation and UI derivation
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosInstance } from 'axios';
@@ -73,35 +74,16 @@ export interface ConnectorMetadata {
 // Phase 1 supports only: Header, Basic, Bearer
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
-/**
- * Header-based authentication (generic)
- * Use for: API keys, custom headers (X-API-Key, etc.)
- */
-export const HeaderAuthSchema = z.object({
-  method: z.literal('headers'),
-  headers: z.record(z.string(), z.string()).describe('Custom Headers'),
-});
+// Auth schemas defined in ./auth_types
 
-/**
- * HTTP Basic Authentication
- * Use for: Username + Password auth (Jira, etc.)
- */
-export const BasicAuthSchema = z.object({
-  method: z.literal('basic'),
-  credentials: z.object({
-    username: z.string().describe('Username'),
-    password: z.string().meta({ sensitive: true }).describe('Password'),
-  }),
-});
+export interface AuthTypeSpec<T extends Record<string, unknown>> {
+  id: string;
+  schema: z.ZodObject<Record<string, z.ZodType>>;
+  normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
+  configure: (axiosInstance: AxiosInstance, secret: T) => AxiosInstance;
+}
 
-/**
- * Bearer Token Authentication
- * Use for: OAuth tokens, API tokens sent as "Authorization: Bearer <token>"
- */
-export const BearerAuthSchema = z.object({
-  method: z.literal('bearer'),
-  token: z.string().meta({ sensitive: true }).describe('Bearer Token'),
-});
+export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
 
 // ============================================================================
 // PHASE 2 AUTH TYPES (Not supported yet - see connector_rfc.ts)
@@ -233,12 +215,18 @@ export interface ConnectorTest {
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
+export interface AuthTypeDef {
+  type: string;
+  defaults: Record<string, unknown>;
+}
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
+  authTypes?: Array<string | AuthTypeDef>;
+
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })
-  schema: z.ZodSchema;
+  schema?: z.ZodObject;
 
   validateUrls?: {
     fields?: string[];
