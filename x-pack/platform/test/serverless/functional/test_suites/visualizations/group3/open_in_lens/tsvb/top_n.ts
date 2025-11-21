@@ -112,14 +112,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         await lens.assertLayerCount(2);
+
+        await lens.ensureLayerTabIsActive(0);
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
-        const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count of records');
+
+        await lens.ensureLayerTabIsActive(1);
+        const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText2).to.be('10');
       });
     });
 
-    it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
+    it('visualizes field to Lens and loads fields to the dimension editor', async () => {
       await panelActions.convertToLensByTitle('Top N - Basic');
       await lens.waitForVisualization('xyVisChart');
 

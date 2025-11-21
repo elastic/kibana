@@ -134,10 +134,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        await lens.assertLayerCount(1);
+        await lens.assertLayerCount(2);
+
+        await lens.ensureLayerTabIsActive(0);
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
-        const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count of records');
+
+        await lens.ensureLayerTabIsActive(1);
+        const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText2).to.be('10');
       });
     });
