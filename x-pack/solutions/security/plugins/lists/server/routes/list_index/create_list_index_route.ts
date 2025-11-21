@@ -24,10 +24,9 @@ const ignoreResourceAlreadyExistsError = async (runFn: () => Promise<void>): Pro
   try {
     await runFn();
   } catch (err) {
-    if (
-      typeof err?.message === 'string' &&
-      err.message.includes('resource_already_exists_exception')
-    ) {
+    const isResourceAlreadyExistError =
+      typeof err?.message === 'string' && err.message.includes('resource_already_exists_exception');
+    if (!isResourceAlreadyExistError) {
       throw err;
     }
   }
