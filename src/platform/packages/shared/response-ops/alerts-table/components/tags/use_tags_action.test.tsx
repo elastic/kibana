@@ -13,10 +13,9 @@ import type { Alert } from '@kbn/alerting-types';
 
 describe('useTagsAction', () => {
   const mockAlert = {
-    id: 'alert-1',
-    version: 'v1',
+    _id: 'alert-1',
     _index: 'test-index',
-    'kibana.alert.workflow_tags': ['coke', 'pepsi'],
+    ALERT_WORKFLOW_TAGS: ['coke', 'pepsi'],
   } as unknown as Alert;
 
   const onAction = jest.fn();
@@ -37,13 +36,13 @@ describe('useTagsAction', () => {
 
     expect(result.current.getAction([mockAlert])).toMatchInlineSnapshot(`
       Object {
-        "data-test-subj": "cases-bulk-action-tags",
+        "data-test-subj": "alerts-bulk-action-tags",
         "disabled": false,
         "icon": <EuiIcon
           size="m"
           type="tag"
         />,
-        "key": "cases-bulk-action-tags",
+        "key": "alerts-bulk-action-tags",
         "name": "Edit tags",
         "onClick": [Function],
       }
@@ -107,9 +106,8 @@ describe('useTagsAction', () => {
 
     const mockAlert2 = {
       ...mockAlert,
-      id: 'alert-2',
       _id: 'alert-2',
-      'kibana.alert.workflow_tags': ['one', 'three'],
+      ALERT_WORKFLOW_TAGS: ['one', 'three'],
     } as unknown as Alert;
 
     const action = result.current.getAction([mockAlert, mockAlert2]);

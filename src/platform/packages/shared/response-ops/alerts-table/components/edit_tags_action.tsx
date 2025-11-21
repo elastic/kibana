@@ -15,9 +15,6 @@ import { typedMemo } from '../utils/react';
 import { EditTagsFlyout } from './tags/edit_tags_flyout';
 import type { ItemsSelectionState } from './tags/items/types';
 
-/**
- * Alerts table row action to edit tags on the selected alert
- */
 export const EditTagsAction = typedMemo(
   <AC extends AdditionalContext = AdditionalContext>({
     alert,

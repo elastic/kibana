@@ -14,10 +14,6 @@ import type { Alert } from '@kbn/alerting-types';
 import { EditTagsFlyout } from './edit_tags_flyout';
 
 describe('EditTagsFlyout', () => {
-  /**
-   * Alert one has the following tags: coke, pepsi
-   * All available tags are extracted from the selected alerts
-   */
   const mockAlert = {
     id: 'alert-1',
     version: 'v1',
@@ -39,16 +35,16 @@ describe('EditTagsFlyout', () => {
   it('renders correctly', async () => {
     render(<EditTagsFlyout {...props} />);
 
-    expect(await screen.findByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-tags-flyout-title')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-tags-flyout-cancel')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-tags-flyout-submit')).toBeInTheDocument();
+    expect(await screen.findByTestId('alerts-edit-tags-flyout')).toBeInTheDocument();
+    expect(await screen.findByTestId('alerts-edit-tags-flyout-title')).toBeInTheDocument();
+    expect(await screen.findByTestId('alerts-edit-tags-flyout-cancel')).toBeInTheDocument();
+    expect(await screen.findByTestId('alerts-edit-tags-flyout-submit')).toBeInTheDocument();
   });
 
   it('calls onClose when pressing the cancel button', async () => {
     render(<EditTagsFlyout {...props} />);
 
-    await userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-cancel'));
+    await userEvent.click(await screen.findByTestId('alerts-edit-tags-flyout-cancel'));
 
     await waitFor(() => {
       expect(props.onClose).toHaveBeenCalled();
@@ -61,7 +57,7 @@ describe('EditTagsFlyout', () => {
     expect(await screen.findByText('coke')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByText('coke'));
-    await userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-submit'));
+    await userEvent.click(await screen.findByTestId('alerts-edit-tags-flyout-submit'));
 
     await waitFor(() => {
       expect(props.onSaveTags).toHaveBeenCalledWith({

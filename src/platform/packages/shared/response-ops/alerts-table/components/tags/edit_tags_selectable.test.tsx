@@ -19,10 +19,6 @@ describe('EditTagsSelectable', () => {
     'kibana.alert.workflow_tags': ['coke', 'pepsi'],
   } as Alert;
 
-  /**
-   * Alert has the following tags: coke, pepsi
-   * All available tags are: one, two, coke, pepsi
-   */
   const props = {
     selectedAlerts: [mockAlert],
     isLoading: false,
@@ -30,11 +26,6 @@ describe('EditTagsSelectable', () => {
     onChangeTags: jest.fn(),
   };
 
-  /**
-   * Alert one has the following tags: coke, pepsi, one
-   * Alert two has the following tags: one, three
-   * All available tags are: one, two, three, coke, pepsi
-   */
   const propsMultipleAlerts = {
     selectedAlerts: [
       { 'kibana.alert.workflow_tags': ['coke', 'pepsi', 'one'] } as Alert,
@@ -52,7 +43,7 @@ describe('EditTagsSelectable', () => {
   it('renders correctly', async () => {
     render(<EditTagsSelectable {...props} />);
 
-    expect(screen.getByTestId('cases-actions-tags-edit-selectable')).toBeInTheDocument();
+    expect(screen.getByTestId('alerts-actions-tags-edit-selectable')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     expect(screen.getByText(`Total tags: ${props.tags.length}`)).toBeInTheDocument();
     expect(screen.getByText('Selected: 2')).toBeInTheDocument();
@@ -85,7 +76,7 @@ describe('EditTagsSelectable', () => {
       ['coke', 'asterisk'],
       ['pepsi', 'asterisk'],
     ]) {
-      const iconDataTestSubj = `cases-actions-tags-edit-selectable-tag-${tag}-icon-${icon}`;
+      const iconDataTestSubj = `alerts-actions-tags-edit-selectable-tag-${tag}-icon-${icon}`;
       expect(screen.getByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
   });
@@ -132,7 +123,7 @@ describe('EditTagsSelectable', () => {
       ['coke', 'check'],
       ['pepsi', 'check'],
     ]) {
-      const iconDataTestSubj = `cases-actions-tags-edit-selectable-tag-${tag}-icon-${icon}`;
+      const iconDataTestSubj = `alerts-actions-tags-edit-selectable-tag-${tag}-icon-${icon}`;
       expect(screen.getByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
 
@@ -150,11 +141,11 @@ describe('EditTagsSelectable', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+        screen.getByTestId('alerts-actions-tags-edit-selectable-add-new-tag')
       ).toBeInTheDocument();
     });
 
-    const addNewTagButton = screen.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
+    const addNewTagButton = screen.getByTestId('alerts-actions-tags-edit-selectable-add-new-tag');
 
     await userEvent.click(addNewTagButton);
 
@@ -194,19 +185,15 @@ describe('EditTagsSelectable', () => {
   it('unselects correctly with the new item presented', async () => {
     render(<EditTagsSelectable {...propsMultipleAlerts} />);
 
-    /**
-     * Tag with label "one" exist. Searching for "on" will show both the
-     * "add new tag" item and the "one" tag
-     */
     await userEvent.type(screen.getByPlaceholderText('Search'), 'on', { delay: 1 });
 
     await waitFor(() => {
       expect(
-        screen.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+        screen.getByTestId('alerts-actions-tags-edit-selectable-add-new-tag')
       ).toBeInTheDocument();
     });
 
-    const iconDataTestSubj = 'cases-actions-tags-edit-selectable-tag-one-icon-check';
+    const iconDataTestSubj = 'alerts-actions-tags-edit-selectable-tag-one-icon-check';
     expect(screen.getByTestId(iconDataTestSubj)).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId(iconDataTestSubj));
@@ -229,15 +216,15 @@ describe('EditTagsSelectable', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+        screen.getByTestId('alerts-actions-tags-edit-selectable-add-new-tag')
       ).toBeInTheDocument();
     });
 
     expect(
-      screen.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
+      screen.queryByTestId('alerts-actions-tags-edit-selectable-no-match-label')
     ).not.toBeInTheDocument();
 
-    const addNewTagButton = screen.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
+    const addNewTagButton = screen.getByTestId('alerts-actions-tags-edit-selectable-add-new-tag');
 
     await userEvent.click(addNewTagButton);
 
@@ -254,7 +241,7 @@ describe('EditTagsSelectable', () => {
     await userEvent.type(screen.getByPlaceholderText('Search'), 'one', { delay: 1 });
 
     expect(
-      screen.queryByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+      screen.queryByTestId('alerts-actions-tags-edit-selectable-add-new-tag')
     ).not.toBeInTheDocument();
   });
 
@@ -262,7 +249,7 @@ describe('EditTagsSelectable', () => {
     render(<EditTagsSelectable {...props} tags={[]} />);
 
     expect(
-      screen.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
+      screen.queryByTestId('alerts-actions-tags-edit-selectable-no-match-label')
     ).not.toBeInTheDocument();
   });
 
@@ -272,7 +259,7 @@ describe('EditTagsSelectable', () => {
     await userEvent.type(screen.getByPlaceholderText('Search'), 'not-exist', { delay: 1 });
 
     expect(
-      screen.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
+      screen.getByTestId('alerts-actions-tags-edit-selectable-no-match-label')
     ).toBeInTheDocument();
   });
 
@@ -283,12 +270,12 @@ describe('EditTagsSelectable', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+        screen.getByTestId('alerts-actions-tags-edit-selectable-add-new-tag')
       ).toBeInTheDocument();
     });
 
     expect(
-      screen.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
+      screen.getByTestId('alerts-actions-tags-edit-selectable-no-match-label')
     ).toBeInTheDocument();
   });
 });

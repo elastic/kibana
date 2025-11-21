@@ -10,20 +10,19 @@
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useItemsAction } from './use_items_action';
 import type { Alert } from '@kbn/alerting-types';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 
 describe('useItemsAction', () => {
   const mockAlert = {
-    id: 'alert-1',
-    version: 'v1',
     _id: 'alert-1',
     _index: 'test-index',
-    'kibana.alert.workflow_tags': ['coke', 'pepsi'],
+    ALERT_WORKFLOW_TAGS: ['coke', 'pepsi'],
   } as unknown as Alert;
 
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
   const successToasterTitle = jest.fn().mockReturnValue('My toaster title');
-  const fieldSelector = jest.fn().mockImplementation((item) => item['kibana.alert.workflow_tags']);
+  const fieldSelector = jest.fn().mockImplementation((item) => item[ALERT_WORKFLOW_TAGS]);
   const itemsTransformer = jest.fn().mockImplementation((items) => items);
 
   const props = {
@@ -132,7 +131,7 @@ describe('useItemsAction', () => {
 
       const alertWithExtraTags = {
         ...mockAlert,
-        'kibana.alert.workflow_tags': ['coke', 'pepsi', 'one'],
+        ALERT_WORKFLOW_TAGS: ['coke', 'pepsi', 'one'],
       } as Alert;
 
       act(() => {
@@ -186,7 +185,7 @@ describe('useItemsAction', () => {
 
       const emptyAlert = {
         ...mockAlert,
-        'kibana.alert.workflow_tags': [],
+        ALERT_WORKFLOW_TAGS: [],
       } as Alert;
 
       act(() => {
@@ -212,7 +211,7 @@ describe('useItemsAction', () => {
 
       const alertWithTags = {
         ...mockAlert,
-        'kibana.alert.workflow_tags': ['1', '2'],
+        ALERT_WORKFLOW_TAGS: ['1', '2'],
       } as Alert;
 
       act(() => {
@@ -238,7 +237,7 @@ describe('useItemsAction', () => {
 
       const alertWithTag = {
         ...mockAlert,
-        'kibana.alert.workflow_tags': ['1'],
+        ALERT_WORKFLOW_TAGS: ['1'],
       } as Alert;
 
       act(() => {
@@ -264,7 +263,7 @@ describe('useItemsAction', () => {
 
       const alertWithTag = {
         ...mockAlert,
-        'kibana.alert.workflow_tags': ['1'],
+        ALERT_WORKFLOW_TAGS: ['1'],
       } as Alert;
 
       act(() => {
@@ -290,7 +289,7 @@ describe('useItemsAction', () => {
 
       const emptyAlert = {
         ...mockAlert,
-        'kibana.alert.workflow_tags': [],
+        ALERT_WORKFLOW_TAGS: [],
       } as Alert;
 
       act(() => {

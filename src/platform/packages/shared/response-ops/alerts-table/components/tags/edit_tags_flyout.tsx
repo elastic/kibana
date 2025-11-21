@@ -23,6 +23,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 
 import type { Alert } from '@kbn/alerting-types';
 import { EditTagsSelectable } from './edit_tags_selectable';
@@ -54,7 +55,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({
   const tags = useMemo(() => {
     const tagSet = new Set<string>();
     for (const alert of selectedAlerts) {
-      const alertTags = alert['kibana.alert.workflow_tags'] as string[] | undefined;
+      const alertTags = alert[ALERT_WORKFLOW_TAGS] as string[] | undefined;
       if (alertTags && Array.isArray(alertTags)) {
         alertTags.forEach((tag) => tagSet.add(tag));
       }
@@ -70,7 +71,6 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({
   });
 
   const onSave = useCallback(() => onSaveTags(tagsSelection), [onSaveTags, tagsSelection]);
-  // const focusTrapProps = useFocusButtonTrap(focusButtonRef);
 
   const headerSubtitle =
     selectedAlerts.length > 1
@@ -81,15 +81,14 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({
     <EuiFlyout
       ownFocus
       onClose={onClose}
-      aria-labelledby="cases-edit-tags-flyout"
-      data-test-subj="cases-edit-tags-flyout"
+      aria-labelledby="alerts-edit-tags-flyout"
+      data-test-subj="alerts-edit-tags-flyout"
       size="s"
       paddingSize="m"
-      // focusTrapProps={focusTrapProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 data-test-subj="cases-edit-tags-flyout-title">{i18n.EDIT_TAGS}</h2>
+          <h2 data-test-subj="alerts-edit-tags-flyout-title">{i18n.EDIT_TAGS}</h2>
         </EuiTitle>
         <EuiText color="subdued">
           <p>{headerSubtitle as string}</p>
@@ -113,13 +112,13 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({
             <EuiButtonEmpty
               onClick={onClose}
               flush="left"
-              data-test-subj="cases-edit-tags-flyout-cancel"
+              data-test-subj="alerts-edit-tags-flyout-cancel"
             >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSave} fill data-test-subj="cases-edit-tags-flyout-submit">
+            <EuiButton onClick={onSave} fill data-test-subj="alerts-edit-tags-flyout-submit">
               {i18n.SAVE_SELECTION}
             </EuiButton>
           </EuiFlexItem>

@@ -20,6 +20,7 @@ import {
   EuiHighlight,
   useEuiTheme,
 } from '@elastic/eui';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
@@ -49,7 +50,7 @@ const itemToSelectableOption = (item: {
   return {
     key: item.key,
     label: item.key,
-    'data-test-subj': `cases-actions-tags-edit-selectable-tag-${item.key}`,
+    'data-test-subj': `alerts-actions-tags-edit-selectable-tag-${item.key}`,
   } as ItemSelectableOption;
 };
 
@@ -64,7 +65,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       items: tags,
       selectedAlerts,
       itemToSelectableOption,
-      fieldSelector: (alert) => alert['kibana.alert.workflow_tags'] as string[],
+      fieldSelector: (alert) => alert[ALERT_WORKFLOW_TAGS] as string[],
       onChangeItems: onChangeTags,
     }
   );
@@ -75,8 +76,8 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   const renderOption = useCallback(
     (option: ItemSelectableOption, search: string) => {
       const dataTestSubj = option.newItem
-        ? 'cases-actions-tags-edit-selectable-add-new-tag-icon'
-        : `cases-actions-tags-edit-selectable-tag-${option.label}-icon-${option.itemIcon}`;
+        ? 'alerts-actions-tags-edit-selectable-add-new-tag-icon'
+        : `alerts-actions-tags-edit-selectable-tag-${option.label}-icon-${option.itemIcon}`;
 
       return (
         <>
@@ -107,7 +108,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
         {
           key: searchValue,
           label: i18n.ADD_TAG_CUSTOM_OPTION_LABEL(searchValue),
-          'data-test-subj': 'cases-actions-tags-edit-selectable-add-new-tag',
+          'data-test-subj': 'alerts-actions-tags-edit-selectable-add-new-tag',
           data: { itemIcon: 'empty', newItem: true },
         },
         ...options,
@@ -132,14 +133,14 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
         isClearable: !isLoading,
         onChange: setSearchValue,
         value: searchValue,
-        'data-test-subj': 'cases-actions-tags-edit-selectable-search-input',
+        'data-test-subj': 'alerts-actions-tags-edit-selectable-search-input',
       }}
       renderOption={renderOption}
       listProps={{ showIcons: false }}
       onChange={onChange}
       noMatchesMessage={i18n.NO_SEARCH_MATCH}
       emptyMessage={i18n.NO_TAGS_AVAILABLE}
-      data-test-subj="cases-actions-tags-edit-selectable"
+      data-test-subj="alerts-actions-tags-edit-selectable"
       height="full"
     >
       {(list, search) => (
@@ -205,7 +206,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
               css={{
                 marginBottom: euiTheme.size.s,
               }}
-              data-test-subj="cases-actions-tags-edit-selectable-no-match-label"
+              data-test-subj="alerts-actions-tags-edit-selectable-no-match-label"
             >
               {i18n.NO_SEARCH_MATCH}
             </EuiText>

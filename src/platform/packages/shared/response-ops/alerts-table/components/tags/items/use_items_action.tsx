@@ -12,6 +12,8 @@ import { difference, isEqual } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import type { UseActionProps, ItemsSelectionState } from './types';
 
+type AlertsUpdateRequest = Record<string, unknown>;
+
 type UseItemsActionProps<T> = UseActionProps & {
   fieldKey: 'tags' | 'assignees';
   successToasterTitle: (totalAlerts: number) => string;
@@ -78,7 +80,7 @@ export const useItemsAction = <T,>({
             version: alert.version,
           },
         ];
-      }, [] as any[]);
+      }, [] as AlertsUpdateRequest[]);
 
       // updateAlerts(
       //   {

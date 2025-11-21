@@ -10,6 +10,7 @@
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import type { Alert } from '@kbn/alerting-types';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import type { UseActionProps } from './items/types';
 import { useItemsAction } from './items/use_items_action';
 import * as i18n from './translations';
@@ -22,7 +23,7 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
       onAction,
       onActionSuccess,
       successToasterTitle: i18n.EDITED_ALERTS,
-      fieldSelector: (alert) => alert['kibana.alert.workflow_tags'] as string[],
+      fieldSelector: (alert) => alert[ALERT_WORKFLOW_TAGS] as string[],
       itemsTransformer: (items) => items,
     });
 
@@ -31,9 +32,9 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
       name: i18n.EDIT_TAGS,
       onClick: () => openFlyout(selectedAlerts),
       disabled: isActionDisabled,
-      'data-test-subj': 'cases-bulk-action-tags',
+      'data-test-subj': 'alerts-bulk-action-tags',
       icon: <EuiIcon type="tag" size="m" />,
-      key: 'cases-bulk-action-tags',
+      key: 'alerts-bulk-action-tags',
     };
   };
 

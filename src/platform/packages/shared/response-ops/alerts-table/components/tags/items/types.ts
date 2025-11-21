@@ -15,8 +15,6 @@ export interface UseActionProps {
   isDisabled: boolean;
 }
 
-export type UseCopyIDActionProps = Pick<UseActionProps, 'onActionSuccess'>;
-
 export interface ItemsSelectionState {
   selectedItems: string[];
   unSelectedItems: string[];

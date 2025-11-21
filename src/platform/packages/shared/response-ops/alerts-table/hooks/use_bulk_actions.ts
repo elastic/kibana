@@ -76,10 +76,7 @@ type UseBulkUntrackActionsProps = Pick<
     isAllSelected: boolean;
   };
 
-type UseBulkTagsActionsProps = Pick<
-  BulkActionsProps,
-  'refresh' | 'query' | 'ruleTypeIds' | 'application' | 'http' | 'notifications'
-> &
+type UseBulkTagsActionsProps = Pick<BulkActionsProps, 'refresh' | 'http' | 'notifications'> &
   Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'> & {
     isAllSelected: boolean;
   };
@@ -368,12 +365,9 @@ export function useBulkActions({
     notifications,
   });
   const { tagsAction } = useBulkTagsActions({
-    application,
     setIsBulkActionsLoading,
     refresh,
     clearSelection,
-    query,
-    ruleTypeIds,
     isAllSelected: bulkActionsState.isAllSelected,
     http,
     notifications,
