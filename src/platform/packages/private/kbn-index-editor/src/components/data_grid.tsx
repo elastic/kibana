@@ -251,7 +251,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           rowsPerPageState={rowsPerPage}
           rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
           sampleSizeState={10000}
-          canDragAndDropColumns
+          canDragAndDropColumns={false}
           loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
           dataView={props.dataView}
           onSetColumns={setActiveColumns}
