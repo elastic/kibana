@@ -48,7 +48,7 @@ interface GeneratedSignificantEventQuery {
   kql: string;
   feature?: {
     name: string;
-    filter: Condition;
+    filter?: Condition;
   };
 }
 
