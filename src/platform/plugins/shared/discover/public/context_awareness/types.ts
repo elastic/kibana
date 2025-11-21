@@ -229,7 +229,7 @@ export interface RowControlsExtensionParams {
    * Available actions for row controls
    */
   actions: {
-    openInNewTabExtPointAction?: (params: OpenInNewTabExtPointAction) => void;
+    openInNewTab?: (params: OpenInNewTabParams) => void;
     /**
      * Updates the current ES|QL query
      */
@@ -334,9 +334,9 @@ export interface AdditionalCellAction {
 }
 
 /**
- * Parameters passed to the open in new tab extension point action
+ * Parameters passed to the open in new tab action
  */
-export interface OpenInNewTabExtPointAction {
+export interface OpenInNewTabParams {
   /**
    * The query to open in the new tab
    */
