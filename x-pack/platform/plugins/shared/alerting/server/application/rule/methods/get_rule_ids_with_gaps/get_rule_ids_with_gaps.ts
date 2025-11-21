@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
+import type { AggregationsMaxAggregate } from '@elastic/elasticsearch/lib/api/types';
+
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
@@ -101,11 +103,12 @@ export async function getRuleIdsWithGaps(
       }
     }
 
-    const latestGapTimestampAgg = aggs.aggregations?.latest_gap_timestamp as { value: number };
+    const latestGapTimestampAgg = aggs.aggregations
+      ?.latest_gap_timestamp as AggregationsMaxAggregate;
     const result: GetRuleIdsWithGapsResponse = {
       total: ruleIds.length,
       ruleIds,
-      latestGapTimestamp: latestGapTimestampAgg?.value,
+      latestGapTimestamp: latestGapTimestampAgg.value ?? undefined,
     };
     return result;
   } catch (err) {
