@@ -864,7 +864,7 @@ const ESQLEditorInternal = function ESQLEditor({
       return () => (subscription.active = false);
     },
     { skipFirstRender: false },
-    500,
+    256,
     [serverErrors, serverWarning, code, queryValidation]
   );
 
