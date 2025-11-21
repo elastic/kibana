@@ -163,3 +163,99 @@ describe('action params validation', () => {
     });
   });
 });
+
+describe('form deserializer', () => {
+  it.each([[null], [undefined]])('should set service to OTHER when data is %s', (value) => {
+    // @ts-expect-error deserializer expects a valid connector data object, but we're testing with undefined
+    const result = connectorTypeModel.connectorForm?.deserializer!(value);
+
+    expect(result).toEqual({
+      config: {
+        service: 'other',
+      },
+    });
+  });
+
+  it.each([[null], [undefined], [{}]])('should set service to OTHER when config is %s', (value) => {
+    const result = connectorTypeModel.connectorForm?.deserializer!({
+      // @ts-expect-error config is a Record<string, unknown>, but we're testing the case where it's missing
+      config: value,
+      secrets: {},
+    });
+
+    expect(result).toEqual({
+      config: {
+        service: 'other',
+      },
+      secrets: {},
+    });
+  });
+
+  it.each([[null], [undefined]])(
+    'should set service to OTHER when config.service is %s',
+    (value) => {
+      const data = {
+        actionTypeId: '.email',
+        config: {
+          from: 'test@example.com',
+          service: value,
+        },
+        secrets: {},
+        isDeprecated: false,
+      };
+
+      const result = connectorTypeModel.connectorForm?.deserializer!(data);
+
+      expect(result).toEqual({
+        ...data,
+        config: {
+          ...data.config,
+          service: 'other',
+        },
+      });
+    }
+  );
+
+  it('should preserve existing service when config.service is already set', () => {
+    const data = {
+      actionTypeId: '.email',
+      config: {
+        service: 'gmail',
+        from: 'test@example.com',
+      },
+      secrets: {},
+      isDeprecated: false,
+    };
+
+    const result = connectorTypeModel.connectorForm?.deserializer!(data);
+
+    expect(result).toEqual(data);
+  });
+
+  it('should preserve all other properties when setting default service', () => {
+    const data = {
+      actionTypeId: '.email',
+      name: 'My Email Connector',
+      config: {
+        from: 'test@example.com',
+        hasAuth: true,
+      },
+      secrets: {
+        user: 'user',
+        password: 'password',
+      },
+      isDeprecated: false,
+      isMissingSecrets: false,
+    };
+
+    const result = connectorTypeModel.connectorForm?.deserializer!(data);
+
+    expect(result).toEqual({
+      ...data,
+      config: {
+        ...data.config,
+        service: 'other',
+      },
+    });
+  });
+});

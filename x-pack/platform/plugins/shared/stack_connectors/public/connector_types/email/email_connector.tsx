@@ -116,6 +116,10 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     [docLinks.links.alerting.emailActionConfig, validateEmailAddresses]
   );
 
+  /**
+   * The deserializer in the connectorForm definition will set the service to OTHER
+   * if it is not defined.
+   */
   const { service = null, hasAuth = false } = config ?? {};
   const disableServiceConfig = shouldDisableEmailConfiguration(service);
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });
@@ -140,11 +144,18 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
       }
 
       const emailConfig = await getEmailServiceConfig(service);
+
+      /**
+       * The below updateFieldValues call will call the form deserializer.
+       * For this reason, we need to pass the service again because the deserializer
+       * sets the service to AdditionalEmailServices.OTHER when it is undefined.
+       */
       updateFieldValues({
         config: {
           host: emailConfig?.host,
           port: emailConfig?.port,
           secure: emailConfig?.secure,
+          service,
         },
       });
     }
@@ -193,9 +204,9 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {service === AdditionalEmailServices.EXCHANGE ? (
-        <ExchangeFormFields readOnly={readOnly} />
-      ) : (
+      {service === AdditionalEmailServices.EXCHANGE && <ExchangeFormFields readOnly={readOnly} />}
+
+      {!isEmpty(service) && service !== AdditionalEmailServices.EXCHANGE && (
         <>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
