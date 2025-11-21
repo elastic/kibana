@@ -243,11 +243,11 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         const dashboardResponse = await kibanaServer.savedObjects.create({
           type: 'dashboard',
+          overwrite: false,
           attributes: {
             title: testDashboardTitle,
             description: 'Test dashboard for rule details functional test',
             panelsJSON: '[]',
-            version: 1,
             kibanaSavedObjectMeta: {
               searchSourceJSON: '{}',
             },
