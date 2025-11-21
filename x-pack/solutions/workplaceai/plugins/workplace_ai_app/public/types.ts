@@ -23,7 +23,7 @@ export interface WorkplaceAIAppPluginSetupDependencies {
 
 export interface WorkplaceAIAppPluginStartDependencies {
   inference: InferencePublicStart;
+  spaces: SpacesPluginStart;
   cloud?: CloudStart;
   share?: SharePluginStart;
-  spaces?: SpacesPluginStart;
 }
