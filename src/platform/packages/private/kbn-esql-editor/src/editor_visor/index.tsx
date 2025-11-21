@@ -104,7 +104,9 @@ export function QuickSearchVisor({
 
   useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
-    const sources = sourceFromUpdatedQuery.split(',').map((source) => ({ label: source.trim() }));
+    const sources = sourceFromUpdatedQuery
+      ? sourceFromUpdatedQuery.split(',').map((source) => ({ label: source.trim() }))
+      : [];
     if (!initializedRef.current) {
       if (sources.length > 0) {
         setSelectedSources(sources);
