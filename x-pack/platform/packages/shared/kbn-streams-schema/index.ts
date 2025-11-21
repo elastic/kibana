@@ -115,6 +115,7 @@ export {
   type FailureStoreStatsResponse,
   isEnabledFailureStore,
   isInheritFailureStore,
+  isDisabledLifecycleFailureStore,
 } from './src/models/ingest/failure_store';
 
 export type {

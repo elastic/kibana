@@ -41,7 +41,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Edit failure store button should not be visible for wired streams
     await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
-    await expect(page.getByTestId('datasetQualityDetailsEditFailureStore')).toBeHidden();
+    await expect(page.getByTestId('datasetQualityDetailsEditFailureStore')).toBeVisible();
 
     // Quality issues table should be visible
     await expect(page.getByTestId('datasetQualityDetailsDegradedFieldTable')).toBeVisible();
@@ -76,5 +76,26 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     // Go to Streams main page
     await pageObjects.streams.clickRootBreadcrumb();
     await pageObjects.streams.verifyDatePickerTimeRange(dataQualityTimeRange);
+  });
+
+  test('should edit failure store for wired stream from data quality tab', async ({ page }) => {
+    // Click on the Failed documents card to expand it
+    await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
+
+    // Click the edit button to open the failure store modal
+    await page.getByTestId('datasetQualityDetailsEditFailureStore').click();
+
+    // Modal should be visible
+    await expect(page.getByTestId('editFailureStoreModal')).toBeVisible();
+
+    // Inherit failure store switch should be visible for wired streams
+    await expect(page.getByTestId('inheritFailureStoreSwitch')).toBeVisible();
+
+    // Toggle the inherit failure store switch
+    await page.getByTestId('inheritFailureStoreSwitch').click();
+    await page.getByTestId('failureStoreModalSaveButton').click();
+
+    // Verify the modal is closed
+    await expect(page.getByTestId('editFailureStoreModal')).toBeHidden();
   });
 });

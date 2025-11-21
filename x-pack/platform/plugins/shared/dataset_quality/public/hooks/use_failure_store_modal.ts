@@ -7,6 +7,13 @@
 
 import React, { useState } from 'react';
 import { FailureStoreModal } from '@kbn/failure-store-modal';
+import {
+  isRootStreamDefinition,
+  isEnabledFailureStore,
+  isInheritFailureStore,
+  isDisabledLifecycleFailureStore,
+} from '@kbn/streams-schema';
+import type { FailureStoreFormData } from '@kbn/failure-store-modal';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 
 export function useFailureStoreModal() {
@@ -17,6 +24,9 @@ export function useFailureStoreModal() {
     customRetentionPeriod,
     updateFailureStore,
     canUserManageFailureStore,
+    streamDefinition,
+    view,
+    dataStreamDetails,
   } = useDatasetQualityDetailsState();
 
   const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
@@ -29,19 +39,94 @@ export function useFailureStoreModal() {
     setIsFailureStoreModalOpen(false);
   };
 
-  const handleSaveModal = async (data: {
-    failureStoreEnabled: boolean;
-    customRetentionPeriod?: string;
-  }) => {
-    updateFailureStore({
-      failureStoreEnabled: data.failureStoreEnabled,
-      customRetentionPeriod: data.customRetentionPeriod,
+  const getFailureStoreConfigForStreamView = (data: FailureStoreFormData) => {
+    if ('inherit' in data && data.inherit) {
+      return { inherit: {} };
+    } else if (!data.failureStoreEnabled) {
+      return { disabled: {} };
+    } else if ('retentionDisabled' in data && data.retentionDisabled) {
+      return {
+        lifecycle: { disabled: {} },
+      };
+    } else {
+      return {
+        lifecycle: {
+          enabled: {
+            data_retention:
+              'customRetentionPeriod' in data ? data.customRetentionPeriod : undefined,
+          },
+        },
+      };
+    }
+  };
+
+  const renderModalForStreamView = () => {
+    if (!streamDefinition) {
+      return null;
+    }
+
+    const isWired = view === 'wired';
+    const canShowInherit = !isRootStreamDefinition(streamDefinition.stream);
+
+    const isCurrentlyInherited = isInheritFailureStore(
+      streamDefinition.stream.ingest.failure_store
+    );
+
+    const effectiveFailureStoreEnabled = isEnabledFailureStore(
+      streamDefinition.stream.ingest.failure_store
+    );
+
+    const retentionDisabled = isDisabledLifecycleFailureStore(
+      streamDefinition.stream.ingest.failure_store
+    );
+    const effectiveCustomRetentionPeriod =
+      streamDefinition.stream.ingest.failure_store.lifecycle?.enabled?.data_retention;
+
+    const isServerless = dataStreamDetails?.isServerless ?? false;
+
+    return React.createElement(FailureStoreModal, {
+      onCloseModal: closeModal,
+      onSaveModal: handleSaveModal,
+      failureStoreProps: {
+        failureStoreEnabled: effectiveFailureStoreEnabled,
+        defaultRetentionPeriod,
+        customRetentionPeriod: effectiveCustomRetentionPeriod,
+        retentionDisabled,
+      },
+      ...(canShowInherit && {
+        inheritOptions: {
+          canShowInherit,
+          isWired,
+          isCurrentlyInherited,
+        },
+      }),
+      canShowDisableLifecycle: !isServerless,
     });
+  };
+
+  const handleSaveModal = async (data: FailureStoreFormData) => {
+    const newFailureStoreConfig =
+      view === 'dataQuality'
+        ? {
+            failureStoreDataQualityConfig: {
+              failureStoreEnabled: data.failureStoreEnabled ?? false,
+              customRetentionPeriod:
+                'customRetentionPeriod' in data ? data.customRetentionPeriod : undefined,
+            },
+          }
+        : { failureStoreStreamConfig: getFailureStoreConfigForStreamView(data) };
+
+    updateFailureStore(newFailureStoreConfig);
+
     closeModal();
   };
 
   const renderModal = (): React.ReactElement | null => {
-    if (canUserManageFailureStore && isFailureStoreModalOpen) {
+    if (!canUserManageFailureStore || !isFailureStoreModalOpen) {
+      return null;
+    }
+
+    if (view === 'dataQuality') {
       return React.createElement(FailureStoreModal, {
         onCloseModal: closeModal,
         onSaveModal: handleSaveModal,
@@ -52,7 +137,8 @@ export function useFailureStoreModal() {
         },
       });
     }
-    return null;
+    // For stream views (classic/wired)
+    return renderModalForStreamView();
   };
 
   return {

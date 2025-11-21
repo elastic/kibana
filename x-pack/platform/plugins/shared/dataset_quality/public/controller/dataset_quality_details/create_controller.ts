@@ -31,8 +31,12 @@ export const createDatasetQualityDetailsControllerFactory =
   ({ core, plugins, dataStreamStatsService, dataStreamDetailsService }: Dependencies) =>
   async ({
     initialState,
+    streamsRepositoryClient,
+    refreshDefinition,
   }: {
     initialState: DatasetQualityDetailsPublicStateUpdate;
+    streamsRepositoryClient?: any;
+    refreshDefinition?: () => void;
   }): Promise<DatasetQualityDetailsController> => {
     const initialContext = getContextFromPublicState(initialState);
 
@@ -43,6 +47,8 @@ export const createDatasetQualityDetailsControllerFactory =
       plugins,
       toasts: core.notifications.toasts,
       dataStreamDetailsClient,
+      streamsRepositoryClient,
+      refreshDefinition,
     });
 
     const service = interpret(machine, {

@@ -23,9 +23,13 @@ import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_co
 
 export const useDatasetQualityController = (
   definition: Streams.ingest.all.GetResponse,
-  saveStateInUrl: boolean = true
+  saveStateInUrl: boolean = true,
+  refreshDefinition?: () => void
 ): DatasetQualityDetailsController | undefined => {
-  const { datasetQuality } = useKibana().dependencies.start;
+  const {
+    datasetQuality,
+    streams: { streamsRepositoryClient },
+  } = useKibana().dependencies.start;
   const {
     core: {
       notifications: { toasts },
@@ -61,6 +65,7 @@ export const useDatasetQualityController = (
             to: timeState.timeRange.to,
             refresh: DEFAULT_DATEPICKER_REFRESH,
           },
+          streamDefinition: definition,
         };
       }
 
@@ -71,7 +76,10 @@ export const useDatasetQualityController = (
             view: (Streams.WiredStream.Definition.is(definition.stream)
               ? 'wired'
               : 'classic') as DatasetQualityView,
+            streamDefinition: definition,
           },
+          streamsRepositoryClient,
+          refreshDefinition,
         });
       datasetQualityDetailsController.service.start();
 
@@ -105,12 +113,13 @@ export const useDatasetQualityController = (
     history,
     toasts,
     urlStateStorageContainer,
-    definition.stream.name,
+    definition,
     saveStateInUrl,
-    definition.stream,
     timeState.timeRange.from,
     timeState.timeRange.to,
     setTime,
+    streamsRepositoryClient,
+    refreshDefinition,
   ]);
 
   return controller;
