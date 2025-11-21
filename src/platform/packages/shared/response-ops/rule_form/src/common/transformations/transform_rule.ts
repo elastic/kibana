@@ -40,6 +40,7 @@ const transformFlapping = (flapping: AsApiContract<Rule['flapping']>) => {
   }
 
   return {
+    enabled: flapping.enabled,
     lookBackWindow: flapping.look_back_window,
     statusChangeThreshold: flapping.status_change_threshold,
   };

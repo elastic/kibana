@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import type { flappingSchemaV2 } from '../..';
 
-export const flappingSchema = schema.object({
-  enabled: schema.maybe(schema.boolean()),
-  lookBackWindow: schema.number(),
-  statusChangeThreshold: schema.number(),
-});
+export type Flapping = TypeOf<typeof flappingSchemaV2>;

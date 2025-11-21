@@ -239,6 +239,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     // flapping: {
     //   index: false,
     //   properties: {
+    //     enabled: {
+    //       type: 'boolean',
+    //     },
     //     lookBackWindow: {
     //       type: 'long',
     //     },

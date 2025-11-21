@@ -6,9 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { rawRuleSchema as rawRuleSchemaV6 } from './v6';
+import { flappingSchema as flappingSchemaV2 } from './v2';
 
-export const flappingSchema = schema.object({
+export const flappingSchema = flappingSchemaV2.extends({
   enabled: schema.maybe(schema.boolean()),
-  lookBackWindow: schema.number(),
-  statusChangeThreshold: schema.number(),
+});
+
+export const rawRuleSchema = rawRuleSchemaV6.extends({
+  flapping: schema.maybe(schema.nullable(flappingSchema)),
 });
