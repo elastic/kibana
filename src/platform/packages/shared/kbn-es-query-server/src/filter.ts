@@ -56,11 +56,6 @@ const rangeSchema = schema.object({
  * Used as foundation for condition filters where negation is encoded in the operator
  */
 const commonBasePropertiesSchema = schema.object({
-  pinned: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Whether the filter is pinned' },
-    })
-  ),
   disabled: schema.maybe(
     schema.boolean({
       meta: { description: 'Whether the filter is disabled' },
