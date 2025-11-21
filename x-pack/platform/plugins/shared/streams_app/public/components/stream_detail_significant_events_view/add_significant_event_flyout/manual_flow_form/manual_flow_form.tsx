@@ -30,7 +30,7 @@ interface Props {
   isSubmitting: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
-  features: Omit<Feature, 'description'>[];
+  features: Feature[];
   dataViews: DataView[];
 }
 
@@ -127,7 +127,10 @@ export function ManualFlowForm({
               onChange={(value) => {
                 setQuery({
                   ...query,
-                  feature: value,
+                  feature: {
+                    name: value.name,
+                    filter: value.filter,
+                  },
                 });
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}

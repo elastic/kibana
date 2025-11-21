@@ -10,46 +10,31 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '../../../../../../../../shared_imports';
 import type { PhaseWithAllocation } from '../../../../../../../../../common/types';
 import {
   noCustomAttributesTitle,
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
-const i18nTexts = {
-  body: {
-    warm: (
-      // @ts-expect-error upgrade typescript v5.9.3
-      <>
-        <p>
-          {i18n.translate(
-            'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableDescription',
-            { defaultMessage: 'Data will be allocated to the warm tier.' }
-          )}
-        </p>
-
-        {nodeAllocationMigrationGuidance}
-      </>
-    ),
-    cold: (
-      // @ts-expect-error upgrade typescript v5.9.3
-      <>
-        <p>
-          {i18n.translate(
-            'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableDescription',
-            { defaultMessage: 'Data will be allocated to the cold tier.' }
-          )}
-        </p>
-
-        {nodeAllocationMigrationGuidance}
-      </>
-    ),
-  },
-};
-
 export const DefaultToDataTiersNotice: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
   phase,
 }) => {
+  const {
+    services: { docLinks },
+  } = useKibana();
+
+  const phaseTexts = {
+    warm: i18n.translate(
+      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableDescription',
+      { defaultMessage: 'Data will be allocated to the warm tier.' }
+    ),
+    cold: i18n.translate(
+      'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableDescription',
+      { defaultMessage: 'Data will be allocated to the cold tier.' }
+    ),
+  };
+
   return (
     <EuiCallOut
       data-test-subj="defaultToDataTiersNotice"
@@ -57,7 +42,8 @@ export const DefaultToDataTiersNotice: FunctionComponent<{ phase: PhaseWithAlloc
       title={noCustomAttributesTitle}
       color="primary"
     >
-      {i18nTexts.body[phase]}
+      <p>{phaseTexts[phase]}</p>
+      {nodeAllocationMigrationGuidance({ docLinks })}
     </EuiCallOut>
   );
 };

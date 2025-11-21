@@ -61,6 +61,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     const model = await this.actionsClientChat.createModel({
       connectorId,
       migrationId: this.migrationId,
+      migrationType: 'rules',
       abortController: this.abortController,
     });
 
