@@ -11,6 +11,6 @@ import type { LensApiState } from '../../../schema';
 import type { LensAttributes } from '../../../types';
 
 export interface ValidateTransform {
-  fromState: (attributes: LensAttributes, strict?: boolean) => void;
+  fromState: (attributes: LensAttributes, strict?: boolean, excludedFields?: string[]) => void;
   fromApi: (apiConfig: LensApiState, excludedFields?: string[]) => void;
 }

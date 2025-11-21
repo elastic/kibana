@@ -15,4 +15,4 @@ import type { LensAttributes } from '../../../../types';
  * In some cases things like ids, accessors and defaults are different or missing.
  * This function converts the initial attributes to allow comparing with output attributes.
  */
-export type Canonicalizer<T extends LensAttributes> = (state: T) => T;
+export type Canonicalizer<T extends LensAttributes = LensAttributes> = (state: T) => T;

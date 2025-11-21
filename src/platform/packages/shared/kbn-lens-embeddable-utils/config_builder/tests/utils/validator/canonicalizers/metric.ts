@@ -11,10 +11,11 @@ import type { MetricVisualizationState } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../../../types';
 import { canonicalizeCommonState } from './common';
+import type { Canonicalizer } from './types';
 
 const DEFAULT_LAYER_ID = 'layer_0';
 
-export function canonicalizeMetric(state: LensAttributes): LensAttributes {
+export const canonicalizeMetric: Canonicalizer = (state: LensAttributes): LensAttributes => {
   const metricVizState = state.state.visualization as MetricVisualizationState;
 
   const commonState = canonicalizeCommonState(state, metricVizState.layerId, [
@@ -42,4 +43,4 @@ export function canonicalizeMetric(state: LensAttributes): LensAttributes {
       },
     },
   };
-}
+};

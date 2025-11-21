@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
-
-import type { LensAttributes } from '../../../types';
 import { validateStateTransformsFn } from './validate_state_transforms';
-import type { Canonicalizer } from './canonicalizers/types';
 import { validateApiTransformsFn } from './validate_api_transforms';
 import type { ValidateTransform } from './types';
 
-export function validateTransformsFn(
-  schema: Type<any>,
-  canonicalizer?: Canonicalizer<LensAttributes>
-): ValidateTransform {
+export function validateTransformsFn(chartType: string): ValidateTransform {
   return {
-    fromState: validateStateTransformsFn(schema, canonicalizer),
-    fromApi: validateApiTransformsFn(schema),
+    fromState: validateStateTransformsFn(chartType),
+    fromApi: validateApiTransformsFn(chartType),
   };
 }

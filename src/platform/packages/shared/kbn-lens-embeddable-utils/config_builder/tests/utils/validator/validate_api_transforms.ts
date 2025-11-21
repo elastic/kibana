@@ -9,12 +9,11 @@
 
 import { unset } from 'lodash';
 
-import type { Type } from '@kbn/config-schema';
-
 import { LensConfigBuilder } from '../../../config_builder';
 import type { LensApiState } from '../../../schema';
 import { lensApiStateSchema } from '../../../schema';
 import type { ValidateTransform } from './types';
+import { getChartSchema } from './schema';
 
 /**
  * Test harness to validate LensConfigBuilder conversions
@@ -30,10 +29,11 @@ import type { ValidateTransform } from './types';
  * - Checks that the new API config includes the filtered API config
  * - Note: the excluded fields are expected to be omitted during the conversion to LensStateConfig, so they are not included in the new API config
  */
-export function validateApiTransformsFn(schema: Type<any>): ValidateTransform['fromApi'] {
-  return function validateConverter(apiConfig: LensApiState, excludedFields?: string[]) {
-    const builder = new LensConfigBuilder();
+export function validateApiTransformsFn(chartType: string): ValidateTransform['fromApi'] {
+  const schema = getChartSchema(chartType);
+  const builder = new LensConfigBuilder(undefined, true);
 
+  return function validateApiTransforms(apiConfig: LensApiState, excludedFields?: string[]) {
     expect(() => {
       schema.validate(apiConfig);
     }).not.toThrow();

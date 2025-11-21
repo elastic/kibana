@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { gaugeStateSchema } from '../../../schema/charts/gauge';
-import { tagcloudStateSchema } from '../../../schema/charts/tagcloud';
-import { metricStateSchema } from '../../../schema/charts/metric';
-import { legacyMetricStateSchema } from '../../../schema/charts/legacy_metric';
-import * as canonicalizers from './canonicalizers';
 import { validateTransformsFn } from './validate_transforms';
 import type { ValidateTransform } from './types';
 
 export const validator = {
-  gauge: validateTransformsFn(gaugeStateSchema, canonicalizers.gauge),
-  tagcloud: validateTransformsFn(tagcloudStateSchema, canonicalizers.tagcloud),
-  metric: validateTransformsFn(metricStateSchema, canonicalizers.metric),
-  legacyMetric: validateTransformsFn(legacyMetricStateSchema, canonicalizers.legacyMetric),
+  gauge: validateTransformsFn('gauge'),
+  tagcloud: validateTransformsFn('tagcloud'),
+  metric: validateTransformsFn('metric'),
+  legacyMetric: validateTransformsFn('legacyMetric'),
 } satisfies Record<string, ValidateTransform>;

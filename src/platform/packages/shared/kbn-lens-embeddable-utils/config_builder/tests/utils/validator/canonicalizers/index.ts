@@ -7,8 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { canonicalizeXY as xy } from './xy';
-export { canonicalizeMetric as metric } from './metric';
-export { canonicalizeLegacyMetric as legacyMetric } from './legacy_metric';
-export { canonicalizeGauge as gauge } from './gauge';
-export { canonicalizeTagcloud as tagcloud } from './tagcloud';
+import type { Canonicalizer } from './types';
+import { canonicalizeXY } from './xy';
+import { canonicalizeMetric } from './metric';
+import { canonicalizeLegacyMetric } from './legacy_metric';
+import { canonicalizeGauge } from './gauge';
+import { canonicalizeTagcloud } from './tagcloud';
+
+const chartCanonicalizers = {
+  xy: canonicalizeXY,
+  gauge: canonicalizeGauge,
+  tagcloud: canonicalizeTagcloud,
+  metric: canonicalizeMetric,
+  legacyMetric: canonicalizeLegacyMetric,
+} satisfies Record<string, Canonicalizer>;
+
+export function getChartCanonicalizer(chartType: string): Canonicalizer | undefined {
+  return (chartCanonicalizers as any)[chartType];
+}

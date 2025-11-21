@@ -27,13 +27,12 @@ import type { ValidateTransform } from './types';
  * - Validates against the provided schema
  * - Validates against the general lensApiStateSchema
  */
-export function validateStateTransformsFn(
-  schema: Type<any>,
-  canonicalizer?: Canonicalizer<LensAttributes>
-): ValidateTransform['fromState'] {
-  return function validateConverter(attributes, strict = false) {
-    const builder = new LensConfigBuilder();
+export function validateStateTransformsFn(chartType: string): ValidateTransform['fromState'] {
+  const schema = getChartSchema(chartType);
+  const canonicalizer = getChartCanonicalizer(chartType);
+  const builder = new LensConfigBuilder(undefined, true);
 
+  return function validateStateTransforms(attributes, strict = false, excludedFields = []) {
     const newApiConfig = builder.toAPIFormat(attributes);
 
     expect(() => {

@@ -8,7 +8,8 @@
  */
 
 import type { LensAttributes } from '../../../../types';
+import type { Canonicalizer } from './types';
 
-export function canonicalizeTagcloud(state: LensAttributes): LensAttributes {
+export const canonicalizeTagcloud: Canonicalizer = (state: LensAttributes): LensAttributes => {
   return state; // TODO
-}
+};
