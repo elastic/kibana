@@ -10,11 +10,11 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('apis', () => {
     // load new platform deployment-agnostic test here
-    // loadTestFile(require.resolve('../../apis/core'));
-    // loadTestFile(require.resolve('../../apis/management'));
-    // loadTestFile(require.resolve('../../apis/painless_lab'));
-    // loadTestFile(require.resolve('../../apis/saved_objects_management'));
-    // loadTestFile(require.resolve('../../apis/intercepts'));
+    loadTestFile(require.resolve('../../apis/core'));
+    loadTestFile(require.resolve('../../apis/management'));
+    loadTestFile(require.resolve('../../apis/painless_lab'));
+    loadTestFile(require.resolve('../../apis/saved_objects_management'));
+    loadTestFile(require.resolve('../../apis/intercepts'));
     loadTestFile(require.resolve('../../apis/streams'));
   });
 }
