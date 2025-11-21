@@ -56,7 +56,7 @@ Each infrastructure component you identify should have:
 
 *   **`name`**: A short, specific name for the infrastructure component (e.g., "AWS EC2", "Kubernetes", "Debian 11", "Docker Engine").
 *   **`description`**: A clear description of what this infrastructure component is and its role (e.g., "Amazon Elastic Compute Cloud (EC2) virtual machine instances providing compute capacity").
-*   **`provider`**: (Optional) The provider of this infrastructure, typically used for cloud platforms (e.g., "AWS", "GCP", "Azure"). Omit if not applicable (e.g., for open-source software like Kubernetes or Linux distributions).
+*   **`provider`**: (Optional) The cloud provider name for cloud-based infrastructure (e.g., "AWS", "GCP", "Azure", "Oracle Cloud", "IBM Cloud"). Only use this field for cloud platforms. Omit for non-cloud infrastructure like operating systems, orchestration platforms, or container runtimes.
 
 ---
 ### Infrastructure Categories and Examples
