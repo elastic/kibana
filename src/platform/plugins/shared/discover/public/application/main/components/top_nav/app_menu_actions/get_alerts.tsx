@@ -109,8 +109,8 @@ const CreateAlertFlyout: React.FC<{
       initialValues={{ params: getParams() }}
       validConsumers={EsQueryValidConsumer}
       shouldUseRuleProducer
-      // Default to the Alerts consumer if it's available. This should fall back to Stack Alerts if it's not.
-      multiConsumerSelection={AlertConsumers.ALERTS}
+      // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
+      multiConsumerSelection={AlertConsumers.LOGS}
     />
   );
 };
