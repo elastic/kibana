@@ -10,6 +10,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import type { Attachment } from '../../lib/streams/attachments/types';
 import { ATTACHMENT_TYPES } from '../../lib/streams/attachments/types';
+import { assertAttachmentsAccess } from '../utils/assert_attachments_access';
 
 export interface ListAttachmentsResponse {
   attachments: Attachment[];
@@ -90,7 +91,10 @@ const listAttachmentsRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListAttachmentsResponse> {
-    const { attachmentClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertAttachmentsAccess({ uiSettingsClient });
     await streamsClient.ensureStream(params.path.streamName);
 
     const {
@@ -157,7 +161,11 @@ const linkAttachmentRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkAttachmentResponse> => {
-    const { attachmentClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertAttachmentsAccess({ uiSettingsClient });
+
     const {
       path: { attachmentId, attachmentType, streamName },
     } = params;
@@ -229,7 +237,10 @@ const unlinkAttachmentRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkAttachmentResponse> => {
-    const { attachmentClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertAttachmentsAccess({ uiSettingsClient });
 
     await streamsClient.ensureStream(params.path.streamName);
 
@@ -336,7 +347,10 @@ const bulkAttachmentsRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<BulkUpdateAttachmentsResponse> => {
-    const { attachmentClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertAttachmentsAccess({ uiSettingsClient });
 
     const {
       path: { streamName },

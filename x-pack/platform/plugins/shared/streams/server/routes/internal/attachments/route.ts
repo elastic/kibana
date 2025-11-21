@@ -10,6 +10,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type { Attachment } from '../../../lib/streams/attachments/types';
 import { ATTACHMENT_TYPES } from '../../../lib/streams/attachments/types';
+import { assertAttachmentsAccess } from '../../utils/assert_attachments_access';
 
 const attachmentTypeSchema = z.enum(ATTACHMENT_TYPES);
 
@@ -40,7 +41,10 @@ const suggestAttachmentsRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<SuggestAttachmentsResponse> => {
-    const { attachmentClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertAttachmentsAccess({ uiSettingsClient });
 
     await streamsClient.ensureStream(params.path.streamName);
 

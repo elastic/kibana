@@ -288,9 +288,10 @@ export async function getAttachments(options: {
   apiClient: StreamsSupertestRepositoryClient;
   stream: string;
   type?: AttachmentType;
+  expectedStatusCode?: number;
   spaceId?: string;
 }) {
-  const { apiClient, stream, type, spaceId } = options;
+  const { apiClient, stream, type, expectedStatusCode = 200, spaceId } = options;
 
   const baseEndpoint = 'GET /api/streams/{streamName}/attachments 2023-10-31';
   const endpoint = spaceId
@@ -304,7 +305,7 @@ export async function getAttachments(options: {
     },
   });
 
-  expect(response.status).to.be(200);
+  expect(response.status).to.be(expectedStatusCode);
   return response.body;
 }
 
@@ -342,9 +343,18 @@ export async function getAttachmentSuggestions(options: {
   type?: AttachmentType;
   tags?: string[];
   query?: string;
+  expectedStatusCode?: number;
   spaceId?: string;
 }) {
-  const { apiClient, stream, type, tags = [], query = '', spaceId } = options;
+  const {
+    apiClient,
+    stream,
+    type,
+    tags = [],
+    query = '',
+    expectedStatusCode = 200,
+    spaceId,
+  } = options;
 
   const baseEndpoint = 'POST /internal/streams/{streamName}/attachments/_suggestions';
   const endpoint = spaceId
@@ -358,7 +368,7 @@ export async function getAttachmentSuggestions(options: {
       query: { query, ...(type ? { attachmentType: type } : {}) },
     },
   });
-  expect(response.status).to.be(200);
+  expect(response.status).to.be(expectedStatusCode);
 
   return response.body;
 }
