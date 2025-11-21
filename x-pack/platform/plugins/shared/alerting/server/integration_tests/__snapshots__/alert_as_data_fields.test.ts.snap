@@ -683,11 +683,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
-      "required": false,
-      "type": "keyword",
-    },
     "kibana.alert.case_ids": Object {
       "array": true,
       "required": false,
@@ -1375,11 +1370,6 @@ Object {
     "kibana.alert.ancestors.type": Object {
       "array": false,
       "required": true,
-      "type": "keyword",
-    },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
-      "required": false,
       "type": "keyword",
     },
     "kibana.alert.building_block_type": Object {
@@ -2559,11 +2549,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
-      "required": false,
-      "type": "keyword",
-    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -3739,11 +3724,6 @@ Object {
     "kibana.alert.ancestors.type": Object {
       "array": false,
       "required": true,
-      "type": "keyword",
-    },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
-      "required": false,
       "type": "keyword",
     },
     "kibana.alert.building_block_type": Object {
@@ -4923,11 +4903,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
-      "required": false,
-      "type": "keyword",
-    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -6103,11 +6078,6 @@ Object {
     "kibana.alert.ancestors.type": Object {
       "array": false,
       "required": true,
-      "type": "keyword",
-    },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
-      "required": false,
       "type": "keyword",
     },
     "kibana.alert.building_block_type": Object {
@@ -7293,11 +7263,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
-      "required": false,
-      "type": "keyword",
-    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -8475,11 +8440,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
-      "required": false,
-      "type": "keyword",
-    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -9655,11 +9615,6 @@ Object {
     "kibana.alert.ancestors.type": Object {
       "array": false,
       "required": true,
-      "type": "keyword",
-    },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
-      "required": false,
       "type": "keyword",
     },
     "kibana.alert.building_block_type": Object {

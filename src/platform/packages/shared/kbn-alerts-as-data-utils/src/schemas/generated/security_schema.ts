@@ -127,7 +127,6 @@ const SecurityAlertOptional = rt.partial({
   'host.asset.criticality': schemaString,
   'kibana.alert.action_group': schemaString,
   'kibana.alert.ancestors.rule': schemaString,
-  'kibana.alert.attack_ids': schemaStringArray,
   'kibana.alert.building_block_type': schemaString,
   'kibana.alert.case_ids': schemaStringArray,
   'kibana.alert.consecutive_matches': schemaStringOrNumber,
