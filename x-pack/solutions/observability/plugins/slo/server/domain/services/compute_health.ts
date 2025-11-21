@@ -24,6 +24,7 @@ interface Item {
   instanceId?: string;
   revision: number;
   name: string;
+  enabled: boolean;
 }
 
 interface Dependencies {
@@ -37,9 +38,9 @@ export interface SLOHealth {
   sloName: string;
   state: State;
   health: {
-    overall: TransformHealth;
-    rollup: HealthStatus;
-    summary: HealthStatus;
+    overall: HealthStatus;
+    rollup: TransformHealth;
+    summary: TransformHealth;
   };
 }
 
@@ -49,11 +50,11 @@ const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
 export async function computeHealth(list: Item[], deps: Dependencies): Promise<SLOHealth[]> {
   const [summaryDocsById, transformStatsById] = await Promise.all([
     getSummaryDocsById(list, deps),
-    getTransformStats(list, deps),
+    getTransformStatsById(list, deps),
   ]);
 
   return list.map((item) => {
-    const health = computeTransformHealth(transformStatsById, item);
+    const health = computeTransformsHealth(transformStatsById, item);
     const state = computeTransformState(summaryDocsById, item);
 
     return {
@@ -92,7 +93,7 @@ async function getSummaryDocsById(list: Item[], deps: Dependencies) {
   return summaryDocsById;
 }
 
-async function getTransformStats(
+async function getTransformStatsById(
   list: Item[],
   deps: Dependencies
 ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
@@ -144,38 +145,47 @@ function computeTransformState(
 
 function getTransformHealth(
   transformStat?: TransformGetTransformStatsTransformStats
-): HealthStatus {
+): TransformHealth {
   if (!transformStat) {
     return {
       status: 'missing',
+      state: 'unavailable',
     };
   }
+
+  const transformStatus = transformStat.health?.status?.toLowerCase();
   const transformState = transformStat.state?.toLowerCase();
-  return transformStat.health?.status?.toLowerCase() === 'green'
-    ? {
-        status: 'healthy',
-        transformState: transformState as HealthStatus['transformState'],
-      }
-    : {
-        status: 'unhealthy',
-        transformState: transformState as HealthStatus['transformState'],
-      };
+
+  return {
+    status: transformStatus === 'green' ? 'healthy' : 'unhealthy',
+    state:
+      transformState === 'started'
+        ? 'started'
+        : transformState === 'stopped'
+        ? 'stopped'
+        : 'unavailable',
+  };
 }
 
-function computeTransformHealth(
+function computeTransformsHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
   item: Item
-): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
+): { overall: HealthStatus; rollup: TransformHealth; summary: TransformHealth } {
   const rollup = getTransformHealth(transformStatsById[getSLOTransformId(item.id, item.revision)]);
   const summary = getTransformHealth(
     transformStatsById[getSLOSummaryTransformId(item.id, item.revision)]
   );
 
-  const overall: 'healthy' | 'unhealthy' =
+  const rollupStateMatchesSloEnabled =
+    (item.enabled && rollup.state === 'started') || (!item.enabled && rollup.state === 'stopped');
+  const summaryStateMatchesSloEnabled =
+    (item.enabled && rollup.state === 'started') || (!item.enabled && rollup.state === 'stopped');
+
+  const overall: HealthStatus =
     rollup.status === 'healthy' &&
-    rollup.transformState === 'started' &&
+    rollupStateMatchesSloEnabled &&
     summary.status === 'healthy' &&
-    summary.transformState === 'started'
+    summaryStateMatchesSloEnabled
       ? 'healthy'
       : 'unhealthy';
 

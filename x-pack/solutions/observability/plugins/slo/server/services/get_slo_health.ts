@@ -30,6 +30,7 @@ export class GetSLOHealth {
         instanceId: item.sloInstanceId,
         revision: definitionById[item.sloId].revision,
         name: definitionById[item.sloId].name,
+        enabled: definitionById[item.sloId].enabled,
       }));
 
     const results = await computeHealth(list, { scopedClusterClient: this.scopedClusterClient });

@@ -14,20 +14,12 @@ import * as t from 'io-ts';
  * If types need to diverge, they should be split into separate files.
  */
 
-const transformHealthSchema = t.union([
-  t.literal('healthy'),
-  t.literal('unhealthy'),
-  t.literal('missing'),
-]);
+const healthStatusSchema = t.union([t.literal('healthy'), t.literal('unhealthy')]);
 
-const healthStatusSchema = t.intersection([
-  t.partial({
-    transformState: t.union([t.literal('stopped'), t.literal('started')]),
-  }),
-  t.type({
-    status: transformHealthSchema,
-  }),
-]);
+const transformHealthSchema = t.type({
+  status: t.union([t.literal('healthy'), t.literal('unhealthy'), t.literal('missing')]),
+  state: t.union([t.literal('stopped'), t.literal('started'), t.literal('unavailable')]),
+});
 
 const stateSchema = t.union([
   t.literal('no_data'),

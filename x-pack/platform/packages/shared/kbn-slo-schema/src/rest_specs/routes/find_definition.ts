@@ -21,9 +21,9 @@ const findSloDefinitionsParamsSchema = t.partial({
 
 const healthMetadataSchema = t.partial({
   health: t.type({
-    overall: transformHealthSchema,
-    rollup: healthStatusSchema,
-    summary: healthStatusSchema,
+    overall: healthStatusSchema,
+    rollup: transformHealthSchema,
+    summary: transformHealthSchema,
   }),
 });
 
