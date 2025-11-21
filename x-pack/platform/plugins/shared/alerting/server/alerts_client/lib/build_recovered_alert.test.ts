@@ -16,6 +16,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -96,6 +97,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -104,6 +106,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -169,6 +172,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -177,6 +181,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -236,6 +241,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
               [SPACE_IDS]: ['*'],
             }
           : {
@@ -245,6 +251,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -340,6 +347,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -348,6 +356,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -407,6 +416,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -415,6 +425,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -518,6 +529,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -526,6 +538,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -627,6 +640,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -635,6 +649,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -735,6 +750,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -743,6 +759,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },

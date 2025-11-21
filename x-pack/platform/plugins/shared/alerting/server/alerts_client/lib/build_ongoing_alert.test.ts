@@ -16,6 +16,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -82,6 +83,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -90,6 +92,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -147,6 +150,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -155,6 +159,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -228,6 +233,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -236,6 +242,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -310,6 +317,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -318,6 +326,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -388,6 +397,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -396,6 +406,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -483,6 +494,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -491,6 +503,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -544,6 +557,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -552,6 +566,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -645,6 +660,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -653,6 +669,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -751,6 +768,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -759,6 +777,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -838,6 +857,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -847,6 +867,7 @@ for (const flattened of [true, false]) {
                 alert: {
                   nested_field: 3,
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },
@@ -940,6 +961,7 @@ for (const flattened of [true, false]) {
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_START]: '2023-03-28T12:27:28.159Z',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -948,6 +970,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  muted: false,
                   start: '2023-03-28T12:27:28.159Z',
                   uuid: 'abcdefg',
                 },

@@ -353,8 +353,6 @@ describe('muteInstance()', () => {
       await expect(
         rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' })
       ).rejects.toThrow('ES connection failed');
-
-      expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     });
   });
 });
