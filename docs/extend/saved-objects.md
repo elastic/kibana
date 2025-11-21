@@ -56,7 +56,7 @@ export const dashboardVisualization: SavedObjectsType = {
 
 1. Since the name of a Saved Object type may form part of the URL path for the public Saved Objects HTTP API, these should follow our API URL path convention and always be written in snake case.
 2. This field determines "space behavior", whether these objects can exist in one space, multiple spaces, or all spaces. This value means that objects of this type can only exist in a single space. See [Sharing Saved Objects](/extend/sharing-saved-objects.md) for more information.
-3. This field determines whether repositories have access to the type by default. Hidden types will not be automatically exposed via the Saved Objects Client APIs.
+3. This field determines whether repositories have access to the type by default. Hidden types will not be automatically exposed via the Saved Objects Client APIs nor the Saved Objects HTTP APIs.
 Hidden types must be listed in `SavedObjectsClientProviderOptions[includedHiddenTypes]` to be accessible by the client.
 
 ```typescript
@@ -130,7 +130,7 @@ Will result in the following mappings being applied to the `.kibana_analytics` i
 
 Do not use field mappings like you would use data types for the columns of a SQL database. Instead, field mappings are analogous to a SQL index. Only specify field mappings for the fields you wish to search on or query. By specifying `dynamic: false` in any level of your mappings, {{es}} will accept and store any other fields even if they are not specified in your mappings.
 
-Never use `enabled: false` or `index: false` in your mappings. {{es}} does not support toggling these mapping options, so if your plugin ever needs to query the data, you will not be able to do so. Since these fields cannot be queried, they would require migrating to a new field and making associated code changes. Instead, use `dynamic: false` which provides the same flexibility while maintaining the future ability to query fields if necessary.
+Never use `enabled: false` or `index: false` in your mappings. {{es}} does not support toggling these mapping options, so if your plugin ever needs to query the data, you will not be able to do so. Since these fields cannot be queried, they would require migrating to a new field and making associated code changes. Instead, use `dynamic: false` which provides the same flexibility while maintaining the future ability to query fields if necessary or do not specify a mapping for the field at all -- it will still be stored, just not mapped for search or aggregations.
 
 Here's an example of what NOT to do:
 
@@ -213,7 +213,7 @@ identify this reference. This guarantees that the id the reference points to alw
  visualization id was directly stored in `dashboard.panels[0].visualization` there is a risk that this id gets updated without
  updating the reference in the references array.
 
-## Model versions
+## Model versions [model-versions]
 
 The modelVersion API is a new way to define transformations (*"migrations"*) for your savedObject types, and will
 replace the "old" migration API after Kibana version `8.10.0` (where it will no longer be possible to register
@@ -221,8 +221,8 @@ migrations using the old system).
 
 The main purpose of this API is to address two problems of the old migration system regarding managed ("serverless") deployments:
 
-* savedObjects model versioning is coupled to the stack versioning (migrations are registered per stack version)
-* migration functions are not safe in regard to our BWC and ZDT requirements (Kibana N and N+1 running at the same time during upgrade)
+* classic versioning (using the deprecated [migrations](https://github.com/elastic/kibana/blob/8efc5263142043c40648fe23270a06bb1d6b6234/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L81-L88)) is coupled to the stack versioning (migrations are registered per stack version)
+* migration functions are not safe in regard to our backwards-compatibility and and zero-downtime upgrade requirements (older versions of {{kib}} should continue to work as we run migrations)
 
 This API also intend to address minor DX issues of the old migration system, by having a more explicit definition of saved Objects "versions".
 
@@ -273,8 +273,9 @@ This map follows a similar `{ [version number] => version definition }` format a
 The first version must be numbered as version 1, incrementing by one for each new version.
 
 That way:
-*SO type versions are decoupled from stack versioning
-*SO type versions are independent between types
+
+* SO type versions are decoupled from stack versioning
+* SO type versions are independent between types
 
 *a **valid** version numbering:*
 
@@ -1355,14 +1356,16 @@ These errors are pretty obvious. Model versions must be defined as consecutive n
 ❌ The SO type '<soType>' is defining two (or more) new model versions.
 ```
 
-**Problem:** To ensure seamless rollouts, and safe rollbacks, some features need to be rolled out as several incremental changes where each incremental change is guaranteed to be released before the next. See more details in [this document](https://docs.google.com/document/d/1e1vZldfwqUXEdbspSSO3C3ltGQTErp7oKhzUDNSG01Y/edit?tab=t.0).
+**Problem:** To ensure seamless rollouts, and safe rollbacks, some features need to be rolled out as several incremental changes where each incremental change is guaranteed to be released before the next. For instance, a new property cannot be introduced, backfilled and assumed to be present in the same release.
+
 **Scenario 1:** I am developing a large feature and including multiple changes in my SO type. If changes are unrelated (in the sense that they don't require a 2-step rollout), you should be able to condense them into a single `modelVersion`.
 **Scenario 2:** I have only defined 1 new `modelVersion`. My PR was green before and all of a sudden it started failing :shrug:. The sanity checks on SO changes are performed against 2 baselines:
 
 * Your PR merge base commit (or one of its ancestors). This should not change, so likely not the culprit.
-* The current serverless release. If a high-severity issue occurs, Serverless might be rolled back to a previous version. This could in turn impact CI pipelines for PRs that would otherwise be fine. In other words, *"from the current serverless standpoint, your PR is not releasable at the moment"* . This should only happen exceptionally. Please take a look at the `#kibana-mission-control` channel to see if something is going on.
+* The current serverless release. If a high-severity issue occurs, Serverless might be rolled back to a previous version. This could in turn impact CI pipelines for PRs that would otherwise be fine. In other words, *"from the current serverless standpoint, your PR is not releasable at the moment"* . This should only happen exceptionally.
+
   * **Scenario 2.1**: {{kib}} has been rolled back. Please wait until the situation goes back to normal, i.e. an emergency release is performed after the rollback, and {{kib}} gets to a normal release state.
-  * **Scenario 2.2**: {{kib}} has NOT been rolled back. Reach out to `#kibana-core` and we will help you figure out what's going on.
+  * **Scenario 2.2**: {{kib}} has NOT been rolled back. Reach out to the {{kib}} Core team and we will help you figure out what's going on.
 
 ```shell
 ❌ The following SO types are no longer registered: '<soType>'. Please run with --fix to update 'removed_types.json'.
