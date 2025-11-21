@@ -38,7 +38,8 @@
     "@kbn/onechat-common",
     "@kbn/cloud",
     "@kbn/cloud-plugin",
-    "@kbn/share-plugin"
+    "@kbn/share-plugin",
+    "@kbn/spaces-plugin"
   ],
   "exclude": [
     "target/**/*",
