@@ -7,19 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnvironmentMode, PackageInfo } from '@kbn/config';
-import type { LoggerFactory } from '@kbn/logging';
-import type { CoreId } from '@kbn/core-base-common-internal';
+export { useCoreEnv } from './core_env_context';
 
-/** @internal */
-export interface CoreContext {
-  coreId: CoreId;
-  logger: LoggerFactory;
-  env: CoreEnv;
-}
-
-/** @internal */
-export interface CoreEnv {
-  mode: Readonly<EnvironmentMode>;
-  packageInfo: Readonly<PackageInfo>;
-}
+export { CoreEnvContextProvider } from './core_env_context';

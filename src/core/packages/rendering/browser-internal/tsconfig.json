@@ -37,7 +37,8 @@
     "@kbn/core-chrome-layout",
     "@kbn/core-feature-flags-browser-mocks",
     "@kbn/core-chrome-layout-feature-flags",
-    "@kbn/global-redirect-app-links"
+    "@kbn/global-redirect-app-links",
+    "@kbn/core-base-browser-internal"
   ],
   "exclude": [
     "target/**/*"

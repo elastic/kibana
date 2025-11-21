@@ -1,0 +1,65 @@
+---
+id: react/context/env
+slug: /react/context/env
+title: React Context - Environment
+description: Hooks for accessing Kibana environment configuration.
+tags: ['shared-ux', 'react', 'context']
+date: 2025-11-21
+---
+
+> **⚠️ Internal Package** - This package is intended for internal use by `@kbn/react-kibana-context-root` only. Do not use directly in applications. Use `@kbn/react-kibana-context-root` instead.
+
+## Hooks
+
+### useIsServerless()
+
+Returns `true` if Kibana is running in serverless mode.
+
+```ts
+import { useIsServerless } from '@kbn/react-kibana-context-env';
+
+export const MyComponent = () => {
+  const isServerless = useIsServerless();
+  return <div>{isServerless ? 'Serverless' : 'Stateful'}</div>;
+};
+```
+
+### useKibanaVersion()
+
+Returns the current Kibana version.
+
+```ts
+import { useKibanaVersion } from '@kbn/react-kibana-context-env';
+
+export const MyComponent = () => {
+  const version = useKibanaVersion();
+  return <div>Version: {version}</div>;
+};
+```
+
+### useIsDevMode()
+
+Returns `true` if Kibana is running in development mode.
+
+```ts
+import { useIsDevMode } from '@kbn/react-kibana-context-env';
+
+export const MyComponent = () => {
+  const isDevMode = useIsDevMode();
+  return <div>{isDevMode ? 'Dev Mode' : 'Production'}</div>;
+};
+```
+
+## Provider
+
+### CoreEnvContextProvider
+
+Provider component that supplies environment configuration to child components. Typically used at the application root.
+
+```ts
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+
+<CoreEnvContextProvider>
+  <App />
+</CoreEnvContextProvider>
+```

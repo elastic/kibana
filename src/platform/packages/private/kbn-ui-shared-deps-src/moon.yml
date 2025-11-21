@@ -62,6 +62,7 @@ tasks:
       - /src/platform/packages/shared/react/kibana_context/root/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_context/render/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_context/theme/**/*.{js,ts,tsx}
+      - /src/platform/packages/shared/react/kibana_context/env/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/shared-ux/router/impl/**/*.{js,ts,tsx}
       - /src/platform/packages/private/kbn-ui-shared-deps-npm/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_mount/**/*.{js,ts,tsx}
