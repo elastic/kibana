@@ -59,7 +59,7 @@ describe(
       cleanupRule(ruleId);
     });
 
-    it('adds response actions with osquery with proper validation and form values', () => {
+    it('adds response actions with osquery with proper validation and form values dummy', () => {
       cy.visit('/app/security/rules');
       clickRuleName(ruleName);
       cy.getBySel('globalLoadingIndicator').should('not.exist');
