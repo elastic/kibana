@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './find_gaps';
-export * from './gap';
-export * from './intervals';
+export type * from './find_gaps';
+export type * from './gap';
+export type * from './intervals';
