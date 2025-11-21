@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
+import {
+  openRetentionModal,
+  saveRetentionChanges,
+  setCustomRetention,
+  toggleInheritSwitch,
+  verifyRetentionDisplay,
+} from '../../../fixtures/retention_helpers';
 
 test.describe(
-  'Stream data retention - updating data retention',
+  'Stream data retention - custom retention periods',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
@@ -29,49 +35,75 @@ test.describe(
       await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
     });
 
+    test.afterEach(async ({ apiServices, pageObjects }) => {
+      await pageObjects.toasts.closeAll();
+      // Clean up the stream to ensure fresh state for next test
+      await apiServices.streams.clearStreamChildren('logs');
+    });
+
     test.afterAll(async ({ apiServices }) => {
       await apiServices.streams.disable();
     });
 
-    test('should update a stream data retention policy successfully', async ({ page }) => {
-      // Update to a specific retention policy first
-      await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
+    test('should set and reset retention policy', async ({ page }) => {
+      // Set a specific retention policy
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '7', 'd');
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '7 days');
 
-      // Toggle off the inherit switch to enable other options
-      await page.getByTestId('inheritDataRetentionSwitch').click();
-      await expect(page.getByTestId('inheritDataRetentionSwitch')).not.toBeChecked();
-
-      await page.getByRole('button', { name: 'Custom period' }).click();
-      await page.getByTestId('streamsAppDslModalDaysField').fill('7');
-      await page.getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByTestId('retention-metric').getByText('7 days')).toBeVisible();
+      // Reset to inherit
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, true);
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '∞');
     });
 
-    test('should reset a stream data retention policy successfully', async ({
-      page,
-      pageObjects,
-    }) => {
-      // Set a specific retention policy first
-      await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
+    test('should set retention with days unit', async ({ page }) => {
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '30', 'd');
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '30 days');
+    });
 
-      // Toggle off the inherit switch to enable other options
-      await page.getByTestId('inheritDataRetentionSwitch').click();
-      await expect(page.getByTestId('inheritDataRetentionSwitch')).not.toBeChecked();
-      await page.getByRole('button', { name: 'Custom period' }).click();
-      await page.getByTestId('streamsAppDslModalDaysField').fill('7');
-      await page.getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByTestId('retention-metric').getByText('7 days')).toBeVisible();
-      await pageObjects.toasts.closeAll();
+    test('should set retention with hours unit', async ({ page }) => {
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '24', 'h');
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '24 hours');
+    });
 
-      // Reset the retention policy
-      await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
+    test('should set retention with minutes unit', async ({ page }) => {
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '60', 'm');
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '60 minutes');
+    });
 
-      // Toggle the inherit switch back on
-      await page.getByTestId('inheritDataRetentionSwitch').click();
-      await expect(page.getByTestId('inheritDataRetentionSwitch')).toBeChecked();
-      await page.getByRole('button', { name: 'Save' }).click();
+    test('should set retention with seconds unit', async ({ page }) => {
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '3600', 's');
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '3600 seconds');
+    });
 
-      await expect(page.getByTestId('retention-metric').getByText('∞')).toBeVisible();
+    test('should persist retention value across page refresh', async ({ page, pageObjects }) => {
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '30', 'd');
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '30 days');
+
+      // Refresh the page
+      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+
+      // Verify the value persists
+      await verifyRetentionDisplay(page, '30 days');
     });
   }
 );
