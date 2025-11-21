@@ -181,7 +181,7 @@ describe('DashboardsSelector', () => {
       expect(mockSearchExecute).toHaveBeenCalledWith(
         expect.objectContaining({
           search: {
-            search: undefined,
+            search: '',
             per_page: 100,
           },
         })
@@ -217,11 +217,10 @@ describe('DashboardsSelector', () => {
 
     await waitFor(() => {
       expect(mockSearchExecute).toHaveBeenCalled();
-      const lastCall = mockSearchExecute.mock.calls[mockSearchExecute.mock.calls.length - 1];
-      expect(lastCall[0]).toEqual(
+      expect(mockSearchExecute).toHaveBeenLastCalledWith(
         expect.objectContaining({
           search: {
-            search: undefined,
+            search: '',
             per_page: 100,
           },
         })

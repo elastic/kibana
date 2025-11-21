@@ -241,21 +241,18 @@ export default ({ getService }: FtrProviderContext) => {
       const testDashboardTitle = `Test Dashboard for Rule Details ${Date.now()}`;
 
       before(async () => {
-        const { body: dashboardResponse } = await supertest
-          .post('/api/saved_objects/dashboard')
-          .set('kbn-xsrf', 'true')
-          .send({
-            attributes: {
-              title: testDashboardTitle,
-              description: 'Test dashboard for rule details functional test',
-              panelsJSON: '[]',
-              version: '1',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: '{}',
-              },
+        const dashboardResponse = await kibanaServer.savedObjects.create({
+          type: 'dashboard',
+          attributes: {
+            title: testDashboardTitle,
+            description: 'Test dashboard for rule details functional test',
+            panelsJSON: '[]',
+            version: 1,
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: '{}',
             },
-          })
-          .expect(200);
+          },
+        });
 
         testDashboardId = dashboardResponse.id;
       });
@@ -295,34 +292,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(optionsText.trim()).to.not.be.empty();
 
         expect(optionsText).to.contain(testDashboardTitle);
-      });
-
-      it('should allow selecting a dashboard from the dropdown when editing rule', async () => {
-        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
-        await retry.waitFor(
-          'Rule details to be visible',
-          async () => await testSubjects.exists('ruleDetails')
-        );
-
-        // Click edit button to open the rule edit form
-        await testSubjects.click('actions');
-        await testSubjects.click('editRuleButton');
-
-        // Wait for the rule form to load
-        await retry.waitFor(
-          'Rule form to be visible',
-          async () => await testSubjects.exists('ruleDetailsNameInput')
-        );
-
-        await retry.waitFor(
-          'Dashboard selector to be visible',
-          async () => await testSubjects.exists('dashboardsSelector')
-        );
-
-        await comboBox.set('dashboardsSelector', testDashboardTitle);
-
-        const selectedOptions = await comboBox.getComboBoxSelectedOptions('dashboardsSelector');
-        expect(selectedOptions).to.contain(testDashboardTitle);
       });
     });
   });

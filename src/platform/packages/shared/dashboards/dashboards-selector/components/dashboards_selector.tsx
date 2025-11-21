@@ -127,7 +127,7 @@ export function DashboardsSelector({
     try {
       const trimmedSearch = searchValue.trim();
       const dashboards = await searchDashboards(uiActions, {
-        search: trimmedSearch || undefined,
+        search: trimmedSearch,
         perPage: 100,
       });
       const dashboardOptions = dashboards.map((dashboard) => ({
