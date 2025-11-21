@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './actions';
-
-export { setupEnvironment, WithAppDependencies } from './setup_environment';
+export * from './mappings';
