@@ -92,6 +92,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
+        await lens.ensureLayerTabIsActive(1);
+
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
 
         const referenceLineDimensions = await testSubjects.findAllDescendant(
@@ -102,10 +104,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await referenceLineDimensions[0].getVisibleText()).to.be('Static value: 10');
       });
 
-      // switch to data tab
-      await lens.ensureLayerTabIsActive(1);
-
       await retry.try(async () => {
+        // switch to data tab
+        await lens.ensureLayerTabIsActive(0);
+
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
         const dimensions = await testSubjects.findAllDescendant('lns-dimensionTrigger', layers[0]);
         expect(dimensions).to.have.length(2);
