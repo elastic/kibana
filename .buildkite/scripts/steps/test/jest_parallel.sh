@@ -78,7 +78,9 @@ export JEST_ALL_CHECKPOINT_PATH="$CHECKPOINT_FILE"
 if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
   echo "--- Downloading checkpoint from previous run attempt"
   set +e
-  buildkite-agent artifact download "$CHECKPOINT_FILE" . --step "${BUILDKITE_STEP_ID}"
+  # Don't restrict to specific step ID - the step ID changes on retry
+  # Search for the checkpoint file across all steps in this build
+  buildkite-agent artifact download "$CHECKPOINT_FILE" .
   checkpoint_download_code=$?
   set -e
   
