@@ -392,7 +392,7 @@ describe('getConnectorTypeSuggestions', () => {
     });
 
     it('should handle empty connector list', () => {
-      (getConnectorsCache as jest.Mock).mockReturnValue([]);
+      (getConnectorsCache as jest.Mock).mockReturnValue(getConnectorsCacheFromList([]));
       const result = getConnectorTypeSuggestions('', mockRange);
       // Should still have built-in steps
       expect(result.length).toBeGreaterThanOrEqual(6);
