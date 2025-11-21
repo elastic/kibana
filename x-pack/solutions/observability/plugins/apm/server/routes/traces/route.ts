@@ -327,7 +327,7 @@ const rootItemByTraceIdRoute = createApmServerRoute({
     });
 
     if (!span) {
-      return {} as TraceRootSpan;
+      return undefined;
     }
 
     const apmDuration = span.transaction?.duration?.us ?? span.span?.duration?.us;
@@ -335,8 +335,8 @@ const rootItemByTraceIdRoute = createApmServerRoute({
 
     const duration = apmDuration ?? parseOtelDuration(otelDuration);
 
-    if (duration === undefined || duration === 0) {
-      return {} as TraceRootSpan;
+    if (duration === undefined) {
+      return undefined;
     }
 
     return {
