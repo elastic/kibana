@@ -17,7 +17,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 import {
   extractGapDurationSums,
   calculateHighestPriorityGapFillStatus,
-  COMMON_GAP_AGGREGATIONS,
+  RULE_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from './utils';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
@@ -86,17 +86,13 @@ export async function getRuleIdsWithGaps(
           latest_gap_timestamp: { max: { field: '@timestamp' } },
           by_rule: {
             terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
-            aggs: COMMON_GAP_AGGREGATIONS,
+            aggs: RULE_GAP_AGGREGATIONS,
           },
         },
       }
     );
 
-    interface ByRuleBucket extends GapDurationBucket {
-      key: string;
-    }
-
-    const byRuleAgg = aggs.aggregations?.by_rule as { buckets: ByRuleBucket[] };
+    const byRuleAgg = aggs.aggregations?.by_rule as { buckets: GapDurationBucket[] };
     const buckets = byRuleAgg?.buckets ?? [];
 
     const ruleIds: string[] = [];

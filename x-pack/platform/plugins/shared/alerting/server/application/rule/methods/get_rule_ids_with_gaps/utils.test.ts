@@ -8,7 +8,7 @@
 import {
   extractGapDurationSums,
   calculateHighestPriorityGapFillStatus,
-  COMMON_GAP_AGGREGATIONS,
+  RULE_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from './utils';
 
@@ -29,6 +29,7 @@ describe('utils', () => {
         totalInProgressDurationMs: { value: 50 },
         totalFilledDurationMs: { value: 25 },
         totalDurationMs: { value: 175 },
+        key: 'test',
       };
       expect(extractGapDurationSums(bucket)).toEqual({
         totalUnfilledDurationMs: 100,
@@ -39,7 +40,7 @@ describe('utils', () => {
     });
 
     it('defaults missing fields to 0', () => {
-      const bucket: GapDurationBucket = {};
+      const bucket: GapDurationBucket = { key: 'test' };
       expect(extractGapDurationSums(bucket)).toEqual({
         totalUnfilledDurationMs: 0,
         totalInProgressDurationMs: 0,
@@ -54,6 +55,7 @@ describe('utils', () => {
         totalInProgressDurationMs: { value: null },
         totalFilledDurationMs: { value: null },
         totalDurationMs: { value: null },
+        key: 'test',
       };
       expect(extractGapDurationSums(bucket)).toEqual({
         totalUnfilledDurationMs: 0,
@@ -69,6 +71,7 @@ describe('utils', () => {
         totalInProgressDurationMs: { value: -1 },
         totalFilledDurationMs: { value: -5 },
         totalDurationMs: { value: -16 },
+        key: 'test',
       };
       expect(extractGapDurationSums(bucket)).toEqual({
         totalUnfilledDurationMs: 0,
@@ -125,18 +128,18 @@ describe('utils', () => {
     });
   });
 
-  describe('COMMON_GAP_AGGREGATIONS', () => {
+  describe('RULE_GAP_AGGREGATIONS', () => {
     it('contains expected sum field mappings', () => {
-      expect(COMMON_GAP_AGGREGATIONS.totalUnfilledDurationMs).toEqual({
+      expect(RULE_GAP_AGGREGATIONS.totalUnfilledDurationMs).toEqual({
         sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' },
       });
-      expect(COMMON_GAP_AGGREGATIONS.totalInProgressDurationMs).toEqual({
+      expect(RULE_GAP_AGGREGATIONS.totalInProgressDurationMs).toEqual({
         sum: { field: 'kibana.alert.rule.gap.in_progress_duration_ms' },
       });
-      expect(COMMON_GAP_AGGREGATIONS.totalFilledDurationMs).toEqual({
+      expect(RULE_GAP_AGGREGATIONS.totalFilledDurationMs).toEqual({
         sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' },
       });
-      expect(COMMON_GAP_AGGREGATIONS.totalDurationMs).toEqual({
+      expect(RULE_GAP_AGGREGATIONS.totalDurationMs).toEqual({
         sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' },
       });
     });

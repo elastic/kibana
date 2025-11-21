@@ -22,7 +22,7 @@ import {
 import {
   extractGapDurationSums,
   calculateHighestPriorityGapFillStatus,
-  COMMON_GAP_AGGREGATIONS,
+  RULE_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from '../get_rule_ids_with_gaps/utils';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
@@ -122,7 +122,7 @@ export async function getGapsSummaryByRuleIds(
               size: 10000,
             },
             aggs: {
-              ...COMMON_GAP_AGGREGATIONS,
+              ...RULE_GAP_AGGREGATIONS,
             },
           },
         },
@@ -130,11 +130,7 @@ export async function getGapsSummaryByRuleIds(
     );
 
     interface UniqueRuleIdsAgg {
-      buckets: Array<
-        GapDurationBucket & {
-          key: string;
-        }
-      >;
+      buckets: Array<GapDurationBucket>;
     }
 
     const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;

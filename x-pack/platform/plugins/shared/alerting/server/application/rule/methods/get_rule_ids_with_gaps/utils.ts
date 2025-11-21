@@ -4,21 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { GapFillStatus } from '../../../../../common/constants/gap_status';
-
 export interface GapDurationSums {
   totalUnfilledDurationMs: number;
   totalInProgressDurationMs: number;
   totalFilledDurationMs: number;
   totalDurationMs: number;
-}
-
-export interface GapDurationBucket {
-  totalUnfilledDurationMs?: { value: number | null };
-  totalInProgressDurationMs?: { value: number | null };
-  totalFilledDurationMs?: { value: number | null };
-  totalDurationMs?: { value: number | null };
 }
 
 /**
@@ -48,7 +40,7 @@ export function calculateHighestPriorityGapFillStatus(sums: GapDurationSums): Ga
 /**
  * Common aggregation fields for gap duration tracking
  */
-export const COMMON_GAP_AGGREGATIONS = {
+export const RULE_GAP_AGGREGATIONS = {
   totalUnfilledDurationMs: {
     sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' },
   },
@@ -62,3 +54,7 @@ export const COMMON_GAP_AGGREGATIONS = {
     sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' },
   },
 } as const;
+
+export type GapDurationBucket = { key: string } & Partial<
+  Record<keyof typeof RULE_GAP_AGGREGATIONS, AggregationsSumAggregate>
+>;
