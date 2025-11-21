@@ -22,6 +22,7 @@ import type {
 import { getFilters, dateHistogram, type ChangePoint } from './common';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { getLogsIndices } from '../../utils/get_logs_indices';
+import { getTotalHits } from '../../utils/get_total_hits';
 
 export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_log_change_points';
 
@@ -59,10 +60,7 @@ export async function getLogChangePoint({
       },
     });
 
-    const totalHits =
-      typeof countDocumentsResponse.hits.total === 'number'
-        ? countDocumentsResponse.hits.total
-        : countDocumentsResponse.hits.total?.value ?? 0;
+    const totalHits = getTotalHits(countDocumentsResponse);
 
     if (totalHits === 0) {
       return [];
