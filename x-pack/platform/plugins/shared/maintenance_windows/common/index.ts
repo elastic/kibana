@@ -40,6 +40,13 @@ export {
 
 export type { MaintenanceWindowAttributes } from '../server/data/types/maintenance_window_attributes';
 
+// export only necessary server types
+export type { MaintenanceWindowCategoryIds } from '../server/routes/schemas/maintenance_window/shared';
+export type { MaintenanceWindowResponse } from '../server/routes/schemas/maintenance_window/internal/response';
+export type { FindMaintenanceWindowsResponse } from '../server/routes/schemas/maintenance_window/internal/request/find';
+export type { CreateMaintenanceWindowRequestBody } from '../server/routes/schemas/maintenance_window/internal/request/create';
+export type { UpdateMaintenanceWindowRequestBody } from '../server/routes/schemas/maintenance_window/internal/request/update';
+
 // Internal
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
 export const INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH =
