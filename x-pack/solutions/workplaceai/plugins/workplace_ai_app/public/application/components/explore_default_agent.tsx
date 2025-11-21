@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { useKibana } from '../hooks/use_kibana';
 
 export const ExploreDefaultAgent: React.FC = () => {
@@ -33,7 +34,7 @@ export const ExploreDefaultAgent: React.FC = () => {
     }
 
     // Navigate to Agent Builder with the message in location state
-    application.navigateToApp('agent_builder', {
+    application.navigateToApp(AGENT_BUILDER_APP_ID, {
       path: '/conversations/new',
       state: {
         initialMessage: chatInput.trim(),
@@ -44,12 +45,12 @@ export const ExploreDefaultAgent: React.FC = () => {
   return (
     <EuiPanel paddingSize="l">
       <EuiTitle size="s">
-        <h5>
+        <h3>
           <FormattedMessage
             id="xpack.workplaceai.gettingStarted.exploreDefaultAgent.title"
             defaultMessage="Explore default Elastic agent"
           />
-        </h5>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiPanel paddingSize="s" hasShadow={false} hasBorder>

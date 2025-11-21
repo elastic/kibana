@@ -12,7 +12,6 @@ import type {
   PluginInitializerContext,
   LoggerFactory,
 } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { registerWorkplaceAIApiKeysRoutes } from '@kbn/workplaceai-api-keys-server';
 import { registerRoutes } from './routes';
 import { registerFeatures } from './features';
@@ -58,11 +57,7 @@ export class WorkplaceAIAppPlugin
       logger: this.loggerFactory.get('routes'),
       getServices: () => {
         if (!this.services) {
-          throw new Error(
-            i18n.translate('xpack.workplaceai.server.getServicesCalledBeforeStartError', {
-              defaultMessage: 'getServices called before #start',
-            })
-          );
+          throw new Error('getServices called before #start');
         }
         return this.services;
       },
