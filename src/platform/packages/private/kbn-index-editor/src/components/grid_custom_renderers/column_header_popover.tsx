@@ -59,7 +59,10 @@ export const ColumnHeaderPopover = ({
   const { columnType, setColumnType, columnName, setColumnName, saveColumn, validationError } =
     useAddColumnName(initialColumnName, initialColumnType);
 
-  const canSubmit = useMemo(() => columnType && columnName.length > 0 && !validationError, [columnType, columnName, validationError]);
+  const canSubmit = useMemo(
+    () => columnType && columnName.length > 0 && !validationError,
+    [columnType, columnName, validationError]
+  );
 
   const onSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
