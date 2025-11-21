@@ -224,14 +224,14 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
   });
 
   test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
-    await page.testSubj.locator('dscViewModeFieldStatsButton').click();
+    await page.testSubj.click('dscViewModeFieldStatsButton');
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
-    await page.testSubj.locator('dataVisualizerDetailsToggle-@message.raw-arrowRight').click();
+    await page.testSubj.click('dataVisualizerDetailsToggle-@message.raw-arrowRight');
     await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
   });
 
   test('navigate to Lens from field statistics', async ({ page, pageObjects }) => {
-    await page.testSubj.locator('dscViewModeFieldStatsButton').click();
+    await page.testSubj.click('dscViewModeFieldStatsButton');
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
     const viewLensButton = await pageObjects.discover.getFirstViewLensButtonFromFieldStatistics();
     await viewLensButton.click();
