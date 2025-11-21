@@ -30,7 +30,7 @@ export const getFilterItemObjListFromControlState = (controlState: ControlGroupR
       existsSelected: existsSelected ?? false,
       exclude: exclude ?? false,
       hideActionBar: displaySettings?.hideActionBar ?? false,
-    } as FilterControlConfig;
+    };
   });
 };
 
