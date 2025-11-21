@@ -18,6 +18,7 @@ import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
 import type { YamlEditorProps } from '../../../shared/ui';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
 
@@ -74,7 +75,7 @@ jest.mock('../../../entities/connectors/model/use_available_connectors', () => (
 const mockSaveYaml = jest.fn();
 const mockUseSaveYaml = useSaveYaml as jest.MockedFunction<typeof useSaveYaml>;
 
-// Mock the useSaveYaml hook
+// Mock the useSaveYaml hook - now returns just the function, not an array
 jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
   useSaveYaml: jest.fn(),
 }));
@@ -238,15 +239,16 @@ describe('WorkflowYAMLEditor', () => {
     jest.clearAllMocks();
     capturedKeyboardHandlers = {};
     mockSaveYaml.mockResolvedValue(undefined);
-    mockUseSaveYaml.mockReturnValue([
-      mockSaveYaml,
-      { isLoading: false, error: null, result: undefined },
-    ]);
+    // useSaveYaml now returns just the function, not an array
+    mockUseSaveYaml.mockReturnValue(mockSaveYaml);
   });
 
-  it('renders without crashing', () => {
+  it('renders without crashing', async () => {
     renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />);
-    expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+    // Wait for async state updates (setTimeout in handleEditorDidMount)
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+    });
   });
 
   it('updates store when editor content changes', async () => {
@@ -290,17 +292,20 @@ steps:
       message: "Alert triggered!"
 `.trim();
 
-    it('renders without crashing with alert trigger YAML', () => {
+    it('renders without crashing with alert trigger YAML', async () => {
       const store = createMockStore();
       store.dispatch(setYamlString(yamlWithAlertTrigger));
       store.dispatch(setActiveTab('workflow'));
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
-      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
     });
 
-    it('renders in readOnly mode when isExecutionYaml is true', () => {
+    it('renders in readOnly mode when isExecutionYaml is true', async () => {
       const store = createMockStore();
       store.dispatch(setActiveTab('executions'));
       store.dispatch(
@@ -312,10 +317,13 @@ steps:
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
-      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
     });
 
-    it('handles invalid YAML gracefully', () => {
+    it('handles invalid YAML gracefully', async () => {
       const invalidYaml = `
 version: "1"
 name: "test workflow"
@@ -337,12 +345,15 @@ steps:
         renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
       }).not.toThrow();
 
-      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
     });
   });
 
   describe('editor initialization', () => {
-    it('renders correctly when editor mounts with content', () => {
+    it('renders correctly when editor mounts with content', async () => {
       const yamlContent = 'version: "1"\nname: "test"';
       const store = createMockStore();
       store.dispatch(setYamlString(yamlContent));
@@ -350,8 +361,11 @@ steps:
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
-      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
-      expect(document.querySelector('[data-testid="yaml-textarea"]')).toBeInTheDocument();
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+        expect(document.querySelector('[data-testid="yaml-textarea"]')).toBeInTheDocument();
+      });
 
       const textarea = document.querySelector(
         '[data-testid="yaml-textarea"]'
@@ -361,7 +375,7 @@ steps:
   });
 
   describe('completion provider', () => {
-    it('registers the completion provider when the editor mounts', () => {
+    it('registers the completion provider when the editor mounts', async () => {
       const yamlContent = 'version: "1"\nname: "test"';
       const store = createMockStore();
       store.dispatch(setYamlString(yamlContent));
@@ -369,11 +383,14 @@ steps:
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
-      // Verify that registerCompletionItemProvider was called with the correct parameters
-      expect(monaco.languages.registerCompletionItemProvider).toHaveBeenCalledWith(
-        YAML_LANG_ID,
-        mockCompletionProvider
-      );
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        // Verify that registerCompletionItemProvider was called with the correct parameters
+        expect(monaco.languages.registerCompletionItemProvider).toHaveBeenCalledWith(
+          YAML_LANG_ID,
+          mockCompletionProvider
+        );
+      });
 
       // Verify that getCompletionItemProvider was called
       expect(getCompletionItemProvider).toHaveBeenCalled();
@@ -388,7 +405,7 @@ steps:
       expect(registeredProvider).toHaveProperty('provideCompletionItems');
     });
 
-    it('should dispose the completion provider when the editor unmounts', () => {
+    it('should dispose the completion provider when the editor unmounts', async () => {
       const yamlContent = 'version: "1"\nname: "test"';
       const store = createMockStore();
       store.dispatch(setYamlString(yamlContent));
@@ -400,6 +417,10 @@ steps:
       });
 
       const { unmount } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(monaco.languages.registerCompletionItemProvider).toHaveBeenCalled();
+      });
 
       unmount();
 
@@ -409,14 +430,18 @@ steps:
   });
 
   describe('keyboard commands', () => {
-    it('should register keyboard commands when editor mounts', () => {
+    it('should register keyboard commands when editor mounts', async () => {
       const store = createMockStore();
       store.dispatch(setYamlString('version: "1"\nname: "test"'));
       store.dispatch(setActiveTab('workflow'));
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
-      expect(mockRegisterKeyboardCommands).toHaveBeenCalled();
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(mockRegisterKeyboardCommands).toHaveBeenCalled();
+      });
+
       const callArgs = mockRegisterKeyboardCommands.mock.calls[0][0];
       expect(callArgs).toHaveProperty('save');
       expect(callArgs).toHaveProperty('run');
@@ -441,11 +466,8 @@ steps:
       store.dispatch(setYamlString('version: "1"\nname: "test"'));
       store.dispatch(setActiveTab('workflow'));
 
-      // Set isLoading to true to simulate a save in progress
-      mockUseSaveYaml.mockReturnValue([
-        mockSaveYaml,
-        { isLoading: true, error: null, result: undefined },
-      ]);
+      // Set loading state to true in the store to simulate a save in progress
+      store.dispatch(saveYamlThunk.pending('', undefined));
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
@@ -481,11 +503,8 @@ steps:
       store.dispatch(setYamlString('version: "1"\nname: "test"'));
       store.dispatch(setActiveTab('workflow'));
 
-      // Set isLoading to true to simulate a save in progress
-      mockUseSaveYaml.mockReturnValue([
-        mockSaveYaml,
-        { isLoading: true, error: null, result: undefined },
-      ]);
+      // Set loading state to true in the store to simulate a save in progress
+      store.dispatch(saveYamlThunk.pending('', undefined));
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
@@ -506,12 +525,6 @@ steps:
       const store = createMockStore();
       store.dispatch(setYamlString('version: "1"\nname: "test"'));
       store.dispatch(setActiveTab('workflow'));
-
-      // Start with not saving
-      mockUseSaveYaml.mockReturnValue([
-        mockSaveYaml,
-        { isLoading: false, error: null, result: undefined },
-      ]);
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
