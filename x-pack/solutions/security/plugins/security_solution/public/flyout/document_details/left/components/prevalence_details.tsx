@@ -22,25 +22,27 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../common/lib/kibana';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import {
-  PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_TEST_ID,
-  PREVALENCE_DETAILS_UPSELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_COUNT_TEXT_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_UPSELL_TEST_ID,
 } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
@@ -353,6 +355,8 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
+  const { storage } = useKibana().services;
+
   const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
     useDocumentDetailsContext();
 
@@ -362,16 +366,18 @@ export const PrevalenceDetails: React.FC = () => {
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
+  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE);
+
   // these two are used by the usePrevalence hook to fetch the data
-  const [start, setStart] = useState(DEFAULT_FROM);
-  const [end, setEnd] = useState(DEFAULT_TO);
+  const [start, setStart] = useState(timeSavedInLocalStorage?.start || DEFAULT_FROM);
+  const [end, setEnd] = useState(timeSavedInLocalStorage?.end || DEFAULT_TO);
 
   // these two are used to pass to timeline
   const [absoluteStart, setAbsoluteStart] = useState(
-    (dateMath.parse(DEFAULT_FROM) || new Date()).toISOString()
+    (dateMath.parse(timeSavedInLocalStorage?.start || DEFAULT_FROM) || new Date()).toISOString()
   );
   const [absoluteEnd, setAbsoluteEnd] = useState(
-    (dateMath.parse(DEFAULT_TO) || new Date()).toISOString()
+    (dateMath.parse(timeSavedInLocalStorage?.end || DEFAULT_TO) || new Date()).toISOString()
   );
 
   // TODO update the logic to use a single set of start/end dates
@@ -379,6 +385,8 @@ export const PrevalenceDetails: React.FC = () => {
   //  as an AbsoluteTimeRange, which requires from/to values
   const onTimeChange = ({ start: s, end: e, isInvalid }: OnTimeChangeProps) => {
     if (isInvalid) return;
+
+    storage.set(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE, { start: s, end: e });
 
     setStart(s);
     setEnd(e);
