@@ -295,12 +295,6 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   };
 };
 
-/**
- * Replace any JSON Schema $ref that points at "#/definitions/..." with an OpenAPI-compatible
- * "#/components/schemas/..." pointer. This is used to adapt zod-to-json-schema's output
- * (which uses "definitions" even for target: 'openApi3') to the structure expected by
- * the router-to-openapispec components collection.
- */
 const replaceDefinitionRefs = <T>(schema: T): T => {
   if (schema === null || typeof schema !== 'object') {
     return schema;
@@ -324,11 +318,6 @@ const replaceDefinitionRefs = <T>(schema: T): T => {
 
 const COMPONENT_PREFIX = '@kbn/oas-component:';
 
-/**
- * Walk a JSON Schema produced by zod-to-json-schema, extract any sub-schemas that
- * carry an "@kbn/oas-component:<Name>" description as reusable OpenAPI components,
- * and replace those inlined sub-schemas with $ref pointers.
- */
 const extractComponentsFromSchema = (
   schema: unknown,
   components: { [id: string]: OpenAPIV3.SchemaObject }
@@ -347,8 +336,6 @@ const extractComponentsFromSchema = (
   if (typeof description === 'string' && description.startsWith(COMPONENT_PREFIX)) {
     const componentId = description.slice(COMPONENT_PREFIX.length);
 
-    // Drop the synthetic description and recursively process the component body
-    // so nested components (if any) are also extracted.
     const { description: _ignored, ...rest } = obj;
     const processedComponent = extractComponentsFromSchema(
       rest,
@@ -357,13 +344,6 @@ const extractComponentsFromSchema = (
 
     if (!components[componentId]) {
       components[componentId] = processedComponent;
-
-      // Special-case fixups for well-known components whose recursive positions
-      // are otherwise erased by zod-to-json-schema. StreamlangCondition is a
-      // discriminated union over itself, but the generated JSON Schema uses
-      // `{}` in recursive positions (e.g. "and.items": {}, "or.items": {}, "not": {}).
-      // Replace those with self-refs so downstream generators (like oapi-codegen)
-      // see a properly-typed recursive union.
       if (componentId === 'StreamlangCondition') {
         const ensureSelfRef = (value: unknown): OpenAPIV3.ReferenceObject | undefined => {
           if (
