@@ -65,10 +65,7 @@ export async function getUnifiedTraceErrors({
 }
 
 export const requiredOtelFields = asMutableArray([SPAN_ID] as const);
-export const optionalOtelFields = asMutableArray([
-  EXCEPTION_TYPE,
-  EXCEPTION_MESSAGE,
-] as const);
+export const optionalOtelFields = asMutableArray([EXCEPTION_TYPE, EXCEPTION_MESSAGE] as const);
 
 export interface UnifiedError {
   id: string;

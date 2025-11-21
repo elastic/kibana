@@ -11,12 +11,7 @@ import { getErrorCountByDocId } from './get_unified_trace_items';
 describe('getErrorCountByDocId', () => {
   it('counts errors grouped by doc id from apmErrors and unprocessedOtelErrors', () => {
     const unifiedTraceErrors = {
-      apmErrors: [
-        { parentId: 'a' },
-        { parentId: 'a' },
-        { parentId: 'b' },
-        { parentId: undefined },
-      ],
+      apmErrors: [{ parentId: 'a' }, { parentId: 'a' }, { parentId: 'b' }, { parentId: undefined }],
       unprocessedOtelErrors: [{ id: 'a' }, { id: 'c' }, { id: undefined }],
       totalErrors: 5,
     } as UnifiedTraceErrors;
