@@ -48,7 +48,7 @@ export const GettingStartedFooter = () => {
     {
       id: 'elasticTraining',
       title: i18n.translate('xpack.gettingStarted.elasticTraining.title', {
-        defaultMessage: 'Learn Elasticsearch',
+        defaultMessage: 'Elastic training',
       }),
       description: i18n.translate('xpack.gettingStarted.elasticTraining.description', {
         defaultMessage:
