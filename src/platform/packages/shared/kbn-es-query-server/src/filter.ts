@@ -52,9 +52,10 @@ const rangeSchema = schema.object({
 // ====================================================================
 
 /**
- * Base properties shared by all simplified filters
+ * Common base properties shared by all filters (without negate)
+ * Used as foundation for condition filters where negation is encoded in the operator
  */
-const basePropertiesSchema = schema.object({
+const commonBasePropertiesSchema = schema.object({
   pinned: schema.maybe(
     schema.boolean({
       meta: { description: 'Whether the filter is pinned' },
@@ -75,11 +76,6 @@ const basePropertiesSchema = schema.object({
   dataViewId: schema.maybe(
     schema.string({
       meta: { description: 'Data view ID that this filter applies to' },
-    })
-  ),
-  negate: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Whether to negate the filter condition' },
     })
   ),
   label: schema.maybe(
@@ -111,6 +107,21 @@ const basePropertiesSchema = schema.object({
     schema.string({
       meta: {
         description: 'Value metadata from legacy filters for backwards compatibility',
+      },
+    })
+  ),
+});
+
+/**
+ * Base properties for DSL and group filters (includes negate)
+ * Negate is semantically meaningful for DSL/group filters where it applies to the entire filter/group
+ */
+const basePropertiesWithNegateSchema = commonBasePropertiesSchema.extends({
+  negate: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether to negate the entire filter/group. For condition filters, use negation operators (is_not, is_not_one_of, not_exists) instead.',
       },
     })
   ),
@@ -208,8 +219,10 @@ interface RecursiveType {
 
 /**
  * Schema for condition filters
+ * Note: Uses commonBasePropertiesSchema WITHOUT negate since negation is encoded in the operator
+ * (is_not, is_not_one_of, not_exists)
  */
-export const asCodeConditionFilterSchema = basePropertiesSchema.extends(
+export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
   {
     condition: conditionSchema,
   },
@@ -219,9 +232,10 @@ export const asCodeConditionFilterSchema = basePropertiesSchema.extends(
 /**
  * Schema for logical filter groups with recursive structure
  * Uses lazy schema to handle recursive references
+ * Note: Uses basePropertiesWithNegateSchema to allow negating entire group
  */
 const GROUP_FILTER_ID = '@kbn/es-query-server_groupFilter'; // package prefix for global uniqueness in OAS specs
-export const asCodeGroupFilterSchema = basePropertiesSchema.extends(
+export const asCodeGroupFilterSchema = basePropertiesWithNegateSchema.extends(
   {
     group: schema.object(
       {
@@ -242,8 +256,9 @@ export const asCodeGroupFilterSchema = basePropertiesSchema.extends(
 /**
  * Schema for DSL filters
  * Includes field and params properties specific to DSL filters for preserving metadata
+ * Note: Uses basePropertiesWithNegateSchema to allow negating entire DSL filter
  */
-export const asCodeDSLFilterSchema = basePropertiesSchema.extends({
+export const asCodeDSLFilterSchema = basePropertiesWithNegateSchema.extends({
   dsl: schema.recordOf(schema.string(), schema.any(), {
     meta: { description: 'Elasticsearch Query DSL object' },
   }),

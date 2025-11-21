@@ -303,6 +303,19 @@ function extractFieldFromQuery(query: unknown): string | null {
 }
 
 /**
+ * Helper to remove negate property from base properties
+ * For condition filters, negate is encoded in the operator (is_not, is_not_one_of, not_exists)
+ */
+function stripNegateProperty(
+  baseProperties: Partial<AsCodeFilter>
+): Omit<Partial<AsCodeFilter>, 'negate'> {
+  const { negate: _, ...basePropsWithoutNegate } = baseProperties as Partial<AsCodeFilter> & {
+    negate?: boolean;
+  };
+  return basePropsWithoutNegate;
+}
+
+/**
  * TYPE-SPECIFIC CONVERTERS
  * Each function handles a specific FILTERS enum type
  */
@@ -334,7 +347,7 @@ function convertPhraseFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...baseProperties,
+      ...stripNegateProperty(baseProperties),
       condition,
     };
   } catch (error) {
@@ -350,7 +363,7 @@ function convertPhrasesFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...baseProperties,
+      ...stripNegateProperty(baseProperties),
       condition,
     };
   } catch (error) {
@@ -372,7 +385,7 @@ function convertRangeFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...baseProperties,
+      ...stripNegateProperty(baseProperties),
       condition,
     };
   } catch (error) {
@@ -388,7 +401,7 @@ function convertExistsFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...baseProperties,
+      ...stripNegateProperty(baseProperties),
       condition,
     };
   } catch (error) {
