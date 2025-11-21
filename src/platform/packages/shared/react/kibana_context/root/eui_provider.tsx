@@ -86,7 +86,7 @@ const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiPopover: {
     repositionOnScroll: true,
   },
-  EuiTooltip: {
+  EuiToolTip: {
     repositionOnScroll: true,
   },
 };
