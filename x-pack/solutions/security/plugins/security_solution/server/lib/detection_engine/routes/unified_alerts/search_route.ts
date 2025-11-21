@@ -8,7 +8,6 @@
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
-import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 
 import { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -25,7 +24,7 @@ export const searchUnifiedAlertsRoute = (
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution', ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: ['securitySolution'],
         },
       },
     })
