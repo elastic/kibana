@@ -33,6 +33,7 @@ describe('SelectField', () => {
     render(
       <TestFormWrapper>
         <SelectField
+          formConfig={{}}
           path="country"
           schema={z.enum(['option1', 'option2', 'option3'])}
           fieldProps={{
@@ -58,6 +59,7 @@ describe('SelectField', () => {
     render(
       <TestFormWrapper>
         <SelectField
+          formConfig={{}}
           path="country"
           schema={z.enum(['US', 'UK', 'CA'])}
           fieldProps={{
@@ -87,6 +89,7 @@ describe('SelectField', () => {
     render(
       <TestFormWrapper>
         <SelectField
+          formConfig={{}}
           path="role"
           schema={z.enum(['admin', 'user', 'guest'])}
           fieldProps={{
@@ -118,6 +121,7 @@ describe('SelectField', () => {
       return (
         <Form form={form}>
           <SelectField
+            formConfig={{}}
             path="choice"
             schema={z.enum(['option1', 'option2', 'option3'])}
             fieldProps={{
@@ -147,6 +151,7 @@ describe('SelectField', () => {
     render(
       <TestFormWrapper>
         <SelectField
+          formConfig={{}}
           path="choice"
           schema={z.enum(['option1', 'option2', 'option3'])}
           fieldProps={{
@@ -176,6 +181,7 @@ describe('SelectField', () => {
     render(
       <TestFormWrapper>
         <SelectField
+          formConfig={{}}
           path="choice"
           schema={z.enum(['option1', 'option2', 'option3'])}
           fieldProps={{
@@ -209,6 +215,7 @@ describe('SelectField', () => {
       return (
         <Form form={form}>
           <SelectField
+            formConfig={{}}
             path="choice"
             schema={z.enum(['option1', 'option2', 'option3'])}
             fieldProps={{
@@ -249,6 +256,7 @@ describe('SelectField', () => {
       render(
         <TestFormWrapper>
           <SelectField
+            formConfig={{}}
             path="choice"
             schema={z.string() as any}
             fieldProps={{

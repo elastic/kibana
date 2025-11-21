@@ -23,7 +23,6 @@ export const HiddenField: React.FC<TextWidgetProps> = ({
   fieldConfig,
   formConfig,
 }) => {
-  console.log({ path, schema, fieldProps, fieldConfig, formConfig });
   return (
     <UseField
       path={path}

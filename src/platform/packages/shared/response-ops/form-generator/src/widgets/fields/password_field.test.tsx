@@ -33,6 +33,7 @@ describe('PasswordField', () => {
     render(
       <TestFormWrapper>
         <PasswordField
+          formConfig={{}}
           path="password"
           schema={z.string()}
           fieldProps={{
@@ -63,6 +64,7 @@ describe('PasswordField', () => {
       return (
         <Form form={form}>
           <PasswordField
+            formConfig={{}}
             path="password"
             schema={z.string()}
             fieldProps={{
@@ -94,6 +96,7 @@ describe('PasswordField', () => {
       return (
         <Form form={form}>
           <PasswordField
+            formConfig={{}}
             path="password"
             schema={z.string()}
             fieldProps={{
@@ -127,6 +130,7 @@ describe('PasswordField', () => {
       return (
         <Form form={form}>
           <PasswordField
+            formConfig={{}}
             path="password"
             schema={z.string().min(6, 'Password must be at least 6 characters')}
             fieldProps={{
@@ -167,6 +171,7 @@ describe('PasswordField', () => {
       return (
         <Form form={form}>
           <PasswordField
+            formConfig={{}}
             path="password"
             schema={z.string().min(1, 'Password is required')}
             fieldProps={{
@@ -204,6 +209,7 @@ describe('PasswordField', () => {
     render(
       <TestFormWrapper>
         <PasswordField
+          formConfig={{}}
           path="password"
           schema={z.string()}
           fieldProps={{

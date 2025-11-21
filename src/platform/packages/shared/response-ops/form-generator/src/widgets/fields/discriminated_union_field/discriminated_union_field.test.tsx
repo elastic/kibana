@@ -55,6 +55,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1, option2]}
@@ -101,6 +102,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1, option2]}
@@ -147,6 +149,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper defaultValue={{ auth: { type: 'basic', username: '', password: '' } }}>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1, option2]}
@@ -193,6 +196,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1, option2]}
@@ -234,6 +238,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1]}
@@ -272,6 +277,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1]}
@@ -313,6 +319,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1]}
@@ -354,6 +361,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1]}
@@ -399,6 +407,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1, option2]}
@@ -444,6 +453,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1, option2]}
@@ -498,6 +508,7 @@ describe('DiscriminatedUnionField', () => {
     render(
       <TestFormWrapper>
         <DiscriminatedUnionField
+          formConfig={{}}
           path="auth"
           schema={schema}
           options={[option1, option2]}

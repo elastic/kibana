@@ -336,8 +336,8 @@ describe('Authentication Form Integration Tests', () => {
       .default({ type: 'basic', username: '', password: '' }),
   });
 
-  const usernameTestId = 'generator-field-authType-basic-username';
-  const passwordTestId = 'generator-field-authType-basic-password';
+  const usernameTestId = 'generator-field-authType-username';
+  const passwordTestId = 'generator-field-authType-password';
 
   it('initializes with default discriminated union option when specified', async () => {
     render(<TestFormWrapper schema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -362,10 +362,9 @@ describe('Authentication Form Integration Tests', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {
           authType: {
-            basic: {
-              username: 'admin',
-              password: 'secret123',
-            },
+            type: 'basic',
+            username: 'admin',
+            password: 'secret123',
           },
         },
       });
@@ -397,10 +396,9 @@ describe('Authentication Form Integration Tests', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {
           authType: {
-            basic: {
-              username: 'testuser',
-              password: 'testpass',
-            },
+            type: 'basic',
+            username: 'testuser',
+            password: 'testpass',
           },
         },
       });
@@ -412,7 +410,7 @@ describe('Authentication Form Integration Tests', () => {
 
     const bearerCard = screen.getByLabelText('Bearer Token', { selector: 'input' });
     fireEvent.click(bearerCard);
-    const tokenInput = await screen.findByTestId('generator-field-authType-bearer-token');
+    const tokenInput = await screen.findByTestId('generator-field-authType-token');
 
     fireEvent.change(tokenInput, { target: { value: 'my-secret-token' } });
 
@@ -423,9 +421,8 @@ describe('Authentication Form Integration Tests', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {
           authType: {
-            bearer: {
-              token: 'my-secret-token',
-            },
+            type: 'bearer',
+            token: 'my-secret-token',
           },
         },
       });
@@ -501,6 +498,7 @@ describe('Authentication Form Integration Tests', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {
           apiKey: {
+            type: 'headers',
             headers: 'my-secret-api-key',
           },
         },

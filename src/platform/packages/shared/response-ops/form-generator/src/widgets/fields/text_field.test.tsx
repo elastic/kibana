@@ -34,6 +34,7 @@ describe('TextField', () => {
     render(
       <TestFormWrapper>
         <TextField
+          formConfig={{}}
           path="username"
           schema={z.string()}
           fieldProps={{
@@ -64,6 +65,7 @@ describe('TextField', () => {
       return (
         <Form form={form}>
           <TextField
+            formConfig={{}}
             path="username"
             schema={z.string()}
             fieldProps={{ label: 'Username', euiFieldProps: {} }}
@@ -91,6 +93,7 @@ describe('TextField', () => {
       return (
         <Form form={form}>
           <TextField
+            formConfig={{}}
             path="username"
             schema={z.string()}
             fieldProps={{ label: 'Username', euiFieldProps: {} }}
@@ -121,6 +124,7 @@ describe('TextField', () => {
       return (
         <Form form={form}>
           <TextField
+            formConfig={{}}
             path="username"
             schema={z.string().min(3, 'Username must be at least 3 characters')}
             fieldProps={{ label: 'Username', euiFieldProps: {} }}
@@ -158,6 +162,7 @@ describe('TextField', () => {
       return (
         <Form form={form}>
           <TextField
+            formConfig={{}}
             path="username"
             schema={z.string().min(1, 'Username is required')}
             fieldProps={{ label: 'Username', euiFieldProps: {} }}
