@@ -57,6 +57,13 @@ export const Analyst = {
 };
 
 export const LogsEspecialist = {
+  /**
+   * This method can be called in the `beforeAll` hook of a test suite to set up
+   * the necessary role for the Logs Especialist user.
+   *
+   * Once set up, the role can be used by logging in with the `await browserAuth.loginAs(samlAuth.customRoleName)` method in the `beforeEach` hook.
+   * @param samlAuth
+   */
   async setUp(samlAuth: SamlAuth) {
     await samlAuth.setCustomRole({
       kibana: [{ base: [], feature: { logs: ['all'] }, spaces: ['*'] }],
