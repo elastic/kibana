@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { addMeta } from './schema_connector_metadata';
 
 interface HasUnwrap {
   unwrap(): z.ZodType;
@@ -23,7 +24,9 @@ const isUnwrappable = (schema: z.ZodType): schema is z.ZodType & HasUnwrap => {
   );
 };
 
-export const unwrap = (schema: z.ZodType) => {
+// Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
+// In the process, we also extract the default value if any
+export const extractSchemaCore = (schema: z.ZodType) => {
   let current = schema;
   let defaultValue: unknown;
 
@@ -31,7 +34,17 @@ export const unwrap = (schema: z.ZodType) => {
     if (current instanceof z.ZodDefault) {
       defaultValue = current.parse(undefined);
     }
+    if (current instanceof z.ZodReadonly) {
+      addMeta(current, { readOnly: true });
+    }
     current = current.unwrap();
+  }
+
+  // If the schema is a literal, we need it as defaultValue.
+  // Works for fields that are literally a non editable value, but also
+  // for hidden fields like the discriminator value in a discriminated union.
+  if (schema instanceof z.ZodLiteral) {
+    defaultValue = schema.value;
   }
 
   return { schema: current as z.ZodType, defaultValue };

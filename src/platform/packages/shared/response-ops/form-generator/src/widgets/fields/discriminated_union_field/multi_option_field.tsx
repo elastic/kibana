@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { getMeta } from '../../../schema_metadata';
+import { getMeta } from '../../../schema_connector_metadata';
 import {
   getDiscriminatorFieldValue,
   type DiscriminatedUnionWithProps,

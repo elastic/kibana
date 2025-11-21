@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { BaseWidgetProps } from './types';
 import { WidgetType } from './types';
-import { addMeta, getMeta } from '../schema_metadata';
+import { addMeta, getMeta } from '../schema_connector_metadata';
 import { TextField } from './fields/text_field';
 import { SelectField } from './fields/select_field';
 import { PasswordField } from './fields/password_field';

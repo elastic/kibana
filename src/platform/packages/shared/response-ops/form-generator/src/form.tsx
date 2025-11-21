@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 import { getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import { EuiSpacer } from '@elastic/eui';
 import { getWidgetComponent } from './widgets/registry';
-import { unwrap } from './schema_unwrap';
+import { extractSchemaCore } from './schema_extract_core';
 
 export interface FormConfig {
   readOnly?: boolean;
@@ -43,18 +43,13 @@ export const getFieldFromSchema = ({
   formConfig,
 }: GetFieldFromSchemaProps) => {
   // Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
-  const { schema, defaultValue: zodDefault } = unwrap(outerSchema);
-
-  let defaultValue: unknown;
-  if (schema instanceof z.ZodLiteral) {
-    defaultValue = schema.value;
-  }
+  const { schema, defaultValue } = extractSchemaCore(outerSchema);
 
   return {
     path,
     schema,
     formConfig,
-    defaultValue: zodDefault ?? defaultValue,
+    defaultValue,
     validate: (
       ...args: Parameters<ValidationFunc>
     ): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
