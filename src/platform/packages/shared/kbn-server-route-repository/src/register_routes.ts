@@ -168,8 +168,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     let validationObject;
     if (params === undefined) {
-      // For GET/DELETE without explicit params, do not emit a request body at all
-      // so downstream OAS does not include a requestBody.
       if (method === 'get' || method === 'delete') {
         validationObject = {
           ...noParamsValidationObject,
@@ -180,8 +178,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       }
     } else if (isZod(params)) {
       validationObject = makeZodValidationObject(params as ZodParamsObject);
-      // If a route declares params but no body schema, treat the request body as
-      // undefined so the OpenAPI generator does not emit a phantom requestBody.
+
       if (!(params as ZodParamsObject).shape.body) {
         validationObject = {
           ...validationObject,

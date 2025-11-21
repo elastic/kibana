@@ -34,12 +34,6 @@ export const isReferenceObject = (schema: unknown): schema is OpenAPIV3.Referenc
   return typeof schema === 'object' && schema !== null && '$ref' in (schema as object);
 };
 
-/**
- * Detects the \"void\" JSON Schema used for routes which explicitly model
- * the absence of a request body as `z.undefined()`. In those cases we want
- * to omit `requestBody` from the OpenAPI operation entirely instead of
- * surfacing a `{ not: {} }` schema.
- */
 export const isVoidRequestBodySchema = (schema: OpenAPIV3.SchemaObject | undefined): boolean => {
   if (!schema || typeof schema !== 'object') {
     return false;

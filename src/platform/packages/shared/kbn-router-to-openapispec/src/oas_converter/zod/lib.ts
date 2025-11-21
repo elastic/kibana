@@ -386,7 +386,6 @@ const extractComponentsFromSchema = (
               | undefined;
             const typeEnum = (props as any)?.type?.enum as unknown;
 
-            // and-condition: properties.type.enum includes "and"
             if (
               Array.isArray(typeEnum) &&
               typeEnum.includes('and') &&
@@ -400,7 +399,6 @@ const extractComponentsFromSchema = (
               }
             }
 
-            // or-condition: properties.type.enum includes "or"
             if (
               Array.isArray(typeEnum) &&
               typeEnum.includes('or') &&
@@ -414,7 +412,6 @@ const extractComponentsFromSchema = (
               }
             }
 
-            // not-condition: properties.type.enum includes "not"
             if (Array.isArray(typeEnum) && typeEnum.includes('not') && props && 'not' in props) {
               const replacement = ensureSelfRef(props.not as unknown);
               if (replacement) {
@@ -451,9 +448,6 @@ export const convert = (schema: z.ZodTypeAny) => {
     shared
   ) as OpenAPIV3.SchemaObject;
 
-  // Final fix-up pass for well-known components where recursive positions
-  // may still appear as "{}" after extraction. This is intentionally
-  // conservative and only touches the specific StreamlangCondition shape.
   const streamlangCondition = shared['StreamlangCondition'] as OpenAPIV3.SchemaObject | undefined;
   if (streamlangCondition && Array.isArray((streamlangCondition as any).anyOf)) {
     const ensureSelfRef = (value: unknown): OpenAPIV3.ReferenceObject | undefined => {
@@ -475,7 +469,6 @@ export const convert = (schema: z.ZodTypeAny) => {
         | undefined;
       const typeEnum = (props as any)?.type?.enum as unknown;
 
-      // and-condition
       if (
         Array.isArray(typeEnum) &&
         typeEnum.includes('and') &&
@@ -489,7 +482,6 @@ export const convert = (schema: z.ZodTypeAny) => {
         }
       }
 
-      // or-condition
       if (
         Array.isArray(typeEnum) &&
         typeEnum.includes('or') &&
@@ -503,7 +495,6 @@ export const convert = (schema: z.ZodTypeAny) => {
         }
       }
 
-      // not-condition
       if (Array.isArray(typeEnum) && typeEnum.includes('not') && props && 'not' in props) {
         const replacement = ensureSelfRef(props.not as unknown);
         if (replacement) {
@@ -523,9 +514,6 @@ export const convert = (schema: z.ZodTypeAny) => {
         | undefined;
       const kindEnum = (props as any)?.kind?.enum as unknown;
 
-      // We are only interested in the "where" step variant, which is modeled as
-      // an object with kind === 'where' and a "where" property that is an allOf
-      // of StreamlangCondition plus an object that adds "steps".
       if (
         Array.isArray(kindEnum) &&
         kindEnum.includes('where') &&

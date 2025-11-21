@@ -37,10 +37,6 @@ export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(()
  * Nested where block (recursive)
  */
 export interface StreamlangWhereBlock {
-  /**
-   * Discriminator for step-level unions.
-   * Optional for backwards compatibility; we normalize it on read.
-   */
   kind?: 'where';
   customIdentifier?: string;
   where: ConditionWithSteps;
