@@ -28,6 +28,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { ScriptsLibraryClient } from './services/scripts_library';
 import { EndpointError } from '../../common/endpoint/errors';
 import { installScriptsLibraryIndexTemplates } from './lib/scripts_library';
 import type { ReferenceDataClientInterface } from './lib/reference_data';
@@ -472,5 +473,18 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.config[key];
+  }
+
+  getScriptsLibraryClient(
+    spaceId: string,
+    username: string,
+    esClient: ElasticsearchClient
+  ): ScriptsLibraryClient {
+    return new ScriptsLibraryClient({
+      spaceId,
+      username,
+      endpointService: this,
+      esClient,
+    });
   }
 }

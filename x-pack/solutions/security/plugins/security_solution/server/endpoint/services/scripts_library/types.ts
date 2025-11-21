@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
 import type { EndpointScript } from '../../../../common/endpoint/types';
 
@@ -18,5 +19,11 @@ export interface ScriptsLibraryClientInterface {
   get: (scriptId: string) => Promise<EndpointScript>;
   list: () => Promise<void>;
   delete: (scriptId: string) => Promise<void>;
-  download: (scriptId: string) => Promise<null>;
+  download: (scriptId: string) => Promise<ScriptDownloadResponse>;
+}
+
+export interface ScriptDownloadResponse {
+  stream: Readable;
+  fileName: string;
+  mimeType?: string;
 }

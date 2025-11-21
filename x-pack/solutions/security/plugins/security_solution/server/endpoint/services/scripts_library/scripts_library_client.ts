@@ -27,7 +27,7 @@ import { ScriptLibraryError } from './common';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
 import type { EndpointScript } from '../../../../common/endpoint/types';
-import type { ScriptsLibraryClientInterface } from './types';
+import type { ScriptDownloadResponse, ScriptsLibraryClientInterface } from './types';
 import { wrapErrorIfNeeded } from '../../utils';
 import { stringify } from '../../utils/stringify';
 
@@ -59,7 +59,6 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       blobStorageIndex: SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME,
       elasticsearchClient: this.esClient,
       logger: this.logger,
-      indexIsAlias: false,
       maxSizeBytes: options.endpointService.getServerConfigValue('maxEndpointScriptFileSize'),
     });
   }
@@ -230,7 +229,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     throw new ScriptLibraryError('Not implemented', 501);
   }
 
-  public async download(scriptId: string): Promise<null> {
+  public async download(scriptId: string): Promise<ScriptDownloadResponse> {
     throw new ScriptLibraryError('Not implemented', 501);
   }
 }
