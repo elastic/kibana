@@ -53,6 +53,14 @@ export const SUPPRESSED_PRIORITY_ACTION = {
   }),
 };
 
+export const NO_SLI_DATA_ACTIONS_ID = 'slo.burnRate.noSliData';
+export const NO_SLI_DATA_ACTION = {
+  id: NO_SLI_DATA_ACTIONS_ID,
+  name: i18n.translate('xpack.slo.alerting.burnRate.noSliDataAction', {
+    defaultMessage: 'No SLI Data',
+  }),
+};
+
 export const LOCK_ID_RESOURCE_INSTALLER = 'slo:resource_installer';
 
 export const SLO_MODEL_VERSION = 2;

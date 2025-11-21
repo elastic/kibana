@@ -25,6 +25,7 @@ import {
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
   SUPPRESSED_PRIORITY_ACTION,
+  NO_SLI_DATA_ACTION,
 } from '../../../../common/constants';
 
 import { getRuleExecutor } from './executor';
@@ -55,6 +56,7 @@ export function sloBurnRateRuleType(
       MEDIUM_PRIORITY_ACTION,
       LOW_PRIORITY_ACTION,
       SUPPRESSED_PRIORITY_ACTION,
+      NO_SLI_DATA_ACTION,
     ],
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: sloFeatureId,

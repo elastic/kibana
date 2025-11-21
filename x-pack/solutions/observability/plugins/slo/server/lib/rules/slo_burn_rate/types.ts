@@ -16,11 +16,13 @@ import type {
   MEDIUM_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   SUPPRESSED_PRIORITY_ACTION,
+  NO_SLI_DATA_ACTIONS_ID,
 } from '../../../../common/constants';
 
 export enum AlertStates {
   OK,
   ALERT,
+  NO_DATA,
 }
 
 export interface WindowSchema {
@@ -52,6 +54,14 @@ export type BurnRateAllowedActionGroups = ActionGroupIdsOf<
   | typeof LOW_PRIORITY_ACTION
   | typeof SUPPRESSED_PRIORITY_ACTION
 >;
+
+export type BurnRateActionGroup =
+  | typeof ALERT_ACTION.id
+  | typeof HIGH_PRIORITY_ACTION.id
+  | typeof MEDIUM_PRIORITY_ACTION.id
+  | typeof LOW_PRIORITY_ACTION.id
+  | typeof SUPPRESSED_PRIORITY_ACTION.id
+  | typeof NO_SLI_DATA_ACTIONS_ID;
 
 export interface Group {
   field: string;

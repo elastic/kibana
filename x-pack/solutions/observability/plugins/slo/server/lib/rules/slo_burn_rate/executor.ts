@@ -11,6 +11,7 @@ import type { ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/ser
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import type { IBasePath } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { getFormattedGroups, getEcsGroupsFromFlattenGrouping } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
@@ -25,11 +26,18 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { upperCase } from 'lodash';
+import type { AlertsClient } from '@kbn/alerting-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { GetTimeRange } from '@kbn/alerting-plugin/server';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
+  NO_SLI_DATA_ACTIONS_ID,
+  SLI_DESTINATION_INDEX_PATTERN,
+  SLO_RESOURCES_VERSION_MAJOR,
   SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 import {
@@ -45,6 +53,7 @@ import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
+import { buildSourceDataQuery } from './lib/build_source_query';
 import type {
   BurnRateAlertContext,
   BurnRateAlertState,
@@ -101,6 +110,30 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     }
 
     if (!slo.enabled) {
+      return { state: {} };
+    }
+
+    // Check for SLI data and source data before burn rate evaluation
+    const shouldProceed = await checkSliAndSourceData(
+      esClient.asCurrentUser,
+      slo,
+      alertsClient,
+      spaceId,
+      basePath,
+      startedAt,
+      getTimeRange,
+      logger,
+      await services.getDataViews()
+    );
+
+    // Handle recovery for no-data alert if SLI data exists (shouldProceed = true)
+    // The recovery logic at the end will handle this, but we need to ensure it runs
+    // even if we return early. However, when shouldProceed = true, we continue to the end
+    // where recovery logic is handled.
+    
+    if (!shouldProceed) {
+      // No-data alert was triggered, return early without burn rate evaluation
+      // Note: Recovery will be handled in the main recovery logic when SLI data exists again (shouldProceed = true)
       return { state: {} };
     }
 
@@ -233,31 +266,171 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       const alertUuid = recoveredAlert.alert.getUuid();
       const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, alertUuid);
 
-      const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
+      // Handle recovery for no-data alert differently
+      if (alertId === `${slo.id}-no-sli-data`) {
+        const context = {
+          timestamp: startedAt.toISOString(),
+          viewInAppUrl: addSpaceIdToPath(
+            basePath.publicBaseUrl,
+            spaceId,
+            `/app/observability/slos/${slo.id}`
+          ),
+          alertDetailsUrl,
+          sloId: slo.id,
+          sloName: slo.name,
+          sloInstanceId: ALL_VALUE,
+          grouping: recoveredAlert.hit?.[ALERT_GROUPING],
+        };
+        alertsClient.setAlertData({
+          id: alertId,
+          context,
+        });
+      } else {
+        // Handle recovery for regular burn rate alerts
+        const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          `/app/observability/slos/${slo.id}${urlQuery}`
+        );
+
+        const context = {
+          timestamp: startedAt.toISOString(),
+          viewInAppUrl,
+          alertDetailsUrl,
+          sloId: slo.id,
+          sloName: slo.name,
+          sloInstanceId: alertId,
+          grouping: recoveredAlert.hit?.[ALERT_GROUPING],
+        };
+
+        alertsClient.setAlertData({
+          id: alertId,
+          context,
+        });
+      }
+    }
+
+    return { state: {} };
+  };
+
+async function checkSliAndSourceData(
+  esClient: ElasticsearchClient,
+  slo: SLODefinition,
+  alertsClient: AlertsClient,
+  spaceId: string,
+  basePath: IBasePath,
+  startedAt: Date,
+  getTimeRange: GetTimeRange,
+  logger: Logger,
+  dataViews: DataViewsContract
+): Promise<boolean> {
+  const { dateStart, dateEnd } = getTimeRange('1h');
+  const timeRange = {
+    from: new Date(dateStart),
+    to: new Date(dateEnd),
+  };
+
+  // Check for SLI data in the past 1 hour
+  const sliIndexPattern = `.slo-observability.sli-v${SLO_RESOURCES_VERSION_MAJOR}*`;
+  const sliDataCount = await esClient.count({
+    index: sliIndexPattern,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'slo.id': slo.id } },
+          { term: { 'slo.revision': slo.revision } },
+          {
+            range: {
+              '@timestamp': {
+                gte: timeRange.from.toISOString(),
+                lte: timeRange.to.toISOString(),
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  if (sliDataCount.count > 0) {
+    // SLI data exists, proceed with burn rate evaluation
+    return true;
+  }
+
+  // No SLI data, check if source data exists
+  try {
+    const sourceQuery = await buildSourceDataQuery(
+      slo,
+      timeRange,
+      dataViews,
+      spaceId,
+      false // isServerless - could be made configurable if needed
+    );
+
+    const sourceDataCount = await esClient.count({
+      index: sourceQuery.index,
+      query: sourceQuery.query,
+    });
+
+    if (sourceDataCount.count > 0) {
+      // Source data exists but no SLI data, trigger "no data" alert
+      const reason = i18n.translate('xpack.slo.alerting.burnRate.noSliDataReason', {
+        defaultMessage:
+          'No SLI data generated for SLO {sloName} in the past hour. Source data exists but transform may not be running correctly.',
+        values: { sloName: slo.name },
+      });
+
+      const alertId = `${slo.id}-no-sli-data`;
+      const urlQuery = '';
       const viewInAppUrl = addSpaceIdToPath(
         basePath.publicBaseUrl,
         spaceId,
         `/app/observability/slos/${slo.id}${urlQuery}`
       );
 
+      const { uuid } = alertsClient.report({
+        id: alertId,
+        actionGroup: NO_SLI_DATA_ACTIONS_ID,
+        state: {
+          alertState: AlertStates.NO_DATA,
+        },
+        payload: {
+          [ALERT_REASON]: reason,
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_INSTANCE_ID_FIELD]: ALL_VALUE,
+          [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId || '',
+        },
+      });
+
+      const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
+
       const context = {
+        alertDetailsUrl,
+        reason,
         timestamp: startedAt.toISOString(),
         viewInAppUrl,
-        alertDetailsUrl,
         sloId: slo.id,
         sloName: slo.name,
-        sloInstanceId: alertId,
-        grouping: recoveredAlert.hit?.[ALERT_GROUPING],
+        sloInstanceId: ALL_VALUE,
+        slo,
       };
 
-      alertsClient.setAlertData({
-        id: alertId,
-        context,
-      });
-    }
+      alertsClient.setAlertData({ id: alertId, context });
 
-    return { state: {} };
-  };
+      return false; // No SLI data, "no data" alert triggered
+    }
+  } catch (error) {
+    logger.warn(`Failed to check source data for SLO ${slo.id}: ${error.message}`);
+    // If we can't check source data, proceed with evaluation to avoid blocking
+    return true;
+  }
+
+  // No SLI data and no source data, proceed with evaluation (this is expected if there's truly no data)
+  return true;
+}
 
 function getActionGroupName(id: string) {
   switch (id) {
