@@ -31,27 +31,66 @@ const MOCK_SECOND_DASHBOARD = {
   title: MOCK_SECOND_DASHBOARD_TITLE,
 };
 
-const mockExecute = jest.fn((context: any) => {
+const mockSearchExecute = jest.fn((context: any) => {
   if (context.onResults) {
     context.onResults([MOCK_FIRST_DASHBOARD, MOCK_SECOND_DASHBOARD]);
   }
 });
 
+const mockGetByIdExecute = jest.fn((context: any) => {
+  if (context.onResults && context.ids) {
+    const requestedDashboards = context.ids
+      .map((id: string) => {
+        if (id === MOCK_FIRST_DASHBOARD_ID) return MOCK_FIRST_DASHBOARD;
+        if (id === MOCK_SECOND_DASHBOARD_ID) return MOCK_SECOND_DASHBOARD;
+        return null;
+      })
+      .filter(Boolean);
+    context.onResults(requestedDashboards);
+  }
+});
+
 const mockSearchAction = {
-  execute: mockExecute,
+  execute: mockSearchExecute,
 };
 
-const mockGetAction = jest.fn().mockResolvedValue(mockSearchAction);
+const mockGetDashboardByIdAction = {
+  execute: mockGetByIdExecute,
+};
+
+const mockGetAction = jest.fn((actionId: string) => {
+  if (actionId === 'getDashboardByIdAction') {
+    return Promise.resolve(mockGetDashboardByIdAction);
+  }
+  return Promise.resolve(mockSearchAction);
+});
 
 const mockOnChange = jest.fn();
 
 describe('DashboardsSelector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetAction.mockResolvedValue(mockSearchAction);
-    mockExecute.mockImplementation((context: any) => {
+    mockGetAction.mockImplementation((actionId: string) => {
+      if (actionId === 'getDashboardByIdAction') {
+        return Promise.resolve(mockGetDashboardByIdAction);
+      }
+      return Promise.resolve(mockSearchAction);
+    });
+    mockSearchExecute.mockImplementation((context: any) => {
       if (context.onResults) {
         context.onResults([MOCK_FIRST_DASHBOARD, MOCK_SECOND_DASHBOARD]);
+      }
+    });
+    mockGetByIdExecute.mockImplementation((context: any) => {
+      if (context.onResults && context.ids) {
+        const requestedDashboards = context.ids
+          .map((id: string) => {
+            if (id === MOCK_FIRST_DASHBOARD_ID) return MOCK_FIRST_DASHBOARD;
+            if (id === MOCK_SECOND_DASHBOARD_ID) return MOCK_SECOND_DASHBOARD;
+            return null;
+          })
+          .filter(Boolean);
+        context.onResults(requestedDashboards);
       }
     });
   });
@@ -74,7 +113,6 @@ describe('DashboardsSelector', () => {
       />
     );
 
-    // Check that the component renders with the placeholder text
     expect(screen.getByTestId('dashboardsSelector')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(MOCK_PLACEHOLDER)).toBeInTheDocument();
   });
@@ -89,14 +127,12 @@ describe('DashboardsSelector', () => {
       />
     );
 
-    // Wait for the dashboard titles to be fetched and displayed
     await waitFor(() => {
       expect(screen.getByText(MOCK_FIRST_DASHBOARD_TITLE)).toBeInTheDocument();
       expect(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE)).toBeInTheDocument();
     });
 
-    // Verify that searchDashboards was called to fetch all dashboards
-    expect(mockGetAction).toHaveBeenCalledWith('searchDashboardAction');
+    expect(mockGetAction).toHaveBeenCalledWith('getDashboardByIdAction');
   });
 
   it('debounces and triggers dashboard search with user input in the ComboBox', async () => {
@@ -112,12 +148,10 @@ describe('DashboardsSelector', () => {
     const searchInput = screen.getByPlaceholderText(MOCK_PLACEHOLDER);
     await userEvent.type(searchInput, MOCK_FIRST_DASHBOARD_TITLE);
 
-    // Assert that searchDashboards was called with the correct search value
-    // Wait for the next tick to allow state update and effect to run
     await waitFor(() => {
       expect(searchInput).toHaveValue(MOCK_FIRST_DASHBOARD_TITLE);
 
-      expect(mockExecute).toHaveBeenCalledWith(
+      expect(mockSearchExecute).toHaveBeenCalledWith(
         expect.objectContaining({
           search: {
             search: MOCK_FIRST_DASHBOARD_TITLE,
@@ -144,7 +178,7 @@ describe('DashboardsSelector', () => {
     fireEvent.focus(searchInput);
 
     await waitFor(() => {
-      expect(mockExecute).toHaveBeenCalledWith(
+      expect(mockSearchExecute).toHaveBeenCalledWith(
         expect.objectContaining({
           search: {
             search: undefined,
@@ -165,7 +199,7 @@ describe('DashboardsSelector', () => {
       />
     );
 
-    expect(mockExecute).not.toHaveBeenCalled();
+      expect(mockSearchExecute).not.toHaveBeenCalled();
   });
 
   it('dispatches selected dashboards on change', async () => {
@@ -178,15 +212,12 @@ describe('DashboardsSelector', () => {
       />
     );
 
-    // Click on the combobox to open it
     const searchInput = screen.getByPlaceholderText(MOCK_PLACEHOLDER);
     fireEvent.focus(searchInput);
 
-    // Wait for the dropdown to open and options to load
     await waitFor(() => {
-      expect(mockExecute).toHaveBeenCalled();
-      // When search value is empty, search should be undefined
-      const lastCall = mockExecute.mock.calls[mockExecute.mock.calls.length - 1];
+      expect(mockSearchExecute).toHaveBeenCalled();
+      const lastCall = mockSearchExecute.mock.calls[mockSearchExecute.mock.calls.length - 1];
       expect(lastCall[0]).toEqual(
         expect.objectContaining({
           search: {
@@ -197,15 +228,12 @@ describe('DashboardsSelector', () => {
       );
     });
 
-    // Wait for the second dashboard option to appear in the dropdown
     await waitFor(() => {
       expect(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE)).toBeInTheDocument();
     });
 
-    // Click on the second dashboard option to select it
     await userEvent.click(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE));
 
-    // Verify that the onChange callback was called with both dashboards
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith([
         { label: MOCK_FIRST_DASHBOARD_TITLE, value: MOCK_FIRST_DASHBOARD_ID },
@@ -213,7 +241,6 @@ describe('DashboardsSelector', () => {
       ]);
     });
 
-    // Verify that both selected options are now displayed
     expect(screen.getByText(MOCK_FIRST_DASHBOARD_TITLE)).toBeInTheDocument();
     expect(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE)).toBeInTheDocument();
   });
