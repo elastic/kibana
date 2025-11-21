@@ -32,6 +32,7 @@ import { initializeTrackPanel } from './track_panel';
 import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
+import { initializeProjectRoutingManager } from './project_routing_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mergeControlGroupStates } from './merge_control_group_states';
@@ -111,6 +112,11 @@ export function getDashboardApi({
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
+  const projectRoutingManager = initializeProjectRoutingManager(
+    initialState,
+    settingsManager.api.projectRoutingRestore$
+  );
+
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
@@ -120,15 +126,18 @@ export function getDashboardApi({
     savedObjectId$,
     settingsManager,
     unifiedSearchManager,
+    projectRoutingManager,
     getReferences,
   });
 
   function getState() {
     const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
+    const projectRoutingState = projectRoutingManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
+      ...projectRoutingState,
       panels,
     };
 
@@ -152,6 +161,7 @@ export function getDashboardApi({
     ...settingsManager.api,
     ...trackPanel,
     ...unifiedSearchManager.api,
+    ...projectRoutingManager.api,
     ...unsavedChangesManager.api,
     ...trackOverlayApi,
     ...initializeTrackContentfulRender(),
@@ -180,7 +190,8 @@ export function getDashboardApi({
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
 
-      const { description, tags, timeRestore, title } = settingsManager.api.getSettings();
+      const { description, tags, timeRestore, projectRoutingRestore, title } =
+        settingsManager.api.getSettings();
       const saveResult = await openSaveModal({
         description,
         isManaged,
@@ -188,8 +199,11 @@ export function getDashboardApi({
         serializeState: getState,
         setTimeRestore: (newTimeRestore: boolean) =>
           settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+        setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
+          settingsManager.api.setSettings({ projectRoutingRestore: newProjectRoutingRestore }),
         tags,
         timeRestore,
+        projectRoutingRestore,
         title,
         viewMode: viewModeManager.api.viewMode$.value,
       });
@@ -270,6 +284,7 @@ export function getDashboardApi({
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
+      projectRoutingManager.cleanup();
       unsavedChangesManager.cleanup();
       layoutManager.cleanup();
     },

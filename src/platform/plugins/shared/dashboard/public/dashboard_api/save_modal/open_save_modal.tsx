@@ -33,8 +33,10 @@ export async function openSaveModal({
   lastSavedId,
   serializeState,
   setTimeRestore,
+  setProjectRoutingRestore,
   tags,
   timeRestore,
+  projectRoutingRestore,
   title,
   viewMode,
 }: {
@@ -43,8 +45,10 @@ export async function openSaveModal({
   lastSavedId: string | undefined;
   serializeState: () => { dashboardState: DashboardState; references: Reference[] };
   setTimeRestore: (timeRestore: boolean) => void;
+  setProjectRoutingRestore: (projectRoutingRestore: boolean) => void;
   tags?: string[];
   timeRestore: boolean;
+  projectRoutingRestore: boolean;
   title: string;
   viewMode: ViewMode;
 }) {
@@ -61,6 +65,7 @@ export async function openSaveModal({
           newDescription,
           newCopyOnSave,
           newTimeRestore,
+          newProjectRoutingRestore,
           onTitleDuplicate,
           isTitleDuplicateConfirmed,
         }: DashboardSaveOptions): Promise<SaveDashboardReturn> => {
@@ -85,6 +90,7 @@ export async function openSaveModal({
             }
 
             setTimeRestore(newTimeRestore);
+            setProjectRoutingRestore(newProjectRoutingRestore);
             const { dashboardState, references } = serializeState();
 
             const dashboardStateToSave: DashboardState = {
@@ -132,7 +138,9 @@ export async function openSaveModal({
             title={saveAsTitle}
             onClose={() => resolve(undefined)}
             timeRestore={timeRestore}
+            projectRoutingRestore={projectRoutingRestore}
             showStoreTimeOnSave={!lastSavedId}
+            showStoreProjectRoutingOnSave={!lastSavedId}
             description={description ?? ''}
             showCopyOnSave={false}
             onSave={onSaveAttempt}

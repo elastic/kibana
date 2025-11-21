@@ -27,6 +27,7 @@ test('renders DashboardSaveModal', () => {
       title="dash title"
       description="dash description"
       timeRestore={true}
+      projectRoutingRestore={true}
       showCopyOnSave={true}
     />
   );

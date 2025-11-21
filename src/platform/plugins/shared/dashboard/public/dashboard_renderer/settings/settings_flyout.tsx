@@ -220,6 +220,28 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               }
             />
           </EuiFormRow>
+          <EuiFormRow
+            helpText={
+              <FormattedMessage
+                id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
+                defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
+              />
+            }
+          >
+            <EuiSwitch
+              data-test-subj="storeProjectRoutingWithDashboard"
+              checked={localSettings.projectRoutingRestore}
+              onChange={(event) =>
+                updateDashboardSetting({ projectRoutingRestore: event.target.checked })
+              }
+              label={
+                <FormattedMessage
+                  id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowLabel"
+                  defaultMessage="Store project routing with dashboard"
+                />
+              }
+            />
+          </EuiFormRow>
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate(
