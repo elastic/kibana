@@ -251,6 +251,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         upcoming: ['edit', 'copyId', 'archive', 'delete'],
         finished: ['edit', 'copyId', 'archive', 'delete'],
         archived: ['copyId', 'unarchive', 'delete'],
+        disabled: ['copyId', 'delete'],
       };
       return statusMenuItemsMap[status].map((type) => menuItems[type]);
     }, [status, closePopover, onEdit, id, toasts, showModal]);
