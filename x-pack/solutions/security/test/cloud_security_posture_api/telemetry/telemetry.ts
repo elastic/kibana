@@ -387,5 +387,33 @@ export default function ({ getService }: FtrProviderContext) {
         )
       ).to.be(true);
     });
+
+    it('includes asset_inventory_cloud_connector_usage_stats in telemetry', async () => {
+      const {
+        body: [{ stats: apiResponse }],
+      } = await supertest
+        .post(`/internal/telemetry/clusters/_stats`)
+        .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          unencrypted: true,
+          refreshCache: true,
+        })
+        .expect(200);
+
+      // Verify that asset_inventory_cloud_connector_usage_stats field exists in asset_inventory
+      expect(apiResponse.stack_stats.kibana.plugins.asset_inventory).to.have.property(
+        'asset_inventory_cloud_connector_usage_stats'
+      );
+
+      // Verify it's an array (even if empty)
+      expect(
+        Array.isArray(
+          apiResponse.stack_stats.kibana.plugins.asset_inventory
+            .asset_inventory_cloud_connector_usage_stats
+        )
+      ).to.be(true);
+    });
   });
 }

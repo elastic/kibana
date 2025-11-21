@@ -15,8 +15,8 @@ import {
   stopChild,
   and,
   raise,
-  cancel,
   stateIn,
+  cancel,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
@@ -53,7 +53,7 @@ import {
   defaultEnrichmentUrlState,
   findInsertIndex,
   getConfiguredSteps,
-  getDataSourcesSamples,
+  getActiveDataSourceSamples,
   getDataSourcesUrlState,
   getUpsertFields,
   getStepsForSimulation,
@@ -61,6 +61,8 @@ import {
   spawnDataSource,
   spawnStep,
   reorderSteps,
+  getActiveSimulationMode,
+  selectDataSource,
 } from './utils';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
@@ -103,13 +105,13 @@ export const streamEnrichmentMachine = setup({
       definition: params.definition,
     })),
     /* Steps actions */
-    setupSteps: assign(({ context, spawn, self }) => {
+    setupSteps: assign((assignArgs) => {
       // Clean-up pre-existing steps
-      context.stepRefs.forEach(stopChild);
+      assignArgs.context.stepRefs.forEach(stopChild);
       // Setup processors from the stream definition
-      const uiSteps = convertStepsForUI(context.definition.stream.ingest.processing);
+      const uiSteps = convertStepsForUI(assignArgs.context.definition.stream.ingest.processing);
       const stepRefs = uiSteps.map((step) => {
-        return spawnStep(step, { self, spawn });
+        return spawnStep(step, assignArgs);
       });
 
       return {
@@ -234,9 +236,10 @@ export const streamEnrichmentMachine = setup({
     addDataSource: assign((assignArgs, { dataSource }: { dataSource: EnrichmentDataSource }) => {
       const newDataSourceRef = spawnDataSource(dataSource, assignArgs);
 
-      return {
-        dataSourcesRefs: [newDataSourceRef, ...assignArgs.context.dataSourcesRefs],
-      };
+      const dataSourcesRefs = [newDataSourceRef, ...assignArgs.context.dataSourcesRefs];
+      selectDataSource(dataSourcesRefs, newDataSourceRef.id);
+
+      return { dataSourcesRefs };
     }),
     deleteDataSource: assign(({ context }, params: { id: string }) => ({
       dataSourcesRefs: context.dataSourcesRefs.filter((proc) => proc.id !== params.id),
@@ -248,30 +251,28 @@ export const streamEnrichmentMachine = setup({
     },
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
     sendStepsEventToSimulator: enqueueActions(
-      ({ context, enqueue }, params: { type: StreamEnrichmentEvent['type'] }) => {
+      ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
+        const simulationMode = getActiveSimulationMode(context);
+        const isPartialSimulation = simulationMode === 'partial';
         /**
          * When any processor is before persisted, we need to reset the simulator
          * because the processors are not in a valid order.
          * If the order allows it, notify the simulator to run the simulation based on the received event.
          */
-        if (selectWhetherAnyProcessorBeforePersisted(context)) {
+        if (isPartialSimulation && selectWhetherAnyProcessorBeforePersisted(context)) {
           enqueue('sendResetEventToSimulator');
         } else {
           enqueue.sendTo('simulator', {
-            type: params.type,
-            steps: getStepsForSimulation({ stepRefs: context.stepRefs }),
+            type: params?.type ?? 'simulation.receive_steps',
+            steps: getStepsForSimulation({ stepRefs: context.stepRefs, isPartialSimulation }),
           });
         }
       }
     ),
-    sendDataSourcesSamplesToSimulator: sendTo(
-      'simulator',
-      ({ context }) => ({
-        type: 'simulation.receive_samples',
-        samples: getDataSourcesSamples(context),
-      }),
-      { delay: 800, id: 'send-samples-to-simulator' }
-    ),
+    sendDataSourcesSamplesToSimulator: sendTo('simulator', ({ context }) => ({
+      type: 'simulation.receive_samples',
+      samples: getActiveDataSourceSamples(context),
+    })),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
   },
   guards: {
@@ -349,7 +350,11 @@ export const streamEnrichmentMachine = setup({
     ready: {
       id: 'ready',
       type: 'parallel',
-      entry: [{ type: 'setupSteps' }, { type: 'setupDataSources' }],
+      entry: [
+        { type: 'setupSteps' },
+        { type: 'setupDataSources' },
+        { type: 'sendStepsEventToSimulator' },
+      ],
       on: {
         'stream.received': {
           target: '#ready',
@@ -418,14 +423,20 @@ export const streamEnrichmentMachine = setup({
                 { type: 'syncUrlState' },
               ],
             },
+            'dataSources.select': {
+              actions: [
+                ({ context, event }) => selectDataSource(context.dataSourcesRefs, event.id),
+                { type: 'sendStepsEventToSimulator' },
+              ],
+            },
             'dataSource.change': {
-              actions: raise({ type: 'url.sync' }),
+              actions: [
+                cancel('sync-on-change'),
+                raise({ type: 'url.sync' }, { id: 'sync-on-change', delay: 300 }),
+              ],
             },
             'dataSource.dataChange': {
-              actions: [
-                cancel('send-samples-to-simulator'), // Debounce samples sent to simulator on multiple data sources retrieval
-                { type: 'sendDataSourcesSamplesToSimulator' },
-              ],
+              actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
             },
           },
           states: {
@@ -473,6 +484,7 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         { type: 'addDataSource', params: ({ event }) => event },
                         raise({ type: 'url.sync' }),
+                        { type: 'sendStepsEventToSimulator' },
                       ],
                     },
                     'dataSource.delete': {
@@ -491,7 +503,7 @@ export const streamEnrichmentMachine = setup({
               initial: 'idle',
               states: {
                 idle: {
-                  entry: [{ type: 'sendStepsEventToSimulator', params: ({ event }) => event }],
+                  entry: [{ type: 'sendStepsEventToSimulator' }],
                   on: {
                     'step.edit': {
                       guard: 'hasSimulatePrivileges',
@@ -520,7 +532,7 @@ export const streamEnrichmentMachine = setup({
                           type: 'duplicateProcessor',
                           params: ({ event }) => event,
                         },
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                        { type: 'sendStepsEventToSimulator' },
                       ],
                     },
                     'step.addProcessor': {
@@ -537,7 +549,7 @@ export const streamEnrichmentMachine = setup({
                 },
                 creating: {
                   id: 'creatingStep',
-                  entry: [{ type: 'sendStepsEventToSimulator', params: ({ event }) => event }],
+                  entry: [{ type: 'sendStepsEventToSimulator' }],
                   on: {
                     'step.change': {
                       actions: [
@@ -561,7 +573,7 @@ export const streamEnrichmentMachine = setup({
                 },
                 editing: {
                   id: 'editingStep',
-                  entry: [{ type: 'sendStepsEventToSimulator', params: ({ event }) => event }],
+                  entry: [{ type: 'sendStepsEventToSimulator' }],
                   on: {
                     'step.change': {
                       actions: [

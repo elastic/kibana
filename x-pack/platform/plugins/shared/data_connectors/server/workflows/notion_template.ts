@@ -94,12 +94,9 @@ steps:
 /**
  * Creates a workflow template for Notion
  * @param stackConnectorId - The ID of the stack connector connected via OAuth
- * @param feature - Optional capability/feature (e.g., 'search_web')
  * @returns Workflow YAML template with secret reference
  */
-export function createNotionSearchWorkflowTemplates(
-  stackConnectorId: string,
-): string[] {
+export function createNotionSearchWorkflowTemplates(stackConnectorId: string): string[] {
   return [
     generateSearchWorkflow(stackConnectorId),
     generateQueryWorkflow(stackConnectorId),

@@ -10,7 +10,10 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import type { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { FederatedConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import {
+  FederatedConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+} from '@kbn/actions-plugin/common/connector_feature_config';
 import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '../../../common/notion/constants';
 import type {
   NotionConfig,
@@ -190,7 +193,7 @@ export function getConnectorType(): NotionConnectorType {
     name: CONNECTOR_NAME,
     minimumLicenseRequired: 'gold',
     getService: (params) => new NotionConnector(params),
-    supportedFeatureIds: [FederatedConnectorFeatureId],
+    supportedFeatureIds: [FederatedConnectorFeatureId, WorkflowsConnectorFeatureId],
     schema: {
       config: NotionConfigSchema,
       secrets: NotionSecretsSchema,

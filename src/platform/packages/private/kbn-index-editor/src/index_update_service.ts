@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkRequest,
+  BulkResponse,
+  SecurityHasPrivilegesResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -44,7 +48,13 @@ import { esql } from '@kbn/esql-ast';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import type { IndicesAutocompleteResult } from '@kbn/esql-types';
+import {
+  LOOKUP_INDEX_CREATE_ROUTE,
+  LOOKUP_INDEX_PRIVILEGES_ROUTE,
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_ROUTE,
+  type IndicesAutocompleteResult,
+} from '@kbn/esql-types';
 import { isPlaceholderColumn } from './utils';
 import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
@@ -125,6 +135,7 @@ export class IndexUpdateService {
     this.listenForUpdates();
   }
 
+  public userCanResetIndex: boolean = false;
   private indexHasNewFields: boolean = false;
 
   /** Indicates the service has been completed */
@@ -447,10 +458,13 @@ export class IndexUpdateService {
 
     const esqlQuery = esql`FROM ${indexName}`.print();
 
-    const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, {
-      allowNoIndex: true,
+    const newDataView = await getESQLAdHocDataview({
+      dataViewsService: this.data.dataViews,
+      query: esqlQuery,
+      options: {
+        allowNoIndex: true,
+      },
     });
-
     // If at some point the index existed, the dataView fields are present in the browser cache, we need to force refresh it.
     await this.data.dataViews.refreshFields(newDataView, false, true);
 
@@ -793,6 +807,18 @@ export class IndexUpdateService {
         )
         .subscribe(this._pendingColumnsToBeSaved$)
     );
+
+    // Checks if user can reset the given index
+    this._subscription.add(
+      this.indexName$
+        .pipe(
+          filter((indexName) => indexName !== null),
+          switchMap((indexName) => from(this.fetchUserCanResetIndex(indexName!)))
+        )
+        .subscribe((result) => {
+          this.userCanResetIndex = result;
+        })
+    );
   }
 
   private summarizeSavingUpdates(savingDocs: PendingSave, updates: BulkUpdateOperations) {
@@ -824,12 +850,8 @@ export class IndexUpdateService {
     const docId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
     return {
       id: docId,
-      raw: {
-        _id: docId,
-      },
-      flattened: {
-        _id: docId,
-      },
+      raw: {},
+      flattened: {},
     };
   }
 
@@ -877,6 +899,24 @@ export class IndexUpdateService {
     this.addAction('delete-doc', { ids });
 
     this.telemetry.trackEditInteraction({ actionType: 'delete_row' });
+  }
+
+  /** Reset index to original state */
+  public async resetIndexMapping() {
+    if (this.isIndexCreated()) {
+      await this.http.post<BulkResponse>(`${LOOKUP_INDEX_RECREATE_ROUTE}/${this.getIndexName()}`);
+
+      // Refresh dataview fields
+      const dataView = await firstValueFrom(this.dataView$);
+      await this.data.dataViews.refreshFields(dataView, false, true);
+
+      // Clean all unsaved changes that might be in memory
+      this.discardUnsavedChanges();
+      this._docs$.next([]);
+      this._totalHits$.next(0);
+    } else {
+      this.discardUnsavedChanges();
+    }
   }
 
   /**
@@ -939,7 +979,7 @@ export class IndexUpdateService {
     });
 
     const bulkResponse = await this.http.post<BulkResponse>(
-      `/internal/esql/lookup_index/${this.getIndexName()}/update`,
+      `${LOOKUP_INDEX_UPDATE_ROUTE}/${this.getIndexName()}`,
       {
         body,
       }
@@ -1017,7 +1057,7 @@ export class IndexUpdateService {
   public async createIndex({ exitAfterFlush = false }) {
     try {
       this._isSaving$.next(true);
-      await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
+      await this.http.post(`${LOOKUP_INDEX_CREATE_ROUTE}/${this.getIndexName()}`);
 
       this.setIndexCreated(true);
       this.flush({ exitAfterFlush });
@@ -1061,6 +1101,21 @@ export class IndexUpdateService {
     );
 
     return lookupIndexesResult.indices.some((index) => index.name === indexName);
+  }
+
+  private async fetchUserCanResetIndex(indexName: string): Promise<boolean> {
+    const lookupIndexesResult = await this.http.get<SecurityHasPrivilegesResponse['index']>(
+      LOOKUP_INDEX_PRIVILEGES_ROUTE,
+      {
+        query: {
+          indexName,
+        },
+      }
+    );
+    return (
+      (lookupIndexesResult[indexName]?.delete_index || lookupIndexesResult['*']?.delete_index) &&
+      (lookupIndexesResult[indexName]?.create_index || lookupIndexesResult['*']?.create_index)
+    );
   }
 
   public exit(onExitCallback?: () => void) {

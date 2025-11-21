@@ -7,7 +7,7 @@
 import Path from 'path';
 import { node } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { identifyFeatures } from '@kbn/streams-ai';
+import { identifySystemFeatures } from '@kbn/streams-ai';
 import kbnDatemath from '@kbn/datemath';
 import type { ScoutTestConfig } from '@kbn/scout';
 import { uniq } from 'lodash';
@@ -241,16 +241,21 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
             });
           }
 
-          const { features } = await identifyFeatures({
+          const { features } = await identifySystemFeatures({
             start: from.valueOf(),
             end: to.valueOf(),
             esClient,
             inferenceClient,
             logger,
             stream,
-            kql: '',
             dropUnmapped: true,
             signal: new AbortController().signal,
+            analysis: await describeDataset({
+              esClient,
+              start: from.valueOf(),
+              end: to.valueOf(),
+              index: stream.name,
+            }),
           });
 
           const featuresWithAnalysis = await Promise.all(

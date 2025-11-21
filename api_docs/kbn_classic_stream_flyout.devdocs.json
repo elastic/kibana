@@ -1,0 +1,61 @@
+{
+  "id": "@kbn/classic-stream-flyout",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/classic-stream-flyout",
+        "id": "def-common.CreateClassicStreamFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "CreateClassicStreamFlyout",
+        "description": [],
+        "signature": [
+          "({ onClose, onCreate, }: CreateClassicStreamFlyoutProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-classic-stream-flyout/src/components/create_classic_stream_flyout/create_classic_stream_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/classic-stream-flyout",
+            "id": "def-common.CreateClassicStreamFlyout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onClose,\n  onCreate,\n}",
+            "description": [],
+            "signature": [
+              "CreateClassicStreamFlyoutProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-classic-stream-flyout/src/components/create_classic_stream_flyout/create_classic_stream_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
