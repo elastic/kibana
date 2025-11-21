@@ -10,41 +10,25 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiCard, EuiButton, EuiIcon } from
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_AGENTS_CREATE } from '@kbn/deeplinks-agent-builder';
 import { DATA_CONNECTORS_APP_ID } from '@kbn/deeplinks-data-connectors';
-import { useKibana } from '../hooks/use_kibana';
+import { useNavigateToApp } from '../hooks/use_navigate_to_app';
 import searchWindowSVG from '../../assets/search_window_illustration.svg';
 import searchAnalyticsSVG from '../../assets/search_analytics.svg';
 import searchResultsSVG from '../../assets/search_results_illustration.svg';
 
 export const ExploreWorkplaceAI: React.FC = () => {
-  const {
-    services: { application, chrome },
-  } = useKibana();
+  const navigateToApp = useNavigateToApp();
 
   const onConnectSource = useCallback(() => {
-    const dataConnectorsUrl = chrome?.navLinks.get(DATA_CONNECTORS_APP_ID)?.url;
-
-    if (dataConnectorsUrl) {
-      application?.navigateToUrl(dataConnectorsUrl);
-    }
-  }, [application, chrome]);
+    navigateToApp(DATA_CONNECTORS_APP_ID);
+  }, [navigateToApp]);
 
   const onCreateAgent = useCallback(() => {
-    const createAgentUrl = chrome?.navLinks.get(
-      `${AGENT_BUILDER_APP_ID}:${AGENT_BUILDER_AGENTS_CREATE}`
-    )?.url;
-
-    if (createAgentUrl) {
-      application?.navigateToUrl(createAgentUrl);
-    }
-  }, [application, chrome]);
+    navigateToApp(`${AGENT_BUILDER_APP_ID}:${AGENT_BUILDER_AGENTS_CREATE}`);
+  }, [navigateToApp]);
 
   const onChatNow = useCallback(() => {
-    const agentBuilderUrl = chrome?.navLinks.get(AGENT_BUILDER_APP_ID)?.url;
-
-    if (agentBuilderUrl) {
-      application?.navigateToUrl(agentBuilderUrl);
-    }
-  }, [application, chrome]);
+    navigateToApp(AGENT_BUILDER_APP_ID);
+  }, [navigateToApp]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
