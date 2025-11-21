@@ -6,12 +6,7 @@
  */
 import { toBooleanRt } from '@kbn/io-ts-utils/src/to_boolean_rt';
 import * as t from 'io-ts';
-import {
-  healthStatusSchema,
-  sloDefinitionSchema,
-  stateSchema,
-  transformHealthSchema,
-} from '../../schema';
+import { healthStatusSchema, sloDefinitionSchema, transformHealthSchema } from '../../schema';
 
 const findSloDefinitionsParamsSchema = t.partial({
   query: t.partial({
@@ -24,26 +19,44 @@ const findSloDefinitionsParamsSchema = t.partial({
   }),
 });
 
-const healthMetadataSchema = t.partial({
-  state: stateSchema,
-  health: t.type({
-    overall: transformHealthSchema,
-    rollup: healthStatusSchema,
-    summary: healthStatusSchema,
-  }),
+const healthMetadataSchema = t.type({
+  overall: transformHealthSchema,
+  rollup: healthStatusSchema,
+  summary: healthStatusSchema,
 });
 
-const findSloDefinitionsResultSchema = t.intersection([sloDefinitionSchema, healthMetadataSchema]);
+const sloDefinitionResponseSchema = t.intersection([
+  sloDefinitionSchema,
+  t.partial({ health: healthMetadataSchema }),
+]);
+
+const sloDefinitionWithHealthResponseSchema = t.intersection([
+  sloDefinitionSchema,
+  t.type({ health: healthMetadataSchema }),
+]);
 
 const findSloDefinitionsResponseSchema = t.type({
   page: t.number,
   perPage: t.number,
   total: t.number,
-  results: t.array(findSloDefinitionsResultSchema),
+  results: t.array(sloDefinitionResponseSchema),
 });
 
 type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.props.query>;
 type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
 
-export { findSloDefinitionsParamsSchema, findSloDefinitionsResponseSchema };
-export type { FindSLODefinitionsParams, FindSLODefinitionsResponse };
+type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionResponseSchema>;
+type SLODefinitionWithHealthResponse = t.OutputOf<typeof sloDefinitionWithHealthResponseSchema>;
+
+export {
+  findSloDefinitionsParamsSchema,
+  findSloDefinitionsResponseSchema,
+  sloDefinitionResponseSchema,
+  sloDefinitionWithHealthResponseSchema,
+};
+export type {
+  FindSLODefinitionsParams,
+  FindSLODefinitionsResponse,
+  SLODefinitionResponse,
+  SLODefinitionWithHealthResponse,
+};

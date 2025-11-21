@@ -45,7 +45,7 @@ export class FindSLODefinitions {
       const resultsWithHealth = definitions.map((definition) => {
         return {
           ...definition,
-          state: healthBySloId[definition.id]?.state,
+          statE: 'foo',
           health: healthBySloId[definition.id]?.health,
         };
       });
