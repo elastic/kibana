@@ -128,7 +128,7 @@ export const ContextMenu = ({
         }),
       });
 
-      throw new Error('Kibana requests can only be copied as curl');
+      return;
     }
 
     const { data: requestsAsCode, error: requestError } = await convertRequestToLanguage({
@@ -147,7 +147,7 @@ export const ContextMenu = ({
         }),
       });
 
-      throw new Error('Failed to convert request to language');
+      return;
     }
 
     notifications.toasts.addSuccess({

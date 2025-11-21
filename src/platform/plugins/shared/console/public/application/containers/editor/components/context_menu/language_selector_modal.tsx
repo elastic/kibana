@@ -71,23 +71,27 @@ export const LanguageSelectorModal = ({
   const optionsList = useMemo(() => {
     return options.map((option) => ({
       ...option,
-      ...(noOptionsSelected && option.key === selectedLanguage && { checked: 'on' }),
-      append: option.key === selectedLanguage ? DEFAULT_BADGE : undefined,
+      ...(noOptionsSelected && option.key === currentLanguage && { checked: 'on' }),
+      append: option.key === currentLanguage ? DEFAULT_BADGE : undefined,
     }));
-  }, [options, selectedLanguage, noOptionsSelected]);
+  }, [options, currentLanguage, noOptionsSelected]);
+
+  const handleOptionsChange = (changedOptions: EuiSelectableOption[]) => {
+    setOptions(changedOptions);
+
+    // Update selectedLanguage when user clicks a different option
+    const checkedOption = changedOptions.find((option) => option.checked);
+    if (checkedOption?.key) {
+      setSelectedLanguage(checkedOption.key);
+    }
+  };
 
   const onCopyCode = () => {
-    const selectedOption = options.find((option) => option.checked);
-    const language = selectedOption?.key || selectedLanguage;
-
-    onSubmit(language);
+    onSubmit(selectedLanguage);
   };
 
   const onSetAsDefault = () => {
-    const selectedOption = options.find((option) => option.checked);
-    const language = selectedOption?.key || selectedLanguage;
-
-    changeDefaultLanguage(language);
+    changeDefaultLanguage(selectedLanguage);
     closeModal();
   };
 
@@ -114,7 +118,7 @@ export const LanguageSelectorModal = ({
         <EuiSelectable
           css={styles.constrainedSelectable}
           options={optionsList as EuiSelectableOption[]}
-          onChange={(changedOptions) => setOptions(changedOptions)}
+          onChange={handleOptionsChange}
           singleSelection="always"
           listProps={{
             onFocusBadge: false,
