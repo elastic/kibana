@@ -18,9 +18,16 @@ export interface Props {
   isAutoRefreshing: boolean;
   range?: { from: Date; to: Date };
   onBrushed?: (timeBounds: TimeBounds) => void;
+  hideHeaderDurationLabel?: boolean;
 }
 
-export function HistoricalDataCharts({ slo, range, isAutoRefreshing, onBrushed }: Props) {
+export function HistoricalDataCharts({
+  slo,
+  range,
+  isAutoRefreshing,
+  onBrushed,
+  hideHeaderDurationLabel = false,
+}: Props) {
   const { data: historicalSummaries = [], isLoading } = useFetchHistoricalSummary({
     sloList: [slo],
     shouldRefetch: isAutoRefreshing,
@@ -50,6 +57,7 @@ export function HistoricalDataCharts({ slo, range, isAutoRefreshing, onBrushed }
           slo={slo}
           observedValue={lastObservedValue}
           onBrushed={onBrushed}
+          hideHeaderDurationLabel={hideHeaderDurationLabel}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -59,6 +67,7 @@ export function HistoricalDataCharts({ slo, range, isAutoRefreshing, onBrushed }
           slo={slo}
           onBrushed={onBrushed}
           lastErrorBudgetRemaining={lastErrorBudgetRemaining}
+          hideHeaderDurationLabel={hideHeaderDurationLabel}
         />
       </EuiFlexItem>
     </>

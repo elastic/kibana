@@ -28,6 +28,7 @@ export interface Props {
   slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
   lastErrorBudgetRemaining?: number;
+  hideHeaderDurationLabel?: boolean;
 }
 
 export function ErrorBudgetChartPanel({
@@ -36,6 +37,7 @@ export function ErrorBudgetChartPanel({
   slo,
   onBrushed,
   lastErrorBudgetRemaining,
+  hideHeaderDurationLabel = false,
 }: Props) {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
@@ -88,6 +90,7 @@ export function ErrorBudgetChartPanel({
         <EuiFlexGroup direction="column" gutterSize="l">
           <ErrorBudgetHeader
             slo={slo}
+            hideHeaderDurationLabel={hideHeaderDurationLabel}
             isMouseOver={isMouseOver}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
           />

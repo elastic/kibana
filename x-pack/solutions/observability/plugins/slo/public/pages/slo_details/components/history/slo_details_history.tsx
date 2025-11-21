@@ -110,6 +110,7 @@ export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
         isAutoRefreshing={isAutoRefreshing}
         range={range}
         onBrushed={onBrushed}
+        hideHeaderDurationLabel={true}
       />
 
       <EventsChartPanel slo={slo} range={range} hideRangeDurationLabel onBrushed={onBrushed} />

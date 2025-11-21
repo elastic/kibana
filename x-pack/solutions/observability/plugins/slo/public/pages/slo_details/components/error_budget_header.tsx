@@ -18,6 +18,7 @@ import { ErrorBudgetActions } from './error_budget_actions';
 interface Props {
   slo: SLOWithSummaryResponse;
   hideTitle?: boolean;
+  hideHeaderDurationLabel?: boolean;
   isMouseOver?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
 }
@@ -25,6 +26,7 @@ interface Props {
 export function ErrorBudgetHeader({
   slo,
   hideTitle = false,
+  hideHeaderDurationLabel = false,
   isMouseOver,
   setDashboardAttachmentReady,
 }: Props) {
@@ -58,16 +60,18 @@ export function ErrorBudgetHeader({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText color="subdued" size="s">
-          {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-            ? i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.duration', {
-                defaultMessage: 'Last {duration}',
-                values: { duration: toDurationLabel(slo.timeWindow.duration) },
-              })
-            : toDurationAdverbLabel(slo.timeWindow.duration)}
-        </EuiText>
-      </EuiFlexItem>
+      {!hideHeaderDurationLabel && (
+        <EuiFlexItem>
+          <EuiText color="subdued" size="s">
+            {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+              ? i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.duration', {
+                  defaultMessage: 'Last {duration}',
+                  values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                })
+              : toDurationAdverbLabel(slo.timeWindow.duration)}
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

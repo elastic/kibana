@@ -21,9 +21,17 @@ export interface Props {
   slo: SLOWithSummaryResponse;
   observedValue?: number;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  hideHeaderDurationLabel?: boolean;
 }
 
-export function SliChartPanel({ data, isLoading, slo, observedValue, onBrushed }: Props) {
+export function SliChartPanel({
+  data,
+  isLoading,
+  slo,
+  observedValue,
+  onBrushed,
+  hideHeaderDurationLabel = false,
+}: Props) {
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="sliChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -37,16 +45,18 @@ export function SliChartPanel({ data, isLoading, slo, observedValue, onBrushed }
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-                ? i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.duration', {
-                    defaultMessage: 'Last {duration}',
-                    values: { duration: toDurationLabel(slo.timeWindow.duration) },
-                  })
-                : toDurationAdverbLabel(slo.timeWindow.duration)}
-            </EuiText>
-          </EuiFlexItem>
+          {!hideHeaderDurationLabel && (
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s">
+                {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+                  ? i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.duration', {
+                      defaultMessage: 'Last {duration}',
+                      values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                    })
+                  : toDurationAdverbLabel(slo.timeWindow.duration)}
+              </EuiText>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <SliChart
