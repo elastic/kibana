@@ -93,8 +93,8 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
     !!permissions?.hasAllWriteRequested &&
     (health?.summary.transformState === 'missing' ||
       health?.rollup.transformState === 'missing' ||
-      !health?.rollup.match ||
-      !health?.summary.match);
+      !health?.rollup.alignedWithSLO ||
+      !health?.summary.alignedWithSLO);
 
   return (
     <EuiCallOut

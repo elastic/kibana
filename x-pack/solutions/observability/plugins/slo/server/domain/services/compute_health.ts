@@ -63,6 +63,7 @@ export async function computeHealth(list: Item[], deps: Dependencies): Promise<S
       sloName: item.name,
       sloInstanceId: item.instanceId,
       sloRevision: item.revision,
+      sloEnabled: item.enabled,
       state,
       health,
     };
@@ -148,39 +149,47 @@ function computeTransformState(
 }
 
 function getTransformHealth(
-  transformStat?: TransformGetTransformStatsTransformStats
+  transformStat?: TransformGetTransformStatsTransformStats,
+  sloEnabled?: boolean
 ): HealthStatus {
   if (!transformStat) {
     return {
       status: 'missing',
+      alignedWithSLO: false,
     };
   }
+
   const transformState = transformStat.state?.toLowerCase();
-  return transformStat.health?.status?.toLowerCase() === 'green'
-    ? {
-        status: 'healthy',
-        transformState: transformState as HealthStatus['transformState'],
-      }
-    : {
-        status: 'unhealthy',
-        transformState: transformState as HealthStatus['transformState'],
-      };
+
+  const alignedWithSLO =
+    (transformState === 'started' && sloEnabled) || (transformState === 'stopped' && !sloEnabled)
+      ? true
+      : false;
+  return {
+    status: transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy',
+    alignedWithSLO,
+    transformState: transformState as HealthStatus['transformState'],
+  };
 }
 
 function computeTransformHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { id: string; instanceId: string; revision: number }
+  item: { id: string; instanceId: string; revision: number; enabled: boolean | undefined }
 ): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
-  const rollup = getTransformHealth(transformStatsById[getSLOTransformId(item.id, item.revision)]);
+  const rollup = getTransformHealth(
+    transformStatsById[getSLOTransformId(item.id, item.revision)],
+    item.enabled
+  );
   const summary = getTransformHealth(
-    transformStatsById[getSLOSummaryTransformId(item.id, item.revision)]
+    transformStatsById[getSLOSummaryTransformId(item.id, item.revision)],
+    item.enabled
   );
 
   const overall: 'healthy' | 'unhealthy' =
     rollup.status === 'healthy' &&
-    rollup.transformState === 'started' &&
     summary.status === 'healthy' &&
-    summary.transformState === 'started'
+    rollup.alignedWithSLO &&
+    summary.alignedWithSLO
       ? 'healthy'
       : 'unhealthy';
 

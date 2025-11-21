@@ -20,7 +20,7 @@ const healthStatusSchema = t.intersection([
   }),
   t.type({
     status: transformHealthSchema,
-    match: t.union([t.undefined, t.boolean]),
+    alignedWithSLO: t.union([t.undefined, t.boolean]),
   }),
 ]);
 
