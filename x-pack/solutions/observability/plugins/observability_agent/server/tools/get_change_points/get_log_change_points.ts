@@ -8,7 +8,6 @@
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { ChangePointType } from '@kbn/es-types/src';
 import { orderBy } from 'lodash';
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
@@ -20,7 +19,7 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../../types';
-import { getFilters, dateHistogram } from './common';
+import { getFilters, dateHistogram, type ChangePoint } from './common';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 
@@ -48,95 +47,103 @@ export async function getLogChangePoint({
   field: string;
   esClient: IScopedClusterClient;
 }) {
-  const countDocumentsResponse = await esClient.asCurrentUser.search({
-    size: 0,
-    track_total_hits: true,
-    index,
-    query: {
-      bool: {
-        filter: filters,
-      },
-    },
-  });
-
-  const totalHits =
-    typeof countDocumentsResponse.hits.total === 'number'
-      ? countDocumentsResponse.hits.total
-      : countDocumentsResponse.hits.total?.value ?? 0;
-
-  if (totalHits === 0) {
-    return [];
-  }
-
-  const probability = Math.min(1, 500_000 / totalHits);
-
-  const search = getTypedSearch(esClient.asCurrentUser);
-
-  const response = await search({
-    index,
-    size: 0,
-    track_total_hits: false,
-    query: {
-      bool: {
-        filter: filters,
-      },
-    },
-    aggs: {
-      sampler: {
-        random_sampler: {
-          probability: probability > 0.5 ? 1 : probability,
+  try {
+    const countDocumentsResponse = await esClient.asCurrentUser.search({
+      size: 0,
+      track_total_hits: true,
+      index,
+      query: {
+        bool: {
+          filter: filters,
         },
-        aggs: {
-          groups: {
-            categorize_text: {
-              field,
-              size: 1000,
-            },
-            aggs: {
-              over_time: {
-                auto_date_histogram: dateHistogram,
+      },
+    });
+
+    const totalHits =
+      typeof countDocumentsResponse.hits.total === 'number'
+        ? countDocumentsResponse.hits.total
+        : countDocumentsResponse.hits.total?.value ?? 0;
+
+    if (totalHits === 0) {
+      return [];
+    }
+
+    const probability = Math.min(1, 500_000 / totalHits);
+
+    const search = getTypedSearch(esClient.asCurrentUser);
+
+    const response = await search({
+      index,
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: filters,
+        },
+      },
+      aggs: {
+        sampler: {
+          random_sampler: {
+            probability: probability > 0.5 ? 1 : probability,
+          },
+          aggs: {
+            groups: {
+              categorize_text: {
+                field,
+                size: 1000,
               },
-              changes: {
-                change_point: {
-                  buckets_path: 'over_time>_count',
+              aggs: {
+                over_time: {
+                  auto_date_histogram: dateHistogram,
                 },
-                // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-              } as AggregationsAggregationContainer,
+                changes: {
+                  change_point: {
+                    buckets_path: 'over_time>_count',
+                  },
+                  // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
+                } as AggregationsAggregationContainer,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  const buckets = response.aggregations?.sampler?.groups?.buckets;
+    const buckets = response.aggregations?.sampler?.groups?.buckets;
 
-  if (!buckets || !Array.isArray(buckets)) {
-    return [];
+    if (!buckets || !Array.isArray(buckets)) {
+      return [];
+    }
+
+    const series = buckets.reduce((acc, group) => {
+      const changes = group.changes as ChangePointResult;
+
+      // filter out indeterminable changes
+      if (!changes || changes.type?.indeterminable === true || !changes.bucket?.key) {
+        return acc;
+      }
+
+      const changePoint = {
+        key: group.key,
+        pattern: group.regex,
+        over_time: group.over_time.buckets.map((bucket) => ({
+          x: new Date(bucket.key).getTime(),
+          y: bucket.doc_count,
+        })),
+        changes: {
+          time: new Date(changes.bucket!.key).toISOString(),
+          type: Object.keys(changes.type)[0] as string,
+          ...(Object.values(changes.type)[0] as Record<string, any>),
+        },
+      };
+
+      return [...acc, changePoint];
+    }, [] as (ChangePoint & { pattern: string })[]);
+
+    return series;
+  } catch (error) {
+    throw error;
   }
-
-  return buckets.map((group) => {
-    const changes = group.changes as ChangePointResult;
-
-    const isIndeterminable =
-      !changes || changes.type?.indeterminable === true || !changes.bucket?.key;
-
-    return {
-      key: group.key,
-      pattern: group.regex,
-      over_time: group.over_time.buckets.map((bucket) => ({
-        x: new Date(bucket.key).getTime(),
-        y: bucket.doc_count,
-      })),
-      changes: isIndeterminable
-        ? { type: 'indeterminable' as ChangePointType }
-        : {
-            time: new Date(changes.bucket!.key).toISOString(),
-            type: Object.keys(changes.type)[0] as string,
-            ...(Object.values(changes.type)[0] as Record<string, any>),
-          },
-    };
-  });
 }
 
 const getLogChangePointsSchema = z.object({
