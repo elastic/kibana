@@ -220,7 +220,9 @@ export const createAgentExecutionError = <ErrCode extends AgentExecutionErrorCod
 /**
  * Checks if the given error is a context length exceeded error
  */
-export const isContextLengthExceededAgentError = (err: unknown): boolean => {
+export const isContextLengthExceededAgentError = (
+  err: unknown
+): err is OnechatAgentExecutionError<AgentExecutionErrorCode.contextLengthExceeded> => {
   return (
     isAgentExecutionError(err) && err.meta.errCode === AgentExecutionErrorCode.contextLengthExceeded
   );
