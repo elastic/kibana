@@ -93,7 +93,7 @@ export const tourSteps: TourStep[] = [
       defaultMessage: 'Learning content now available!',
     }),
     content: (
-      <EuiText size={'s'}>
+      <EuiText size="s">
         <p>
           <FormattedMessage
             id="core.chrome.navigationTour.sidenavSearchGettingStartedMessage"
