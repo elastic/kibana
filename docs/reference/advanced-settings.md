@@ -130,10 +130,10 @@ $$$histogram-bartarget$$$`histogram:barTarget` {applies_to}`stack: ga` {applies_
 :   When date histograms use the `auto` interval, {{product.kibana}} attempts to generate this number of bars. `50` by default.
 
 $$$histogram-maxbars$$$`histogram:maxBars` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   To improve performance, limits the density of date and number histograms across {{product.kibana}} using a test query. When the test query contains too many buckets, the interval between buckets increases. This setting applies separately to each histogram aggregation, and does not apply to other types of aggregations. To find the maximum value of this setting, divide the {{es}} `search.max_buckets` value by the maximum number of aggregations in each visualization. `1000` by default.
+:   Limits the density of date and number histograms across {{product.kibana}} using a test query to improve performance. When the test query contains too many buckets, the interval between buckets increases. Applies separately to each histogram aggregation, and does not apply to other types of aggregations. To find the maximum value, divide the {{product.elasticsearch}} `search.max_buckets` value by the maximum number of aggregations in each visualization. `1000` by default.
 
 $$$history-limit$$$`history:limit` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   In fields that have history, such as query inputs, show this many recent values. `10` by default.
+:   In fields that have history, such as query inputs, shows this many recent values. `10` by default.
 
 $$$timepicker-refreshintervaldefaults$$$`timepicker:refreshIntervalDefaults` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The default refresh interval for the time filter. Specify the `value` parameter in milliseconds. `{"pause": true, "value": 60000}` by default.
@@ -225,7 +225,7 @@ Banners are a [subscription feature](https://www.elastic.co/subscriptions).
 
 
 $$$banners-placement$$$`banners:placement` {applies_to}`stack: ga` {applies_to}`serverless: ga`
-:   Set to `Top` to display a banner above the Elastic header for this space. Uses the value of the `xpack.banners.placement` configuration property by default.
+:   The placement of the banner for this space. Set to `Top` to display a banner above the Elastic header. Uses the value of the `xpack.banners.placement` configuration property by default.
 
 $$$banners-textcontent$$$`banners:textContent` {applies_to}`stack: ga` {applies_to}`serverless: ga`
 :   The text to display inside the banner for this space, either plain text or Markdown. Uses the value of the `xpack.banners.textContent` configuration property by default.
@@ -444,7 +444,7 @@ $$$observability-profiling-per-vcpu-watt-arm64$$$`observability:profilingPervCPU
 :   The average amortized per-core power consumption (based on 100% CPU utilization) for arm64 architecture. `2,8` by default.
 
 $$$observability-profiling-datacenter-PUE$$$`observability:profilingDatacenterPUE` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to `1.7`, the average on-premise data center PUE according to the [Uptime Institute](https://ela.st/uptimeinstitute) survey.
+:   Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. `1.7` by default, the average on-premise data center PUE according to the [Uptime Institute](https://ela.st/uptimeinstitute) survey.
 
 $$$observability-profiling-per-co2-per-kwh$$$`observability:profilingCo2PerKWH` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   Carbon intensity measures how clean your data center electricity is. Specifically, it measures the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region. Use the [cloud carbon footprint data sheet](https://ela.st/grid-datasheet) to update this value according to your region. Defaults to US East (N. Virginia).
@@ -459,7 +459,7 @@ $$$observability-profiling-cost-per-vcpu-per-hour$$$`observability:profilingCost
 :   Default Hourly Cost per CPU Core for machines not on AWS or Azure. `0,0425` by default.
 
 $$$observability-apm-enable-transaction-profiling$$$`observability:apmEnableTransactionProfiling` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   Enable Universal Profiling on Transaction view. `true` by default.
+:   Enables Universal Profiling on Transaction view. `true` by default.
 
 $$$observability-profiling-use-topNFunctions-from-stacktraces$$$`observability:profilingFetchTopNFunctionsFromStacktraces` {applies_to}`stack: removed 9.1` {applies_to}`serverless: unavailable`
 :   Switch to fetch the TopN Functions from the Stacktraces API. `false` by default.
@@ -516,7 +516,7 @@ $$$search-includefrozen$$$`search:includeFrozen` {applies_to}`stack: deprecated 
 :    Includes [frozen indices](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-unfreeze) in results. Searching through frozen indices might increase the search time. `false` by default.
 
 $$$search-timeout$$$`search:timeout` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   Change the maximum timeout, in milliseconds (ms), for search requests. To deactivate the timeout and allow queries to run to completion, set to 0. The default is `600000`, or 10 minutes.
+:   The maximum timeout, in milliseconds, for search requests. To deactivate the timeout and allow queries to run to completion, set to `0`. `600000` (10 minutes) by default.
 
 
 ### Security solution [kibana-siem-settings]
@@ -577,7 +577,7 @@ $$$securitysolution-enableCcsWarning$$$`securitySolution:enableCcsWarning` {appl
 :   Enables privilege check warnings in rules for CCS indices. `true` by default.
 
 $$$security-solution-suppression-behavior-on-alert-closure$$$`securitySolution:suppressionBehaviorOnAlertClosure` {applies_to}`stack: ga` {applies_to}`security: ga`
-:   If an alert is closed while suppression is active, you can choose whether suppression continues or resets. `Restart supression` by default.
+:   If an alert is closed while suppression is active, you can choose whether suppression continues or resets. `Restart suppression` by default.
 
 $$$securitySolution-showRelatedIntegrations$$$`securitySolution:showRelatedIntegrations` {applies_to}`stack: ga` {applies_to}`security: ga`
 :   Shows related integrations on the rules and monitoring tables. `true` by default.
