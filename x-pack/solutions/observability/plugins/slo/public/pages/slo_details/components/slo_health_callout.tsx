@@ -68,14 +68,12 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const summaryUrl = getUrl(summaryTransformId);
 
   const rollup = {
-    unhealthy: health.rollup.status === 'unhealthy',
-    missing: health.rollup.status === 'missing',
-    stopped: health.rollup.transformState === 'stopped',
+    unhealthy: health.rollup === 'unhealthy',
+    missing: health.rollup === 'missing',
   };
   const summary = {
-    unhealthy: health.summary.status === 'unhealthy',
-    missing: health.summary.status === 'missing',
-    stopped: health.summary.transformState === 'stopped',
+    unhealthy: health.summary === 'unhealthy',
+    missing: health.summary === 'missing',
   };
 
   const rollupHasIssue = values(rollup).some(Boolean);
@@ -98,15 +96,11 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
             values={{ count }}
           />
           <ul>
-            {(rollup.unhealthy || rollup.stopped) && !!rollupUrl && (
+            {rollup.unhealthy && !!rollupUrl && (
               <li>
                 <ContentWithInspectCta
                   textSize="s"
-                  content={
-                    rollup.unhealthy
-                      ? getUnhealthyText(rollupTransformId)
-                      : getStoppedText(rollupTransformId)
-                  }
+                  content={getUnhealthyText(rollupTransformId)}
                   url={rollupUrl}
                 />
               </li>
@@ -121,15 +115,11 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
               </li>
             )}
 
-            {(summary.unhealthy || summary.stopped) && !!summaryUrl && (
+            {summary.unhealthy && !!summaryUrl && (
               <li>
                 <ContentWithInspectCta
                   textSize="s"
-                  content={
-                    summary.unhealthy
-                      ? getUnhealthyText(summaryTransformId)
-                      : getStoppedText(summaryTransformId)
-                  }
+                  content={getUnhealthyText(summaryTransformId)}
                   url={summaryUrl}
                 />
               </li>
@@ -153,12 +143,6 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
 const getUnhealthyText = (transformId: string) =>
   i18n.translate('xpack.slo.sloDetails.healthCallout.unhealthyTransformText', {
     defaultMessage: '{transformId} (unhealthy)',
-    values: { transformId },
-  });
-
-const getStoppedText = (transformId: string) =>
-  i18n.translate('xpack.slo.sloDetails.healthCallout.stoppedTransformText', {
-    defaultMessage: '{transformId} (stopped)',
     values: { transformId },
   });
 
