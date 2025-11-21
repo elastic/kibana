@@ -16,13 +16,9 @@ import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
 
-export const transformDashboardIn = ({
-  dashboardState,
-  incomingReferences = [],
-}: {
-  dashboardState: DashboardState;
-  incomingReferences?: SavedObjectReference[];
-}):
+export const transformDashboardIn = (
+  dashboardState: DashboardState
+):
   | {
       attributes: DashboardSavedObjectAttributes;
       references: SavedObjectReference[];
@@ -34,9 +30,20 @@ export const transformDashboardIn = ({
       error: Error;
     } => {
   try {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { controlGroupInput, options, filters, panels, query, tags, time_range, ...rest } =
-      dashboardState;
+    const {
+      controlGroupInput,
+      options,
+      filters,
+      panels,
+      query,
+      references: incomingReferences,
+      tags,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      time_range,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      refresh_interval,
+      ...rest
+    } = dashboardState;
 
     const tagReferences = transformTagsIn({
       tags,
@@ -44,7 +51,7 @@ export const transformDashboardIn = ({
     });
 
     // TODO - remove once all references are provided server side
-    const nonTagIncomingReferences = incomingReferences.filter(
+    const nonTagIncomingReferences = (incomingReferences ?? []).filter(
       ({ type }) => type !== tagSavedObjectTypeName
     );
 

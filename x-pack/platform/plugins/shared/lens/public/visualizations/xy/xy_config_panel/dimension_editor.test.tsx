@@ -12,7 +12,7 @@ import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
 import { DataDimensionEditor } from './dimension_editor';
 import type { FramePublicAPI, DatasourcePublicAPI } from '@kbn/lens-common';
-import type { State, XYState, XYDataLayerConfig } from '../types';
+import type { XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -24,7 +24,7 @@ import { getKbnPalettes } from '@kbn/palettes';
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
 
-  function testState(): State {
+  function testState(): XYState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',
