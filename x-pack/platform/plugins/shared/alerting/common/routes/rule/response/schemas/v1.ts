@@ -653,7 +653,7 @@ export const ruleResponseSchema = schema.object({
     )
   ),
   alert_delay: schema.maybe(alertDelaySchema),
-  flapping: schema.maybe(schema.nullable(flappingSchemaV2)), // come back to this after question is answered
+  flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
   artifacts: schema.maybe(artifactsSchema),
 });
 
