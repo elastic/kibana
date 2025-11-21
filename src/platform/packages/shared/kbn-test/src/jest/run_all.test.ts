@@ -79,6 +79,7 @@ describe('run_all.ts', () => {
     delete process.env.JEST_MAX_PARALLEL;
     delete process.env.JEST_ALL_FAILED_CONFIGS_PATH;
     delete process.env.JEST_ALL_CHECKPOINT_PATH;
+    delete process.env.BUILDKITE;
 
     // Set up mocks
     mockGetopts = jest.mocked(jest.requireMock('getopts'));
