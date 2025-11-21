@@ -50,7 +50,7 @@ export function ErrorBudgetChart({
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
 
-  const errorBudgetTimeRemainingFormatted = React.useMemo(() => {
+  const errorBudgetTimeRemainingFormatted = (() => {
     if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
       const totalSlices =
         toMinutes(toDuration(slo.timeWindow.duration)) /
@@ -61,14 +61,7 @@ export function ErrorBudgetChart({
       return formatTime(errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0);
     }
     return undefined;
-  }, [
-    slo.budgetingMethod,
-    slo.timeWindow.type,
-    slo.timeWindow.duration,
-    slo.objective.timesliceWindow,
-    slo.summary.errorBudget.remaining,
-    slo.summary.errorBudget.initial,
-  ]);
+  })();
 
   const metadata = (
     <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
