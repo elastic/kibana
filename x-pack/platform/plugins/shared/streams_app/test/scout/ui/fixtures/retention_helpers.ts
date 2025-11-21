@@ -354,12 +354,12 @@ export async function setFailureStoreRetention(
   const field = dialog.getByTestId('selectFailureStorePeriodValue');
   await field.fill('');
   await field.fill(value);
-  
+
   if (unit !== 'd') {
     await dialog.getByTestId('failureStoreDslUnitButton').click();
     await dialog.getByTestId(`failureStoreDslUnitOption-${unit}`).click();
   }
-  
+
   await page.getByTestId('failureStoreModalSaveButton').click();
 }
 
