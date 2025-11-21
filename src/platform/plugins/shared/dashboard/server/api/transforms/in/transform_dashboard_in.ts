@@ -34,7 +34,8 @@ export const transformDashboardIn = ({
       error: Error;
     } => {
   try {
-    const { controlGroupInput, options, filters, panels, query, tags, timeRange, ...rest } =
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { controlGroupInput, options, filters, panels, query, tags, time_range, ...rest } =
       dashboardState;
 
     const tagReferences = transformTagsIn({
@@ -65,8 +66,8 @@ export const transformDashboardIn = ({
         panelsJSON,
       }),
       ...(sections?.length && { sections }),
-      ...(timeRange
-        ? { timeFrom: timeRange.from, timeTo: timeRange.to, timeRestore: true }
+      ...(time_range
+        ? { timeFrom: time_range.from, timeTo: time_range.to, timeRestore: true }
         : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
     };

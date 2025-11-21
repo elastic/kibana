@@ -176,16 +176,17 @@ export function getDashboardApi({
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
 
-      const { description, tags, timeRestore, title } = settingsManager.api.getSettings();
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { description, tags, time_restore, title } = settingsManager.api.getSettings();
       const saveResult = await openSaveModal({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
         serializeState: getState,
         setTimeRestore: (newTimeRestore: boolean) =>
-          settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+          settingsManager.api.setSettings({ time_restore: newTimeRestore }),
         tags,
-        timeRestore,
+        timeRestore: time_restore,
         title,
         viewMode: viewModeManager.api.viewMode$.value,
       });
@@ -200,7 +201,7 @@ export function getDashboardApi({
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
-          hidePanelTitles: settings.hidePanelTitles ?? false,
+          hide_panel_titles: settings.hide_panel_titles ?? false,
           description: saveResult.savedState.description,
           tags: saveResult.savedState.tags,
           title: saveResult.savedState.title,

@@ -17,7 +17,7 @@ import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
   tags: DashboardState['tags'];
-  timeRestore: boolean;
+  time_restore: boolean;
   title: DashboardState['title'];
 };
 
@@ -25,19 +25,19 @@ const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
   ...DEFAULT_DASHBOARD_OPTIONS,
   description: undefined,
   tags: [],
-  timeRestore: false,
+  time_restore: false,
   title: '',
 };
 
 const comparators: StateComparators<DashboardSettings> = {
   title: 'referenceEquality',
   description: 'referenceEquality',
-  hidePanelTitles: 'referenceEquality',
-  syncColors: 'referenceEquality',
-  syncCursor: 'referenceEquality',
-  syncTooltips: 'referenceEquality',
-  timeRestore: 'referenceEquality',
-  useMargins: 'referenceEquality',
+  hide_panel_titles: 'referenceEquality',
+  sync_colors: 'referenceEquality',
+  sync_cursor: 'referenceEquality',
+  sync_tooltips: 'referenceEquality',
+  time_restore: 'referenceEquality',
+  use_margins: 'referenceEquality',
   tags: 'deepEquality',
 };
 
@@ -46,7 +46,7 @@ function deserializeState(state: DashboardState) {
     ...state.options,
     description: state.description,
     tags: state.tags,
-    timeRestore: Boolean(state.timeRange),
+    time_restore: Boolean(state.time_range),
     title: state.title,
   };
 }
@@ -59,7 +59,8 @@ export function initializeSettingsManager(initialState: DashboardState) {
   );
 
   function serializeSettings() {
-    const { description, tags, timeRestore, title, ...options } = stateManager.getLatestState();
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { description, tags, time_restore, title, ...options } = stateManager.getLatestState();
     return {
       ...(description && { description }),
       tags,
@@ -70,24 +71,19 @@ export function initializeSettingsManager(initialState: DashboardState) {
 
   return {
     api: {
-      description$: stateManager.api.description$,
-      getSettings: stateManager.getLatestState,
-      hideTitle$: stateManager.api.hidePanelTitles$,
-      settings: {
-        syncColors$: stateManager.api.syncColors$,
-        syncCursor$: stateManager.api.syncCursor$,
-        syncTooltips$: stateManager.api.syncTooltips$,
-        useMargins$: stateManager.api.useMargins$,
-      },
-      setSettings: (settings: Partial<DashboardSettings>) => {
-        stateManager.reinitializeState({
-          ...stateManager.getLatestState(),
-          ...settings,
-        });
-      },
       setTags: stateManager.api.setTags,
-      timeRestore$: stateManager.api.timeRestore$,
+      getSettings: stateManager.getLatestState,
+      setSettings: stateManager.reinitializeState,
       title$: stateManager.api.title$,
+      description$: stateManager.api.description$,
+      timeRestore$: stateManager.api.time_restore$,
+      hideTitle$: stateManager.api.hide_panel_titles$,
+      settings: {
+        syncColors$: stateManager.api.sync_colors$,
+        syncCursor$: stateManager.api.sync_cursor$,
+        syncTooltips$: stateManager.api.sync_tooltips$,
+        useMargins$: stateManager.api.use_margins$,
+      },
     },
     internalApi: {
       serializeSettings,
@@ -97,7 +93,8 @@ export function initializeSettingsManager(initialState: DashboardState) {
           map(() => stateManager.getLatestState()),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) => {
-            const { description, tags, timeRestore, title, ...optionDiffs } = diffComparators(
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            const { description, tags, time_restore, title, ...optionDiffs } = diffComparators(
               comparators,
               deserializeState(lastSavedState),
               latestState,
@@ -111,7 +108,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
               ...(description && { description }),
               ...(tags && { tags }),
               ...(title && { title }),
-              ...(typeof timeRestore === 'boolean' && { timeRestore }),
+              ...(typeof time_restore === 'boolean' && { time_restore }),
               ...(options && { options }),
             };
           })

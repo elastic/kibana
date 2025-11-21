@@ -38,11 +38,11 @@ describe('transformDashboardIn', () => {
       description: 'description',
       query: { query: 'test', language: 'KQL' },
       options: {
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
+        hide_panel_titles: true,
+        use_margins: false,
+        sync_colors: false,
+        sync_tooltips: false,
+        sync_cursor: false,
       },
       panels: [
         {
@@ -59,8 +59,8 @@ describe('transformDashboardIn', () => {
       ],
       tags: [],
       title: 'title',
-      refreshInterval: { pause: true, value: 1000 },
-      timeRange: {
+      refresh_interval: { pause: true, value: 1000 },
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },

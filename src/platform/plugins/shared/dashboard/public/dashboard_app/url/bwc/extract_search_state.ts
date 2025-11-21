@@ -12,7 +12,7 @@ import { migrateLegacyQuery } from '../../../../common';
 
 type DashboardSearchState = Pick<
   DashboardState,
-  'filters' | 'query' | 'refreshInterval' | 'timeRange'
+  'filters' | 'query' | 'refresh_interval' | 'time_range'
 >;
 
 export function extractSearchState(state: {
@@ -29,11 +29,11 @@ export function extractSearchState(state: {
   }
 
   if (state.refreshInterval && typeof state.refreshInterval === 'object') {
-    searchState.refreshInterval = state.refreshInterval as DashboardState['refreshInterval'];
+    searchState.refresh_interval = state.refreshInterval as DashboardState['refresh_interval'];
   }
 
   if (state.timeRange && typeof state.timeRange === 'object') {
-    searchState.timeRange = state.timeRange as DashboardState['timeRange'];
+    searchState.time_range = state.timeRange as DashboardState['time_range'];
   }
 
   return searchState;

@@ -70,7 +70,7 @@ const unifiedSearchManagerMock = {
   internalApi: {
     startComparing$: () =>
       new BehaviorSubject<
-        Partial<Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>>
+        Partial<Pick<DashboardState, 'filters' | 'query' | 'refresh_interval' | 'time_range'>>
       >({}),
   },
 } as unknown as ReturnType<typeof initializeUnifiedSearchManager>;

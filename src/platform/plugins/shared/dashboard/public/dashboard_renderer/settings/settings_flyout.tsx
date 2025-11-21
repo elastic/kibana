@@ -210,8 +210,8 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
           >
             <EuiSwitch
               data-test-subj="storeTimeWithDashboard"
-              checked={localSettings.timeRestore}
-              onChange={(event) => updateDashboardSetting({ timeRestore: event.target.checked })}
+              checked={localSettings.time_restore}
+              onChange={(event) => updateDashboardSetting({ time_restore: event.target.checked })}
               label={
                 <FormattedMessage
                   id="dashboard.embeddableApi.showSettings.flyout.form.storeTimeWithDashboardFormRowLabel"
@@ -228,8 +228,8 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                   defaultMessage: 'Use margins between panels',
                 }
               )}
-              checked={localSettings.useMargins}
-              onChange={(event) => updateDashboardSetting({ useMargins: event.target.checked })}
+              checked={localSettings.use_margins}
+              onChange={(event) => updateDashboardSetting({ use_margins: event.target.checked })}
               data-test-subj="dashboardMarginsCheckbox"
             />
           </EuiFormRow>
@@ -242,9 +242,9 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                   defaultMessage: 'Show panel titles',
                 }
               )}
-              checked={!localSettings.hidePanelTitles}
+              checked={!localSettings.hide_panel_titles}
               onChange={(event) =>
-                updateDashboardSetting({ hidePanelTitles: !event.target.checked })
+                updateDashboardSetting({ hide_panel_titles: !event.target.checked })
               }
               data-test-subj="dashboardPanelTitlesCheckbox"
             />
@@ -301,8 +301,10 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                       />
                     </EuiText>
                   }
-                  checked={localSettings.syncColors}
-                  onChange={(event) => updateDashboardSetting({ syncColors: event.target.checked })}
+                  checked={localSettings.sync_colors}
+                  onChange={(event) =>
+                    updateDashboardSetting({ sync_colors: event.target.checked })
+                  }
                   data-test-subj="dashboardSyncColorsCheckbox"
                 />
               </EuiFormRow>
@@ -314,13 +316,13 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                       defaultMessage: 'Sync cursor across panels',
                     }
                   )}
-                  checked={localSettings.syncCursor}
+                  checked={localSettings.sync_cursor}
                   onChange={(event) => {
                     const syncCursor = event.target.checked;
-                    if (!syncCursor && localSettings.syncTooltips) {
-                      updateDashboardSetting({ syncCursor, syncTooltips: false });
+                    if (!syncCursor && localSettings.sync_tooltips) {
+                      updateDashboardSetting({ sync_cursor: syncCursor, sync_tooltips: false });
                     } else {
-                      updateDashboardSetting({ syncCursor });
+                      updateDashboardSetting({ sync_cursor: syncCursor });
                     }
                   }}
                   data-test-subj="dashboardSyncCursorCheckbox"
@@ -334,10 +336,10 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                       defaultMessage: 'Sync tooltips across panels',
                     }
                   )}
-                  checked={localSettings.syncTooltips}
-                  disabled={!Boolean(localSettings.syncCursor)}
+                  checked={localSettings.sync_tooltips}
+                  disabled={!Boolean(localSettings.sync_cursor)}
                   onChange={(event) =>
-                    updateDashboardSetting({ syncTooltips: event.target.checked })
+                    updateDashboardSetting({ sync_tooltips: event.target.checked })
                   }
                   data-test-subj="dashboardSyncTooltipsCheckbox"
                 />

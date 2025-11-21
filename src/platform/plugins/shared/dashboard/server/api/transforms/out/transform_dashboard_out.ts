@@ -59,11 +59,11 @@ export function transformDashboardOut(
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),
     ...(refreshInterval && {
-      refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
+      refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
     ...(tags && tags.length && { tags }),
-    ...(timeRange && { timeRange }),
-    title: title ?? '',
+    ...(timeRange && { time_range: timeRange }),
+    title,
     ...(version && { version }),
   };
 }

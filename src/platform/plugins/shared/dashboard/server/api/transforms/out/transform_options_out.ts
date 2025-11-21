@@ -9,13 +9,27 @@
 
 import type { DashboardState } from '../../types';
 
-const OPTION_KEYS = ['hidePanelTitles', 'useMargins', 'syncColors', 'syncCursor', 'syncTooltips'];
+const SO_OPTION_KEYS = [
+  'hidePanelTitles',
+  'useMargins',
+  'syncColors',
+  'syncCursor',
+  'syncTooltips',
+];
+const API_OPTION_KEYS = [
+  'hide_panel_titles',
+  'use_margins',
+  'sync_colors',
+  'sync_cursor',
+  'sync_tooltips',
+];
 
 export function transformOptionsOut(optionsJSON: string): Required<DashboardState>['options'] {
   const options = JSON.parse(optionsJSON);
   const knownOptions: { [key: string]: unknown } = {};
-  Object.keys(options).forEach((key) => {
-    if (OPTION_KEYS.includes(key)) knownOptions[key] = options[key];
+  Object.keys(options).forEach((soKey, index) => {
+    const apiKey = API_OPTION_KEYS[index];
+    if (SO_OPTION_KEYS.includes(soKey)) knownOptions[apiKey] = options[soKey];
   });
   return knownOptions;
 }

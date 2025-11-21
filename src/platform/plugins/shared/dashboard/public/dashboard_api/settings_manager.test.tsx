@@ -20,15 +20,15 @@ describe('initializeSettingsManager', () => {
         title: 'dashboard 1',
         panels: [],
       });
-      expect(settingsManager.api.getSettings().syncColors).toBe(false);
+      expect(settingsManager.api.getSettings().sync_colors).toBe(false);
     });
 
-    test('Should set syncTooltips to false when value not provided', () => {
+    test('Should set sync_tooltips to false when value not provided', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
         panels: [],
       });
-      expect(settingsManager.api.getSettings().syncTooltips).toBe(false);
+      expect(settingsManager.api.getSettings().sync_tooltips).toBe(false);
     });
   });
 
@@ -39,13 +39,13 @@ describe('initializeSettingsManager', () => {
         panels: [],
         options: {
           ...DEFAULT_DASHBOARD_OPTIONS,
-          useMargins: false,
+          use_margins: false,
         },
       });
-      settingsManager.api.setSettings({ timeRestore: true });
+      settingsManager.api.setSettings({ time_restore: true });
       const settings = settingsManager.api.getSettings();
-      expect(settings.timeRestore).toBe(true);
-      expect(settings.useMargins).toBe(false);
+      expect(settings.time_restore).toBe(true);
+      expect(settings.use_margins).toBe(false);
     });
   });
 
@@ -59,13 +59,13 @@ describe('initializeSettingsManager', () => {
       });
     });
 
-    test('Should return timeRestore change when timeRestoreChanges', (done) => {
+    test('Should return time_restore change when time_restoreChanges', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const settingsManager = initializeSettingsManager(lastSavedState$.value);
       settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
-            "timeRestore": false,
+            "time_restore": false,
           }
         `);
         done();
@@ -73,7 +73,7 @@ describe('initializeSettingsManager', () => {
       const currentSettings = settingsManager.api.getSettings();
       settingsManager.api.setSettings({
         ...currentSettings,
-        timeRestore: !currentSettings.timeRestore,
+        time_restore: !currentSettings.time_restore,
       });
     });
 
@@ -84,11 +84,11 @@ describe('initializeSettingsManager', () => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
             "options": Object {
-              "hidePanelTitles": true,
-              "syncColors": false,
-              "syncCursor": true,
-              "syncTooltips": false,
-              "useMargins": true,
+              "hide_panel_titles": true,
+              "sync_colors": false,
+              "sync_cursor": true,
+              "sync_tooltips": false,
+              "use_margins": true,
             },
             "title": "updated title",
           }
@@ -99,7 +99,7 @@ describe('initializeSettingsManager', () => {
       settingsManager.api.setSettings({
         ...currentSettings,
         title: 'updated title',
-        hidePanelTitles: !currentSettings.hidePanelTitles,
+        hide_panel_titles: !currentSettings.hide_panel_titles,
       });
     });
   });
