@@ -199,7 +199,7 @@ describe('DashboardsSelector', () => {
       />
     );
 
-      expect(mockSearchExecute).not.toHaveBeenCalled();
+    expect(mockSearchExecute).not.toHaveBeenCalled();
   });
 
   it('dispatches selected dashboards on change', async () => {
