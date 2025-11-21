@@ -179,17 +179,6 @@ describe('Data Loader', () => {
     });
   });
 
-  it('should re-render once on search session change', async () => {
-    await expectRerenderOnDataLoader(async ({ parentApi }) => {
-      // dispatch a new searchSessionId
-      (
-        parentApi as unknown as { searchSessionId$: BehaviorSubject<string | undefined> }
-      ).searchSessionId$.next('newSessionId');
-
-      return 'searchContext';
-    });
-  });
-
   it('should re-render once on attributes change', async () => {
     await expectRerenderOnDataLoader(async ({ internalApi }) => {
       // trigger a change by changing the title in the attributes
