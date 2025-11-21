@@ -46,9 +46,14 @@ export async function runMigrateComponentTemplateILMs(params: {
       continue;
     }
 
-    const componentTemplates = await esClient.cluster.getComponentTemplate({
-      name: `${dataStreamType}-*@package`,
-    });
+    const componentTemplates = await esClient.cluster.getComponentTemplate(
+      {
+        name: `${dataStreamType}-*@package`,
+      },
+      {
+        ignore: [404],
+      }
+    );
     for (const [, componentTemplate] of Object.entries(componentTemplates.component_templates)) {
       throwIfAborted(abortController);
 
