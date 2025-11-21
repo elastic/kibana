@@ -46,7 +46,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     await params.workflowLogger.flushEvents();
   }
 
-  // Final save to ensure workflow state is persisted after exiting the loop
+  // Final save to ensure workflow state is persisted after execution loop
   await params.workflowRuntime.saveState();
   await params.workflowLogger.flushEvents();
 }
