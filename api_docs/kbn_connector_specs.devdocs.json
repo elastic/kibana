@@ -678,7 +678,7 @@
             "label": "supportedFeatureIds",
             "description": [],
             "signature": [
-              "(\"endpointSecurity\" | \"security\" | \"alerting\" | \"cases\" | \"uptime\" | \"siem\" | \"generativeAIForSecurity\" | \"generativeAIForObservability\" | \"generativeAIForSearchPlayground\")[]"
+              "(\"endpointSecurity\" | \"alerting\" | \"cases\" | \"uptime\" | \"siem\" | \"generativeAIForSecurity\" | \"generativeAIForObservability\" | \"generativeAIForSearchPlayground\" | \"workflows\")[]"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
