@@ -77,26 +77,49 @@ export JEST_ALL_CHECKPOINT_PATH="$CHECKPOINT_FILE"
 # Try to download existing checkpoint from previous run (if job was restarted)
 if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
   echo "--- Downloading checkpoint from previous run attempt"
-  echo "Checkpoint: Searching for $CHECKPOINT_FILE"
   
-  # Debug: List all available checkpoint artifacts
-  echo "Checkpoint: Available checkpoint artifacts:"
+  # Multiple uploads of the same checkpoint occur during a run (after each config completes)
+  # This causes "Multiple artifacts" error. Solution: Download all to temp dir and pick the best one
+  
+  CHECKPOINT_TEMP_DIR=$(mktemp -d)
   set +e
-  buildkite-agent artifact search "target/jest_checkpoint_*.json" --include-retried-jobs || echo "No checkpoint artifacts found"
+  
+  # Download checkpoint(s) - Buildkite will create numbered copies if multiple exist
+  # e.g., checkpoint.json, checkpoint (1).json, checkpoint (2).json, etc.
+  buildkite-agent artifact download "$CHECKPOINT_FILE" "$CHECKPOINT_TEMP_DIR/" --include-retried-jobs 2>/dev/null
+  download_code=$?
   set -e
   
-  # Try to download checkpoint using the standard helper (includes retry logic)
-  set +e
-  download_artifact "$CHECKPOINT_FILE" . --include-retried-jobs
-  checkpoint_download_code=$?
-  set -e
-  
-  if [ $checkpoint_download_code -eq 0 ] && [ -f "$CHECKPOINT_FILE" ]; then
-    completed_count=$(jq -r '.completedConfigs | length' "$CHECKPOINT_FILE" 2>/dev/null || echo "0")
-    echo "Checkpoint: Found ${completed_count} already-completed configs from previous attempt"
+  if [ $download_code -eq 0 ]; then
+    # Find checkpoint with the most completed configs (latest progress)
+    MAX_CONFIGS=0
+    BEST_CHECKPOINT=""
+    
+    # Check all downloaded checkpoint files (including numbered copies)
+    for checkpoint_file in "$CHECKPOINT_TEMP_DIR"/"$CHECKPOINT_FILE" "$CHECKPOINT_TEMP_DIR"/target/*checkpoint*.json*; do
+      if [ -f "$checkpoint_file" ]; then
+        config_count=$(jq -r '.completedConfigs | length' "$checkpoint_file" 2>/dev/null || echo "0")
+        if [ "$config_count" -ge "$MAX_CONFIGS" ]; then
+          MAX_CONFIGS=$config_count
+          BEST_CHECKPOINT="$checkpoint_file"
+        fi
+      fi
+    done
+    
+    if [ -n "$BEST_CHECKPOINT" ] && [ -f "$BEST_CHECKPOINT" ] && [ "$MAX_CONFIGS" -gt 0 ]; then
+      # Create target directory if it doesn't exist
+      mkdir -p "$(dirname "$CHECKPOINT_FILE")"
+      cp "$BEST_CHECKPOINT" "$CHECKPOINT_FILE"
+      echo "Checkpoint: Found ${MAX_CONFIGS} already-completed configs from previous attempt"
+    else
+      echo "Checkpoint: No valid checkpoint found, starting fresh"
+    fi
   else
     echo "Checkpoint: No previous checkpoint found, starting fresh"
   fi
+  
+  # Cleanup
+  rm -rf "$CHECKPOINT_TEMP_DIR"
 fi
 
 node_opts="--max-old-space-size=${JEST_MAX_OLD_SPACE_MB} --trace-warnings --no-experimental-require-module"
