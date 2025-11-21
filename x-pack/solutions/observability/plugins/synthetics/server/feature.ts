@@ -200,14 +200,5 @@ export const syntheticsFeature = {
       }),
       privilegeGroups: [canReadParamsPrivilege],
     },
-    {
-      name: i18n.translate('xpack.synthetics.features.app.writeParams', {
-        defaultMessage: 'Write Global Parameters',
-      }),
-      description: i18n.translate('xpack.synthetics.features.app.writeParams.description', {
-        defaultMessage: 'This feature allows you to grant write access to Global Parameters.',
-      }),
-      privilegeGroups: [canWriteParamsPrivilege],
-    },
   ],
 };
