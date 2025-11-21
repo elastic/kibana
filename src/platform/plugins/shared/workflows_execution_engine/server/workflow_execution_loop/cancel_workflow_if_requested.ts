@@ -62,6 +62,9 @@ export async function cancelWorkflowIfRequested(
   workflowExecutionState.upsertStep({
     id: monitoredStepExecutionRuntime.stepExecutionId,
     status: ExecutionStatus.CANCELLED,
+    stepId: monitoredStepExecutionRuntime.node.stepId,
+    stepType: monitoredStepExecutionRuntime.node.stepType,
+    scopeStack: monitoredStepExecutionRuntime.scopeStack.stackFrames,
   });
   workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.CANCELLED,
