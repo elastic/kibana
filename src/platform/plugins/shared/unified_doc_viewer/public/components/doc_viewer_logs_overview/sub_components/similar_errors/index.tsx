@@ -45,6 +45,7 @@ export interface SimilarErrorsProps {
 }
 
 export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
+  // TODO should I also check error.grouping_name?
   const serviceNameValue = formattedDoc[fieldConstants.SERVICE_NAME_FIELD];
   const culpritValue = formattedDoc[fieldConstants.ERROR_CULPRIT_FIELD];
   const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(formattedDoc, {
@@ -84,6 +85,9 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
   // TODO extract to a higher level folder
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.logs });
+
+  // TODO check how to parse the message properly, when there's special chars the query does not work.
+  // It does work if you filter by message from the flyout.
 
   const esqlQuery = getEsqlQuery({
     serviceName: formattedDoc[fieldConstants.SERVICE_NAME_FIELD],
