@@ -111,10 +111,6 @@ export const MonacoEditor = ({
     return requests ?? [];
   }, []);
 
-  const isKbnRequestSelectedCallback = useCallback(async () => {
-    return actionsProvider.current!.isKbnRequestSelected();
-  }, []);
-
   const getDocumenationLink = useCallback(async () => {
     return actionsProvider.current!.getDocumentationLink(docLinkVersion);
   }, [docLinkVersion]);
@@ -126,6 +122,10 @@ export const MonacoEditor = ({
   const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(dispatch, context);
   }, [dispatch, context]);
+
+  const isKbnRequestSelectedCallback = useCallback(async () => {
+    return actionsProvider.current!.isKbnRequestSelected();
+  }, []);
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {

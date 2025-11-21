@@ -13,7 +13,6 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
-  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
@@ -243,9 +242,9 @@ export const ContextMenu = ({
             key="Copy to"
             data-test-subj="consoleMenuCopyAsButton"
             id="copyAs"
-            disabled={!window.navigator?.clipboard || isRequestConverterLoading}
+            disabled={!window.navigator?.clipboard}
             onClick={onCopyAsSubmit}
-            icon={isRequestConverterLoading ? <EuiLoadingSpinner size="m" /> : 'copyClipboard'}
+            icon="copyClipboard"
             css={styles.button}
           >
             <EuiFlexGroup
