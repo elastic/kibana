@@ -203,11 +203,11 @@ export const ColumnHeaderPopover = ({
               label={i18n.translate('indexEditor.columnHeaderEdit.columnNameLabel', {
                 defaultMessage: 'Name',
               })}
-              isInvalid={!!errorMessage}
+              isInvalid={Boolean(errorMessage)}
               error={errorMessage}
             >
               <EuiFieldText
-                isInvalid={!!errorMessage}
+                isInvalid={Boolean(errorMessage)}
                 data-test-subj="indexEditorColumnNameInput"
                 value={columnName}
                 placeholder={i18n.translate('indexEditor.columnHeaderEdit.columnNamePlaceholder', {
