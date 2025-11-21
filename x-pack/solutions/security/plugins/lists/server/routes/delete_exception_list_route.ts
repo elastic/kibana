@@ -12,7 +12,7 @@ import {
   DeleteExceptionListRequestQuery,
   DeleteExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
-import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
+import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -25,8 +25,7 @@ export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
       path: EXCEPTION_LIST_URL,
       security: {
         authz: {
-          // TODO: migrate away from lists authz string
-          requiredPrivileges: [LISTS_API_ALL],
+          requiredPrivileges: [EXCEPTIONS_API_ALL],
         },
       },
     })

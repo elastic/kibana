@@ -9,7 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ExportExceptionListRequestQuery } from '@kbn/securitysolution-exceptions-common/api';
-import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
+import { EXCEPTIONS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -22,8 +22,7 @@ export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
       path: `${EXCEPTION_LIST_URL}/_export`,
       security: {
         authz: {
-          // TODO: migrate away from lists authz string
-          requiredPrivileges: [LISTS_API_READ],
+          requiredPrivileges: [EXCEPTIONS_API_READ],
         },
       },
     })
