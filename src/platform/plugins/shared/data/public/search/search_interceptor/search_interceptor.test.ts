@@ -482,12 +482,14 @@ describe('SearchInterceptor', () => {
       const firstRequest = (
         mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
       )[1];
-      expect(JSON.parse(firstRequest?.body as string).params).toBeDefined();
+      expect(JSON.parse(firstRequest?.body as string).params?.query).toBeDefined();
 
       const secondRequest = (
         mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
       )[1];
-      expect(JSON.parse(secondRequest?.body as string).params).not.toBeDefined();
+      expect(JSON.parse(secondRequest?.body as string).params?.query).not.toBeDefined();
+      // FIXME: should be removed after https://github.com/elastic/elasticsearch/issues/138439
+      expect(JSON.parse(secondRequest?.body as string).params?.dropNullColumns).toBeDefined();
     });
 
     test('should make secondary request if first call returns partial result (DSL)', async () => {
@@ -599,12 +601,12 @@ describe('SearchInterceptor', () => {
       const firstRequest = (
         mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
       )[1];
-      expect(JSON.parse(firstRequest?.body as string).params).toBeDefined();
+      expect(JSON.parse(firstRequest?.body as string).params.body).toBeDefined();
 
       const secondRequest = (
         mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
       )[1];
-      expect(JSON.parse(secondRequest?.body as string).params).not.toBeDefined();
+      expect(JSON.parse(secondRequest?.body as string).params.body).not.toBeDefined();
     });
 
     test('should abort on user abort', async () => {
