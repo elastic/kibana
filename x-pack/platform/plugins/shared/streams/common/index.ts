@@ -20,3 +20,10 @@ export {
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';
+export {
+  excludeFrozenQuery,
+  kqlQuery,
+  rangeQuery,
+  isKqlQueryValid,
+  buildEsqlFilter,
+} from './query_helpers';

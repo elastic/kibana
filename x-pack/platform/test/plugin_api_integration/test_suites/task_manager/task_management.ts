@@ -172,11 +172,11 @@ export default function ({ getService }: FtrProviderContext) {
         });
     }
 
-    function runTaskSoon(task: { id: string }) {
+    function runTaskSoon(task: { id: string }, force: boolean = false) {
       return supertest
         .post('/api/sample_tasks/run_soon')
         .set('kbn-xsrf', 'xxx')
-        .send({ task })
+        .send({ task, force })
         .expect(200)
         .then((response) => response.body);
     }
@@ -675,7 +675,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: originalTask.id,
       });
 
-      expect(runSoonResult).to.eql({ id: originalTask.id });
+      expect(runSoonResult).to.eql({ id: originalTask.id, forced: false });
 
       await retry.try(async () => {
         expect(
@@ -836,6 +836,46 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should return a task run error result when asked to run a task that is actually running even with force parameter', async () => {
+      const longRunningTask = await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: '30m' },
+        params: {
+          waitForParams: true,
+        },
+      });
+
+      // tell the task to wait for the 'runSoonHasBeenAttempted' event
+      await provideParamsToTasksWaitingForParams(longRunningTask.id, {
+        waitForEvent: 'runSoonHasBeenAttempted',
+      });
+
+      await retry.try(async () => {
+        const docs = await historyDocs();
+        expect(
+          docs.filter((taskDoc) => taskDoc._source.taskId === longRunningTask.id).length
+        ).to.eql(1);
+
+        const task = await currentTask(longRunningTask.id);
+        expect(task.status).to.eql('running');
+      });
+
+      await ensureTasksIndexRefreshed();
+
+      // force runSoon
+      const runSoonResult = await runTaskSoon(
+        {
+          id: longRunningTask.id,
+        },
+        true
+      );
+
+      expect(runSoonResult).to.eql({
+        id: longRunningTask.id,
+        error: `Error: Failed to run task "${longRunningTask.id}" as it is currently running and cannot be forced`,
+      });
+    });
+
     it('should return a task run error result when trying to run a task now which is already running', async () => {
       const longRunningTask = await scheduleTask({
         taskType: 'sampleTask',
@@ -891,7 +931,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await provideParamsToTasksWaitingForParams(longRunningTask.id);
 
-      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
+      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id, forced: false });
     });
 
     it('should disable and reenable task and run it when runSoon = true', async () => {

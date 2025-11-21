@@ -11,6 +11,7 @@ import type { StreamDocsStat } from '@kbn/streams-plugin/common';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
+import { executeEsqlQuery } from './use_execute_esql_query';
 
 export interface StreamDocCountsFetch {
   docCount: Promise<StreamDocsStat[]>;
@@ -104,6 +105,8 @@ export function useStreamDocCountsFetch({
           query: commonQueryParams,
         },
         signal: abortController.signal,
+        start: timeState.start,
+        end: timeState.end,
       });
 
       const failedCountPromise = canReadFailureStore
@@ -112,6 +115,8 @@ export function useStreamDocCountsFetch({
               query: commonQueryParams,
             },
             signal: abortController.signal,
+            start: timeState.start,
+            end: timeState.end,
           })
         : Promise.reject(new Error('Cannot read failed doc count, insufficient privileges'));
 
