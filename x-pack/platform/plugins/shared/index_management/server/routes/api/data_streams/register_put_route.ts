@@ -82,11 +82,13 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
 export function registerPutDataStreamFailureStore({
   router,
   lib: { handleEsError },
+  config,
 }: RouteDependencies) {
   const bodySchema = schema.object({
     dataStreams: schema.arrayOf(schema.string()),
     dsFailureStore: schema.boolean(),
     customRetentionPeriod: schema.maybe(schema.string()),
+    retentionDisabled: schema.maybe(schema.boolean()),
   });
 
   router.put(
@@ -101,9 +103,8 @@ export function registerPutDataStreamFailureStore({
       validate: { body: bodySchema },
     },
     async (context, request, response) => {
-      const { dataStreams, dsFailureStore, customRetentionPeriod } = request.body as TypeOf<
-        typeof bodySchema
-      >;
+      const { dataStreams, dsFailureStore, customRetentionPeriod, retentionDisabled } =
+        request.body as TypeOf<typeof bodySchema>;
 
       const { client } = (await context.core).elasticsearch;
 
@@ -115,11 +116,17 @@ export function registerPutDataStreamFailureStore({
               name: dataStreamName,
               failure_store: {
                 enabled: dsFailureStore,
-                ...(customRetentionPeriod && dsFailureStore
+                ...(customRetentionPeriod && dsFailureStore && !retentionDisabled
                   ? {
                       lifecycle: {
                         data_retention: customRetentionPeriod,
                         enabled: true,
+                      },
+                    }
+                  : retentionDisabled && config.enableTogglingFailureStoreRetention
+                  ? {
+                      lifecycle: {
+                        enabled: false,
                       },
                     }
                   : {}),

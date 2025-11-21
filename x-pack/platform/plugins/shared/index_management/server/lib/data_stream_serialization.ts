@@ -68,6 +68,8 @@ export function deserializeDataStream(
   if (failureStore?.enabled === true) {
     failureStoreEnabled = true;
   }
+  // @ts-expect-error failure store lifecycle is well not typed
+  const failureStoreLifecycle = failureStore?.lifecycle;
 
   return {
     name,
@@ -110,9 +112,12 @@ export function deserializeDataStream(
     nextGenerationManagedBy,
     failureStoreEnabled,
     failureStoreRetention: {
-      // @ts-expect-error
-      customRetentionPeriod: failureStore?.lifecycle?.data_retention ?? undefined,
+      customRetentionPeriod:
+        failureStoreLifecycle?.enabled && failureStoreLifecycle?.data_retention
+          ? failureStoreLifecycle.data_retention
+          : undefined,
       defaultRetentionPeriod: failureStoreSettings?.defaultRetentionPeriod,
+      retentionDisabled: failureStoreLifecycle?.enabled === false,
     },
     indexMode: (indexMode ??
       (isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)

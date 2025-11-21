@@ -68,6 +68,7 @@ export interface ClientConfigType {
   enableMappingsSourceFieldSection?: boolean;
   enableTogglingDataRetention?: boolean;
   enableProjectLevelRetentionChecks?: boolean;
+  enableTogglingFailureStoreRetention?: boolean;
   dev: {
     enableSemanticText?: boolean;
   };

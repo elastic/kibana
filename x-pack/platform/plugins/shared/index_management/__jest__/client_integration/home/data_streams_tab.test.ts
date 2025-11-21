@@ -1450,4 +1450,333 @@ describe('Data Streams tab', () => {
       });
     });
   });
+
+  describe('failure store fields', () => {
+    const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+    describe('failure store status', () => {
+      test('displays "Disabled" when failure store is not enabled', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: false,
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        const failureStoreDetail = testBed.findDetailPanelFailureStoreDetail();
+        expect(failureStoreDetail.text()).toBe('Disabled');
+      });
+
+      test('displays "Enabled" when failure store is enabled', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: true,
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        const failureStoreDetail = testBed.findDetailPanelFailureStoreDetail();
+        expect(failureStoreDetail.text()).toBe('Enabled');
+      });
+    });
+
+    describe('failure store retention', () => {
+      test('does not display failure store retention field when failure store is disabled', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: false,
+          failureStoreRetention: undefined,
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        const failureStoreRetentionDetail = testBed.findDetailPanelFailureStoreRetentionDetail();
+        expect(failureStoreRetentionDetail.exists()).toBe(false);
+      });
+
+      test('displays "Disabled" when failure store retention is explicitly disabled', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: true,
+          failureStoreRetention: {
+            retentionDisabled: true,
+          },
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        const failureStoreRetentionDetail = testBed.findDetailPanelFailureStoreRetentionDetail();
+        expect(failureStoreRetentionDetail.text()).toBe('Disabled');
+      });
+
+      test('displays custom retention period when set', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: true,
+          failureStoreRetention: {
+            customRetentionPeriod: '30d',
+          },
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        const failureStoreRetentionDetail = testBed.findDetailPanelFailureStoreRetentionDetail();
+        expect(failureStoreRetentionDetail.text()).toContain('30 days');
+      });
+
+      test('displays default retention period when no custom period is set', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: true,
+          failureStoreRetention: {
+            defaultRetentionPeriod: '7d',
+          },
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        const failureStoreRetentionDetail = testBed.findDetailPanelFailureStoreRetentionDetail();
+        expect(failureStoreRetentionDetail.text()).toContain('7 days');
+      });
+
+      test('prioritizes custom retention period over default retention period', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: true,
+          failureStoreRetention: {
+            customRetentionPeriod: '30d',
+            defaultRetentionPeriod: '7d',
+          },
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        const failureStoreRetentionDetail = testBed.findDetailPanelFailureStoreRetentionDetail();
+        const text = failureStoreRetentionDetail.text();
+        expect(text).toContain('30 days');
+        expect(text).not.toContain('7 days');
+      });
+
+      test('displays failure store retention with hours', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: true,
+          failureStoreRetention: {
+            customRetentionPeriod: '48h',
+          },
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        const failureStoreRetentionDetail = testBed.findDetailPanelFailureStoreRetentionDetail();
+        expect(failureStoreRetentionDetail.text()).toContain('48 hours');
+      });
+    });
+
+    describe('configure failure store button', () => {
+      test('shows configure failure store button when user has read_failure_store privilege', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: true,
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: true,
+          },
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        // Open the manage menu
+        act(() => {
+          testBed.find('manageDataStreamButton').simulate('click');
+        });
+        testBed.component.update();
+
+        expect(testBed.find('configureFailureStoreButton').exists()).toBe(true);
+      });
+
+      test('does not show configure failure store button when user does not have read_failure_store privilege', async () => {
+        const dataStream = createDataStreamPayload({
+          name: 'test-data-stream',
+          failureStoreEnabled: true,
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: false,
+          },
+        });
+
+        setLoadDataStreamsResponse([dataStream]);
+        setLoadDataStreamResponse(dataStream.name, dataStream);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+
+        await act(async () => {
+          testBed.actions.clickNameAt(0);
+        });
+        testBed.component.update();
+
+        // Open the manage menu
+        act(() => {
+          testBed.find('manageDataStreamButton').simulate('click');
+        });
+        testBed.component.update();
+
+        expect(testBed.find('configureFailureStoreButton').exists()).toBeFalsy();
+      });
+    });
+  });
 });

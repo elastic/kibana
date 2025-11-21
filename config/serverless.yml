@@ -152,7 +152,8 @@ xpack.index_management.enableMappingsSourceFieldSection: false
 xpack.index_management.enableTogglingDataRetention: false
 # Disable project level rentention checks in DSL form from Index Management UI
 xpack.index_management.enableProjectLevelRetentionChecks: false
-
+# Disable toggle for disabling failure store lifecycle from Index Management UI
+xpack.index_management.enableTogglingFailureStoreRetention: false
 # Disable Manage Processors UI in Ingest Pipelines
 xpack.ingest_pipelines.enableManageProcessors: false
 

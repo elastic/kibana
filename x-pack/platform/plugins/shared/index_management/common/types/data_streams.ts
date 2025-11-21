@@ -74,6 +74,7 @@ export interface DataStream {
   failureStoreRetention?: {
     customRetentionPeriod?: string;
     defaultRetentionPeriod?: string;
+    retentionDisabled?: boolean;
   };
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
     enabled?: boolean;
