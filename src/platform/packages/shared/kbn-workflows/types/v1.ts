@@ -393,6 +393,16 @@ export interface DynamicConnectorContract extends ConnectorContract {
   isSystemActionType?: boolean;
 }
 
+export const KNOWN_HTTP_METHODS = [
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+  'PATCH',
+  'HEAD',
+  'OPTIONS',
+] as const;
+
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
 export interface InternalConnectorContract extends ConnectorContract {

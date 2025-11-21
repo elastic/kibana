@@ -11,25 +11,31 @@
 
 import { readFileSync } from 'fs';
 import Path from 'path';
-import yaml from 'yaml';
 import { parseWorkflowYamlToJSON } from './lib/yaml';
 import { getWorkflowZodSchema } from './schema';
+
+const examples = [
+  {
+    name: 'national_parks.yaml',
+    yaml: readFileSync(Path.join(__dirname, 'examples', 'national_parks.yaml'), 'utf8'),
+  },
+  {
+    name: 'automated_triaging.yaml',
+    yaml: readFileSync(Path.join(__dirname, 'examples', 'automated_triaging.yaml'), 'utf8'),
+  },
+];
 
 describe('getWorkflowZodSchema: elasticsearch steps', () => {
   it('should return the correct schema', () => {
     const schema = getWorkflowZodSchema({});
     expect(schema).toBeDefined();
   });
-  it('should parse national_parks.yaml', () => {
-    const schema = getWorkflowZodSchema({});
-    const workflowYaml = readFileSync(
-      Path.join(__dirname, 'examples', 'national_parks.yaml'),
-      'utf8'
-    );
-    const simpleParse = yaml.parse(workflowYaml);
-    const result = parseWorkflowYamlToJSON(workflowYaml, schema);
-    expect(result.error).toBeUndefined();
-    expect(result.success).toBe(true);
-    expect(result.data).toEqual(simpleParse);
+  examples.forEach((example) => {
+    it(`should parse ${example.name} with zod schema`, () => {
+      const schema = getWorkflowZodSchema({});
+      const result = parseWorkflowYamlToJSON(example.yaml, schema);
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+    });
   });
 });

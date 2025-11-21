@@ -19,13 +19,17 @@ import {
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
-import type { HttpMethod, InternalConnectorContract } from '../../types/latest';
-
-interface ContractMeta extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
-  contractName: string;
-  operationIds: string[];
-  schemaImports: string[];
-}
+import { isHttpMethod } from '../..';
+import type { HttpMethod } from '../../types/latest';
+import {
+  type ContractMeta,
+  escapeString,
+  generateOutputSchemaString,
+  generateParamsSchemaString,
+  getRequestSchemaName,
+  getResponseSchemaName,
+  toSnakeCase,
+} from '../generation_utils';
 
 export const generateAndSaveKibanaConnectors = () => {
   try {
@@ -64,7 +68,7 @@ export const generateAndSaveKibanaConnectors = () => {
 
 import type { InternalConnectorContract } from '../../types/latest';
 import { z } from '@kbn/zod/v4';
-import { getShape } from '../utils';
+import { getZodObjectProperty, getShape } from '../utils';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import { ${contracts
@@ -159,13 +163,6 @@ function generateContractName(operationId: string): string {
   return `${toSnakeCase(operationId).toUpperCase()}_CONTRACT`;
 }
 
-function escapeString(str: string): string {
-  return str
-    .replace(/\\/g, '\\\\') // Escape backslashes first
-    .replace(/`/g, '\\`') // Escape backticks
-    .replace(/\$/g, '\\$'); // Escape dollar signs (template literals)
-}
-
 function generateContractMetasFromPath(
   path: string,
   pathItem: OpenAPIV3.PathItemObject,
@@ -173,11 +170,11 @@ function generateContractMetasFromPath(
 ): ContractMeta[] {
   const contractMetas: ContractMeta[] = [];
   for (const key of Object.keys(pathItem)) {
-    if (!isHttpMethod(key)) {
+    if (!isHttpMethod(key.toUpperCase())) {
       // eslint-disable-next-line no-continue
       continue;
     }
-    const method = key.toLowerCase() as HttpMethod;
+    const method = key.toLowerCase();
     const operation = pathItem[method as keyof typeof pathItem] as OpenAPIV3.OperationObject;
     const operationId = operation.operationId;
     if (!operationId) {
@@ -195,7 +192,7 @@ function generateContractMetasFromPath(
       type,
       description,
       summary: operation.summary,
-      methods: [method],
+      methods: [method.toUpperCase() as HttpMethod],
       patterns: [path],
       documentation,
       parameterTypes,
@@ -206,10 +203,6 @@ function generateContractMetasFromPath(
     });
   }
   return contractMetas;
-}
-
-function isHttpMethod(key: string): key is HttpMethod {
-  return key === 'get' || key === 'post' || key === 'put' || key === 'delete' || key === 'patch';
 }
 
 function getDocumentationUrl(path: string, pathItem: OpenAPIV3.PathItemObject): string {
@@ -239,80 +232,4 @@ function generateParameterTypes(
     urlParams,
     bodyParams,
   };
-}
-
-// TODO: unwrap and combine the shapes at the build time instead of at the runtime
-function generateParamsSchemaString(operationIds: string[]): string {
-  if (operationIds.length === 0) {
-    return 'z.optional(z.looseObject({}))';
-  }
-  if (operationIds.length === 1) {
-    return `z.looseObject({
-      ...(getShape(getShape(${getRequestSchemaName(operationIds[0])}).body)), 
-      ...(getShape(getShape(${getRequestSchemaName(operationIds[0])}).path)), 
-      ...(getShape(getShape(${getRequestSchemaName(operationIds[0])}).query)),
-    }).partial()`;
-  }
-  return `z.looseObject({${operationIds
-    .map(
-      (operationId) => `...(getShape(getShape(${getRequestSchemaName(operationId)}).body)), 
-    ...(getShape(getShape(${getRequestSchemaName(operationId)}).path)), 
-    ...(getShape(getShape(${getRequestSchemaName(operationId)}).query)),`
-    )
-    .join('\n')}}).partial()`;
-}
-
-function generateOutputSchemaString(operationIds: string[]): string {
-  return `z.object({
-    output: z.looseObject({
-      ${operationIds
-        .map((operationId) => `...(getShape(getShape(${getResponseSchemaName(operationId)})))`)
-        .join(', ')}
-    }),
-    error: z.any().optional(),
-  })`;
-}
-
-function getRequestSchemaName(operationId: string): string {
-  return `${getSchemaNamePrefix(operationId)}_request`;
-}
-
-function getResponseSchemaName(operationId: string): string {
-  return `${getSchemaNamePrefix(operationId)}_response`;
-}
-
-// copied from packages/openapi-ts/src/openApi/common/parser/sanitize.ts, which is licensed under the MIT license
-/**
- * Sanitizes namespace identifiers so they are valid TypeScript identifiers of a certain form.
- *
- * 1: Remove any leading characters that are illegal as starting character of a typescript identifier.
- * 2: Replace illegal characters in remaining part of type name with hyphen (-).
- *
- * Step 1 should perhaps instead also replace illegal characters with underscore, or prefix with it, like sanitizeEnumName
- * does. The way this is now one could perhaps end up removing all characters, if all are illegal start characters. It
- * would be sort of a breaking change to do so, though, previously generated code might change then.
- *
- * JavaScript identifier regexp pattern retrieved from https://developer.mozilla.org/docs/Web/JavaScript/Reference/Lexical_grammar#identifiers
- *
- * The output of this is expected to be converted to PascalCase
- */
-export const sanitizeNamespaceIdentifier = (name: string) =>
-  name
-    .replace(/^[^\p{ID_Start}]+/u, '')
-    .replace(/[^$\u200c\u200d\p{ID_Continue}]/gu, '-')
-    .replace(/[$+]/g, '-');
-
-function camelToSnake(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-}
-
-function toSnakeCase(str: string): string {
-  return str
-    .replace(/-(\d+)/g, '$1') // Remove hyphen before numbers
-    .replace(/-/g, '_') // Replace remaining hyphens with underscores
-    .replace(/\./g, '_'); // Replace dots with underscores
-}
-
-export function getSchemaNamePrefix(operationId: string): string {
-  return toSnakeCase(camelToSnake(sanitizeNamespaceIdentifier(operationId)));
 }

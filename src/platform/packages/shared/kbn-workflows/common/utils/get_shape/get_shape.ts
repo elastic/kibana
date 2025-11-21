@@ -24,3 +24,14 @@ export function getShape(
   }
   return {};
 }
+
+export function getZodObjectProperty(
+  schema: z.ZodObject | z.ZodOptional | z.ZodNever,
+  property: string,
+  defaultValue: z.ZodType
+): z.ZodType {
+  if (schema instanceof z.ZodObject) {
+    return schema.shape[property] ?? defaultValue;
+  }
+  return defaultValue;
+}

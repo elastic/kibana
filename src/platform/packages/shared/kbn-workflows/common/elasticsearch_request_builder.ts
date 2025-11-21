@@ -13,6 +13,7 @@
  * Builds an Elasticsearch request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
+// eslint-disable-next-line complexity
 export function buildRequestFromConnector(
   stepType: string,
   params: Record<string, unknown>
@@ -37,8 +38,10 @@ export function buildRequestFromConnector(
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated/elasticsearch_connectors');
+  const {
+    GENERATED_ELASTICSEARCH_CONNECTORS,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  } = require('./generated/elasticsearch_connectors_v2.gen');
 
   // Find the connector definition for this step type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

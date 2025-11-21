@@ -12,8 +12,9 @@ import type {
   DynamicConnectorContract,
   EnhancedInternalConnectorContract,
   EsWorkflowCreate,
+  HttpMethod,
 } from './v1';
-import { ExecutionStatus } from './v1';
+import { ExecutionStatus, KNOWN_HTTP_METHODS } from './v1';
 import type {
   BuiltInStepType,
   ElasticsearchStep,
@@ -101,3 +102,6 @@ export const isDynamicConnector = (
 export const isEnhancedInternalConnector = (
   connector: ConnectorContractUnion
 ): connector is EnhancedInternalConnectorContract => 'examples' in connector;
+
+export const isHttpMethod = (method: string): method is HttpMethod =>
+  KNOWN_HTTP_METHODS.includes(method as HttpMethod);

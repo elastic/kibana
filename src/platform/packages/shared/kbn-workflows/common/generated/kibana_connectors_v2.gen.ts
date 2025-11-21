@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-11-20T20:05:06.638Z
+ * Generated at: 2025-11-21T22:07:27.338Z
  * Source: /oas_docs/output/kibana.yaml (undefined APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
@@ -19,384 +19,16 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  _alerts_migration_cleanup_request,
-  _alerts_migration_cleanup_response,
-  _apply_entity_engine_dataview_indices_request,
-  _apply_entity_engine_dataview_indices_response,
-  _attack_discovery_find_request,
-  _attack_discovery_find_response,
-  _bulk_upsert_asset_criticality_records_request,
-  _bulk_upsert_asset_criticality_records_response,
-  _cancel_action_request,
-  _cancel_action_response,
-  _chat_complete_request,
-  _chat_complete_response,
-  _clean_draft_timelines_request,
-  _clean_draft_timelines_response,
-  _clean_up_risk_engine_request,
-  _clean_up_risk_engine_response,
-  _configure_risk_engine_saved_object_request,
-  _configure_risk_engine_saved_object_response,
-  _copy_timeline_request,
-  _copy_timeline_response,
-  _create_alerts_index_request,
-  _create_alerts_index_response,
-  _create_alerts_migration_request,
-  _create_alerts_migration_response,
-  _create_asset_criticality_record_request,
-  _create_asset_criticality_record_response,
-  _create_attack_discovery_schedules_request,
-  _create_attack_discovery_schedules_response,
-  _create_conversation_request,
-  _create_conversation_response,
-  _create_endpoint_list_item_request,
-  _create_endpoint_list_item_response,
-  _create_endpoint_list_request,
-  _create_endpoint_list_response,
-  _create_exception_list_item_request,
-  _create_exception_list_item_response,
-  _create_exception_list_request,
-  _create_exception_list_response,
-  _create_knowledge_base_entry_request,
-  _create_knowledge_base_entry_response,
-  _create_knowledge_base_request,
-  _create_knowledge_base_response,
-  _create_list_index_request,
-  _create_list_index_response,
-  _create_list_item_request,
-  _create_list_item_response,
-  _create_list_request,
-  _create_list_response,
-  _create_priv_mon_user_request,
-  _create_priv_mon_user_response,
-  _create_rule_exception_list_items_request,
-  _create_rule_exception_list_items_response,
-  _create_rule_request,
-  _create_rule_response,
-  _create_shared_exception_list_request,
-  _create_shared_exception_list_response,
-  _create_timelines_request,
-  _create_timelines_response,
-  _create_update_protection_updates_note_request,
-  _create_update_protection_updates_note_response,
-  _delete_alerts_index_request,
-  _delete_alerts_index_response,
-  _delete_all_conversations_request,
-  _delete_all_conversations_response,
-  _delete_asset_criticality_record_request,
-  _delete_asset_criticality_record_response,
-  _delete_attack_discovery_schedules_request,
-  _delete_attack_discovery_schedules_response,
-  _delete_conversation_request,
-  _delete_conversation_response,
-  _delete_endpoint_list_item_request,
-  _delete_endpoint_list_item_response,
-  _delete_entity_engine_request,
-  _delete_entity_engine_response,
-  _delete_entity_engines_request,
-  _delete_entity_engines_response,
-  _delete_exception_list_item_request,
-  _delete_exception_list_item_response,
-  _delete_exception_list_request,
-  _delete_exception_list_response,
-  _delete_knowledge_base_entry_request,
-  _delete_knowledge_base_entry_response,
-  _delete_list_index_request,
-  _delete_list_index_response,
-  _delete_list_item_request,
-  _delete_list_item_response,
-  _delete_list_request,
-  _delete_list_response,
-  _delete_monitoring_engine_request,
-  _delete_monitoring_engine_response,
-  _delete_note_request,
-  _delete_note_response,
-  _delete_priv_mon_user_request,
-  _delete_priv_mon_user_response,
-  _delete_rule_request,
-  _delete_rule_response,
-  _delete_single_entity_request,
-  _delete_single_entity_response,
-  _delete_timelines_request,
-  _delete_timelines_response,
-  _disable_attack_discovery_schedules_request,
-  _disable_attack_discovery_schedules_response,
-  _disable_monitoring_engine_request,
-  _disable_monitoring_engine_response,
-  _duplicate_exception_list_request,
-  _duplicate_exception_list_response,
-  _enable_attack_discovery_schedules_request,
-  _enable_attack_discovery_schedules_response,
-  _endpoint_execute_action_request,
-  _endpoint_execute_action_response,
-  _endpoint_file_download_request,
-  _endpoint_file_download_response,
-  _endpoint_file_info_request,
-  _endpoint_file_info_response,
-  _endpoint_get_actions_details_request,
-  _endpoint_get_actions_details_response,
-  _endpoint_get_actions_list_request,
-  _endpoint_get_actions_list_response,
-  _endpoint_get_actions_state_request,
-  _endpoint_get_actions_state_response,
-  _endpoint_get_actions_status_request,
-  _endpoint_get_actions_status_response,
-  _endpoint_get_file_action_request,
-  _endpoint_get_file_action_response,
-  _endpoint_get_processes_action_request,
-  _endpoint_get_processes_action_response,
-  _endpoint_isolate_action_request,
-  _endpoint_isolate_action_response,
-  _endpoint_kill_process_action_request,
-  _endpoint_kill_process_action_response,
-  _endpoint_scan_action_request,
-  _endpoint_scan_action_response,
-  _endpoint_suspend_process_action_request,
-  _endpoint_suspend_process_action_response,
-  _endpoint_unisolate_action_request,
-  _endpoint_unisolate_action_response,
-  _endpoint_upload_action_request,
-  _endpoint_upload_action_response,
-  _export_exception_list_request,
-  _export_exception_list_response,
-  _export_list_items_request,
-  _export_list_items_response,
-  _export_rules_request,
-  _export_rules_response,
-  _export_timelines_request,
-  _export_timelines_response,
-  _finalize_alerts_migration_request,
-  _finalize_alerts_migration_response,
-  _find_anonymization_fields_request,
-  _find_anonymization_fields_response,
-  _find_asset_criticality_records_request,
-  _find_asset_criticality_records_response,
-  _find_attack_discovery_schedules_request,
-  _find_attack_discovery_schedules_response,
-  _find_conversations_request,
-  _find_conversations_response,
-  _find_endpoint_list_items_request,
-  _find_endpoint_list_items_response,
-  _find_exception_list_items_request,
-  _find_exception_list_items_response,
-  _find_exception_lists_request,
-  _find_exception_lists_response,
-  _find_knowledge_base_entries_request,
-  _find_knowledge_base_entries_response,
-  _find_list_items_request,
-  _find_list_items_response,
-  _find_lists_request,
-  _find_lists_response,
-  _find_prompts_request,
-  _find_prompts_response,
-  _find_rules_request,
-  _find_rules_response,
-  _get_asset_criticality_record_request,
-  _get_asset_criticality_record_response,
-  _get_attack_discovery_generation_request,
-  _get_attack_discovery_generation_response,
-  _get_attack_discovery_generations_request,
-  _get_attack_discovery_generations_response,
-  _get_attack_discovery_schedules_request,
-  _get_attack_discovery_schedules_response,
-  _get_draft_timelines_request,
-  _get_draft_timelines_response,
-  _get_endpoint_metadata_list_request,
-  _get_endpoint_metadata_list_response,
-  _get_endpoint_metadata_request,
-  _get_endpoint_metadata_response,
-  _get_entity_engine_request,
-  _get_entity_engine_response,
-  _get_entity_store_status_request,
-  _get_entity_store_status_response,
-  _get_knowledge_base_request,
-  _get_knowledge_base_response,
-  _get_notes_request,
-  _get_notes_response,
-  _get_policy_response_request,
-  _get_policy_response_response,
-  _get_privileged_access_detection_package_status_request,
-  _get_privileged_access_detection_package_status_response,
-  _get_protection_updates_note_request,
-  _get_protection_updates_note_response,
-  _get_timeline_request,
-  _get_timeline_response,
-  _get_timelines_request,
-  _get_timelines_response,
-  _import_exception_list_request,
-  _import_exception_list_response,
-  _import_list_items_request,
-  _import_list_items_response,
-  _import_rules_request,
-  _import_rules_response,
-  _import_timelines_request,
-  _import_timelines_response,
-  _init_entity_engine_request,
-  _init_entity_engine_response,
-  _init_entity_store_request,
-  _init_entity_store_response,
-  _init_monitoring_engine_request,
-  _init_monitoring_engine_response,
-  _install_prebuilt_rules_and_timelines_request,
-  _install_prebuilt_rules_and_timelines_response,
-  _install_prepacked_timelines_request,
-  _install_prepacked_timelines_response,
-  _install_privileged_access_detection_package_request,
-  _install_privileged_access_detection_package_response,
-  _list_entities_request,
-  _list_entities_response,
-  _list_entity_engines_request,
-  _list_entity_engines_response,
-  _list_priv_mon_users_request,
-  _list_priv_mon_users_response,
-  _osquery_create_live_query_request,
-  _osquery_create_live_query_response,
-  _osquery_create_packs_request,
-  _osquery_create_packs_response,
-  _osquery_create_saved_query_request,
-  _osquery_create_saved_query_response,
-  _osquery_delete_packs_request,
-  _osquery_delete_packs_response,
-  _osquery_delete_saved_query_request,
-  _osquery_delete_saved_query_response,
-  _osquery_find_live_queries_request,
-  _osquery_find_live_queries_response,
-  _osquery_find_packs_request,
-  _osquery_find_packs_response,
-  _osquery_find_saved_queries_request,
-  _osquery_find_saved_queries_response,
-  _osquery_get_live_query_details_request,
-  _osquery_get_live_query_details_response,
-  _osquery_get_live_query_results_request,
-  _osquery_get_live_query_results_response,
-  _osquery_get_packs_details_request,
-  _osquery_get_packs_details_response,
-  _osquery_get_saved_query_details_request,
-  _osquery_get_saved_query_details_response,
-  _osquery_update_packs_request,
-  _osquery_update_packs_response,
-  _osquery_update_saved_query_request,
-  _osquery_update_saved_query_response,
-  _patch_list_item_request,
-  _patch_list_item_response,
-  _patch_list_request,
-  _patch_list_response,
-  _patch_rule_request,
-  _patch_rule_response,
-  _patch_timeline_request,
-  _patch_timeline_response,
-  _perform_anonymization_fields_bulk_action_request,
-  _perform_anonymization_fields_bulk_action_response,
-  _perform_knowledge_base_entry_bulk_action_request,
-  _perform_knowledge_base_entry_bulk_action_response,
-  _perform_prompts_bulk_action_request,
-  _perform_prompts_bulk_action_response,
-  _perform_rules_bulk_action_request,
-  _perform_rules_bulk_action_response,
-  _persist_favorite_route_request,
-  _persist_favorite_route_response,
-  _persist_note_route_request,
-  _persist_note_route_response,
-  _persist_pinned_event_route_request,
-  _persist_pinned_event_route_response,
-  _post_attack_discovery_bulk_request,
-  _post_attack_discovery_bulk_response,
-  _post_attack_discovery_generate_request,
-  _post_attack_discovery_generate_response,
-  _post_attack_discovery_generations_dismiss_request,
-  _post_attack_discovery_generations_dismiss_response,
-  _post_knowledge_base_request,
-  _post_knowledge_base_response,
-  _priv_mon_health_request,
-  _priv_mon_health_response,
-  _priv_mon_privileges_request,
-  _priv_mon_privileges_response,
-  _privmon_bulk_upload_users_c_s_v_request,
-  _privmon_bulk_upload_users_c_s_v_response,
-  _read_alerts_index_request,
-  _read_alerts_index_response,
-  _read_alerts_migration_status_request,
-  _read_alerts_migration_status_response,
-  _read_conversation_request,
-  _read_conversation_response,
-  _read_endpoint_list_item_request,
-  _read_endpoint_list_item_response,
-  _read_exception_list_item_request,
-  _read_exception_list_item_response,
-  _read_exception_list_request,
-  _read_exception_list_response,
-  _read_exception_list_summary_request,
-  _read_exception_list_summary_response,
-  _read_knowledge_base_entry_request,
-  _read_knowledge_base_entry_response,
-  _read_knowledge_base_request,
-  _read_knowledge_base_response,
-  _read_list_index_request,
-  _read_list_index_response,
-  _read_list_item_request,
-  _read_list_item_response,
-  _read_list_privileges_request,
-  _read_list_privileges_response,
-  _read_list_request,
-  _read_list_response,
-  _read_prebuilt_rules_and_timelines_status_request,
-  _read_prebuilt_rules_and_timelines_status_response,
-  _read_privileges_request,
-  _read_privileges_response,
-  _read_rule_request,
-  _read_rule_response,
-  _read_tags_request,
-  _read_tags_response,
-  _resolve_timeline_request,
-  _resolve_timeline_response,
-  _rule_preview_request,
-  _rule_preview_response,
-  _run_script_action_request,
-  _run_script_action_response,
-  _schedule_monitoring_engine_request,
-  _schedule_monitoring_engine_response,
-  _schedule_risk_engine_now_request,
-  _schedule_risk_engine_now_response,
-  _search_alerts_request,
-  _search_alerts_response,
-  _set_alert_assignees_request,
-  _set_alert_assignees_response,
-  _set_alert_tags_request,
-  _set_alert_tags_response,
-  _set_alerts_status_request,
-  _set_alerts_status_response,
-  _start_entity_engine_request,
-  _start_entity_engine_response,
-  _stop_entity_engine_request,
-  _stop_entity_engine_response,
-  _update_attack_discovery_schedules_request,
-  _update_attack_discovery_schedules_response,
-  _update_conversation_request,
-  _update_conversation_response,
-  _update_endpoint_list_item_request,
-  _update_endpoint_list_item_response,
-  _update_exception_list_item_request,
-  _update_exception_list_item_response,
-  _update_exception_list_request,
-  _update_exception_list_response,
-  _update_knowledge_base_entry_request,
-  _update_knowledge_base_entry_response,
-  _update_list_item_request,
-  _update_list_item_response,
-  _update_list_request,
-  _update_list_response,
-  _update_priv_mon_user_request,
-  _update_priv_mon_user_response,
-  _update_rule_request,
-  _update_rule_response,
-  _upsert_entities_bulk_request,
-  _upsert_entities_bulk_response,
-  _upsert_entity_request,
-  _upsert_entity_response,
   add_case_comment_default_space_request,
   add_case_comment_default_space_response,
   add_case_file_default_space_request,
   add_case_file_default_space_response,
+  alerts_migration_cleanup_request,
+  alerts_migration_cleanup_response,
+  apply_entity_engine_dataview_indices_request,
+  apply_entity_engine_dataview_indices_response,
+  attack_discovery_find_request,
+  attack_discovery_find_response,
   bulk_create_saved_objects_request,
   bulk_create_saved_objects_response,
   bulk_delete_op_request,
@@ -411,24 +43,78 @@ import {
   bulk_resolve_saved_objects_response,
   bulk_update_saved_objects_request,
   bulk_update_saved_objects_response,
+  bulk_upsert_asset_criticality_records_request,
+  bulk_upsert_asset_criticality_records_response,
+  cancel_action_request,
+  cancel_action_response,
+  chat_complete_request,
+  chat_complete_response,
+  clean_draft_timelines_request,
+  clean_draft_timelines_response,
+  clean_up_risk_engine_request,
+  clean_up_risk_engine_response,
+  configure_risk_engine_saved_object_request,
+  configure_risk_engine_saved_object_response,
+  copy_timeline_request,
+  copy_timeline_response,
   create_agent_key_request,
   create_agent_key_response,
+  create_alerts_index_request,
+  create_alerts_index_response,
+  create_alerts_migration_request,
+  create_alerts_migration_response,
   create_annotation_request,
   create_annotation_response,
+  create_asset_criticality_record_request,
+  create_asset_criticality_record_response,
+  create_attack_discovery_schedules_request,
+  create_attack_discovery_schedules_response,
   create_case_default_space_request,
   create_case_default_space_response,
+  create_conversation_request,
+  create_conversation_response,
   create_data_view_defaultw_request,
   create_data_view_defaultw_response,
+  create_endpoint_list_item_request,
+  create_endpoint_list_item_response,
+  create_endpoint_list_request,
+  create_endpoint_list_response,
+  create_exception_list_item_request,
+  create_exception_list_item_response,
+  create_exception_list_request,
+  create_exception_list_response,
+  create_knowledge_base_entry_request,
+  create_knowledge_base_entry_response,
+  create_knowledge_base_request,
+  create_knowledge_base_response,
+  create_list_index_request,
+  create_list_index_response,
+  create_list_item_request,
+  create_list_item_response,
+  create_list_request,
+  create_list_response,
+  create_priv_mon_user_request,
+  create_priv_mon_user_response,
+  create_rule_exception_list_items_request,
+  create_rule_exception_list_items_response,
+  create_rule_request,
+  create_rule_response,
   create_runtime_field_default_request,
   create_runtime_field_default_response,
   create_saved_object_id_request,
   create_saved_object_id_response,
   create_saved_object_request,
   create_saved_object_response,
+  create_shared_exception_list_request,
+  create_shared_exception_list_response,
   create_slo_op_request,
   create_slo_op_response,
+  create_timelines_request,
+  create_timelines_response,
   create_update_agent_configuration_request,
   create_update_agent_configuration_response,
+  create_update_protection_updates_note_request,
+  create_update_protection_updates_note_response,
   create_update_runtime_field_default_request,
   create_update_runtime_field_default_response,
   delete_actions_connector_id_request,
@@ -445,14 +131,34 @@ import {
   delete_alerting_rule_id_response,
   delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
   delete_alerting_rule_ruleid_snooze_schedule_scheduleid_response,
+  delete_alerts_index_request,
+  delete_alerts_index_response,
+  delete_all_conversations_request,
+  delete_all_conversations_response,
+  delete_asset_criticality_record_request,
+  delete_asset_criticality_record_response,
+  delete_attack_discovery_schedules_request,
+  delete_attack_discovery_schedules_response,
   delete_case_comment_default_space_request,
   delete_case_comment_default_space_response,
   delete_case_comments_default_space_request,
   delete_case_comments_default_space_response,
   delete_case_default_space_request,
   delete_case_default_space_response,
+  delete_conversation_request,
+  delete_conversation_response,
   delete_data_view_default_request,
   delete_data_view_default_response,
+  delete_endpoint_list_item_request,
+  delete_endpoint_list_item_response,
+  delete_entity_engine_request,
+  delete_entity_engine_response,
+  delete_entity_engines_request,
+  delete_entity_engines_response,
+  delete_exception_list_item_request,
+  delete_exception_list_item_response,
+  delete_exception_list_request,
+  delete_exception_list_response,
   delete_fleet_agent_download_sources_sourceid_request,
   delete_fleet_agent_download_sources_sourceid_response,
   delete_fleet_agentless_policies_policyid_request,
@@ -479,22 +185,40 @@ import {
   delete_fleet_package_policies_packagepolicyid_response,
   delete_fleet_proxies_itemid_request,
   delete_fleet_proxies_itemid_response,
+  delete_knowledge_base_entry_request,
+  delete_knowledge_base_entry_response,
+  delete_list_index_request,
+  delete_list_index_response,
+  delete_list_item_request,
+  delete_list_item_response,
+  delete_list_request,
+  delete_list_response,
   delete_logstash_pipeline_request,
   delete_logstash_pipeline_response,
   delete_maintenance_window_id_request,
   delete_maintenance_window_id_response,
+  delete_monitoring_engine_request,
+  delete_monitoring_engine_response,
+  delete_note_request,
+  delete_note_response,
   delete_parameter_request,
   delete_parameter_response,
   delete_parameters_request,
   delete_parameters_response,
+  delete_priv_mon_user_request,
+  delete_priv_mon_user_response,
   delete_private_location_request,
   delete_private_location_response,
   delete_rollup_data_op_request,
   delete_rollup_data_op_response,
+  delete_rule_request,
+  delete_rule_response,
   delete_runtime_field_default_request,
   delete_runtime_field_default_response,
   delete_security_role_name_request,
   delete_security_role_name_response,
+  delete_single_entity_request,
+  delete_single_entity_response,
   delete_slo_instances_op_request,
   delete_slo_instances_op_response,
   delete_slo_op_request,
@@ -515,12 +239,68 @@ import {
   delete_synthetic_monitor_response,
   delete_synthetic_monitors_request,
   delete_synthetic_monitors_response,
+  delete_timelines_request,
+  delete_timelines_response,
   delete_url_request,
   delete_url_response,
+  disable_attack_discovery_schedules_request,
+  disable_attack_discovery_schedules_response,
+  disable_monitoring_engine_request,
+  disable_monitoring_engine_response,
   disable_slo_op_request,
   disable_slo_op_response,
+  duplicate_exception_list_request,
+  duplicate_exception_list_response,
+  enable_attack_discovery_schedules_request,
+  enable_attack_discovery_schedules_response,
   enable_slo_op_request,
   enable_slo_op_response,
+  endpoint_execute_action_request,
+  endpoint_execute_action_response,
+  endpoint_file_download_request,
+  endpoint_file_download_response,
+  endpoint_file_info_request,
+  endpoint_file_info_response,
+  endpoint_get_actions_details_request,
+  endpoint_get_actions_details_response,
+  endpoint_get_actions_list_request,
+  endpoint_get_actions_list_response,
+  endpoint_get_actions_state_request,
+  endpoint_get_actions_state_response,
+  endpoint_get_actions_status_request,
+  endpoint_get_actions_status_response,
+  endpoint_get_file_action_request,
+  endpoint_get_file_action_response,
+  endpoint_get_processes_action_request,
+  endpoint_get_processes_action_response,
+  endpoint_isolate_action_request,
+  endpoint_isolate_action_response,
+  endpoint_kill_process_action_request,
+  endpoint_kill_process_action_response,
+  endpoint_scan_action_request,
+  endpoint_scan_action_response,
+  endpoint_suspend_process_action_request,
+  endpoint_suspend_process_action_response,
+  endpoint_unisolate_action_request,
+  endpoint_unisolate_action_response,
+  endpoint_upload_action_request,
+  endpoint_upload_action_response,
+  export_exception_list_request,
+  export_exception_list_response,
+  export_list_items_request,
+  export_list_items_response,
+  export_rules_request,
+  export_rules_response,
+  export_timelines_request,
+  export_timelines_response,
+  finalize_alerts_migration_request,
+  finalize_alerts_migration_response,
+  find_anonymization_fields_request,
+  find_anonymization_fields_response,
+  find_asset_criticality_records_request,
+  find_asset_criticality_records_response,
+  find_attack_discovery_schedules_request,
+  find_attack_discovery_schedules_response,
   find_case_activity_default_space_request,
   find_case_activity_default_space_response,
   find_case_comments_default_space_request,
@@ -529,6 +309,24 @@ import {
   find_case_connectors_default_space_response,
   find_cases_default_space_request,
   find_cases_default_space_response,
+  find_conversations_request,
+  find_conversations_response,
+  find_endpoint_list_items_request,
+  find_endpoint_list_items_response,
+  find_exception_list_items_request,
+  find_exception_list_items_response,
+  find_exception_lists_request,
+  find_exception_lists_response,
+  find_knowledge_base_entries_request,
+  find_knowledge_base_entries_response,
+  find_list_items_request,
+  find_list_items_response,
+  find_lists_request,
+  find_lists_response,
+  find_prompts_request,
+  find_prompts_response,
+  find_rules_request,
+  find_rules_response,
   find_saved_objects_request,
   find_saved_objects_response,
   find_slos_op_request,
@@ -567,6 +365,14 @@ import {
   get_all_data_views_default_response,
   get_annotation_request,
   get_annotation_response,
+  get_asset_criticality_record_request,
+  get_asset_criticality_record_response,
+  get_attack_discovery_generation_request,
+  get_attack_discovery_generation_response,
+  get_attack_discovery_generations_request,
+  get_attack_discovery_generations_response,
+  get_attack_discovery_schedules_request,
+  get_attack_discovery_schedules_response,
   get_case_alerts_default_space_request,
   get_case_alerts_default_space_response,
   get_case_comment_default_space_request,
@@ -587,6 +393,16 @@ import {
   get_default_data_view_default_response,
   get_definitions_op_request,
   get_definitions_op_response,
+  get_draft_timelines_request,
+  get_draft_timelines_response,
+  get_endpoint_metadata_list_request,
+  get_endpoint_metadata_list_response,
+  get_endpoint_metadata_request,
+  get_endpoint_metadata_response,
+  get_entity_engine_request,
+  get_entity_engine_response,
+  get_entity_store_status_request,
+  get_entity_store_status_response,
   get_environments_for_service_request,
   get_environments_for_service_response,
   get_features_request,
@@ -699,6 +515,8 @@ import {
   get_fleet_uninstall_tokens_response,
   get_fleet_uninstall_tokens_uninstalltokenid_request,
   get_fleet_uninstall_tokens_uninstalltokenid_response,
+  get_knowledge_base_request,
+  get_knowledge_base_response,
   get_logstash_pipeline_request,
   get_logstash_pipeline_response,
   get_logstash_pipelines_request,
@@ -707,14 +525,22 @@ import {
   get_maintenance_window_find_response,
   get_maintenance_window_id_request,
   get_maintenance_window_id_response,
+  get_notes_request,
+  get_notes_response,
   get_parameter_request,
   get_parameter_response,
   get_parameters_request,
   get_parameters_response,
+  get_policy_response_request,
+  get_policy_response_response,
   get_private_location_request,
   get_private_location_response,
   get_private_locations_request,
   get_private_locations_response,
+  get_privileged_access_detection_package_status_request,
+  get_privileged_access_detection_package_status_response,
+  get_protection_updates_note_request,
+  get_protection_updates_note_response,
   get_rule_types_request,
   get_rule_types_response,
   get_runtime_field_default_request,
@@ -757,18 +583,98 @@ import {
   get_synthetic_monitor_response,
   get_synthetic_monitors_request,
   get_synthetic_monitors_response,
+  get_timeline_request,
+  get_timeline_response,
+  get_timelines_request,
+  get_timelines_response,
   get_upgrade_status_request,
   get_upgrade_status_response,
   get_uptime_settings_request,
   get_uptime_settings_response,
   get_url_request,
   get_url_response,
+  import_exception_list_request,
+  import_exception_list_response,
+  import_list_items_request,
+  import_list_items_response,
+  import_rules_request,
+  import_rules_response,
+  import_timelines_request,
+  import_timelines_response,
+  init_entity_engine_request,
+  init_entity_engine_response,
+  init_entity_store_request,
+  init_entity_store_response,
+  init_monitoring_engine_request,
+  init_monitoring_engine_response,
+  install_prebuilt_rules_and_timelines_request,
+  install_prebuilt_rules_and_timelines_response,
+  install_prepacked_timelines_request,
+  install_prepacked_timelines_response,
+  install_privileged_access_detection_package_request,
+  install_privileged_access_detection_package_response,
+  list_entities_request,
+  list_entities_response,
+  list_entity_engines_request,
+  list_entity_engines_response,
+  list_priv_mon_users_request,
+  list_priv_mon_users_response,
   ml_sync_request,
   ml_sync_response,
   observability_ai_assistant_chat_complete_request,
   observability_ai_assistant_chat_complete_response,
+  osquery_create_live_query_request,
+  osquery_create_live_query_response,
+  osquery_create_packs_request,
+  osquery_create_packs_response,
+  osquery_create_saved_query_request,
+  osquery_create_saved_query_response,
+  osquery_delete_packs_request,
+  osquery_delete_packs_response,
+  osquery_delete_saved_query_request,
+  osquery_delete_saved_query_response,
+  osquery_find_live_queries_request,
+  osquery_find_live_queries_response,
+  osquery_find_packs_request,
+  osquery_find_packs_response,
+  osquery_find_saved_queries_request,
+  osquery_find_saved_queries_response,
+  osquery_get_live_query_details_request,
+  osquery_get_live_query_details_response,
+  osquery_get_live_query_results_request,
+  osquery_get_live_query_results_response,
+  osquery_get_packs_details_request,
+  osquery_get_packs_details_response,
+  osquery_get_saved_query_details_request,
+  osquery_get_saved_query_details_response,
+  osquery_update_packs_request,
+  osquery_update_packs_response,
+  osquery_update_saved_query_request,
+  osquery_update_saved_query_response,
+  patch_list_item_request,
+  patch_list_item_response,
+  patch_list_request,
+  patch_list_response,
   patch_maintenance_window_id_request,
   patch_maintenance_window_id_response,
+  patch_rule_request,
+  patch_rule_response,
+  patch_timeline_request,
+  patch_timeline_response,
+  perform_anonymization_fields_bulk_action_request,
+  perform_anonymization_fields_bulk_action_response,
+  perform_knowledge_base_entry_bulk_action_request,
+  perform_knowledge_base_entry_bulk_action_response,
+  perform_prompts_bulk_action_request,
+  perform_prompts_bulk_action_response,
+  perform_rules_bulk_action_request,
+  perform_rules_bulk_action_response,
+  persist_favorite_route_request,
+  persist_favorite_route_response,
+  persist_note_route_request,
+  persist_note_route_response,
+  persist_pinned_event_route_request,
+  persist_pinned_event_route_response,
   post_actions_connector_id_execute_request,
   post_actions_connector_id_execute_response,
   post_actions_connector_id_request,
@@ -805,6 +711,12 @@ import {
   post_alerting_rule_rule_id_alert_alert_id_mute_response,
   post_alerting_rule_rule_id_alert_alert_id_unmute_request,
   post_alerting_rule_rule_id_alert_alert_id_unmute_response,
+  post_attack_discovery_bulk_request,
+  post_attack_discovery_bulk_response,
+  post_attack_discovery_generate_request,
+  post_attack_discovery_generate_response,
+  post_attack_discovery_generations_dismiss_request,
+  post_attack_discovery_generations_dismiss_response,
   post_fleet_agent_download_sources_request,
   post_fleet_agent_download_sources_response,
   post_fleet_agent_policies_agentpolicyid_copy_request,
@@ -903,6 +815,8 @@ import {
   post_fleet_service_tokens_response,
   post_fleet_setup_request,
   post_fleet_setup_response,
+  post_knowledge_base_request,
+  post_knowledge_base_response,
   post_maintenance_window_id_archive_request,
   post_maintenance_window_id_archive_response,
   post_maintenance_window_id_unarchive_request,
@@ -963,6 +877,12 @@ import {
   post_url_response,
   preview_swap_data_views_default_request,
   preview_swap_data_views_default_response,
+  priv_mon_health_request,
+  priv_mon_health_response,
+  priv_mon_privileges_request,
+  priv_mon_privileges_response,
+  privmon_bulk_upload_users_c_s_v_request,
+  privmon_bulk_upload_users_c_s_v_response,
   push_case_default_space_request,
   push_case_default_space_response,
   put_actions_connector_id_request,
@@ -1023,38 +943,114 @@ import {
   put_synthetic_monitor_response,
   put_uptime_settings_request,
   put_uptime_settings_response,
+  read_alerts_index_request,
+  read_alerts_index_response,
+  read_alerts_migration_status_request,
+  read_alerts_migration_status_response,
+  read_conversation_request,
+  read_conversation_response,
+  read_endpoint_list_item_request,
+  read_endpoint_list_item_response,
+  read_exception_list_item_request,
+  read_exception_list_item_response,
+  read_exception_list_request,
+  read_exception_list_response,
+  read_exception_list_summary_request,
+  read_exception_list_summary_response,
+  read_knowledge_base_entry_request,
+  read_knowledge_base_entry_response,
+  read_knowledge_base_request,
+  read_knowledge_base_response,
+  read_list_index_request,
+  read_list_index_response,
+  read_list_item_request,
+  read_list_item_response,
+  read_list_privileges_request,
+  read_list_privileges_response,
+  read_list_request,
+  read_list_response,
+  read_prebuilt_rules_and_timelines_status_request,
+  read_prebuilt_rules_and_timelines_status_response,
+  read_privileges_request,
+  read_privileges_response,
+  read_rule_request,
+  read_rule_response,
+  read_tags_request,
+  read_tags_response,
   reset_slo_op_request,
   reset_slo_op_response,
   resolve_import_errors_request,
   resolve_import_errors_response,
   resolve_saved_object_request,
   resolve_saved_object_response,
+  resolve_timeline_request,
+  resolve_timeline_response,
   resolve_url_request,
   resolve_url_response,
   rotate_encryption_key_request,
   rotate_encryption_key_response,
+  rule_preview_request,
+  rule_preview_response,
+  run_script_action_request,
+  run_script_action_response,
   save_apm_server_schema_request,
   save_apm_server_schema_response,
+  schedule_monitoring_engine_request,
+  schedule_monitoring_engine_response,
+  schedule_risk_engine_now_request,
+  schedule_risk_engine_now_response,
+  search_alerts_request,
+  search_alerts_response,
   search_single_configuration_request,
   search_single_configuration_response,
+  set_alert_assignees_request,
+  set_alert_assignees_response,
+  set_alert_tags_request,
+  set_alert_tags_response,
+  set_alerts_status_request,
+  set_alerts_status_response,
   set_case_configuration_default_space_request,
   set_case_configuration_default_space_response,
   set_default_datail_view_default_request,
   set_default_datail_view_default_response,
+  start_entity_engine_request,
+  start_entity_engine_response,
+  stop_entity_engine_request,
+  stop_entity_engine_response,
   swap_data_views_default_request,
   swap_data_views_default_response,
   task_manager_health_request,
   task_manager_health_response,
+  update_attack_discovery_schedules_request,
+  update_attack_discovery_schedules_response,
   update_case_comment_default_space_request,
   update_case_comment_default_space_response,
   update_case_configuration_default_space_request,
   update_case_configuration_default_space_response,
   update_case_default_space_request,
   update_case_default_space_response,
+  update_conversation_request,
+  update_conversation_response,
   update_data_view_default_request,
   update_data_view_default_response,
+  update_endpoint_list_item_request,
+  update_endpoint_list_item_response,
+  update_exception_list_item_request,
+  update_exception_list_item_response,
+  update_exception_list_request,
+  update_exception_list_response,
   update_fields_metadata_default_request,
   update_fields_metadata_default_response,
+  update_knowledge_base_entry_request,
+  update_knowledge_base_entry_response,
+  update_list_item_request,
+  update_list_item_response,
+  update_list_request,
+  update_list_response,
+  update_priv_mon_user_request,
+  update_priv_mon_user_response,
+  update_rule_request,
+  update_rule_response,
   update_runtime_field_default_request,
   update_runtime_field_default_response,
   update_saved_object_request,
@@ -1063,6 +1059,10 @@ import {
   update_slo_op_response,
   upload_source_map_request,
   upload_source_map_response,
+  upsert_entities_bulk_request,
+  upsert_entities_bulk_response,
+  upsert_entity_request,
+  upsert_entity_response,
 } from './schemas/kibana_openapi_zod.gen';
 import type { InternalConnectorContract } from '../../types/latest';
 import { getShape } from '../utils';
@@ -1080,7 +1080,7 @@ const GET_ACTIONS_CONNECTOR_TYPES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 You do not need any Kibana feature privileges to run this API.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/actions/connector_types'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1113,7 +1113,7 @@ const DELETE_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 WARNING: When you delete a connector, it cannot be recovered.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/actions/connector/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1144,7 +1144,7 @@ const GET_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/actions/connector/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1175,7 +1175,7 @@ const POST_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/actions/connector/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1206,7 +1206,7 @@ const PUT_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/actions/connector/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1239,7 +1239,7 @@ const POST_ACTIONS_CONNECTOR_ID_EXECUTE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/actions/connector/{id}/_execute'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1270,7 +1270,7 @@ const GET_ACTIONS_CONNECTORS_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connectors</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/actions/connectors'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1303,7 +1303,7 @@ const POST_AGENT_BUILDER_A2A_AGENTID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 WARNING: This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/agent_builder/a2a/{agentId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1336,7 +1336,7 @@ const GET_AGENT_BUILDER_A2A_AGENTID_JSON_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/agent_builder/a2a/{agentId}.json'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1369,7 +1369,7 @@ const GET_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/agent_builder/agents'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1402,7 +1402,7 @@ const POST_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/agent_builder/agents'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1435,7 +1435,7 @@ const DELETE_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/agent_builder/agents/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1468,7 +1468,7 @@ const GET_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/agent_builder/agents/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1501,7 +1501,7 @@ const PUT_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/agent_builder/agents/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1534,7 +1534,7 @@ const GET_AGENT_BUILDER_CONVERSATIONS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/agent_builder/conversations'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1567,7 +1567,7 @@ const DELETE_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConne
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/agent_builder/conversations/{conversation_id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1600,7 +1600,7 @@ const GET_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnecto
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/agent_builder/conversations/{conversation_id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1633,7 +1633,7 @@ const POST_AGENT_BUILDER_CONVERSE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/agent_builder/converse'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1842,7 +1842,7 @@ A typical conversation round emits events in this sequence:
 6. \`message_chunk\` (multiple, as text streams)
 7. \`message_complete\`
 8. \`round_complete\`<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/agent_builder/converse/async'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1875,7 +1875,7 @@ const POST_AGENT_BUILDER_MCP_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/agent_builder/mcp'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1908,7 +1908,7 @@ const GET_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/agent_builder/tools'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1941,7 +1941,7 @@ const POST_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/agent_builder/tools'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -1974,7 +1974,7 @@ const POST_AGENT_BUILDER_TOOLS_EXECUTE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/agent_builder/tools/_execute'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2007,7 +2007,7 @@ const DELETE_AGENT_BUILDER_TOOLS_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/agent_builder/tools/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2040,7 +2040,7 @@ const GET_AGENT_BUILDER_TOOLS_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/agent_builder/tools/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2073,7 +2073,7 @@ const PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/agent_builder/tools/{toolId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2107,7 +2107,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`read\` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine Learning**, **Observability**, or **Security** features.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/alerting/_health'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2141,7 +2141,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 If you have \`read\` privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, and **Security** features. To get rule types associated with the **Stack Monitoring** feature, use the \`monitoring_user\` built-in role.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/alerting/rule_types'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2172,7 +2172,7 @@ const DELETE_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/alerting/rule/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2203,7 +2203,7 @@ const GET_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/alerting/rule/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2234,7 +2234,7 @@ const POST_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2265,7 +2265,7 @@ const PUT_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/alerting/rule/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2296,7 +2296,7 @@ const POST_ALERTING_RULE_ID_DISABLE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_disable</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_disable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2327,7 +2327,7 @@ const POST_ALERTING_RULE_ID_ENABLE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_enable</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_enable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2358,7 +2358,7 @@ const POST_ALERTING_RULE_ID_MUTE_ALL_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_mute_all</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_mute_all'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2389,7 +2389,7 @@ const POST_ALERTING_RULE_ID_UNMUTE_ALL_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_unmute_all</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_unmute_all'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2420,7 +2420,7 @@ const POST_ALERTING_RULE_ID_UPDATE_API_KEY_CONTRACT: InternalConnectorContract =
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_update_api_key</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_update_api_key'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2453,7 +2453,7 @@ const POST_ALERTING_RULE_ID_SNOOZE_SCHEDULE_CONTRACT: InternalConnectorContract 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/snooze_schedule'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2484,7 +2484,7 @@ const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_MUTE_CONTRACT: InternalConnector
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2515,7 +2515,7 @@ const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_UNMUTE_CONTRACT: InternalConnect
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2546,7 +2546,7 @@ const DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT: InternalC
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2577,7 +2577,7 @@ const GET_ALERTING_RULES_FIND_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/_find</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/alerting/rules/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2625,7 +2625,7 @@ Create a new agent key for APM.
 The user creating an APM agent API key must have at least the \`manage_own_api_key\` cluster privilege and the APM application-level privileges that it wishes to grant.
 After it is created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/apm/agent_keys'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2656,7 +2656,7 @@ const SAVEAPMSERVERSCHEMA_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/fleet/apm_server_schema</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/apm/fleet/apm_server_schema'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2689,7 +2689,7 @@ const CREATEANNOTATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a new annotation for a specific service.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/apm/services/{serviceName}/annotation'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2722,7 +2722,7 @@ const GETANNOTATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Search for annotations related to a specific service.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/apm/services/{serviceName}/annotation/search'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2753,7 +2753,7 @@ const DELETEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/apm/settings/agent-configuration'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2784,7 +2784,7 @@ const GETAGENTCONFIGURATIONS_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/apm/settings/agent-configuration'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2815,7 +2815,7 @@ const CREATEUPDATEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/apm/settings/agent-configuration'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2848,7 +2848,7 @@ const GETAGENTNAMEFORSERVICE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Retrieve \`agentName\` for a service.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/apm/settings/agent-configuration/agent_name'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2879,7 +2879,7 @@ const GETENVIRONMENTSFORSERVICE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/environments</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/apm/settings/agent-configuration/environments'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2913,7 +2913,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/apm/settings/agent-configuration/search'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2944,7 +2944,7 @@ const GETSINGLEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/view</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/apm/settings/agent-configuration/view'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -2978,7 +2978,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Get an array of Fleet artifacts, including source map uploads. You must have \`read\` or \`all\` Kibana privileges for the APM and User Experience feature.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/apm/sourcemaps'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3013,7 +3013,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Upload a source map for a specific service and version. You must have \`all\` Kibana privileges for the APM and User Experience feature.
 The maximum payload size is \`1mb\`. If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error. Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the \`server.maxPayload\` variable.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/apm/sourcemaps'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3047,7 +3047,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Delete a previously uploaded source map. You must have \`all\` Kibana privileges for the APM and User Experience feature.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/apm/sourcemaps/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3080,7 +3080,7 @@ const DELETEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete the asset criticality record for a specific entity.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/asset_criticality'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3091,14 +3091,14 @@ Delete the asset criticality record for a specific entity.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_asset_criticality_record_request).body),
-      ...getShape(getShape(_delete_asset_criticality_record_request).path),
-      ...getShape(getShape(_delete_asset_criticality_record_request).query),
+      ...getShape(getShape(delete_asset_criticality_record_request).body),
+      ...getShape(getShape(delete_asset_criticality_record_request).path),
+      ...getShape(getShape(delete_asset_criticality_record_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_asset_criticality_record_response)),
+      ...getShape(getShape(delete_asset_criticality_record_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3113,7 +3113,7 @@ const GETASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the asset criticality record for a specific entity.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/asset_criticality'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3124,14 +3124,14 @@ Get the asset criticality record for a specific entity.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_asset_criticality_record_request).body),
-      ...getShape(getShape(_get_asset_criticality_record_request).path),
-      ...getShape(getShape(_get_asset_criticality_record_request).query),
+      ...getShape(getShape(get_asset_criticality_record_request).body),
+      ...getShape(getShape(get_asset_criticality_record_request).path),
+      ...getShape(getShape(get_asset_criticality_record_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_asset_criticality_record_response)),
+      ...getShape(getShape(get_asset_criticality_record_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3149,7 +3149,7 @@ Create or update an asset criticality record for a specific entity.
 
 If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/asset_criticality'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3160,14 +3160,14 @@ If a record already exists for the specified entity, that record is overwritten 
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_asset_criticality_record_request).body),
-      ...getShape(getShape(_create_asset_criticality_record_request).path),
-      ...getShape(getShape(_create_asset_criticality_record_request).query),
+      ...getShape(getShape(create_asset_criticality_record_request).body),
+      ...getShape(getShape(create_asset_criticality_record_request).path),
+      ...getShape(getShape(create_asset_criticality_record_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_asset_criticality_record_response)),
+      ...getShape(getShape(create_asset_criticality_record_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3185,7 +3185,7 @@ Bulk upsert up to 1000 asset criticality records.
 
 If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/asset_criticality/bulk'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3196,14 +3196,14 @@ If asset criticality records already exist for the specified entities, those rec
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_bulk_upsert_asset_criticality_records_request).body),
-      ...getShape(getShape(_bulk_upsert_asset_criticality_records_request).path),
-      ...getShape(getShape(_bulk_upsert_asset_criticality_records_request).query),
+      ...getShape(getShape(bulk_upsert_asset_criticality_records_request).body),
+      ...getShape(getShape(bulk_upsert_asset_criticality_records_request).path),
+      ...getShape(getShape(bulk_upsert_asset_criticality_records_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_bulk_upsert_asset_criticality_records_response)),
+      ...getShape(getShape(bulk_upsert_asset_criticality_records_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3218,7 +3218,7 @@ const FINDASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 List asset criticality records, paging, sorting and filtering as needed.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/asset_criticality/list'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3229,14 +3229,14 @@ List asset criticality records, paging, sorting and filtering as needed.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_asset_criticality_records_request).body),
-      ...getShape(getShape(_find_asset_criticality_records_request).path),
-      ...getShape(getShape(_find_asset_criticality_records_request).query),
+      ...getShape(getShape(find_asset_criticality_records_request).body),
+      ...getShape(getShape(find_asset_criticality_records_request).path),
+      ...getShape(getShape(find_asset_criticality_records_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_asset_criticality_records_response)),
+      ...getShape(getShape(find_asset_criticality_records_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3251,7 +3251,7 @@ const POSTATTACKDISCOVERYBULK_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Performs bulk updates on multiple Attack discoveries, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert. \`Technical preview\``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/attack_discovery/_bulk'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3262,14 +3262,14 @@ Performs bulk updates on multiple Attack discoveries, including workflow status 
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_post_attack_discovery_bulk_request).body),
-      ...getShape(getShape(_post_attack_discovery_bulk_request).path),
-      ...getShape(getShape(_post_attack_discovery_bulk_request).query),
+      ...getShape(getShape(post_attack_discovery_bulk_request).body),
+      ...getShape(getShape(post_attack_discovery_bulk_request).path),
+      ...getShape(getShape(post_attack_discovery_bulk_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_post_attack_discovery_bulk_response)),
+      ...getShape(getShape(post_attack_discovery_bulk_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3284,7 +3284,7 @@ const ATTACKDISCOVERYFIND_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Find Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. \`Technical preview\``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/attack_discovery/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3311,14 +3311,14 @@ Find Attack discoveries that match the search criteria. Supports free text searc
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_attack_discovery_find_request).body),
-      ...getShape(getShape(_attack_discovery_find_request).path),
-      ...getShape(getShape(_attack_discovery_find_request).query),
+      ...getShape(getShape(attack_discovery_find_request).body),
+      ...getShape(getShape(attack_discovery_find_request).path),
+      ...getShape(getShape(attack_discovery_find_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_attack_discovery_find_response)),
+      ...getShape(getShape(attack_discovery_find_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3333,7 +3333,7 @@ const POSTATTACKDISCOVERYGENERATE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Initiates the generation of attack discoveries by analyzing security alerts using AI. Returns an execution UUID that can be used to track the generation progress and retrieve results. Results may also be retrieved via the find endpoint. \`Technical preview\``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/attack_discovery/_generate'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3344,14 +3344,14 @@ Initiates the generation of attack discoveries by analyzing security alerts usin
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_post_attack_discovery_generate_request).body),
-      ...getShape(getShape(_post_attack_discovery_generate_request).path),
-      ...getShape(getShape(_post_attack_discovery_generate_request).query),
+      ...getShape(getShape(post_attack_discovery_generate_request).body),
+      ...getShape(getShape(post_attack_discovery_generate_request).path),
+      ...getShape(getShape(post_attack_discovery_generate_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_post_attack_discovery_generate_response)),
+      ...getShape(getShape(post_attack_discovery_generate_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3366,7 +3366,7 @@ const GETATTACKDISCOVERYGENERATIONS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the latest attack discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations. \`Technical preview\``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/attack_discovery/generations'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3377,14 +3377,14 @@ Get the latest attack discovery generations metadata (that are not dismissed) fo
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_attack_discovery_generations_request).body),
-      ...getShape(getShape(_get_attack_discovery_generations_request).path),
-      ...getShape(getShape(_get_attack_discovery_generations_request).query),
+      ...getShape(getShape(get_attack_discovery_generations_request).body),
+      ...getShape(getShape(get_attack_discovery_generations_request).path),
+      ...getShape(getShape(get_attack_discovery_generations_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_attack_discovery_generations_response)),
+      ...getShape(getShape(get_attack_discovery_generations_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3399,7 +3399,7 @@ const GETATTACKDISCOVERYGENERATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics. \`Technical preview\``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/attack_discovery/generations/{execution_uuid}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3410,14 +3410,14 @@ Returns a specific Attack discovery generation, including all generated Attack d
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_attack_discovery_generation_request).body),
-      ...getShape(getShape(_get_attack_discovery_generation_request).path),
-      ...getShape(getShape(_get_attack_discovery_generation_request).query),
+      ...getShape(getShape(get_attack_discovery_generation_request).body),
+      ...getShape(getShape(get_attack_discovery_generation_request).path),
+      ...getShape(getShape(get_attack_discovery_generation_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_attack_discovery_generation_response)),
+      ...getShape(getShape(get_attack_discovery_generation_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3432,7 +3432,7 @@ const POSTATTACKDISCOVERYGENERATIONSDISMISS_CONTRACT: InternalConnectorContract 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Dismisses an attack discovery generation for the current user, indicating that it's status should not be reported in the UI. This sets the generation's status to "dismissed" and affects how the generation appears in subsequent queries. \`Technical preview\``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/attack_discovery/generations/{execution_uuid}/_dismiss'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3443,14 +3443,14 @@ Dismisses an attack discovery generation for the current user, indicating that i
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_post_attack_discovery_generations_dismiss_request).body),
-      ...getShape(getShape(_post_attack_discovery_generations_dismiss_request).path),
-      ...getShape(getShape(_post_attack_discovery_generations_dismiss_request).query),
+      ...getShape(getShape(post_attack_discovery_generations_dismiss_request).body),
+      ...getShape(getShape(post_attack_discovery_generations_dismiss_request).path),
+      ...getShape(getShape(post_attack_discovery_generations_dismiss_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_post_attack_discovery_generations_dismiss_response)),
+      ...getShape(getShape(post_attack_discovery_generations_dismiss_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3465,7 +3465,7 @@ const CREATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found. \`Technical preview\``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/attack_discovery/schedules'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3476,14 +3476,14 @@ Creates a new Attack discovery schedule that analyzes security alerts at specifi
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_attack_discovery_schedules_request).body),
-      ...getShape(getShape(_create_attack_discovery_schedules_request).path),
-      ...getShape(getShape(_create_attack_discovery_schedules_request).query),
+      ...getShape(getShape(create_attack_discovery_schedules_request).body),
+      ...getShape(getShape(create_attack_discovery_schedules_request).path),
+      ...getShape(getShape(create_attack_discovery_schedules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_attack_discovery_schedules_response)),
+      ...getShape(getShape(create_attack_discovery_schedules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3498,7 +3498,7 @@ const FINDATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields. \`Technical preview\``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/attack_discovery/schedules/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3509,14 +3509,14 @@ Finds Attack discovery schedules that match the search criteria. Supports pagina
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_attack_discovery_schedules_request).body),
-      ...getShape(getShape(_find_attack_discovery_schedules_request).path),
-      ...getShape(getShape(_find_attack_discovery_schedules_request).query),
+      ...getShape(getShape(find_attack_discovery_schedules_request).body),
+      ...getShape(getShape(find_attack_discovery_schedules_request).path),
+      ...getShape(getShape(find_attack_discovery_schedules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_attack_discovery_schedules_response)),
+      ...getShape(getShape(find_attack_discovery_schedules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3531,7 +3531,7 @@ const DELETEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Permanently deletes an Attack discovery schedule and all associated configuration. \`Technical preview\``,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/attack_discovery/schedules/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3542,14 +3542,14 @@ Permanently deletes an Attack discovery schedule and all associated configuratio
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_attack_discovery_schedules_request).body),
-      ...getShape(getShape(_delete_attack_discovery_schedules_request).path),
-      ...getShape(getShape(_delete_attack_discovery_schedules_request).query),
+      ...getShape(getShape(delete_attack_discovery_schedules_request).body),
+      ...getShape(getShape(delete_attack_discovery_schedules_request).path),
+      ...getShape(getShape(delete_attack_discovery_schedules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_attack_discovery_schedules_response)),
+      ...getShape(getShape(delete_attack_discovery_schedules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3564,7 +3564,7 @@ const GETATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history. \`Technical preview\``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/attack_discovery/schedules/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3575,14 +3575,14 @@ Retrieves a specific Attack discovery schedule by its unique identifier. Returns
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_attack_discovery_schedules_request).body),
-      ...getShape(getShape(_get_attack_discovery_schedules_request).path),
-      ...getShape(getShape(_get_attack_discovery_schedules_request).query),
+      ...getShape(getShape(get_attack_discovery_schedules_request).body),
+      ...getShape(getShape(get_attack_discovery_schedules_request).path),
+      ...getShape(getShape(get_attack_discovery_schedules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_attack_discovery_schedules_response)),
+      ...getShape(getShape(get_attack_discovery_schedules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3597,7 +3597,7 @@ const UPDATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values. \`Technical preview\``,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/attack_discovery/schedules/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3608,14 +3608,14 @@ Updates an existing Attack discovery schedule with new configuration. All schedu
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_attack_discovery_schedules_request).body),
-      ...getShape(getShape(_update_attack_discovery_schedules_request).path),
-      ...getShape(getShape(_update_attack_discovery_schedules_request).query),
+      ...getShape(getShape(update_attack_discovery_schedules_request).body),
+      ...getShape(getShape(update_attack_discovery_schedules_request).path),
+      ...getShape(getShape(update_attack_discovery_schedules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_attack_discovery_schedules_response)),
+      ...getShape(getShape(update_attack_discovery_schedules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3630,7 +3630,7 @@ const DISABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started. \`Technical preview\``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/attack_discovery/schedules/{id}/_disable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3641,14 +3641,14 @@ Disables an Attack discovery schedule, preventing it from running according to i
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_disable_attack_discovery_schedules_request).body),
-      ...getShape(getShape(_disable_attack_discovery_schedules_request).path),
-      ...getShape(getShape(_disable_attack_discovery_schedules_request).query),
+      ...getShape(getShape(disable_attack_discovery_schedules_request).body),
+      ...getShape(getShape(disable_attack_discovery_schedules_request).path),
+      ...getShape(getShape(disable_attack_discovery_schedules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_disable_attack_discovery_schedules_response)),
+      ...getShape(getShape(disable_attack_discovery_schedules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3663,7 +3663,7 @@ const ENABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration. \`Technical preview\``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/attack_discovery/schedules/{id}/_enable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3674,14 +3674,14 @@ Enables a previously disabled Attack discovery schedule, allowing it to run acco
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_enable_attack_discovery_schedules_request).body),
-      ...getShape(getShape(_enable_attack_discovery_schedules_request).path),
-      ...getShape(getShape(_enable_attack_discovery_schedules_request).query),
+      ...getShape(getShape(enable_attack_discovery_schedules_request).body),
+      ...getShape(getShape(enable_attack_discovery_schedules_request).path),
+      ...getShape(getShape(enable_attack_discovery_schedules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_enable_attack_discovery_schedules_response)),
+      ...getShape(getShape(enable_attack_discovery_schedules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -3697,7 +3697,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`read\` or \`all\` privileges and the \`delete\` sub-feature privilege for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/cases'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3731,7 +3731,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`all\` privileges for the **Cases** feature in the  **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're updating.
 `,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/cases'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3765,7 +3765,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're creating.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/cases'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3799,7 +3799,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3833,7 +3833,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/{caseId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3867,7 +3867,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/{caseId}/alerts'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3901,7 +3901,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Deletes all comments and alerts from a case. You must have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/cases/{caseId}/comments'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3935,7 +3935,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.
 `,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/cases/{caseId}/comments'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -3969,7 +3969,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating. NOTE: Each case can have a maximum of 1,000 alerts.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/cases/{caseId}/comments'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4003,7 +4003,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Retrieves a paginated list of comments for a case. You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/{caseId}/comments/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4037,7 +4037,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/cases/{caseId}/comments/{commentId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4071,7 +4071,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/{caseId}/comments/{commentId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4105,7 +4105,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`all\` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. You must also have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're pushing.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/cases/{caseId}/connector/{connectorId}/_push'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4141,7 +4141,7 @@ Attach a file to a case. You must have \`all\` privileges for the **Cases** feat
 - The \`Content-Type: multipart/form-data\` HTTP header.
 - The location of the file that is being uploaded.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/cases/{caseId}/files'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4175,7 +4175,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Retrives a paginated list of user activity for a case. You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/{caseId}/user_actions/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4209,7 +4209,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/alerts/{alertId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4243,7 +4243,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Get setting details such as the closure type, custom fields, templatse, and the default connector for cases. You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/configure'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4277,7 +4277,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Case settings include external connection details, custom fields, and templates. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details. You must have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where you are creating cases.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/cases/configure'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4311,7 +4311,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Updates setting details such as the closure type, custom fields, templates, and the default connector for cases. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. You must have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the case was created.
 `,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/cases/configure/{configurationId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4345,7 +4345,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Get information about connectors that are supported for use in cases. You must have \`read\` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/configure/connectors/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4373,7 +4373,7 @@ const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   summary: `Get case creators`,
   description: `Returns information about the users who opened cases. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases. The API returns information about the users as they existed at the time of the case creation, including their name, full name, and email address. If any of those details change thereafter or if a user is deleted, the information returned by this API is unchanged.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/reporters'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4407,7 +4407,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Aggregates and returns a list of case tags. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/cases/tags'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4438,7 +4438,7 @@ const GETALLDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/data_views'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4469,7 +4469,7 @@ const CREATEDATAVIEWDEFAULTW_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/data_views/data_view'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4503,7 +4503,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 WARNING: When you delete a data view, it cannot be recovered.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/data_views/data_view/{viewId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4534,7 +4534,7 @@ const GETDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/data_views/data_view/{viewId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4565,7 +4565,7 @@ const UPDATEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4599,7 +4599,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Update fields presentation metadata such as count, customLabel, customDescription, and format.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}/fields'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4630,7 +4630,7 @@ const CREATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4661,7 +4661,7 @@ const CREATEUPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4692,7 +4692,7 @@ const DELETERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field/{fieldName}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4723,7 +4723,7 @@ const GETRUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field/{fieldName}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4754,7 +4754,7 @@ const UPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field/{fieldName}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4785,7 +4785,7 @@ const GETDEFAULTDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/default</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/data_views/default'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4816,7 +4816,7 @@ const SETDEFAULTDATAILVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/default</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/data_views/default'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4850,7 +4850,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Changes saved object references from one data view identifier to another. WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/data_views/swap_references'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4884,7 +4884,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Preview the impact of swapping saved object references from one data view identifier to another.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/data_views/swap_references/_preview'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4915,7 +4915,7 @@ const DELETEALERTSINDEX_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/index</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/detection_engine/index'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4926,14 +4926,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_alerts_index_request).body),
-      ...getShape(getShape(_delete_alerts_index_request).path),
-      ...getShape(getShape(_delete_alerts_index_request).query),
+      ...getShape(getShape(delete_alerts_index_request).body),
+      ...getShape(getShape(delete_alerts_index_request).path),
+      ...getShape(getShape(delete_alerts_index_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_alerts_index_response)),
+      ...getShape(getShape(delete_alerts_index_response)),
     }),
     error: z.any().optional(),
   }),
@@ -4946,7 +4946,7 @@ const READALERTSINDEX_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/index</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/detection_engine/index'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4957,14 +4957,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_alerts_index_request).body),
-      ...getShape(getShape(_read_alerts_index_request).path),
-      ...getShape(getShape(_read_alerts_index_request).query),
+      ...getShape(getShape(read_alerts_index_request).body),
+      ...getShape(getShape(read_alerts_index_request).path),
+      ...getShape(getShape(read_alerts_index_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_alerts_index_response)),
+      ...getShape(getShape(read_alerts_index_response)),
     }),
     error: z.any().optional(),
   }),
@@ -4977,7 +4977,7 @@ const CREATEALERTSINDEX_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/index</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/index'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -4988,14 +4988,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_alerts_index_request).body),
-      ...getShape(getShape(_create_alerts_index_request).path),
-      ...getShape(getShape(_create_alerts_index_request).query),
+      ...getShape(getShape(create_alerts_index_request).body),
+      ...getShape(getShape(create_alerts_index_request).path),
+      ...getShape(getShape(create_alerts_index_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_alerts_index_response)),
+      ...getShape(getShape(create_alerts_index_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5014,7 +5014,7 @@ space and index privileges, which determine if the user can create an
 index for the Elastic Security alerts generated by
 detection engine rules.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/detection_engine/privileges'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5025,14 +5025,14 @@ detection engine rules.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_privileges_request).body),
-      ...getShape(getShape(_read_privileges_request).path),
-      ...getShape(getShape(_read_privileges_request).query),
+      ...getShape(getShape(read_privileges_request).body),
+      ...getShape(getShape(read_privileges_request).path),
+      ...getShape(getShape(read_privileges_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_privileges_response)),
+      ...getShape(getShape(read_privileges_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5055,7 +5055,7 @@ The URL query must include one of the following:
 
 The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas \`rule_id\` is a stable rule identifier that can be assigned during rule creation.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/detection_engine/rules'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5066,14 +5066,14 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_rule_request).body),
-      ...getShape(getShape(_delete_rule_request).path),
-      ...getShape(getShape(_delete_rule_request).query),
+      ...getShape(getShape(delete_rule_request).body),
+      ...getShape(getShape(delete_rule_request).path),
+      ...getShape(getShape(delete_rule_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_rule_response)),
+      ...getShape(getShape(delete_rule_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5096,7 +5096,7 @@ The URL query must include one of the following:
 
 The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas \`rule_id\` is a stable rule identifier that can be assigned during rule creation.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/detection_engine/rules'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5107,14 +5107,14 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_rule_request).body),
-      ...getShape(getShape(_read_rule_request).path),
-      ...getShape(getShape(_read_rule_request).query),
+      ...getShape(getShape(read_rule_request).body),
+      ...getShape(getShape(read_rule_request).path),
+      ...getShape(getShape(read_rule_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_rule_response)),
+      ...getShape(getShape(read_rule_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5136,7 +5136,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 `,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/detection_engine/rules'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5147,14 +5147,14 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_patch_rule_request).body),
-      ...getShape(getShape(_patch_rule_request).path),
-      ...getShape(getShape(_patch_rule_request).query),
+      ...getShape(getShape(patch_rule_request).body),
+      ...getShape(getShape(patch_rule_request).path),
+      ...getShape(getShape(patch_rule_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_patch_rule_response)),
+      ...getShape(getShape(patch_rule_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5223,7 +5223,7 @@ For detailed information on Kibana actions and alerting, and additional API call
 * [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
 * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/rules'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5234,14 +5234,14 @@ For detailed information on Kibana actions and alerting, and additional API call
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_rule_request).body),
-      ...getShape(getShape(_create_rule_request).path),
-      ...getShape(getShape(_create_rule_request).query),
+      ...getShape(getShape(create_rule_request).body),
+      ...getShape(getShape(create_rule_request).path),
+      ...getShape(getShape(create_rule_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_rule_response)),
+      ...getShape(getShape(create_rule_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5263,7 +5263,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/detection_engine/rules'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5274,14 +5274,14 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_rule_request).body),
-      ...getShape(getShape(_update_rule_request).path),
-      ...getShape(getShape(_update_rule_request).query),
+      ...getShape(getShape(update_rule_request).body),
+      ...getShape(getShape(update_rule_request).path),
+      ...getShape(getShape(update_rule_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_rule_response)),
+      ...getShape(getShape(update_rule_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5304,7 +5304,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/rules/_bulk_action'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5315,14 +5315,14 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_perform_rules_bulk_action_request).body),
-      ...getShape(getShape(_perform_rules_bulk_action_request).path),
-      ...getShape(getShape(_perform_rules_bulk_action_request).query),
+      ...getShape(getShape(perform_rules_bulk_action_request).body),
+      ...getShape(getShape(perform_rules_bulk_action_request).path),
+      ...getShape(getShape(perform_rules_bulk_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_perform_rules_bulk_action_response)),
+      ...getShape(getShape(perform_rules_bulk_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5346,7 +5346,7 @@ Export detection rules to an \`.ndjson\` file. The following configuration items
 
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/rules/_export'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5357,14 +5357,14 @@ Export detection rules to an \`.ndjson\` file. The following configuration items
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_export_rules_request).body),
-      ...getShape(getShape(_export_rules_request).path),
-      ...getShape(getShape(_export_rules_request).query),
+      ...getShape(getShape(export_rules_request).body),
+      ...getShape(getShape(export_rules_request).path),
+      ...getShape(getShape(export_rules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_export_rules_response)),
+      ...getShape(getShape(export_rules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5379,7 +5379,7 @@ const FINDRULES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/detection_engine/rules/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5399,14 +5399,14 @@ Retrieve a paginated list of detection rules. By default, the first page is retu
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_rules_request).body),
-      ...getShape(getShape(_find_rules_request).path),
-      ...getShape(getShape(_find_rules_request).query),
+      ...getShape(getShape(find_rules_request).body),
+      ...getShape(getShape(find_rules_request).path),
+      ...getShape(getShape(find_rules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_rules_response)),
+      ...getShape(getShape(find_rules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5437,7 +5437,7 @@ Import detection rules from an \`.ndjson\` file, including actions and exception
 
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/rules/_import'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5448,14 +5448,14 @@ Import detection rules from an \`.ndjson\` file, including actions and exception
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_import_rules_request).body),
-      ...getShape(getShape(_import_rules_request).path),
-      ...getShape(getShape(_import_rules_request).query),
+      ...getShape(getShape(import_rules_request).body),
+      ...getShape(getShape(import_rules_request).path),
+      ...getShape(getShape(import_rules_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_import_rules_response)),
+      ...getShape(getShape(import_rules_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5470,7 +5470,7 @@ const CREATERULEEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create exception items that apply to a single detection rule.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/rules/{id}/exceptions'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5481,14 +5481,14 @@ Create exception items that apply to a single detection rule.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_rule_exception_list_items_request).body),
-      ...getShape(getShape(_create_rule_exception_list_items_request).path),
-      ...getShape(getShape(_create_rule_exception_list_items_request).query),
+      ...getShape(getShape(create_rule_exception_list_items_request).body),
+      ...getShape(getShape(create_rule_exception_list_items_request).path),
+      ...getShape(getShape(create_rule_exception_list_items_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_rule_exception_list_items_response)),
+      ...getShape(getShape(create_rule_exception_list_items_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5514,7 +5514,7 @@ When you call this endpoint, it will:
 This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
 providing you with the most current and effective threat detection capabilities.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/detection_engine/rules/prepackaged'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5525,14 +5525,14 @@ providing you with the most current and effective threat detection capabilities.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_install_prebuilt_rules_and_timelines_request).body),
-      ...getShape(getShape(_install_prebuilt_rules_and_timelines_request).path),
-      ...getShape(getShape(_install_prebuilt_rules_and_timelines_request).query),
+      ...getShape(getShape(install_prebuilt_rules_and_timelines_request).body),
+      ...getShape(getShape(install_prebuilt_rules_and_timelines_request).path),
+      ...getShape(getShape(install_prebuilt_rules_and_timelines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_install_prebuilt_rules_and_timelines_response)),
+      ...getShape(getShape(install_prebuilt_rules_and_timelines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5550,7 +5550,7 @@ Retrieve the status of all Elastic prebuilt detection rules and Timelines.
 
 This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/detection_engine/rules/prepackaged/_status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5561,14 +5561,14 @@ This endpoint provides detailed information about the number of custom rules, in
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_prebuilt_rules_and_timelines_status_request).body),
-      ...getShape(getShape(_read_prebuilt_rules_and_timelines_status_request).path),
-      ...getShape(getShape(_read_prebuilt_rules_and_timelines_status_request).query),
+      ...getShape(getShape(read_prebuilt_rules_and_timelines_status_request).body),
+      ...getShape(getShape(read_prebuilt_rules_and_timelines_status_request).path),
+      ...getShape(getShape(read_prebuilt_rules_and_timelines_status_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_prebuilt_rules_and_timelines_status_response)),
+      ...getShape(getShape(read_prebuilt_rules_and_timelines_status_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5581,7 +5581,7 @@ const RULEPREVIEW_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/preview</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/rules/preview'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5592,14 +5592,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_rule_preview_request).body),
-      ...getShape(getShape(_rule_preview_request).path),
-      ...getShape(getShape(_rule_preview_request).query),
+      ...getShape(getShape(rule_preview_request).body),
+      ...getShape(getShape(rule_preview_request).path),
+      ...getShape(getShape(rule_preview_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_rule_preview_response)),
+      ...getShape(getShape(rule_preview_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5617,7 +5617,7 @@ Assign users to detection alerts, and unassign them from alerts.
 > info
 > You cannot add and remove the same assignee in the same request.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/signals/assignees'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5628,14 +5628,14 @@ Assign users to detection alerts, and unassign them from alerts.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_set_alert_assignees_request).body),
-      ...getShape(getShape(_set_alert_assignees_request).path),
-      ...getShape(getShape(_set_alert_assignees_request).query),
+      ...getShape(getShape(set_alert_assignees_request).body),
+      ...getShape(getShape(set_alert_assignees_request).path),
+      ...getShape(getShape(set_alert_assignees_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_set_alert_assignees_response)),
+      ...getShape(getShape(set_alert_assignees_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5653,7 +5653,7 @@ Finalize successful migrations of detection alerts. This replaces the original i
 The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
 finalize it.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/signals/finalize_migration'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5664,14 +5664,14 @@ finalize it.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_finalize_alerts_migration_request).body),
-      ...getShape(getShape(_finalize_alerts_migration_request).path),
-      ...getShape(getShape(_finalize_alerts_migration_request).query),
+      ...getShape(getShape(finalize_alerts_migration_request).body),
+      ...getShape(getShape(finalize_alerts_migration_request).path),
+      ...getShape(getShape(finalize_alerts_migration_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_finalize_alerts_migration_response)),
+      ...getShape(getShape(finalize_alerts_migration_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5693,7 +5693,7 @@ While you can delete these indices manually,
 the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
 after 30 days. It also deletes other artifacts specific to the migration implementation.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/detection_engine/signals/migration'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5704,14 +5704,14 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_alerts_migration_cleanup_request).body),
-      ...getShape(getShape(_alerts_migration_cleanup_request).path),
-      ...getShape(getShape(_alerts_migration_cleanup_request).query),
+      ...getShape(getShape(alerts_migration_cleanup_request).body),
+      ...getShape(getShape(alerts_migration_cleanup_request).path),
+      ...getShape(getShape(alerts_migration_cleanup_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_alerts_migration_cleanup_response)),
+      ...getShape(getShape(alerts_migration_cleanup_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5728,7 +5728,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Initiate a migration of detection alerts.
 Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/signals/migration'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5739,14 +5739,14 @@ Migrations are initiated per index. While the process is neither destructive nor
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_alerts_migration_request).body),
-      ...getShape(getShape(_create_alerts_migration_request).path),
-      ...getShape(getShape(_create_alerts_migration_request).query),
+      ...getShape(getShape(create_alerts_migration_request).body),
+      ...getShape(getShape(create_alerts_migration_request).path),
+      ...getShape(getShape(create_alerts_migration_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_alerts_migration_response)),
+      ...getShape(getShape(create_alerts_migration_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5761,7 +5761,7 @@ const READALERTSMIGRATIONSTATUS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/detection_engine/signals/migration_status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5772,14 +5772,14 @@ Retrieve indices that contain detection alerts of a particular age, along with m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_alerts_migration_status_request).body),
-      ...getShape(getShape(_read_alerts_migration_status_request).path),
-      ...getShape(getShape(_read_alerts_migration_status_request).query),
+      ...getShape(getShape(read_alerts_migration_status_request).body),
+      ...getShape(getShape(read_alerts_migration_status_request).path),
+      ...getShape(getShape(read_alerts_migration_status_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_alerts_migration_status_response)),
+      ...getShape(getShape(read_alerts_migration_status_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5794,7 +5794,7 @@ const SEARCHALERTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Find and/or aggregate detection alerts that match the given query.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/signals/search'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5805,14 +5805,14 @@ Find and/or aggregate detection alerts that match the given query.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_search_alerts_request).body),
-      ...getShape(getShape(_search_alerts_request).path),
-      ...getShape(getShape(_search_alerts_request).query),
+      ...getShape(getShape(search_alerts_request).body),
+      ...getShape(getShape(search_alerts_request).path),
+      ...getShape(getShape(search_alerts_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_search_alerts_response)),
+      ...getShape(getShape(search_alerts_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5827,7 +5827,7 @@ const SETALERTSSTATUS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Set the status of one or more detection alerts.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/signals/status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5838,14 +5838,14 @@ Set the status of one or more detection alerts.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_set_alerts_status_request).body),
-      ...getShape(getShape(_set_alerts_status_request).path),
-      ...getShape(getShape(_set_alerts_status_request).query),
+      ...getShape(getShape(set_alerts_status_request).body),
+      ...getShape(getShape(set_alerts_status_request).path),
+      ...getShape(getShape(set_alerts_status_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_set_alerts_status_response)),
+      ...getShape(getShape(set_alerts_status_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5863,7 +5863,7 @@ And tags to detection alerts, and remove them from alerts.
 > info
 > You cannot add and remove the same alert tag in the same request.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/detection_engine/signals/tags'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5874,14 +5874,14 @@ And tags to detection alerts, and remove them from alerts.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_set_alert_tags_request).body),
-      ...getShape(getShape(_set_alert_tags_request).path),
-      ...getShape(getShape(_set_alert_tags_request).query),
+      ...getShape(getShape(set_alert_tags_request).body),
+      ...getShape(getShape(set_alert_tags_request).path),
+      ...getShape(getShape(set_alert_tags_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_set_alert_tags_response)),
+      ...getShape(getShape(set_alert_tags_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5896,7 +5896,7 @@ const READTAGS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 List all unique tags from all detection rules.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/detection_engine/tags'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5907,14 +5907,14 @@ List all unique tags from all detection rules.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_tags_request).body),
-      ...getShape(getShape(_read_tags_request).path),
-      ...getShape(getShape(_read_tags_request).query),
+      ...getShape(getShape(read_tags_request).body),
+      ...getShape(getShape(read_tags_request).path),
+      ...getShape(getShape(read_tags_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_tags_response)),
+      ...getShape(getShape(read_tags_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5928,7 +5928,7 @@ If a saved object cannot be decrypted using the primary encryption key, then Kib
 
 This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/encrypted_saved_objects/_rotate_key'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5961,7 +5961,7 @@ const CREATEENDPOINTLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a \`list_id\` of \`endpoint_list\`. If the Elastic Endpoint exception list already exists, your request will return an empty response.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint_list'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -5972,14 +5972,14 @@ Create the exception list for Elastic Endpoint rule exceptions. When you create 
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_endpoint_list_request).body),
-      ...getShape(getShape(_create_endpoint_list_request).path),
-      ...getShape(getShape(_create_endpoint_list_request).query),
+      ...getShape(getShape(create_endpoint_list_request).body),
+      ...getShape(getShape(create_endpoint_list_request).path),
+      ...getShape(getShape(create_endpoint_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_endpoint_list_response)),
+      ...getShape(getShape(create_endpoint_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -5994,7 +5994,7 @@ const DELETEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete an Elastic Endpoint exception list item, specified by the \`id\` or \`item_id\` field.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/endpoint_list/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6005,14 +6005,14 @@ Delete an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_endpoint_list_item_request).body),
-      ...getShape(getShape(_delete_endpoint_list_item_request).path),
-      ...getShape(getShape(_delete_endpoint_list_item_request).query),
+      ...getShape(getShape(delete_endpoint_list_item_request).body),
+      ...getShape(getShape(delete_endpoint_list_item_request).path),
+      ...getShape(getShape(delete_endpoint_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_endpoint_list_item_response)),
+      ...getShape(getShape(delete_endpoint_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6027,7 +6027,7 @@ const READENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of an Elastic Endpoint exception list item, specified by the \`id\` or \`item_id\` field.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint_list/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6038,14 +6038,14 @@ Get the details of an Elastic Endpoint exception list item, specified by the \`i
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_endpoint_list_item_request).body),
-      ...getShape(getShape(_read_endpoint_list_item_request).path),
-      ...getShape(getShape(_read_endpoint_list_item_request).query),
+      ...getShape(getShape(read_endpoint_list_item_request).body),
+      ...getShape(getShape(read_endpoint_list_item_request).path),
+      ...getShape(getShape(read_endpoint_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_endpoint_list_item_response)),
+      ...getShape(getShape(read_endpoint_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6060,7 +6060,7 @@ const CREATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint_list/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6071,14 +6071,14 @@ Create an Elastic Endpoint exception list item, and associate it with the Elasti
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_endpoint_list_item_request).body),
-      ...getShape(getShape(_create_endpoint_list_item_request).path),
-      ...getShape(getShape(_create_endpoint_list_item_request).query),
+      ...getShape(getShape(create_endpoint_list_item_request).body),
+      ...getShape(getShape(create_endpoint_list_item_request).path),
+      ...getShape(getShape(create_endpoint_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_endpoint_list_item_response)),
+      ...getShape(getShape(create_endpoint_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6093,7 +6093,7 @@ const UPDATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an Elastic Endpoint exception list item, specified by the \`id\` or \`item_id\` field.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/endpoint_list/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6104,14 +6104,14 @@ Update an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_endpoint_list_item_request).body),
-      ...getShape(getShape(_update_endpoint_list_item_request).path),
-      ...getShape(getShape(_update_endpoint_list_item_request).query),
+      ...getShape(getShape(update_endpoint_list_item_request).body),
+      ...getShape(getShape(update_endpoint_list_item_request).path),
+      ...getShape(getShape(update_endpoint_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_endpoint_list_item_response)),
+      ...getShape(getShape(update_endpoint_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6126,7 +6126,7 @@ const FINDENDPOINTLISTITEMS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all Elastic Endpoint exception list items.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint_list/items/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6137,14 +6137,14 @@ Get a list of all Elastic Endpoint exception list items.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_endpoint_list_items_request).body),
-      ...getShape(getShape(_find_endpoint_list_items_request).path),
-      ...getShape(getShape(_find_endpoint_list_items_request).query),
+      ...getShape(getShape(find_endpoint_list_items_request).body),
+      ...getShape(getShape(find_endpoint_list_items_request).path),
+      ...getShape(getShape(find_endpoint_list_items_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_endpoint_list_items_response)),
+      ...getShape(getShape(find_endpoint_list_items_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6159,7 +6159,7 @@ const ENDPOINTGETACTIONSLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all response actions.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/action'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6181,14 +6181,14 @@ Get a list of all response actions.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_get_actions_list_request).body),
-      ...getShape(getShape(_endpoint_get_actions_list_request).path),
-      ...getShape(getShape(_endpoint_get_actions_list_request).query),
+      ...getShape(getShape(endpoint_get_actions_list_request).body),
+      ...getShape(getShape(endpoint_get_actions_list_request).path),
+      ...getShape(getShape(endpoint_get_actions_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_get_actions_list_response)),
+      ...getShape(getShape(endpoint_get_actions_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6203,7 +6203,7 @@ const ENDPOINTGETACTIONSSTATUS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the status of response actions for the specified agent IDs.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/action_status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6214,14 +6214,14 @@ Get the status of response actions for the specified agent IDs.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_get_actions_status_request).body),
-      ...getShape(getShape(_endpoint_get_actions_status_request).path),
-      ...getShape(getShape(_endpoint_get_actions_status_request).query),
+      ...getShape(getShape(endpoint_get_actions_status_request).body),
+      ...getShape(getShape(endpoint_get_actions_status_request).path),
+      ...getShape(getShape(endpoint_get_actions_status_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_get_actions_status_response)),
+      ...getShape(getShape(endpoint_get_actions_status_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6236,7 +6236,7 @@ const ENDPOINTGETACTIONSDETAILS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of a response action using the action ID.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/action/{action_id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6247,14 +6247,14 @@ Get the details of a response action using the action ID.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_get_actions_details_request).body),
-      ...getShape(getShape(_endpoint_get_actions_details_request).path),
-      ...getShape(getShape(_endpoint_get_actions_details_request).query),
+      ...getShape(getShape(endpoint_get_actions_details_request).body),
+      ...getShape(getShape(endpoint_get_actions_details_request).path),
+      ...getShape(getShape(endpoint_get_actions_details_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_get_actions_details_response)),
+      ...getShape(getShape(endpoint_get_actions_details_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6270,7 +6270,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Get information for the specified response action file download.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/action/{action_id}/file/{file_id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6281,14 +6281,14 @@ Get information for the specified response action file download.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_file_info_request).body),
-      ...getShape(getShape(_endpoint_file_info_request).path),
-      ...getShape(getShape(_endpoint_file_info_request).query),
+      ...getShape(getShape(endpoint_file_info_request).body),
+      ...getShape(getShape(endpoint_file_info_request).path),
+      ...getShape(getShape(endpoint_file_info_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_file_info_response)),
+      ...getShape(getShape(endpoint_file_info_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6304,7 +6304,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Download a file associated with a response action.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/action/{action_id}/file/{file_id}/download'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6315,14 +6315,14 @@ Download a file associated with a response action.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_file_download_request).body),
-      ...getShape(getShape(_endpoint_file_download_request).path),
-      ...getShape(getShape(_endpoint_file_download_request).query),
+      ...getShape(getShape(endpoint_file_download_request).body),
+      ...getShape(getShape(endpoint_file_download_request).path),
+      ...getShape(getShape(endpoint_file_download_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_file_download_response)),
+      ...getShape(getShape(endpoint_file_download_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6337,7 +6337,7 @@ const CANCELACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Cancel a running or pending response action (Applies only to some agent types).`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/cancel'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6348,14 +6348,14 @@ Cancel a running or pending response action (Applies only to some agent types).`
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_cancel_action_request).body),
-      ...getShape(getShape(_cancel_action_request).path),
-      ...getShape(getShape(_cancel_action_request).query),
+      ...getShape(getShape(cancel_action_request).body),
+      ...getShape(getShape(cancel_action_request).path),
+      ...getShape(getShape(cancel_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_cancel_action_response)),
+      ...getShape(getShape(cancel_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6370,7 +6370,7 @@ const ENDPOINTEXECUTEACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Run a shell command on an endpoint.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/execute'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6381,14 +6381,14 @@ Run a shell command on an endpoint.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_execute_action_request).body),
-      ...getShape(getShape(_endpoint_execute_action_request).path),
-      ...getShape(getShape(_endpoint_execute_action_request).query),
+      ...getShape(getShape(endpoint_execute_action_request).body),
+      ...getShape(getShape(endpoint_execute_action_request).path),
+      ...getShape(getShape(endpoint_execute_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_execute_action_response)),
+      ...getShape(getShape(endpoint_execute_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6403,7 +6403,7 @@ const ENDPOINTGETFILEACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a file from an endpoint.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/get_file'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6414,14 +6414,14 @@ Get a file from an endpoint.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_get_file_action_request).body),
-      ...getShape(getShape(_endpoint_get_file_action_request).path),
-      ...getShape(getShape(_endpoint_get_file_action_request).query),
+      ...getShape(getShape(endpoint_get_file_action_request).body),
+      ...getShape(getShape(endpoint_get_file_action_request).path),
+      ...getShape(getShape(endpoint_get_file_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_get_file_action_response)),
+      ...getShape(getShape(endpoint_get_file_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6436,7 +6436,7 @@ const ENDPOINTISOLATEACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Isolate an endpoint from the network. The endpoint remains isolated until it's released.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/isolate'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6447,14 +6447,14 @@ Isolate an endpoint from the network. The endpoint remains isolated until it's r
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_isolate_action_request).body),
-      ...getShape(getShape(_endpoint_isolate_action_request).path),
-      ...getShape(getShape(_endpoint_isolate_action_request).query),
+      ...getShape(getShape(endpoint_isolate_action_request).body),
+      ...getShape(getShape(endpoint_isolate_action_request).path),
+      ...getShape(getShape(endpoint_isolate_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_isolate_action_response)),
+      ...getShape(getShape(endpoint_isolate_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6469,7 +6469,7 @@ const ENDPOINTKILLPROCESSACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Terminate a running process on an endpoint.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/kill_process'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6480,14 +6480,14 @@ Terminate a running process on an endpoint.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_kill_process_action_request).body),
-      ...getShape(getShape(_endpoint_kill_process_action_request).path),
-      ...getShape(getShape(_endpoint_kill_process_action_request).query),
+      ...getShape(getShape(endpoint_kill_process_action_request).body),
+      ...getShape(getShape(endpoint_kill_process_action_request).path),
+      ...getShape(getShape(endpoint_kill_process_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_kill_process_action_response)),
+      ...getShape(getShape(endpoint_kill_process_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6502,7 +6502,7 @@ const ENDPOINTGETPROCESSESACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all processes running on an endpoint.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/running_procs'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6513,14 +6513,14 @@ Get a list of all processes running on an endpoint.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_get_processes_action_request).body),
-      ...getShape(getShape(_endpoint_get_processes_action_request).path),
-      ...getShape(getShape(_endpoint_get_processes_action_request).query),
+      ...getShape(getShape(endpoint_get_processes_action_request).body),
+      ...getShape(getShape(endpoint_get_processes_action_request).path),
+      ...getShape(getShape(endpoint_get_processes_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_get_processes_action_response)),
+      ...getShape(getShape(endpoint_get_processes_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6535,7 +6535,7 @@ const RUNSCRIPTACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Run a script on a host. Currently supported only for some agent types.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/runscript'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6546,14 +6546,14 @@ Run a script on a host. Currently supported only for some agent types.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_run_script_action_request).body),
-      ...getShape(getShape(_run_script_action_request).path),
-      ...getShape(getShape(_run_script_action_request).query),
+      ...getShape(getShape(run_script_action_request).body),
+      ...getShape(getShape(run_script_action_request).path),
+      ...getShape(getShape(run_script_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_run_script_action_response)),
+      ...getShape(getShape(run_script_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6568,7 +6568,7 @@ const ENDPOINTSCANACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Scan a specific file or directory on an endpoint for malware.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/scan'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6579,14 +6579,14 @@ Scan a specific file or directory on an endpoint for malware.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_scan_action_request).body),
-      ...getShape(getShape(_endpoint_scan_action_request).path),
-      ...getShape(getShape(_endpoint_scan_action_request).query),
+      ...getShape(getShape(endpoint_scan_action_request).body),
+      ...getShape(getShape(endpoint_scan_action_request).path),
+      ...getShape(getShape(endpoint_scan_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_scan_action_response)),
+      ...getShape(getShape(endpoint_scan_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6601,7 +6601,7 @@ const ENDPOINTGETACTIONSSTATE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a response actions state, which reports whether encryption is enabled.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/action/state'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6612,14 +6612,14 @@ Get a response actions state, which reports whether encryption is enabled.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_get_actions_state_request).body),
-      ...getShape(getShape(_endpoint_get_actions_state_request).path),
-      ...getShape(getShape(_endpoint_get_actions_state_request).query),
+      ...getShape(getShape(endpoint_get_actions_state_request).body),
+      ...getShape(getShape(endpoint_get_actions_state_request).path),
+      ...getShape(getShape(endpoint_get_actions_state_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_get_actions_state_response)),
+      ...getShape(getShape(endpoint_get_actions_state_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6634,7 +6634,7 @@ const ENDPOINTSUSPENDPROCESSACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Suspend a running process on an endpoint.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/suspend_process'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6645,14 +6645,14 @@ Suspend a running process on an endpoint.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_suspend_process_action_request).body),
-      ...getShape(getShape(_endpoint_suspend_process_action_request).path),
-      ...getShape(getShape(_endpoint_suspend_process_action_request).query),
+      ...getShape(getShape(endpoint_suspend_process_action_request).body),
+      ...getShape(getShape(endpoint_suspend_process_action_request).path),
+      ...getShape(getShape(endpoint_suspend_process_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_suspend_process_action_response)),
+      ...getShape(getShape(endpoint_suspend_process_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6667,7 +6667,7 @@ const ENDPOINTUNISOLATEACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Release an isolated endpoint, allowing it to rejoin a network.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/unisolate'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6678,14 +6678,14 @@ Release an isolated endpoint, allowing it to rejoin a network.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_unisolate_action_request).body),
-      ...getShape(getShape(_endpoint_unisolate_action_request).path),
-      ...getShape(getShape(_endpoint_unisolate_action_request).query),
+      ...getShape(getShape(endpoint_unisolate_action_request).body),
+      ...getShape(getShape(endpoint_unisolate_action_request).path),
+      ...getShape(getShape(endpoint_unisolate_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_unisolate_action_response)),
+      ...getShape(getShape(endpoint_unisolate_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6700,7 +6700,7 @@ const ENDPOINTUPLOADACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Upload a file to an endpoint.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/action/upload'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6711,14 +6711,14 @@ Upload a file to an endpoint.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_endpoint_upload_action_request).body),
-      ...getShape(getShape(_endpoint_upload_action_request).path),
-      ...getShape(getShape(_endpoint_upload_action_request).query),
+      ...getShape(getShape(endpoint_upload_action_request).body),
+      ...getShape(getShape(endpoint_upload_action_request).path),
+      ...getShape(getShape(endpoint_upload_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_endpoint_upload_action_response)),
+      ...getShape(getShape(endpoint_upload_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6731,7 +6731,7 @@ const GETENDPOINTMETADATALIST_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/metadata</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/metadata'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6742,14 +6742,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_endpoint_metadata_list_request).body),
-      ...getShape(getShape(_get_endpoint_metadata_list_request).path),
-      ...getShape(getShape(_get_endpoint_metadata_list_request).query),
+      ...getShape(getShape(get_endpoint_metadata_list_request).body),
+      ...getShape(getShape(get_endpoint_metadata_list_request).path),
+      ...getShape(getShape(get_endpoint_metadata_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_endpoint_metadata_list_response)),
+      ...getShape(getShape(get_endpoint_metadata_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6762,7 +6762,7 @@ const GETENDPOINTMETADATA_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/metadata/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/metadata/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6773,14 +6773,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_endpoint_metadata_request).body),
-      ...getShape(getShape(_get_endpoint_metadata_request).path),
-      ...getShape(getShape(_get_endpoint_metadata_request).query),
+      ...getShape(getShape(get_endpoint_metadata_request).body),
+      ...getShape(getShape(get_endpoint_metadata_request).path),
+      ...getShape(getShape(get_endpoint_metadata_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_endpoint_metadata_response)),
+      ...getShape(getShape(get_endpoint_metadata_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6793,7 +6793,7 @@ const GETPOLICYRESPONSE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/policy_response</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/policy_response'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6804,14 +6804,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_policy_response_request).body),
-      ...getShape(getShape(_get_policy_response_request).path),
-      ...getShape(getShape(_get_policy_response_request).query),
+      ...getShape(getShape(get_policy_response_request).body),
+      ...getShape(getShape(get_policy_response_request).path),
+      ...getShape(getShape(get_policy_response_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_policy_response_response)),
+      ...getShape(getShape(get_policy_response_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6824,7 +6824,7 @@ const GETPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/protection_updates_note/{package_policy_id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/endpoint/protection_updates_note/{package_policy_id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6835,14 +6835,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_protection_updates_note_request).body),
-      ...getShape(getShape(_get_protection_updates_note_request).path),
-      ...getShape(getShape(_get_protection_updates_note_request).query),
+      ...getShape(getShape(get_protection_updates_note_request).body),
+      ...getShape(getShape(get_protection_updates_note_request).path),
+      ...getShape(getShape(get_protection_updates_note_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_protection_updates_note_response)),
+      ...getShape(getShape(get_protection_updates_note_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6855,7 +6855,7 @@ const CREATEUPDATEPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/protection_updates_note/{package_policy_id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/endpoint/protection_updates_note/{package_policy_id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6866,14 +6866,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_update_protection_updates_note_request).body),
-      ...getShape(getShape(_create_update_protection_updates_note_request).path),
-      ...getShape(getShape(_create_update_protection_updates_note_request).query),
+      ...getShape(getShape(create_update_protection_updates_note_request).body),
+      ...getShape(getShape(create_update_protection_updates_note_request).path),
+      ...getShape(getShape(create_update_protection_updates_note_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_update_protection_updates_note_response)),
+      ...getShape(getShape(create_update_protection_updates_note_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6886,7 +6886,7 @@ const DELETEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/delete</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/entity_analytics/monitoring/engine/delete'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6897,14 +6897,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_monitoring_engine_request).body),
-      ...getShape(getShape(_delete_monitoring_engine_request).path),
-      ...getShape(getShape(_delete_monitoring_engine_request).query),
+      ...getShape(getShape(delete_monitoring_engine_request).body),
+      ...getShape(getShape(delete_monitoring_engine_request).path),
+      ...getShape(getShape(delete_monitoring_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_monitoring_engine_response)),
+      ...getShape(getShape(delete_monitoring_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6917,7 +6917,7 @@ const DISABLEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/disable</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/engine/disable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6928,14 +6928,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_disable_monitoring_engine_request).body),
-      ...getShape(getShape(_disable_monitoring_engine_request).path),
-      ...getShape(getShape(_disable_monitoring_engine_request).query),
+      ...getShape(getShape(disable_monitoring_engine_request).body),
+      ...getShape(getShape(disable_monitoring_engine_request).path),
+      ...getShape(getShape(disable_monitoring_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_disable_monitoring_engine_response)),
+      ...getShape(getShape(disable_monitoring_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6948,7 +6948,7 @@ const INITMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/init</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/engine/init'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6959,14 +6959,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_init_monitoring_engine_request).body),
-      ...getShape(getShape(_init_monitoring_engine_request).path),
-      ...getShape(getShape(_init_monitoring_engine_request).query),
+      ...getShape(getShape(init_monitoring_engine_request).body),
+      ...getShape(getShape(init_monitoring_engine_request).path),
+      ...getShape(getShape(init_monitoring_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_init_monitoring_engine_response)),
+      ...getShape(getShape(init_monitoring_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -6979,7 +6979,7 @@ const SCHEDULEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/schedule_now</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/engine/schedule_now'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -6990,14 +6990,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_schedule_monitoring_engine_request).body),
-      ...getShape(getShape(_schedule_monitoring_engine_request).path),
-      ...getShape(getShape(_schedule_monitoring_engine_request).query),
+      ...getShape(getShape(schedule_monitoring_engine_request).body),
+      ...getShape(getShape(schedule_monitoring_engine_request).path),
+      ...getShape(getShape(schedule_monitoring_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_schedule_monitoring_engine_response)),
+      ...getShape(getShape(schedule_monitoring_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7010,7 +7010,7 @@ const PRIVMONHEALTH_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/privileges/health</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/entity_analytics/monitoring/privileges/health'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7021,14 +7021,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_priv_mon_health_request).body),
-      ...getShape(getShape(_priv_mon_health_request).path),
-      ...getShape(getShape(_priv_mon_health_request).query),
+      ...getShape(getShape(priv_mon_health_request).body),
+      ...getShape(getShape(priv_mon_health_request).path),
+      ...getShape(getShape(priv_mon_health_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_priv_mon_health_response)),
+      ...getShape(getShape(priv_mon_health_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7043,7 +7043,7 @@ const PRIVMONPRIVILEGES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Check if the current user has all required permissions for Privilege Monitoring`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/entity_analytics/monitoring/privileges/privileges'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7054,14 +7054,14 @@ Check if the current user has all required permissions for Privilege Monitoring`
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_priv_mon_privileges_request).body),
-      ...getShape(getShape(_priv_mon_privileges_request).path),
-      ...getShape(getShape(_priv_mon_privileges_request).query),
+      ...getShape(getShape(priv_mon_privileges_request).body),
+      ...getShape(getShape(priv_mon_privileges_request).path),
+      ...getShape(getShape(priv_mon_privileges_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_priv_mon_privileges_response)),
+      ...getShape(getShape(priv_mon_privileges_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7074,7 +7074,7 @@ const CREATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/users'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7085,14 +7085,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_priv_mon_user_request).body),
-      ...getShape(getShape(_create_priv_mon_user_request).path),
-      ...getShape(getShape(_create_priv_mon_user_request).query),
+      ...getShape(getShape(create_priv_mon_user_request).body),
+      ...getShape(getShape(create_priv_mon_user_request).path),
+      ...getShape(getShape(create_priv_mon_user_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_priv_mon_user_response)),
+      ...getShape(getShape(create_priv_mon_user_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7105,7 +7105,7 @@ const PRIVMONBULKUPLOADUSERSCSV_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/_csv</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/users/_csv'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7116,14 +7116,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_privmon_bulk_upload_users_c_s_v_request).body),
-      ...getShape(getShape(_privmon_bulk_upload_users_c_s_v_request).path),
-      ...getShape(getShape(_privmon_bulk_upload_users_c_s_v_request).query),
+      ...getShape(getShape(privmon_bulk_upload_users_c_s_v_request).body),
+      ...getShape(getShape(privmon_bulk_upload_users_c_s_v_request).path),
+      ...getShape(getShape(privmon_bulk_upload_users_c_s_v_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_privmon_bulk_upload_users_c_s_v_response)),
+      ...getShape(getShape(privmon_bulk_upload_users_c_s_v_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7136,7 +7136,7 @@ const DELETEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/entity_analytics/monitoring/users/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7147,14 +7147,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_priv_mon_user_request).body),
-      ...getShape(getShape(_delete_priv_mon_user_request).path),
-      ...getShape(getShape(_delete_priv_mon_user_request).query),
+      ...getShape(getShape(delete_priv_mon_user_request).body),
+      ...getShape(getShape(delete_priv_mon_user_request).path),
+      ...getShape(getShape(delete_priv_mon_user_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_priv_mon_user_response)),
+      ...getShape(getShape(delete_priv_mon_user_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7167,7 +7167,7 @@ const UPDATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/entity_analytics/monitoring/users/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7178,14 +7178,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_priv_mon_user_request).body),
-      ...getShape(getShape(_update_priv_mon_user_request).path),
-      ...getShape(getShape(_update_priv_mon_user_request).query),
+      ...getShape(getShape(update_priv_mon_user_request).body),
+      ...getShape(getShape(update_priv_mon_user_request).path),
+      ...getShape(getShape(update_priv_mon_user_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_priv_mon_user_response)),
+      ...getShape(getShape(update_priv_mon_user_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7198,7 +7198,7 @@ const LISTPRIVMONUSERS_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/list</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/entity_analytics/monitoring/users/list'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7209,14 +7209,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_list_priv_mon_users_request).body),
-      ...getShape(getShape(_list_priv_mon_users_request).path),
-      ...getShape(getShape(_list_priv_mon_users_request).query),
+      ...getShape(getShape(list_priv_mon_users_request).body),
+      ...getShape(getShape(list_priv_mon_users_request).path),
+      ...getShape(getShape(list_priv_mon_users_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_list_priv_mon_users_response)),
+      ...getShape(getShape(list_priv_mon_users_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7229,7 +7229,7 @@ const INSTALLPRIVILEGEDACCESSDETECTIONPACKAGE_CONTRACT: InternalConnectorContrac
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/privileged_user_monitoring/pad/install</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_analytics/privileged_user_monitoring/pad/install'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7240,14 +7240,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_install_privileged_access_detection_package_request).body),
-      ...getShape(getShape(_install_privileged_access_detection_package_request).path),
-      ...getShape(getShape(_install_privileged_access_detection_package_request).query),
+      ...getShape(getShape(install_privileged_access_detection_package_request).body),
+      ...getShape(getShape(install_privileged_access_detection_package_request).path),
+      ...getShape(getShape(install_privileged_access_detection_package_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_install_privileged_access_detection_package_response)),
+      ...getShape(getShape(install_privileged_access_detection_package_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7260,7 +7260,7 @@ const GETPRIVILEGEDACCESSDETECTIONPACKAGESTATUS_CONTRACT: InternalConnectorContr
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/privileged_user_monitoring/pad/status</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/entity_analytics/privileged_user_monitoring/pad/status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7271,14 +7271,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_privileged_access_detection_package_status_request).body),
-      ...getShape(getShape(_get_privileged_access_detection_package_status_request).path),
-      ...getShape(getShape(_get_privileged_access_detection_package_status_request).query),
+      ...getShape(getShape(get_privileged_access_detection_package_status_request).body),
+      ...getShape(getShape(get_privileged_access_detection_package_status_request).path),
+      ...getShape(getShape(get_privileged_access_detection_package_status_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_privileged_access_detection_package_status_response)),
+      ...getShape(getShape(get_privileged_access_detection_package_status_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7291,7 +7291,7 @@ const INITENTITYSTORE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/enable</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_store/enable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7302,14 +7302,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_init_entity_store_request).body),
-      ...getShape(getShape(_init_entity_store_request).path),
-      ...getShape(getShape(_init_entity_store_request).query),
+      ...getShape(getShape(init_entity_store_request).body),
+      ...getShape(getShape(init_entity_store_request).path),
+      ...getShape(getShape(init_entity_store_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_init_entity_store_response)),
+      ...getShape(getShape(init_entity_store_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7322,7 +7322,7 @@ const DELETEENTITYENGINES_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/entity_store/engines'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7333,14 +7333,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_entity_engines_request).body),
-      ...getShape(getShape(_delete_entity_engines_request).path),
-      ...getShape(getShape(_delete_entity_engines_request).query),
+      ...getShape(getShape(delete_entity_engines_request).body),
+      ...getShape(getShape(delete_entity_engines_request).path),
+      ...getShape(getShape(delete_entity_engines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_entity_engines_response)),
+      ...getShape(getShape(delete_entity_engines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7353,7 +7353,7 @@ const LISTENTITYENGINES_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/entity_store/engines'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7364,14 +7364,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_list_entity_engines_request).body),
-      ...getShape(getShape(_list_entity_engines_request).path),
-      ...getShape(getShape(_list_entity_engines_request).query),
+      ...getShape(getShape(list_entity_engines_request).body),
+      ...getShape(getShape(list_entity_engines_request).path),
+      ...getShape(getShape(list_entity_engines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_list_entity_engines_response)),
+      ...getShape(getShape(list_entity_engines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7384,7 +7384,7 @@ const DELETEENTITYENGINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/entity_store/engines/{entityType}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7395,14 +7395,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_entity_engine_request).body),
-      ...getShape(getShape(_delete_entity_engine_request).path),
-      ...getShape(getShape(_delete_entity_engine_request).query),
+      ...getShape(getShape(delete_entity_engine_request).body),
+      ...getShape(getShape(delete_entity_engine_request).path),
+      ...getShape(getShape(delete_entity_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_entity_engine_response)),
+      ...getShape(getShape(delete_entity_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7415,7 +7415,7 @@ const GETENTITYENGINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/entity_store/engines/{entityType}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7426,14 +7426,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_entity_engine_request).body),
-      ...getShape(getShape(_get_entity_engine_request).path),
-      ...getShape(getShape(_get_entity_engine_request).query),
+      ...getShape(getShape(get_entity_engine_request).body),
+      ...getShape(getShape(get_entity_engine_request).path),
+      ...getShape(getShape(get_entity_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_entity_engine_response)),
+      ...getShape(getShape(get_entity_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7446,7 +7446,7 @@ const INITENTITYENGINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/init</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_store/engines/{entityType}/init'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7457,14 +7457,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_init_entity_engine_request).body),
-      ...getShape(getShape(_init_entity_engine_request).path),
-      ...getShape(getShape(_init_entity_engine_request).query),
+      ...getShape(getShape(init_entity_engine_request).body),
+      ...getShape(getShape(init_entity_engine_request).path),
+      ...getShape(getShape(init_entity_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_init_entity_engine_response)),
+      ...getShape(getShape(init_entity_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7477,7 +7477,7 @@ const STARTENTITYENGINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/start</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_store/engines/{entityType}/start'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7488,14 +7488,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_start_entity_engine_request).body),
-      ...getShape(getShape(_start_entity_engine_request).path),
-      ...getShape(getShape(_start_entity_engine_request).query),
+      ...getShape(getShape(start_entity_engine_request).body),
+      ...getShape(getShape(start_entity_engine_request).path),
+      ...getShape(getShape(start_entity_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_start_entity_engine_response)),
+      ...getShape(getShape(start_entity_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7508,7 +7508,7 @@ const STOPENTITYENGINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/stop</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_store/engines/{entityType}/stop'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7519,14 +7519,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_stop_entity_engine_request).body),
-      ...getShape(getShape(_stop_entity_engine_request).path),
-      ...getShape(getShape(_stop_entity_engine_request).query),
+      ...getShape(getShape(stop_entity_engine_request).body),
+      ...getShape(getShape(stop_entity_engine_request).path),
+      ...getShape(getShape(stop_entity_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_stop_entity_engine_response)),
+      ...getShape(getShape(stop_entity_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7539,7 +7539,7 @@ const APPLYENTITYENGINEDATAVIEWINDICES_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/apply_dataview_indices</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/entity_store/engines/apply_dataview_indices'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7550,14 +7550,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_apply_entity_engine_dataview_indices_request).body),
-      ...getShape(getShape(_apply_entity_engine_dataview_indices_request).path),
-      ...getShape(getShape(_apply_entity_engine_dataview_indices_request).query),
+      ...getShape(getShape(apply_entity_engine_dataview_indices_request).body),
+      ...getShape(getShape(apply_entity_engine_dataview_indices_request).path),
+      ...getShape(getShape(apply_entity_engine_dataview_indices_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_apply_entity_engine_dataview_indices_response)),
+      ...getShape(getShape(apply_entity_engine_dataview_indices_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7574,7 +7574,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a single entity in Entity Store.
 The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/entity_store/entities/{entityType}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7585,14 +7585,14 @@ The entity will be immediately deleted from the latest index.  It will remain av
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_single_entity_request).body),
-      ...getShape(getShape(_delete_single_entity_request).path),
-      ...getShape(getShape(_delete_single_entity_request).query),
+      ...getShape(getShape(delete_single_entity_request).body),
+      ...getShape(getShape(delete_single_entity_request).path),
+      ...getShape(getShape(delete_single_entity_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_single_entity_response)),
+      ...getShape(getShape(delete_single_entity_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7611,7 +7611,7 @@ If the specified entity already exists, it is updated with the provided values. 
 > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
 > Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/entity_store/entities/{entityType}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7622,14 +7622,14 @@ If the specified entity already exists, it is updated with the provided values. 
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_upsert_entity_request).body),
-      ...getShape(getShape(_upsert_entity_request).path),
-      ...getShape(getShape(_upsert_entity_request).query),
+      ...getShape(getShape(upsert_entity_request).body),
+      ...getShape(getShape(upsert_entity_request).path),
+      ...getShape(getShape(upsert_entity_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_upsert_entity_response)),
+      ...getShape(getShape(upsert_entity_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7647,7 +7647,7 @@ Update or create many entities in Entity Store.
 If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
 The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/entity_store/entities/bulk'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7658,14 +7658,14 @@ The creation is asynchronous. The time for a document to be present in the  fina
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_upsert_entities_bulk_request).body),
-      ...getShape(getShape(_upsert_entities_bulk_request).path),
-      ...getShape(getShape(_upsert_entities_bulk_request).query),
+      ...getShape(getShape(upsert_entities_bulk_request).body),
+      ...getShape(getShape(upsert_entities_bulk_request).path),
+      ...getShape(getShape(upsert_entities_bulk_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_upsert_entities_bulk_response)),
+      ...getShape(getShape(upsert_entities_bulk_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7680,7 +7680,7 @@ const LISTENTITIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 List entities records, paging, sorting and filtering as needed.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/entity_store/entities/list'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7691,14 +7691,14 @@ List entities records, paging, sorting and filtering as needed.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_list_entities_request).body),
-      ...getShape(getShape(_list_entities_request).path),
-      ...getShape(getShape(_list_entities_request).query),
+      ...getShape(getShape(list_entities_request).body),
+      ...getShape(getShape(list_entities_request).path),
+      ...getShape(getShape(list_entities_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_list_entities_response)),
+      ...getShape(getShape(list_entities_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7711,7 +7711,7 @@ const GETENTITYSTORESTATUS_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/status</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/entity_store/status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7722,14 +7722,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_entity_store_status_request).body),
-      ...getShape(getShape(_get_entity_store_status_request).path),
-      ...getShape(getShape(_get_entity_store_status_request).query),
+      ...getShape(getShape(get_entity_store_status_request).body),
+      ...getShape(getShape(get_entity_store_status_request).path),
+      ...getShape(getShape(get_entity_store_status_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_entity_store_status_response)),
+      ...getShape(getShape(get_entity_store_status_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7744,7 +7744,7 @@ const DELETEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete an exception list using the \`id\` or \`list_id\` field.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/exception_lists'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7755,14 +7755,14 @@ Delete an exception list using the \`id\` or \`list_id\` field.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_exception_list_request).body),
-      ...getShape(getShape(_delete_exception_list_request).path),
-      ...getShape(getShape(_delete_exception_list_request).query),
+      ...getShape(getShape(delete_exception_list_request).body),
+      ...getShape(getShape(delete_exception_list_request).path),
+      ...getShape(getShape(delete_exception_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_exception_list_response)),
+      ...getShape(getShape(delete_exception_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7777,7 +7777,7 @@ const READEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of an exception list using the \`id\` or \`list_id\` field.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/exception_lists'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7788,14 +7788,14 @@ Get the details of an exception list using the \`id\` or \`list_id\` field.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_exception_list_request).body),
-      ...getShape(getShape(_read_exception_list_request).path),
-      ...getShape(getShape(_read_exception_list_request).query),
+      ...getShape(getShape(read_exception_list_request).body),
+      ...getShape(getShape(read_exception_list_request).path),
+      ...getShape(getShape(read_exception_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_exception_list_response)),
+      ...getShape(getShape(read_exception_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7813,7 +7813,7 @@ An exception list groups exception items and can be associated with detection ru
 > info
 > All exception items added to the same list are evaluated using \`OR\` logic. That is, if any of the items in a list evaluate to \`true\`, the exception prevents the rule from generating an alert. Likewise, \`OR\` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the \`AND\` operator, you can define multiple clauses (\`entries\`) in a single exception item.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/exception_lists'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7824,14 +7824,14 @@ An exception list groups exception items and can be associated with detection ru
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_exception_list_request).body),
-      ...getShape(getShape(_create_exception_list_request).path),
-      ...getShape(getShape(_create_exception_list_request).query),
+      ...getShape(getShape(create_exception_list_request).body),
+      ...getShape(getShape(create_exception_list_request).path),
+      ...getShape(getShape(create_exception_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_exception_list_response)),
+      ...getShape(getShape(create_exception_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7846,7 +7846,7 @@ const UPDATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an exception list using the \`id\` or \`list_id\` field.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/exception_lists'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7857,14 +7857,14 @@ Update an exception list using the \`id\` or \`list_id\` field.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_exception_list_request).body),
-      ...getShape(getShape(_update_exception_list_request).path),
-      ...getShape(getShape(_update_exception_list_request).query),
+      ...getShape(getShape(update_exception_list_request).body),
+      ...getShape(getShape(update_exception_list_request).path),
+      ...getShape(getShape(update_exception_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_exception_list_response)),
+      ...getShape(getShape(update_exception_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7879,7 +7879,7 @@ const DUPLICATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Duplicate an existing exception list.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/exception_lists/_duplicate'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7890,14 +7890,14 @@ Duplicate an existing exception list.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_duplicate_exception_list_request).body),
-      ...getShape(getShape(_duplicate_exception_list_request).path),
-      ...getShape(getShape(_duplicate_exception_list_request).query),
+      ...getShape(getShape(duplicate_exception_list_request).body),
+      ...getShape(getShape(duplicate_exception_list_request).path),
+      ...getShape(getShape(duplicate_exception_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_duplicate_exception_list_response)),
+      ...getShape(getShape(duplicate_exception_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7912,7 +7912,7 @@ const EXPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Export an exception list and its associated items to an NDJSON file.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/exception_lists/_export'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7923,14 +7923,14 @@ Export an exception list and its associated items to an NDJSON file.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_export_exception_list_request).body),
-      ...getShape(getShape(_export_exception_list_request).path),
-      ...getShape(getShape(_export_exception_list_request).query),
+      ...getShape(getShape(export_exception_list_request).body),
+      ...getShape(getShape(export_exception_list_request).path),
+      ...getShape(getShape(export_exception_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_export_exception_list_response)),
+      ...getShape(getShape(export_exception_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7945,7 +7945,7 @@ const FINDEXCEPTIONLISTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all exception list containers.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/exception_lists/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7956,14 +7956,14 @@ Get a list of all exception list containers.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_exception_lists_request).body),
-      ...getShape(getShape(_find_exception_lists_request).path),
-      ...getShape(getShape(_find_exception_lists_request).query),
+      ...getShape(getShape(find_exception_lists_request).body),
+      ...getShape(getShape(find_exception_lists_request).path),
+      ...getShape(getShape(find_exception_lists_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_exception_lists_response)),
+      ...getShape(getShape(find_exception_lists_response)),
     }),
     error: z.any().optional(),
   }),
@@ -7978,7 +7978,7 @@ const IMPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Import an exception list and its associated items from an NDJSON file.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/exception_lists/_import'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -7989,14 +7989,14 @@ Import an exception list and its associated items from an NDJSON file.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_import_exception_list_request).body),
-      ...getShape(getShape(_import_exception_list_request).path),
-      ...getShape(getShape(_import_exception_list_request).query),
+      ...getShape(getShape(import_exception_list_request).body),
+      ...getShape(getShape(import_exception_list_request).path),
+      ...getShape(getShape(import_exception_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_import_exception_list_response)),
+      ...getShape(getShape(import_exception_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -8011,7 +8011,7 @@ const DELETEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete an exception list item using the \`id\` or \`item_id\` field.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/exception_lists/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8022,14 +8022,14 @@ Delete an exception list item using the \`id\` or \`item_id\` field.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_exception_list_item_request).body),
-      ...getShape(getShape(_delete_exception_list_item_request).path),
-      ...getShape(getShape(_delete_exception_list_item_request).query),
+      ...getShape(getShape(delete_exception_list_item_request).body),
+      ...getShape(getShape(delete_exception_list_item_request).path),
+      ...getShape(getShape(delete_exception_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_exception_list_item_response)),
+      ...getShape(getShape(delete_exception_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -8044,7 +8044,7 @@ const READEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of an exception list item using the \`id\` or \`item_id\` field.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/exception_lists/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8055,14 +8055,14 @@ Get the details of an exception list item using the \`id\` or \`item_id\` field.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_exception_list_item_request).body),
-      ...getShape(getShape(_read_exception_list_item_request).path),
-      ...getShape(getShape(_read_exception_list_item_request).query),
+      ...getShape(getShape(read_exception_list_item_request).body),
+      ...getShape(getShape(read_exception_list_item_request).path),
+      ...getShape(getShape(read_exception_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_exception_list_item_response)),
+      ...getShape(getShape(read_exception_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -8080,7 +8080,7 @@ Create an exception item and associate it with the specified exception list.
 > info
 > Before creating exception items, you must create an exception list.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/exception_lists/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8091,14 +8091,14 @@ Create an exception item and associate it with the specified exception list.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_exception_list_item_request).body),
-      ...getShape(getShape(_create_exception_list_item_request).path),
-      ...getShape(getShape(_create_exception_list_item_request).query),
+      ...getShape(getShape(create_exception_list_item_request).body),
+      ...getShape(getShape(create_exception_list_item_request).path),
+      ...getShape(getShape(create_exception_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_exception_list_item_response)),
+      ...getShape(getShape(create_exception_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -8113,7 +8113,7 @@ const UPDATEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an exception list item using the \`id\` or \`item_id\` field.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/exception_lists/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8124,14 +8124,14 @@ Update an exception list item using the \`id\` or \`item_id\` field.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_exception_list_item_request).body),
-      ...getShape(getShape(_update_exception_list_item_request).path),
-      ...getShape(getShape(_update_exception_list_item_request).query),
+      ...getShape(getShape(update_exception_list_item_request).body),
+      ...getShape(getShape(update_exception_list_item_request).path),
+      ...getShape(getShape(update_exception_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_exception_list_item_response)),
+      ...getShape(getShape(update_exception_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -8146,7 +8146,7 @@ const FINDEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all exception list items in the specified list.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/exception_lists/items/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8166,14 +8166,14 @@ Get a list of all exception list items in the specified list.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_exception_list_items_request).body),
-      ...getShape(getShape(_find_exception_list_items_request).path),
-      ...getShape(getShape(_find_exception_list_items_request).query),
+      ...getShape(getShape(find_exception_list_items_request).body),
+      ...getShape(getShape(find_exception_list_items_request).path),
+      ...getShape(getShape(find_exception_list_items_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_exception_list_items_response)),
+      ...getShape(getShape(find_exception_list_items_response)),
     }),
     error: z.any().optional(),
   }),
@@ -8188,7 +8188,7 @@ const READEXCEPTIONLISTSUMMARY_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a summary of the specified exception list.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/exception_lists/summary'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8199,14 +8199,14 @@ Get a summary of the specified exception list.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_exception_list_summary_request).body),
-      ...getShape(getShape(_read_exception_list_summary_request).path),
-      ...getShape(getShape(_read_exception_list_summary_request).query),
+      ...getShape(getShape(read_exception_list_summary_request).body),
+      ...getShape(getShape(read_exception_list_summary_request).path),
+      ...getShape(getShape(read_exception_list_summary_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_exception_list_summary_response)),
+      ...getShape(getShape(read_exception_list_summary_response)),
     }),
     error: z.any().optional(),
   }),
@@ -8224,7 +8224,7 @@ An exception list groups exception items and can be associated with detection ru
 > info
 > All exception items added to the same list are evaluated using \`OR\` logic. That is, if any of the items in a list evaluate to \`true\`, the exception prevents the rule from generating an alert. Likewise, \`OR\` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the \`AND\` operator, you can define multiple clauses (\`entries\`) in a single exception item.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/exceptions/shared'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8235,14 +8235,14 @@ An exception list groups exception items and can be associated with detection ru
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_shared_exception_list_request).body),
-      ...getShape(getShape(_create_shared_exception_list_request).path),
-      ...getShape(getShape(_create_shared_exception_list_request).query),
+      ...getShape(getShape(create_shared_exception_list_request).body),
+      ...getShape(getShape(create_shared_exception_list_request).path),
+      ...getShape(getShape(create_shared_exception_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_shared_exception_list_response)),
+      ...getShape(getShape(create_shared_exception_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -8252,7 +8252,7 @@ const GET_FEATURES_CONTRACT: InternalConnectorContract = {
   summary: `Get features`,
   description: `Get information about all Kibana features. Features are used by spaces and security to refine and secure access to Kibana.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/features'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8285,7 +8285,7 @@ const GET_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-settings-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agent_download_sources'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8318,7 +8318,7 @@ const POST_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agent_download_sources'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8351,7 +8351,7 @@ const DELETE_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorCo
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/agent_download_sources/{sourceId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8384,7 +8384,7 @@ const GET_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContr
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-settings-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agent_download_sources/{sourceId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8417,7 +8417,7 @@ const PUT_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContr
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/agent_download_sources/{sourceId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8450,7 +8450,7 @@ const GET_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agent_policies'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8494,7 +8494,7 @@ const POST_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agent_policies'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8527,7 +8527,7 @@ const POST_FLEET_AGENT_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agent_policies/_bulk_get'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8560,7 +8560,7 @@ const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8593,7 +8593,7 @@ const PUT_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8627,7 +8627,7 @@ const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_AUTO_UPGRADE_AGENTS_STATUS_CONTRACT
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get auto upgrade agent status<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.`,
-    methods: ['get'],
+    methods: ['GET'],
     patterns: ['/api/fleet/agent_policies/{agentPolicyId}/auto_upgrade_agents_status'],
     isInternal: true,
     documentation: 'URL_NOT_IMPLEMENTED',
@@ -8668,7 +8668,7 @@ const POST_FLEET_AGENT_POLICIES_AGENTPOLICYID_COPY_CONTRACT: InternalConnectorCo
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Copy an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}/copy'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8701,7 +8701,7 @@ const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_DOWNLOAD_CONTRACT: InternalConnecto
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}/download'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8734,7 +8734,7 @@ const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_FULL_CONTRACT: InternalConnectorCon
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}/full'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8767,7 +8767,7 @@ const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_OUTPUTS_CONTRACT: InternalConnector
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of outputs associated with agent policy by policy id.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-settings-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}/outputs'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8800,7 +8800,7 @@ const POST_FLEET_AGENT_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agent_policies/delete'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8833,7 +8833,7 @@ const POST_FLEET_AGENT_POLICIES_OUTPUTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of outputs associated with agent policies.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-settings-read.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agent_policies/outputs'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8864,7 +8864,7 @@ const GET_FLEET_AGENT_STATUS_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_status</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agent_status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8897,7 +8897,7 @@ const GET_FLEET_AGENT_STATUS_DATA_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agent_status/data'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8930,7 +8930,7 @@ const POST_FLEET_AGENTLESS_POLICIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create an agentless policy`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agentless_policies'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8963,7 +8963,7 @@ const DELETE_FLEET_AGENTLESS_POLICIES_POLICYID_CONTRACT: InternalConnectorContra
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete an agentless policy`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/agentless_policies/{policyId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -8996,7 +8996,7 @@ const GET_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agents'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9044,7 +9044,7 @@ const POST_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9077,7 +9077,7 @@ const DELETE_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete an agent by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/agents/{agentId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9110,7 +9110,7 @@ const GET_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get an agent by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agents/{agentId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9143,7 +9143,7 @@ const PUT_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an agent by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/agents/{agentId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9176,7 +9176,7 @@ const POST_FLEET_AGENTS_AGENTID_ACTIONS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/actions'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9209,7 +9209,7 @@ const POST_FLEET_AGENTS_AGENTID_MIGRATE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/migrate'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9242,7 +9242,7 @@ const POST_FLEET_AGENTS_AGENTID_REASSIGN_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/reassign'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9275,7 +9275,7 @@ const POST_FLEET_AGENTS_AGENTID_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorC
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/request_diagnostics'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9308,7 +9308,7 @@ const POST_FLEET_AGENTS_AGENTID_UNENROLL_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/unenroll'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9341,7 +9341,7 @@ const POST_FLEET_AGENTS_AGENTID_UPGRADE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/upgrade'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9374,7 +9374,7 @@ const GET_FLEET_AGENTS_AGENTID_UPLOADS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agents/{agentId}/uploads'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9407,7 +9407,7 @@ const GET_FLEET_AGENTS_ACTION_STATUS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agents/action_status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9440,7 +9440,7 @@ const POST_FLEET_AGENTS_ACTIONS_ACTIONID_CANCEL_CONTRACT: InternalConnectorContr
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/actions/{actionId}/cancel'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9473,7 +9473,7 @@ const GET_FLEET_AGENTS_AVAILABLE_VERSIONS_CONTRACT: InternalConnectorContract = 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agents/available_versions'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9506,7 +9506,7 @@ const POST_FLEET_AGENTS_BULK_MIGRATE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_migrate'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9539,7 +9539,7 @@ const POST_FLEET_AGENTS_BULK_REASSIGN_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_reassign'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9572,7 +9572,7 @@ const POST_FLEET_AGENTS_BULK_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorCont
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_request_diagnostics'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9605,7 +9605,7 @@ const POST_FLEET_AGENTS_BULK_UNENROLL_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_unenroll'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9638,7 +9638,7 @@ const POST_FLEET_AGENTS_BULK_UPDATE_AGENT_TAGS_CONTRACT: InternalConnectorContra
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_update_agent_tags'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9671,7 +9671,7 @@ const POST_FLEET_AGENTS_BULK_UPGRADE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_upgrade'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9704,7 +9704,7 @@ const DELETE_FLEET_AGENTS_FILES_FILEID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/agents/files/{fileId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9737,7 +9737,7 @@ const GET_FLEET_AGENTS_FILES_FILEID_FILENAME_CONTRACT: InternalConnectorContract
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agents/files/{fileId}/{fileName}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9770,7 +9770,7 @@ const GET_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agents/setup'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9803,7 +9803,7 @@ const POST_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/agents/setup'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9836,7 +9836,7 @@ const GET_FLEET_AGENTS_TAGS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/agents/tags'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9867,7 +9867,7 @@ const GET_FLEET_CHECK_PERMISSIONS_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/check-permissions</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/check-permissions'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9900,7 +9900,7 @@ const GET_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/cloud_connectors'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9933,7 +9933,7 @@ const POST_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/cloud_connectors'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9966,7 +9966,7 @@ const DELETE_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnector
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/cloud_connectors/{cloudConnectorId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -9999,7 +9999,7 @@ const GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorCon
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/cloud_connectors/{cloudConnectorId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10032,7 +10032,7 @@ const PUT_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorCon
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/cloud_connectors/{cloudConnectorId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10065,7 +10065,7 @@ const GET_FLEET_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/data_streams'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10098,7 +10098,7 @@ const GET_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all OR fleet-setup.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/enrollment_api_keys'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10131,7 +10131,7 @@ const POST_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/enrollment_api_keys'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10164,7 +10164,7 @@ const DELETE_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/enrollment_api_keys/{keyId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10197,7 +10197,7 @@ const GET_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get an enrollment API key by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all OR fleet-setup.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/enrollment_api_keys/{keyId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10230,7 +10230,7 @@ const POST_FLEET_EPM_BULK_ASSETS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/bulk_assets'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10263,7 +10263,7 @@ const GET_FLEET_EPM_CATEGORIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/categories'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10296,7 +10296,7 @@ const POST_FLEET_EPM_CUSTOM_INTEGRATIONS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/custom_integrations'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10329,7 +10329,7 @@ const PUT_FLEET_EPM_CUSTOM_INTEGRATIONS_PKGNAME_CONTRACT: InternalConnectorContr
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-all AND integrations-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/epm/custom_integrations/{pkgName}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10362,7 +10362,7 @@ const GET_FLEET_EPM_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/data_streams'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10395,7 +10395,7 @@ const GET_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/packages'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10428,7 +10428,7 @@ const POST_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/packages'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10461,7 +10461,7 @@ const POST_FLEET_EPM_PACKAGES_BULK_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/_bulk'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10494,7 +10494,7 @@ const POST_FLEET_EPM_PACKAGES_BULK_ROLLBACK_CONTRACT: InternalConnectorContract 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/_bulk_rollback'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10527,7 +10527,7 @@ const GET_FLEET_EPM_PACKAGES_BULK_ROLLBACK_TASKID_CONTRACT: InternalConnectorCon
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/_bulk_rollback/{taskId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10560,7 +10560,7 @@ const POST_FLEET_EPM_PACKAGES_BULK_UNINSTALL_CONTRACT: InternalConnectorContract
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/_bulk_uninstall'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10593,7 +10593,7 @@ const GET_FLEET_EPM_PACKAGES_BULK_UNINSTALL_TASKID_CONTRACT: InternalConnectorCo
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/_bulk_uninstall/{taskId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10626,7 +10626,7 @@ const POST_FLEET_EPM_PACKAGES_BULK_UPGRADE_CONTRACT: InternalConnectorContract =
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/_bulk_upgrade'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10659,7 +10659,7 @@ const GET_FLEET_EPM_PACKAGES_BULK_UPGRADE_TASKID_CONTRACT: InternalConnectorCont
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/_bulk_upgrade/{taskId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10692,7 +10692,7 @@ const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorCo
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10723,7 +10723,7 @@ const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContr
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10756,7 +10756,7 @@ const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorCont
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10789,7 +10789,7 @@ const PUT_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContr
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10822,7 +10822,7 @@ const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_FILEPATH_CONTRACT: InternalConne
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -10856,7 +10856,7 @@ const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_DATASTREAM_ASSETS_CONTRACT: I
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-    methods: ['delete'],
+    methods: ['DELETE'],
     patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/datastream_assets'],
     isInternal: true,
     documentation: 'URL_NOT_IMPLEMENTED',
@@ -10898,7 +10898,7 @@ const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: Inter
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-    methods: ['delete'],
+    methods: ['DELETE'],
     patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets'],
     isInternal: true,
     documentation: 'URL_NOT_IMPLEMENTED',
@@ -10938,7 +10938,7 @@ const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: Interna
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-    methods: ['post'],
+    methods: ['POST'],
     patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets'],
     isInternal: true,
     documentation: 'URL_NOT_IMPLEMENTED',
@@ -10977,7 +10977,7 @@ const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_RULE_ASSETS_CONTRACT: InternalC
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/rule_assets'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11009,7 +11009,7 @@ const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_TRANSFORMS_AUTHORIZE_CONTRACT: 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-    methods: ['post'],
+    methods: ['POST'],
     patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize'],
     isInternal: true,
     documentation: 'URL_NOT_IMPLEMENTED',
@@ -11050,7 +11050,7 @@ const POST_FLEET_EPM_PACKAGES_PKGNAME_ROLLBACK_CONTRACT: InternalConnectorContra
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/rollback'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11083,7 +11083,7 @@ const GET_FLEET_EPM_PACKAGES_PKGNAME_STATS_CONTRACT: InternalConnectorContract =
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/stats'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11116,7 +11116,7 @@ const GET_FLEET_EPM_PACKAGES_INSTALLED_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/installed'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11156,7 +11156,7 @@ const GET_FLEET_EPM_PACKAGES_LIMITED_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/limited'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11189,7 +11189,7 @@ const GET_FLEET_EPM_TEMPLATES_PKGNAME_PKGVERSION_INPUTS_CONTRACT: InternalConnec
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11222,7 +11222,7 @@ const GET_FLEET_EPM_VERIFICATION_KEY_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/epm/verification_key_id'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11255,7 +11255,7 @@ const GET_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all OR fleet-settings-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/fleet_server_hosts'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11288,7 +11288,7 @@ const POST_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/fleet_server_hosts'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11321,7 +11321,7 @@ const DELETE_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/fleet_server_hosts/{itemId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11354,7 +11354,7 @@ const GET_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/fleet_server_hosts/{itemId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11387,7 +11387,7 @@ const PUT_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/fleet_server_hosts/{itemId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11420,7 +11420,7 @@ const POST_FLEET_HEALTH_CHECK_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/health_check'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11453,7 +11453,7 @@ const GET_FLEET_KUBERNETES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/kubernetes'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11486,7 +11486,7 @@ const GET_FLEET_KUBERNETES_DOWNLOAD_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/kubernetes/download'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11519,7 +11519,7 @@ const POST_FLEET_LOGSTASH_API_KEYS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/logstash_api_keys'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11552,7 +11552,7 @@ const POST_FLEET_MESSAGE_SIGNING_SERVICE_ROTATE_KEY_PAIR_CONTRACT: InternalConne
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/message_signing_service/rotate_key_pair'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11585,7 +11585,7 @@ const GET_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-read OR fleet-agent-policies-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/outputs'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11618,7 +11618,7 @@ const POST_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/outputs'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11651,7 +11651,7 @@ const DELETE_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/outputs/{outputId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11684,7 +11684,7 @@ const GET_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read OR fleet-agent-policies-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/outputs/{outputId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11717,7 +11717,7 @@ const PUT_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all OR fleet-agent-policies-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/outputs/{outputId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11750,7 +11750,7 @@ const GET_FLEET_OUTPUTS_OUTPUTID_HEALTH_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/outputs/{outputId}/health'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11781,7 +11781,7 @@ const GET_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/package_policies'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11821,7 +11821,7 @@ const POST_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/package_policies'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11852,7 +11852,7 @@ const POST_FLEET_PACKAGE_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract =
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/_bulk_get</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/package_policies/_bulk_get'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11885,7 +11885,7 @@ const DELETE_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorC
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a package policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/package_policies/{packagePolicyId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11918,7 +11918,7 @@ const GET_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorCont
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a package policy by ID.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/package_policies/{packagePolicyId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11951,7 +11951,7 @@ const PUT_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorCont
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update a package policy by ID.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/package_policies/{packagePolicyId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -11984,7 +11984,7 @@ const POST_FLEET_PACKAGE_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/package_policies/delete'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12017,7 +12017,7 @@ const POST_FLEET_PACKAGE_POLICIES_UPGRADE_CONTRACT: InternalConnectorContract = 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Upgrade a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/package_policies/upgrade'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12050,7 +12050,7 @@ const POST_FLEET_PACKAGE_POLICIES_UPGRADE_DRYRUN_CONTRACT: InternalConnectorCont
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agent-policies-read AND integrations-read.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/package_policies/upgrade/dryrun'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12083,7 +12083,7 @@ const GET_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/proxies'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12116,7 +12116,7 @@ const POST_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/proxies'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12149,7 +12149,7 @@ const DELETE_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/fleet/proxies/{itemId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12182,7 +12182,7 @@ const GET_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/proxies/{itemId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12215,7 +12215,7 @@ const PUT_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update a proxy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/proxies/{itemId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12249,7 +12249,7 @@ const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_OUTPUTID_REMOTE_STATUS_CONTRACT: Inte
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-read AND integrations-read.`,
-    methods: ['get'],
+    methods: ['GET'],
     patterns: ['/api/fleet/remote_synced_integrations/{outputId}/remote_status'],
     isInternal: true,
     documentation: 'URL_NOT_IMPLEMENTED',
@@ -12288,7 +12288,7 @@ const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_STATUS_CONTRACT: InternalConnectorCon
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-read AND integrations-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/remote_synced_integrations/status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12321,7 +12321,7 @@ const POST_FLEET_SERVICE_TOKENS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/service_tokens'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12354,7 +12354,7 @@ const GET_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-read.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/settings'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12387,7 +12387,7 @@ const PUT_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/settings'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12420,7 +12420,7 @@ const POST_FLEET_SETUP_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/fleet/setup'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12451,7 +12451,7 @@ const GET_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/space_settings</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/space_settings'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12484,7 +12484,7 @@ const PUT_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: fleet-settings-all.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/fleet/space_settings'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12517,7 +12517,7 @@ const GET_FLEET_UNINSTALL_TOKENS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/uninstall_tokens'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12550,7 +12550,7 @@ const GET_FLEET_UNINSTALL_TOKENS_UNINSTALLTOKENID_CONTRACT: InternalConnectorCon
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/fleet/uninstall_tokens/{uninstallTokenId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12586,7 +12586,7 @@ Delete a value list using the list ID.
 > info
 > When you delete a list, all of its list items are also deleted.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/lists'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12597,14 +12597,14 @@ Delete a value list using the list ID.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_list_request).body),
-      ...getShape(getShape(_delete_list_request).path),
-      ...getShape(getShape(_delete_list_request).query),
+      ...getShape(getShape(delete_list_request).body),
+      ...getShape(getShape(delete_list_request).path),
+      ...getShape(getShape(delete_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_list_response)),
+      ...getShape(getShape(delete_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12619,7 +12619,7 @@ const READLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of a value list using the list ID.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/lists'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12630,14 +12630,14 @@ Get the details of a value list using the list ID.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_list_request).body),
-      ...getShape(getShape(_read_list_request).path),
-      ...getShape(getShape(_read_list_request).query),
+      ...getShape(getShape(read_list_request).body),
+      ...getShape(getShape(read_list_request).path),
+      ...getShape(getShape(read_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_list_response)),
+      ...getShape(getShape(read_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12652,7 +12652,7 @@ const PATCHLIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update specific fields of an existing list using the list \`id\`.`,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/lists'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12663,14 +12663,14 @@ Update specific fields of an existing list using the list \`id\`.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_patch_list_request).body),
-      ...getShape(getShape(_patch_list_request).path),
-      ...getShape(getShape(_patch_list_request).query),
+      ...getShape(getShape(patch_list_request).body),
+      ...getShape(getShape(patch_list_request).path),
+      ...getShape(getShape(patch_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_patch_list_response)),
+      ...getShape(getShape(patch_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12685,7 +12685,7 @@ const CREATELIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a new value list.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/lists'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12696,14 +12696,14 @@ Create a new value list.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_list_request).body),
-      ...getShape(getShape(_create_list_request).path),
-      ...getShape(getShape(_create_list_request).query),
+      ...getShape(getShape(create_list_request).body),
+      ...getShape(getShape(create_list_request).path),
+      ...getShape(getShape(create_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_list_response)),
+      ...getShape(getShape(create_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12721,7 +12721,7 @@ Update a value list using the list \`id\`. The original list is replaced, and al
 > info
 > You cannot modify the \`id\` value.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/lists'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12732,14 +12732,14 @@ Update a value list using the list \`id\`. The original list is replaced, and al
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_list_request).body),
-      ...getShape(getShape(_update_list_request).path),
-      ...getShape(getShape(_update_list_request).query),
+      ...getShape(getShape(update_list_request).body),
+      ...getShape(getShape(update_list_request).path),
+      ...getShape(getShape(update_list_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_list_response)),
+      ...getShape(getShape(update_list_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12754,7 +12754,7 @@ const FINDLISTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/lists/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12765,14 +12765,14 @@ Get a paginated subset of value lists. By default, the first page is returned, w
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_lists_request).body),
-      ...getShape(getShape(_find_lists_request).path),
-      ...getShape(getShape(_find_lists_request).query),
+      ...getShape(getShape(find_lists_request).body),
+      ...getShape(getShape(find_lists_request).path),
+      ...getShape(getShape(find_lists_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_lists_response)),
+      ...getShape(getShape(find_lists_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12787,7 +12787,7 @@ const DELETELISTINDEX_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete the \`.lists\` and \`.items\` data streams.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/lists/index'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12798,14 +12798,14 @@ Delete the \`.lists\` and \`.items\` data streams.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_list_index_request).body),
-      ...getShape(getShape(_delete_list_index_request).path),
-      ...getShape(getShape(_delete_list_index_request).query),
+      ...getShape(getShape(delete_list_index_request).body),
+      ...getShape(getShape(delete_list_index_request).path),
+      ...getShape(getShape(delete_list_index_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_list_index_response)),
+      ...getShape(getShape(delete_list_index_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12820,7 +12820,7 @@ const READLISTINDEX_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Verify that \`.lists\` and \`.items\` data streams exist.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/lists/index'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12831,14 +12831,14 @@ Verify that \`.lists\` and \`.items\` data streams exist.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_list_index_request).body),
-      ...getShape(getShape(_read_list_index_request).path),
-      ...getShape(getShape(_read_list_index_request).query),
+      ...getShape(getShape(read_list_index_request).body),
+      ...getShape(getShape(read_list_index_request).path),
+      ...getShape(getShape(read_list_index_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_list_index_response)),
+      ...getShape(getShape(read_list_index_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12853,7 +12853,7 @@ const CREATELISTINDEX_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create \`.lists\` and \`.items\` data streams in the relevant space.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/lists/index'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12864,14 +12864,14 @@ Create \`.lists\` and \`.items\` data streams in the relevant space.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_list_index_request).body),
-      ...getShape(getShape(_create_list_index_request).path),
-      ...getShape(getShape(_create_list_index_request).query),
+      ...getShape(getShape(create_list_index_request).body),
+      ...getShape(getShape(create_list_index_request).path),
+      ...getShape(getShape(create_list_index_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_list_index_response)),
+      ...getShape(getShape(create_list_index_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12886,7 +12886,7 @@ const DELETELISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a value list item using its \`id\`, or its \`list_id\` and \`value\` fields.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/lists/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12897,14 +12897,14 @@ Delete a value list item using its \`id\`, or its \`list_id\` and \`value\` fiel
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_list_item_request).body),
-      ...getShape(getShape(_delete_list_item_request).path),
-      ...getShape(getShape(_delete_list_item_request).query),
+      ...getShape(getShape(delete_list_item_request).body),
+      ...getShape(getShape(delete_list_item_request).path),
+      ...getShape(getShape(delete_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_list_item_response)),
+      ...getShape(getShape(delete_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12919,7 +12919,7 @@ const READLISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of a value list item.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/lists/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12930,14 +12930,14 @@ Get the details of a value list item.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_list_item_request).body),
-      ...getShape(getShape(_read_list_item_request).path),
-      ...getShape(getShape(_read_list_item_request).query),
+      ...getShape(getShape(read_list_item_request).body),
+      ...getShape(getShape(read_list_item_request).path),
+      ...getShape(getShape(read_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_list_item_response)),
+      ...getShape(getShape(read_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12952,7 +12952,7 @@ const PATCHLISTITEM_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update specific fields of an existing value list item using the item \`id\`.`,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/lists/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -12963,14 +12963,14 @@ Update specific fields of an existing value list item using the item \`id\`.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_patch_list_item_request).body),
-      ...getShape(getShape(_patch_list_item_request).path),
-      ...getShape(getShape(_patch_list_item_request).query),
+      ...getShape(getShape(patch_list_item_request).body),
+      ...getShape(getShape(patch_list_item_request).path),
+      ...getShape(getShape(patch_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_patch_list_item_response)),
+      ...getShape(getShape(patch_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -12990,7 +12990,7 @@ All value list items in the same list must be the same type. For example, each l
 > info
 > Before creating a list item, you must create a list.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/lists/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13001,14 +13001,14 @@ All value list items in the same list must be the same type. For example, each l
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_list_item_request).body),
-      ...getShape(getShape(_create_list_item_request).path),
-      ...getShape(getShape(_create_list_item_request).query),
+      ...getShape(getShape(create_list_item_request).body),
+      ...getShape(getShape(create_list_item_request).path),
+      ...getShape(getShape(create_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_list_item_response)),
+      ...getShape(getShape(create_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13026,7 +13026,7 @@ Update a value list item using the list item ID. The original list item is repla
 > info
 > You cannot modify the \`id\` value.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/lists/items'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13037,14 +13037,14 @@ Update a value list item using the list item ID. The original list item is repla
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_list_item_request).body),
-      ...getShape(getShape(_update_list_item_request).path),
-      ...getShape(getShape(_update_list_item_request).query),
+      ...getShape(getShape(update_list_item_request).body),
+      ...getShape(getShape(update_list_item_request).path),
+      ...getShape(getShape(update_list_item_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_list_item_response)),
+      ...getShape(getShape(update_list_item_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13059,7 +13059,7 @@ const EXPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Export list item values from the specified value list.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/lists/items/_export'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13070,14 +13070,14 @@ Export list item values from the specified value list.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_export_list_items_request).body),
-      ...getShape(getShape(_export_list_items_request).path),
-      ...getShape(getShape(_export_list_items_request).query),
+      ...getShape(getShape(export_list_items_request).body),
+      ...getShape(getShape(export_list_items_request).path),
+      ...getShape(getShape(export_list_items_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_export_list_items_response)),
+      ...getShape(getShape(export_list_items_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13092,7 +13092,7 @@ const FINDLISTITEMS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get all value list items in the specified list.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/lists/items/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13103,14 +13103,14 @@ Get all value list items in the specified list.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_list_items_request).body),
-      ...getShape(getShape(_find_list_items_request).path),
-      ...getShape(getShape(_find_list_items_request).query),
+      ...getShape(getShape(find_list_items_request).body),
+      ...getShape(getShape(find_list_items_request).path),
+      ...getShape(getShape(find_list_items_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_list_items_response)),
+      ...getShape(getShape(find_list_items_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13128,7 +13128,7 @@ Import value list items from a TXT or CSV file. The maximum file size is 9 milli
 
 You can import items to a new or existing list.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/lists/items/_import'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13139,14 +13139,14 @@ You can import items to a new or existing list.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_import_list_items_request).body),
-      ...getShape(getShape(_import_list_items_request).path),
-      ...getShape(getShape(_import_list_items_request).query),
+      ...getShape(getShape(import_list_items_request).body),
+      ...getShape(getShape(import_list_items_request).path),
+      ...getShape(getShape(import_list_items_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_import_list_items_response)),
+      ...getShape(getShape(import_list_items_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13159,7 +13159,7 @@ const READLISTPRIVILEGES_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/privileges</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/lists/privileges'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13170,14 +13170,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_list_privileges_request).body),
-      ...getShape(getShape(_read_list_privileges_request).path),
-      ...getShape(getShape(_read_list_privileges_request).query),
+      ...getShape(getShape(read_list_privileges_request).body),
+      ...getShape(getShape(read_list_privileges_request).path),
+      ...getShape(getShape(read_list_privileges_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_list_privileges_response)),
+      ...getShape(getShape(read_list_privileges_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13188,7 +13188,7 @@ const DELETE_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   description: `Delete a centrally-managed Logstash pipeline.
 If your Elasticsearch cluster is protected with basic authentication, you must have either the \`logstash_admin\` built-in role or a customized Logstash writer role.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/logstash/pipeline/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13217,7 +13217,7 @@ const GET_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   description: `Get information for a centrally-managed Logstash pipeline.
 To use this API, you must have either the \`logstash_admin\` built-in role or a customized Logstash reader role.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/logstash/pipeline/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13246,7 +13246,7 @@ const PUT_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   description: `Create a centrally-managed Logstash pipeline or update a pipeline.
 To use this API, you must have either the \`logstash_admin\` built-in role or a customized Logstash writer role.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/logstash/pipeline/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13280,7 +13280,7 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
 
 The \`username\` property appears in the response when security is enabled and depends on when the pipeline was created or last updated.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/logstash/pipelines'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13313,7 +13313,7 @@ const POST_MAINTENANCE_WINDOW_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: write-maintenance-window.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/maintenance_window'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13346,7 +13346,7 @@ const GET_MAINTENANCE_WINDOW_FIND_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: read-maintenance-window.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/maintenance_window/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13379,7 +13379,7 @@ const DELETE_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: write-maintenance-window.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/maintenance_window/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13412,7 +13412,7 @@ const GET_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: read-maintenance-window.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/maintenance_window/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13445,7 +13445,7 @@ const PATCH_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: write-maintenance-window.`,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/maintenance_window/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13478,7 +13478,7 @@ const POST_MAINTENANCE_WINDOW_ID_ARCHIVE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: write-maintenance-window.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/maintenance_window/{id}/_archive'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13511,7 +13511,7 @@ const POST_MAINTENANCE_WINDOW_ID_UNARCHIVE_CONTRACT: InternalConnectorContract =
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 [Required authorization] Route required privileges: write-maintenance-window.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/maintenance_window/{id}/_unarchive'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13545,7 +13545,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space. You must have \`all\` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/ml/saved_objects/sync'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13578,7 +13578,7 @@ const DELETENOTE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a note from a Timeline using the note ID.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/note'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13589,14 +13589,14 @@ Delete a note from a Timeline using the note ID.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_note_request).body),
-      ...getShape(getShape(_delete_note_request).path),
-      ...getShape(getShape(_delete_note_request).query),
+      ...getShape(getShape(delete_note_request).body),
+      ...getShape(getShape(delete_note_request).path),
+      ...getShape(getShape(delete_note_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_note_response)),
+      ...getShape(getShape(delete_note_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13611,7 +13611,7 @@ const GETNOTES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get all notes for a given document.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/note'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13633,14 +13633,14 @@ Get all notes for a given document.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_notes_request).body),
-      ...getShape(getShape(_get_notes_request).path),
-      ...getShape(getShape(_get_notes_request).query),
+      ...getShape(getShape(get_notes_request).body),
+      ...getShape(getShape(get_notes_request).path),
+      ...getShape(getShape(get_notes_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_notes_response)),
+      ...getShape(getShape(get_notes_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13655,7 +13655,7 @@ const PERSISTNOTEROUTE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Add a note to a Timeline or update an existing note.`,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/note'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13666,14 +13666,14 @@ Add a note to a Timeline or update an existing note.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_persist_note_route_request).body),
-      ...getShape(getShape(_persist_note_route_request).path),
-      ...getShape(getShape(_persist_note_route_request).query),
+      ...getShape(getShape(persist_note_route_request).body),
+      ...getShape(getShape(persist_note_route_request).path),
+      ...getShape(getShape(persist_note_route_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_persist_note_route_response)),
+      ...getShape(getShape(persist_note_route_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13695,7 +13695,7 @@ It also handles any tool requests within the conversation, which may trigger mul
 
 This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/observability_ai_assistant/chat/complete'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13728,7 +13728,7 @@ const OSQUERYFINDLIVEQUERIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all live queries.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/osquery/live_queries'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13739,14 +13739,14 @@ Get a list of all live queries.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_find_live_queries_request).body),
-      ...getShape(getShape(_osquery_find_live_queries_request).path),
-      ...getShape(getShape(_osquery_find_live_queries_request).query),
+      ...getShape(getShape(osquery_find_live_queries_request).body),
+      ...getShape(getShape(osquery_find_live_queries_request).path),
+      ...getShape(getShape(osquery_find_live_queries_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_find_live_queries_response)),
+      ...getShape(getShape(osquery_find_live_queries_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13761,7 +13761,7 @@ const OSQUERYCREATELIVEQUERY_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create and run a live query.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/osquery/live_queries'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13772,14 +13772,14 @@ Create and run a live query.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_create_live_query_request).body),
-      ...getShape(getShape(_osquery_create_live_query_request).path),
-      ...getShape(getShape(_osquery_create_live_query_request).query),
+      ...getShape(getShape(osquery_create_live_query_request).body),
+      ...getShape(getShape(osquery_create_live_query_request).path),
+      ...getShape(getShape(osquery_create_live_query_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_create_live_query_response)),
+      ...getShape(getShape(osquery_create_live_query_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13794,7 +13794,7 @@ const OSQUERYGETLIVEQUERYDETAILS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of a live query using the query ID.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/osquery/live_queries/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13805,14 +13805,14 @@ Get the details of a live query using the query ID.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_get_live_query_details_request).body),
-      ...getShape(getShape(_osquery_get_live_query_details_request).path),
-      ...getShape(getShape(_osquery_get_live_query_details_request).query),
+      ...getShape(getShape(osquery_get_live_query_details_request).body),
+      ...getShape(getShape(osquery_get_live_query_details_request).path),
+      ...getShape(getShape(osquery_get_live_query_details_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_get_live_query_details_response)),
+      ...getShape(getShape(osquery_get_live_query_details_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13827,7 +13827,7 @@ const OSQUERYGETLIVEQUERYRESULTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the results of a live query using the query action ID.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/osquery/live_queries/{id}/results/{actionId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13838,14 +13838,14 @@ Get the results of a live query using the query action ID.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_get_live_query_results_request).body),
-      ...getShape(getShape(_osquery_get_live_query_results_request).path),
-      ...getShape(getShape(_osquery_get_live_query_results_request).query),
+      ...getShape(getShape(osquery_get_live_query_results_request).body),
+      ...getShape(getShape(osquery_get_live_query_results_request).path),
+      ...getShape(getShape(osquery_get_live_query_results_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_get_live_query_results_response)),
+      ...getShape(getShape(osquery_get_live_query_results_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13860,7 +13860,7 @@ const OSQUERYFINDPACKS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all query packs.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/osquery/packs'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13871,14 +13871,14 @@ Get a list of all query packs.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_find_packs_request).body),
-      ...getShape(getShape(_osquery_find_packs_request).path),
-      ...getShape(getShape(_osquery_find_packs_request).query),
+      ...getShape(getShape(osquery_find_packs_request).body),
+      ...getShape(getShape(osquery_find_packs_request).path),
+      ...getShape(getShape(osquery_find_packs_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_find_packs_response)),
+      ...getShape(getShape(osquery_find_packs_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13893,7 +13893,7 @@ const OSQUERYCREATEPACKS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a query pack.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/osquery/packs'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13904,14 +13904,14 @@ Create a query pack.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_create_packs_request).body),
-      ...getShape(getShape(_osquery_create_packs_request).path),
-      ...getShape(getShape(_osquery_create_packs_request).query),
+      ...getShape(getShape(osquery_create_packs_request).body),
+      ...getShape(getShape(osquery_create_packs_request).path),
+      ...getShape(getShape(osquery_create_packs_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_create_packs_response)),
+      ...getShape(getShape(osquery_create_packs_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13926,7 +13926,7 @@ const OSQUERYDELETEPACKS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a query pack using the pack ID.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/osquery/packs/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13937,14 +13937,14 @@ Delete a query pack using the pack ID.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_delete_packs_request).body),
-      ...getShape(getShape(_osquery_delete_packs_request).path),
-      ...getShape(getShape(_osquery_delete_packs_request).query),
+      ...getShape(getShape(osquery_delete_packs_request).body),
+      ...getShape(getShape(osquery_delete_packs_request).path),
+      ...getShape(getShape(osquery_delete_packs_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_delete_packs_response)),
+      ...getShape(getShape(osquery_delete_packs_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13959,7 +13959,7 @@ const OSQUERYGETPACKSDETAILS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of a query pack using the pack ID.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/osquery/packs/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -13970,14 +13970,14 @@ Get the details of a query pack using the pack ID.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_get_packs_details_request).body),
-      ...getShape(getShape(_osquery_get_packs_details_request).path),
-      ...getShape(getShape(_osquery_get_packs_details_request).query),
+      ...getShape(getShape(osquery_get_packs_details_request).body),
+      ...getShape(getShape(osquery_get_packs_details_request).path),
+      ...getShape(getShape(osquery_get_packs_details_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_get_packs_details_response)),
+      ...getShape(getShape(osquery_get_packs_details_response)),
     }),
     error: z.any().optional(),
   }),
@@ -13995,7 +13995,7 @@ Update a query pack using the pack ID.
 > info
 > You cannot update a prebuilt pack.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/osquery/packs/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14006,14 +14006,14 @@ Update a query pack using the pack ID.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_update_packs_request).body),
-      ...getShape(getShape(_osquery_update_packs_request).path),
-      ...getShape(getShape(_osquery_update_packs_request).query),
+      ...getShape(getShape(osquery_update_packs_request).body),
+      ...getShape(getShape(osquery_update_packs_request).path),
+      ...getShape(getShape(osquery_update_packs_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_update_packs_response)),
+      ...getShape(getShape(osquery_update_packs_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14028,7 +14028,7 @@ const OSQUERYFINDSAVEDQUERIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all saved queries.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/osquery/saved_queries'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14039,14 +14039,14 @@ Get a list of all saved queries.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_find_saved_queries_request).body),
-      ...getShape(getShape(_osquery_find_saved_queries_request).path),
-      ...getShape(getShape(_osquery_find_saved_queries_request).query),
+      ...getShape(getShape(osquery_find_saved_queries_request).body),
+      ...getShape(getShape(osquery_find_saved_queries_request).path),
+      ...getShape(getShape(osquery_find_saved_queries_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_find_saved_queries_response)),
+      ...getShape(getShape(osquery_find_saved_queries_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14061,7 +14061,7 @@ const OSQUERYCREATESAVEDQUERY_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create and run a saved query.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/osquery/saved_queries'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14072,14 +14072,14 @@ Create and run a saved query.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_create_saved_query_request).body),
-      ...getShape(getShape(_osquery_create_saved_query_request).path),
-      ...getShape(getShape(_osquery_create_saved_query_request).query),
+      ...getShape(getShape(osquery_create_saved_query_request).body),
+      ...getShape(getShape(osquery_create_saved_query_request).path),
+      ...getShape(getShape(osquery_create_saved_query_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_create_saved_query_response)),
+      ...getShape(getShape(osquery_create_saved_query_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14094,7 +14094,7 @@ const OSQUERYDELETESAVEDQUERY_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a saved query using the query ID.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/osquery/saved_queries/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14105,14 +14105,14 @@ Delete a saved query using the query ID.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_delete_saved_query_request).body),
-      ...getShape(getShape(_osquery_delete_saved_query_request).path),
-      ...getShape(getShape(_osquery_delete_saved_query_request).query),
+      ...getShape(getShape(osquery_delete_saved_query_request).body),
+      ...getShape(getShape(osquery_delete_saved_query_request).path),
+      ...getShape(getShape(osquery_delete_saved_query_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_delete_saved_query_response)),
+      ...getShape(getShape(osquery_delete_saved_query_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14127,7 +14127,7 @@ const OSQUERYGETSAVEDQUERYDETAILS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of a saved query using the query ID.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/osquery/saved_queries/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14138,14 +14138,14 @@ Get the details of a saved query using the query ID.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_get_saved_query_details_request).body),
-      ...getShape(getShape(_osquery_get_saved_query_details_request).path),
-      ...getShape(getShape(_osquery_get_saved_query_details_request).query),
+      ...getShape(getShape(osquery_get_saved_query_details_request).body),
+      ...getShape(getShape(osquery_get_saved_query_details_request).path),
+      ...getShape(getShape(osquery_get_saved_query_details_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_get_saved_query_details_response)),
+      ...getShape(getShape(osquery_get_saved_query_details_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14163,7 +14163,7 @@ Update a saved query using the query ID.
 > info
 > You cannot update a prebuilt saved query.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/osquery/saved_queries/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14174,14 +14174,14 @@ Update a saved query using the query ID.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_osquery_update_saved_query_request).body),
-      ...getShape(getShape(_osquery_update_saved_query_request).path),
-      ...getShape(getShape(_osquery_update_saved_query_request).query),
+      ...getShape(getShape(osquery_update_saved_query_request).body),
+      ...getShape(getShape(osquery_update_saved_query_request).path),
+      ...getShape(getShape(osquery_update_saved_query_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_osquery_update_saved_query_response)),
+      ...getShape(getShape(osquery_update_saved_query_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14196,7 +14196,7 @@ const PERSISTPINNEDEVENTROUTE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Pin/unpin an event to/from an existing Timeline.`,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/pinned_event'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14207,14 +14207,14 @@ Pin/unpin an event to/from an existing Timeline.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_persist_pinned_event_route_request).body),
-      ...getShape(getShape(_persist_pinned_event_route_request).path),
-      ...getShape(getShape(_persist_pinned_event_route_request).query),
+      ...getShape(getShape(persist_pinned_event_route_request).body),
+      ...getShape(getShape(persist_pinned_event_route_request).path),
+      ...getShape(getShape(persist_pinned_event_route_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_persist_pinned_event_route_response)),
+      ...getShape(getShape(persist_pinned_event_route_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14229,7 +14229,7 @@ const CLEANUPRISKENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Cleaning up the the Risk Engine by removing the indices, mapping and transforms`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/risk_score/engine/dangerously_delete_data'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14240,14 +14240,14 @@ Cleaning up the the Risk Engine by removing the indices, mapping and transforms`
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_clean_up_risk_engine_request).body),
-      ...getShape(getShape(_clean_up_risk_engine_request).path),
-      ...getShape(getShape(_clean_up_risk_engine_request).query),
+      ...getShape(getShape(clean_up_risk_engine_request).body),
+      ...getShape(getShape(clean_up_risk_engine_request).path),
+      ...getShape(getShape(clean_up_risk_engine_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_clean_up_risk_engine_response)),
+      ...getShape(getShape(clean_up_risk_engine_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14262,7 +14262,7 @@ const CONFIGURERISKENGINESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Configuring the Risk Engine Saved Object`,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/risk_score/engine/saved_object/configure'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14273,14 +14273,14 @@ Configuring the Risk Engine Saved Object`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_configure_risk_engine_saved_object_request).body),
-      ...getShape(getShape(_configure_risk_engine_saved_object_request).path),
-      ...getShape(getShape(_configure_risk_engine_saved_object_request).query),
+      ...getShape(getShape(configure_risk_engine_saved_object_request).body),
+      ...getShape(getShape(configure_risk_engine_saved_object_request).path),
+      ...getShape(getShape(configure_risk_engine_saved_object_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_configure_risk_engine_saved_object_response)),
+      ...getShape(getShape(configure_risk_engine_saved_object_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14295,7 +14295,7 @@ const SCHEDULERISKENGINENOW_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/risk_score/engine/schedule_now'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14306,14 +14306,14 @@ Schedule the risk scoring engine to run as soon as possible. You can use this to
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_schedule_risk_engine_now_request).body),
-      ...getShape(getShape(_schedule_risk_engine_now_request).path),
-      ...getShape(getShape(_schedule_risk_engine_now_request).query),
+      ...getShape(getShape(schedule_risk_engine_now_request).body),
+      ...getShape(getShape(schedule_risk_engine_now_request).path),
+      ...getShape(getShape(schedule_risk_engine_now_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_schedule_risk_engine_now_response)),
+      ...getShape(getShape(schedule_risk_engine_now_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14326,7 +14326,7 @@ const BULKCREATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_create</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_create'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14360,7 +14360,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 WARNING: When you delete a saved object, it cannot be recovered.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_delete'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14391,7 +14391,7 @@ const BULKGETSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_get</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_get'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14425,7 +14425,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist. Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_resolve'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14458,7 +14458,7 @@ const BULKUPDATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update the attributes for multiple Kibana saved objects.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_update'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14495,7 +14495,7 @@ Retrieve sets of saved objects that you want to import into Kibana. You must inc
 Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
 NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the number of saved objects which may be exported.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/_export'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14528,7 +14528,7 @@ const FINDSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Retrieve a paginated set of Kibana saved objects.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/saved_objects/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14578,7 +14578,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.
 
 Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/_import'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14616,7 +14616,7 @@ To resolve errors from the Import objects API, you can:
 * Overwrite specific saved objects
 * Change references to different saved objects
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/_resolve_import_errors'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14649,7 +14649,7 @@ const CREATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a Kibana saved object with a randomly generated identifier.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/{type}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14682,7 +14682,7 @@ const GETSAVEDOBJECT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Retrieve a single Kibana saved object by identifier.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/saved_objects/{type}/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14715,7 +14715,7 @@ const CREATESAVEDOBJECTID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/saved_objects/{type}/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14748,7 +14748,7 @@ const UPDATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update the attributes for Kibana saved objects.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/saved_objects/{type}/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14782,7 +14782,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists. Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/saved_objects/resolve/{type}/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14815,7 +14815,7 @@ const PERFORMANONYMIZATIONFIELDSBULKACTION_CONTRACT: InternalConnectorContract =
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Apply a bulk action to multiple anonymization fields. The bulk action is applied to all anonymization fields that match the filter or to the list of anonymization fields by their IDs.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security_ai_assistant/anonymization_fields/_bulk_action'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14826,14 +14826,14 @@ Apply a bulk action to multiple anonymization fields. The bulk action is applied
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_perform_anonymization_fields_bulk_action_request).body),
-      ...getShape(getShape(_perform_anonymization_fields_bulk_action_request).path),
-      ...getShape(getShape(_perform_anonymization_fields_bulk_action_request).query),
+      ...getShape(getShape(perform_anonymization_fields_bulk_action_request).body),
+      ...getShape(getShape(perform_anonymization_fields_bulk_action_request).path),
+      ...getShape(getShape(perform_anonymization_fields_bulk_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_perform_anonymization_fields_bulk_action_response)),
+      ...getShape(getShape(perform_anonymization_fields_bulk_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14848,7 +14848,7 @@ const FINDANONYMIZATIONFIELDS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all anonymization fields.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security_ai_assistant/anonymization_fields/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14859,14 +14859,14 @@ Get a list of all anonymization fields.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_anonymization_fields_request).body),
-      ...getShape(getShape(_find_anonymization_fields_request).path),
-      ...getShape(getShape(_find_anonymization_fields_request).query),
+      ...getShape(getShape(find_anonymization_fields_request).body),
+      ...getShape(getShape(find_anonymization_fields_request).path),
+      ...getShape(getShape(find_anonymization_fields_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_anonymization_fields_response)),
+      ...getShape(getShape(find_anonymization_fields_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14881,7 +14881,7 @@ const CHATCOMPLETE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a model response for the given chat conversation.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security_ai_assistant/chat/complete'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14892,14 +14892,14 @@ Create a model response for the given chat conversation.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_chat_complete_request).body),
-      ...getShape(getShape(_chat_complete_request).path),
-      ...getShape(getShape(_chat_complete_request).query),
+      ...getShape(getShape(chat_complete_request).body),
+      ...getShape(getShape(chat_complete_request).path),
+      ...getShape(getShape(chat_complete_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_chat_complete_response)),
+      ...getShape(getShape(chat_complete_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14914,7 +14914,7 @@ const DELETEALLCONVERSATIONS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 This endpoint allows users to permanently delete all conversations.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/security_ai_assistant/current_user/conversations'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14925,14 +14925,14 @@ This endpoint allows users to permanently delete all conversations.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_all_conversations_request).body),
-      ...getShape(getShape(_delete_all_conversations_request).path),
-      ...getShape(getShape(_delete_all_conversations_request).query),
+      ...getShape(getShape(delete_all_conversations_request).body),
+      ...getShape(getShape(delete_all_conversations_request).path),
+      ...getShape(getShape(delete_all_conversations_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_all_conversations_response)),
+      ...getShape(getShape(delete_all_conversations_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14947,7 +14947,7 @@ const CREATECONVERSATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a new Security AI Assistant conversation. This endpoint allows the user to initiate a conversation with the Security AI Assistant by providing the required parameters.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security_ai_assistant/current_user/conversations'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14958,14 +14958,14 @@ Create a new Security AI Assistant conversation. This endpoint allows the user t
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_conversation_request).body),
-      ...getShape(getShape(_create_conversation_request).path),
-      ...getShape(getShape(_create_conversation_request).query),
+      ...getShape(getShape(create_conversation_request).body),
+      ...getShape(getShape(create_conversation_request).path),
+      ...getShape(getShape(create_conversation_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_conversation_response)),
+      ...getShape(getShape(create_conversation_response)),
     }),
     error: z.any().optional(),
   }),
@@ -14980,7 +14980,7 @@ const FINDCONVERSATIONS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all conversations for the current user. This endpoint allows users to search, filter, sort, and paginate through their conversations.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security_ai_assistant/current_user/conversations/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -14991,14 +14991,14 @@ Get a list of all conversations for the current user. This endpoint allows users
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_conversations_request).body),
-      ...getShape(getShape(_find_conversations_request).path),
-      ...getShape(getShape(_find_conversations_request).query),
+      ...getShape(getShape(find_conversations_request).body),
+      ...getShape(getShape(find_conversations_request).path),
+      ...getShape(getShape(find_conversations_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_conversations_response)),
+      ...getShape(getShape(find_conversations_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15013,7 +15013,7 @@ const DELETECONVERSATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete an existing conversation using the conversation ID. This endpoint allows users to permanently delete a conversation.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/security_ai_assistant/current_user/conversations/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15024,14 +15024,14 @@ Delete an existing conversation using the conversation ID. This endpoint allows 
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_conversation_request).body),
-      ...getShape(getShape(_delete_conversation_request).path),
-      ...getShape(getShape(_delete_conversation_request).query),
+      ...getShape(getShape(delete_conversation_request).body),
+      ...getShape(getShape(delete_conversation_request).path),
+      ...getShape(getShape(delete_conversation_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_conversation_response)),
+      ...getShape(getShape(delete_conversation_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15046,7 +15046,7 @@ const READCONVERSATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of an existing conversation using the conversation ID. This allows users to fetch the specific conversation data by its unique ID.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security_ai_assistant/current_user/conversations/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15057,14 +15057,14 @@ Get the details of an existing conversation using the conversation ID. This allo
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_conversation_request).body),
-      ...getShape(getShape(_read_conversation_request).path),
-      ...getShape(getShape(_read_conversation_request).query),
+      ...getShape(getShape(read_conversation_request).body),
+      ...getShape(getShape(read_conversation_request).path),
+      ...getShape(getShape(read_conversation_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_conversation_response)),
+      ...getShape(getShape(read_conversation_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15079,7 +15079,7 @@ const UPDATECONVERSATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an existing conversation using the conversation ID. This endpoint allows users to modify the details of an existing conversation.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/security_ai_assistant/current_user/conversations/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15090,14 +15090,14 @@ Update an existing conversation using the conversation ID. This endpoint allows 
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_conversation_request).body),
-      ...getShape(getShape(_update_conversation_request).path),
-      ...getShape(getShape(_update_conversation_request).query),
+      ...getShape(getShape(update_conversation_request).body),
+      ...getShape(getShape(update_conversation_request).path),
+      ...getShape(getShape(update_conversation_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_conversation_response)),
+      ...getShape(getShape(update_conversation_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15112,7 +15112,7 @@ const GETKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Read a single KB`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15123,14 +15123,14 @@ Read a single KB`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_knowledge_base_request).body),
-      ...getShape(getShape(_get_knowledge_base_request).path),
-      ...getShape(getShape(_get_knowledge_base_request).query),
+      ...getShape(getShape(get_knowledge_base_request).body),
+      ...getShape(getShape(get_knowledge_base_request).path),
+      ...getShape(getShape(get_knowledge_base_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_knowledge_base_response)),
+      ...getShape(getShape(get_knowledge_base_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15143,7 +15143,7 @@ const POSTKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security_ai_assistant/knowledge_base'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15154,14 +15154,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_post_knowledge_base_request).body),
-      ...getShape(getShape(_post_knowledge_base_request).path),
-      ...getShape(getShape(_post_knowledge_base_request).query),
+      ...getShape(getShape(post_knowledge_base_request).body),
+      ...getShape(getShape(post_knowledge_base_request).path),
+      ...getShape(getShape(post_knowledge_base_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_post_knowledge_base_response)),
+      ...getShape(getShape(post_knowledge_base_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15176,7 +15176,7 @@ const READKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Read a knowledge base with a specific resource identifier.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base/{resource}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15187,14 +15187,14 @@ Read a knowledge base with a specific resource identifier.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_knowledge_base_request).body),
-      ...getShape(getShape(_read_knowledge_base_request).path),
-      ...getShape(getShape(_read_knowledge_base_request).query),
+      ...getShape(getShape(read_knowledge_base_request).body),
+      ...getShape(getShape(read_knowledge_base_request).path),
+      ...getShape(getShape(read_knowledge_base_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_knowledge_base_response)),
+      ...getShape(getShape(read_knowledge_base_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15209,7 +15209,7 @@ const CREATEKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a knowledge base with a specific resource identifier.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security_ai_assistant/knowledge_base/{resource}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15220,14 +15220,14 @@ Create a knowledge base with a specific resource identifier.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_knowledge_base_request).body),
-      ...getShape(getShape(_create_knowledge_base_request).path),
-      ...getShape(getShape(_create_knowledge_base_request).query),
+      ...getShape(getShape(create_knowledge_base_request).body),
+      ...getShape(getShape(create_knowledge_base_request).path),
+      ...getShape(getShape(create_knowledge_base_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_knowledge_base_response)),
+      ...getShape(getShape(create_knowledge_base_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15242,7 +15242,7 @@ const CREATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a Knowledge Base Entry`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15253,14 +15253,14 @@ Create a Knowledge Base Entry`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_knowledge_base_entry_request).body),
-      ...getShape(getShape(_create_knowledge_base_entry_request).path),
-      ...getShape(getShape(_create_knowledge_base_entry_request).query),
+      ...getShape(getShape(create_knowledge_base_entry_request).body),
+      ...getShape(getShape(create_knowledge_base_entry_request).path),
+      ...getShape(getShape(create_knowledge_base_entry_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_knowledge_base_entry_response)),
+      ...getShape(getShape(create_knowledge_base_entry_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15275,7 +15275,7 @@ const PERFORMKNOWLEDGEBASEENTRYBULKACTION_CONTRACT: InternalConnectorContract = 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/_bulk_action'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15286,14 +15286,14 @@ The bulk action is applied to all Knowledge Base Entries that match the filter o
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_perform_knowledge_base_entry_bulk_action_request).body),
-      ...getShape(getShape(_perform_knowledge_base_entry_bulk_action_request).path),
-      ...getShape(getShape(_perform_knowledge_base_entry_bulk_action_request).query),
+      ...getShape(getShape(perform_knowledge_base_entry_bulk_action_request).body),
+      ...getShape(getShape(perform_knowledge_base_entry_bulk_action_request).path),
+      ...getShape(getShape(perform_knowledge_base_entry_bulk_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_perform_knowledge_base_entry_bulk_action_response)),
+      ...getShape(getShape(perform_knowledge_base_entry_bulk_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15308,7 +15308,7 @@ const FINDKNOWLEDGEBASEENTRIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Finds Knowledge Base Entries that match the given query.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15319,14 +15319,14 @@ Finds Knowledge Base Entries that match the given query.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_knowledge_base_entries_request).body),
-      ...getShape(getShape(_find_knowledge_base_entries_request).path),
-      ...getShape(getShape(_find_knowledge_base_entries_request).query),
+      ...getShape(getShape(find_knowledge_base_entries_request).body),
+      ...getShape(getShape(find_knowledge_base_entries_request).path),
+      ...getShape(getShape(find_knowledge_base_entries_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_knowledge_base_entries_response)),
+      ...getShape(getShape(find_knowledge_base_entries_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15341,7 +15341,7 @@ const DELETEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a Knowledge Base Entry by its unique \`id\`.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15352,14 +15352,14 @@ Delete a Knowledge Base Entry by its unique \`id\`.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_knowledge_base_entry_request).body),
-      ...getShape(getShape(_delete_knowledge_base_entry_request).path),
-      ...getShape(getShape(_delete_knowledge_base_entry_request).query),
+      ...getShape(getShape(delete_knowledge_base_entry_request).body),
+      ...getShape(getShape(delete_knowledge_base_entry_request).path),
+      ...getShape(getShape(delete_knowledge_base_entry_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_knowledge_base_entry_response)),
+      ...getShape(getShape(delete_knowledge_base_entry_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15374,7 +15374,7 @@ const READKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Retrieve a Knowledge Base Entry by its unique \`id\`.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15385,14 +15385,14 @@ Retrieve a Knowledge Base Entry by its unique \`id\`.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_read_knowledge_base_entry_request).body),
-      ...getShape(getShape(_read_knowledge_base_entry_request).path),
-      ...getShape(getShape(_read_knowledge_base_entry_request).query),
+      ...getShape(getShape(read_knowledge_base_entry_request).body),
+      ...getShape(getShape(read_knowledge_base_entry_request).path),
+      ...getShape(getShape(read_knowledge_base_entry_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_read_knowledge_base_entry_response)),
+      ...getShape(getShape(read_knowledge_base_entry_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15407,7 +15407,7 @@ const UPDATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an existing Knowledge Base Entry by its unique \`id\`.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15418,14 +15418,14 @@ Update an existing Knowledge Base Entry by its unique \`id\`.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_update_knowledge_base_entry_request).body),
-      ...getShape(getShape(_update_knowledge_base_entry_request).path),
-      ...getShape(getShape(_update_knowledge_base_entry_request).query),
+      ...getShape(getShape(update_knowledge_base_entry_request).body),
+      ...getShape(getShape(update_knowledge_base_entry_request).path),
+      ...getShape(getShape(update_knowledge_base_entry_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_update_knowledge_base_entry_response)),
+      ...getShape(getShape(update_knowledge_base_entry_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15440,7 +15440,7 @@ const PERFORMPROMPTSBULKACTION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Apply a bulk action to multiple prompts. The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs. This action allows for bulk create, update, or delete operations.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security_ai_assistant/prompts/_bulk_action'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15451,14 +15451,14 @@ Apply a bulk action to multiple prompts. The bulk action is applied to all promp
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_perform_prompts_bulk_action_request).body),
-      ...getShape(getShape(_perform_prompts_bulk_action_request).path),
-      ...getShape(getShape(_perform_prompts_bulk_action_request).query),
+      ...getShape(getShape(perform_prompts_bulk_action_request).body),
+      ...getShape(getShape(perform_prompts_bulk_action_request).path),
+      ...getShape(getShape(perform_prompts_bulk_action_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_perform_prompts_bulk_action_response)),
+      ...getShape(getShape(perform_prompts_bulk_action_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15473,7 +15473,7 @@ const FINDPROMPTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all prompts based on optional filters, sorting, and pagination.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security_ai_assistant/prompts/_find'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15484,14 +15484,14 @@ Get a list of all prompts based on optional filters, sorting, and pagination.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_find_prompts_request).body),
-      ...getShape(getShape(_find_prompts_request).path),
-      ...getShape(getShape(_find_prompts_request).query),
+      ...getShape(getShape(find_prompts_request).body),
+      ...getShape(getShape(find_prompts_request).path),
+      ...getShape(getShape(find_prompts_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_find_prompts_response)),
+      ...getShape(getShape(find_prompts_response)),
     }),
     error: z.any().optional(),
   }),
@@ -15500,7 +15500,7 @@ const GET_SECURITY_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_security_role',
   summary: `Get all roles`,
   description: ``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security/role'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15527,7 +15527,7 @@ const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_role_query',
   summary: `Query roles`,
   description: ``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security/role/_query'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15554,7 +15554,7 @@ const DELETE_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_security_role_name',
   summary: `Delete a role`,
   description: ``,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/security/role/{name}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15581,7 +15581,7 @@ const GET_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_security_role_name',
   summary: `Get a role`,
   description: ``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/security/role/{name}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15608,7 +15608,7 @@ const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_security_role_name',
   summary: `Create or update a role`,
   description: `Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/security/role/{name}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15635,7 +15635,7 @@ const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_roles',
   summary: `Create or update roles`,
   description: ``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security/roles'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15663,7 +15663,7 @@ const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
   summary: `Invalidate user sessions`,
   description: `Invalidate user sessions that match a query. To use this API, you must be a superuser.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/security/session/_invalidate'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15692,7 +15692,7 @@ const POST_URL_CONTRACT: InternalConnectorContract = {
   description: `Kibana URLs may be long and cumbersome, short URLs are much easier to remember and share.
 Short URLs are created by specifying the locator ID and locator parameters. When a short URL is resolved, the locator ID and locator parameters are used to redirect user to the right Kibana page.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/short_url'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15720,7 +15720,7 @@ const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
   summary: `Resolve a short URL`,
   description: `Resolve a Kibana short URL by its slug.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/short_url/_slug/{slug}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15748,7 +15748,7 @@ const DELETE_URL_CONTRACT: InternalConnectorContract = {
   summary: `Delete a short URL`,
   description: `Delete a Kibana short URL.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/short_url/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15776,7 +15776,7 @@ const GET_URL_CONTRACT: InternalConnectorContract = {
   summary: `Get a short URL`,
   description: `Get a single Kibana short URL.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/short_url/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15803,7 +15803,7 @@ const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_copy_saved_objects',
   summary: `Copy saved objects between spaces`,
   description: `It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/spaces/_copy_saved_objects'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15830,7 +15830,7 @@ const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract
   type: 'kibana.post_spaces_disable_legacy_url_aliases',
   summary: `Disable legacy URL aliases`,
   description: ``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/spaces/_disable_legacy_url_aliases'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15857,7 +15857,7 @@ const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract =
   type: 'kibana.post_spaces_get_shareable_references',
   summary: `Get shareable references`,
   description: `Collect references and space contexts for saved objects.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/spaces/_get_shareable_references'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15884,7 +15884,7 @@ const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorC
   type: 'kibana.post_spaces_resolve_copy_saved_objects_errors',
   summary: `Resolve conflicts copying saved objects`,
   description: `Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/spaces/_resolve_copy_saved_objects_errors'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15911,7 +15911,7 @@ const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_update_objects_spaces',
   summary: `Update saved objects in spaces`,
   description: `Update one or more saved objects to add or remove them from some spaces.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/spaces/_update_objects_spaces'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15938,7 +15938,7 @@ const GET_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_spaces_space',
   summary: `Get all spaces`,
   description: ``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/spaces/space'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15965,7 +15965,7 @@ const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_space',
   summary: `Create a space`,
   description: ``,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/spaces/space'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -15992,7 +15992,7 @@ const DELETE_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_spaces_space_id',
   summary: `Delete a space`,
   description: `When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/spaces/space/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16019,7 +16019,7 @@ const GET_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_spaces_space_id',
   summary: `Get a space`,
   description: ``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/spaces/space/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16046,7 +16046,7 @@ const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_spaces_space_id',
   summary: `Update a space`,
   description: ``,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/spaces/space/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16073,7 +16073,7 @@ const GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_status',
   summary: `Get Kibana's current status`,
   description: ``,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16106,7 +16106,7 @@ const GET_STREAMS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Fetches list of all streams<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/streams'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16139,7 +16139,7 @@ const POST_STREAMS_DISABLE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/_disable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16172,7 +16172,7 @@ const POST_STREAMS_ENABLE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Enables wired streams<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/_enable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16205,7 +16205,7 @@ const POST_STREAMS_RESYNC_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/_resync'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16238,7 +16238,7 @@ const DELETE_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Deletes a stream definition and the underlying data stream<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/streams/{name}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16271,7 +16271,7 @@ const GET_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Fetches a stream definition and associated dashboards<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/streams/{name}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16304,7 +16304,7 @@ const PUT_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Creates or updates a stream definition. Classic streams can not be created through this API, only updated<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/streams/{name}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16337,7 +16337,7 @@ const POST_STREAMS_NAME_FORK_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Forks a wired stream and creates a child stream<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/{name}/_fork'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16370,7 +16370,7 @@ const GET_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Fetches the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/streams/{name}/_group'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16403,7 +16403,7 @@ const PUT_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Upserts the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/streams/{name}/_group'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16436,7 +16436,7 @@ const GET_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Fetches the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/streams/{name}/_ingest'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16469,7 +16469,7 @@ const PUT_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Upserts the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/streams/{name}/_ingest'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16502,7 +16502,7 @@ const POST_STREAMS_NAME_CONTENT_EXPORT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/{name}/content/export'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16535,7 +16535,7 @@ const POST_STREAMS_NAME_CONTENT_IMPORT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/{name}/content/import'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16568,7 +16568,7 @@ const GET_STREAMS_NAME_DASHBOARDS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Fetches all dashboards linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/streams/{name}/dashboards'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16601,7 +16601,7 @@ const POST_STREAMS_NAME_DASHBOARDS_BULK_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/{name}/dashboards/_bulk'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16634,7 +16634,7 @@ const DELETE_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorCont
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/streams/{name}/dashboards/{dashboardId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16667,7 +16667,7 @@ const PUT_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContrac
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/streams/{name}/dashboards/{dashboardId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16700,7 +16700,7 @@ const GET_STREAMS_NAME_QUERIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/streams/{name}/queries'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16733,7 +16733,7 @@ const POST_STREAMS_NAME_QUERIES_BULK_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Bulk update queries of a stream. Can add new queries and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/{name}/queries/_bulk'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16766,7 +16766,7 @@ const DELETE_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/streams/{name}/queries/{queryId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16799,7 +16799,7 @@ const PUT_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/streams/{name}/queries/{queryId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16832,7 +16832,7 @@ const GET_STREAMS_NAME_RULES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/streams/{name}/rules'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16865,7 +16865,7 @@ const DELETE_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/streams/{name}/rules/{ruleId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16898,7 +16898,7 @@ const PUT_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/streams/{name}/rules/{ruleId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16931,7 +16931,7 @@ const GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT: InternalConnectorContract = 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/streams/{name}/significant_events'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16964,7 +16964,7 @@ const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_GENERATE_CONTRACT: InternalConnectorC
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Generate significant events queries based on the stream data<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/{name}/significant_events/_generate'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -16997,7 +16997,7 @@ const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_PREVIEW_CONTRACT: InternalConnectorCo
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/streams/{name}/significant_events/_preview'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17031,7 +17031,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Trigger an immediate test execution for the specified monitor. The response includes the generated \`testRunId\`. If the test encounters issues in one or more service locations, an \`errors\` array is also returned with details about the failures.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/synthetics/monitor/test/{monitorId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17066,7 +17066,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of monitors.
 You must have \`read\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/synthetics/monitors'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17115,7 +17115,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a new monitor with the specified attributes. A monitor can be one of the following types: HTTP, TCP, ICMP, or Browser. The required and default fields may vary based on the monitor type.
 You must have \`all\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/synthetics/monitors'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17149,7 +17149,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Delete multiple monitors by sending a list of config IDs.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/synthetics/monitors/_bulk_delete'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17184,7 +17184,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a monitor from the Synthetics app.
 You must have \`all\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/synthetics/monitors/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17215,7 +17215,7 @@ const GET_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{id}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/synthetics/monitors/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17251,7 +17251,7 @@ Update a monitor with the specified attributes. The required and default fields 
 You must have \`all\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 You can also partially update a monitor. This will only update the fields that are specified in the request body. All other fields are left unchanged. The specified fields should conform to the monitor type. For example, you can't update the \`inline_scipt\` field of a HTTP monitor.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/synthetics/monitors/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17285,7 +17285,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Get a list of all parameters. You must have \`read\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/synthetics/params'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17320,7 +17320,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Add one or more parameters to the Synthetics app.
 You must have \`all\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/synthetics/params'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17355,7 +17355,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete parameters from the Synthetics app.
 You must have \`all\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/synthetics/params/_bulk_delete'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17390,7 +17390,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a parameter from the Synthetics app.
 You must have \`all\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/synthetics/params/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17425,7 +17425,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a parameter from the Synthetics app.
 You must have \`read\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/synthetics/params/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17460,7 +17460,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update a parameter in the Synthetics app.
 You must have \`all\` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/synthetics/params/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17495,7 +17495,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of private locations.
 You must have \`read\` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/synthetics/private_locations'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17528,7 +17528,7 @@ const POST_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 You must have \`all\` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/synthetics/private_locations'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17564,7 +17564,7 @@ You must have \`all\` privileges for the Synthetics and Uptime feature in the Ob
 The API does not return a response body for deletion, but it will return an appropriate status code upon successful deletion.
 A location cannot be deleted if it has associated monitors in use. You must delete all monitors associated with the location before deleting the location.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/synthetics/private_locations/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17598,7 +17598,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`read\` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/synthetics/private_locations/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17634,7 +17634,7 @@ Update an existing private location's label.
 You must have \`all\` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
 When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/synthetics/private_locations/{id}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17662,7 +17662,7 @@ const TASK_MANAGER_HEALTH_CONTRACT: InternalConnectorContract = {
   summary: `Get the task manager health`,
   description: `Get the health status of the Kibana task manager.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/task_manager/_health'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17695,7 +17695,7 @@ const DELETETIMELINES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete one or more Timelines or Timeline templates.`,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/api/timeline'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17706,14 +17706,14 @@ Delete one or more Timelines or Timeline templates.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_delete_timelines_request).body),
-      ...getShape(getShape(_delete_timelines_request).path),
-      ...getShape(getShape(_delete_timelines_request).query),
+      ...getShape(getShape(delete_timelines_request).body),
+      ...getShape(getShape(delete_timelines_request).path),
+      ...getShape(getShape(delete_timelines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_delete_timelines_response)),
+      ...getShape(getShape(delete_timelines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -17728,7 +17728,7 @@ const GETTIMELINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of an existing saved Timeline or Timeline template.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/timeline'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17739,14 +17739,14 @@ Get the details of an existing saved Timeline or Timeline template.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_timeline_request).body),
-      ...getShape(getShape(_get_timeline_request).path),
-      ...getShape(getShape(_get_timeline_request).query),
+      ...getShape(getShape(get_timeline_request).body),
+      ...getShape(getShape(get_timeline_request).path),
+      ...getShape(getShape(get_timeline_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_timeline_response)),
+      ...getShape(getShape(get_timeline_response)),
     }),
     error: z.any().optional(),
   }),
@@ -17761,7 +17761,7 @@ const PATCHTIMELINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.`,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/timeline'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17772,14 +17772,14 @@ Update an existing Timeline. You can update the title, description, date range, 
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_patch_timeline_request).body),
-      ...getShape(getShape(_patch_timeline_request).path),
-      ...getShape(getShape(_patch_timeline_request).query),
+      ...getShape(getShape(patch_timeline_request).body),
+      ...getShape(getShape(patch_timeline_request).path),
+      ...getShape(getShape(patch_timeline_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_patch_timeline_response)),
+      ...getShape(getShape(patch_timeline_response)),
     }),
     error: z.any().optional(),
   }),
@@ -17794,7 +17794,7 @@ const CREATETIMELINES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Create a new Timeline or Timeline template.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/timeline'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17805,14 +17805,14 @@ Create a new Timeline or Timeline template.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_create_timelines_request).body),
-      ...getShape(getShape(_create_timelines_request).path),
-      ...getShape(getShape(_create_timelines_request).query),
+      ...getShape(getShape(create_timelines_request).body),
+      ...getShape(getShape(create_timelines_request).path),
+      ...getShape(getShape(create_timelines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_create_timelines_response)),
+      ...getShape(getShape(create_timelines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -17828,7 +17828,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Copies and returns a timeline or timeline template.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/timeline/_copy'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17839,14 +17839,14 @@ Copies and returns a timeline or timeline template.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_copy_timeline_request).body),
-      ...getShape(getShape(_copy_timeline_request).path),
-      ...getShape(getShape(_copy_timeline_request).query),
+      ...getShape(getShape(copy_timeline_request).body),
+      ...getShape(getShape(copy_timeline_request).path),
+      ...getShape(getShape(copy_timeline_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_copy_timeline_response)),
+      ...getShape(getShape(copy_timeline_response)),
     }),
     error: z.any().optional(),
   }),
@@ -17861,7 +17861,7 @@ const GETDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/timeline/_draft'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17872,14 +17872,14 @@ Get the details of the draft Timeline  or Timeline template for the current user
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_draft_timelines_request).body),
-      ...getShape(getShape(_get_draft_timelines_request).path),
-      ...getShape(getShape(_get_draft_timelines_request).query),
+      ...getShape(getShape(get_draft_timelines_request).body),
+      ...getShape(getShape(get_draft_timelines_request).path),
+      ...getShape(getShape(get_draft_timelines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_draft_timelines_response)),
+      ...getShape(getShape(get_draft_timelines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -17897,7 +17897,7 @@ Create a clean draft Timeline or Timeline template for the current user.
 > info
 > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/timeline/_draft'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17908,14 +17908,14 @@ Create a clean draft Timeline or Timeline template for the current user.
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_clean_draft_timelines_request).body),
-      ...getShape(getShape(_clean_draft_timelines_request).path),
-      ...getShape(getShape(_clean_draft_timelines_request).query),
+      ...getShape(getShape(clean_draft_timelines_request).body),
+      ...getShape(getShape(clean_draft_timelines_request).path),
+      ...getShape(getShape(clean_draft_timelines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_clean_draft_timelines_response)),
+      ...getShape(getShape(clean_draft_timelines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -17930,7 +17930,7 @@ const EXPORTTIMELINES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Export Timelines as an NDJSON file.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/timeline/_export'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17941,14 +17941,14 @@ Export Timelines as an NDJSON file.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_export_timelines_request).body),
-      ...getShape(getShape(_export_timelines_request).path),
-      ...getShape(getShape(_export_timelines_request).query),
+      ...getShape(getShape(export_timelines_request).body),
+      ...getShape(getShape(export_timelines_request).path),
+      ...getShape(getShape(export_timelines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_export_timelines_response)),
+      ...getShape(getShape(export_timelines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -17963,7 +17963,7 @@ const PERSISTFAVORITEROUTE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Favorite a Timeline or Timeline template for the current user.`,
-  methods: ['patch'],
+  methods: ['PATCH'],
   patterns: ['/api/timeline/_favorite'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -17974,14 +17974,14 @@ Favorite a Timeline or Timeline template for the current user.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_persist_favorite_route_request).body),
-      ...getShape(getShape(_persist_favorite_route_request).path),
-      ...getShape(getShape(_persist_favorite_route_request).query),
+      ...getShape(getShape(persist_favorite_route_request).body),
+      ...getShape(getShape(persist_favorite_route_request).path),
+      ...getShape(getShape(persist_favorite_route_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_persist_favorite_route_response)),
+      ...getShape(getShape(persist_favorite_route_response)),
     }),
     error: z.any().optional(),
   }),
@@ -17996,7 +17996,7 @@ const IMPORTTIMELINES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Import Timelines.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/timeline/_import'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18007,14 +18007,14 @@ Import Timelines.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_import_timelines_request).body),
-      ...getShape(getShape(_import_timelines_request).path),
-      ...getShape(getShape(_import_timelines_request).query),
+      ...getShape(getShape(import_timelines_request).body),
+      ...getShape(getShape(import_timelines_request).path),
+      ...getShape(getShape(import_timelines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_import_timelines_response)),
+      ...getShape(getShape(import_timelines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -18029,7 +18029,7 @@ const INSTALLPREPACKEDTIMELINES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Install or update prepackaged Timelines.`,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/api/timeline/_prepackaged'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18040,14 +18040,14 @@ Install or update prepackaged Timelines.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_install_prepacked_timelines_request).body),
-      ...getShape(getShape(_install_prepacked_timelines_request).path),
-      ...getShape(getShape(_install_prepacked_timelines_request).query),
+      ...getShape(getShape(install_prepacked_timelines_request).body),
+      ...getShape(getShape(install_prepacked_timelines_request).path),
+      ...getShape(getShape(install_prepacked_timelines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_install_prepacked_timelines_response)),
+      ...getShape(getShape(install_prepacked_timelines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -18060,7 +18060,7 @@ const RESOLVETIMELINE_CONTRACT: InternalConnectorContract = {
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/resolve</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/timeline/resolve'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18071,14 +18071,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_resolve_timeline_request).body),
-      ...getShape(getShape(_resolve_timeline_request).path),
-      ...getShape(getShape(_resolve_timeline_request).query),
+      ...getShape(getShape(resolve_timeline_request).body),
+      ...getShape(getShape(resolve_timeline_request).path),
+      ...getShape(getShape(resolve_timeline_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_resolve_timeline_response)),
+      ...getShape(getShape(resolve_timeline_response)),
     }),
     error: z.any().optional(),
   }),
@@ -18093,7 +18093,7 @@ const GETTIMELINES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a list of all saved Timelines or Timeline templates.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/timelines'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18113,14 +18113,14 @@ Get a list of all saved Timelines or Timeline templates.`,
   },
   paramsSchema: z
     .looseObject({
-      ...getShape(getShape(_get_timelines_request).body),
-      ...getShape(getShape(_get_timelines_request).path),
-      ...getShape(getShape(_get_timelines_request).query),
+      ...getShape(getShape(get_timelines_request).body),
+      ...getShape(getShape(get_timelines_request).path),
+      ...getShape(getShape(get_timelines_request).query),
     })
     .partial(),
   outputSchema: z.object({
     output: z.looseObject({
-      ...getShape(getShape(_get_timelines_response)),
+      ...getShape(getShape(get_timelines_response)),
     }),
     error: z.any().optional(),
   }),
@@ -18129,7 +18129,7 @@ const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_upgrade_status',
   summary: `Get the upgrade readiness status`,
   description: `Check the status of your cluster.`,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/upgrade_assistant/status'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18163,7 +18163,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 You must have \`read\` privileges for the uptime feature in the Observability section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/api/uptime/settings'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18197,7 +18197,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 
 Update uptime setting attributes like \`heartbeatIndices\`, \`certExpirationThreshold\`, \`certAgeThreshold\`, \`defaultConnectors\`, or \`defaultEmail\`. You must have \`all\` privileges for the uptime feature in the Observability section of the Kibana feature privileges. A partial update is supported, provided settings keys will be merged with existing settings.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/api/uptime/settings'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18225,7 +18225,7 @@ const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
   summary: `Get a paginated list of SLOs`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/s/{spaceId}/api/observability/slos'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18262,7 +18262,7 @@ const CREATESLOOP_CONTRACT: InternalConnectorContract = {
   summary: `Create an SLO`,
   description: `You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18290,7 +18290,7 @@ const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
   summary: `Bulk delete SLO definitions and their associated summary and rollup data.`,
   description: `Bulk delete SLO definitions and their associated summary and rollup data.  This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete.  The status of the operation can be checked using the \`GET /api/slo/_bulk_delete/{taskId}\` endpoint.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/_bulk_delete'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18318,7 +18318,7 @@ const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
   summary: `Retrieve the status of the bulk deletion`,
   description: `Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18346,7 +18346,7 @@ const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
   summary: `Batch delete rollup and summary data`,
   description: `The deletion occurs for the specified list of \`sloId\`. You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/_bulk_purge_rollup'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18374,7 +18374,7 @@ const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
   summary: `Batch delete rollup and summary data`,
   description: `The deletion occurs for the specified list of \`sloId\` and \`instanceId\`. You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/_delete_instances'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18402,7 +18402,7 @@ const DELETESLOOP_CONTRACT: InternalConnectorContract = {
   summary: `Delete an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['delete'],
+  methods: ['DELETE'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18430,7 +18430,7 @@ const GETSLOOP_CONTRACT: InternalConnectorContract = {
   summary: `Get an SLO`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18458,7 +18458,7 @@ const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
   summary: `Update an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['put'],
+  methods: ['PUT'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18486,7 +18486,7 @@ const RESETSLOOP_CONTRACT: InternalConnectorContract = {
   summary: `Reset an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}/_reset'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18514,7 +18514,7 @@ const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
   summary: `Disable an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}/disable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18542,7 +18542,7 @@ const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
   summary: `Enable an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['post'],
+  methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}/enable'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
@@ -18570,7 +18570,7 @@ const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
   summary: `Get the SLO definitions`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
-  methods: ['get'],
+  methods: ['GET'],
   patterns: ['/s/{spaceId}/internal/observability/slos/_definitions'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',

@@ -13,6 +13,7 @@
  * Builds a Kibana HTTP request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
+// eslint-disable-next-line complexity
 export function buildKibanaRequestFromAction(
   actionType: string,
   params: Record<string, unknown>,
@@ -56,7 +57,7 @@ export function buildKibanaRequestFromAction(
 
   // Lazy load the generated connectors to avoid main bundle bloat
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GENERATED_KIBANA_CONNECTORS } = require('./generated/kibana_connectors');
+  const { GENERATED_KIBANA_CONNECTORS } = require('./generated/kibana_connectors_v2.gen');
 
   // Find the connector definition for this action type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

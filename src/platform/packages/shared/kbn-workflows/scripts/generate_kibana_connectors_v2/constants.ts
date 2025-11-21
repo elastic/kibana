@@ -28,7 +28,7 @@ const KIBANA_CONTRACTS_OUTPUT_FILE_PATH = Path.resolve(
   'kibana_connectors_v2.gen.ts'
 );
 const OPENAPI_TS_OUTPUT_FOLDER_PATH = Path.resolve(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, 'schemas');
-const OPENAPI_TS_CONFIG_PATH = Path.resolve(SCRIPT_FOLDER_PATH, 'schemas/openapi_ts.config.ts');
+const OPENAPI_TS_CONFIG_PATH = Path.resolve(SCRIPT_FOLDER_PATH, 'openapi_ts.config.ts');
 const OPENAPI_TS_OUTPUT_FILENAME = 'kibana_openapi_zod'; // .gen.ts will be added automatically
 
 export {

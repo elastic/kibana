@@ -13,5 +13,5 @@ export { extractSchemaPropertyPaths } from './extract_schema_property_paths/extr
 export { parseJsPropertyAccess } from './parse_js_property_access/parse_js_property_access';
 export { extractPropertyPathsFromKql } from './extract_property_paths_from_kql/extract_property_paths_from_kql';
 export { isPropertyAccess } from './is_property_access/is_property_access';
-export { getShape } from './get_shape/get_shape';
+export { getShape, getZodObjectProperty } from './get_shape/get_shape';
 export { getZodSchemaType } from './get_zod_schema_type/get_zod_schema_type';
