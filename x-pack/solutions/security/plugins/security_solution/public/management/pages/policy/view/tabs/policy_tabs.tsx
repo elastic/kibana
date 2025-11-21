@@ -480,7 +480,7 @@ export const PolicyTabs = React.memo(() => {
                   />
                 </>
               ),
-              'data-test-subj': 'policyEventFiltersTab',
+              'data-test-subj': 'policyEndpointExceptionsTab',
             }
           : undefined,
 

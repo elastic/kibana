@@ -66,7 +66,18 @@ const clickArtifactTab = (tabId: string) => {
 
 describe(
   'Artifact tabs in Policy Details page',
-  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
+  {
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'endpointExceptionsMovedUnderManagement',
+          ])}`,
+        ],
+      },
+    },
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+  },
   () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
@@ -84,9 +95,7 @@ describe(
     });
 
     for (const testData of getArtifactsListTestsData()) {
-      // FLAKY: https://github.com/elastic/kibana/issues/183670
-      // FLAKY: https://github.com/elastic/kibana/issues/183671
-      describe.skip(`${testData.title} tab`, () => {
+      describe(`${testData.title} tab`, () => {
         beforeEach(() => {
           login();
           removeExceptionsList(testData.createRequestBody.list_id);

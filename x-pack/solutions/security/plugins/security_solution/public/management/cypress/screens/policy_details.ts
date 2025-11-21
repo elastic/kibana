@@ -30,7 +30,7 @@ export const visitPolicyDetailsPage = (policyId?: string) => {
     loadPage(`${APP_POLICIES_PATH}/${policyId}`);
   } else {
     cy.visit(APP_POLICIES_PATH);
-    cy.getByTestSubj('policyNameCellLink').eq(0).click({ force: true });
+    cy.getByTestSubj('policyNameCellLink-link').eq(0).click();
   }
   cy.getByTestSubj('policyDetailsPage').should('exist');
   cy.get('#settings').should('exist'); // waiting for Policy Settings tab
