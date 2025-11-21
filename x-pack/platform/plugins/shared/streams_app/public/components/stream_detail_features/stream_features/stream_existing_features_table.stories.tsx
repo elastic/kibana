@@ -20,6 +20,7 @@ const features: Feature[] = [];
 
 for (let i = 0; i < 5; i++) {
   features.push({
+    type: 'system',
     name: faker.company.name(),
     description: faker.lorem.sentence(),
     filter: {
