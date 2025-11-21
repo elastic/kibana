@@ -64,19 +64,23 @@ export async function runJestAll() {
   const configsArg: string | undefined = argv.configs;
   const maxParallelRaw: string | undefined = argv.maxParallel || process.env.JEST_MAX_PARALLEL;
   const maxParallel = Math.max(1, parseInt(maxParallelRaw || '3', 10));
+
   let configs: string[] = [];
+  let passedConfigs: string[] = [];
+  let configsWithTests: Array<{ config: string; testFiles: string[] }> = [];
+  let emptyConfigs: string[] = [];
 
   let hasAnyConfigs = false;
 
   if (configsArg) {
-    const passedConfigs = configsArg
+    passedConfigs = configsArg
       .split(',')
       .map((c) => c.trim())
       .filter(Boolean);
 
-    const { configsWithTests, emptyConfigs } = await getJestConfigs(passedConfigs);
-
-    writeConfigDiscoverySummary(passedConfigs, configsWithTests, emptyConfigs, log);
+    const result = await getJestConfigs(passedConfigs);
+    configsWithTests = result.configsWithTests;
+    emptyConfigs = result.emptyConfigs;
 
     hasAnyConfigs = Boolean(configsWithTests.length || emptyConfigs.length);
 
@@ -84,7 +88,9 @@ export async function runJestAll() {
   } else {
     log.info('--configs flag is not passed. Finding and running all configs in the repo.');
 
-    const { configsWithTests, emptyConfigs } = await getJestConfigs();
+    const result = await getJestConfigs();
+    configsWithTests = result.configsWithTests;
+    emptyConfigs = result.emptyConfigs;
 
     configs = configsWithTests.map((c) => c.config);
 
@@ -98,6 +104,7 @@ export async function runJestAll() {
   // Load checkpoint to skip already-successful configs from previous runs
   const checkpointPath = process.env.JEST_ALL_CHECKPOINT_PATH;
   const completedConfigs = new Set<string>();
+  let resumedConfigCount = 0;
 
   if (checkpointPath) {
     try {
@@ -109,15 +116,14 @@ export async function runJestAll() {
 
         const beforeFilter = configs.length;
         configs = configs.filter((c) => !completedConfigs.has(c));
+        resumedConfigCount = beforeFilter - configs.length;
 
-        if (completedConfigs.size > 0) {
+        if (resumedConfigCount > 0) {
           log.info(
             `Checkpoint: Loaded ${completedConfigs.size} already-completed configs from ${checkpointPath}`
           );
           log.info(
-            `Checkpoint: Filtered ${beforeFilter - configs.length} configs (${
-              configs.length
-            } remaining)`
+            `Checkpoint: Filtered ${resumedConfigCount} configs (${configs.length} remaining)`
           );
         }
       }
@@ -126,6 +132,17 @@ export async function runJestAll() {
         log.warning(`Unable to read checkpoint file: ${(err as Error).message}`);
       }
     }
+  }
+
+  // Write config discovery summary after checkpoint loading (only if configs were explicitly passed)
+  if (configsArg) {
+    writeConfigDiscoverySummary(
+      passedConfigs,
+      configsWithTests,
+      emptyConfigs,
+      resumedConfigCount,
+      log
+    );
   }
 
   log.info(
@@ -490,6 +507,7 @@ function writeConfigDiscoverySummary(
   passedConfigs: string[],
   configsWithTests: Array<{ config: string; testFiles: string[] }>,
   emptyConfigs: string[],
+  resumedConfigCount: number,
   log: ToolingLog
 ) {
   log.info('Config Discovery Summary:');
@@ -503,12 +521,20 @@ function writeConfigDiscoverySummary(
     },
   });
 
-  table.push(
-    ['Configs passed', passedConfigs.length],
+  const rows: Array<[string, number]> = [
+    ['Configs passed to the Jest runner', passedConfigs.length],
     ['Configs with test files', configsWithTests.length],
     ['Configs with no tests (skipping)', emptyConfigs.length],
-    [`${chalk.bold('Configs to run ')}`, configsWithTests.length]
-  );
+  ];
+
+  // Add resumed configs row if any were resumed from checkpoint
+  if (resumedConfigCount > 0) {
+    rows.push(['Configs resumed from previous run', resumedConfigCount]);
+  }
+
+  rows.push([`${chalk.bold('Configs to run ')}`, configsWithTests.length - resumedConfigCount]);
+
+  table.push(...rows);
 
   log.info(table.toString());
   log.info('');

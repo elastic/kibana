@@ -866,6 +866,53 @@ describe('run_all.ts', () => {
         expect(mockSpawn).toHaveBeenCalledTimes(1);
       });
 
+      it('should display resumed configs in discovery summary', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+
+        // Mock existing checkpoint with config1 already completed
+        mockFs.readFile.mockResolvedValue(
+          JSON.stringify({
+            completedConfigs: ['/path/to/config1.js'],
+          })
+        );
+
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js,config2.js',
+          maxParallel: undefined,
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            { config: '/path/to/config1.js', testFiles: ['test1.js'] },
+            { config: '/path/to/config2.js', testFiles: ['test2.js'] },
+          ],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        // Should log Config Discovery Summary with resumed configs row
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringContaining('Config Discovery Summary:')
+        );
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringContaining('Configs resumed from previous run')
+        );
+      });
+
       it('should accumulate completed configs in checkpoint across multiple successes', async () => {
         process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
 
