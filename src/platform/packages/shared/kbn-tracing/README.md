@@ -48,7 +48,10 @@ The YAML follows the schema exported from `@kbn/inference-tracing-config`:
 
 - `InferenceTracingPhoenixExportConfig`
 - `InferenceTracingLangfuseExportConfig`
-- `InferenceTracingOtlpExportConfig` (used for both `grpc` and `http` keys)
+
+And from `@kbn/tracing-config`:
+
+- `OTLPExportConfig` (used for both `grpc` and `http` keys)
 
 See those types for a full list of allowed fields.
 

@@ -68,10 +68,8 @@ export function createEvaluateDataset({
       output,
       metadata,
     }) => {
-      const response = await withEvaluateExampleSpan('EvaluateExample', {}, async () => {
-        return await chatClient.converse({
-          messages: [{ message: input.question }],
-        });
+      const response = await chatClient.converse({
+        messages: [{ message: input.question }],
       });
 
       // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output

@@ -9,20 +9,6 @@ import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { WithActiveSpanOptions } from '@kbn/tracing-utils';
 import { ROOT_CONTEXT, context } from '@opentelemetry/api';
 
-export function withEvaluateExampleSpan(name: string, opts: WithActiveSpanOptions, cb: () => any) {
-  return withActiveInferenceSpan(
-    name,
-    {
-      ...opts,
-      attributes: {
-        'inscrumentationScope.name': '@kbn/evals',
-        ...opts.attributes,
-      },
-    },
-    cb
-  );
-}
-
 /**
  * Use this wrapper when you want to include trace-based metrics with evaluations and use qualitative evaluators within the
  * context of a Phoenix task. This ensures the evaluator spans get new root context and have a different trace id than the evaluated example span.

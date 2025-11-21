@@ -12,7 +12,7 @@ export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
-export { withEvaluateExampleSpan, withEvaluatorSpan } from './src/utils/tracing';
+export { withEvaluatorSpan } from './src/utils/tracing';
 export {
   type EvaluationReporter,
   createDefaultTerminalReporter,

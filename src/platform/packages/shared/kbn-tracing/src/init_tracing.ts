@@ -8,11 +8,7 @@
  */
 import type { resources } from '@elastic/opentelemetry-node/sdk';
 import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
-import {
-  LangfuseSpanProcessor,
-  PhoenixSpanProcessor,
-  OTLPSpanProcessor,
-} from '@kbn/inference-tracing';
+import { LangfuseSpanProcessor, PhoenixSpanProcessor } from '@kbn/inference-tracing';
 import { fromExternalVariant } from '@kbn/std';
 import type { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
@@ -20,6 +16,7 @@ import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-ho
 import { castArray } from 'lodash';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { LateBindingSpanProcessor } from '..';
+import { OTLPSpanProcessor } from './otlp_span_processor';
 
 /**
  * Initialize the OpenTelemetry tracing provider
