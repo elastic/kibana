@@ -21,6 +21,7 @@ export const PasswordField: React.FC<PasswordWidgetProps> = ({
   schema,
   fieldProps,
   fieldConfig,
+  formConfig,
 }) => {
   return (
     <UseField

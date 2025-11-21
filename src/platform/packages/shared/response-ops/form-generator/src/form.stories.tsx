@@ -14,8 +14,21 @@ import { EuiButton } from '@elastic/eui';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormGenerator } from './form';
 
+interface StoryArgs {
+  readOnly?: boolean;
+}
+
 const meta = {
   title: 'Form Generator',
+  args: {
+    readOnly: false,
+  },
+  argTypes: {
+    readOnly: {
+      control: 'boolean',
+      description: 'Whether the form is in read-only mode',
+    },
+  },
 };
 
 export default meta;
@@ -29,9 +42,10 @@ const submit = ({ data }: { data: unknown }) => {
 interface FormWrapperProps {
   schema: z.ZodObject<z.ZodRawShape>;
   onSubmit: (data: { data: unknown }) => void;
+  readOnly?: boolean;
 }
 
-const FormWrapper = ({ schema, onSubmit }: FormWrapperProps) => {
+const FormWrapper = ({ schema, onSubmit, readOnly = false }: FormWrapperProps) => {
   const { form } = useForm({
     onSubmit: async (data, isValid) => {
       if (isValid) {
@@ -42,7 +56,7 @@ const FormWrapper = ({ schema, onSubmit }: FormWrapperProps) => {
 
   return (
     <Form form={form}>
-      <FormGenerator schema={schema} />
+      <FormGenerator schema={schema} formConfig={{ readOnly }} />
       <EuiButton onClick={form.submit} isLoading={form.isSubmitting}>
         Submit
       </EuiButton>
@@ -50,45 +64,63 @@ const FormWrapper = ({ schema, onSubmit }: FormWrapperProps) => {
   );
 };
 
-export const WebhookConnector: StoryObj = {
-  render: () => {
-    return <FormWrapper schema={webhookConnectorFormSchema} onSubmit={submit} />;
+export const WebhookConnector: StoryObj<StoryArgs> = {
+  render: (args) => {
+    return (
+      <FormWrapper schema={webhookConnectorFormSchema} onSubmit={submit} readOnly={args.readOnly} />
+    );
   },
 };
 
-export const AbuseIPDBConnector: StoryObj = {
-  render: () => {
-    return <FormWrapper schema={abuseIPDBConnectorSchema} onSubmit={submit} />;
+export const AbuseIPDBConnector: StoryObj<StoryArgs> = {
+  render: (args) => {
+    return (
+      <FormWrapper schema={abuseIPDBConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+    );
   },
 };
 
-export const AlienVaultOTXConnector: StoryObj = {
-  render: () => {
-    return <FormWrapper schema={alienVaultOTXConnectorSchema} onSubmit={submit} />;
+export const AlienVaultOTXConnector: StoryObj<StoryArgs> = {
+  render: (args) => {
+    return (
+      <FormWrapper
+        schema={alienVaultOTXConnectorSchema}
+        onSubmit={submit}
+        readOnly={args.readOnly}
+      />
+    );
   },
 };
 
-export const GreyNoiseConnector: StoryObj = {
-  render: () => {
-    return <FormWrapper schema={GreyNoiseConnectorSchema} onSubmit={submit} />;
+export const GreyNoiseConnector: StoryObj<StoryArgs> = {
+  render: (args) => {
+    return (
+      <FormWrapper schema={GreyNoiseConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+    );
   },
 };
 
-export const ShodanConnector: StoryObj = {
-  render: () => {
-    return <FormWrapper schema={ShodanConnectorSchema} onSubmit={submit} />;
+export const ShodanConnector: StoryObj<StoryArgs> = {
+  render: (args) => {
+    return (
+      <FormWrapper schema={ShodanConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+    );
   },
 };
 
-export const UrlVoidConnector: StoryObj = {
-  render: () => {
-    return <FormWrapper schema={UrlVoidConnectorSchema} onSubmit={submit} />;
+export const UrlVoidConnector: StoryObj<StoryArgs> = {
+  render: (args) => {
+    return (
+      <FormWrapper schema={UrlVoidConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+    );
   },
 };
 
-export const VirusTotalConnector: StoryObj = {
-  render: () => {
-    return <FormWrapper schema={VirusTotalConnectorSchema} onSubmit={submit} />;
+export const VirusTotalConnector: StoryObj<StoryArgs> = {
+  render: (args) => {
+    return (
+      <FormWrapper schema={VirusTotalConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+    );
   },
 };
 

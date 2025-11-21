@@ -24,9 +24,9 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
   path: rootPath,
   options,
   discriminatorKey,
-  schema,
   fieldConfig,
   fieldProps,
+  formConfig,
 }) => {
   const option = options[0];
   const optionSchema = option.omit({ [discriminatorKey]: true });
@@ -38,6 +38,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
   const fields = getFieldsFromSchema({
     schema: optionSchema,
     rootPath,
+    formConfig,
   });
   return fields.map((field) => renderFieldComponent({ field }));
 };

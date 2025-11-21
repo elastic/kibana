@@ -17,17 +17,28 @@ import { EuiSpacer } from '@elastic/eui';
 import { getWidgetComponent } from './widgets/registry';
 import { unwrap } from './schema_unwrap';
 
+export interface FormConfig {
+  readOnly?: boolean;
+}
+
 export interface FieldDefinition {
   path: string;
   validate: (...args: Parameters<ValidationFunc>) => ReturnType<ValidationFunc<any, ERROR_CODE>>;
   schema: z.ZodType;
+  formConfig: FormConfig;
   options?: Record<string, unknown>;
 }
 
-export const getFieldFromSchema = ({ schema, path }: { schema: z.ZodType; path: string }) => {
+interface GetFieldFromSchemaProps {
+  schema: z.ZodType;
+  path: string;
+  formConfig: FormConfig;
+}
+export const getFieldFromSchema = ({ schema, path, formConfig }: GetFieldFromSchemaProps) => {
   return {
     path,
     schema,
+    formConfig,
     validate: (
       ...args: Parameters<ValidationFunc>
     ): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
@@ -56,24 +67,29 @@ export const getFieldFromSchema = ({ schema, path }: { schema: z.ZodType; path: 
 export const getFieldsFromSchema = <T extends z.ZodRawShape>({
   schema,
   rootPath,
+  formConfig,
 }: {
   schema: z.ZodObject<T>;
   rootPath?: string;
+  formConfig: FormConfig;
 }) => {
   const fields: FieldDefinition[] = [];
 
   Object.keys(schema.shape).forEach((key) => {
     const fieldSchema = schema.shape[key] as z.ZodType;
     const path = rootPath ? `${rootPath}.${key}` : key;
-    const field = getFieldFromSchema({ schema: fieldSchema, path });
+    const field = getFieldFromSchema({ schema: fieldSchema, path, formConfig });
     fields.push(field);
   });
 
   return fields;
 };
 
-export const renderFieldComponent = ({ field }: { field: FieldDefinition }) => {
-  const { schema: outerSchema, validate, path } = field;
+interface RenderFieldComponentProps {
+  field: FieldDefinition;
+}
+export const renderFieldComponent = ({ field }: RenderFieldComponentProps) => {
+  const { schema: outerSchema, validate, path, formConfig } = field;
 
   // Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
   const { schema, defaultValue } = unwrap(outerSchema);
@@ -86,6 +102,7 @@ export const renderFieldComponent = ({ field }: { field: FieldDefinition }) => {
         key={path}
         path={path}
         schema={schema}
+        formConfig={formConfig}
         fieldConfig={{
           defaultValue: defaultValue ?? meta.default,
           validations: [
@@ -99,6 +116,7 @@ export const renderFieldComponent = ({ field }: { field: FieldDefinition }) => {
           helpText: meta.helpText,
           fullWidth: true,
           euiFieldProps: {
+            readOnly: formConfig.readOnly,
             placeholder: meta.placeholder,
             ['data-test-subj']: `generator-field-${path.replace(/\./g, '-')}`,
           },
@@ -111,10 +129,12 @@ export const renderFieldComponent = ({ field }: { field: FieldDefinition }) => {
 
 interface FormProps<TSchema extends z.ZodObject<z.ZodRawShape>> {
   schema: TSchema;
+  formConfig?: FormConfig;
 }
 export const FormGenerator = <TSchema extends z.ZodObject<z.ZodRawShape>>({
   schema,
+  formConfig = {},
 }: FormProps<TSchema>) => {
-  const fields = getFieldsFromSchema({ schema });
+  const fields = getFieldsFromSchema({ schema, formConfig });
   return fields.map((field) => renderFieldComponent({ field }));
 };

@@ -30,6 +30,7 @@ export const SelectField: React.FC<SelectWidgetProps> = ({
   schema,
   fieldProps,
   fieldConfig,
+  formConfig,
 }) => {
   if (!(schema instanceof z.ZodEnum)) {
     throw new Error('SelectField requires a ZodEnum schema');

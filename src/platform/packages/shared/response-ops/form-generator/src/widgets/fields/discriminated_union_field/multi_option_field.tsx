@@ -41,6 +41,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
   schema,
   fieldConfig,
   fieldProps,
+  formConfig,
 }) => {
   const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig);
   const [selectedOption, setSelectedOption] = useState(() =>
@@ -80,6 +81,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
                   discriminatorKey={discriminatorKey}
                   fieldConfig={fieldConfig}
                   fieldProps={fieldProps}
+                  formConfig={formConfig}
                 />
               )}
             </EuiCheckableCard>
