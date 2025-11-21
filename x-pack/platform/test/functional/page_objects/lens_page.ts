@@ -969,12 +969,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openChartSwitchPopover(layerIndex = 0) {
+      await this.ensureLayerTabIsActive(layerIndex);
+
       if (await testSubjects.exists('lnsChartSwitchList', { timeout: 200 })) {
         return;
       }
       await retry.try(async () => {
         const allChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
-        await allChartSwitches[layerIndex].click();
+        expect(allChartSwitches.length).to.be(1);
+        await allChartSwitches[0].click();
         await testSubjects.existOrFail('lnsChartSwitchList', { timeout: 5000 });
       });
     },
