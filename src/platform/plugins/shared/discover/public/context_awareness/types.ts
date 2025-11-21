@@ -229,7 +229,6 @@ export interface RowControlsExtensionParams {
    * Available actions for row controls
    */
   actions: {
-    openInNewTab?: (params: OpenInNewTabParams) => void;
     /**
      * Updates the current ES|QL query
      */
