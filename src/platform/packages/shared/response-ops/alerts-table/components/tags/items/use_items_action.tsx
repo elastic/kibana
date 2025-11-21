@@ -51,6 +51,7 @@ export const useItemsAction = <T,>({
   const updateAlerts = useCallback(
     (payload: AlertsUpdateRequest, options: { onSuccess: () => void }) => {
       // TODO: Implement logic to update alerts
+      options.onSuccess();
     },
     []
   );

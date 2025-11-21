@@ -16,7 +16,7 @@ describe('useItemsAction', () => {
   const mockAlert = {
     _id: 'alert-1',
     _index: 'test-index',
-    ALERT_WORKFLOW_TAGS: ['coke', 'pepsi'],
+    [ALERT_WORKFLOW_TAGS]: ['coke', 'pepsi'],
   } as unknown as Alert;
 
   const onAction = jest.fn();
@@ -131,7 +131,7 @@ describe('useItemsAction', () => {
 
       const alertWithExtraTags = {
         ...mockAlert,
-        ALERT_WORKFLOW_TAGS: ['coke', 'pepsi', 'one'],
+        [ALERT_WORKFLOW_TAGS]: ['coke', 'pepsi', 'one'],
       } as Alert;
 
       act(() => {
@@ -176,7 +176,6 @@ describe('useItemsAction', () => {
         expect(result.current.isFlyoutOpen).toBe(false);
       });
 
-      // Verify that itemsTransformer is called with deduplicated items
       expect(itemsTransformer).toHaveBeenCalledWith(['coke', 'one']);
     });
 
@@ -185,7 +184,7 @@ describe('useItemsAction', () => {
 
       const emptyAlert = {
         ...mockAlert,
-        ALERT_WORKFLOW_TAGS: [],
+        [ALERT_WORKFLOW_TAGS]: [],
       } as Alert;
 
       act(() => {
@@ -211,7 +210,7 @@ describe('useItemsAction', () => {
 
       const alertWithTags = {
         ...mockAlert,
-        ALERT_WORKFLOW_TAGS: ['1', '2'],
+        [ALERT_WORKFLOW_TAGS]: ['1', '2'],
       } as Alert;
 
       act(() => {
@@ -237,7 +236,7 @@ describe('useItemsAction', () => {
 
       const alertWithTag = {
         ...mockAlert,
-        ALERT_WORKFLOW_TAGS: ['1'],
+        [ALERT_WORKFLOW_TAGS]: ['1'],
       } as Alert;
 
       act(() => {
@@ -263,7 +262,7 @@ describe('useItemsAction', () => {
 
       const alertWithTag = {
         ...mockAlert,
-        ALERT_WORKFLOW_TAGS: ['1'],
+        [ALERT_WORKFLOW_TAGS]: ['1'],
       } as Alert;
 
       act(() => {
@@ -289,7 +288,7 @@ describe('useItemsAction', () => {
 
       const emptyAlert = {
         ...mockAlert,
-        ALERT_WORKFLOW_TAGS: [],
+        [ALERT_WORKFLOW_TAGS]: [],
       } as Alert;
 
       act(() => {
