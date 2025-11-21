@@ -336,7 +336,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('dropping between layers', () => {
+    // not supported for layers as tabs
+    describe.skip('dropping between layers', () => {
       it('should move the column', async () => {
         await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsXYvis');
