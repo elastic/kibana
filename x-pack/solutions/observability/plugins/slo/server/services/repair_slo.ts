@@ -10,7 +10,7 @@ import { type Logger } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RepairParams } from '@kbn/slo-schema';
 import pLimit from 'p-limit';
-import { computeHealth, getTransformStatsForSLO } from './slo_transform_health';
+import { computeHealth, SLOHealth } from '../domain/services/compute_health';
 import { getSLOTransformId, getSLOSummaryTransformId } from '../../common/constants';
 import type { DefaultTransformManager } from './transform_manager';
 import type { DefaultSummaryTransformManager } from './summay_transform_manager';
@@ -44,28 +44,24 @@ export class RepairSLO {
       // find definitions for the provided list, dedup/filter out the inexistant tuples (ids.)
       // definitions.map({...definition, instanceId})
 
-      const healthData = await Promise.all(
-        params.list.map(async (item) => {
-          const transformStatsById = await getTransformStatsForSLO(this.scopedClusterClient, {
-            sloId: item.sloId,
-            sloRevision: item.sloRevision,
-          });
-          const health = computeHealth(transformStatsById, {
-            sloId: item.sloId,
-            sloInstanceId: item.sloInstanceId || '*',
-            sloRevision: item.sloRevision,
-            enabled: item.sloEnabled,
-          });
-          return {
-            sloId: item.sloId,
-            sloRevision: item.sloRevision,
-            sloEnabled: item.sloEnabled,
-            health,
-          };
-        })
+      const sloDefinitions = await this.repository.findAllByIds(
+        params.list.map((item) => item.sloId)
       );
 
-      const repairActions = this.identifyRepairActions(healthData);
+      const health = await computeHealth(
+        sloDefinitions.map((definition) => ({
+          id: definition.id,
+          instanceId: '*',
+          revision: definition.revision,
+          name: definition.name,
+          enabled: definition.enabled,
+        })),
+        {
+          scopedClusterClient: this.scopedClusterClient,
+        }
+      );
+
+      const repairActions = this.identifyRepairActions(health);
       this.logger.debug(`Identified ${repairActions.length} repair actions needed`);
 
       if (repairActions.length === 0) {
@@ -172,19 +168,7 @@ export class RepairSLO {
     }
   }
 
-  private identifyRepairActions(
-    healthData: Array<{
-      sloId: string;
-      sloRevision: number;
-      sloEnabled?: boolean;
-      health: {
-        overall: 'healthy' | 'unhealthy' | 'missing';
-        rollup: { status: string; transformState?: string; match: boolean | undefined };
-        summary: { status: string; transformState?: string; match: boolean | undefined };
-        sloEnabled?: boolean;
-      };
-    }>
-  ): RepairAction[] {
+  private identifyRepairActions(healthData: SLOHealth[]): RepairAction[] {
     const actions: RepairAction[] = [];
 
     for (const item of healthData) {

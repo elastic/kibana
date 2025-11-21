@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { healthStatusSchema, stateSchema } from '@kbn/slo-schema';
+import type { healthStatusSchema, stateSchema, transformHealthSchema } from '@kbn/slo-schema';
 import type * as t from 'io-ts';
 
+type TransformHealth = t.OutputOf<typeof transformHealthSchema>;
 type HealthStatus = t.OutputOf<typeof healthStatusSchema>;
 type State = t.OutputOf<typeof stateSchema>;
 
-export type { HealthStatus, State };
+export type { HealthStatus, State, TransformHealth };

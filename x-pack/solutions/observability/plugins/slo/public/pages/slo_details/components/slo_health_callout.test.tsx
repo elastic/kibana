@@ -150,6 +150,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -182,6 +183,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -216,6 +218,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -250,6 +253,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -284,6 +288,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -318,6 +323,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -352,6 +358,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -386,6 +393,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -420,6 +428,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -454,6 +463,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {

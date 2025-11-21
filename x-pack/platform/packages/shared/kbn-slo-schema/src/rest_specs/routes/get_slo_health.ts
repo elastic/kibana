@@ -11,6 +11,7 @@ import { allOrAnyString } from '../../schema/common';
 const fetchSLOHealthResponseSchema = t.array(
   t.type({
     sloId: sloIdSchema,
+    sloInstanceId: allOrAnyString,
     sloRevision: t.number,
     sloName: t.string,
     state: stateSchema,
@@ -18,20 +19,13 @@ const fetchSLOHealthResponseSchema = t.array(
       overall: transformHealthSchema,
       rollup: healthStatusSchema,
       summary: healthStatusSchema,
-      enabled: t.union([t.undefined, t.boolean]),
     }),
   })
 );
 
 const fetchSLOHealthParamsSchema = t.type({
   body: t.type({
-    list: t.array(
-      t.type({
-        sloId: sloIdSchema,
-        sloInstanceId: allOrAnyString,
-        sloEnabled: t.union([t.undefined, t.boolean]),
-      })
-    ),
+    list: t.array(t.type({ sloId: sloIdSchema, sloInstanceId: allOrAnyString })),
   }),
 });
 
