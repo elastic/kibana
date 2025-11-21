@@ -113,12 +113,15 @@ export const SharedLists = React.memo(() => {
   const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
 
   const exceptionListTypes = useMemo(() => {
-    const lists = [ExceptionListTypeEnum.DETECTION];
+    const lists = [];
+    if (canReadExceptions) {
+      lists.push(ExceptionListTypeEnum.DETECTION);
+    }
     if (canAccessEndpointExceptions) {
       lists.push(ExceptionListTypeEnum.ENDPOINT);
     }
     return lists;
-  }, [canAccessEndpointExceptions]);
+  }, [canAccessEndpointExceptions, canReadExceptions]);
   const [
     loadingExceptions,
     exceptions,
@@ -496,7 +499,7 @@ export const SharedLists = React.memo(() => {
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
-              !isReadOnly && (
+              canCrudExceptions && (
                 <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
                   {i18n.CREATE_BUTTON}
                 </EuiButton>

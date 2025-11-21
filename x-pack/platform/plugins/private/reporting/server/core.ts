@@ -48,8 +48,9 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -68,6 +69,7 @@ export interface ReportingInternalSetup {
   docLinks: DocLinksServiceSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
+  licensing: LicensingPluginSetup;
   logger: Logger;
   router: ReportingPluginRouter;
   security?: SecurityPluginSetup;
@@ -108,7 +110,6 @@ export class ReportingCore {
   private runScheduledReportTask: RunScheduledReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
@@ -117,6 +118,7 @@ export class ReportingCore {
   constructor(
     private core: CoreSetup,
     private logger: Logger,
+    private exportTypesRegistry: ExportTypesRegistry,
     private context: PluginInitializerContext<ReportingConfigType>
   ) {
     this.packageInfo = context.env.packageInfo;

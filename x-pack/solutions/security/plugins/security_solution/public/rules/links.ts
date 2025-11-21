@@ -18,6 +18,7 @@ import {
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
+  SECURITY_FEATURE_ID,
 } from '../../common/constants';
 import {
   ADD_RULES,
@@ -83,7 +84,7 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [RULES_UI_READ_PRIVILEGE],
+      capabilities: [RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.showEndpointExceptions`],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [

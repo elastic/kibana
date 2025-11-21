@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
   SIEM_MIGRATIONS_FEATURE_ID,
 } from '@kbn/security-solution-features/constants';
 import {
@@ -49,7 +50,10 @@ const subLinks: LinkItem[] = [
     ),
     landingIcon: IconDashboards,
     path: SIEM_MIGRATIONS_DASHBOARDS_PATH,
-    capabilities: [[RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    // dashboard page requires both the Security:Read and Dashboard:Read privileges
+    capabilities: [
+      [`dashboard_v2.show`, SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+    ],
     skipUrlState: true,
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
@@ -69,7 +73,10 @@ export const links: LinkItem = {
     defaultMessage: 'Migrations',
   }),
   path: SIEM_MIGRATIONS_LANDING_PATH,
-  capabilities: [[RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+  capabilities: [
+    [SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+    [RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+  ],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.migrations', {
       defaultMessage: 'Migrations',
