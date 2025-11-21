@@ -138,7 +138,7 @@ import { setLensFeatureFlags } from './get_feature_flags';
 import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggestion } from '.';
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
-import { setLensBuilder } from './lazy_builder';
+import { ensureBuilderIsInitialized, setLensBuilder } from './lazy_builder';
 
 export type { SaveProps } from './app_plugin';
 
@@ -518,6 +518,7 @@ export class LensPlugin {
         initMemoizedErrorNotification(coreStart);
 
         const frameStart = this.editorFrameService!.start(coreStart, deps);
+        await ensureBuilderIsInitialized();
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart.http),
