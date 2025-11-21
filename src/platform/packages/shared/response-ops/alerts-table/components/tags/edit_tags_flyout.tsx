@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useCallback, useState } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  euiFullHeight,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+
+import type { Alert } from '@kbn/alerting-types';
+import { EditTagsSelectable } from './edit_tags_selectable';
+import * as i18n from './translations';
+import type { ItemsSelectionState } from './items/types';
+// import { useFocusButtonTrap } from '../../use_focus_button';
+
+interface Props {
+  selectedAlerts: Alert[];
+  onClose: () => void;
+  onSaveTags: (args: ItemsSelectionState) => void;
+  focusButtonRef?: React.Ref<HTMLButtonElement>;
+}
+
+const FlyoutBodyCss = css`
+  ${euiFullHeight()}
+
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+  }
+`;
+
+const EditTagsFlyoutComponent: React.FC<Props> = ({
+  selectedAlerts,
+  onClose,
+  onSaveTags,
+  focusButtonRef,
+}) => {
+  // const { data: tags, isLoading } = useGetTags();
+  const isLoading = false;
+  const tags: string[] = [];
+
+  const [tagsSelection, setTagsSelection] = useState<ItemsSelectionState>({
+    selectedItems: [],
+    unSelectedItems: [],
+  });
+
+  const onSave = useCallback(() => onSaveTags(tagsSelection), [onSaveTags, tagsSelection]);
+  // const focusTrapProps = useFocusButtonTrap(focusButtonRef);
+
+  const headerSubtitle =
+    selectedAlerts.length > 1
+      ? i18n.SELECTED_ALERTS(selectedAlerts.length)
+      : selectedAlerts[0].title;
+
+  return (
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      aria-labelledby="cases-edit-tags-flyout"
+      data-test-subj="cases-edit-tags-flyout"
+      size="s"
+      paddingSize="m"
+      // focusTrapProps={focusTrapProps}
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 data-test-subj="cases-edit-tags-flyout-title">{i18n.EDIT_TAGS}</h2>
+        </EuiTitle>
+        <EuiText color="subdued">
+          <p>{headerSubtitle as string}</p>
+        </EuiText>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody css={FlyoutBodyCss}>
+        {isLoading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <EditTagsSelectable
+            selectedAlerts={selectedAlerts}
+            isLoading={isLoading}
+            tags={tags ?? []}
+            onChangeTags={setTagsSelection}
+          />
+        )}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={onClose}
+              flush="left"
+              data-test-subj="cases-edit-tags-flyout-cancel"
+            >
+              {i18n.CANCEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={onSave} fill data-test-subj="cases-edit-tags-flyout-submit">
+              {i18n.SAVE_SELECTION}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+};
+
+EditTagsFlyoutComponent.displayName = 'EditTagsFlyout';
+
+export const EditTagsFlyout = React.memo(EditTagsFlyoutComponent);
