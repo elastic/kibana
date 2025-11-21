@@ -115,8 +115,8 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
     [discoverUrl]
   );
 
-  // TODO check if there's at least one of the other fields with value
-  if (!serviceNameValue) {
+  const hasAtLeastOneErrorField = culpritValue || messageValue || typeValue;
+  if (!serviceNameValue || !hasAtLeastOneErrorField) {
     return undefined;
   }
 
