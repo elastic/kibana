@@ -37,6 +37,7 @@ import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
+import { analyzeMultiMatchTypes } from '../../../utils/query_analysis';
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -126,6 +127,11 @@ export function fetchAll(
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
+
+    // Analyze query for multi_match types before tracking
+    const searchRequestBody = searchSource.getSearchRequestBody();
+    const queryAnalysis = analyzeMultiMatchTypes(searchRequestBody.query);
+
     const fetchAllRequestOnlyTracker = scopedEbtManager.trackPerformanceEvent(
       'discoverFetchAllRequestsOnly'
     );
@@ -139,9 +145,14 @@ export function fetchAll(
     response
       .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
         fetchAllRequestOnlyTracker.reportEvent({
-          meta: { fetchType },
           key1: 'query_range_secs',
           value1: queryRangeSeconds,
+          key2: 'has_phrase_query',
+          value2: queryAnalysis.types.has('match_phrase') ? 1 : 0,
+          meta: {
+            fetchType,
+            multi_match_types: Array.from(queryAnalysis.types),
+          },
         });
 
         if (isEsqlQuery) {

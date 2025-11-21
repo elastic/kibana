@@ -44,6 +44,7 @@ import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabSta
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import { analyzeMultiMatchTypes } from '../../../utils/query_analysis';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -287,6 +288,11 @@ export function getDataStateContainer({
           abortController?.abort();
           abortControllerFetchMore?.abort();
 
+          // Analyze query for multi_match types - reused across both branches
+          const searchSource = savedSearchContainer.getState().searchSource;
+          const searchRequestBody = searchSource.getSearchRequestBody();
+          const queryAnalysis = analyzeMultiMatchTypes(searchRequestBody.query);
+
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
             const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
@@ -303,6 +309,11 @@ export function getDataStateContainer({
             fetchMoreTracker.reportEvent({
               key1: 'query_range_secs',
               value1: queryRangeSeconds,
+              key2: 'has_phrase_query',
+              value2: queryAnalysis.types.has('match_phrase') ? 1 : 0,
+              meta: {
+                multi_match_types: Array.from(queryAnalysis.types),
+              },
             });
 
             return;
@@ -392,6 +403,11 @@ export function getDataStateContainer({
           fetchAllTracker.reportEvent({
             key1: 'query_range_secs',
             value1: queryRangeSeconds,
+            key2: 'has_phrase_query',
+            value2: queryAnalysis.types.has('match_phrase') ? 1 : 0,
+            meta: {
+              multi_match_types: Array.from(queryAnalysis.types),
+            },
           });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
