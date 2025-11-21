@@ -10,6 +10,7 @@
 import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES, getKbnFieldType } from '@kbn/field-types';
 
 export interface ValueInputProps {
   onError?: (error: string | null) => void;
@@ -58,19 +59,16 @@ export const BooleanInput = ({ onError, onChange, ...restOfProps }: ValueInputPr
 };
 
 export function getInputComponentForType(type: string | undefined): React.FC<ValueInputProps> {
-  switch (type) {
-    case 'byte':
-    case 'double':
-    case 'float':
-    case 'half_float':
-    case 'integer':
-    case 'long':
-    case 'scaled_float':
-    case 'short':
-    case 'unsigned_long':
-    case 'number':
+  if (!type) {
+    return StringInput;
+  }
+
+  const kibanaFieldType = getKbnFieldType(type);
+
+  switch (kibanaFieldType.name) {
+    case KBN_FIELD_TYPES.NUMBER:
       return NumberInput;
-    case 'boolean':
+    case KBN_FIELD_TYPES.BOOLEAN:
       return BooleanInput;
     default:
       return StringInput;
