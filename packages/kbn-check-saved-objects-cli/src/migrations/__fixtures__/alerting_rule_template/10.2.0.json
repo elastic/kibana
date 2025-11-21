@@ -1,0 +1,39 @@
+{
+  "10.1.0": [
+    {
+      "name": "test template",
+      "tags": [],
+      "ruleTypeId": ".test",
+      "flapping": {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "params": {},
+      "schedule": {
+        "interval": "1m"
+      },
+      "alertDelay": {
+        "active": 1
+      }
+    }
+  ],
+  "10.2.0": [
+    {
+      "name": "test template",
+      "tags": [],
+      "ruleTypeId": ".test",
+      "flapping": {
+        "enabled": true,
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "params": {},
+      "schedule": {
+        "interval": "1m"
+      },
+      "alertDelay": {
+        "active": 1
+      }
+    }
+  ]
+}
