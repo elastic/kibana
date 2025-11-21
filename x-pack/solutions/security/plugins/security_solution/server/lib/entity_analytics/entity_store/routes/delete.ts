@@ -51,6 +51,12 @@ export const deleteEntityEngineRoute = (
       },
 
       async (context, request, response): Promise<IKibanaResponse<DeleteEntityEngineResponse>> => {
+        if (request.query.esqlPoc) {
+          const secSol = await context.securitySolution;
+          await secSol.getEntityStoreEsqlService().stopTask();
+          return response.ok();
+        }
+
         const siemResponse = buildSiemResponse(response);
         const [_, { taskManager }] = await getStartServices();
         if (!taskManager) {

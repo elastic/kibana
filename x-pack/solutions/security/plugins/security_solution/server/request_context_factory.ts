@@ -44,6 +44,7 @@ import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_an
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { getSiemMigrationClients } from './lib/siem_migrations';
 import { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
+import { EntityStoreESQLService } from './lib/entity_analytics/entity_store/esql_poc';
 
 export interface IRequestContextFactory {
   create(
@@ -137,7 +138,6 @@ export class RequestContextFactory implements IRequestContextFactory {
       });
 
     const getEntityStoreDataClient = memoize(() => {
-      // why are we defining this here, but other places we do it inline?
       const clusterClient = coreContext.elasticsearch.client;
       const logger = options.logger;
 
@@ -344,6 +344,16 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: options.logger,
           dataClient: getEntityStoreDataClient(),
         });
+      }),
+      getEntityStoreEsqlService: memoize(() => {
+        return new EntityStoreESQLService(
+          getSpaceId(),
+          coreContext.elasticsearch.client.asCurrentUser,
+          coreContext.savedObjects.client,
+          getEntityStoreApiKeyManager(),
+          options.logger,
+          startPlugins.taskManager
+        );
       }),
       getAssetInventoryClient: memoize(
         () =>

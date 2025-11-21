@@ -19,6 +19,7 @@ import type { InitEntityEngineResponse } from '../../../../../common/api/entity_
 import {
   InitEntityEngineRequestBody,
   InitEntityEngineRequestParams,
+  InitEntityEngineRequestQuery,
 } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -48,6 +49,7 @@ export const initEntityEngineRoute = (
         validate: {
           request: {
             params: buildRouteValidationWithZod(InitEntityEngineRequestParams),
+            query: buildRouteValidationWithZod(InitEntityEngineRequestQuery),
             body: buildInitRequestBodyValidation(InitEntityEngineRequestBody),
           },
         },
@@ -59,6 +61,11 @@ export const initEntityEngineRoute = (
         const { pipelineDebugMode } = config.entityAnalytics.entityStore.developer;
         const { getSpaceId, getAppClient, getDataViewsService } = await context.securitySolution;
         const entityStoreClient = secSol.getEntityStoreDataClient();
+
+        if (request.query.esqlPoc) {
+          await secSol.getEntityStoreEsqlService().startTask();
+          return response.ok();
+        }
 
         try {
           const securitySolutionIndices = await buildIndexPatternsByEngine(

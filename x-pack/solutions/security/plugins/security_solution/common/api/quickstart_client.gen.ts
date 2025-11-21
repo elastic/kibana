@@ -240,6 +240,7 @@ import type {
   GetEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/get.gen';
 import type {
+  InitEntityEngineRequestQueryInput,
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
   InitEntityEngineResponse,
@@ -2184,6 +2185,7 @@ finalize it.
         },
         method: 'POST',
         body: props.body,
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3461,6 +3463,7 @@ export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
 export interface InitEntityEngineProps {
+  query: InitEntityEngineRequestQueryInput;
   params: InitEntityEngineRequestParamsInput;
   body: InitEntityEngineRequestBodyInput;
 }

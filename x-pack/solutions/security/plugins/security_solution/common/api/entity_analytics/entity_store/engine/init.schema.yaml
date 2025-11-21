@@ -17,6 +17,12 @@ paths:
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
           description: The entity type of the engine.
+        - name: esqlPoc
+          in: query
+          required: false          
+          description: init esql poc instead of regular entity store.
+          schema:
+            type: boolean
       requestBody:
         description: Schema for the engine initialization
         required: true
