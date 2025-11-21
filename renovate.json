@@ -4175,13 +4175,13 @@
         "@xstate/react"
       ],
       "reviewers": [
-        "team:obs-ux-onboarding-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-onboarding",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4196,13 +4196,13 @@
         "@xstate5/react"
       ],
       "reviewers": [
-        "team:obs-ux-onboarding-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-onboarding",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4216,13 +4216,13 @@
         "constate"
       ],
       "reviewers": [
-        "team:obs-ux-onboarding-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-onboarding",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4235,13 +4235,13 @@
         "oniguruma-to-es"
       ],
       "reviewers": [
-        "team:obs-ux-onboarding-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-onboarding",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
