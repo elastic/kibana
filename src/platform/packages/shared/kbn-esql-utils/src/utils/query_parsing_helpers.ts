@@ -24,8 +24,7 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
-  ESQLCommand,
-  ESQLAstQueryExpression,
+  ESQLAstForkCommand,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -105,16 +104,21 @@ export function hasTransformationalCommand(esql?: string) {
   }
 
   // Check for fork commands with all transformational branches
-  const forkCommands = Walker.findAll(root, (node) => node.name === 'fork') as Array<ESQLCommand>;
+  const forkCommands = Walker.findAll(
+    root,
+    (node) => node.name === 'fork'
+  ) as Array<ESQLAstForkCommand>;
 
   const hasForkWithAllTransformationalBranches = forkCommands.some((forkCommand) => {
-    const forkArguments = forkCommand?.args as ESQLAstQueryExpression[];
+    const forkArguments = forkCommand?.args;
 
     if (!forkArguments || forkArguments.length === 0) {
       return false;
     }
 
-    return forkArguments.every((branch) => {
+    return forkArguments.every((parens) => {
+      const branch = parens.child;
+
       if (branch.type !== 'query') {
         return false;
       }
