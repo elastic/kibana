@@ -45,6 +45,14 @@ const rangeSchema = schema.object({
       meta: { description: 'Less than' },
     })
   ),
+  format: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Date format (e.g., strict_date_optional_time, strict_date_optional_time_nanos)',
+      },
+    })
+  ),
 });
 
 // ====================================================================

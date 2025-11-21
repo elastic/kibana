@@ -148,6 +148,7 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
         ...(range.lte !== undefined && { lte: range.lte as number | string }),
         ...(range.gt !== undefined && { gt: range.gt as number | string }),
         ...(range.lt !== undefined && { lt: range.lt as number | string }),
+        ...(range.format !== undefined && { format: range.format as string }),
       },
     };
   }

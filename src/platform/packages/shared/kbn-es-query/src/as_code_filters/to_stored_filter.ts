@@ -184,19 +184,17 @@ function convertFromSimpleCondition(
 
   // RANGE
   if (condition.operator === ASCODE_FILTER_OPERATOR.RANGE) {
-    // Determine format - use existing meta.params.format if available, otherwise default for @timestamp
-    const existingFormat =
-      typeof baseStored.meta.params === 'object' &&
-      baseStored.meta.params !== null &&
-      'format' in baseStored.meta.params
-        ? (baseStored.meta.params as { format?: string }).format
-        : undefined;
-    const format =
-      existingFormat ??
-      (condition.field === '@timestamp' ? 'strict_date_optional_time' : undefined);
+    // Extract format from condition if available
+    const format = 'format' in condition.value ? condition.value.format : undefined;
 
     // Build range query, including format if present
-    const rangeQuery = { ...condition.value, ...(format && { format }) };
+    const rangeQuery = {
+      ...(condition.value.gte !== undefined && { gte: condition.value.gte }),
+      ...(condition.value.lte !== undefined && { lte: condition.value.lte }),
+      ...(condition.value.gt !== undefined && { gt: condition.value.gt }),
+      ...(condition.value.lt !== undefined && { lt: condition.value.lt }),
+      ...(format && { format }),
+    };
 
     return {
       ...baseStored,

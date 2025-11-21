@@ -338,12 +338,9 @@ describe('toStoredFilter', () => {
 
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
-      // Verify format is present
+      // Verify format is preserved through round-trip
       expect(roundTrip.query?.range?.['@timestamp']).toBeDefined();
-      // NOTE: Format is currently normalized to 'strict_date_optional_time' (without _nanos)
-      // This is done in convertFromSimpleCondition (line 159) for @timestamp fields
-      // The _nanos precision is lost in round-trip conversion
-      expect(roundTrip.query?.range?.['@timestamp'].format).toBe('strict_date_optional_time');
+      expect(roundTrip.query?.range?.['@timestamp'].format).toBe('strict_date_optional_time_nanos');
       expect(roundTrip.query?.range?.['@timestamp'].gte).toBe('2024-01-01T00:00:00.000000000Z');
       expect(roundTrip.query?.range?.['@timestamp'].lte).toBe('2024-01-01T23:59:59.999999999Z');
       expect(roundTrip.meta.type).toBe('range');
@@ -418,8 +415,8 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(singleDateFilter) as AsCodeFilter;
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
-      // Format is normalized (see previous test for explanation)
-      expect(roundTrip.query?.range?.['@timestamp'].format).toBe('strict_date_optional_time');
+      // Format is now preserved through round-trip
+      expect(roundTrip.query?.range?.['@timestamp'].format).toBe('strict_date_optional_time_nanos');
       // Equal gte/lte should be preserved
       expect(roundTrip.query?.range?.['@timestamp'].gte).toBe('2024-11-10T15:30:00.000Z');
       expect(roundTrip.query?.range?.['@timestamp'].lte).toBe('2024-11-10T15:30:00.000Z');
