@@ -17,12 +17,9 @@ import type { ExecutorParams } from '../../sub_action_framework/types';
 type RecordUnknown = Record<string, unknown>;
 
 function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate(
-    'xpack.stackConnectors.singleFileConnector.unexpectedErrorMessage',
-    {
-      defaultMessage: 'error calling connector, unexpected error',
-    }
-  );
+  const errMessage = i18n.translate('xpack.actions.singleFileConnector.unexpectedErrorMessage', {
+    defaultMessage: 'error calling connector, unexpected error',
+  });
   return {
     status: 'error',
     message: errMessage,
