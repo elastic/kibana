@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -97,7 +98,21 @@ const ContextExceededError: React.FC<{ onRetry: () => void }> = ({ onRetry }) =>
             <p>
               <FormattedMessage
                 id="xpack.onechat.round.error.contextExceeded.description"
-                defaultMessage="The conversation is too long for the model to process. Try starting a new conversation."
+                defaultMessage="This conversation exceeded the maximum context size. This typically occurs when tools return too many results or result content is very large. See {docsLink} for approaches to address this issue."
+                values={{
+                  docsLink: (
+                    <EuiLink
+                      href="https://www.elastic.co/docs/solutions/search/agent-builder/limitations-known-issues#conversation-length-exceeded"
+                      external
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        id="xpack.onechat.round.error.contextExceeded.docsLink"
+                        defaultMessage="documentation"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             </p>
           </EuiText>
