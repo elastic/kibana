@@ -249,56 +249,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/connector-specs",
-        "id": "def-common.withUIMeta",
-        "type": "Function",
-        "tags": [],
-        "label": "withUIMeta",
-        "description": [
-          "\nHelper function to add UI metadata to any Zod schema\nWHY: Provides type-safe way to attach metadata\n"
-        ],
-        "signature": [
-          "(schema: T, meta: { sensitive?: boolean | undefined; widget?: \"number\" | \"text\" | \"date\" | \"password\" | \"code\" | \"select\" | \"textarea\" | \"document\" | \"json\" | \"dateTime\" | \"toggle\" | \"keyValue\" | \"multiSelect\" | undefined; widgetOptions?: { [key: string]: unknown; language?: \"python\" | \"json\" | \"yaml\" | \"javascript\" | \"typescript\" | undefined; rows?: number | undefined; cols?: number | undefined; } | undefined; label?: string | undefined; placeholder?: string | undefined; section?: string | undefined; order?: number | undefined; when?: { field: string; is: unknown; then?: \"enable\" | \"disable\" | \"hide\" | \"show\" | undefined; } | undefined; optionsFrom?: { action: string; map: (result: unknown) => { value: string | number; label: string; }[]; cacheDuration?: number | undefined; refreshOn?: string[] | undefined; } | undefined; helpText?: string | undefined; docsUrl?: string | undefined; }) => T"
-        ],
-        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/connector-specs",
-            "id": "def-common.withUIMeta.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "schema",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/connector-specs",
-            "id": "def-common.withUIMeta.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "meta",
-            "description": [],
-            "signature": [
-              "{ sensitive?: boolean | undefined; widget?: \"number\" | \"text\" | \"date\" | \"password\" | \"code\" | \"select\" | \"textarea\" | \"document\" | \"json\" | \"dateTime\" | \"toggle\" | \"keyValue\" | \"multiSelect\" | undefined; widgetOptions?: { [key: string]: unknown; language?: \"python\" | \"json\" | \"yaml\" | \"javascript\" | \"typescript\" | undefined; rows?: number | undefined; cols?: number | undefined; } | undefined; label?: string | undefined; placeholder?: string | undefined; section?: string | undefined; order?: number | undefined; when?: { field: string; is: unknown; then?: \"enable\" | \"disable\" | \"hide\" | \"show\" | undefined; } | undefined; optionsFrom?: { action: string; map: (result: unknown) => { value: string | number; label: string; }[]; cacheDuration?: number | undefined; refreshOn?: string[] | undefined; } | undefined; helpText?: string | undefined; docsUrl?: string | undefined; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -436,9 +386,9 @@
             "description": [],
             "signature": [
               "ZodType",
-              "<TInput, ",
-              "ZodTypeDef",
-              ", TInput>"
+              "<TInput, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TInput, unknown>>"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
@@ -453,9 +403,9 @@
             "description": [],
             "signature": [
               "ZodType",
-              "<TOutput, ",
-              "ZodTypeDef",
-              ", TOutput> | undefined"
+              "<TOutput, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TOutput, unknown>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
@@ -470,9 +420,9 @@
             "description": [],
             "signature": [
               "ZodType",
-              "<TError, ",
-              "ZodTypeDef",
-              ", TError> | undefined"
+              "<TError, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TError, unknown>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
@@ -580,6 +530,191 @@
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.AuthTypeDef",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthTypeDef",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeDef.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeDef.defaults",
+            "type": "Object",
+            "tags": [],
+            "label": "defaults",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.AuthTypeSpec",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthTypeSpec",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.AuthTypeSpec",
+            "text": "AuthTypeSpec"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodObject",
+              "<Record<string, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.normalizeSchema",
+            "type": "Function",
+            "tags": [],
+            "label": "normalizeSchema",
+            "description": [],
+            "signature": [
+              "((defaults?: Record<string, unknown> | undefined) => ",
+              "ZodObject",
+              "<Record<string, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.normalizeSchema.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "defaults",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.configure",
+            "type": "Function",
+            "tags": [],
+            "label": "configure",
+            "description": [],
+            "signature": [
+              "(axiosInstance: ",
+              "AxiosInstance",
+              ", secret: T) => ",
+              "AxiosInstance"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.configure.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "axiosInstance",
+                "description": [],
+                "signature": [
+                  "AxiosInstance"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.configure.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "secret",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -839,16 +974,40 @@
           },
           {
             "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.authTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "authTypes",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.AuthTypeDef",
+                "text": "AuthTypeDef"
+              },
+              ")[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
             "id": "def-common.ConnectorSpec.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
             "description": [],
             "signature": [
-              "ZodType",
-              "<any, ",
-              "ZodTypeDef",
-              ", any>"
+              "ZodObject",
+              "<",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodLooseShape, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
@@ -1731,90 +1890,31 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.NormalizedAuthType",
+        "type": "Type",
+        "tags": [],
+        "label": "NormalizedAuthType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.AuthTypeSpec",
+            "text": "AuthTypeSpec"
+          },
+          "<Record<string, unknown>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
-      {
-        "parentPluginId": "@kbn/connector-specs",
-        "id": "def-common.BasicAuthSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "BasicAuthSchema",
-        "description": [
-          "\nHTTP Basic Authentication\nUse for: Username + Password auth (Jira, etc.)"
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ method: ",
-          "ZodLiteral",
-          "<\"basic\">; credentials: ",
-          "ZodObject",
-          "<{ username: ",
-          "ZodString",
-          "; password: ",
-          "ZodString",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { username: string; password: string; }, { username: string; password: string; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { credentials: { username: string; password: string; }; method: \"basic\"; }, { credentials: { username: string; password: string; }; method: \"basic\"; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/connector-specs",
-        "id": "def-common.BearerAuthSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "BearerAuthSchema",
-        "description": [
-          "\nBearer Token Authentication\nUse for: OAuth tokens, API tokens sent as \"Authorization: Bearer <token>\""
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ method: ",
-          "ZodLiteral",
-          "<\"bearer\">; token: ",
-          "ZodString",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { method: \"bearer\"; token: string; }, { method: \"bearer\"; token: string; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/connector-specs",
-        "id": "def-common.HeaderAuthSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "HeaderAuthSchema",
-        "description": [
-          "\nHeader-based authentication (generic)\nUse for: API keys, custom headers (X-API-Key, etc.)"
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ method: ",
-          "ZodLiteral",
-          "<\"headers\">; headers: ",
-          "ZodRecord",
-          "<",
-          "ZodString",
-          ", ",
-          "ZodString",
-          ">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { method: \"headers\"; headers: Record<string, string>; }, { method: \"headers\"; headers: Record<string, string>; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/connector-specs",
         "id": "def-common.RETRY_GATEWAY_ERRORS",
@@ -1882,7 +1982,7 @@
         "tags": [],
         "label": "UISchemas",
         "description": [
-          "\nPre-configured schema types for common field patterns\nWHY: Reduces boilerplate for frequently used field types\nThese are convenience wrappers that apply common metadata"
+          "\nPre-configured schema types for common field patterns\nWHY: Reduces boilerplate for frequently used field types\nThese use Zod's built-in .meta() to attach UI metadata\n"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
         "deprecated": false,
@@ -2035,7 +2135,7 @@
             ],
             "signature": [
               "(placeholder?: string | undefined) => ",
-              "ZodString"
+              "ZodURL"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
             "deprecated": false,
