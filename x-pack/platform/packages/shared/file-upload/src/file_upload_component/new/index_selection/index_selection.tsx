@@ -14,6 +14,8 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTitle,
+  EuiText,
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -68,40 +70,35 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
 
   return (
     <>
-      <EuiSpacer size="xs" />
-
       {allowExistingIndices === true ? (
-        <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <span>
               <EuiButtonGroup
-                legend={i18n.translate('xpack.dataVisualizer.file.indexSelection.label', {
+                legend={i18n.translate('xpack.fileUpload.indexSelection.label', {
                   defaultMessage: 'Select index creation method',
                 })}
+                isFullWidth={true}
                 isDisabled={false}
                 options={[
                   {
                     id: UPLOAD_TYPE.NEW,
-                    label: i18n.translate('xpack.dataVisualizer.file.indexSelection.newLabel', {
+                    label: i18n.translate('xpack.fileUpload.indexSelection.newLabel', {
                       defaultMessage: 'New index',
                     }),
                   },
                   {
                     id: UPLOAD_TYPE.EXISTING,
-                    label: i18n.translate(
-                      'xpack.dataVisualizer.file.existingIndexSelection.label',
-                      {
-                        defaultMessage: 'Existing index',
-                      }
-                    ),
+                    label: i18n.translate('xpack.fileUpload.existingIndexSelection.label', {
+                      defaultMessage: 'Existing index',
+                    }),
                   },
                 ]}
                 idSelected={indexCreateMode}
                 onChange={(id) => setIndexCreateModeWrapper(id as UPLOAD_TYPE)}
               />
             </span>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+
             <EuiSpacer size="m" />
 
             {indexCreateMode === UPLOAD_TYPE.NEW ? (
@@ -139,6 +136,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
               </>
             )}
           </EuiFlexItem>
+          <EuiFlexItem />
         </EuiFlexGroup>
       ) : (
         <IndexInput
