@@ -6,6 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import type { TransformGetTransformStatsTransformStats } from 'elasticsearch-8.x/lib/api/types';
 import { groupBy, keyBy, type Dictionary } from 'lodash';
 import moment from 'moment';
@@ -20,14 +21,13 @@ import type { HealthStatus, State, TransformHealth } from '../models/health';
 
 interface Item {
   id: string;
-  instanceId: string;
+  instanceId?: string;
   revision: number;
   name: string;
 }
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
-  abortSignal?: AbortSignal;
 }
 
 export interface SLOHealth {
@@ -59,7 +59,7 @@ export async function computeHealth(list: Item[], deps: Dependencies): Promise<S
     return {
       sloId: item.id,
       sloName: item.name,
-      sloInstanceId: item.instanceId,
+      sloInstanceId: item.instanceId ?? ALL_VALUE,
       sloRevision: item.revision,
       state,
       health,
@@ -68,25 +68,22 @@ export async function computeHealth(list: Item[], deps: Dependencies): Promise<S
 }
 
 async function getSummaryDocsById(list: Item[], deps: Dependencies) {
-  const summaryDocs = await deps.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>(
-    {
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      query: {
-        bool: {
-          should: list.map((item) => ({
-            bool: {
-              must: [
-                { term: { 'slo.id': item.id } },
-                { term: { 'slo.instanceId': item.instanceId } },
-                { term: { 'slo.revision': item.revision } },
-              ],
-            },
-          })),
-        },
+  const summaryDocs = await deps.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>({
+    index: SUMMARY_DESTINATION_INDEX_PATTERN,
+    query: {
+      bool: {
+        should: list.map((item) => ({
+          bool: {
+            must: [
+              { term: { 'slo.id': item.id } },
+              { term: { 'slo.instanceId': item.instanceId } },
+              { term: { 'slo.revision': item.revision } },
+            ],
+          },
+        })),
       },
     },
-    { signal: deps.abortSignal }
-  );
+  });
 
   const summaryDocsById = groupBy(
     summaryDocs.hits.hits.map((hit) => hit._source!),
@@ -105,7 +102,7 @@ async function getTransformStats(
       allow_no_match: true,
       size: list.length * 2,
     },
-    { ignore: [404], signal: deps.abortSignal }
+    { ignore: [404] }
   );
 
   return keyBy(stats.transforms, (transform) => transform.id);
@@ -113,7 +110,7 @@ async function getTransformStats(
 
 function computeTransformState(
   summaryDocsById: Dictionary<EsSummaryDocument[]>,
-  item: { id: string; instanceId: string; revision: number }
+  item: Item
 ): State {
   const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.id, item.instanceId)];
 
@@ -167,7 +164,7 @@ function getTransformHealth(
 
 function computeTransformHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { id: string; instanceId: string; revision: number }
+  item: Item
 ): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
   const rollup = getTransformHealth(transformStatsById[getSLOTransformId(item.id, item.revision)]);
   const summary = getTransformHealth(
@@ -185,6 +182,6 @@ function computeTransformHealth(
   return { overall, rollup, summary };
 }
 
-function buildSummaryKey(id: string, instanceId: string) {
+function buildSummaryKey(id: string, instanceId: string = ALL_VALUE) {
   return id + '|' + instanceId;
 }

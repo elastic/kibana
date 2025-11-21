@@ -13,7 +13,7 @@ import type {
 } from '@kbn/slo-schema';
 import { findSloDefinitionsResponseSchema } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
-import { computeHealth, type SLOHealth } from '../domain/services';
+import { computeHealth } from '../domain/services';
 import { IllegalArgumentError } from '../errors';
 import type { SLORepository } from './slo_repository';
 
@@ -37,25 +37,9 @@ export class FindSLODefinitions {
     );
 
     if (params.includeHealth) {
-      let healthResults: SLOHealth[] = [];
-      try {
-        healthResults = await computeHealth(
-          definitions.map((definition) => ({
-            id: definition.id,
-            instanceId: '*',
-            name: definition.name,
-            revision: definition.revision,
-          })),
-          {
-            scopedClusterClient: this.scopedClusterClient,
-            abortSignal: AbortSignal.timeout(2),
-          }
-        );
-      } catch (err) {
-        if (err.name !== 'RequestAbortedError') {
-          throw err;
-        }
-      }
+      const healthResults = await computeHealth(definitions, {
+        scopedClusterClient: this.scopedClusterClient,
+      });
 
       const healthBySloId = keyBy(healthResults, 'sloId');
       const resultsWithHealth = definitions.map((definition) => {
