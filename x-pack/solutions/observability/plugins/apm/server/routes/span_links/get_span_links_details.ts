@@ -131,7 +131,8 @@ async function fetchSpanLinksDetails({
     { skipProcessorEventFilter: true }
   );
 
-  const spanIdsMap = keyBy(spanLinks, 'span.id');
+  // Avoid overhead of parsing a string accessor with a function
+  const spanIdsMap = keyBy(spanLinks, (link) => link.span.id);
 
   return compact(
     response.hits.hits.map((hit): SpanLinkDetails | null => {
