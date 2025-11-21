@@ -2262,6 +2262,8 @@
       "@kbn/tinymath/*": ["src/platform/packages/private/kbn-tinymath/*"],
       "@kbn/tooling-log": ["src/platform/packages/shared/kbn-tooling-log"],
       "@kbn/tooling-log/*": ["src/platform/packages/shared/kbn-tooling-log/*"],
+      "@kbn/tour-queue": ["src/platform/packages/shared/kbn-tour-queue"],
+      "@kbn/tour-queue/*": ["src/platform/packages/shared/kbn-tour-queue/*"],
       "@kbn/traced-es-client": ["src/platform/packages/shared/kbn-traced-es-client"],
       "@kbn/traced-es-client/*": ["src/platform/packages/shared/kbn-traced-es-client/*"],
       "@kbn/tracing": ["src/platform/packages/shared/kbn-tracing"],
