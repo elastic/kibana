@@ -471,8 +471,12 @@ describe('AutomaticImportSavedObjectService', () => {
 
           const result = await savedObjectService.getAllIntegrations();
 
-          expect(result.total).toBe(2);
-          const ids = result.saved_objects.map((obj) => obj.id);
+          // Filter to only the test integrations to avoid pollution from other tests
+          const testIntegrations = result.saved_objects.filter(
+            (obj) => obj.id === 'test-getall-1' || obj.id === 'test-getall-2'
+          );
+          expect(testIntegrations.length).toBe(2);
+          const ids = testIntegrations.map((obj) => obj.id);
           expect(ids).toContain('test-getall-1');
           expect(ids).toContain('test-getall-2');
         } finally {

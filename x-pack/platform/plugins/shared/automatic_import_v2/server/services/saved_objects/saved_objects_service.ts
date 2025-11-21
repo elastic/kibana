@@ -107,6 +107,10 @@ export class AutomaticImportSavedObjectService {
     }
     const integrationId = data.integration_id;
 
+    if (!integrationId || integrationId.trim() === '') {
+      throw new Error('Integration ID is required');
+    }
+
     try {
       this.logger.debug(`Creating integration: ${integrationId}`);
 
@@ -487,19 +491,28 @@ export class AutomaticImportSavedObjectService {
             `Data stream created successfully, creating new integration ${integrationId}`
           );
 
-          const defaultIntegrationData: IntegrationAttributes = {
+          const defaultIntegrationData: Integration = {
             integration_id: integrationId,
-            data_stream_count: 1,
-            created_by: authenticatedUser.username,
-            status: TASK_STATUSES.pending,
-            metadata: {
-              created_at: new Date().toISOString(),
-              version: '0.0.0',
-              title: `Auto-generated integration ${integrationId}`,
-            },
+            dataStreams: [], // Empty array, data_stream_count will be set correctly below
+            title: `Auto-generated integration ${integrationId}`,
           };
 
-          await this.insertIntegration(request, defaultIntegrationData);
+          const createdIntegration = await this.insertIntegration(request, defaultIntegrationData);
+
+          // Update the data_stream_count to 1 since we just created a data stream
+          // Need to preserve all metadata fields when updating
+          await this.updateIntegration(
+            {
+              integration_id: integrationId,
+              data_stream_count: 1,
+              created_by: createdIntegration.attributes.created_by,
+              status: createdIntegration.attributes.status,
+              metadata: {
+                ...createdIntegration.attributes.metadata,
+              },
+            },
+            createdIntegration.attributes.metadata?.version || '1.0.0'
+          );
         }
       } catch (integrationError) {
         this.logger.error(
