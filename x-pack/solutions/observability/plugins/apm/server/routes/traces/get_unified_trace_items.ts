@@ -58,12 +58,16 @@ export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
     groupedErrorCountByDocId[id] += 1;
   }
 
-  unifiedTraceErrors.apmErrors.forEach((doc) =>
-    doc.parent?.id ? incrementErrorCount(doc.parent.id) : undefined
-  );
-  unifiedTraceErrors.unprocessedOtelErrors.forEach((doc) =>
-    doc.id ? incrementErrorCount(doc.id) : undefined
-  );
+  unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
+    if (errorDoc.parentId) {
+      incrementErrorCount(errorDoc.parentId);
+    }
+  });
+  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
+    if (errorDoc.id) {
+      incrementErrorCount(errorDoc.id);
+    }
+  });
 
   return groupedErrorCountByDocId;
 }
@@ -150,7 +154,6 @@ export async function getUnifiedTraceItems({
     unifiedTraceErrorsPromise,
     unifiedTracePromise,
   ]);
-
   const errorCountByDocId = getErrorCountByDocId(unifiedTraceErrors);
 
   return {
