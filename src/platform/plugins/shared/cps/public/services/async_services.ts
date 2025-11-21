@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { CpsPlugin } from './plugin';
-
-export function plugin(initContext: PluginInitializerContext) {
-  return new CpsPlugin(initContext);
-}
-
-export type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
+export { getProjectRoutingAccess, getReadonlyMessage } from './access_control';
+export { createProjectFetcher } from './project_fetcher';

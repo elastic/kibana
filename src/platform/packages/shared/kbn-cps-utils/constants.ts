@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { CpsPlugin } from './plugin';
+/**
+ * Project routing constants for cross-project search
+ * These are stored as strings in saved objects to explicitly override parent values
+ */
+export const PROJECT_ROUTING = {
+  /** Search across all linked projects */
+  ALL: 'ALL',
+  /** Search only the origin project */
+  ORIGIN: '_alias:_origin',
+} as const;
 
-export function plugin(initContext: PluginInitializerContext) {
-  return new CpsPlugin(initContext);
-}
-
-export type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
+export type ProjectRoutingValue = (typeof PROJECT_ROUTING)[keyof typeof PROJECT_ROUTING];
