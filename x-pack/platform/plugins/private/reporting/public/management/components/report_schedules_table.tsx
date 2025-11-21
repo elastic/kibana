@@ -7,9 +7,11 @@
 
 import { Fragment, default as React, useCallback, useMemo, useState } from 'react';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButton, logicalCSS, useEuiTheme } from '@elastic/eui';
 import {
   EuiAvatar,
   EuiBasicTable,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -24,8 +26,9 @@ import { orderBy } from 'lodash';
 import { stringify } from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
-import type { ReportingAPIClient } from '@kbn/reporting-public';
 import { useKibana } from '@kbn/reporting-public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   guessAppIconTypeFromObjectType,
   getDisplayNameFromObjectType,
@@ -46,14 +49,16 @@ import { ViewScheduledReportFlyout } from './view_scheduled_report_flyout';
 interface QueryParams {
   page: number;
   perPage: number;
+  search: string;
 }
 
-export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) => {
+export const ReportSchedulesTable = () => {
   const {
     application: { capabilities },
     http,
     userProfile: userProfileService,
   } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   const { data: userProfile } = useGetUserProfileQuery({
     userProfileService,
@@ -81,9 +86,11 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     useState<boolean>(false);
   const [isDeleteModalConfirmationOpen, setIsDeleteModalConfirmationOpen] =
     useState<boolean>(false);
+  const [searchText, setSearchText] = useState('');
   const [queryParams, setQueryParams] = useState<QueryParams>({
     page: 1,
     perPage: 50,
+    search: searchText,
   });
   const { data: scheduledList, isLoading } = useGetScheduledList({
     ...queryParams,
@@ -382,23 +389,76 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     [setQueryParams]
   );
 
+  const updateSearch = useCallback(() => {
+    setQueryParams((oldParams) => ({ ...oldParams, search: searchText, page: 1 }));
+  }, [searchText]);
+
   return (
     <Fragment>
-      <EuiSpacer size={'l'} />
-      <EuiBasicTable
-        data-test-subj="reportSchedulesTable"
-        items={sortedList}
-        columns={tableColumns}
-        loading={isLoading}
-        pagination={{
-          pageIndex: queryParams.page - 1,
-          pageSize: queryParams.perPage,
-          totalItemCount: scheduledList?.total ?? 0,
-        }}
-        noItemsMessage={NO_CREATED_REPORTS_DESCRIPTION}
-        onChange={tableOnChangeCallback}
-        rowProps={() => ({ 'data-test-subj': 'scheduledReportRow' })}
-      />
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          gutterSize="s"
+          css={css`
+            ${logicalCSS('padding-vertical', euiTheme.size.s)}
+          `}
+        >
+          <EuiFlexItem grow>
+            <EuiFieldSearch
+              data-test-subj="scheduledReportsSearchField"
+              fullWidth
+              isClearable
+              placeholder={i18n.translate(
+                'xpack.reporting.schedules.table.searchPlaceholderTitle',
+                {
+                  defaultMessage: 'Search scheduled reports by title or creator',
+                }
+              )}
+              value={searchText}
+              onChange={(event) => {
+                setSearchText(event.target.value);
+              }}
+              onSearch={updateSearch}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="searchScheduledReportsButton"
+              iconType="search"
+              onClick={updateSearch}
+              name="search"
+              color="primary"
+            >
+              <FormattedMessage
+                id="xpack.reporting.schedules.table.searchScheduledReportsButtonLabel"
+                defaultMessage="Search"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiSpacer size={'s'} />
+      <EuiFlexItem grow>
+        <EuiBasicTable
+          data-test-subj="reportSchedulesTable"
+          items={sortedList}
+          columns={tableColumns}
+          loading={isLoading}
+          pagination={{
+            pageIndex: queryParams.page - 1,
+            pageSize: queryParams.perPage,
+            totalItemCount: scheduledList?.total ?? 0,
+          }}
+          noItemsMessage={NO_CREATED_REPORTS_DESCRIPTION}
+          onChange={tableOnChangeCallback}
+          rowProps={() => ({ 'data-test-subj': 'scheduledReportRow' })}
+          tableCaption={i18n.translate(
+            'xpack.reporting.schedules.table.reportSchedulesTableCaption',
+            {
+              defaultMessage: 'Report schedules table',
+            }
+          )}
+        />
+      </EuiFlexItem>
       {selectedReport &&
         isConfigFlyOutOpen &&
         (canEditSchedule(selectedReport) ? (

@@ -177,11 +177,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
           path={REPORTING_SCHEDULES_PATH}
           render={() => (
             <Suspense fallback={<EuiLoadingSpinner size={'xl'} />}>
-              {enableLinks && showLinks ? (
-                <ReportSchedulesTable apiClient={apiClient} />
-              ) : (
-                <LicensePrompt />
-              )}
+              {enableLinks && showLinks ? <ReportSchedulesTable /> : <LicensePrompt />}
             </Suspense>
           )}
         />

@@ -42,4 +42,16 @@ export const scheduledReportModelVersions: SavedObjectsModelVersionMap = {
       create: rawScheduledReportSchemaV4,
     },
   },
+  '5': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          title: {
+            type: 'text',
+          },
+        },
+      },
+    ],
+  },
 };
