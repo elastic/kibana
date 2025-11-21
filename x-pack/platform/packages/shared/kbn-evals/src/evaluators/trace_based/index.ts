@@ -11,5 +11,5 @@ export {
   createOutputTokensEvaluator,
   createCachedTokensEvaluator,
 } from './tokens';
-export { createLatencyEvaluator } from './latency';
+export { createLatencyEvaluator, createSpanLatencyEvaluator } from './latency';
 export { createToolCallsEvaluator } from './tool_calls';

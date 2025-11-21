@@ -13,11 +13,13 @@ import {
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
   selectEvaluators,
-  withEvaluateExampleSpan,
   withEvaluatorSpan,
+  createSpanLatencyEvaluator,
 } from '@kbn/evals';
 import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { EsClient } from '@kbn/scout';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { OnechatEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
@@ -43,10 +45,14 @@ export function createEvaluateDataset({
   evaluators,
   phoenixClient,
   chatClient,
+  traceEsClient,
+  log,
 }: {
   evaluators: DefaultEvaluators;
   phoenixClient: KibanaPhoenixClient;
   chatClient: OnechatEvaluationChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
 }): EvaluateDataset {
   return async function evaluateDataset({
     dataset: { name, description, examples },
@@ -110,7 +116,14 @@ export function createEvaluateDataset({
       selectEvaluators([
         ...createQuantitativeCorrectnessEvaluators(),
         createQuantitativeGroundednessEvaluator(),
-        ...Object.values(evaluators.traceBasedEvaluators),
+        ...Object.values({
+          ...evaluators.traceBasedEvaluators,
+          latency: createSpanLatencyEvaluator({
+            traceEsClient,
+            log,
+            spanName: 'Converse',
+          }),
+        }),
       ])
     );
   };

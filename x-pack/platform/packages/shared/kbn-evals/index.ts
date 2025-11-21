@@ -37,3 +37,4 @@ export type {
 } from './src/utils/evaluation_stats';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
+export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';

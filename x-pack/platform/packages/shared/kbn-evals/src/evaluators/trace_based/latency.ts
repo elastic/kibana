@@ -33,3 +33,29 @@ export function createLatencyEvaluator({
     },
   });
 }
+
+export function createSpanLatencyEvaluator({
+  traceEsClient,
+  log,
+  spanName,
+}: {
+  traceEsClient: EsClient;
+  log: ToolingLog;
+  spanName: string;
+}): Evaluator {
+  return createTraceBasedEvaluator({
+    traceEsClient,
+    log,
+    config: {
+      name: 'Latency',
+      buildQuery: (traceId) => `FROM traces-*
+| WHERE trace.id == "${traceId}" AND name == "${spanName}"
+| EVAL latency_seconds = TO_DOUBLE(duration) / 1000000000
+| KEEP latency_seconds`,
+      extractResult: (response) => {
+        log.info(`Span latency: ${response}`);
+        return response.values[0][0] as number;
+      },
+    },
+  });
+}
