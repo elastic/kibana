@@ -59,8 +59,9 @@ const getSpaceIcon = (space: Space['solution']) => {
     case 'oblt':
       return 'logoObservability';
     case 'classic':
-    default:
       return 'logoElasticStack';
+    default:
+      return undefined;
   }
 };
 
