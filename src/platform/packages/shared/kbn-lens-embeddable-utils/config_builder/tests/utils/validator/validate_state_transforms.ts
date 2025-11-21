@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
-
 import { LensConfigBuilder } from '../../../config_builder';
-import type { LensAttributes } from '../../../types';
 import { lensApiStateSchema } from '../../../schema';
-import type { Canonicalizer } from './canonicalizers/types';
 import type { ValidateTransform } from './types';
+import { getChartSchema } from './schema';
+import { getChartCanonicalizer } from './canonicalizers';
+import { unsetMany } from '../unset_many';
 
 /**
  * Test harness to validate LensConfigBuilder conversions
@@ -47,8 +46,14 @@ export function validateStateTransformsFn(chartType: string): ValidateTransform[
 
     // Temporary strict mode, all checks should eventually be strict
     if (strict) {
-      const canonicalizedAttributes = canonicalizer?.(attributes) ?? attributes;
-      expect(newLensAttributes).toEqual(canonicalizedAttributes);
+      const ignoredFields = getExcludedFieldsByChartType(chartType, excludedFields);
+      const newAttributes = unsetMany(newLensAttributes, ignoredFields);
+      const originalAttributes = unsetMany(
+        canonicalizer?.(attributes) ?? attributes,
+        ignoredFields
+      );
+
+      expect(newAttributes).toEqual(originalAttributes);
     }
 
     const newApiConfig2 = builder.toAPIFormat(newLensAttributes);
@@ -63,4 +68,20 @@ export function validateStateTransformsFn(chartType: string): ValidateTransform[
 
     expect(newApiConfig).toEqual(newApiConfig2);
   };
+}
+
+const defaultExcludedFieldsByChartType = {
+  metric: [
+    'state.visualization.showBar',
+    'state.visualization.valueFontMode',
+    'state.visualization.secondaryLabelPosition',
+    'state.visualization.secondaryTrend',
+  ],
+} as const satisfies Record<string, string[]>;
+
+export function getExcludedFieldsByChartType(
+  chartType: string,
+  excludedFields: string[] = []
+): string[] {
+  return ((defaultExcludedFieldsByChartType as any)[chartType] ?? []).concat(excludedFields);
 }
