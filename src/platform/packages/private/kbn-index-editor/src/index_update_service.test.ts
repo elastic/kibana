@@ -22,6 +22,7 @@ import {
 import { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { LOOKUP_INDEX_RECREATE_ROUTE, LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLAdHocDataview: jest.fn(),
@@ -162,7 +163,7 @@ describe('IndexUpdateService', () => {
 
       expect(http.post).toHaveBeenCalledTimes(1);
       const [url, options] = (http.post as jest.Mock).mock.calls[0];
-      expect(url).toBe('/internal/esql/lookup_index/my-index/update');
+      expect(url).toBe(`${LOOKUP_INDEX_UPDATE_ROUTE}/my-index`);
 
       const body = JSON.parse(options.body);
       expect(Array.isArray(body.operations)).toBe(true);
@@ -205,7 +206,7 @@ describe('IndexUpdateService', () => {
     service.deleteDoc([rowsAfterEdition[0].id]);
     const rowsAfterDeletion = await firstValueFrom(service.rows$);
     expect(rowsAfterDeletion.length).toBe(1); // An empty placeholder row should always be visible
-    expect(rowsAfterDeletion[0].raw).toMatchObject({ _id: expect.anything() });
+    expect(rowsAfterDeletion[0].id).toEqual(expect.stringContaining(ROW_PLACEHOLDER_PREFIX));
   });
 
   describe('flush operations', () => {
@@ -252,6 +253,35 @@ describe('IndexUpdateService', () => {
         outcome: 'success',
         latency: expect.any(Number),
       });
+    });
+  });
+
+  describe('resetIndexMapping', () => {
+    it('should recreate index, refresh dataview, discard changes and refetch when index is created', async () => {
+      service.setIndexName('my-index');
+      service.setIndexCreated(true);
+
+      await service.resetIndexMapping();
+
+      // Verify the recreate endpoint was called
+      expect(http.post).toHaveBeenCalledWith(`${LOOKUP_INDEX_RECREATE_ROUTE}/my-index`);
+
+      // Verify unsaved changes were discarded
+      const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
+      expect(hasChangesAfterReset).toBe(false);
+    });
+
+    it('should not call recreate endpoint if index is not created', async () => {
+      service.setIndexName('my-index');
+
+      await service.resetIndexMapping();
+
+      // Verify the recreate endpoint was not called
+      expect(http.post).not.toHaveBeenCalled();
+
+      // Verify unsaved changes were discarded
+      const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
+      expect(hasChangesAfterReset).toBe(false);
     });
   });
 });
