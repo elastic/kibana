@@ -54,6 +54,8 @@ const labelsSchemaProps = {
   ),
 };
 
+const simpleLabelsSchema = schema.object(omit(labelsSchemaProps, 'orientation'));
+
 const heatmapSharedStateSchema = {
   type: schema.literal('heatmap'),
   legend: schema.maybe(schema.object(legendSchemaProps)),
@@ -70,9 +72,14 @@ const heatmapSharedStateSchema = {
       y: schema.maybe(
         schema.object({
           title: schema.maybe(schema.object(titleSchemaProps)),
-          labels: schema.maybe(schema.object(omit(labelsSchemaProps, 'orientation'))),
+          labels: schema.maybe(simpleLabelsSchema),
         })
       ),
+    })
+  ),
+  cells: schema.maybe(
+    schema.object({
+      labels: schema.maybe(simpleLabelsSchema),
     })
   ),
 };
