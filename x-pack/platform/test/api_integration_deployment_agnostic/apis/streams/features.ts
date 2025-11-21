@@ -134,6 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const features = await listFeatures();
         expect(features).to.have.length(1);
         expect(features[0]).to.eql({
+          type: 'system',
           name: 'feature-a',
           description: 'Initial description',
           filter: { always: {} },
