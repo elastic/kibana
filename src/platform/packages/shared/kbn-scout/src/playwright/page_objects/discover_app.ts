@@ -177,6 +177,7 @@ export class DiscoverApp {
 
   async writeSearchQuery(query: string) {
     await this.page.testSubj.fill('queryInput', query);
+    await expect(this.page.testSubj.locator('queryInput')).toHaveValue(query);
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
   }
@@ -208,7 +209,7 @@ export class DiscoverApp {
   }
 
   async moveColumn(fieldName: string, direction: 'left' | 'right') {
-    await this.page.testSubj.locator(`dataGridHeaderCell-${fieldName}`).hover();
+    await this.page.testSubj.hover(`dataGridHeaderCell-${fieldName}`);
     await this.page.testSubj.click(`dataGridHeaderCellActionButton-${fieldName}`);
     await this.page.getByText(`Move ${direction}`).click();
   }
