@@ -38,6 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(
         (await find.allByCssSelector('[data-test-subj=lnsLayerActionsMenu] button')).length
       ).to.eql(2);
+
+      await lens.removeLayer(1);
     });
 
     it('should open layer settings for a data layer and set a sampling rate', async () => {
@@ -59,7 +61,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should expose the ignore global filters control for a data layer', async () => {
-      await lens.openLayerContextMenu();
       expect(
         await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
       ).to.be(false);
@@ -93,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.exists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
       ).to.be(true);
 
-      await lens.openLayerContextMenu(1);
+      await lens.ensureLayerTabIsActive(1);
       await testSubjects.click('lnsLayerSettings');
       // annotations settings have only ignore filters
       await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
@@ -107,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add a new visualization layer and disable the sampling if max operation is chosen', async () => {
       await lens.createLayer('data');
 
-      await lens.openLayerContextMenu(2);
+      await lens.ensureLayerTabIsActive(2);
       // click on open layer settings
       await testSubjects.click('lnsLayerSettings');
       // tweak the value
@@ -136,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check that sampling info is hidden as disabled now the dataView picker
       await testSubjects.missingOrFail('lns-layerPanel-2 > lnsChangeIndexPatternSamplingInfo');
       // open the layer settings and check that the slider is disabled
-      await lens.openLayerContextMenu(2);
+      await lens.ensureLayerTabIsActive(2);
       // click on open layer settings
       await testSubjects.click('lnsLayerSettings');
       expect(
@@ -148,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should expose sampling and ignore filters settings for reference lines layer', async () => {
       await lens.createLayer('referenceLine');
 
-      await lens.openLayerContextMenu(3);
+      await lens.ensureLayerTabIsActive(3);
       // click on open layer settings
       await testSubjects.click('lnsLayerSettings');
       // random sampling available
@@ -169,8 +170,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should switch to pie chart and have layer settings available', async () => {
+      await retry.try(async () => {
+        // click on the tab navigation left button 10 times to make the first tab visible
+        for (let i = 0; i < 10; i++) {
+          await testSubjects.click('unifiedTabs_tabsBar_scrollLeftBtn');
+        }
+        await lens.ensureLayerTabIsActive(0);
+      });
       await lens.switchToVisualization('pie');
-      await lens.openLayerContextMenu();
       // layer settings still available
       // open the panel
       await testSubjects.click('lnsLayerSettings');
@@ -183,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should switch to table and still have layer settings', async () => {
       await lens.switchToVisualization('lnsDatatable');
-      await lens.openLayerContextMenu();
+      await lens.ensureLayerTabIsActive(0);
       // layer settings still available
       // open the panel
       await testSubjects.click('lnsLayerSettings');
@@ -198,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
       // click on open layer settings
-      await lens.openLayerContextMenu();
+      await lens.ensureLayerTabIsActive(0);
       await testSubjects.click('lnsLayerSettings');
       // tweak the value
       await lens.dragRangeInput('lns-indexPattern-random-sampling-slider', 2, 'left');
@@ -219,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add another layer with a different sampling rate
       await lens.createLayer('data');
 
-      await lens.openLayerContextMenu(1);
+      await lens.ensureLayerTabIsActive(1);
       // click on open layer settings
       await testSubjects.click('lnsLayerSettings');
       // tweak the value

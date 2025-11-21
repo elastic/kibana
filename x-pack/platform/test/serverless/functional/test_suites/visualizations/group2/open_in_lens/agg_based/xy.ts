@@ -145,6 +145,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         await lens.assertLayerCount(2);
+        await lens.ensureLayerTabIsActive(0);
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText).to.be('Count');
         await lens.ensureLayerTabIsActive(1);
