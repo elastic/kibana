@@ -214,14 +214,21 @@ export const simulateProcessing = async ({
   fieldsMetadataClient,
 }: SimulateProcessingDeps) => {
   /* 0. Retrieve required data to prepare the simulation */
-  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
+  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }, streamFields] =
     await Promise.all([
       streamsClient.getStream(params.path.name),
       getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
+      getStreamFields(streamsClient, params.path.name),
     ]);
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
-  const simulationData = prepareSimulationData(params, stream, params.body.detected_fields);
+  const simulationData = prepareSimulationData(
+    params,
+    stream,
+    streamIndexFieldCaps,
+    streamFields,
+    params.body.detected_fields
+  );
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
   const ingestSimulationBody = prepareIngestSimulationBody(
     simulationData,
@@ -249,8 +256,6 @@ export const simulateProcessing = async ({
     return prepareSimulationFailureResponse(ingestSimulationResult.error);
   }
 
-  const streamFields = await getStreamFields(streamsClient, params.path.name);
-
   /* 4. Extract all the documents reports and processor metrics from the simulations */
   const { docReports, processorsMetrics } = computePipelineSimulationResult(
     pipelineSimulationResult.simulation,
@@ -259,7 +264,8 @@ export const simulateProcessing = async ({
     params.body.processing,
     Streams.WiredStream.Definition.is(stream),
     streamFields,
-    params.body.detected_fields
+    params.body.detected_fields,
+    simulationData.geoPointFields
   );
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
@@ -346,6 +352,8 @@ const prepareSimulationProcessors = (
 const prepareSimulationData = (
   params: ProcessingSimulationParams,
   stream: Streams.all.Definition,
+  fieldCaps: FieldCapsResponse['fields'],
+  streamFields: FieldDefinition,
   additionalFields?: NamedFieldDefinitionConfig[]
 ) => {
   const { body } = params;
@@ -355,17 +363,21 @@ const prepareSimulationData = (
     ? getRoot(stream.name)
     : stream.name;
 
-  // Extract geo_point fields for regrouping
-  const geoPointFields = new Set(
-    additionalFields
-      ? additionalFields.filter((field) => field.type === 'geo_point').map((field) => field.name)
-      : []
+  // Extract geo_point fields from all authoritative sources:
+  // - fieldCaps (actual index mappings)
+  // - detected_fields (being tested in simulation)
+  // - stream definition (may not be in index yet)
+  const geoPointFields = getGeoPointFieldsForSimulation(
+    fieldCaps,
+    additionalFields,
+    streamFields
   );
 
   return {
     docs: prepareSimulationDocs(documents, targetStreamName, stream, geoPointFields),
     processors: prepareSimulationProcessors(processing, stream, additionalFields),
     stream, // Pass stream for later use in ingest simulation
+    geoPointFields, // Pass through for use in result computation
   };
 };
 
@@ -606,7 +618,8 @@ const computePipelineSimulationResult = (
   processing: StreamlangDSL,
   isWiredStream: boolean,
   streamFields: FieldDefinition,
-  detectedFields?: NamedFieldDefinitionConfig[]
+  detectedFields: NamedFieldDefinitionConfig[] | undefined,
+  geoPointFields: Set<string>
 ): {
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
@@ -621,16 +634,6 @@ const computePipelineSimulationResult = (
   const forbiddenFields = Object.entries(streamFields)
     .filter(([, { type }]) => type === 'system')
     .map(([name]) => name);
-
-  // Extract geo_point field names from both streamFields and detectedFields
-  const geoPointFields = new Set([
-    ...Object.entries(streamFields)
-      .filter(([, { type }]) => type === 'geo_point')
-      .map(([name]) => name),
-    ...(detectedFields
-      ? detectedFields.filter((field) => field.type === 'geo_point').map((field) => field.name)
-      : []),
-  ]);
 
   const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
     const ingestDocResult = ingestSimulationResult.docs[id];
@@ -1016,6 +1019,44 @@ const getStreamFields = async (
   }
 
   return {};
+};
+
+/**
+ * Combines geopoint fields from three authoritative sources:
+ * 1. FieldCaps (actual index mappings - most authoritative for existing fields)
+ * 2. Detected fields (new fields being added/tested in this simulation)
+ * 3. Stream definition fields (may include fields not yet in index)
+ *
+ * This ensures we correctly regroup geopoints for both classic and wired streams,
+ * including inherited fields and fields being simulated.
+ */
+const getGeoPointFieldsForSimulation = (
+  fieldCaps: FieldCapsResponse['fields'],
+  detectedFields: NamedFieldDefinitionConfig[] | undefined,
+  streamFields: FieldDefinition
+): Set<string> => {
+  const geoPointFields = new Set<string>();
+
+  // 1. From fieldCaps (actual index mappings - most authoritative)
+  for (const [fieldName, fieldTypes] of Object.entries(fieldCaps)) {
+    if ('geo_point' in fieldTypes) {
+      geoPointFields.add(fieldName);
+    }
+  }
+
+  // 2. From detected_fields (new fields being added in this simulation)
+  if (detectedFields) {
+    detectedFields
+      .filter((field) => field.type === 'geo_point')
+      .forEach((field) => geoPointFields.add(field.name));
+  }
+
+  // 3. From stream definition (may include fields not yet in index)
+  Object.entries(streamFields)
+    .filter(([, config]) => config.type === 'geo_point')
+    .forEach(([name]) => geoPointFields.add(name));
+
+  return geoPointFields;
 };
 
 /**

@@ -104,6 +104,11 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             }),
             onClick: () => openFlyout({ isEditingByDefault: true }),
           },
+          {
+            name: "Map as geo field",
+            onClick: () => {
+            }
+          }
         ];
         break;
       case 'inherited':
