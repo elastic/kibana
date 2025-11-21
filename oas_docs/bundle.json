@@ -47449,7 +47449,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
@@ -47522,7 +47523,7 @@
             }
           },
           {
-            "description": "The status of the maintenance window. One of \"running\", \"upcoming\", \"finished\" or \"archived\".",
+            "description": "The status of the maintenance window. One of \"running\", \"upcoming\", \"finished\", \"archived\", or \"disabled\".",
             "in": "query",
             "name": "status",
             "required": false,
@@ -47533,7 +47534,8 @@
                     "running",
                     "finished",
                     "upcoming",
-                    "archived"
+                    "archived",
+                    "disabled"
                   ],
                   "type": "string"
                 },
@@ -47543,7 +47545,8 @@
                       "running",
                       "finished",
                       "upcoming",
-                      "archived"
+                      "archived",
+                      "disabled"
                     ],
                     "type": "string"
                   },
@@ -47712,7 +47715,8 @@
                               "running",
                               "upcoming",
                               "finished",
-                              "archived"
+                              "archived",
+                              "disabled"
                             ],
                             "type": "string"
                           },
@@ -47971,7 +47975,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
@@ -48305,7 +48310,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
@@ -48516,7 +48522,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
@@ -48724,7 +48731,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
