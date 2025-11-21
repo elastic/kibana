@@ -78,6 +78,18 @@ describe('FindSLODefinitions with Health validation', () => {
         }
       );
 
+      expect(mockGetSLOHealth.execute).toHaveBeenCalledWith({
+        list: [
+          {
+            sloId: slo.id,
+            sloInstanceId: '*',
+            sloRevision: slo.revision,
+            sloName: slo.name,
+            sloEnabled: slo.enabled,
+          },
+        ],
+      });
+
       expect(result.results[0].health).toEqual({
         enabled: true,
         overall: 'healthy',
