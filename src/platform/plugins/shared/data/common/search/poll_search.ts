@@ -66,7 +66,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
 
     const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
       switchMap((e) =>
-        (e.target as AbortSignal).reason === AbortReason.CANCELED
+        (e.target as AbortSignal)?.reason === AbortReason.CANCELED
           ? EMPTY
           : throwError(new AbortError())
       )

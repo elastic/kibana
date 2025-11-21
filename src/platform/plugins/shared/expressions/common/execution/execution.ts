@@ -179,6 +179,8 @@ function takeUntilAborted<T>(signal: AbortSignal) {
   return (source: Observable<T>) =>
     new Observable<T>((subscriber) => {
       const throwAbortError = (e?: Event) => {
+        // If the execution was aborted due to end user cancellation, we still want to let
+        // the execution complete and handle the partial results
         if ((e?.target as AbortSignal)?.reason !== AbortReason.CANCELED)
           subscriber.error(new AbortError());
       };
