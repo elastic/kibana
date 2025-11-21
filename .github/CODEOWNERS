@@ -610,6 +610,7 @@ src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @e
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-timerange @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
+src/platform/packages/shared/kbn-tour-queue @elastic/appex-sharedux
 src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
 src/platform/packages/shared/kbn-tracing @elastic/kibana-core @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-tracing-config @elastic/kibana-core

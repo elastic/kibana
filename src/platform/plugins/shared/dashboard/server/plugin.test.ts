@@ -12,6 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
+import type { DashboardCreateRequestBody, DashboardUpdateRequestBody } from './api';
 
 jest.mock('./usage/dashboard_telemetry_collection_task', () => ({
   scheduleDashboardTelemetry: jest.fn().mockResolvedValue('ok'),
@@ -70,6 +71,8 @@ describe('DashboardPlugin', () => {
     let mockTaskManager: ReturnType<typeof taskManagerMock.createStart>;
     let mockRequestHandlerContext: any;
     let mockCoreContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
+    let dashboardPlugin: DashboardPlugin;
+    let pluginStart: ReturnType<DashboardPlugin['start']>;
 
     beforeEach(() => {
       mockCoreStart = coreMock.createStart();
@@ -90,6 +93,12 @@ describe('DashboardPlugin', () => {
           return resolved;
         }),
       };
+
+      dashboardPlugin = new DashboardPlugin(initContext);
+      pluginStart = dashboardPlugin.start(mockCoreStart, {
+        embeddable: mockEmbeddable,
+        taskManager: mockTaskManager,
+      });
     });
 
     afterEach(() => {
@@ -97,16 +106,6 @@ describe('DashboardPlugin', () => {
     });
 
     test('client should be an object with create, read, update, delete methods', () => {
-      const dashboardPlugin = new DashboardPlugin(initContext);
-      const pluginStart = dashboardPlugin.start(mockCoreStart, {
-        embeddable: mockEmbeddable,
-        taskManager: mockTaskManager,
-      });
-
-      expect(pluginStart.client).toHaveProperty('create');
-      expect(pluginStart.client).toHaveProperty('read');
-      expect(pluginStart.client).toHaveProperty('update');
-      expect(pluginStart.client).toHaveProperty('delete');
       expect(typeof pluginStart.client.create).toBe('function');
       expect(typeof pluginStart.client.read).toBe('function');
       expect(typeof pluginStart.client.update).toBe('function');
@@ -114,31 +113,24 @@ describe('DashboardPlugin', () => {
     });
 
     test('client.create should call the create function', async () => {
-      const dashboardPlugin = new DashboardPlugin(initContext);
-      const pluginStart = dashboardPlugin.start(mockCoreStart, {
-        embeddable: mockEmbeddable,
-        taskManager: mockTaskManager,
-      });
-
       const mockSavedObject = {
         id: 'test-id',
         type: 'dashboard',
         attributes: {
           title: 'Test Dashboard',
           description: 'Test Description',
+          panels: [],
         },
         references: [],
       };
 
       mockCoreContext.savedObjects.client.create = jest.fn().mockResolvedValue(mockSavedObject);
 
-      const createBody = {
+      const createBody: DashboardCreateRequestBody = {
         data: {
           title: 'Test Dashboard',
           description: 'Test Description',
-          panelsJSON: '[]',
-          optionsJSON: '{}',
-          version: '1',
+          panels: [],
         },
       };
 
@@ -148,12 +140,6 @@ describe('DashboardPlugin', () => {
     });
 
     test('client.read should call the read function', async () => {
-      const dashboardPlugin = new DashboardPlugin(initContext);
-      const pluginStart = dashboardPlugin.start(mockCoreStart, {
-        embeddable: mockEmbeddable,
-        taskManager: mockTaskManager,
-      });
-
       const mockResolvedObject = {
         saved_object: {
           id: 'test-id',
@@ -178,12 +164,6 @@ describe('DashboardPlugin', () => {
     });
 
     test('client.update should call the update function', async () => {
-      const dashboardPlugin = new DashboardPlugin(initContext);
-      const pluginStart = dashboardPlugin.start(mockCoreStart, {
-        embeddable: mockEmbeddable,
-        taskManager: mockTaskManager,
-      });
-
       const mockUpdatedObject = {
         id: 'test-id',
         type: 'dashboard',
@@ -196,13 +176,11 @@ describe('DashboardPlugin', () => {
 
       mockCoreContext.savedObjects.client.update = jest.fn().mockResolvedValue(mockUpdatedObject);
 
-      const updateBody = {
+      const updateBody: DashboardUpdateRequestBody = {
         data: {
           title: 'Updated Dashboard',
           description: 'Updated Description',
-          panelsJSON: '[]',
-          optionsJSON: '{}',
-          version: '1',
+          panels: [],
         },
       };
 
@@ -212,12 +190,6 @@ describe('DashboardPlugin', () => {
     });
 
     test('client.delete should call the delete function', async () => {
-      const dashboardPlugin = new DashboardPlugin(initContext);
-      const pluginStart = dashboardPlugin.start(mockCoreStart, {
-        embeddable: mockEmbeddable,
-        taskManager: mockTaskManager,
-      });
-
       mockCoreContext.savedObjects.client.delete = jest.fn().mockResolvedValue({});
 
       await pluginStart.client.delete(mockRequestHandlerContext, 'test-id');

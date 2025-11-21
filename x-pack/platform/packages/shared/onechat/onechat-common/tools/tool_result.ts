@@ -20,7 +20,8 @@ export enum ToolResultType {
 
 export enum SupportedChartType {
   Metric = 'metric',
-  Map = 'map',
+  Gauge = 'gauge',
+  Tagcloud = 'tagcloud',
 }
 
 interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {

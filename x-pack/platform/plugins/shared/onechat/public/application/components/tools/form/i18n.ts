@@ -191,6 +191,37 @@ export const i18nMessages = {
             defaultMessage: 'Target pattern',
           }
         ),
+        defaultRowLimitLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.defaultRowLimitLabel',
+          {
+            defaultMessage: 'Row limit',
+          }
+        ),
+        defaultRowLimitHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.defaultRowLimitHelpText',
+          {
+            defaultMessage: 'Maximum number of rows to return from ES|QL queries.',
+          }
+        ),
+        customInstructionsLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsLabel',
+          {
+            defaultMessage: 'Custom instructions',
+          }
+        ),
+        customInstructionsHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsHelpText',
+          {
+            defaultMessage:
+              'Additional guidance for ES|QL query generation, such as field selection or limit logic.',
+          }
+        ),
+        customInstructionsPlaceholder: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsPlaceholder',
+          {
+            defaultMessage: 'e.g., "Always include timestamp field" ',
+          }
+        ),
       },
       esql: {
         queryLabel: i18n.translate(
