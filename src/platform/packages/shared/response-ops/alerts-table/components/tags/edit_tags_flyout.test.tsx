@@ -1,0 +1,92 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { render, waitFor, screen } from '@testing-library/react';
+import type { Alert } from '@kbn/alerting-types';
+import { EditTagsFlyout } from './edit_tags_flyout';
+
+describe('EditTagsFlyout', () => {
+  /**
+   * Alert one has the following tags: coke, pepsi
+   * All available tags are extracted from the selected alerts
+   */
+  const mockAlert = {
+    id: 'alert-1',
+    version: 'v1',
+    _index: 'test-index',
+    title: 'Test Alert',
+    'kibana.alert.workflow_tags': ['coke', 'pepsi'],
+  } as unknown as Alert;
+
+  const props = {
+    selectedAlerts: [mockAlert],
+    onClose: jest.fn(),
+    onSaveTags: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders correctly', async () => {
+    render(<EditTagsFlyout {...props} />);
+
+    expect(await screen.findByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-edit-tags-flyout-title')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-edit-tags-flyout-cancel')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-edit-tags-flyout-submit')).toBeInTheDocument();
+  });
+
+  it('calls onClose when pressing the cancel button', async () => {
+    render(<EditTagsFlyout {...props} />);
+
+    await userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-cancel'));
+
+    await waitFor(() => {
+      expect(props.onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('calls onSaveTags when pressing the save selection button', async () => {
+    render(<EditTagsFlyout {...props} />);
+
+    expect(await screen.findByText('coke')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByText('coke'));
+    await userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-submit'));
+
+    await waitFor(() => {
+      expect(props.onSaveTags).toHaveBeenCalledWith({
+        selectedItems: ['pepsi'],
+        unSelectedItems: ['coke'],
+      });
+    });
+  });
+
+  it('shows the alert title when selecting one alert', async () => {
+    render(<EditTagsFlyout {...props} />);
+
+    expect(await screen.findByText(mockAlert.title as string)).toBeInTheDocument();
+  });
+
+  it('shows the number of total selected alerts in the title when selecting multiple alerts', async () => {
+    const mockAlert2 = {
+      ...mockAlert,
+      id: 'alert-2',
+      title: 'Test Alert 2',
+      'kibana.alert.workflow_tags': ['one', 'three'],
+    } as unknown as Alert;
+
+    render(<EditTagsFlyout {...props} selectedAlerts={[mockAlert, mockAlert2]} />);
+
+    expect(await screen.findByText('Selected alerts: 2')).toBeInTheDocument();
+  });
+});
