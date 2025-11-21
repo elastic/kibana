@@ -79,7 +79,7 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
       meta: {
         ...(filter.label !== undefined ? { alias: filter.label } : {}),
         ...(filter.disabled !== undefined ? { disabled: filter.disabled } : {}),
-        ...(filter.negate !== undefined ? { negate: filter.negate } : {}),
+        ...('negate' in filter && filter.negate !== undefined ? { negate: filter.negate } : {}),
         ...(filter.controlledBy !== undefined ? { controlledBy: filter.controlledBy } : {}),
         ...(filter.dataViewId !== undefined ? { index: filter.dataViewId } : {}),
         ...(filter.isMultiIndex !== undefined ? { isMultiIndex: filter.isMultiIndex } : {}),

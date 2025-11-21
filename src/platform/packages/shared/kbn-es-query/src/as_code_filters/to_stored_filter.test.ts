@@ -143,7 +143,13 @@ describe('toStoredFilter', () => {
 
       const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
       const roundTripFilter = toStoredFilter(asCodeFilter) as StoredFilter;
-      expect(roundTripFilter).toEqual(originalFilter);
+
+      // negate: false is not preserved in round-trip for condition filters
+      // because negation is encoded in the operator (is_one_of vs is_not_one_of)
+      const { negate, ...metaWithoutNegate } = originalFilter.meta;
+      const expectedFilter = { ...originalFilter, meta: metaWithoutNegate };
+
+      expect(roundTripFilter).toEqual(expectedFilter);
     });
 
     it('should preserve spatial filter data through round-trip conversion', () => {
@@ -714,7 +720,7 @@ describe('toStoredFilter', () => {
 
     it('should handle single query filter with incomplete metadata as DSL', () => {
       // A filter that has query but incomplete metadata (no meta.type)
-      // Based on type-first approach, this should fall back to DSL
+      // These should be preserved as DSL to avoid ambiguity
       const singleQueryFilter: StoredFilter = {
         meta: {
           // Incomplete metadata - no type, no key

@@ -14,7 +14,7 @@ import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
 
 describe('fromStoredFilter', () => {
   describe('Input validation', () => {
-    it('should return DSL filter for null/undefined input when logger provided', () => {
+    it('should return undefined for null/undefined input when logger provided', () => {
       const mockLogger = {
         warn: jest.fn(),
       } as any;
@@ -23,7 +23,7 @@ describe('fromStoredFilter', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to convert stored filter')
       );
-      expect(resultNull).toHaveProperty('dsl');
+      expect(resultNull).toBeUndefined();
 
       mockLogger.warn.mockClear();
 
@@ -31,15 +31,15 @@ describe('fromStoredFilter', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to convert stored filter')
       );
-      expect(resultUndefined).toHaveProperty('dsl');
+      expect(resultUndefined).toBeUndefined();
     });
 
-    it('should return DSL filter for null/undefined input without logger', () => {
+    it('should return undefined for null/undefined input without logger', () => {
       const resultNull = fromStoredFilter(null);
-      expect(resultNull).toHaveProperty('dsl');
+      expect(resultNull).toBeUndefined();
 
       const resultUndefined = fromStoredFilter(undefined);
-      expect(resultUndefined).toHaveProperty('dsl');
+      expect(resultUndefined).toBeUndefined();
     });
   });
 
@@ -169,7 +169,7 @@ describe('fromStoredFilter', () => {
 
     it('should handle negated filters', () => {
       const storedFilter = {
-        meta: { key: 'status', negate: true },
+        meta: { key: 'status', negate: true, type: 'phrase' },
         query: { term: { status: 'inactive' } },
       };
 
@@ -182,8 +182,8 @@ describe('fromStoredFilter', () => {
     });
   });
 
-  describe('Strategy 2: Query Parsing (enhanced compatibility)', () => {
-    it('should parse match_phrase query when meta is incomplete', () => {
+  describe('Strategy 2: Filters without meta.type (preserved as DSL)', () => {
+    it('should preserve match_phrase query as DSL when meta.type is missing', () => {
       const storedFilter = {
         meta: { key: 'message' },
         query: {
@@ -195,17 +195,17 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
-      expect(isConditionFilter(result)).toBe(true);
-      if (isConditionFilter(result)) {
-        expect(result.condition).toEqual({
-          field: 'message',
-          operator: 'is',
-          value: 'error occurred',
+      expect(isDSLFilter(result)).toBe(true);
+      if (isDSLFilter(result)) {
+        expect(result.dsl.query).toEqual({
+          match_phrase: {
+            message: 'error occurred',
+          },
         });
       }
     });
 
-    it('should parse match_phrase queries with object values', () => {
+    it('should preserve match_phrase queries with object values as DSL', () => {
       const storedFilter = {
         meta: {},
         query: {
@@ -217,17 +217,17 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
-      expect(isConditionFilter(result)).toBe(true);
-      if (isConditionFilter(result)) {
-        expect(result.condition).toEqual({
-          field: 'message',
-          operator: 'is',
-          value: 'error occurred',
+      expect(isDSLFilter(result)).toBe(true);
+      if (isDSLFilter(result)) {
+        expect(result.dsl.query).toEqual({
+          match_phrase: {
+            message: { query: 'error occurred' },
+          },
         });
       }
     });
 
-    it('should parse match queries with phrase type', () => {
+    it('should preserve match queries as DSL when meta.type is missing', () => {
       const storedFilter = {
         meta: {},
         query: {
@@ -242,17 +242,20 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
-      expect(isConditionFilter(result)).toBe(true);
-      if (isConditionFilter(result)) {
-        expect(result.condition).toEqual({
-          field: 'message',
-          operator: 'is',
-          value: 'test message',
+      expect(isDSLFilter(result)).toBe(true);
+      if (isDSLFilter(result)) {
+        expect(result.dsl.query).toEqual({
+          match: {
+            message: {
+              type: 'phrase',
+              query: 'test message',
+            },
+          },
         });
       }
     });
 
-    it('should extract field from query when missing from meta', () => {
+    it('should preserve term queries as DSL when meta.type is missing', () => {
       const storedFilter = {
         meta: {},
         query: { term: { username: 'john' } },
@@ -260,9 +263,9 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
-      expect(isConditionFilter(result)).toBe(true);
-      if (isConditionFilter(result)) {
-        expect(result.condition.field).toBe('username');
+      expect(isDSLFilter(result)).toBe(true);
+      if (isDSLFilter(result)) {
+        expect(result.dsl.query).toEqual({ term: { username: 'john' } });
       }
     });
   });
@@ -487,14 +490,11 @@ describe('fromStoredFilter', () => {
               Object {
                 "conditions": Array [
                   Object {
-                    "conditions": Array [
-                      Object {
-                        "field": "geo.src",
-                        "operator": "is",
-                        "value": "US",
-                      },
+                    "field": "geo.src",
+                    "operator": "is_one_of",
+                    "value": Array [
+                      "US",
                     ],
-                    "type": "or",
                   },
                   Object {
                     "field": "host.keyword",
@@ -564,11 +564,12 @@ describe('fromStoredFilter', () => {
   });
 
   describe('Base properties extraction', () => {
-    it('should extract pinned, disabled, label, and negate properties', () => {
+    it('should extract pinned, disabled, and label properties', () => {
       const storedFilter = {
         $state: { store: 'globalState' },
         meta: {
           key: 'status',
+          type: 'phrase',
           disabled: true,
           alias: 'Status Filter',
           negate: true,
@@ -581,7 +582,11 @@ describe('fromStoredFilter', () => {
       expect(result.pinned).toBe(true);
       expect(result.disabled).toBe(true);
       expect(result.label).toBe('Status Filter');
-      expect(result.negate).toBe(true);
+      // For condition filters, negate is encoded in the operator, not as a separate property
+      expect(isConditionFilter(result)).toBe(true);
+      if (isConditionFilter(result)) {
+        expect(result.condition.operator).toBe('is_not');
+      }
     });
   });
 });
