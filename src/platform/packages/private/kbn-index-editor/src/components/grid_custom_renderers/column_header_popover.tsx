@@ -136,7 +136,7 @@ export const ColumnHeaderPopover = ({
     // This button is keyboard accesible via the column actions menu.
     // eslint-disable-next-line @elastic/eui/accessible-interactive-element
     <EuiButtonEmpty
-      data-test-subj="indexEditorindexEditorColumnNameButton"
+      data-test-subj="indexEditorColumnNameButton"
       aria-label={i18n.translate('indexEditor.columnHeaderEdit.aria', {
         defaultMessage: 'Edit column',
       })}

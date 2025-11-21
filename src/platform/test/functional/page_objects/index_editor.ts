@@ -19,7 +19,7 @@ export class IndexEditorObject extends FtrService {
   private readonly comboBox = this.ctx.getService('comboBox');
 
   public async getColumnNames(): Promise<string[]> {
-    const columnHeaders = await this.testSubjects.findAll('indexEditorindexEditorColumnNameButton');
+    const columnHeaders = await this.testSubjects.findAll('indexEditorColumnNameButton');
 
     const columnNames: string[] = [];
 
@@ -35,7 +35,7 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async setColumn(name: string, type: string, columnIndex: number) {
-    const columnHeaders = await this.testSubjects.findAll('indexEditorindexEditorColumnNameButton');
+    const columnHeaders = await this.testSubjects.findAll('indexEditorColumnNameButton');
     const columnHeader = columnHeaders[columnIndex];
 
     expect(columnHeader).to.not.be(undefined);
