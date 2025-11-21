@@ -30,6 +30,14 @@ describe('utils', () => {
       expect(result).toBe(42);
     });
 
+    it('should convert empty select field to undefined', () => {
+      const result = formFieldToResilientFieldValue('', {
+        input_type: 'select',
+      } as EnhancedFieldMetaData);
+
+      expect(result).toBeUndefined();
+    });
+
     it('should convert multiselect field to number array', () => {
       const result = formFieldToResilientFieldValue(['42', '43'], {
         input_type: 'multiselect',

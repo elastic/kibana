@@ -11,6 +11,7 @@ import {
   type EuiComboBoxOptionOption,
   EuiFormRow,
   type EuiComboBoxProps,
+  type EuiSelectOption,
 } from '@elastic/eui';
 import {
   type FieldHook,
@@ -36,7 +37,7 @@ interface AdditionalFieldProps {
 
 const AdditionalGenericField = React.memo<
   AdditionalFieldProps & { Component: UseFieldProps<unknown>['component'] }
->(({ path, label, 'data-test-subj': dataTestSubj, Component }) => {
+>(({ path, label, 'data-test-subj': dataTestSubj, Component, field }) => {
   const fieldProps = useMemo(() => {
     return {
       config: { defaultValue: '', label },
@@ -44,10 +45,11 @@ const AdditionalGenericField = React.memo<
         euiFieldProps: {
           display: 'center',
           'data-test-subj': dataTestSubj,
+          required: field.required === 'always',
         },
       },
     };
-  }, [label, dataTestSubj]);
+  }, [label, dataTestSubj, field]);
   return (
     <UseField<string>
       path={path}
@@ -60,7 +62,7 @@ const AdditionalGenericField = React.memo<
 AdditionalGenericField.displayName = 'AdditionalGenericField';
 
 const AdditionalDateField = React.memo<AdditionalFieldProps & { showTimeSelect: boolean }>(
-  ({ path, label, 'data-test-subj': dataTestSubj, showTimeSelect }) => {
+  ({ path, label, 'data-test-subj': dataTestSubj, showTimeSelect, field }) => {
     const fieldProps = useMemo(() => {
       return {
         config: { label },
@@ -69,10 +71,11 @@ const AdditionalDateField = React.memo<AdditionalFieldProps & { showTimeSelect: 
           euiFieldProps: {
             'data-test-subj': dataTestSubj,
             showTimeSelect,
+            required: field.required === 'always',
           },
         },
       };
-    }, [label, dataTestSubj, showTimeSelect]);
+    }, [label, dataTestSubj, showTimeSelect, field]);
     return (
       <UseField<Moment>
         path={path}
@@ -89,6 +92,23 @@ AdditionalDateField.displayName = 'AdditionalDateField';
 const AdditionalSelectField = React.memo<AdditionalFieldProps>(
   ({ path, label, 'data-test-subj': dataTestSubj, field }) => {
     const fieldProps = useMemo(() => {
+      const calculatedOptions = (field.values || []).reduce<{
+        options: EuiSelectOption[];
+        defaultValue: number | undefined;
+      }>(
+        (acc, val) => {
+          acc.options.push({
+            label: val.label,
+            text: val.label,
+            value: val.value,
+          });
+          if (!acc.defaultValue && val.default) {
+            acc.defaultValue = parseInt(val.value as string, 10);
+          }
+          return acc;
+        },
+        { options: [], defaultValue: undefined }
+      );
       return {
         config: { label },
         componentProps: {
@@ -97,14 +117,11 @@ const AdditionalSelectField = React.memo<AdditionalFieldProps>(
             hasNoInitialSelection: true,
             disabled: false,
             isLoading: false,
-            options: field.values
-              ? field.values.map((val) => ({
-                  label: val.label,
-                  value: val.value,
-                }))
-              : [],
+            required: field.required === 'always',
+            options: calculatedOptions.options,
           },
         },
+        defaultValue: calculatedOptions.defaultValue,
       };
     }, [label, dataTestSubj, field]);
     return (
@@ -113,6 +130,7 @@ const AdditionalSelectField = React.memo<AdditionalFieldProps>(
         config={fieldProps.config}
         component={SelectField}
         componentProps={fieldProps.componentProps}
+        defaultValue={fieldProps.defaultValue}
       />
     );
   }
@@ -165,37 +183,53 @@ AdditionalMultiSelectInnerField.displayName = 'AdditionalMultiSelectInnerField';
 const AdditionalMultiSelectField = React.memo<AdditionalFieldProps>(
   ({ path, label, 'data-test-subj': dataTestSubj, field }) => {
     const fieldProps = useMemo(() => {
+      const preparedOptions = (field.values || []).reduce<{
+        options: EuiComboBoxOptionOption<string>[];
+        defaultValue: number[];
+      }>(
+        (acc, value) => {
+          acc.options.push({
+            label: value.label,
+            value: value.value.toString(),
+          });
+          if (value.default === true) {
+            acc.defaultValue.push(parseInt(value.value as string, 10));
+          }
+          return acc;
+        },
+        { options: [], defaultValue: [] }
+      );
+
       const componentProps: InnerFieldProps = {
         label,
         outerField: field,
-        options: field.values
-          ? field.values.map((val) => ({
-              label: val.label,
-              value: val.value.toString(),
-            }))
-          : [],
+        options: preparedOptions.options,
         'data-test-subj': dataTestSubj,
       };
       return {
         config: { defaultValue: [] },
         componentProps,
+        defaultValue: preparedOptions.defaultValue,
       };
     }, [label, dataTestSubj, field]);
+
     return (
       <UseField<number[]>
         path={path}
         config={fieldProps.config}
         component={AdditionalMultiSelectInnerField}
         componentProps={fieldProps.componentProps}
+        defaultValue={fieldProps.defaultValue}
       />
     );
   }
 );
 AdditionalMultiSelectField.displayName = 'AdditionalMultiSelectField';
 
-export const AdditionalFormField = React.memo<{
+export interface AdditionalFormFieldProps {
   field: ResilientFieldMetadata;
-}>(({ field }) => {
+}
+export const AdditionalFormField = React.memo<AdditionalFormFieldProps>(({ field }) => {
   const path = field.name;
   const dataTestSubj = `resilientAdditionalField-${field.name}`;
   const props: AdditionalFieldProps = useMemo(() => {

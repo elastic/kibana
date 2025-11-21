@@ -21,8 +21,8 @@ export function formFieldToResilientFieldValue(
     // DatePickerFields return Moment objects but resilient expects numbers
     return value.toDate().getTime();
   } else if (typeof value === 'string' && fieldMetadata.input_type === 'select') {
-    // SelectFields return strings but resilient expects numbers
-    return Number(value);
+    // SelectFields return strings but resilient expects numbers or undefined
+    return value ? Number(value) : undefined;
   } else if (Array.isArray(value) && fieldMetadata.input_type === 'multiselect') {
     // MultiSelectFields return string[] but resilient expects number[]
     return value.map((v) => Number(v));
