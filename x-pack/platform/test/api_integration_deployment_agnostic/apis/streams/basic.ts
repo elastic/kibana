@@ -258,7 +258,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           status,
         };
         const response = await forkStream(apiClient, 'logs', body, 400);
-        expect(response).to.have.property('message', 'Stream name must not be empty.');
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name must not be empty.'
+        );
       });
 
       it('fails to fork logs with stream name that is over the 200 character limit', async () => {
@@ -276,7 +279,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await forkStream(apiClient, 'logs', body, 400);
         expect(response).to.have.property(
           'message',
-          'Stream name cannot be longer than 200 characters.'
+          'Desired stream state is invalid: Stream name cannot be longer than 200 characters.'
         );
       });
 
