@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { getEdgeId, isSpanGroupingSupported } from './utils';
 
-const MINIMUM_GROUP_SIZE = 4;
+const MINIMUM_GROUP_SIZE = 2; // changed just for testing porposes
 
 const isEdge = (el: ConnectionElement): el is { data: ConnectionEdge } =>
   Boolean(el.data.source && el.data.target);
@@ -33,9 +33,11 @@ const isElligibleGroupNode = (el: ConnectionElement): el is { data: ConnectionNo
 function groupConnections({
   edgesMap,
   groupableNodeIds,
+  nodesMap,
 }: {
   edgesMap: Map<string, ConnectionElement>;
   groupableNodeIds: Set<string>;
+  nodesMap: Map<string, ConnectionElement>;
 }) {
   const sourcesByTarget = new Map<string, string[]>();
   for (const { data } of edgesMap.values()) {
@@ -49,7 +51,16 @@ function groupConnections({
 
   const groups = new Map<string, { id: string; sources: string[]; targets: string[] }>();
   for (const [target, sources] of sourcesByTarget) {
-    const groupId = `resourceGroup{${[...sources].sort().join(';')}}`;
+    // Get spanSubtype from the target node
+    const targetNode = nodesMap.get(target);
+    const targetData = targetNode && isNode(targetNode) ? targetNode.data : undefined;
+    const spanSubtype = targetData?.[SPAN_SUBTYPE];
+
+    // Group by source services AND spanSubtype
+    const groupId = spanSubtype
+      ? `resourceGroup{${[...sources].sort().join(';')}|${spanSubtype}}`
+      : `resourceGroup{${[...sources].sort().join(';')}}`;
+
     const group = groups.get(groupId) ?? { id: groupId, sources, targets: [] };
     group.targets.push(target);
     groups.set(groupId, group);
@@ -92,15 +103,24 @@ function groupNodes({
   nodesMap: Map<string, ConnectionElement>;
   groupedConnections: ReturnType<typeof groupConnections>;
 }) {
-  return groupedConnections.map(
-    ({ id, targets }): GroupedNode => ({
+  return groupedConnections.map(({ id, targets }): GroupedNode => {
+    // Get spanType and spanSubtype from the first target node
+    const firstTarget = nodesMap.get(targets[0]);
+    const firstTargetData = firstTarget && isNode(firstTarget) ? firstTarget.data : undefined;
+    const spanType = firstTargetData?.[SPAN_TYPE];
+    const spanSubtype = firstTargetData?.[SPAN_SUBTYPE];
+
+    const resourceCountLabel = i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
+      defaultMessage: '{count} resources',
+      values: { count: targets.length },
+    });
+
+    return {
       data: {
         id,
-        [SPAN_TYPE]: 'external',
-        label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
-          defaultMessage: '{count} resources',
-          values: { count: targets.length },
-        }),
+        [SPAN_TYPE]: spanType || 'external',
+        ...(spanSubtype && { [SPAN_SUBTYPE]: spanSubtype }),
+        label: spanSubtype ? `${spanSubtype} (${resourceCountLabel})` : resourceCountLabel,
         groupedConnections: targets
           .map((target) => {
             const targetElement = nodesMap.get(target);
@@ -113,8 +133,8 @@ function groupNodes({
           })
           .filter((target): target is GroupedConnection => !!target),
       },
-    })
-  );
+    };
+  });
 }
 
 function groupEdges({
@@ -148,7 +168,7 @@ export function groupResourceNodes({
     elements.filter(isElligibleGroupNode).map(({ data: { id } }) => id)
   );
 
-  const groupedConnections = groupConnections({ edgesMap, groupableNodeIds });
+  const groupedConnections = groupConnections({ edgesMap, groupableNodeIds, nodesMap });
   const { ungroupedEdges, ungroupedNodes } = getUngroupedNodesAndEdges({
     nodesMap,
     edgesMap,
