@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../../common/constants';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -755,7 +756,7 @@ describe('Perform bulk action route', () => {
         body: {
           ...getBulkDisableRuleActionSchemaMock(),
           query: '',
-          gap_fill_statuses: ['unfilled'],
+          gap_fill_statuses: [gapFillStatus.UNFILLED],
         },
       });
       const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -779,7 +780,7 @@ describe('Perform bulk action route', () => {
           query: '',
           gaps_range_start: gapStartDate,
           gaps_range_end: gapEndDate,
-          gap_fill_statuses: ['unfilled'],
+          gap_fill_statuses: [gapFillStatus.UNFILLED],
         },
       });
 

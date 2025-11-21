@@ -54,8 +54,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
 
           let ruleIds: string[] | undefined;
           const gapFillStatuses = query.gap_fill_statuses;
-          const hasGapFillStatuses = gapFillStatuses && gapFillStatuses.length > 0;
-          if (hasGapFillStatuses && query.gaps_range_start && query.gaps_range_end) {
+          if (Boolean(gapFillStatuses?.length) && query.gaps_range_start && query.gaps_range_end) {
             const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
               highestPriorityGapFillStatuses: gapFillStatuses,
               start: query.gaps_range_start,

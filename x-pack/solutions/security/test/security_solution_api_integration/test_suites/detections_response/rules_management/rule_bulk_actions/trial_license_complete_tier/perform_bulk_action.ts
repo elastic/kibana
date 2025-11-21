@@ -24,6 +24,7 @@ import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common
 import moment from 'moment';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { getGapsByRuleId } from '@kbn/detections-response-ftr-services/rules/get_gaps_by_rule_id';
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import {
   binaryToString,
   getSimpleMlRule,
@@ -3399,7 +3400,7 @@ export default ({ getService }: FtrProviderContext): void => {
           action: BulkActionTypeEnum.duplicate,
           gaps_range_start: '2025-01-01T00:00:00.000Z',
           gaps_range_end: '2025-01-02T00:00:00.000Z',
-          gap_fill_statuses: ['unfilled'],
+          gap_fill_statuses: [gapFillStatus.UNFILLED],
           duplicate: { include_exceptions: false, include_expired_exceptions: false },
         });
 
