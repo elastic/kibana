@@ -149,6 +149,9 @@ export const PolicyTabs = React.memo(() => {
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
   const isTrustedDevicesFeatureEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const isEndpointExceptionsMovedUnderManagementFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
 
   const isEnterprise = useLicense().isEnterprise();
   const isTrustedDevicesEnabled =
@@ -453,32 +456,33 @@ export const PolicyTabs = React.memo(() => {
             'data-test-subj': 'policyBlocklistTab',
           }
         : undefined,
-      [PolicyTabKeys.ENDPOINT_EXCEPTIONS]: canReadEndpointExceptions
-        ? {
-            id: PolicyTabKeys.ENDPOINT_EXCEPTIONS,
-            name: i18n.translate(
-              'xpack.securitySolution.endpoint.policy.details.tabs.endpointExceptions',
-              {
-                defaultMessage: 'Endpoint exceptions',
-              }
-            ),
-            content: (
-              <>
-                <EuiSpacer />
-                <PolicyArtifactsLayout
-                  policyItem={policyItem}
-                  labels={endpointExceptionsLabels}
-                  getExceptionsListApiClient={getEndpointExceptionsApiClientInstance}
-                  searchableFields={ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS}
-                  getArtifactPath={getEndpointExceptionsListPath}
-                  getPolicyArtifactsPath={getPolicyEndpointExceptionsPath}
-                  canWriteArtifact={canWriteEndpointExceptions}
-                />
-              </>
-            ),
-            'data-test-subj': 'policyEventFiltersTab',
-          }
-        : undefined,
+      [PolicyTabKeys.ENDPOINT_EXCEPTIONS]:
+        isEndpointExceptionsMovedUnderManagementFeatureEnabled && canReadEndpointExceptions
+          ? {
+              id: PolicyTabKeys.ENDPOINT_EXCEPTIONS,
+              name: i18n.translate(
+                'xpack.securitySolution.endpoint.policy.details.tabs.endpointExceptions',
+                {
+                  defaultMessage: 'Endpoint exceptions',
+                }
+              ),
+              content: (
+                <>
+                  <EuiSpacer />
+                  <PolicyArtifactsLayout
+                    policyItem={policyItem}
+                    labels={endpointExceptionsLabels}
+                    getExceptionsListApiClient={getEndpointExceptionsApiClientInstance}
+                    searchableFields={ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS}
+                    getArtifactPath={getEndpointExceptionsListPath}
+                    getPolicyArtifactsPath={getPolicyEndpointExceptionsPath}
+                    canWriteArtifact={canWriteEndpointExceptions}
+                  />
+                </>
+              ),
+              'data-test-subj': 'policyEventFiltersTab',
+            }
+          : undefined,
 
       [PolicyTabKeys.PROTECTION_UPDATES]: isEnterprise
         ? {
@@ -520,6 +524,7 @@ export const PolicyTabs = React.memo(() => {
     canReadBlocklist,
     getBlocklistsApiClientInstance,
     canWriteBlocklist,
+    isEndpointExceptionsMovedUnderManagementFeatureEnabled,
     canReadEndpointExceptions,
     getEndpointExceptionsApiClientInstance,
     canWriteEndpointExceptions,
