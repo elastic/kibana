@@ -42,6 +42,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:defaultValueReportMinutes': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportRate': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportTitle': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'xpackReporting:customPdfLogo': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
