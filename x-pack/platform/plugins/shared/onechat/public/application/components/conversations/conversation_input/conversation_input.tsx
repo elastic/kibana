@@ -137,9 +137,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   // Auto-focus when conversation changes
   useEffect(() => {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       messageEditor.focus();
     }, 200);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [conversationId, messageEditor]);
 
   const handleSubmit = () => {
