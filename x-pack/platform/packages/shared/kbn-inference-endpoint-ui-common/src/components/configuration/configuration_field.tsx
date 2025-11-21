@@ -240,6 +240,14 @@ function getInitialHeadersList(
   }
 }
 
+const checkForDuplicateKeys = (headersList: string[][]) =>
+  headersList.some((header, index) => {
+    return (
+      header[KEY_INDEX] !== '' &&
+      headersList.findIndex((h) => h[KEY_INDEX] === header[KEY_INDEX]) !== index
+    );
+  });
+
 export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   isLoading,
@@ -271,12 +279,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
 
   const onBlur = () => {
     // Check for duplicate keys
-    const hasDuplicateKeys = headersList.some((header, index) => {
-      return (
-        header[KEY_INDEX] !== '' &&
-        headersList.findIndex((h) => h[KEY_INDEX] === header[KEY_INDEX]) !== index
-      );
-    });
+    const hasDuplicateKeys = checkForDuplicateKeys(headersList);
 
     if (hasDuplicateKeys) {
       setErrorMessage(HEADERS_DUPLICATE_KEY_MESSAGE);
@@ -355,7 +358,11 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                       css={{ marginTop: '22px' }}
                       onClick={() => {
                         const newHeaders = headersList.toSpliced(index, 1);
+                        const hasDuplicateKeys = checkForDuplicateKeys(newHeaders);
                         const headersObj = Object.fromEntries(newHeaders);
+                        if (!hasDuplicateKeys && errorMessage) {
+                          setErrorMessage(undefined);
+                        }
                         setHeadersList(newHeaders);
                         validateAndSetConfigValue(
                           Object.keys(headersObj).length > 0 ? headersObj : ''
