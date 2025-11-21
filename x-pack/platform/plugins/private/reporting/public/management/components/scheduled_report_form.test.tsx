@@ -8,10 +8,11 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor, within } from '@testing-library/react';
-import { applicationServiceMock, coreMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
+import { applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { useKibana } from '@kbn/reporting-public';
 import { mockScheduledReports } from '../../../common/test/fixtures';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import type { ScheduledReportFormProps } from './scheduled_report_form';
 import { ScheduledReportForm } from './scheduled_report_form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { getReportingHealth } from '../apis/get_reporting_health';
@@ -41,7 +42,6 @@ describe('ScheduledReportForm', () => {
   const onClose = jest.fn();
   const application = applicationServiceMock.createStartContract();
   const http = httpServiceMock.createSetupContract();
-  const uiSettings = coreMock.createSetup().uiSettings;
   const mockKibanaServices = {
     application: {
       capabilities: { ...application.capabilities, manageReporting: { show: true } },
@@ -52,7 +52,6 @@ describe('ScheduledReportForm', () => {
       validateEmailAddresses: mockValidateEmailAddresses,
     },
   };
-  const apiClient = new ReportingAPIClient(http, uiSettings, 'x.x.x');
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -62,8 +61,10 @@ describe('ScheduledReportForm', () => {
     },
   });
 
-  const defaultProps = {
-    apiClient,
+  const defaultProps: Pick<
+    ScheduledReportFormProps,
+    'scheduledReport' | 'availableReportTypes' | 'onClose' | 'onSubmitForm'
+  > = {
     scheduledReport: transformScheduledReport(mockScheduledReports[0]),
     availableReportTypes: [],
     onClose,
@@ -144,16 +145,7 @@ describe('ScheduledReportForm', () => {
       expect(onSubmitForm).toHaveBeenCalledWith(
         {
           recurringSchedule: {
-            byweekday: {
-              1: true,
-              2: false,
-              3: false,
-              4: false,
-              5: false,
-              6: false,
-              7: false,
-            },
-            frequency: 3,
+            frequency: 2,
           },
           reportTypeId: 'printablePdfV2',
           sendByEmail: false,
@@ -256,16 +248,7 @@ describe('ScheduledReportForm', () => {
         expect(onSubmitForm).toHaveBeenCalledWith(
           {
             recurringSchedule: {
-              byweekday: {
-                1: true,
-                2: false,
-                3: false,
-                4: false,
-                5: false,
-                6: false,
-                7: false,
-              },
-              frequency: 3,
+              frequency: 2,
             },
             reportTypeId: 'printablePdfV2',
             sendByEmail: false,
