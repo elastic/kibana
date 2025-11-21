@@ -48,9 +48,9 @@ interface ESQLDataGridProps {
   totalHits?: number;
 }
 
-const DEFAULT_INITIAL_ROW_HEIGHT = 2;
-const DEFAULT_ROWS_PER_PAGE = 10;
-const ROWS_PER_PAGE_OPTIONS = [10, 25];
+const DEFAULT_INITIAL_ROW_HEIGHT = 1;
+const DEFAULT_ROWS_PER_PAGE = 100;
+const ROWS_PER_PAGE_OPTIONS = [50, 100, 250, 500];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const { rows } = props;
@@ -78,9 +78,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     (props.initialColumns || props.columns).map((c) => c.name)
   );
 
-  const [rowHeight, setRowHeight] = useState<number>(
-    props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
-  );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
   // These are the columns that are currently rendered in the grid.
@@ -275,8 +272,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           maxDocFieldsDisplayed={100}
           showFullScreenButton={false}
           configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
-          rowHeightState={rowHeight}
-          onUpdateRowHeight={setRowHeight}
           controlColumnIds={props.controlColumnIds}
           customBulkActions={bulkActions}
           css={css`
