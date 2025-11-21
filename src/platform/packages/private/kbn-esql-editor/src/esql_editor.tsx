@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
 import { Global, css } from '@emotion/react';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { getESQLQueryColumns, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
@@ -547,9 +547,20 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const canCreateLookupIndex = useCanCreateLookupIndex();
 
+  // Extract source command and build minimal query with cluster prefixes
+  const minimalQuery = useMemo(() => {
+    const prefix = code.match(/\b(FROM|TS)\b/i)?.[1]?.toUpperCase();
+    const indexPattern = getIndexPatternFromESQLQuery(code);
+
+    return prefix && indexPattern ? `${prefix} ${indexPattern}` : '';
+  }, [code]);
+
+  const minimalQueryRef = useRef(minimalQuery);
+  minimalQueryRef.current = minimalQuery;
+
   const getJoinIndices = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
     async (cacheOptions) => {
-      const remoteClusters = getRemoteClustersFromESQLQuery(code);
+      const remoteClusters = getRemoteClustersFromESQLQuery(minimalQueryRef.current);
       let result: IndicesAutocompleteResult = { indices: [] };
       if (kibana.services?.esql?.getJoinIndicesAutocomplete) {
         result = await kibana.services.esql.getJoinIndicesAutocomplete.call(
@@ -559,7 +570,7 @@ const ESQLEditorInternal = function ESQLEditor({
       }
       return result;
     },
-    [code, kibana?.services?.esql?.getJoinIndicesAutocomplete]
+    [kibana?.services?.esql?.getJoinIndicesAutocomplete]
   );
 
   const telemetryCallbacks = useMemo<ESQLTelemetryCallbacks>(
@@ -583,7 +594,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        clearCacheWhenOld(dataSourcesCache, fixedQuery);
+        clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
         const getLicense = kibana.services?.esql?.getLicense;
         const sources = await memoizedSources(core, getLicense).result;
         return sources;
@@ -688,7 +699,6 @@ const ESQLEditorInternal = function ESQLEditor({
     favoritesClient,
     kibana.services?.esql,
     dataSourcesCache,
-    fixedQuery,
     memoizedSources,
     core,
     esqlFieldsCache,
