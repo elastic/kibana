@@ -21,7 +21,7 @@ import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   savedSearchAdHoc,
-  savedSearchMock,
+  savedSearchMock as originalSavedSearchMock,
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
   savedSearchMockWithESQL,
@@ -44,6 +44,7 @@ import { updateSavedSearch } from './utils/update_saved_search';
 import { getConnectedCustomizationService } from '../../../customizations';
 
 let mockServices = createDiscoverServicesMock();
+let savedSearchMock = copySavedSearch(originalSavedSearchMock);
 
 async function getState(url: string = '/', { savedSearch }: { savedSearch?: SavedSearch } = {}) {
   const nextHistory = createBrowserHistory<HistoryLocationState>();
@@ -92,10 +93,10 @@ async function getState(url: string = '/', { savedSearch }: { savedSearch?: Save
 describe('Discover state', () => {
   beforeEach(() => {
     mockServices = createDiscoverServicesMock();
+    savedSearchMock = copySavedSearch(originalSavedSearchMock);
   });
 
   describe('Test discover state', () => {
-    let stopSync = () => {};
     let history: History<HistoryLocationState>;
     let state: DiscoverStateContainer;
     const getCurrentUrl = () => history.createHref(history.location);
@@ -108,34 +109,33 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.replaceAppState)({ appState: {} })
       );
-      stopSync = state.appState.initAndSync();
+      state.actions.initializeAndSync();
     });
 
     afterEach(() => {
-      stopSync();
-      stopSync = () => {};
+      state.actions.stopSyncing();
     });
 
     test('setting app state and syncing to URL', async () => {
       state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.updateAppState)({
           appState: {
-            dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+            dataSource: createDataViewDataSource({ dataViewId: 'index-pattern-with-timefield-id' }),
           },
         })
       );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
+        `"/#?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:index-pattern-with-timefield-id,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
       );
     });
 
     test('changing URL to be propagated to appState', async () => {
-      history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
+      history.push('/#?_a=(dataSource:(dataViewId:index-pattern-with-timefield-id,type:dataView))');
       expect(state.getCurrentTab().appState).toMatchInlineSnapshot(`
               Object {
                 "dataSource": Object {
-                  "dataViewId": "modified",
+                  "dataViewId": "index-pattern-with-timefield-id",
                   "type": "dataView",
                 },
               }
@@ -143,10 +143,10 @@ describe('Discover state', () => {
     });
 
     test('URL navigation to url without _a, state should not change', async () => {
-      history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
+      history.push('/#?_a=(dataSource:(dataViewId:index-pattern-with-timefield-id,type:dataView))');
       history.push('/');
       expect(state.getCurrentTab().appState).toEqual({
-        dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+        dataSource: createDataViewDataSource({ dataViewId: 'index-pattern-with-timefield-id' }),
       });
     });
 
@@ -181,7 +181,6 @@ describe('Discover state', () => {
   });
 
   describe('Test discover state with overridden state storage', () => {
-    let stopSync = () => {};
     let history: History<HistoryLocationState>;
     let stateStorage: IKbnUrlStateStorage;
     let state: DiscoverStateContainer;
@@ -206,12 +205,11 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.replaceAppState)({ appState: {} })
       );
-      stopSync = state.appState.initAndSync();
+      state.actions.initializeAndSync();
     });
 
     afterEach(() => {
-      stopSync();
-      stopSync = () => {};
+      state.actions.stopSyncing();
       jest.useRealTimers();
     });
 
@@ -219,7 +217,7 @@ describe('Discover state', () => {
       state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.updateAppState)({
           appState: {
-            dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+            dataSource: createDataViewDataSource({ dataViewId: 'index-pattern-with-timefield-id' }),
           },
         })
       );
@@ -227,19 +225,19 @@ describe('Discover state', () => {
       await jest.runAllTimersAsync();
 
       expect(history.createHref(history.location)).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_tab=(tabId:the-saved-search-id-with-timefield)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
+        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:index-pattern-with-timefield-id,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_tab=(tabId:the-saved-search-id-with-timefield)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
       );
     });
 
     test('changing URL to be propagated to appState', async () => {
-      history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
+      history.push('/#?_a=(dataSource:(dataViewId:index-pattern-with-timefield-id,type:dataView))');
 
       await jest.runAllTimersAsync();
 
       expect(state.getCurrentTab().appState).toMatchInlineSnapshot(`
               Object {
                 "dataSource": Object {
-                  "dataViewId": "modified",
+                  "dataViewId": "index-pattern-with-timefield-id",
                   "type": "dataView",
                 },
               }
@@ -1470,7 +1468,6 @@ describe('Discover state', () => {
   });
 
   describe('Test discover state with embedded mode', () => {
-    let stopSync = () => {};
     let history: History<HistoryLocationState>;
     let state: DiscoverStateContainer;
     const getCurrentUrl = () => history.createHref(history.location);
@@ -1489,33 +1486,32 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.replaceAppState)({ appState: {} })
       );
-      stopSync = state.appState.initAndSync();
+      state.actions.initializeAndSync();
     });
 
     afterEach(() => {
-      stopSync();
-      stopSync = () => {};
+      state.actions.stopSyncing();
     });
 
     test('setting app state and syncing to URL', async () => {
       state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.updateAppState)({
           appState: {
-            dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+            dataSource: createDataViewDataSource({ dataViewId: 'index-pattern-with-timefield-id' }),
           },
         })
       );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
+        `"/?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:index-pattern-with-timefield-id,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
       );
     });
 
     test('changing URL to be propagated to appState', async () => {
-      history.push('/?_a=(dataSource:(dataViewId:modified,type:dataView))');
+      history.push('/?_a=(dataSource:(dataViewId:index-pattern-with-timefield-id,type:dataView))');
       expect(state.getCurrentTab().appState).toMatchObject(
         expect.objectContaining({
-          dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+          dataSource: createDataViewDataSource({ dataViewId: 'index-pattern-with-timefield-id' }),
         })
       );
     });

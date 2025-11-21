@@ -122,7 +122,8 @@ export const useDiscoverInTimelineActions = (
         try {
           savedSearch = await savedSearchService.get(newSavedSearchId);
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
-          discoverStateContainer.current?.appState.initAndSync();
+          discoverStateContainer.current?.actions.stopSyncing();
+          discoverStateContainer.current?.actions.initializeAndSync();
           await discoverStateContainer.current?.internalState.dispatch(
             discoverStateContainer.current?.injectCurrentTab(
               discoverStateContainer.current?.internalStateActions.replaceAppState

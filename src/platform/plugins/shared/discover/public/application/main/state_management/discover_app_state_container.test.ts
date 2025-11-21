@@ -12,28 +12,25 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { getDiscoverAppStateContainer, isEqualState } from './discover_app_state_container';
+import { isEqualState } from './discover_app_state_container';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import { getSavedSearchContainer } from './discover_saved_search_container';
 import { omit } from 'lodash';
 import type { InternalStateStore, TabState } from './redux';
 import {
   createInternalStateStore,
   createRuntimeStateManager,
-  createTabActionInjector,
   selectTab,
   internalStateActions,
 } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
 import { DiscoverSearchSessionManager } from './discover_search_session';
+import { getDiscoverStateContainer } from './discover_state';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
 let internalState: InternalStateStore;
-let savedSearchState: DiscoverSavedSearchContainer;
 let tabsStorageManager: TabsStorageManager;
 let getCurrentTab: () => TabState;
 
@@ -61,26 +58,25 @@ describe('Test discover app state container', () => {
         session: discoverServiceMock.data.search.session,
       }),
     });
-    savedSearchState = getSavedSearchContainer({
-      services: discoverServiceMock,
-      internalState,
-      getCurrentTab: () => getCurrentTab(),
-    });
     await internalState.dispatch(
-      internalStateActions.initializeTabs({ discoverSessionId: savedSearchState.getState()?.id })
+      internalStateActions.initializeTabs({ discoverSessionId: undefined })
     );
     getCurrentTab = () =>
       selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
   });
 
   const getStateContainer = () =>
-    getDiscoverAppStateContainer({
+    getDiscoverStateContainer({
       tabId: getCurrentTab().id,
-      stateStorage,
-      internalState,
-      savedSearchContainer: savedSearchState,
       services: discoverServiceMock,
-      injectCurrentTab: createTabActionInjector(getCurrentTab().id),
+      customizationContext: mockCustomizationContext,
+      stateStorageContainer: stateStorage,
+      internalState,
+      runtimeStateManager: createRuntimeStateManager(),
+      searchSessionManager: new DiscoverSearchSessionManager({
+        history: discoverServiceMock.history,
+        session: discoverServiceMock.data.search.session,
+      }),
     });
 
   test('getPrevious returns the state before the current', async () => {
@@ -191,7 +187,7 @@ describe('Test discover app state container', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      state.initAndSync();
+      state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
@@ -210,7 +206,7 @@ describe('Test discover app state container', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      state.initAndSync();
+      state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: true,
@@ -229,7 +225,7 @@ describe('Test discover app state container', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      state.initAndSync();
+      state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
@@ -248,7 +244,7 @@ describe('Test discover app state container', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      state.initAndSync();
+      state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: false,
@@ -260,20 +256,20 @@ describe('Test discover app state container', () => {
     it('should call setResetDefaultProfileState correctly with saved search', () => {
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'], rowHeight: 5 });
-      const savedSearchGetSpy = jest.spyOn(savedSearchState, 'getState');
+      const state = getStateContainer();
+      const savedSearchGetSpy = jest.spyOn(state.savedSearchState, 'getState');
       savedSearchGetSpy.mockReturnValue({
         id: 'test',
         searchSource: createSearchSourceMock(),
         managed: false,
       });
-      const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
-      state.initAndSync();
+      state.actions.initializeAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,

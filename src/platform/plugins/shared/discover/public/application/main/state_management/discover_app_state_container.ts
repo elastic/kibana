@@ -8,50 +8,22 @@
  */
 
 import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
-  FilterStateStore,
-  isOfAggregateQueryType,
-} from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isOfAggregateQueryType } from '@kbn/es-query';
 import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import type {
-  IKbnUrlStateStorage,
-  INullableBaseStateContainer,
-} from '@kbn/kibana-utils-plugin/public';
-import { syncState } from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
-import { type GlobalQueryStateFromUrl, connectToQueryState } from '@kbn/data-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { distinctUntilChanged, from, map } from 'rxjs';
 import defaultComparator from 'fast-deep-equal';
 import type { DiscoverServices } from '../../../build_services';
-import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
 import { getStateDefaults } from './utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import type { DiscoverDataSource } from '../../../../common/data_sources';
-import {
-  createDataViewDataSource,
-  createEsqlDataSource,
-  DataSourceType,
-  isDataSourceType,
-  isEsqlSource,
-} from '../../../../common/data_sources';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import type { DiscoverInternalState, InternalStateStore, TabActionInjector } from './redux';
-import { internalStateActions, selectTab, useCurrentTabSelector } from './redux';
+import { createEsqlDataSource, isEsqlSource } from '../../../../common/data_sources';
+import { useCurrentTabSelector } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
-import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
-
-export interface DiscoverAppStateContainer {
-  /**
-   * Initializes the app state and starts syncing it with the URL
-   */
-  initAndSync: () => () => void;
-}
 
 export interface DiscoverAppState {
   /**
@@ -138,175 +110,6 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
 
 export const useAppStateSelector = <T>(selector: (state: DiscoverAppState) => T): T =>
   useCurrentTabSelector((tab) => selector(tab.appState), defaultComparator);
-
-/**
- * This is the app state container for Discover main, it's responsible for syncing state with the URL
- * @param stateStorage
- * @param savedSearch
- * @param services
- */
-export const getDiscoverAppStateContainer = ({
-  tabId,
-  stateStorage,
-  internalState,
-  savedSearchContainer,
-  services,
-  injectCurrentTab,
-}: {
-  tabId: string;
-  stateStorage: IKbnUrlStateStorage;
-  internalState: InternalStateStore;
-  savedSearchContainer: DiscoverSavedSearchContainer;
-  services: DiscoverServices;
-  injectCurrentTab: TabActionInjector;
-}): DiscoverAppStateContainer => {
-  const getAppState = (state: DiscoverInternalState): DiscoverAppState => {
-    return selectTab(state, tabId).appState;
-  };
-
-  const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
-    get: () => getAppState(internalState.getState()),
-    set: (appState) => {
-      if (!appState) {
-        return;
-      }
-
-      internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
-    },
-    state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual)),
-  };
-
-  const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
-    const tabState = selectTab(state, tabId);
-    const { timeRange: time, refreshInterval, filters } = tabState.globalState;
-
-    return { time, refreshInterval, filters };
-  };
-
-  const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
-    get: () => getGlobalState(internalState.getState()),
-    set: (state) => {
-      if (!state) {
-        return;
-      }
-
-      const { time: timeRange, refreshInterval, filters } = state;
-
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.setGlobalState)({
-          globalState: {
-            timeRange,
-            refreshInterval,
-            filters,
-          },
-        })
-      );
-    },
-    state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual)),
-  };
-
-  const initAndSync = () => {
-    const currentSavedSearch = savedSearchContainer.getState();
-
-    addLog('[appState] initialize state and sync with URL', currentSavedSearch);
-
-    // Set the default profile state only if not loading a saved search,
-    // to avoid overwriting saved search state
-    if (!currentSavedSearch.id) {
-      const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
-        stateStorage,
-        services
-      );
-
-      // Only set default state which is not already set in the URL
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: {
-            columns: columns === undefined,
-            rowHeight: rowHeight === undefined,
-            breakdownField: breakdownField === undefined,
-            hideChart: hideChart === undefined,
-          },
-        })
-      );
-    }
-
-    const { data } = services;
-    const savedSearchDataView = currentSavedSearch.searchSource.getField('index');
-    const appState = appStateContainer.get();
-    const setDataViewFromSavedSearch =
-      !appState.dataSource ||
-      (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
-        appState.dataSource.dataViewId !== savedSearchDataView?.id);
-
-    if (setDataViewFromSavedSearch) {
-      // used data view is different from the given by url/state which is invalid
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.updateAppState)({
-          appState: {
-            dataSource: savedSearchDataView?.id
-              ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
-              : undefined,
-          },
-        })
-      );
-    }
-
-    // syncs `_a` portion of url with query services
-    const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
-      data.query,
-      appStateContainer,
-      {
-        filters: FilterStateStore.APP_STATE,
-        query: true,
-      }
-    );
-
-    const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } = syncState({
-      storageKey: APP_STATE_URL_KEY,
-      stateContainer: appStateContainer,
-      stateStorage,
-    });
-
-    // syncs `_g` portion of url with query services
-    const stopSyncingQueryGlobalStateWithStateContainer = connectToQueryState(
-      data.query,
-      globalStateContainer,
-      {
-        refreshInterval: true,
-        time: true,
-        filters: FilterStateStore.GLOBAL_STATE,
-      }
-    );
-
-    const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
-      syncState({
-        storageKey: GLOBAL_STATE_URL_KEY,
-        stateContainer: globalStateContainer,
-        stateStorage,
-      });
-
-    // current state needs to be pushed to url
-    internalState
-      .dispatch(injectCurrentTab(internalStateActions.pushCurrentTabStateToUrl)())
-      .then(() => {
-        startSyncingAppStateWithUrl();
-        startSyncingGlobalStateWithUrl();
-      });
-
-    return () => {
-      stopSyncingQueryAppStateWithStateContainer();
-      stopSyncingQueryGlobalStateWithStateContainer();
-      stopSyncingAppStateWithUrl();
-      stopSyncingGlobalStateWithUrl();
-    };
-  };
-
-  return {
-    ...appStateContainer,
-    initAndSync,
-  };
-};
 
 export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
   return (
