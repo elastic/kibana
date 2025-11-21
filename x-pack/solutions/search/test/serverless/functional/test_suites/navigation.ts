@@ -6,7 +6,7 @@
  */
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const archiveEmptyIndex =
@@ -84,11 +84,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
         },
-        {
-          link: { deepLinkId: 'searchGettingStarted' },
-          breadcrumbs: ['Getting started'],
-          pageTestSubject: 'gettingStartedHeader',
-        },
       ];
 
       for (const testCase of sideNavCases) {
@@ -164,7 +159,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'searchPlayground',
           'machine_learning',
           // footer:
-          'search_getting_started',
           'dev_tools',
           'data_management',
           'admin_and_settings',
