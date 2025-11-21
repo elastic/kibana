@@ -100,6 +100,23 @@ export class IndexEditorObject extends FtrService {
     expect(docs).to.eql(expectedDocs);
   }
 
+  public async verifyIndexMappings(
+    indexName: string,
+    expectedMappings: Record<string, unknown>
+  ): Promise<void> {
+    const indexMappings = await this.es.indices.getMapping({
+      index: indexName,
+    });
+
+    const actualMappings = indexMappings[indexName].mappings.properties!;
+
+    // Verify each expected property exists with the correct type
+    for (const [fieldName, expectedField] of Object.entries(expectedMappings)) {
+      const actualField = actualMappings[fieldName];
+      expect(actualField.type).to.eql((expectedField as any).type);
+    }
+  }
+
   public async uploadFile(filePath: string): Promise<void> {
     const fileInput = await this.testSubjects.find('indexEditorFileInput');
     await fileInput.type(filePath);

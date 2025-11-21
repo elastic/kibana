@@ -206,6 +206,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'extra-column': 'value-2-5',
           },
         ]);
+
+        await indexEditor.verifyIndexMappings(INDEX_NAME_MANUAL, {
+          'renamed-column-1': { type: 'text' },
+          'column-2': { type: 'keyword' },
+          'column-3': { type: 'keyword' },
+          'column-4': { type: 'keyword' },
+          'extra-column': { type: 'keyword' },
+        });
       });
     });
 
@@ -336,10 +344,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             age: 30,
           },
         ]);
+        await indexEditor.verifyIndexMappings(INDEX_NAME_EDITION, {
+          age: { type: 'integer' },
+          customer_first_name: { type: 'text' },
+          customer_full_name: { type: 'text' },
+          customer_gender: { type: 'text' },
+          customer_id: { type: 'text' },
+          customer_last_name: { type: 'text' },
+          email: { type: 'text' },
+        });
       });
     });
 
-    it('allows to save an edition without closing the flyout', async () => {
+    it('allows to save an edition without closing the flyout', async function () {
       // Type lookup join query with index name inside it
       await monacoEditor.setCodeEditorValue('');
       await monacoEditor.typeCodeEditorValue(
@@ -367,14 +384,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
       });
     });
-  });
 
-  async function cleanLookupJoinIndexes() {
-    for (const name of [INDEX_NAME_EDITION, INDEX_NAME_MANUAL, INDEX_NAME_FILE]) {
-      const indexExists = await es.indices.exists({ index: name });
-      if (indexExists) {
-        await es.indices.delete({ index: name });
+    async function cleanLookupJoinIndexes() {
+      for (const name of [INDEX_NAME_EDITION, INDEX_NAME_MANUAL, INDEX_NAME_FILE]) {
+        const indexExists = await es.indices.exists({ index: name });
+        if (indexExists) {
+          await es.indices.delete({ index: name });
+        }
       }
     }
-  }
+  });
 }
