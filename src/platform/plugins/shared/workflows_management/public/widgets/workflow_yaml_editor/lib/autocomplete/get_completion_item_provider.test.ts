@@ -12,7 +12,10 @@ import {
   getCompletionItemProvider,
   WORKFLOW_COMPLETION_PROVIDER_ID,
 } from './get_completion_item_provider';
-import { interceptMonacoYamlProvider } from './intercept_monaco_yaml_provider';
+import {
+  clearAllYamlProviders,
+  interceptMonacoYamlProvider,
+} from './intercept_monaco_yaml_provider';
 
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
@@ -35,6 +38,7 @@ describe('getCompletionItemProvider', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearAllYamlProviders();
     interceptMonacoYamlProvider();
 
     mockModel = {
@@ -53,6 +57,10 @@ describe('getCompletionItemProvider', () => {
     } as monaco.languages.CompletionContext;
 
     getState = jest.fn(() => ({} as any));
+  });
+
+  afterEach(() => {
+    clearAllYamlProviders();
   });
 
   describe('provider structure', () => {

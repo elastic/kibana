@@ -196,6 +196,11 @@ jest.mock('../lib/autocomplete/get_completion_item_provider', () => ({
   getCompletionItemProvider: jest.fn(() => mockCompletionProvider),
 }));
 
+// Mock interceptMonacoYamlProvider to be a no-op so the original mock remains
+jest.mock('../lib/autocomplete/intercept_monaco_yaml_provider', () => ({
+  interceptMonacoYamlProvider: jest.fn(),
+}));
+
 jest.mock('@kbn/monaco', () => ({
   monaco: {
     editor: {
@@ -389,15 +394,17 @@ steps:
       store.dispatch(setYamlString(yamlContent));
       store.dispatch(setActiveTab('workflow'));
 
-      const { unmount } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+      const mockDispose = jest.fn();
+      (monaco.languages.registerCompletionItemProvider as jest.Mock).mockReturnValue({
+        dispose: mockDispose,
+      });
 
-      const registeredProvider = (monaco.languages.registerCompletionItemProvider as jest.Mock).mock
-        .results[0].value;
+      const { unmount } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
       unmount();
 
       // Verify that dispose was called on the completion provider
-      expect(registeredProvider.dispose).toHaveBeenCalled();
+      expect(mockDispose).toHaveBeenCalled();
     });
   });
 

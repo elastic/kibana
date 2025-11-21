@@ -16,6 +16,8 @@ let originalRegisterCompletionItemProvider:
   | typeof monaco.languages.registerCompletionItemProvider
   | null = null;
 
+let isIntercepted = false;
+
 /**
  * Initialize the monkey-patch for monaco.languages.registerCompletionItemProvider
  * This must be called BEFORE monaco-yaml is initialized.
@@ -24,11 +26,12 @@ let originalRegisterCompletionItemProvider:
  * so we can call them manually and deduplicate results.
  */
 export function interceptMonacoYamlProvider(): void {
-  if (originalRegisterCompletionItemProvider) {
+  if (isIntercepted) {
     return;
   }
 
   originalRegisterCompletionItemProvider = monaco.languages.registerCompletionItemProvider;
+  isIntercepted = true;
 
   const isYamlSelector = (selector: monaco.languages.LanguageSelector): boolean => {
     if (typeof selector === 'string') {
@@ -65,7 +68,14 @@ export function interceptMonacoYamlProvider(): void {
       }
 
       yamlProviders.push(provider);
-      return { dispose: () => {} };
+      return {
+        dispose: () => {
+          const index = yamlProviders.indexOf(provider);
+          if (index !== -1) {
+            yamlProviders.splice(index, 1);
+          }
+        },
+      };
     }
 
     // Register non-YAML providers normally
@@ -77,5 +87,30 @@ export function interceptMonacoYamlProvider(): void {
 }
 
 export function getAllYamlProviders(): readonly monaco.languages.CompletionItemProvider[] {
-  return yamlProviders;
+  // Return a frozen copy to ensure readonly behavior at runtime
+  return Object.freeze([...yamlProviders]);
+}
+
+/**
+ * @internal
+ * Test-only utility to clear all stored YAML providers.
+ * This should only be used in tests for cleanup between test cases.
+ */
+export function clearAllYamlProviders(): void {
+  yamlProviders.length = 0;
+}
+
+/**
+ * @internal
+ * Test-only utility to reset the interception state.
+ * This restores the original registerCompletionItemProvider and clears the stored reference.
+ * This should only be used in tests for cleanup between test cases.
+ */
+export function resetInterception(): void {
+  if (originalRegisterCompletionItemProvider && isIntercepted) {
+    monaco.languages.registerCompletionItemProvider = originalRegisterCompletionItemProvider;
+  }
+  originalRegisterCompletionItemProvider = null;
+  isIntercepted = false;
+  yamlProviders.length = 0;
 }

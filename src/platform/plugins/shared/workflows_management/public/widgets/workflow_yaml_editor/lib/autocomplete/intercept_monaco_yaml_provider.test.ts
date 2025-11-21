@@ -9,7 +9,11 @@
 
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { WORKFLOW_COMPLETION_PROVIDER_ID } from './get_completion_item_provider';
-import { getAllYamlProviders, interceptMonacoYamlProvider } from './intercept_monaco_yaml_provider';
+import {
+  getAllYamlProviders,
+  interceptMonacoYamlProvider,
+  resetInterception,
+} from './intercept_monaco_yaml_provider';
 
 // Mock monaco before importing
 jest.mock('@kbn/monaco', () => {
@@ -32,15 +36,14 @@ describe('interceptMonacoYamlProvider', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetInterception();
     mockDisposable = { dispose: jest.fn() };
     originalRegister = jest.fn(() => mockDisposable);
     (monaco.languages.registerCompletionItemProvider as jest.Mock) = originalRegister;
   });
 
   afterEach(() => {
-    // Reset the module state by clearing the providers array
-    // This is a bit of a hack, but necessary since the module maintains state
-    jest.resetModules();
+    resetInterception();
   });
 
   describe('interceptMonacoYamlProvider', () => {
