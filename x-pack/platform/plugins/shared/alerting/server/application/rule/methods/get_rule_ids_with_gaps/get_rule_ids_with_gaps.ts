@@ -14,12 +14,7 @@ import {
 import type { RulesClientContext } from '../../../../rules_client';
 import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import {
-  extractGapDurationSums,
-  calculateHighestPriorityGapFillStatus,
-  RULE_GAP_AGGREGATIONS,
-  type GapDurationBucket,
-} from './utils';
+import { hasMatchedGapFillStatus, RULE_GAP_AGGREGATIONS, type GapDurationBucket } from './utils';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 
@@ -96,15 +91,12 @@ export async function getRuleIdsWithGaps(
     const buckets = byRuleAgg?.buckets ?? [];
 
     const ruleIds: string[] = [];
-    if (highestPriorityGapFillStatuses.length > 0) {
-      for (const b of buckets) {
-        const sums = extractGapDurationSums(b);
-        const gapFillStatus = calculateHighestPriorityGapFillStatus(sums);
-        if (gapFillStatus && highestPriorityGapFillStatuses?.includes(gapFillStatus))
-          ruleIds.push(b.key);
-      }
-    } else {
-      for (const b of buckets) {
+
+    for (const b of buckets) {
+      if (
+        highestPriorityGapFillStatuses.length === 0 ||
+        hasMatchedGapFillStatus(b, highestPriorityGapFillStatuses)
+      ) {
         ruleIds.push(b.key);
       }
     }

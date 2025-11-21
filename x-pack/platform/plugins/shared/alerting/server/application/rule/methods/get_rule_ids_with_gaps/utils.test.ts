@@ -8,6 +8,7 @@
 import {
   extractGapDurationSums,
   calculateHighestPriorityGapFillStatus,
+  hasMatchedGapFillStatus,
   RULE_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from './utils';
@@ -142,6 +143,22 @@ describe('utils', () => {
       expect(RULE_GAP_AGGREGATIONS.totalDurationMs).toEqual({
         sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' },
       });
+    });
+  });
+
+  describe('hasMatchedGapFillStatus', () => {
+    it('returns true when the gap fill status of the bucket matches the given gap fill statuses', () => {
+      expect(
+        hasMatchedGapFillStatus({ key: 'test', totalUnfilledDurationMs: { value: 1 } }, [
+          'unfilled',
+        ])
+      ).toBe(true);
+    });
+
+    it('returns false when the gap fill status of the bucket does not match the given gap fill statuses', () => {
+      expect(
+        hasMatchedGapFillStatus({ key: 'test', totalUnfilledDurationMs: { value: 1 } }, ['filled'])
+      ).toBe(false);
     });
   });
 });

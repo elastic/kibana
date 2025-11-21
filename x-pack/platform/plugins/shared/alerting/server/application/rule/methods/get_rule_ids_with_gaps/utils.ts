@@ -58,3 +58,16 @@ export const RULE_GAP_AGGREGATIONS = {
 export type GapDurationBucket = { key: string } & Partial<
   Record<keyof typeof RULE_GAP_AGGREGATIONS, AggregationsSumAggregate>
 >;
+
+/**
+ * Checks if the gap fill status of the bucket matches the given gap fill statuses
+ */
+export const hasMatchedGapFillStatus = (
+  bucket: GapDurationBucket,
+  gapFillStatuses: GapFillStatus[]
+): boolean => {
+  const sums = extractGapDurationSums(bucket);
+  const gapFillStatus = calculateHighestPriorityGapFillStatus(sums);
+
+  return Boolean(gapFillStatus && gapFillStatuses.includes(gapFillStatus));
+};
