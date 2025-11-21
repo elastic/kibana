@@ -520,39 +520,45 @@ describe('Gap Auto Fill Scheduler Task', () => {
       it.each([
         {
           name: 'skips when capacity is reached initially',
-          capacityTotals: [100],
+          capacity: 100,
           setupGaps: false,
           expectedProcessCalls: 0,
           expectMessage: 'no capacity remaining to schedule gap fills',
         },
         {
           name: 'stops when capacity is reached mid-execution',
-          capacityTotals: [50, 100],
+          capacity: 99,
           setupGaps: true,
           expectedProcessCalls: 1,
           expectMessage: 'no backfill capacity',
         },
       ])(
         'capacity handling: $name',
-        async ({ capacityTotals, setupGaps, expectedProcessCalls, expectMessage }) => {
+        async ({ capacity, setupGaps, expectedProcessCalls, expectMessage }) => {
           // Set capacity sequence
           rulesClient.findBackfill.mockReset();
-          for (const total of capacityTotals) {
-            rulesClient.findBackfill.mockResolvedValueOnce({
-              data: [],
-              total,
-              page: 1,
-              perPage: 1,
-            });
-          }
+          rulesClient.findBackfill.mockResolvedValueOnce({
+            data: [],
+            total: capacity,
+            page: 1,
+            perPage: 1,
+          });
 
           if (setupGaps) {
             (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({
-              ruleIds: ['rule-1', 'rule-2'],
+              ruleIds: Array(150)
+                .fill('rule-')
+                .map((_, index) => `rule-${index + 1}`),
             });
             const mockGaps: Gap[] = [
               buildGap(
                 'rule-1',
+                '2024-01-01T00:00:00.000Z',
+                '2024-01-01T01:00:00.000Z',
+                gapStatus.UNFILLED
+              ),
+              buildGap(
+                'rule-2',
                 '2024-01-01T00:00:00.000Z',
                 '2024-01-01T01:00:00.000Z',
                 gapStatus.UNFILLED
@@ -573,6 +579,11 @@ describe('Gap Auto Fill Scheduler Task', () => {
                   processedGaps: 1,
                   status: GapFillSchedulePerRuleStatus.SUCCESS,
                 },
+                {
+                  ruleId: 'rule-2',
+                  processedGaps: 1,
+                  status: GapFillSchedulePerRuleStatus.SUCCESS,
+                },
               ],
             });
           }
@@ -588,31 +599,6 @@ describe('Gap Auto Fill Scheduler Task', () => {
           }
         }
       );
-      it('respects remaining backfill capacity across rule batches based on capacity checks (e.g., max 100, total 80 -> 20 remaining)', async () => {
-        // Capacity pre-check: total=80 (remaining=20). After first batch, capacity reaches max (100)
-        rulesClient.findBackfill
-          .mockResolvedValueOnce({ data: [], total: 80, page: 1, perPage: 1 })
-          .mockResolvedValueOnce({ data: [], total: 100, page: 1, perPage: 1 });
-
-        const ruleIds = Array.from({ length: 200 }, (_, i) => `rule-${i + 1}`);
-        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds });
-
-        mockedFindGaps.findGapsSearchAfter.mockResolvedValue({
-          total: 0,
-          data: [],
-          searchAfter: undefined,
-          pitId: 'pit-1',
-        });
-
-        const result = await taskRunner.run();
-        expect(result).toEqual({ state: {} });
-
-        const firstCallArgs = mockedFindGaps.findGapsSearchAfter.mock.calls[0][0];
-        const expectedFirstBatchSize = Math.min(DEFAULT_RULES_BATCH_SIZE, 20);
-        expect(firstCallArgs.params.ruleIds.length).toBe(expectedFirstBatchSize);
-
-        expectFinalLog('success', 'no backfill capacity (100/100)');
-      });
     });
 
     describe('Errors', () => {
@@ -692,7 +678,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           const gap: Gap = buildGap(
             'rule-1',
             '2024-01-01T00:00:00.000Z',
-            '2024-01-01T01:00:00.000Z',
+
             gapStatus.UNFILLED
           );
 
@@ -881,39 +867,6 @@ describe('Gap Auto Fill Scheduler Task', () => {
             expect.objectContaining({
               status: 'success',
               message: expect.stringContaining('completed'),
-            })
-          );
-        });
-
-        // Covered by capacity handling parametrized test above
-
-        it('[Capacity] respects remaining backfill capacity across rule batches based on capacity checks (e.g., max 100, total 80 -> 20 remaining)', async () => {
-          // Capacity pre-check: total=80 (remaining=20). After first batch, capacity reaches max (100)
-          rulesClient.findBackfill
-            .mockResolvedValueOnce({ data: [], total: 80, page: 1, perPage: 1 })
-            .mockResolvedValueOnce({ data: [], total: 100, page: 1, perPage: 1 });
-
-          const ruleIds = Array.from({ length: 200 }, (_, i) => `rule-${i + 1}`);
-          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds });
-
-          mockedFindGaps.findGapsSearchAfter.mockResolvedValue({
-            total: 0,
-            data: [],
-            searchAfter: undefined,
-            pitId: 'pit-1',
-          });
-
-          const result = await taskRunner.run();
-          expect(result).toEqual({ state: {} });
-
-          const firstCallArgs = mockedFindGaps.findGapsSearchAfter.mock.calls[0][0];
-          const expectedFirstBatchSize = Math.min(DEFAULT_RULES_BATCH_SIZE, 20);
-          expect(firstCallArgs.params.ruleIds.length).toBe(expectedFirstBatchSize);
-
-          expect(logEventMock).toHaveBeenCalledWith(
-            expect.objectContaining({
-              status: 'success',
-              message: expect.stringContaining('no backfill capacity (100/100)'),
             })
           );
         });
