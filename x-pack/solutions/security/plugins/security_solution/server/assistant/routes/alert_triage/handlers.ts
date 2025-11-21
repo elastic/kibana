@@ -35,7 +35,7 @@ export const createAlertTriageJobHandler = (
 
       const chatModel = await securitySolutionContext.getInferenceChatModel({
         connectorId: request.body.connectorId,
-        chatModelOptions: { }
+        chatModelOptions: {}
       });
 
       // Get the alerts client
@@ -53,55 +53,55 @@ export const createAlertTriageJobHandler = (
       );
 
       // Create a separate job for each alert
-      const jobs = alertIds.map((alertId) => {
-        const jobId = uuidv4();
+      const jobId = uuidv4();
 
-        logger.debug(`Starting alert triage job ${jobId} for alert ${alertId}`);
+      logger.debug(`Starting alert triage job ${jobId} for alerts ${alertIds.join(', ')}`);
 
-        // Create service instance
-        const alertTriageService = new AlertTriageService(
-          {
-            esClient,
-            savedObjectsClient,
-            alertsClient,
-            alertsIndex,
-            chatModel,
-            request,
-            logger,
-          }
-        );
+      // Create service instance
+      const alertTriageService = new AlertTriageService(
+        {
+          esClient,
+          savedObjectsClient,
+          alertsClient,
+          chatModel,
+          request,
+          logger,
+        }
+      );
 
-        // Fire and forget - don't await the processing
-        alertTriageService
-          .processAlertTriageJob({
-            connectorId,
-            alertId,
-            jobId,
-          })
-          .then((result) => {
-            logger.info(
-              `Alert triage job ${jobId} for alert ${alertId} completed successfully`
-            );
-            // TODO: Store results, update status, write event logs
-          })
-          .catch((error) => {
-            console.error(error)
-            logger.error(
-              `Alert triage job ${jobId} for alert ${alertId} failed: ${error.message}`,
-              error
-            );
-            // TODO: Store error, update status, write failure event logs
-          });
-
-        return { alertId, jobId };
-      });
+      // Fire and forget - don't await the processing
+      alertTriageService
+        .processAlertTriageJob({
+          connectorId,
+          alerts: alertIds.map((alertId) => ({ alertId, alertIndex: alertsIndex })),
+          jobId,
+        })
+        .then((result) => {
+          logger.info(
+            `Alert triage job ${jobId} for alerts ${alertIds.join(', ')} completed successfully`
+          );
+          // TODO: Store results, update status, write event logs
+        })
+        .catch((error) => {
+          console.error(error)
+          logger.error(
+            `Alert triage job ${jobId} for alerts ${alertIds.join(', ')} failed: ${error.message}`,
+            error
+          );
+          // TODO: Store error, update status, write failure event logs
+        });
 
       // Return immediately with job IDs
       return response.ok({
         body: {
           success: true,
-          message: `Created ${jobs.length} alert triage job(s) successfully`,
-          jobs,
+          message: `Created 1 alert triage job(s) successfully`,
+          jobs: [
+            {
+              alertIds,
+              jobId,
+            }
+          ],
         },
       });
     } catch (err) {

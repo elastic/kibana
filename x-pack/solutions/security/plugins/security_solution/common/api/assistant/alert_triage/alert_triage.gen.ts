@@ -29,18 +29,6 @@ export const CreateAlertTriageJobRequestBody = z.object({
 });
 export type CreateAlertTriageJobRequestBodyInput = z.input<typeof CreateAlertTriageJobRequestBody>;
 
-export type AlertTriageJob = z.infer<typeof AlertTriageJob>;
-export const AlertTriageJob = z.object({
-  /**
-   * The ID of the alert being triaged
-   */
-  alertId: z.string(),
-  /**
-   * The unique job ID for this alert's triage job
-   */
-  jobId: z.string(),
-});
-
 export type CreateAlertTriageJobResponse = z.infer<typeof CreateAlertTriageJobResponse>;
 export const CreateAlertTriageJobResponse = z.object({
   success: z.boolean(),
@@ -48,6 +36,16 @@ export const CreateAlertTriageJobResponse = z.object({
   /**
    * Array of alert triage jobs created, one per alert
    */
-  jobs: z.array(AlertTriageJob),
+  jobs: z.array(
+    z.object({
+      /**
+       * The ID of the alert being triaged
+       */
+      alertIds: z.array(z.string().min(1)),
+      /**
+       * The unique job ID for this alert's triage job
+       */
+      jobId: z.string(),
+    })
+  ),
 });
-

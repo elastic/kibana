@@ -9,7 +9,6 @@
 import { createMiddleware, tool, ToolMessage } from "langchain";
 import { Command, isCommand, getCurrentTaskInput } from "@langchain/langgraph";
 import { z as z3 } from "zod/v3";
-import { withLangGraph } from "@langchain/langgraph/zod";
 import type {
   BackendProtocol,
   BackendFactory,
@@ -18,45 +17,9 @@ import type {
 } from "../backends/protocol";
 import { StateBackend } from "../backends/state";
 import { sanitizeToolCallId } from "../backends/utils";
-
-/**
- * Zod v3 schema for FileData (re-export from backends)
- */
-const FileDataSchema = z3.object({
-  content: z3.array(z3.string()),
-  created_at: z3.string(),
-  modified_at: z3.string(),
-});
+import { AgentStateSchema } from "../state_schema";
 
 export type { FileData };
-
-/**
- * Merge file updates with support for deletions.
- */
-function fileDataReducer(
-  left: Record<string, FileData> | undefined,
-  right: Record<string, FileData | null>,
-): Record<string, FileData> {
-  if (left === undefined) {
-    const result: Record<string, FileData> = {};
-    for (const [key, value] of Object.entries(right)) {
-      if (value !== null) {
-        result[key] = value;
-      }
-    }
-    return result;
-  }
-
-  const result = { ...left };
-  for (const [key, value] of Object.entries(right)) {
-    if (value === null) {
-      delete result[key];
-    } else {
-      result[key] = value;
-    }
-  }
-  return result;
-}
 
 /**
  * Resolve backend from factory or instance.
@@ -165,9 +128,15 @@ function createReadFileTool(
       };
       const resolvedBackend = getBackend(backend, stateAndStore);
       const { file_path, offset = 0, limit = 2000 } = input;
-      return await awaitIfPromise(
+      const result = await awaitIfPromise(
         resolvedBackend.read(file_path, offset, limit),
       );
+
+      return new ToolMessage({
+        content: result,
+        tool_call_id: config.toolCall?.id as string,
+        name: "read_file",
+      });
     },
     {
       name: "read_file",
@@ -444,18 +413,9 @@ export function createFilesystemMiddleware(
     createGrepTool(backend, customToolDescriptions?.grep ?? null),
   ];
 
-  const FilesystemStateSchema = z3.object({
-    files: withLangGraph(z3.record(z3.string(), FileDataSchema), {
-      reducer: {
-        fn: fileDataReducer,
-        schema: z3.record(z3.string(), FileDataSchema.nullable()),
-      },
-    }).default({}),
-  });
-
   return createMiddleware({
     name: "FilesystemMiddleware",
-    stateSchema: FilesystemStateSchema as any,
+    stateSchema: AgentStateSchema as any,
     tools,
     wrapModelCall: systemPrompt
       ? async (request, handler: any) => {
@@ -474,6 +434,7 @@ export function createFilesystemMiddleware(
             if (
               typeof msg.content === "string" &&
               msg.content.length > toolTokenLimitBeforeEvict! * 4
+              && msg.name !== "read_file"
             ) {
               // Build StateAndStore from request
               const stateAndStore: StateAndStore = {

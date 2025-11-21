@@ -18,7 +18,10 @@ import { InferenceChatModel } from '@kbn/inference-langchain';
 
 export interface AlertTriageServiceParams {
     connectorId: string;
-    alertId: string;
+    alerts: {
+        alertId: string;
+        alertIndex: string;
+    }[];
     jobId: string;
 }
 
@@ -26,7 +29,6 @@ type AlertTriageServiceConstructorParams = {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract;
     alertsClient: AlertsClient;
-    alertsIndex: string;
     chatModel: InferenceChatModel;
     request: KibanaRequest;
     logger: Logger;
@@ -39,7 +41,6 @@ export class AlertTriageService {
     private readonly esClient: ElasticsearchClient;
     private readonly savedObjectsClient: SavedObjectsClientContract;
     private readonly alertsClient: AlertsClient;
-    private readonly alertsIndex: string;
     private readonly chatModel: InferenceChatModel;
     private readonly request: KibanaRequest;
     private readonly logger: Logger;
@@ -50,7 +51,6 @@ export class AlertTriageService {
         this.esClient = options.esClient;
         this.savedObjectsClient = options.savedObjectsClient;
         this.alertsClient = options.alertsClient;
-        this.alertsIndex = options.alertsIndex;
         this.chatModel = options.chatModel;
         this.request = options.request;
         this.logger = options.logger;
@@ -61,16 +61,15 @@ export class AlertTriageService {
      * This creates a new AlertTriageJob instance and executes it.
      */
     async processAlertTriageJob({
-        alertId,
+        alerts,
         jobId,
     }: AlertTriageServiceParams): Promise<AlertTriageResult> {
         const job = new AlertTriageJob({
-            alertId,
+            alerts,
             jobId,
             esClient: this.esClient,
             savedObjectsClient: this.savedObjectsClient,
             alertsClient: this.alertsClient,
-            alertsIndex: this.alertsIndex,
             chatModel: this.chatModel,
             request: this.request,
             logger: this.logger,
@@ -84,16 +83,15 @@ export class AlertTriageService {
      * Useful for testing or when you want more control over execution.
      */
     createJob({
-        alertId,
+        alerts,
         jobId,
     }: AlertTriageServiceParams): AlertTriageJob {
         return new AlertTriageJob({
-            alertId,
+            alerts,
             jobId,
             esClient: this.esClient,
             savedObjectsClient: this.savedObjectsClient,
             alertsClient: this.alertsClient,
-            alertsIndex: this.alertsIndex,
             chatModel: this.chatModel,
             request: this.request,
             logger: this.logger,

@@ -52,11 +52,14 @@ paths:
                     items:
                       type: object
                       required:
-                        - alertId
+                        - alertIds
                         - jobId
                       properties:
-                        alertId:
-                          type: string
+                        alertIds:
+                          type: array
+                          items:
+                            type: string
+                            minLength: 1
                           description: The ID of the alert being triaged
                         jobId:
                           type: string

@@ -24,6 +24,7 @@ import {
 import { StateBackend, type BackendProtocol } from "./backends/index";
 import { InteropZodObject } from "@langchain/core/utils/types";
 import { AnnotationRoot } from "@langchain/langgraph";
+import { AgentStateSchema } from "./state_schema";
 
 /**
  * Configuration parameters for creating a Deep Agent
@@ -119,9 +120,11 @@ export function createDeepAgent<
 
   const middleware: AgentMiddleware[] = [
     // Provides todo list management capabilities for tracking tasks
-    todoListMiddleware(),
+    todoListMiddleware({
+      systemPrompt: "You should always make a todo list.",
+    }),
     // Enables filesystem operations and optional long-term memory storage
-    createFilesystemMiddleware({ backend: filesystemBackend }),
+    createFilesystemMiddleware({ backend: filesystemBackend, toolTokenLimitBeforeEvict: 100 }),
     // Enables delegation to specialized subagents for complex tasks
     createSubAgentMiddleware({
       defaultModel: model,
@@ -132,6 +135,7 @@ export function createDeepAgent<
         // Subagent middleware: Filesystem operations
         createFilesystemMiddleware({
           backend: filesystemBackend,
+          toolTokenLimitBeforeEvict: 100,
         }),
         // Subagent middleware: Automatic conversation summarization when token limits are approached
         summarizationMiddleware({

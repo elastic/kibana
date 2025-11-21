@@ -7,6 +7,9 @@
 
 export { createDeepAgent, type CreateDeepAgentParams } from "./agent";
 
+// Export state schema
+export { AgentStateSchema, type FileData as FileDataType } from "./state_schema";
+
 // Export middleware
 export {
   createFilesystemMiddleware,

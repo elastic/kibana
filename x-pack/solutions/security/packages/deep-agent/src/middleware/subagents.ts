@@ -32,6 +32,8 @@ function getTaskToolDescription(subagentDescriptions: string[]): string {
   return `
 Launch an ephemeral subagent to handle complex, multi-step independent tasks with isolated context windows.
 
+Never call this tool in parallel. Always use sequential calls to this tool.
+
 Available agent types and the tools they have access to:
 ${subagentDescriptions.join("\n")}
 
@@ -54,7 +56,7 @@ When using the Task tool, you must specify a subagent_type parameter to select w
 
 <example>
 User: "I want to conduct research on the accomplishments of Lebron James, Michael Jordan, and Kobe Bryant, and then compare them."
-Assistant: *Uses the task tool in parallel to conduct isolated research on each of the three players*
+Assistant: *Uses the task tool to conduct isolated research on each of the three players*
 Assistant: *Synthesizes the results of the three isolated research tasks and responds to the User*
 <commentary>
 Research is a complex, multi-step task in it of itself.
@@ -77,7 +79,7 @@ If the user then asks followup questions, we have a concise report to reference 
 
 <example>
 User: "Schedule two meetings for me and prepare agendas for each."
-Assistant: *Calls the task tool in parallel to launch two \`task\` subagents (one per meeting) to prepare agendas*
+Assistant: *Calls the task tool to launch two \`task\` subagents (one per meeting) to prepare agendas*
 Assistant: *Returns final schedules and agendas*
 <commentary>
 Tasks are simple individually, but subagents help silo agenda preparation.
@@ -87,7 +89,7 @@ Each subagent only needs to worry about the agenda for one meeting.
 
 <example>
 User: "I want to order a pizza from Dominos, order a burger from McDonald's, and order a salad from Subway."
-Assistant: *Calls tools directly in parallel to order a pizza from Dominos, a burger from McDonald's, and a salad from Subway*
+Assistant: *Calls tools directly to order a pizza from Dominos, a burger from McDonald's, and a salad from Subway*
 <commentary>
 The assistant did not use the task tool because the objective is super simple and clear and only requires a few trivial tool calls.
 It is better to just complete the task directly and NOT use the \`task\`tool.
@@ -148,7 +150,7 @@ You have access to a \`task\` tool to launch short-lived subagents that handle i
 
 When to use the task tool:
 - When a task is complex and multi-step, and can be fully delegated in isolation
-- When a task is independent of other tasks and can run in parallel
+- When a task is independent of other tasks
 - When a task requires focused reasoning or heavy token/context usage that would bloat the orchestrator thread
 - When sandboxing improves reliability (e.g. code execution, structured searches, data formatting)
 - When you only care about the output of the subagent, and not the intermediate steps (ex. performing a lot of research and then returned a synthesized report, performing a series of computations or lookups to achieve a concise, relevant answer.)
@@ -166,7 +168,7 @@ When NOT to use the task tool:
 - If splitting would add latency without benefit
 
 ## Important Task Tool Usage Notes to Remember
-- Whenever possible, parallelize the work that you do. This is true for both tool_calls, and for tasks. Whenever you have independent steps to complete - make tool_calls, or kick off tasks (subagents) in parallel to accomplish them faster. This saves time for the user, which is incredibly important.
+- Whenever you have independent steps to complete - make tool_calls, or kick off tasks (subagents).
 - Remember to use the \`task\` tool to silo independent tasks within a multi-part objective.
 - You should use the \`task\` tool whenever you have a complex task that will take multiple steps, and is independent from other tasks that the agent needs to complete. These agents are highly competent and efficient.`;
 
@@ -297,6 +299,7 @@ function getSubagents(options: {
       systemPrompt: agentParams.systemPrompt,
       tools: agentParams.tools ?? defaultTools,
       middleware,
+      contextSchema: undefined,
     });
   }
 
