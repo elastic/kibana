@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import {
+  type StreamQueryKql,
+  type Streams,
+  type Feature,
+  isFeatureWithFilter,
+} from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -32,7 +37,7 @@ interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   onSave: (query: StreamQueryKql) => void;
-  features: Omit<Feature, 'description'>[];
+  features: Feature[];
   dataViews: DataView[];
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
@@ -195,7 +200,7 @@ export function GeneratedEventPreview({
                 ...query,
                 feature: {
                   name: value.name,
-                  filter: value.filter,
+                  filter: isFeatureWithFilter(value) ? value.filter : undefined,
                 },
               });
               setTouched((prev) => ({ ...prev, feature: true }));

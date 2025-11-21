@@ -31,7 +31,7 @@ interface Props {
   selectedQueries: StreamQueryKql[];
   isSubmitting: boolean;
   onSelectionChange: (selectedItems: StreamQueryKql[]) => void;
-  features: Omit<Feature, 'description'>[];
+  features: Feature[];
   dataViews: DataView[];
 }
 
