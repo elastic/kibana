@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
-test.describe.only(
+test.describe(
   'Stream data routing - preview table cell actions',
   { tag: ['@ess', '@svlOblt'] },
   () => {
