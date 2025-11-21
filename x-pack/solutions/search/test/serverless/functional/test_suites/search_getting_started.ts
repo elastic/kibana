@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
@@ -92,7 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         describe('Footer content', function () {
-          it('renders Learn Elastic callout and navigates correctly', async () => {
+          it('renders Elastic Training callout and navigates correctly', async () => {
             const href = await testSubjects.getAttribute(
               'gettingStartedElasticTraining-btn',
               'href'
@@ -223,7 +223,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const href = await testSubjects.getAttribute('gettingStartedSearchLabs-btn', 'href');
             expect(href).to.contain('search-labs');
           });
-          it('renders Learn Elastic callout and navigates correctly', async () => {
+          it('renders Elastic Training callout and navigates correctly', async () => {
             const href = await testSubjects.getAttribute(
               'gettingStartedElasticTraining-btn',
               'href'
