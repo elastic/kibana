@@ -4942,7 +4942,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>(params?: Readonly<{ options?: Readonly<{ page?: number | undefined; filter?: string | Record<string, any> | undefined; search?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; hasReference?: Readonly<{} & { id: string; type: string; }> | Readonly<{} & { id: string; type: string; }>[] | undefined; fields?: string[] | undefined; ruleTypeIds?: string[] | undefined; consumers?: string[] | undefined; } & {}> | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; } & {}> | undefined) => Promise<",
+          " = never>(params?: Readonly<{ options?: Readonly<{ search?: string | undefined; page?: number | undefined; filter?: string | Record<string, any> | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; hasReference?: Readonly<{} & { id: string; type: string; }> | Readonly<{} & { id: string; type: string; }>[] | undefined; fields?: string[] | undefined; ruleTypeIds?: string[] | undefined; consumers?: string[] | undefined; } & {}> | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; } & {}> | undefined) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -5086,7 +5086,7 @@
           },
           "<never>>; unsnooze: (options: ",
           "UnsnoozeParams",
-          ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<",
+          ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: Readonly<{ force?: boolean | undefined; } & { id: string; }>) => Promise<string | undefined>; listRuleTypes: () => Promise<",
           "RegistryAlertTypeWithAuth",
           "[]>; scheduleBackfill: (params: Readonly<{ runActions?: boolean | undefined; initiatorId?: string | undefined; } & { ruleId: string; ranges: Readonly<{} & { start: string; end: string; }>[]; initiator: \"user\" | \"system\"; }>[]) => Promise<(Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
@@ -12022,7 +12022,7 @@
         "signature": [
           "Pick<",
           "AggregateOptions",
-          ", \"filter\" | \"search\"> & { after?: ",
+          ", \"search\" | \"filter\"> & { after?: ",
           "AggregationsCompositeAggregateKey",
           " | undefined; maxTags?: number | undefined; }"
         ],
