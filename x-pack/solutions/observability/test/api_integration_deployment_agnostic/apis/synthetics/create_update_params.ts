@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
-import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { KibanaRoleDescriptors, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
@@ -22,8 +22,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddEditParams', function () {
     const samlAuth = getService('samlAuth');
     const supertest = getService('supertestWithoutAuth');
+    const syntheticsAllRole: KibanaRoleDescriptors = {
+      elasticsearch: {
+        indices: [
+          {
+            names: ['synthetics-*'],
+            privileges: ['all'],
+          },
+        ],
+      },
+      kibana: [
+        {
+          base: [],
+          spaces: ['*'],
+          feature: {
+            uptime: ['all'],
+          },
+        },
+      ],
+    };
+    let syntheticsAllAuthc: RoleCredentials;
     let adminRoleAuthc: RoleCredentials;
-
+    let editorRoleAuthc: RoleCredentials;
     const kServer = getService('kibanaServer');
     const testParam = {
       key: 'test',
@@ -33,21 +53,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await testPrivateLocations.installSyntheticsPackage();
+
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+
       await kServer.savedObjects.clean({ types: [syntheticsParamType] });
+    });
+
+    beforeEach(async () => {
+      await samlAuth.setCustomRole(syntheticsAllRole);
+      syntheticsAllAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+    });
+
+    after(async () => {
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsAllAuthc);
+      await samlAuth.deleteCustomRole();
     });
 
     it('adds a test param', async () => {
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(testParam)
         .expect(200);
 
       const getResponse = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
@@ -67,13 +100,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
         .send(testParam2)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
       const getResponse = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
@@ -90,14 +123,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(testParam)
         .expect(200);
 
       const getResponse = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const param = getResponse.body[0];
@@ -106,21 +139,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .put(SYNTHETICS_API_URLS.PARAMS + '/' + param.id)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({})
         .expect(400);
 
       await supertest
         .put(SYNTHETICS_API_URLS.PARAMS + '/' + param.id)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ ...expectedUpdatedParam, value: 'testUpdated' })
         .expect(200);
 
       const updatedGetResponse = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const actualUpdatedParam = updatedGetResponse.body[0];
@@ -138,7 +171,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const response = await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(newParam)
         .expect(200);
@@ -146,7 +179,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const getResponse = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       assertHas(getResponse.body, {
@@ -158,7 +191,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .put(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
           key: 'testUpdated',
@@ -167,7 +200,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .put(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
           key: 'testUpdatedAgain',
@@ -177,7 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const updatedGetResponse = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       assertHas(updatedGetResponse.body, {
@@ -196,14 +229,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(testParam)
         .expect(200);
 
       const getResponse = await supertest
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
@@ -226,14 +259,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(testParam)
         .expect(200);
 
       const getResponse = await supertest
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const param = getResponse.body[0];
@@ -242,14 +275,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}/${param.id}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ ...expectedUpdatedParam, value: 'testUpdated' })
         .expect(200);
 
       const updatedGetResponse = await supertest
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const actualUpdatedParam = updatedGetResponse.body[0];
@@ -275,14 +308,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(testParam)
         .expect(200);
 
       const getResponse = await supertest
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const param = getResponse.body[0];
@@ -292,20 +325,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // space does exist so get request should be 200
       await supertest
         .get(`/s/${SPACE_ID_TWO}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
       await supertest
         .put(`/s/${SPACE_ID_TWO}${SYNTHETICS_API_URLS.PARAMS}/${param.id}}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(updatedParam)
         .expect(404);
 
       const updatedGetResponse = await supertest
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const actualUpdatedParam = updatedGetResponse.body[0];
@@ -321,7 +354,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .post(`/s/doesnotexist${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(testParam)
         .expect(404);
@@ -337,13 +370,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(testParam)
         .expect(200);
       const getResponse = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const param = getResponse.body[0];
@@ -352,7 +385,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .put(`/s/doesnotexist${SYNTHETICS_API_URLS.PARAMS}/${param.id}}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(updatedParam)
         .expect(404);
@@ -366,14 +399,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await supertest
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ ...testParam, share_across_spaces: true })
         .expect(200);
 
       const getResponse = await supertest
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
@@ -382,28 +415,49 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(getResponse.body[0].value).eql(undefined);
     });
 
-    it('should not return values for non admin user', async () => {
-      const resp = await supertest
+    it('should NOT return values for editor user', async () => {
+      const editorTestParam = {
+        key: 'editorTestParam',
+        value: 'editorTestParamValue',
+      };
+      const postResp = await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(editorRoleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(editorTestParam)
+        .expect(200);
+      const getAllResp = await supertest
         .get(`${SYNTHETICS_API_URLS.PARAMS}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(editorRoleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+      const getResp = await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}/${postResp.body.id}`)
+        .set(editorRoleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send()
         .expect(200);
 
-      const params = resp.body;
-      expect(params.length).to.eql(6);
+      expect(getResp.body.value).to.eql(undefined);
+
+      const params = getAllResp.body;
       params.forEach((param: any) => {
         expect(param.value).to.eql(undefined);
         expect(param.key).to.not.empty();
       });
     });
 
-    it('should read the param key with read-only synthetics custom role', async () => {
+    it('should NOT return values for read-only synthetics custom role', async () => {
+      const syntheticsReadOnlyTestParam = {
+        key: 'syntheticsReadOnlyTestParam',
+        value: 'syntheticsReadOnlyTestParamValue',
+      };
       const syntheticsReadOnlyRole = {
         elasticsearch: {
           indices: [
             {
-              names: ['*'],
+              names: ['synthetics-*'],
               privileges: ['read'],
             },
           ],
@@ -420,80 +474,122 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       await samlAuth.setCustomRole(syntheticsReadOnlyRole);
-      const syntheticsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+      const syntheticsReadOnlyRoleAuth = await samlAuth.createM2mApiKeyWithCustomRoleScope();
 
       // Create a param first as admin
-      await supertest
+      const postRes = await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(testParam)
+        .send(syntheticsReadOnlyTestParam)
         .expect(200);
 
       // Read params as read-only user
-      const getResponse = await supertest
+      const getAllResp = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS)
-        .set(syntheticsOnlyRole.apiKeyHeader)
+        .set(syntheticsReadOnlyRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+      const getResp = await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}/${postRes.body.id}`)
+        .set(syntheticsReadOnlyRoleAuth.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
-      expect(getResponse.body[0].key).eql(testParam.key);
-      expect(getResponse.body[0].value).eql(undefined);
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsOnlyRole);
+      getAllResp.body.forEach((param: any) => {
+        expect(param.value).to.eql(undefined);
+        expect(param.key).to.not.empty();
+      });
+      expect(getResp.body.value).to.eql(undefined);
+      expect(getResp.body.key).to.eql(syntheticsReadOnlyTestParam.key);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsReadOnlyRoleAuth);
       await samlAuth.deleteCustomRole();
     });
 
-    it('should read the param key with custom role with ALL permissions', async () => {
-      const syntheticsAllRole = {
-        elasticsearch: {
-          indices: [
-            {
-              names: ['*'],
-              privileges: ['all'],
-            },
-          ],
-        },
-        kibana: [
-          {
-            base: [],
-            spaces: ['*'],
-            feature: {
-              uptime: ['all'],
-            },
-          },
-        ],
+    it('SHOULD RETURN values for admin user', async () => {
+      // skip in cloud until sub feature privileges are merged in serverless and statefull
+      this.tags('skipCloud');
+      const adminTestParam = {
+        key: 'adminTestParam',
+        value: 'adminTestParamValue',
       };
+      const postResp = await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(adminTestParam)
+        .expect(200);
+      const getAllResp = await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+      const getResp = await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}/${postResp.body.id}`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
 
+      expect(getResp.body.key).to.eql(adminTestParam.key);
+      expect(getResp.body.value).to.eql(adminTestParam.value);
+
+      const params = getAllResp.body;
+      params.forEach((param: any) => {
+        expect(param.value).to.not.empty();
+        expect(param.key).to.not.empty();
+      });
+    });
+
+    it('should NOT return values with custom role with ALL permissions', async () => {
+      const syntheticsAllRoleParam = {
+        key: 'syntheticsAllRoleParam',
+        value: 'syntheticsAllRoleParamValue',
+      };
       await samlAuth.setCustomRole(syntheticsAllRole);
       const syntheticsAllRoleAuth = await samlAuth.createM2mApiKeyWithCustomRoleScope();
 
       // Create a param first as admin
-      await supertest
+      const postRes = await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(syntheticsAllAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(testParam)
+        .send(syntheticsAllRoleParam)
         .expect(200);
 
       // Read params as user with ALL permissions
-      const getResponse = await supertest
+      const getAllResp = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS)
         .set(syntheticsAllRoleAuth.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
-      expect(getResponse.body[0].key).eql(testParam.key);
-      expect(getResponse.body[0].value).eql(undefined);
+      const getResp = await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}/${postRes.body.id}`)
+        .set(syntheticsAllRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      getAllResp.body.forEach((param: any) => {
+        expect(param.value).to.eql(undefined);
+        expect(param.key).to.not.empty();
+      });
+
+      expect(getResp.body.key).eql(syntheticsAllRoleParam.key);
+      expect(getResp.body.value).eql(undefined);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsAllRoleAuth);
       await samlAuth.deleteCustomRole();
     });
 
-    it('should add param keys with custom role with ALL permissions', async () => {
-      const syntheticsAllRole = {
+    it('SHOULD RETURN values for custom role with ALL and read params subfeature privilege', async () => {
+      // skip in cloud until sub feature privileges are merged in serverless and statefull
+      this.tags('skipCloud');
+      const syntheticsReadParamsRole: KibanaRoleDescriptors = {
         elasticsearch: {
           indices: [
             {
-              names: ['*'],
+              names: ['synthetics-*'],
               privileges: ['all'],
             },
           ],
@@ -503,40 +599,169 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             base: [],
             spaces: ['*'],
             feature: {
-              uptime: ['all'],
+              uptime: ['all', 'can_read_params'],
             },
           },
         ],
       };
-
-      await samlAuth.setCustomRole(syntheticsAllRole);
-      const syntheticsAllRoleAuth = await samlAuth.createM2mApiKeyWithCustomRoleScope();
-
-      const newParam = {
-        key: 'testAllRole',
-        value: 'testAllRoleValue',
+      await samlAuth.setCustomRole(syntheticsReadParamsRole);
+      const syntheticsReadParamsRoleAuth = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+      const syntheticsReadParamsTestParam = {
+        key: 'syntheticsReadParamsTestParam',
+        value: 'syntheticsReadParamsTestParamValue',
       };
 
-      // Add a param as user with ALL permissions
-      await supertest
+      // Create a param first as user with read params privilege
+      const postRes = await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
-        .set(syntheticsAllRoleAuth.apiKeyHeader)
+        .set(syntheticsReadParamsRoleAuth.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(newParam)
+        .send(syntheticsReadParamsTestParam)
         .expect(200);
 
-      // Verify the param was created
-      const getResponse = await supertest
+      // Read params as user with read params privilege
+      const getAllResp = await supertest
         .get(SYNTHETICS_API_URLS.PARAMS)
-        .set(syntheticsAllRoleAuth.apiKeyHeader)
+        .set(syntheticsReadParamsRoleAuth.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
-      const createdParam = getResponse.body.find((param: any) => param.key === newParam.key);
-      expect(createdParam).to.not.be(undefined);
-      expect(createdParam.key).eql(newParam.key);
-      expect(createdParam.value).eql(undefined);
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsAllRoleAuth);
+      const getResp = await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}/${postRes.body.id}`)
+        .set(syntheticsReadParamsRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      getAllResp.body.forEach((param: any) => {
+        expect(param.value).to.not.empty();
+        expect(param.key).to.not.empty();
+      });
+
+      expect(getResp.body.key).eql(syntheticsReadParamsTestParam.key);
+      expect(getResp.body.value).eql(syntheticsReadParamsTestParam.value);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsReadParamsRoleAuth);
+      await samlAuth.deleteCustomRole();
+    });
+
+    it('SHOULD RETURN values for custom role with MINIMAL_ALL and read params subfeature privilege', async () => {
+      // skip in cloud until sub feature privileges are merged in serverless and statefull
+      this.tags('skipCloud');
+      const syntheticsReadParamsRole: KibanaRoleDescriptors = {
+        elasticsearch: {
+          indices: [
+            {
+              names: ['synthetics-*'],
+              privileges: ['all'],
+            },
+          ],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: ['*'],
+            feature: {
+              uptime: ['minimal_all', 'can_read_params'],
+            },
+          },
+        ],
+      };
+      await samlAuth.setCustomRole(syntheticsReadParamsRole);
+      const syntheticsReadParamsRoleAuth = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+      const syntheticsReadParamsTestParam = {
+        key: 'syntheticsReadParamsTestParam',
+        value: 'syntheticsReadParamsTestParamValue',
+      };
+
+      // Create a param first as user with read params privilege
+      const postRes = await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsReadParamsRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(syntheticsReadParamsTestParam)
+        .expect(200);
+
+      // Read params as user with read params privilege
+      const getAllResp = await supertest
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsReadParamsRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      const getResp = await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}/${postRes.body.id}`)
+        .set(syntheticsReadParamsRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      getAllResp.body.forEach((param: any) => {
+        expect(param.value).to.not.empty();
+        expect(param.key).to.not.empty();
+      });
+
+      expect(getResp.body.key).eql(syntheticsReadParamsTestParam.key);
+      expect(getResp.body.value).eql(syntheticsReadParamsTestParam.value);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsReadParamsRoleAuth);
+      await samlAuth.deleteCustomRole();
+    });
+
+    it('SHOULD RETURN values for custom role with READ and read params subfeature privilege', async () => {
+      // skip in cloud until sub feature privileges are merged in serverless and statefull
+      this.tags('skipCloud');
+      const syntheticsReadParamsRole: KibanaRoleDescriptors = {
+        elasticsearch: {
+          indices: [
+            {
+              names: ['synthetics-*'],
+              privileges: ['read'],
+            },
+          ],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: ['*'],
+            feature: {
+              uptime: ['read', 'can_read_params'],
+            },
+          },
+        ],
+      };
+      await samlAuth.setCustomRole(syntheticsReadParamsRole);
+      const syntheticsReadParamsRoleAuth = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+      const syntheticsReadParamsTestParam = {
+        key: 'syntheticsReadParamsTestParam',
+        value: 'syntheticsReadParamsTestParamValue',
+      };
+
+      // Create a param first as admin
+      const postRes = await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(syntheticsReadParamsTestParam)
+        .expect(200);
+
+      // Read params as user with read params privilege
+      const getAllResp = await supertest
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsReadParamsRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      const getResp = await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}/${postRes.body.id}`)
+        .set(syntheticsReadParamsRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      getAllResp.body.forEach((param: any) => {
+        expect(param.value).to.not.empty();
+        expect(param.key).to.not.empty();
+      });
+
+      expect(getResp.body.key).eql(syntheticsReadParamsTestParam.key);
+      expect(getResp.body.value).eql(syntheticsReadParamsTestParam.value);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsReadParamsRoleAuth);
       await samlAuth.deleteCustomRole();
     });
   });
