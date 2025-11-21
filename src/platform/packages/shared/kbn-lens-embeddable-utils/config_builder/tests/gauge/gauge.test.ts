@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { gaugeStateSchema } from '../../schema/charts/gauge';
-import { validateAPIConverter, validateConverter } from '../validate';
+import { validator } from '../utils/validator';
 import {
   basicGaugeWithAdHocDataView,
   basicGaugeWithDataView,
@@ -24,41 +23,42 @@ import {
 } from './lens_state_config.mock';
 
 describe('Gauge', () => {
-  describe('validateConverter', () => {
+  describe('state transform validation', () => {
     it('should convert a gauge chart with full config and absolute color mode', () => {
-      validateConverter(gaugeAttributes, gaugeStateSchema);
+      validator.gauge.fromState(gaugeAttributes);
     });
     //  rangeMax: null for percentage color mode -> throws validation error in the color schema
     it.skip('should convert a gauge chart with full config and percentage color mode', () => {
-      validateConverter(gaugeAttributesWithPercentageColorMode, gaugeStateSchema);
+      validator.gauge.fromState(gaugeAttributesWithPercentageColorMode);
     });
     it('should convert a gauge chart with ESQL dataset', () => {
-      validateConverter(gaugeESQLAttributes, gaugeStateSchema);
+      validator.gauge.fromState(gaugeESQLAttributes);
     });
   });
-  describe('validateAPIConverter', () => {
+
+  describe('api transform validation', () => {
     it('should convert a basic gauge chart with ad hoc dataView', () => {
-      validateAPIConverter(basicGaugeWithAdHocDataView, gaugeStateSchema);
+      validator.gauge.fromApi(basicGaugeWithAdHocDataView);
     });
 
     it('should convert a basic gauge chart with dataView', () => {
-      validateAPIConverter(basicGaugeWithDataView, gaugeStateSchema);
+      validator.gauge.fromApi(basicGaugeWithDataView);
     });
 
     it('should convert a ESQL-based gauge chart', () => {
-      validateAPIConverter(esqlGauge, gaugeStateSchema);
+      validator.gauge.fromApi(esqlGauge);
     });
 
     it('should convert a comprehensive gauge chart with ad hoc data view', () => {
-      validateAPIConverter(comprehensiveGaugeWithAdHocDataView, gaugeStateSchema);
+      validator.gauge.fromApi(comprehensiveGaugeWithAdHocDataView);
     });
 
     it('should convert a comprehensive gauge chart with data view', () => {
-      validateAPIConverter(comprehensiveGaugeWithDataView, gaugeStateSchema);
+      validator.gauge.fromApi(comprehensiveGaugeWithDataView);
     });
 
     it('should convert a comprehensive ESQL-based gauge chart', () => {
-      validateAPIConverter(comprehensiveEsqlGauge, gaugeStateSchema);
+      validator.gauge.fromApi(comprehensiveEsqlGauge);
     });
   });
 });

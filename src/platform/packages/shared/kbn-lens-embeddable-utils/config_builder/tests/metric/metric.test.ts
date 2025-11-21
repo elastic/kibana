@@ -19,11 +19,11 @@ describe('Metric', () => {
     });
 
     it('should convert a complex metric', () => {
-      validator.metric.fromState(complexMetricAttributes, true);
+      validator.metric.fromState(complexMetricAttributes);
     });
 
     it('should convert a breakdown-by metric', () => {
-      validator.metric.fromState(breakdownMetricAttributes, true);
+      validator.metric.fromState(breakdownMetricAttributes);
     });
   });
 
