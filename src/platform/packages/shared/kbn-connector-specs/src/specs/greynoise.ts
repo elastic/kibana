@@ -19,9 +19,8 @@
  * MVP implementation focusing on core noise detection actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
-import { UISchemas } from '../connector_spec_ui';
 
 export const GreyNoiseConnector: ConnectorSpec = {
   metadata: {
@@ -32,20 +31,20 @@ export const GreyNoiseConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  schema: z.discriminatedUnion('method', [
-    z.object({
-      method: z.literal('headers'),
-      headers: z.object({
-        key: UISchemas.secret().describe('API Key'),
-      }),
-    }),
-  ]),
+  authTypes: [
+    {
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'key',
+      },
+    },
+  ],
 
   actions: {
     getIpContext: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -67,7 +66,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
     quickLookup: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -86,7 +85,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
     getMetadata: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -108,7 +107,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
     riotLookup: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
