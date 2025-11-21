@@ -5,18 +5,49 @@
  * 2.0.
  */
 
-import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { conditionSchema, isCondition, type Condition } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
 import { streamObjectNameSchema } from './shared/stream_object_name';
 
-export interface Feature {
+const featureTypes = ['system'] as const;
+export type FeatureType = (typeof featureTypes)[number];
+
+export const featureTypeSchema = z.enum(featureTypes);
+
+export interface BaseFeature<T extends FeatureType = FeatureType> {
+  type: T;
   name: string;
   description: string;
-  filter: Condition;
 }
 
-export const featureSchema: z.Schema<Feature> = z.object({
+export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
+  type: featureTypeSchema,
   name: streamObjectNameSchema,
   description: z.string(),
-  filter: conditionSchema,
 });
+
+export type FeatureWithFilter<T extends FeatureType = FeatureType> = BaseFeature<T> & {
+  filter: Condition;
+};
+
+export const featureWithFilterSchema: z.Schema<FeatureWithFilter> = baseFeatureSchema.and(
+  z.object({
+    filter: conditionSchema,
+  })
+);
+
+export type SystemFeature = FeatureWithFilter<'system'>;
+
+export const systemFeatureSchema: z.Schema<SystemFeature> = featureWithFilterSchema.and(
+  z.object({
+    type: z.literal('system'),
+  })
+);
+
+export type Feature = SystemFeature;
+
+export const featureSchema: z.Schema<Feature> = systemFeatureSchema;
+
+export function isFeatureWithFilter(feature: Feature): feature is SystemFeature {
+  return 'filter' in feature && isCondition(feature.filter);
+}
