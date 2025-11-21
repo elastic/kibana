@@ -8,111 +8,197 @@
  */
 
 import { type Logger } from '@kbn/core/server';
-import type { ErrorResponseBase, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import type { estypes } from '@elastic/elasticsearch';
-import type { InferSearchResponseOf } from '@kbn/es-types';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
-import { dateRangeQuery, termsQuery } from '@kbn/es-query';
+import { dateRangeQuery } from '@kbn/es-query';
+import { from as fromCommand, where, limit, append } from '@kbn/esql-composer';
+import type { QueryOperator } from '@kbn/esql-composer';
+import { Parser, Walker, BasicPrettyPrinter } from '@kbn/esql-ast';
+import pLimit from 'p-limit';
+import { chunk } from 'lodash';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
 import type { Dimension, MetricField, DimensionFilters } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import { normalizeUnit } from './normalize_unit';
-import { NUMERIC_TYPES } from '../../../common/fields/constants';
 
 export interface MetricMetadata {
   dimensions: string[];
   unitFromSample?: string;
   totalHits: number;
 }
-export type MetricMetadataMap = Map<string, MetricMetadata>;
 
-function isErrorResponseBase(subject: unknown): subject is ErrorResponseBase {
-  return typeof subject === 'object' && subject !== null && 'error' in subject;
+export interface EsqlQueryResult {
+  metricField: MetricField;
+  columns: string[];
+  values: unknown[][];
+  error?: Error;
 }
 
+export type MetricMetadataMap = Map<string, MetricMetadata>;
+
+// Maximum number of concurrent request batches to avoid rate limiting (429 errors)
+const MAX_CONCURRENT_REQUESTS = 10;
+// Number of metric fields to process per batch
+const FIELDS_PER_BATCH = 20;
 export function generateMapKey(indexName: string, fieldName: string) {
   return `${fieldName}>${indexName}`;
 }
 
-function buildMetricMetadataMap(
-  response: {
-    responses: InferSearchResponseOf<
-      {
-        fields: Record<string, any>;
-      },
-      estypes.MsearchRequest
-    >[];
-  },
-  metricFields: MetricField[],
+function buildMetricMetadataMapFromEsql(
+  results: EsqlQueryResult[],
   logger: Logger
 ): MetricMetadataMap {
-  const entries = new Map<string, MetricMetadata>(
-    metricFields.map(({ name, index: indexName }, index) => {
-      const searchResult = response.responses[index];
+  const entries = new Map<string, MetricMetadata>();
 
-      const mapKey = generateMapKey(indexName, name);
+  for (const { metricField, columns, values, error } of results) {
+    const { name, index: indexName, dimensions: metricDimensions } = metricField;
 
-      if (isErrorResponseBase(searchResult)) {
-        logger.error(`Error sampling document for metric ${name}: ${searchResult.error}`);
-        return [mapKey, { dimensions: [], totalHits: 0 }];
+    // Build fields to keep
+    const dimensionsSet = new Set([...metricDimensions.map((d) => d.name), semconvFlat.unit.name]);
+
+    const mapKey = generateMapKey(indexName, name);
+
+    if (error) {
+      logger.error(`Error sampling document for metric ${name}: ${error.message}`);
+      entries.set(mapKey, { dimensions: [], totalHits: 0 });
+      continue;
+    }
+
+    if (
+      columns.length === 0 ||
+      values.length === 0 ||
+      values.every((value) => value === null || value === undefined)
+    ) {
+      entries.set(mapKey, { dimensions: [], totalHits: 0 });
+      continue;
+    }
+
+    const dimensions: string[] = [];
+    let unitFromSample: string | undefined;
+
+    // Iterate through the fields in the hit
+    columns.forEach((fieldName, index) => {
+      if (!dimensionsSet.has(fieldName)) {
+        return;
       }
 
-      if (!searchResult?.hits.hits?.length) {
-        return [mapKey, { dimensions: [], totalHits: 0 }];
+      const value = values[0][index];
+      if (fieldName === semconvFlat.unit.name) {
+        if (typeof value === 'string') {
+          unitFromSample = value;
+        }
+      } else if (value !== null && value !== undefined) {
+        dimensions.push(fieldName);
       }
+    });
 
-      const fields = searchResult.hits.hits[0].fields ?? {};
-      const { dimensions, unitFromSample } = Object.entries(fields).reduce<
-        Omit<MetricMetadata, 'totalHits'>
-      >(
-        (acc, [fieldName, fieldValue]) => {
-          if (fieldName === semconvFlat.unit.name) {
-            const value = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue;
+    entries.set(mapKey, {
+      dimensions,
+      unitFromSample,
+      totalHits: values[0].length,
+    });
+  }
 
-            if (typeof value === 'string') {
-              acc.unitFromSample = value;
-            }
-            return acc;
-          } else {
-            acc.dimensions.push(fieldName);
-          }
+  return entries;
+}
 
-          return acc;
-        },
-        { dimensions: [], unitFromSample: undefined }
-      );
+function buildFilterConditions(
+  filterEntries: Array<[string, string[]]>,
+  dimensions: Dimension[],
+  query: string
+): QueryOperator[] {
+  if (filterEntries.length === 0 && query.length === 0) {
+    return [];
+  }
 
-      return [
-        mapKey,
-        {
-          dimensions,
-          unitFromSample,
-          totalHits: searchResult?.hits.hits?.length ?? 0,
-        },
-      ];
+  const dimensionMap = new Map(dimensions.map((dimension) => [dimension.name, dimension]));
+
+  const filterConditions = filterEntries
+    .map(([dimensionName, values]) => {
+      const dimension = dimensionMap.get(dimensionName);
+
+      // Build IN condition using composer's format
+      return where(`??dim::STRING IN (${values.map(() => '?').join(', ')})`, {
+        dim: dimension?.name,
+        ...values,
+      });
+    })
+    .filter((c): c is QueryOperator => c !== null);
+
+  if (query.length > 0) {
+    const whereCommand = Walker.find(
+      Parser.parse(query).root,
+      (node) => node.type === 'command' && node.name === 'where'
+    );
+
+    if (whereCommand) {
+      filterConditions.push(append({ command: BasicPrettyPrinter.print(whereCommand) }));
+    }
+  }
+
+  return filterConditions;
+}
+
+function buildEsqlQuery(metricField: MetricField, filterConditions: QueryOperator[]): string {
+  const { name: field, index } = metricField;
+
+  const source = fromCommand([index]);
+
+  const query = source.pipe(
+    where(`??metricField IS NOT NULL`, { metricField: field }),
+    ...filterConditions,
+    limit(1)
+  );
+
+  return query.toString();
+}
+
+async function executeEsqlQueriesForChunk(
+  esClient: TracedElasticsearchClient,
+  metricFields: MetricField[],
+  from: number,
+  to: number,
+  filterConditions: QueryOperator[],
+  logger: Logger
+): Promise<EsqlQueryResult[]> {
+  // Execute each metric field query in the chunk
+  const results = await Promise.all(
+    metricFields.map(async (metricField) => {
+      try {
+        const query = buildEsqlQuery(metricField, filterConditions);
+
+        const response = await esClient.esql('sample_metrics_documents', {
+          query,
+          filter: {
+            bool: {
+              filter: [...dateRangeQuery(from, to)],
+            },
+          },
+        });
+
+        return {
+          metricField,
+          columns: response.columns.map((column) => column.name),
+          values: response.values,
+        };
+      } catch (error) {
+        logger.warn(
+          `Error executing ES|QL query for metric ${metricField.name}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return {
+          metricField,
+          columns: [],
+          values: [],
+          error: error instanceof Error ? error : new Error(String(error)),
+        };
+      }
     })
   );
 
-  return new Map(entries);
+  return results;
 }
-
-const buildFilters = (filterEntries: Array<[string, string[]]>, dimensions: Dimension[]) => {
-  const dimensionMap = new Map(dimensions.map((dimension) => [dimension.name, dimension]));
-
-  return filterEntries.flatMap(([dimensionName, values]) => {
-    const dimension = dimensionMap.get(dimensionName);
-
-    if (!dimension) {
-      return termsQuery(dimensionName, values);
-    }
-
-    return termsQuery(
-      dimensionName,
-      NUMERIC_TYPES.includes(dimension.type) ? values.map(Number).filter(Boolean) : values
-    );
-  });
-};
 
 export async function sampleMetricMetadata({
   esClient,
@@ -120,12 +206,14 @@ export async function sampleMetricMetadata({
   logger,
   timerange: { from, to },
   filters,
+  query = '',
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   logger: Logger;
   timerange: EpochTimeRange;
   filters: DimensionFilters;
+  query?: string;
 }): Promise<MetricMetadataMap> {
   if (metricFields.length === 0) {
     return new Map();
@@ -134,50 +222,43 @@ export async function sampleMetricMetadata({
   const filterEntries = Object.entries(filters);
 
   try {
-    const body: MsearchRequestItem[] = [];
-    for (const { name: field, index, dimensions } of metricFields) {
-      body.push({ index });
-      // Body for each search
-      body.push({
-        size: 1,
-        terminate_after: 1,
-        query: {
-          bool: {
-            filter: [
-              {
-                exists: {
-                  field,
-                },
-              },
-              ...dateRangeQuery(from, to),
-              ...(filterEntries.length > 0
-                ? [
-                    {
-                      bool: {
-                        should: buildFilters(filterEntries, dimensions),
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ]
-                : []),
-            ],
-          },
-        },
-        _source: false,
-        fields: dimensions.map((dimension) => dimension.name).concat(semconvFlat.unit.name),
-      });
-    }
-    const response = await esClient.msearch<{ fields: Record<string, any> }>(
-      'sample_metrics_documents',
-      { body }
+    // Build filter conditions once, as they're the same for all queries
+    const filterConditions =
+      filterEntries.length > 0 || query.length > 0
+        ? buildFilterConditions(filterEntries, metricFields[0]?.dimensions || [], query)
+        : [];
+
+    logger.debug(
+      `Executing ${metricFields.length} ES|QL queries in batches of ${FIELDS_PER_BATCH} with ${MAX_CONCURRENT_REQUESTS} concurrent batches`
     );
 
-    return buildMetricMetadataMap(response, metricFields, logger);
+    const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
+    const metricFieldChunks = chunk(metricFields, FIELDS_PER_BATCH);
+
+    const batchResults = await Promise.allSettled(
+      metricFieldChunks.map((metricFieldChunk) =>
+        limiter(() =>
+          executeEsqlQueriesForChunk(esClient, metricFieldChunk, from, to, filterConditions, logger)
+        )
+      )
+    );
+
+    // Flatten results from all batches
+    const results = batchResults
+      .filter((result): result is PromiseFulfilledResult<EsqlQueryResult[]> => {
+        return result.status === 'fulfilled';
+      })
+      .flatMap((result) => result.value);
+
+    return buildMetricMetadataMapFromEsql(results, logger);
   } catch (error) {
+    logger.error(
+      `Error sampling metric metadata: ${error instanceof Error ? error.message : String(error)}`
+    );
     const metricMetadataMap: MetricMetadataMap = new Map();
 
-    for (const { name } of metricFields) {
-      metricMetadataMap.set(name, { dimensions: [], totalHits: 0 });
+    for (const { name, index } of metricFields) {
+      metricMetadataMap.set(generateMapKey(index, name), { dimensions: [], totalHits: 0 });
     }
     return metricMetadataMap;
   }
@@ -190,6 +271,7 @@ export async function enrichMetricFields({
   logger,
   timerange,
   filters = {},
+  query,
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
@@ -197,6 +279,7 @@ export async function enrichMetricFields({
   logger: Logger;
   timerange: EpochTimeRange;
   filters?: DimensionFilters;
+  query?: string;
 }): Promise<MetricField[]> {
   if (metricFields.length === 0) {
     return metricFields;
@@ -208,6 +291,7 @@ export async function enrichMetricFields({
     logger,
     timerange,
     filters,
+    query,
   });
 
   const uniqueDimensionSets = new Map<string, Array<Dimension>>();

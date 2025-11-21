@@ -10,7 +10,16 @@
 import type { Logger } from '@kbn/core/server';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { from as fromCommand, evaluate, where, stats, sort, limit } from '@kbn/esql-composer';
+import {
+  from as fromCommand,
+  evaluate,
+  where,
+  stats,
+  sort,
+  limit,
+  append,
+} from '@kbn/esql-composer';
+import { BasicPrettyPrinter, Parser, Walker } from '@kbn/esql-ast';
 
 interface CreateDimensionsParams {
   esClient: TracedElasticsearchClient;
@@ -18,6 +27,7 @@ interface CreateDimensionsParams {
   indices: string[];
   from: number;
   to: number;
+  query?: string;
   logger: Logger;
 }
 
@@ -28,16 +38,25 @@ export const getDimensions = async ({
   from,
   to,
   logger,
+  query: originalQuery,
 }: CreateDimensionsParams): Promise<Array<{ value: string; field: string }>> => {
   if (!dimensions || dimensions.length === 0) {
     return [];
   }
+
+  const whereCommand = originalQuery
+    ? Walker.find(
+        Parser.parse(originalQuery).root,
+        (node) => node.type === 'command' && node.name === 'where'
+      )
+    : undefined;
 
   const source = fromCommand(indices);
   const query = source
     .pipe(
       evaluate('??dim = ??dim::string', { dim: dimensions[0] }),
       where('??dim IS NOT NULL', { dim: dimensions[0] }),
+      whereCommand ? append({ command: BasicPrettyPrinter.print(whereCommand) }) : (q) => q,
       stats('BY ??dim', {
         dim: dimensions[0],
       }),

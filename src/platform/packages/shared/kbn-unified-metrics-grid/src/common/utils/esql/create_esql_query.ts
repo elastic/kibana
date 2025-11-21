@@ -76,7 +76,7 @@ export function createESQLQuery({
 }: CreateESQLQueryParams) {
   const { query: discoverQuery } = requestParams;
 
-  const whereCommands = Walker.findAll(
+  const whereCommand = Walker.find(
     Parser.parse((discoverQuery as AggregateQuery).esql).root,
     (node) => node.type === 'command' && node.name === 'where'
   );
@@ -101,7 +101,7 @@ export function createESQLQuery({
   const unfilteredDimensions = (dimensions ?? []).filter((dim) => !(dim.name in filters));
   const queryPipeline = source.pipe(
     ...whereConditions,
-    append({ command: BasicPrettyPrinter.print(whereCommands[0]) }),
+    whereCommand ? append({ command: BasicPrettyPrinter.print(whereCommand) }) : (q) => q,
     unfilteredDimensions.length > 0
       ? where(
           unfilteredDimensions

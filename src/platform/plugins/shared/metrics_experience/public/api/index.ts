@@ -47,12 +47,12 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
 
   return {
     getDimensions: (
-      params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/dimensions'>['params']['query'],
+      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/dimensions'>['params']['body'],
       signal?: AbortSignal | null
     ) =>
-      request('GET /internal/metrics_experience/dimensions', {
+      request('POST /internal/metrics_experience/dimensions', {
         params: {
-          query: params,
+          body: params,
         },
         signal,
       }),

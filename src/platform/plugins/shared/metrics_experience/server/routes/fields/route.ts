@@ -31,6 +31,7 @@ export const getFieldsRoute = createRoute({
       fields: z.union([z.string(), z.array(z.string())]).default('*'),
       page: z.coerce.number().int().positive().default(1),
       size: z.coerce.number().int().positive().default(100),
+      query: z.string().optional(),
     }),
   }),
   handler: async ({ context, params, logger, request }) => {
@@ -38,8 +39,8 @@ export const getFieldsRoute = createRoute({
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
     const esClient = elasticsearch.client.asCurrentUser;
-    const page = params.body.page;
-    const size = params.body.size;
+
+    const { index, from, to, fields: fieldsParam, page, size, query } = params.body;
 
     const { fields, total } = await getMetricFields({
       esClient: createTracedEsClient({
@@ -48,12 +49,13 @@ export const getFieldsRoute = createRoute({
         plugin: 'metrics_experience',
         abortSignal: getRequestAbortedSignal(request.events.aborted$),
       }),
-      indexPattern: params.body.index,
-      timerange: { from: params.body.from, to: params.body.to },
-      fields: params.body.fields,
+      indexPattern: index,
+      timerange: { from, to },
+      fields: fieldsParam,
       page,
       size,
       logger,
+      query,
     });
 
     return {

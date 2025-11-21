@@ -30,6 +30,7 @@ export async function getMetricFields({
   logger,
   timerange,
   filters,
+  query,
 }: {
   esClient: TracedElasticsearchClient;
   indexPattern: string;
@@ -39,6 +40,7 @@ export async function getMetricFields({
   size: number;
   logger: Logger;
   filters?: DimensionFilters;
+  query?: string;
 }): Promise<MetricFieldsResponse> {
   if (!indexPattern) return { fields: [], total: 0 };
 
@@ -83,6 +85,7 @@ export async function getMetricFields({
     logger,
     timerange,
     filters,
+    query,
   });
 
   const hasFilters = filters && Object.keys(filters).length > 0;

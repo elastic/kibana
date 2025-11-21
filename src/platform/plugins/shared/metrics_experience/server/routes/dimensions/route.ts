@@ -17,10 +17,10 @@ import { getDimensions } from './get_dimensions';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getDimensionsRoute = createRoute({
-  endpoint: 'GET /internal/metrics_experience/dimensions',
+  endpoint: 'POST /internal/metrics_experience/dimensions',
   security: { authz: { enabled: false, reason: 'Authorization provided by Elasticsearch' } },
   params: z.object({
-    query: z.object({
+    body: z.object({
       dimensions: z
         .string()
         .transform((str) => {
@@ -51,13 +51,14 @@ export const getDimensionsRoute = createRoute({
         .datetime()
         .default(dateMathParse('now-15m', { roundUp: true })!.toISOString())
         .transform(isoToEpoch),
+      query: z.string().optional(),
     }),
   }),
   handler: async ({ context, params, logger, request }) => {
     const { elasticsearch, featureFlags } = await context.core;
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
-    const { dimensions, indices, from, to } = params.query;
+    const { dimensions, indices, from, to, query } = params.body;
     const esClient = elasticsearch.client.asCurrentUser;
     const values = await getDimensions({
       esClient: createTracedEsClient({
@@ -71,6 +72,7 @@ export const getDimensionsRoute = createRoute({
       from,
       to,
       logger,
+      query,
     });
 
     return { values };

@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { keys } from '@elastic/eui';
+import type { AggregateQuery } from '@kbn/es-query';
 import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
@@ -42,16 +43,11 @@ export const MetricsExperienceGrid = ({
   const { searchTerm, isFullscreen, valueFilters, onSearchTermChange, onToggleFullscreen } =
     useMetricsExperienceState();
 
-  const fieldNames = useMemo(
-    () => columns?.filter((column) => !column.isNull).map((column) => column.name) ?? [],
-    [columns]
-  );
-
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
   const { data: fields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
     index: indexPattern,
     timeRange,
-    fields: fieldNames,
+    query: (requestParams.query as AggregateQuery).esql,
   });
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({

@@ -14,6 +14,7 @@ import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
+import type { AggregateQuery } from '@kbn/es-query';
 import { useMetricsExperienceState } from '../../../context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
@@ -75,6 +76,7 @@ export const useToolbarActions = ({
           onChange={onValuesChange}
           disabled={dimensions.length === 0}
           indices={indices}
+          query={(requestParams.query as AggregateQuery).esql}
           timeRange={requestParams.getTimeRange()}
           onClear={onClearValues}
           fullWidth={isSmallScreen}

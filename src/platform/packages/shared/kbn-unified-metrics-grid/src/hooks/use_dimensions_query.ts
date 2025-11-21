@@ -15,6 +15,7 @@ export const useDimensionsQuery = (params: {
   indices?: string[];
   from?: string;
   to?: string;
+  query?: string;
 }) => {
   const { client } = useMetricsExperienceClient();
 

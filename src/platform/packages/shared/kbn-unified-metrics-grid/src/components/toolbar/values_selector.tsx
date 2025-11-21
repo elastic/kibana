@@ -38,6 +38,8 @@ export interface ValuesFilterProps {
   disabled?: boolean;
   timeRange: TimeRange;
   fullWidth?: boolean;
+
+  query?: string;
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
@@ -46,6 +48,7 @@ export const ValuesSelector = ({
   selectedValues,
   onChange,
   timeRange,
+  query,
   fullWidth = false,
   disabled = false,
   indices = [],
@@ -65,6 +68,7 @@ export const ValuesSelector = ({
     indices,
     from: timeRange.from,
     to: timeRange.to,
+    query,
   });
 
   const groupedValues = useMemo(() => {

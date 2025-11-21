@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
 import { append } from '../pipeline/append';
 
 /**
@@ -16,7 +17,9 @@ import { append } from '../pipeline/append';
  * @returns A `QueryPipeline` instance with the `KEEP` command appended.
  */
 export function keep(...columns: Array<string | string[]>) {
-  const command = `KEEP ${columns.flatMap((column) => column).join(', ')}`;
+  const command = `KEEP ${columns
+    .flatMap((column) => BasicPrettyPrinter.print(Builder.expression.column(column)))
+    .join(', ')}`;
 
   return append({ command });
 }
