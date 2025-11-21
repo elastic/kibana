@@ -563,7 +563,7 @@ export class IndexUpdateService {
             // First update index mapping for new columns
             const newFieldsMapping = newColumns
               .filter((col) => !isPlaceholderColumn(col.name) && col.fieldType)
-              .reduce<Record<string, { type: string }>>((acc, col) => {
+              .reduce<Record<string, { type: DatatableColumnMeta['esType'] }>>((acc, col) => {
                 acc[col.name] = { type: col.fieldType! }; // Field type is defined due to the filter above
                 return acc;
               }, {});
@@ -1044,7 +1044,9 @@ export class IndexUpdateService {
     };
   }
 
-  private async updateIndexMappings(newFields: Record<string, { type: string }>): Promise<void> {
+  private async updateIndexMappings(
+    newFields: Record<string, { type: DatatableColumnMeta['esType'] }>
+  ): Promise<void> {
     const indexName = this.getIndexName();
     if (!indexName) {
       throw new Error('Index name is not set');
