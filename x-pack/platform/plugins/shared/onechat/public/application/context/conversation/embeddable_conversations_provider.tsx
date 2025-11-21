@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
- */
+
 
 import React, { useMemo, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,6 +17,9 @@ import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { getProcessedAttachments } from './get_processed_attachments';
+import { AppLeaveContext, type OnAppLeave } from '../app_leave_context';
+
+const noopOnAppLeave: OnAppLeave = () => {};
 
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
@@ -110,7 +113,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onConversationCreated,
     onDeleteConversation,
   });
-
   const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
 
   const setAttachmentMap = useCallback((attachments: Map<string, Record<string, unknown>>) => {
@@ -162,9 +164,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <OnechatServicesContext.Provider value={services}>
-            <ConversationContext.Provider value={conversationContextValue}>
-              <SendMessageProvider>{children}</SendMessageProvider>
-            </ConversationContext.Provider>
+            <AppLeaveContext.Provider value={noopOnAppLeave}>
+              <ConversationContext.Provider value={conversationContextValue}>
+                <SendMessageProvider>{children}</SendMessageProvider>
+              </ConversationContext.Provider>
+            </AppLeaveContext.Provider>
           </OnechatServicesContext.Provider>
         </QueryClientProvider>
       </I18nProvider>
