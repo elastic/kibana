@@ -83,7 +83,7 @@ const isCustomRrule = (rRule: Rrule) => {
 };
 
 export const transformScheduledReport = (report: ScheduledReportApiJSON): ScheduledReport => {
-  const { title, schedule, notification } = report;
+  const { title, schedule, notification, id } = report;
   const rRule = schedule.rrule;
 
   const isCustomFrequency = isCustomRrule(rRule);
@@ -124,6 +124,7 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
   }
 
   return {
+    id,
     title,
     recurringSchedule,
     // TODO dtstart should be required

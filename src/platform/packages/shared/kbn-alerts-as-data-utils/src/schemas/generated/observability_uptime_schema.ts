@@ -93,6 +93,7 @@ const ObservabilityUptimeAlertOptional = rt.partial({
   labels: schemaUnknown,
   'location.id': schemaStringArray,
   'location.name': schemaStringArray,
+  'monitor.failed_step_info': schemaString,
   'monitor.id': schemaString,
   'monitor.name': schemaString,
   'monitor.state.id': schemaString,
