@@ -11,7 +11,8 @@ import React from 'react';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { RoundLayout } from './round_layout';
-import { conversationRoundsId } from './conversation_rounds.styles';
+
+const CONVERSATION_ROUNDS_ID = 'onechatConversationRoundsContainer';
 
 interface ConversationRoundsProps {
   scrollContainerHeight: number;
@@ -26,7 +27,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
 
   return (
     <EuiFlexGroup
-      id={conversationRoundsId}
+      id={CONVERSATION_ROUNDS_ID}
       direction="column"
       gutterSize="l"
       aria-label={i18n.translate('xpack.onechat.conversationRounds', {
