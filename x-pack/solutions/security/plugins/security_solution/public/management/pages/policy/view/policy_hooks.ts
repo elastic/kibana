@@ -18,6 +18,7 @@ import {
 import {
   getPolicyBlocklistsPath,
   getPolicyDetailsArtifactsListPath,
+  getPolicyEndpointExceptionsPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedDevicesPath,
@@ -65,6 +66,11 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
         });
       } else if (listId === ENDPOINT_ARTIFACT_LISTS.blocklists.id) {
         return getPolicyBlocklistsPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else if (listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id) {
+        return getPolicyEndpointExceptionsPath(policyId, {
           ...location,
           ...args,
         });

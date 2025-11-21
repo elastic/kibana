@@ -20,11 +20,13 @@ import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getBlocklistsListPath,
+  getEndpointExceptionsListPath,
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getPolicyBlocklistsPath,
   getPolicyDetailPath,
   getPolicyDetailsArtifactsListPath,
+  getPolicyEndpointExceptionsPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyProtectionUpdatesPath,
@@ -37,6 +39,7 @@ import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import {
   isOnBlocklistsView,
+  isOnEndpointExceptionsView,
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
   isOnPolicyFormView,
@@ -65,6 +68,9 @@ import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/
 import { useHostIsolationExceptionsAccess } from '../../../../hooks/artifacts/use_host_isolation_exceptions_access';
 import { TrustedDevicesApiClient } from '../../../trusted_devices/service/api_client';
 import { POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS } from './trusted_devices_translations';
+import { ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../endpoint_exceptions/constants';
+import { EndpointExceptionsApiClient } from '../../../endpoint_exceptions/service/api_client';
+import { POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS } from './endpoint_exceptions_translations';
 
 enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -74,6 +80,7 @@ enum PolicyTabKeys {
   BLOCKLISTS = 'blocklists',
   PROTECTION_UPDATES = 'protectionUpdates',
   TRUSTED_DEVICES = 'trustedDevices',
+  ENDPOINT_EXCEPTIONS = 'endpointExceptions',
 }
 
 interface PolicyTab {
@@ -93,6 +100,7 @@ export const PolicyTabs = React.memo(() => {
   const isInEventFiltersTab = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const isInBlocklistsTab = usePolicyDetailsSelector(isOnBlocklistsView);
+  const isInEndpointExceptionsTab = usePolicyDetailsSelector(isOnEndpointExceptionsView);
   const isInProtectionUpdatesTab = usePolicyDetailsSelector(isOnProtectionUpdatesView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
 
@@ -134,6 +142,8 @@ export const PolicyTabs = React.memo(() => {
     canWriteBlocklist,
     canReadTrustedDevices,
     canWriteTrustedDevices,
+    canReadEndpointExceptions,
+    canWriteEndpointExceptions,
     loading: isPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
@@ -172,6 +182,7 @@ export const PolicyTabs = React.memo(() => {
       (isInEventFiltersTab && !canReadEventFilters) ||
       redirectHostIsolationException ||
       (isInBlocklistsTab && !canReadBlocklist) ||
+      (isInEndpointExceptionsTab && !canReadEndpointExceptions) ||
       (isInTrustedDevicesTab && !canReadTrustedDevices)
     ) {
       history.replace(getPolicyDetailPath(policyId));
@@ -184,6 +195,7 @@ export const PolicyTabs = React.memo(() => {
     }
   }, [
     canReadBlocklist,
+    canReadEndpointExceptions,
     canReadEventFilters,
     canReadHostIsolationExceptions,
     canReadTrustedApplications,
@@ -192,6 +204,7 @@ export const PolicyTabs = React.memo(() => {
     history,
     isHostIsolationExceptionsAccessLoading,
     isInBlocklistsTab,
+    isInEndpointExceptionsTab,
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
     isInProtectionUpdatesTab,
@@ -219,6 +232,11 @@ export const PolicyTabs = React.memo(() => {
 
   const getBlocklistsApiClientInstance = useCallback(
     () => BlocklistsApiClient.getInstance(http),
+    [http]
+  );
+
+  const getEndpointExceptionsApiClientInstance = useCallback(
+    () => EndpointExceptionsApiClient.getInstance(http),
     [http]
   );
 
@@ -273,6 +291,17 @@ export const PolicyTabs = React.memo(() => {
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.blocklist.list.about"
           defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {blocklist} other {blocklist entries}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
+    const endpointExceptionsLabels = {
+      ...POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.endpointExceptions.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {endpoint exception} other {endpoint exceptions}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />
       ),
@@ -424,6 +453,32 @@ export const PolicyTabs = React.memo(() => {
             'data-test-subj': 'policyBlocklistTab',
           }
         : undefined,
+      [PolicyTabKeys.ENDPOINT_EXCEPTIONS]: canReadEndpointExceptions
+        ? {
+            id: PolicyTabKeys.ENDPOINT_EXCEPTIONS,
+            name: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.tabs.endpointExceptions',
+              {
+                defaultMessage: 'Endpoint exceptions',
+              }
+            ),
+            content: (
+              <>
+                <EuiSpacer />
+                <PolicyArtifactsLayout
+                  policyItem={policyItem}
+                  labels={endpointExceptionsLabels}
+                  getExceptionsListApiClient={getEndpointExceptionsApiClientInstance}
+                  searchableFields={ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS}
+                  getArtifactPath={getEndpointExceptionsListPath}
+                  getPolicyArtifactsPath={getPolicyEndpointExceptionsPath}
+                  canWriteArtifact={canWriteEndpointExceptions}
+                />
+              </>
+            ),
+            'data-test-subj': 'policyEventFiltersTab',
+          }
+        : undefined,
 
       [PolicyTabKeys.PROTECTION_UPDATES]: isEnterprise
         ? {
@@ -465,6 +520,9 @@ export const PolicyTabs = React.memo(() => {
     canReadBlocklist,
     getBlocklistsApiClientInstance,
     canWriteBlocklist,
+    canReadEndpointExceptions,
+    getEndpointExceptionsApiClientInstance,
+    canWriteEndpointExceptions,
     isEnterprise,
   ]);
 
@@ -490,6 +548,8 @@ export const PolicyTabs = React.memo(() => {
       selectedTab = tabs[PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS];
     } else if (isInBlocklistsTab) {
       selectedTab = tabs[PolicyTabKeys.BLOCKLISTS];
+    } else if (isInEndpointExceptionsTab) {
+      selectedTab = tabs[PolicyTabKeys.ENDPOINT_EXCEPTIONS];
     } else if (isInProtectionUpdatesTab) {
       selectedTab = tabs[PolicyTabKeys.PROTECTION_UPDATES];
     }
@@ -503,6 +563,7 @@ export const PolicyTabs = React.memo(() => {
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
     isInBlocklistsTab,
+    isInEndpointExceptionsTab,
     isInProtectionUpdatesTab,
   ]);
 
@@ -534,6 +595,9 @@ export const PolicyTabs = React.memo(() => {
           break;
         case PolicyTabKeys.BLOCKLISTS:
           path = getPolicyBlocklistsPath(policyId);
+          break;
+        case PolicyTabKeys.ENDPOINT_EXCEPTIONS:
+          path = getPolicyEndpointExceptionsPath(policyId);
           break;
         case PolicyTabKeys.PROTECTION_UPDATES:
           path = getPolicyProtectionUpdatesPath(policyId);
