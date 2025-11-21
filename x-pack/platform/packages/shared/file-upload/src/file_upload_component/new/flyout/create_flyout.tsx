@@ -84,7 +84,7 @@ const LoadingContents: FC = () => (
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
-            id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+            id="xpack.fileUpload.uploadView.uploadFileTitle"
             defaultMessage="Upload a file"
           />
         </h3>

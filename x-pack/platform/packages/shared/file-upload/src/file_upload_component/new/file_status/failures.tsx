@@ -36,7 +36,7 @@ export const Failures: FC<Props> = ({ failedDocs, docCount }) => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedTitle"
+          id="xpack.fileUpload.importSummary.documentsCouldNotBeImportedTitle"
           defaultMessage="Some documents could not be imported"
         />
       }
@@ -46,7 +46,7 @@ export const Failures: FC<Props> = ({ failedDocs, docCount }) => {
     >
       <p>
         <FormattedMessage
-          id="xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedDescription"
+          id="xpack.fileUpload.importSummary.documentsCouldNotBeImportedDescription"
           defaultMessage="{importFailuresLength} out of {docCount} documents could not be imported.
         This could be due to lines not matching the Grok pattern."
           values={{
@@ -60,7 +60,7 @@ export const Failures: FC<Props> = ({ failedDocs, docCount }) => {
         id="failureList"
         buttonContent={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.importSummary.failedDocumentsButtonLabel"
+            id="xpack.fileUpload.importSummary.failedDocumentsButtonLabel"
             defaultMessage="Failed documents"
           />
         }

@@ -47,7 +47,7 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus, index }) => {
         size="xs"
         color="text"
         data-test-subj={`mlFileUploadAnalysisExplanationButton-${index}`}
-        aria-label={i18n.translate('xpack.dataVisualizer.file.analysisSummary.inspectButtonLabel', {
+        aria-label={i18n.translate('xpack.fileUpload.analysisSummary.inspectButtonLabel', {
           defaultMessage: 'Analysis explanation',
         })}
       />
@@ -62,7 +62,7 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus, index }) => {
             <EuiModalHeaderTitle id={modalTitleId}>
               <EuiIcon type="inspect" size={'l'} />{' '}
               <FormattedMessage
-                id="xpack.dataVisualizer.file.explanationFlyout.title"
+                id="xpack.fileUpload.explanationFlyout.title"
                 defaultMessage="Analysis explanation"
               />
             </EuiModalHeaderTitle>
@@ -74,7 +74,7 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus, index }) => {
             <EuiSpacer size="s" />
 
             <FormattedMessage
-              id="xpack.dataVisualizer.file.explanationFlyout.content"
+              id="xpack.fileUpload.explanationFlyout.content"
               defaultMessage="The logical steps that have produced the analysis results."
             />
 

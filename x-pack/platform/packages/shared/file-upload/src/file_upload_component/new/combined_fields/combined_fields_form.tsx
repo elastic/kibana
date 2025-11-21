@@ -156,7 +156,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
         <EuiTitle size="xxs">
           <h4>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.combinedFieldsForm.title"
+              id="xpack.fileUpload.combinedFieldsForm.title"
               defaultMessage="Add Smarter search fields to the mappings"
             />
           </h4>
@@ -167,7 +167,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.combinedFieldsForm.description"
+              id="xpack.fileUpload.combinedFieldsForm.description"
               defaultMessage="Add a Geo Point field for map-based searches, or a Semantic Text field for meaning-based searches to find related content — not just exact matches."
             />
           </p>
@@ -187,7 +187,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
                   isDisabled={this.isSemanticTextCompatible() === false}
                 >
                   <FormattedMessage
-                    id="xpack.dataVisualizer.file.semanticTextForm.combinedFieldLabel"
+                    id="xpack.fileUpload.semanticTextForm.combinedFieldLabel"
                     defaultMessage="Semantic text field"
                   />
                 </EuiButton>
@@ -213,7 +213,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
                   isDisabled={this.isLatLonCompatible() === false}
                 >
                   <FormattedMessage
-                    id="xpack.dataVisualizer.file.geoFieldLabel"
+                    id="xpack.fileUpload.geoFieldLabel"
                     defaultMessage="Geo point field"
                   />
                 </EuiButton>
@@ -237,7 +237,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
             <EuiTitle size="xxs">
               <h4>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.combinedFieldsForm.title"
+                  id="xpack.fileUpload.combinedFieldsForm.title"
                   defaultMessage="Already added fields"
                 />
               </h4>

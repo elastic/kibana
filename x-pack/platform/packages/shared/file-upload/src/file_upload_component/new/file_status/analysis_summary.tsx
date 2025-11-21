@@ -24,7 +24,7 @@ export const AnalysisSummary: FC<Props> = ({ results }) => {
       <EuiFlexItem>
         <p>
           <FormattedMessage
-            id="xpack.dataVisualizer.file.analysisSummary.analyzedLinesNumberTitle"
+            id="xpack.fileUpload.analysisSummary.analyzedLinesNumberTitle"
             defaultMessage="Number of lines analyzed {code}"
             values={{
               code: <EuiCode>{results.num_lines_analyzed}</EuiCode>,
@@ -36,7 +36,7 @@ export const AnalysisSummary: FC<Props> = ({ results }) => {
         <EuiFlexItem>
           <p>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.analysisSummary.formatTitle"
+              id="xpack.fileUpload.analysisSummary.formatTitle"
               defaultMessage="Format {code}"
               values={{
                 code: <EuiCode>{getFormatLabel(results)}</EuiCode>,
@@ -51,7 +51,7 @@ export const AnalysisSummary: FC<Props> = ({ results }) => {
           <EuiFlexItem>
             <p>
               <FormattedMessage
-                id="xpack.dataVisualizer.file.analysisSummary.delimiterTitle"
+                id="xpack.fileUpload.analysisSummary.delimiterTitle"
                 defaultMessage="Delimiter {code}"
                 values={{
                   code: <EuiCode>{results.delimiter}</EuiCode>,
@@ -63,7 +63,7 @@ export const AnalysisSummary: FC<Props> = ({ results }) => {
           <EuiFlexItem>
             <p>
               <FormattedMessage
-                id="xpack.dataVisualizer.file.analysisSummary.hasHeaderRowTitle"
+                id="xpack.fileUpload.analysisSummary.hasHeaderRowTitle"
                 defaultMessage="Has header row {code}"
                 values={{
                   code: <EuiCode>{`${results.has_header_row}`}</EuiCode>,
@@ -78,7 +78,7 @@ export const AnalysisSummary: FC<Props> = ({ results }) => {
         <EuiFlexItem>
           <p>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.analysisSummary.grokPatternTitle"
+              id="xpack.fileUpload.analysisSummary.grokPatternTitle"
               defaultMessage="Grok pattern {code}"
               values={{
                 code: <EuiCode>{results.grok_pattern}</EuiCode>,
@@ -92,7 +92,7 @@ export const AnalysisSummary: FC<Props> = ({ results }) => {
         <EuiFlexItem>
           <p>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.analysisSummary.timeFieldTitle"
+              id="xpack.fileUpload.analysisSummary.timeFieldTitle"
               defaultMessage="Time field {code}"
               values={{
                 code: <EuiCode>{results.timestamp_field}</EuiCode>,
@@ -106,7 +106,7 @@ export const AnalysisSummary: FC<Props> = ({ results }) => {
         <EuiFlexItem>
           <p>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.analysisSummary.timeFormatTitle"
+              id="xpack.fileUpload.analysisSummary.timeFormatTitle"
               defaultMessage="Time {timestampFormats, plural, zero {format} one {format} other {formats}} {code}"
               values={{
                 timestampFormats: results.java_timestamp_formats.length,

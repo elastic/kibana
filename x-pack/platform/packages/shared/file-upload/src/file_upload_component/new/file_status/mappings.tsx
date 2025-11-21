@@ -81,12 +81,12 @@ export const Mappings: FC<Props> = ({
   const title =
     fileCount > 1 ? (
       <FormattedMessage
-        id="xpack.dataVisualizer.file.advancedImportSettings.mappingsLabel"
+        id="xpack.fileUpload.advancedImportSettings.mappingsLabel"
         defaultMessage="Combined mappings"
       />
     ) : (
       <FormattedMessage
-        id="xpack.dataVisualizer.file.advancedImportSettings.singleFileMappingLabel"
+        id="xpack.fileUpload.advancedImportSettings.singleFileMappingLabel"
         defaultMessage="Mappings"
       />
     );
@@ -99,12 +99,12 @@ export const Mappings: FC<Props> = ({
           size="s"
           color="primary"
           iconType="readOnly"
-          title={i18n.translate('xpack.dataVisualizer.file.mappingsReadonlyWarning', {
+          title={i18n.translate('xpack.fileUpload.mappingsReadonlyWarning', {
             defaultMessage: 'Mappings for individual files are not editable.',
           })}
         >
           <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.mappingsWarning"
+            id="xpack.fileUpload.advancedImportSettings.mappingsWarning"
             defaultMessage="You can only edit combined mappings under advanced options."
           />
         </EuiCallOut>

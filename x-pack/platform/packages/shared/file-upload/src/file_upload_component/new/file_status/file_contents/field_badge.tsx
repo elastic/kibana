@@ -24,7 +24,7 @@ export const FieldBadge: FC<Props> = ({ type, value, name }) => {
   const euiColorLightShade = euiTheme.colors.lightShade;
   const supportedType = getSupportedFieldType(type ?? 'unknown');
   const tooltip = type
-    ? i18n.translate('xpack.dataVisualizer.file.fileContents.fieldBadge.tooltip', {
+    ? i18n.translate('xpack.fileUpload.fileContents.fieldBadge.tooltip', {
         defaultMessage: 'Type: {type}',
         values: { type: supportedType },
       })

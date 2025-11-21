@@ -152,7 +152,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       <EuiSpacer size="s" />
 
       <EuiFormRow
-        label={i18n.translate('xpack.dataVisualizer.file.semanticTextForm.fieldLabel', {
+        label={i18n.translate('xpack.fileUpload.semanticTextForm.fieldLabel', {
           defaultMessage: 'Field',
         })}
       >
@@ -165,7 +165,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
       {renameToFieldOption !== null ? (
         <EuiFormRow
-          label={i18n.translate('xpack.dataVisualizer.file.semanticTextForm.copyFieldLabel', {
+          label={i18n.translate('xpack.fileUpload.semanticTextForm.copyFieldLabel', {
             defaultMessage: 'Copy to field',
           })}
           isInvalid={fieldError !== undefined}
@@ -174,7 +174,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
           <EuiFieldText
             isInvalid={fieldError !== undefined}
             placeholder={i18n.translate(
-              'xpack.dataVisualizer.file.semanticTextForm.copyFieldLabel.placeholder',
+              'xpack.fileUpload.semanticTextForm.copyFieldLabel.placeholder',
               {
                 defaultMessage: 'Field name',
               }
@@ -187,7 +187,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       ) : null}
 
       <EuiFormRow
-        label={i18n.translate('xpack.dataVisualizer.file.semanticTextForm.inferenceLabel', {
+        label={i18n.translate('xpack.fileUpload.semanticTextForm.inferenceLabel', {
           defaultMessage: 'Inference endpoint',
         })}
       >
@@ -203,7 +203,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       <EuiTextAlign textAlign="right">
         <EuiButton size="s" fill disabled={isInvalid} onClick={onSubmit}>
           <FormattedMessage
-            id="xpack.dataVisualizer.file.geoPointForm.submitButtonLabel"
+            id="xpack.fileUpload.geoPointForm.submitButtonLabel"
             defaultMessage="Add"
           />
         </EuiButton>

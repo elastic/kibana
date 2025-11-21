@@ -73,7 +73,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
-            id="xpack.dataVisualizer.file.uploadView.indexSelectionTitle"
+            id="xpack.fileUpload.uploadView.indexSelectionTitle"
             defaultMessage="Index"
           />
         </h3>
@@ -84,7 +84,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
       <EuiText size="s">
         <p>
           <FormattedMessage
-            id="xpack.dataVisualizer.file.uploadView.indexChoiceDescription"
+            id="xpack.fileUpload.uploadView.indexChoiceDescription"
             defaultMessage="An index stores your data and defines the field mappings for searches."
           />
         </p>
@@ -96,7 +96,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButtonGroup
-              legend={i18n.translate('xpack.dataVisualizer.file.indexSelection.label', {
+              legend={i18n.translate('xpack.fileUpload.indexSelection.label', {
                 defaultMessage: 'Select index creation method',
               })}
               isFullWidth={true}
@@ -104,13 +104,13 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
               options={[
                 {
                   id: UPLOAD_TYPE.NEW,
-                  label: i18n.translate('xpack.dataVisualizer.file.indexSelection.newLabel', {
+                  label: i18n.translate('xpack.fileUpload.indexSelection.newLabel', {
                     defaultMessage: 'Create new index',
                   }),
                 },
                 {
                   id: UPLOAD_TYPE.EXISTING,
-                  label: i18n.translate('xpack.dataVisualizer.file.existingIndexSelection.label', {
+                  label: i18n.translate('xpack.fileUpload.existingIndexSelection.label', {
                     defaultMessage: 'Upload to existing index',
                   }),
                 },
@@ -129,21 +129,15 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
             ) : (
               <>
                 <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.dataVisualizer.file.importView.selectExistingIndexLabel',
-                    {
-                      defaultMessage: 'Select existing index',
-                    }
-                  )}
+                  label={i18n.translate('xpack.fileUpload.importView.selectExistingIndexLabel', {
+                    defaultMessage: 'Select existing index',
+                  })}
                   fullWidth
                 >
                   <EuiComboBox
-                    placeholder={i18n.translate(
-                      'xpack.dataVisualizer.file.existingIndexSelect.label',
-                      {
-                        defaultMessage: 'Select an index',
-                      }
-                    )}
+                    placeholder={i18n.translate('xpack.fileUpload.existingIndexSelect.label', {
+                      defaultMessage: 'Select an index',
+                    })}
                     options={indices.map((index) => ({
                       label: index.name,
                       value: index.name,

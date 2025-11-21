@@ -130,7 +130,7 @@ export class GeoPointForm extends Component<Props, State> {
     return (
       <Fragment>
         <EuiFormRow
-          label={i18n.translate('xpack.dataVisualizer.file.geoPointForm.latFieldLabel', {
+          label={i18n.translate('xpack.fileUpload.geoPointForm.latFieldLabel', {
             defaultMessage: 'Latitude field',
           })}
         >
@@ -142,7 +142,7 @@ export class GeoPointForm extends Component<Props, State> {
         </EuiFormRow>
 
         <EuiFormRow
-          label={i18n.translate('xpack.dataVisualizer.file.geoPointForm.lonFieldLabel', {
+          label={i18n.translate('xpack.fileUpload.geoPointForm.lonFieldLabel', {
             defaultMessage: 'Longitude field',
           })}
         >
@@ -154,7 +154,7 @@ export class GeoPointForm extends Component<Props, State> {
         </EuiFormRow>
 
         <EuiFormRow
-          label={i18n.translate('xpack.dataVisualizer.file.geoPointForm.geoPointFieldLabel', {
+          label={i18n.translate('xpack.fileUpload.geoPointForm.geoPointFieldLabel', {
             defaultMessage: 'Geo point field',
           })}
           isInvalid={this.state.geoPointFieldError !== ''}
@@ -164,12 +164,9 @@ export class GeoPointForm extends Component<Props, State> {
             value={this.state.geoPointField}
             onChange={this.onGeoPointFieldChange}
             isInvalid={this.state.geoPointFieldError !== ''}
-            aria-label={i18n.translate(
-              'xpack.dataVisualizer.file.geoPointForm.geoPointFieldAriaLabel',
-              {
-                defaultMessage: 'Geo point field, required field',
-              }
-            )}
+            aria-label={i18n.translate('xpack.fileUpload.geoPointForm.geoPointFieldAriaLabel', {
+              defaultMessage: 'Geo point field, required field',
+            })}
           />
         </EuiFormRow>
 
@@ -190,7 +187,7 @@ export class GeoPointForm extends Component<Props, State> {
             onClick={this.onSubmit}
           >
             <FormattedMessage
-              id="xpack.dataVisualizer.file.geoPointForm.submitButtonLabel"
+              id="xpack.fileUpload.geoPointForm.submitButtonLabel"
               defaultMessage="Add"
             />
           </EuiButton>

@@ -51,7 +51,7 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
           <>
             <EuiText size="xs">
               <FormattedMessage
-                id="xpack.dataVisualizer.file.fileStatus.newFields"
+                id="xpack.fileUpload.fileStatus.newFields"
                 defaultMessage="File contains {count} new fields which are not present in the selected index."
                 values={{ count: fileClash.newFields.length }}
               />
@@ -63,7 +63,7 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
           <>
             <EuiText size="xs">
               <FormattedMessage
-                id="xpack.dataVisualizer.file.fileStatus.missingFields"
+                id="xpack.fileUpload.fileStatus.missingFields"
                 defaultMessage="File is missing {count} fields which are present in the selected index"
                 values={{ count: fileClash.missingFields.length }}
               />
@@ -80,7 +80,7 @@ function getClashText(fileClash: FileClash) {
     if (fileClash.clashType === CLASH_TYPE.FORMAT) {
       return (
         <FormattedMessage
-          id="xpack.dataVisualizer.file.fileStatus.fileFormatClash"
+          id="xpack.fileUpload.fileStatus.fileFormatClash"
           defaultMessage="File format different from other files"
         />
       );
@@ -89,7 +89,7 @@ function getClashText(fileClash: FileClash) {
     if (fileClash.clashType === CLASH_TYPE.MAPPING) {
       return (
         <FormattedMessage
-          id="xpack.dataVisualizer.file.fileStatus.mappingClash"
+          id="xpack.fileUpload.fileStatus.mappingClash"
           defaultMessage="Mappings incompatible with other files"
         />
       );
@@ -98,7 +98,7 @@ function getClashText(fileClash: FileClash) {
     if (fileClash.clashType === CLASH_TYPE.EXISTING_INDEX_MAPPING) {
       return (
         <FormattedMessage
-          id="xpack.dataVisualizer.file.fileStatus.existingIndexMappingClash"
+          id="xpack.fileUpload.fileStatus.existingIndexMappingClash"
           defaultMessage="Mappings incompatible with existing index"
         />
       );
@@ -107,7 +107,7 @@ function getClashText(fileClash: FileClash) {
     if (fileClash.clashType === CLASH_TYPE.UNSUPPORTED) {
       return (
         <FormattedMessage
-          id="xpack.dataVisualizer.file.fileStatus.fileFormatNotSupported"
+          id="xpack.fileUpload.fileStatus.fileFormatNotSupported"
           defaultMessage="File format not supported"
         />
       );
@@ -117,7 +117,7 @@ function getClashText(fileClash: FileClash) {
   if (fileClash.clash === CLASH_ERROR_TYPE.WARNING) {
     return (
       <FormattedMessage
-        id="xpack.dataVisualizer.file.fileStatus.fileClashWarning"
+        id="xpack.fileUpload.fileStatus.fileClashWarning"
         defaultMessage="Mappings may be incompatible with the existing index"
       />
     );

@@ -22,7 +22,7 @@ export const CreateDataViewToolTip: FC<Props> = ({ children, showTooltip }) => {
       content={
         showTooltip ? (
           <FormattedMessage
-            id="xpack.dataVisualizer.file.cannotCreateDataView.tooltip"
+            id="xpack.fileUpload.cannotCreateDataView.tooltip"
             defaultMessage="You need permission to create data views."
           />
         ) : null

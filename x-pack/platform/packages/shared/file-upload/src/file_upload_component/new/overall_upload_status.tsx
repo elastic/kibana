@@ -38,7 +38,7 @@ export const OverallUploadStatus: FC = () => {
       ? []
       : [
           {
-            title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.deployingModel', {
+            title: i18n.translate('xpack.fileUpload.overallUploadStatus.deployingModel', {
               defaultMessage: 'Deploying model',
             }),
             children: <></>,
@@ -49,7 +49,7 @@ export const OverallUploadStatus: FC = () => {
       ? [
           {
             title: i18n.translate(
-              'xpack.dataVisualizer.file.overallUploadStatus.creatingIndexAndIngestPipeline',
+              'xpack.fileUpload.overallUploadStatus.creatingIndexAndIngestPipeline',
               {
                 defaultMessage: 'Creating index { indexName }',
                 values: { indexName },
@@ -59,7 +59,7 @@ export const OverallUploadStatus: FC = () => {
             status: generateStatus([uploadStatus.indexCreated, uploadStatus.pipelineCreated]),
           },
           {
-            title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.indexSearchable', {
+            title: i18n.translate('xpack.fileUpload.overallUploadStatus.indexSearchable', {
               defaultMessage: 'Index searchable',
             }),
             children: <></>,
@@ -75,14 +75,11 @@ export const OverallUploadStatus: FC = () => {
       : []),
     {
       title: existingIndexName
-        ? i18n.translate(
-            'xpack.dataVisualizer.file.overallUploadStatus.uploadingFilesExistingIndex',
-            {
-              defaultMessage: 'Uploading files to { existingIndexName }',
-              values: { existingIndexName },
-            }
-          )
-        : i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadingFiles', {
+        ? i18n.translate('xpack.fileUpload.overallUploadStatus.uploadingFilesExistingIndex', {
+            defaultMessage: 'Uploading files to { existingIndexName }',
+            values: { existingIndexName },
+          })
+        : i18n.translate('xpack.fileUpload.overallUploadStatus.uploadingFiles', {
             defaultMessage: 'Uploading files',
           }),
       children: (
@@ -99,19 +96,16 @@ export const OverallUploadStatus: FC = () => {
       ? []
       : [
           {
-            title: i18n.translate(
-              'xpack.dataVisualizer.file.overallUploadStatus.creatingDataView',
-              {
-                defaultMessage: 'Creating data view',
-              }
-            ),
+            title: i18n.translate('xpack.fileUpload.overallUploadStatus.creatingDataView', {
+              defaultMessage: 'Creating data view',
+            }),
             children: <></>,
             status: generateStatus([uploadStatus.dataViewCreated]),
           },
         ]),
 
     {
-      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadComplete', {
+      title: i18n.translate('xpack.fileUpload.overallUploadStatus.uploadComplete', {
         defaultMessage: 'Upload complete',
       }),
       children: <></>,
@@ -124,7 +118,7 @@ export const OverallUploadStatus: FC = () => {
       ]),
     },
     {
-      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.allDocsSearchable', {
+      title: i18n.translate('xpack.fileUpload.overallUploadStatus.allDocsSearchable', {
         defaultMessage: 'All docs searchable',
       }),
       children: <></>,

@@ -29,7 +29,7 @@ export const FileTooLarge: FC<Props> = ({ fileStatus }) => {
     errorText = (
       <p>
         <FormattedMessage
-          id="xpack.dataVisualizer.file.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage"
+          id="xpack.fileUpload.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage"
           defaultMessage="The size of the file you selected for upload is {fileSizeFormatted} which
           exceeds the maximum permitted size of {maxFileSizeFormatted}"
           values={{
@@ -43,7 +43,7 @@ export const FileTooLarge: FC<Props> = ({ fileStatus }) => {
     errorText = (
       <p>
         <FormattedMessage
-          id="xpack.dataVisualizer.file.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage"
+          id="xpack.fileUpload.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage"
           defaultMessage="The size of the file you selected for upload exceeds the maximum
           permitted size of {maxFileSizeFormatted} by {diffFormatted}"
           values={{
@@ -59,7 +59,7 @@ export const FileTooLarge: FC<Props> = ({ fileStatus }) => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.dataVisualizer.file.fileErrorCallouts.fileSizeTooLargeTitle"
+          id="xpack.fileUpload.fileErrorCallouts.fileSizeTooLargeTitle"
           defaultMessage="File size is too large"
         />
       }
@@ -89,7 +89,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.fileErrorCallouts.fileCouldNotBeReadTitle"
+            id="xpack.fileUpload.fileErrorCallouts.fileCouldNotBeReadTitle"
             defaultMessage="File structure cannot be determined"
           />
         }
@@ -100,13 +100,13 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
         {loaded === false && (
           <>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.fileErrorCallouts.applyOverridesDescription"
+              id="xpack.fileUpload.fileErrorCallouts.applyOverridesDescription"
               defaultMessage="If you know something about this data, such as the file format or timestamp format, adding initial overrides may help us to infer the rest of the structure."
             />
             <br />
             <EuiButtonEmpty onClick={showEditFlyout} flush="left" size="s">
               <FormattedMessage
-                id="xpack.dataVisualizer.file.fileErrorCallouts.overrideButton"
+                id="xpack.fileUpload.fileErrorCallouts.overrideButton"
                 defaultMessage="Apply override settings"
               />
             </EuiButtonEmpty>
@@ -119,7 +119,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
           <>
             <EuiSpacer size="s" />
             <FormattedMessage
-              id="xpack.dataVisualizer.file.fileErrorCallouts.revertingToPreviousSettingsDescription"
+              id="xpack.fileUpload.fileErrorCallouts.revertingToPreviousSettingsDescription"
               defaultMessage="Reverting to previous settings"
             />
           </>
@@ -150,7 +150,7 @@ export const FindFileStructurePermissionDenied: FC = () => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.fileErrorCallouts.findFileStructurePermissionDenied.title"
+            id="xpack.fileUpload.fileErrorCallouts.findFileStructurePermissionDenied.title"
             defaultMessage="Permission denied"
           />
         }
@@ -159,7 +159,7 @@ export const FindFileStructurePermissionDenied: FC = () => {
         data-test-subj="dataVisualizerFileStructurePermissionDeniedErrorCallout"
       >
         <FormattedMessage
-          id="xpack.dataVisualizer.file.fileErrorCallouts.findFileStructurePermissionDenied.description"
+          id="xpack.fileUpload.fileErrorCallouts.findFileStructurePermissionDenied.description"
           defaultMessage="You do not have sufficient privileges to analyze files."
         />
       </EuiCallOut>

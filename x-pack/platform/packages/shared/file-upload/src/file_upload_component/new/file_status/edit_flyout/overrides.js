@@ -59,7 +59,7 @@ class OverridesUI extends Component {
   }
 
   linesToSampleErrors = i18n.translate(
-    'xpack.dataVisualizer.file.editFlyout.overrides.linesToSampleErrorMessage',
+    'xpack.fileUpload.editFlyout.overrides.linesToSampleErrorMessage',
     {
       defaultMessage: 'Value must be greater than {min} and less than or equal to {max}',
       values: {
@@ -70,7 +70,7 @@ class OverridesUI extends Component {
   );
 
   customTimestampFormatErrors = i18n.translate(
-    'xpack.dataVisualizer.file.editFlyout.overrides.customTimestampFormatErrorMessage',
+    'xpack.fileUpload.editFlyout.overrides.customTimestampFormatErrorMessage',
     {
       defaultMessage: `Timestamp format must be a combination of these Java date/time formats:
       yy, yyyy, M, MM, MMM, MMMM, d, dd, EEE, EEEE, H, HH, h, mm, ss, S through SSSSSSSSS, a, XX, XXX, zzz`,
@@ -309,12 +309,9 @@ class OverridesUI extends Component {
     const timestampFormatHelp = (
       <EuiText size="xs">
         <EuiLink href={docsUrl} target="_blank">
-          {i18n.translate(
-            'xpack.dataVisualizer.file.editFlyout.overrides.timestampFormatHelpText',
-            {
-              defaultMessage: 'See more on accepted formats',
-            }
-          )}
+          {i18n.translate('xpack.fileUpload.editFlyout.overrides.timestampFormatHelpText', {
+            defaultMessage: 'See more on accepted formats',
+          })}
         </EuiLink>
       </EuiText>
     );
@@ -323,7 +320,7 @@ class OverridesUI extends Component {
       <EuiForm fullWidth>
         <SectionTitle>
           <FormattedMessage
-            id="xpack.dataVisualizer.file.editFlyout.overrides.generalSettingsTitle"
+            id="xpack.fileUpload.editFlyout.overrides.generalSettingsTitle"
             defaultMessage="General"
           />
         </SectionTitle>
@@ -334,7 +331,7 @@ class OverridesUI extends Component {
           isInvalid={linesToSampleValid === false}
           label={
             <FormattedMessage
-              id="xpack.dataVisualizer.file.editFlyout.overrides.linesToSampleFormRowLabel"
+              id="xpack.fileUpload.editFlyout.overrides.linesToSampleFormRowLabel"
               defaultMessage="Number of lines to sample"
             />
           }
@@ -351,7 +348,7 @@ class OverridesUI extends Component {
           display="columnCompressed"
           label={
             <FormattedMessage
-              id="xpack.dataVisualizer.file.editFlyout.overrides.dataFormatFormRowLabel"
+              id="xpack.fileUpload.editFlyout.overrides.dataFormatFormRowLabel"
               defaultMessage="Data format"
             />
           }
@@ -371,7 +368,7 @@ class OverridesUI extends Component {
               display="columnCompressed"
               label={
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.editFlyout.overrides.delimiterFormRowLabel"
+                  id="xpack.fileUpload.editFlyout.overrides.delimiterFormRowLabel"
                   defaultMessage="Delimiter"
                 />
               }
@@ -390,7 +387,7 @@ class OverridesUI extends Component {
                 display="columnCompressed"
                 label={
                   <FormattedMessage
-                    id="xpack.dataVisualizer.file.editFlyout.overrides.customDelimiterFormRowLabel"
+                    id="xpack.fileUpload.editFlyout.overrides.customDelimiterFormRowLabel"
                     defaultMessage="Custom delimiter"
                   />
                 }
@@ -407,7 +404,7 @@ class OverridesUI extends Component {
               display="columnCompressed"
               label={
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.editFlyout.overrides.quoteCharacterFormRowLabel"
+                  id="xpack.fileUpload.editFlyout.overrides.quoteCharacterFormRowLabel"
                   defaultMessage="Quote character"
                 />
               }
@@ -427,7 +424,7 @@ class OverridesUI extends Component {
                 id={'hasHeaderRow'}
                 label={
                   <FormattedMessage
-                    id="xpack.dataVisualizer.file.editFlyout.overrides.hasHeaderRowLabel"
+                    id="xpack.fileUpload.editFlyout.overrides.hasHeaderRowLabel"
                     defaultMessage="Has header row"
                   />
                 }
@@ -442,7 +439,7 @@ class OverridesUI extends Component {
                 id={'shouldTrimFields'}
                 label={
                   <FormattedMessage
-                    id="xpack.dataVisualizer.file.editFlyout.overrides.trimFieldsLabel"
+                    id="xpack.fileUpload.editFlyout.overrides.trimFieldsLabel"
                     defaultMessage="Should trim fields"
                   />
                 }
@@ -459,7 +456,7 @@ class OverridesUI extends Component {
               display="columnCompressed"
               label={
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.editFlyout.overrides.grokPatternFormRowLabel"
+                  id="xpack.fileUpload.editFlyout.overrides.grokPatternFormRowLabel"
                   defaultMessage="Grok pattern"
                 />
               }
@@ -480,7 +477,7 @@ class OverridesUI extends Component {
 
             <SectionTitle>
               <FormattedMessage
-                id="xpack.dataVisualizer.file.editFlyout.overrides.dateAndTimeTitle"
+                id="xpack.fileUpload.editFlyout.overrides.dateAndTimeTitle"
                 defaultMessage="Date & Time"
               />
             </SectionTitle>
@@ -490,7 +487,7 @@ class OverridesUI extends Component {
                 id={'containsTimeField'}
                 label={
                   <FormattedMessage
-                    id="xpack.dataVisualizer.file.editFlyout.overrides.containsTimeFieldLabel"
+                    id="xpack.fileUpload.editFlyout.overrides.containsTimeFieldLabel"
                     defaultMessage="Contains time field"
                   />
                 }
@@ -507,7 +504,7 @@ class OverridesUI extends Component {
                   helpText={timestampFormatHelp}
                   label={
                     <FormattedMessage
-                      id="xpack.dataVisualizer.file.editFlyout.overrides.timestampFormatFormRowLabel"
+                      id="xpack.fileUpload.editFlyout.overrides.timestampFormatFormRowLabel"
                       defaultMessage="Timestamp format"
                     />
                   }
@@ -528,7 +525,7 @@ class OverridesUI extends Component {
                     isInvalid={timestampFormatValid === false}
                     label={
                       <FormattedMessage
-                        id="xpack.dataVisualizer.file.editFlyout.overrides.customTimestampFormatFormRowLabel"
+                        id="xpack.fileUpload.editFlyout.overrides.customTimestampFormatFormRowLabel"
                         defaultMessage="Custom timestamp format"
                       />
                     }
@@ -545,7 +542,7 @@ class OverridesUI extends Component {
                   display="columnCompressed"
                   label={
                     <FormattedMessage
-                      id="xpack.dataVisualizer.file.editFlyout.overrides.timeFieldFormRowLabel"
+                      id="xpack.fileUpload.editFlyout.overrides.timeFieldFormRowLabel"
                       defaultMessage="Time field"
                     />
                   }
@@ -570,7 +567,7 @@ class OverridesUI extends Component {
 
             <SectionTitle>
               <FormattedMessage
-                id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
+                id="xpack.fileUpload.editFlyout.overrides.editFieldNamesTitle"
                 defaultMessage="Field names"
               />
             </SectionTitle>
@@ -580,12 +577,9 @@ class OverridesUI extends Component {
               const isTimeField = fieldName === timestampField;
               let value = fieldName;
               if (isTimeField) {
-                value = i18n.translate(
-                  'xpack.dataVisualizer.file.editFlyout.overrides.timestampFieldInfo',
-                  {
-                    defaultMessage: 'Timestamp field cannot be renamed',
-                  }
-                );
+                value = i18n.translate('xpack.fileUpload.editFlyout.overrides.timestampFieldInfo', {
+                  defaultMessage: 'Timestamp field cannot be renamed',
+                });
               } else if (fieldName === f) {
                 value = '';
               }
@@ -598,7 +592,7 @@ class OverridesUI extends Component {
                     disabled={isTimeField}
                     prepend={f}
                     placeholder={i18n.translate(
-                      'xpack.dataVisualizer.file.editFlyout.overrides.fieldNamePlaceholder',
+                      'xpack.fileUpload.editFlyout.overrides.fieldNamePlaceholder',
                       {
                         defaultMessage: 'Change field name',
                       }
@@ -617,7 +611,7 @@ class OverridesUI extends Component {
 
             <SectionTitle>
               <FormattedMessage
-                id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
+                id="xpack.fileUpload.editFlyout.overrides.editFieldNamesTitle"
                 defaultMessage="Field names"
               />
             </SectionTitle>
@@ -633,7 +627,7 @@ class OverridesUI extends Component {
                     compressed
                     prepend={f}
                     placeholder={i18n.translate(
-                      'xpack.dataVisualizer.file.editFlyout.overrides.fieldNamePlaceholder',
+                      'xpack.fileUpload.editFlyout.overrides.fieldNamePlaceholder',
                       {
                         defaultMessage: 'Change field name',
                       }

@@ -158,7 +158,7 @@ export const FileStatus: FC<Props> = ({
                             position="top"
                             content={
                               <FormattedMessage
-                                id="xpack.dataVisualizer.file.fileStatus.analysisExplanationTooltip"
+                                id="xpack.fileUpload.fileStatus.analysisExplanationTooltip"
                                 defaultMessage="Analysis explanation"
                               />
                             }
@@ -184,7 +184,7 @@ export const FileStatus: FC<Props> = ({
                         position="top"
                         content={
                           <FormattedMessage
-                            id="xpack.dataVisualizer.file.fileStatus.deleteFile"
+                            id="xpack.fileUpload.fileStatus.deleteFile"
                             defaultMessage="Remove file"
                           />
                         }
@@ -195,12 +195,9 @@ export const FileStatus: FC<Props> = ({
                           size="xs"
                           color="danger"
                           data-test-subj={`mlFileUploadDeleteFileButton-${index}`}
-                          aria-label={i18n.translate(
-                            'xpack.dataVisualizer.file.fileStatus.deleteFile',
-                            {
-                              defaultMessage: 'Remove file',
-                            }
-                          )}
+                          aria-label={i18n.translate('xpack.fileUpload.fileStatus.deleteFile', {
+                            defaultMessage: 'Remove file',
+                          })}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
@@ -221,7 +218,7 @@ export const FileStatus: FC<Props> = ({
                         data-test-subj={`mlFileUploadFileStatusPreviewTab-${index}`}
                       >
                         <FormattedMessage
-                          id="xpack.dataVisualizer.file.fileStatus.previewTabTitle"
+                          id="xpack.fileUpload.fileStatus.previewTabTitle"
                           defaultMessage="Preview"
                         />
                       </EuiTab>
@@ -234,7 +231,7 @@ export const FileStatus: FC<Props> = ({
                         data-test-subj={`mlFileUploadFileStatusStatsTab-${index}`}
                       >
                         <FormattedMessage
-                          id="xpack.dataVisualizer.file.fileStatus.statsTabTitle"
+                          id="xpack.fileUpload.fileStatus.statsTabTitle"
                           defaultMessage="Field statistics"
                         />
                       </EuiTab>
@@ -247,7 +244,7 @@ export const FileStatus: FC<Props> = ({
                         data-test-subj={`mlFileUploadFileStatusMappingsTab-${index}`}
                       >
                         <FormattedMessage
-                          id="xpack.dataVisualizer.file.fileStatus.mappingsTabTitle"
+                          id="xpack.fileUpload.fileStatus.mappingsTabTitle"
                           defaultMessage="Mappings"
                         />
                       </EuiTab>
@@ -259,7 +256,7 @@ export const FileStatus: FC<Props> = ({
                         data-test-subj={`mlFileUploadFileStatusPipelineTab-${index}`}
                       >
                         <FormattedMessage
-                          id="xpack.dataVisualizer.file.fileStatus.pipelineTabTitle"
+                          id="xpack.fileUpload.fileStatus.pipelineTabTitle"
                           defaultMessage="Pipeline"
                         />
                       </EuiTab>

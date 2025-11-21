@@ -15,14 +15,14 @@ import { STATUS } from '../../../..';
 import { useFileUploadKibana } from '../../kibana_context';
 
 const existsErrorText = i18n.translate(
-  'xpack.dataVisualizer.file.importView.indexNameAlreadyExistsErrorMessage',
+  'xpack.fileUpload.importView.indexNameAlreadyExistsErrorMessage',
   {
     defaultMessage: 'Index name already exists',
   }
 );
 
 const permissionErrorText = i18n.translate(
-  'xpack.dataVisualizer.file.importView.indexNameNoPermissionErrorMessage',
+  'xpack.fileUpload.importView.indexNameNoPermissionErrorMessage',
   {
     defaultMessage: 'You do not have permission to create this index',
   }
@@ -99,14 +99,14 @@ export const IndexInput: FC<Props> = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.dataVisualizer.file.importView.indexNameLabel', {
+      label={i18n.translate('xpack.fileUpload.importView.indexNameLabel', {
         defaultMessage: 'New index name',
       })}
       isInvalid={indexNameError !== ''}
       error={indexNameError}
       fullWidth
       helpText={i18n.translate(
-        'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
+        'xpack.fileUpload.importView.indexNameContainsIllegalCharactersErrorMessage',
         {
           defaultMessage: 'Index names must be lowercase and can only contain hyphens and numbers.',
         }
@@ -119,7 +119,7 @@ export const IndexInput: FC<Props> = ({
         onChange={(e) => setIndexNameLocal(e.target.value)}
         data-test-subj="dataVisualizerFileIndexNameInput"
         placeholder={i18n.translate(
-          'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
+          'xpack.fileUpload.importView.indexNameContainsIllegalCharactersErrorMessage',
           {
             defaultMessage: 'Add name to index',
           }
@@ -141,7 +141,7 @@ function isIndexNameValid(name: string): { valid: boolean; error?: string } {
     return {
       valid: false,
       error: i18n.translate(
-        'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
+        'xpack.fileUpload.importView.indexNameContainsIllegalCharactersErrorMessage',
         {
           defaultMessage: 'Index name contains illegal characters',
         }

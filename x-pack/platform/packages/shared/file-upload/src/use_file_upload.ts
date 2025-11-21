@@ -170,12 +170,9 @@ export function useFileUpload(
       if (isAbortError(e) === false) {
         // don't show a notification if the import was aborted
         notifications.toasts.addError(e, {
-          title: i18n.translate(
-            'xpack.dataVisualizer.file.importView.importErrorNotificationTitle',
-            {
-              defaultMessage: 'Error performing import',
-            }
-          ),
+          title: i18n.translate('xpack.fileUpload.importView.importErrorNotificationTitle', {
+            defaultMessage: 'Error performing import',
+          }),
         });
       }
     }
@@ -289,12 +286,9 @@ function isDataViewNameValid(name: string, dataViewNames: string[], index: strin
   }
 
   if (dataViewNames.find((i) => i === name)) {
-    return i18n.translate(
-      'xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage',
-      {
-        defaultMessage: 'Data view name already exists',
-      }
-    );
+    return i18n.translate('xpack.fileUpload.importView.dataViewNameAlreadyExistsErrorMessage', {
+      defaultMessage: 'Data view name already exists',
+    });
   }
 
   // escape . and + to stop the regex matching more than it should.
@@ -306,7 +300,7 @@ function isDataViewNameValid(name: string, dataViewNames: string[], index: strin
   if (index.match(reg) === null) {
     // name should match index
     return i18n.translate(
-      'xpack.dataVisualizer.file.importView.indexPatternDoesNotMatchDataViewErrorMessage',
+      'xpack.fileUpload.importView.indexPatternDoesNotMatchDataViewErrorMessage',
       {
         defaultMessage: 'Data view does not match index name',
       }

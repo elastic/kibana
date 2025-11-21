@@ -26,23 +26,20 @@ export const FileClashWarning: FC = () => {
   const { title, description } =
     clashType === CLASH_TYPE.MAPPING
       ? {
-          title: i18n.translate('xpack.dataVisualizer.file.fileClashWarning.mappingClashTitle', {
+          title: i18n.translate('xpack.fileUpload.fileClashWarning.mappingClashTitle', {
             defaultMessage: 'Incompatible mapping',
           }),
-          description: i18n.translate(
-            'xpack.dataVisualizer.file.fileClashWarning.mappingClashDescription',
-            {
-              defaultMessage: 'Mappings in the selected files are not compatible with each other',
-            }
-          ),
+          description: i18n.translate('xpack.fileUpload.fileClashWarning.mappingClashDescription', {
+            defaultMessage: 'Mappings in the selected files are not compatible with each other',
+          }),
         }
       : clashType === CLASH_TYPE.FORMAT
       ? {
-          title: i18n.translate('xpack.dataVisualizer.file.fileClashWarning.fileFormatClashTitle', {
+          title: i18n.translate('xpack.fileUpload.fileClashWarning.fileFormatClashTitle', {
             defaultMessage: 'Incompatible file formats',
           }),
           description: i18n.translate(
-            'xpack.dataVisualizer.file.fileClashWarning.fileFormatClashDescription',
+            'xpack.fileUpload.fileClashWarning.fileFormatClashDescription',
             {
               defaultMessage:
                 'The selected files must have the same format. e.g. all CSV or all log files',
@@ -52,13 +49,13 @@ export const FileClashWarning: FC = () => {
       : clashType === CLASH_TYPE.EXISTING_INDEX_MAPPING
       ? {
           title: i18n.translate(
-            'xpack.dataVisualizer.file.fileClashWarning.existingIndexMappingClashTitle',
+            'xpack.fileUpload.fileClashWarning.existingIndexMappingClashTitle',
             {
               defaultMessage: 'Incompatible mapping',
             }
           ),
           description: i18n.translate(
-            'xpack.dataVisualizer.file.fileClashWarning.existingIndexMappingClashDescription',
+            'xpack.fileUpload.fileClashWarning.existingIndexMappingClashDescription',
             {
               defaultMessage:
                 'Mappings in the selected files are not compatible with the existing index',
@@ -66,14 +63,11 @@ export const FileClashWarning: FC = () => {
           ),
         }
       : {
-          title: i18n.translate(
-            'xpack.dataVisualizer.file.fileClashWarning.fileFormatNotSupportedTitle',
-            {
-              defaultMessage: 'File format not supported',
-            }
-          ),
+          title: i18n.translate('xpack.fileUpload.fileClashWarning.fileFormatNotSupportedTitle', {
+            defaultMessage: 'File format not supported',
+          }),
           description: i18n.translate(
-            'xpack.dataVisualizer.file.fileClashWarning.fileFormatNotSupportedDescription',
+            'xpack.fileUpload.fileClashWarning.fileFormatNotSupportedDescription',
             {
               defaultMessage: 'Some of the selected files are not supported for upload.',
             }
@@ -90,7 +84,7 @@ export const FileClashWarning: FC = () => {
         fill
       >
         <FormattedMessage
-          id="xpack.dataVisualizer.file.fileClashWarning.deleteAllButtonLabel"
+          id="xpack.fileUpload.fileClashWarning.deleteAllButtonLabel"
           defaultMessage="Delete all"
         />
       </EuiButton>

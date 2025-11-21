@@ -184,7 +184,7 @@ export const ResultsLinks: FC<Props> = ({
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
             title={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.resultsLinks.viewIndexInDiscoverTitle"
+                id="xpack.fileUpload.resultsLinks.viewIndexInDiscoverTitle"
                 defaultMessage="View index in Discover"
               />
             }
@@ -200,7 +200,7 @@ export const ResultsLinks: FC<Props> = ({
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.resultsLinks.indexManagementTitle"
+                id="xpack.fileUpload.resultsLinks.indexManagementTitle"
                 defaultMessage="Index Management"
               />
             }
@@ -216,7 +216,7 @@ export const ResultsLinks: FC<Props> = ({
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.resultsLinks.dataViewManagementTitle"
+                id="xpack.fileUpload.resultsLinks.dataViewManagementTitle"
                 defaultMessage="Data View Management"
               />
             }
@@ -233,7 +233,7 @@ export const ResultsLinks: FC<Props> = ({
             data-test-subj="fileDataVisFilebeatConfigLink"
             title={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.resultsLinks.fileBeatConfig"
+                id="xpack.fileUpload.resultsLinks.fileBeatConfig"
                 defaultMessage="Create Filebeat configuration"
               />
             }
@@ -251,7 +251,7 @@ export const ResultsLinks: FC<Props> = ({
             data-test-subj="fileDataVisFilebeatConfigLink"
             title={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.resultsLinks.playground"
+                id="xpack.fileUpload.resultsLinks.playground"
                 defaultMessage="Playground"
               />
             }

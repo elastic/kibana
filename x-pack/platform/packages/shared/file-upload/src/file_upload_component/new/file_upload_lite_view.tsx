@@ -65,13 +65,13 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
               flyoutContent.title
             ) : existingIndexName ? (
               <FormattedMessage
-                id="xpack.dataVisualizer.file.uploadView.uploadFileWithIndexNameTitle"
+                id="xpack.fileUpload.uploadView.uploadFileWithIndexNameTitle"
                 defaultMessage="Upload files to {indexName}"
                 values={{ indexName: existingIndexName }}
               />
             ) : (
               <FormattedMessage
-                id="xpack.dataVisualizer.file.uploadView.uploadFilesTitle"
+                id="xpack.fileUpload.uploadView.uploadFilesTitle"
                 defaultMessage="Upload files"
               />
             )}
@@ -90,7 +90,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
                   ) : (
                     <>
                       <FormattedMessage
-                        id="xpack.dataVisualizer.file.uploadView.uploadFileLiteDescription"
+                        id="xpack.fileUpload.uploadView.uploadFileLiteDescription"
                         defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
                       />
 
@@ -99,13 +99,13 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
                           <br />
 
                           <FormattedMessage
-                            id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLink"
+                            id="xpack.fileUpload.uploadView.uploadFileDescriptionLink"
                             defaultMessage="If you need to customize the file upload process, the full version is available {fullToolLink}."
                             values={{
                               fullToolLink: (
                                 <EuiLink onClick={fullFileUpload}>
                                   <FormattedMessage
-                                    id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLinkText"
+                                    id="xpack.fileUpload.uploadView.uploadFileDescriptionLinkText"
                                     defaultMessage="here"
                                   />
                                 </EuiLink>
@@ -169,7 +169,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
 
                   <EuiButton onClick={() => abortImport()}>
                     <FormattedMessage
-                      id="xpack.dataVisualizer.file.uploadView.cancelButton"
+                      id="xpack.fileUpload.uploadView.cancelButton"
                       defaultMessage="Cancel"
                     />
                   </EuiButton>
@@ -184,7 +184,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.dataVisualizer.file.uploadView.closeButton"
+                id="xpack.fileUpload.uploadView.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -199,7 +199,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
                 <EuiFlexItem>
                   <EuiButtonEmpty onClick={onClose} disabled={true}>
                     <FormattedMessage
-                      id="xpack.dataVisualizer.file.uploadView.importingButton"
+                      id="xpack.fileUpload.uploadView.importingButton"
                       defaultMessage="Importing"
                     />
                   </EuiButtonEmpty>
@@ -209,7 +209,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
               <EuiButton disabled={canImport === false} onClick={onImportClick}>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.importButton"
+                  id="xpack.fileUpload.uploadView.importButton"
                   defaultMessage="Import"
                 />
               </EuiButton>

@@ -133,7 +133,7 @@ export const FileContents: FC<Props> = ({
             <EuiTitle size="s">
               <h2>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.fileContents.fileContentsTitle"
+                  id="xpack.fileUpload.fileContents.fileContentsTitle"
                   defaultMessage="File contents"
                 />
               </h2>
@@ -143,7 +143,7 @@ export const FileContents: FC<Props> = ({
         {isSemiStructureTextData ? (
           <EuiFlexItem grow={false} data-test-subj="dataVisualizerFileContentsHighlightingSwitch">
             <EuiSwitch
-              label={i18n.translate('xpack.dataVisualizer.file.fileContents.highlightSwitch', {
+              label={i18n.translate('xpack.fileUpload.fileContents.highlightSwitch', {
                 defaultMessage: 'Grok pattern highlighting',
               })}
               compressed
@@ -157,7 +157,7 @@ export const FileContents: FC<Props> = ({
       <PreviewLimitMessage wrapInCallout={showTitle === false}>
         {format === FILE_FORMATS.TIKA ? (
           <FormattedMessage
-            id="xpack.dataVisualizer.file.fileContents.characterCount"
+            id="xpack.fileUpload.fileContents.characterCount"
             defaultMessage="Preview limited to the first {numberOfChars} characters"
             values={{
               numberOfChars: TIKA_PREVIEW_CHARS,
@@ -165,7 +165,7 @@ export const FileContents: FC<Props> = ({
           />
         ) : (
           <FormattedMessage
-            id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
+            id="xpack.fileUpload.fileContents.firstLinesDescription"
             defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
             values={{
               numberOfLines: showHighlights ? LINE_LIMIT : numberOfLines,

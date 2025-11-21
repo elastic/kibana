@@ -66,7 +66,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
             <EuiTitle size="s">
               <h3>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.uploadFilesTitle"
+                  id="xpack.fileUpload.uploadView.uploadFilesTitle"
                   defaultMessage="Upload files"
                 />
               </h3>
@@ -77,7 +77,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
+                  id="xpack.fileUpload.uploadView.uploadFileDescription"
                   defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
                 />
               </p>
@@ -120,7 +120,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
 
                 <EuiButton onClick={() => abortImport()}>
                   <FormattedMessage
-                    id="xpack.dataVisualizer.file.uploadView.cancelButton"
+                    id="xpack.fileUpload.uploadView.cancelButton"
                     defaultMessage="Cancel"
                   />
                 </EuiButton>
@@ -141,7 +141,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
               data-test-subj="fileUploadImportButton"
             >
               <FormattedMessage
-                id="xpack.dataVisualizer.file.uploadView.importButton"
+                id="xpack.fileUpload.uploadView.importButton"
                 defaultMessage="Import"
               />
             </EuiButton>
@@ -157,7 +157,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
             <EuiFlexItem grow={false}>
               <EuiButton onClick={() => resetForm()}>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.importAnotherButton"
+                  id="xpack.fileUpload.uploadView.importAnotherButton"
                   defaultMessage="Upload another file"
                 />
               </EuiButton>
@@ -165,7 +165,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
             <EuiFlexItem grow={false}>
               <EuiButton onClick={() => resetForm(true)}>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.importAnotherButton"
+                  id="xpack.fileUpload.uploadView.importAnotherButton"
                   defaultMessage="Upload file to same index"
                 />
               </EuiButton>
@@ -190,7 +190,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
           <EuiFlexItem grow={false}>
             <EuiButton onClick={() => resetForm()}>
               <FormattedMessage
-                id="xpack.dataVisualizer.file.uploadView.importAnotherButton"
+                id="xpack.fileUpload.uploadView.importAnotherButton"
                 defaultMessage="Upload another file"
               />
             </EuiButton>

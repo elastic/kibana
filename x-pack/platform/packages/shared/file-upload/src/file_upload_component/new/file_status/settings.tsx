@@ -49,7 +49,7 @@ export const Settings: FC<Props> = ({ settings, setSettings, readonly = false })
         id={'containsTimeField'}
         label={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.customizeIndexSettingsLabel"
+            id="xpack.fileUpload.customizeIndexSettingsLabel"
             defaultMessage="Customize index settings"
           />
         }

@@ -33,7 +33,7 @@ export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverri
         position="top"
         content={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.analysisSummary.overrideSettingsTooltip"
+            id="xpack.fileUpload.analysisSummary.overrideSettingsTooltip"
             defaultMessage="File settings"
           />
         }
@@ -44,12 +44,9 @@ export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverri
           size="xs"
           color="text"
           data-test-subj={`mlFileUploadOverrideSettingsButton-${index}`}
-          aria-label={i18n.translate(
-            'xpack.dataVisualizer.file.analysisSummary.overrideSettingsAriaLabel',
-            {
-              defaultMessage: 'File settings',
-            }
-          )}
+          aria-label={i18n.translate('xpack.fileUpload.analysisSummary.overrideSettingsAriaLabel', {
+            defaultMessage: 'File settings',
+          })}
         />
       </EuiToolTip>
 

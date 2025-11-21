@@ -38,12 +38,9 @@ export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = fa
       <EuiFlexItem>
         <EuiFormRow
           fullWidth
-          helpText={i18n.translate(
-            'xpack.dataVisualizer.file.aboutPanel.supportedFormatsDescription',
-            {
-              defaultMessage: 'Supported formats: PDF, TXT, CSV, log files and NDJSON',
-            }
-          )}
+          helpText={i18n.translate('xpack.fileUpload.aboutPanel.supportedFormatsDescription', {
+            defaultMessage: 'Supported formats: PDF, TXT, CSV, log files and NDJSON',
+          })}
         >
           <EuiFilePicker
             ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
@@ -53,7 +50,7 @@ export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = fa
             compressed={true}
             multiple
             initialPromptText={i18n.translate(
-              'xpack.dataVisualizer.file.filePicker.selectOrDragAndDropFiles',
+              'xpack.fileUpload.filePicker.selectOrDragAndDropFiles',
               {
                 defaultMessage: 'Select or drag and drop files',
               }

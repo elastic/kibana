@@ -49,7 +49,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
       id={'advancedSection'}
       buttonContent={
         <FormattedMessage
-          id="xpack.dataVisualizer.file.advancedOptionsTitle"
+          id="xpack.fileUpload.advancedOptionsTitle"
           defaultMessage="Advanced options"
         />
       }
@@ -57,7 +57,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
       data-test-subj="dataVisualizerAdvancedSettingsAccordion"
     >
       <SectionTitle>
-        <FormattedMessage id="xpack.dataVisualizer.file.mappingsTitle" defaultMessage="Mappings" />
+        <FormattedMessage id="xpack.fileUpload.mappingsTitle" defaultMessage="Mappings" />
       </SectionTitle>
 
       <Mappings
@@ -86,10 +86,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
           <EuiSpacer />
 
           <SectionTitle>
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.dataViewTitle"
-              defaultMessage="Data view"
-            />
+            <FormattedMessage id="xpack.fileUpload.dataViewTitle" defaultMessage="Data view" />
           </SectionTitle>
 
           <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
@@ -98,7 +95,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
               id="createDataView"
               label={
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.advancedImportSettings.createDataViewLabel"
+                  id="xpack.fileUpload.advancedImportSettings.createDataViewLabel"
                   defaultMessage="Create data view"
                 />
               }
@@ -113,13 +110,13 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.advancedImportSettings.dataViewNameLabel"
+                id="xpack.fileUpload.advancedImportSettings.dataViewNameLabel"
                 defaultMessage="Data view name"
               />
             }
             helpText={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.advancedImportSettings.dataViewNameHelpText"
+                id="xpack.fileUpload.advancedImportSettings.dataViewNameHelpText"
                 defaultMessage="By default data view will have the same name as the new index."
               />
             }
@@ -142,7 +139,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
 
       <SectionTitle>
         <FormattedMessage
-          id="xpack.dataVisualizer.file.indexSettingsTitle"
+          id="xpack.fileUpload.indexSettingsTitle"
           defaultMessage="Index settings"
         />
       </SectionTitle>

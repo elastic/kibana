@@ -19,10 +19,10 @@ import type { FileUploadStartDependencies } from '../kibana_context';
 
 export const createOpenFileUploadLiteTrigger: Trigger = {
   id: OPEN_FILE_UPLOAD_LITE_TRIGGER,
-  title: i18n.translate('xpack.dataVisualizer.file.lite.actions.triggerTitle', {
+  title: i18n.translate('xpack.fileUpload.lite.actions.triggerTitle', {
     defaultMessage: 'Open file upload UI',
   }),
-  description: i18n.translate('xpack.dataVisualizer.file.lite.actions.triggerDescription', {
+  description: i18n.translate('xpack.fileUpload.lite.actions.triggerDescription', {
     defaultMessage: 'Open file upload UI',
   }),
 };
@@ -38,7 +38,7 @@ export function createOpenFileUploadLiteAction(
       return 'machineLearningApp';
     },
     getDisplayName: () =>
-      i18n.translate('xpack.dataVisualizer.file.lite.actions.displayName', {
+      i18n.translate('xpack.fileUpload.lite.actions.displayName', {
         defaultMessage: 'Open file upload UI',
       }),
     async execute({

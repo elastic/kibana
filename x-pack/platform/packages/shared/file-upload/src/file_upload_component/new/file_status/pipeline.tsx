@@ -79,7 +79,7 @@ export const IngestPipeline: FC<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.dataVisualizer.file.advancedImportSettings.ingestPipelineLabel"
+          id="xpack.fileUpload.advancedImportSettings.ingestPipelineLabel"
           defaultMessage="Ingest pipeline"
         />
       }

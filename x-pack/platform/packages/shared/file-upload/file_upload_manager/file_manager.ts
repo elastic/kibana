@@ -632,7 +632,7 @@ export class FileUploadManager {
         overallImportStatus: STATUS.FAILED,
         errors: [
           {
-            title: i18n.translate('xpack.dataVisualizer.file.fileManager.errorInitializing', {
+            title: i18n.translate('xpack.fileUpload.fileManager.errorInitializing', {
               defaultMessage: 'Error initializing index and ingest pipeline',
             }),
             error: e,
@@ -677,7 +677,7 @@ export class FileUploadManager {
         overallImportStatus: STATUS.FAILED,
         errors: [
           {
-            title: i18n.translate('xpack.dataVisualizer.file.fileManager.errorImportingData', {
+            title: i18n.translate('xpack.fileUpload.fileManager.errorImportingData', {
               defaultMessage: 'Error importing data',
             }),
             error,
@@ -716,12 +716,9 @@ export class FileUploadManager {
           pipelinesDeleted: STATUS.FAILED,
           errors: [
             {
-              title: i18n.translate(
-                'xpack.dataVisualizer.file.fileManager.errorDeletingPipelines',
-                {
-                  defaultMessage: 'Error deleting pipelines',
-                }
-              ),
+              title: i18n.translate('xpack.fileUpload.fileManager.errorDeletingPipelines', {
+                defaultMessage: 'Error deleting pipelines',
+              }),
               error,
             },
           ],
@@ -747,7 +744,7 @@ export class FileUploadManager {
           overallImportStatus: STATUS.FAILED,
           errors: [
             {
-              title: i18n.translate('xpack.dataVisualizer.file.fileManager.errorCreatingDataView', {
+              title: i18n.translate('xpack.fileUpload.fileManager.errorCreatingDataView', {
                 defaultMessage: 'Error creating data view',
               }),
               error: dataViewResp.error,
@@ -802,7 +799,7 @@ export class FileUploadManager {
         modelDeployed: STATUS.FAILED,
         errors: [
           {
-            title: i18n.translate('xpack.dataVisualizer.file.fileManager.errorDeployingModel', {
+            title: i18n.translate('xpack.fileUpload.fileManager.errorDeployingModel', {
               defaultMessage: 'Error deploying model',
             }),
             error,
@@ -865,13 +862,10 @@ export class FileUploadManager {
     } catch (e) {
       this.existingIndexMappings$.next(null);
       this.notifications.toasts.addError(e, {
-        title: i18n.translate(
-          'xpack.dataVisualizer.file.fileManager.errorLoadingExistingMappings',
-          {
-            defaultMessage: 'Error loading existing index mappings for {indexName}',
-            values: { indexName: existingIndexName },
-          }
-        ),
+        title: i18n.translate('xpack.fileUpload.fileManager.errorLoadingExistingMappings', {
+          defaultMessage: 'Error loading existing index mappings for {indexName}',
+          values: { indexName: existingIndexName },
+        }),
       });
     }
   }
