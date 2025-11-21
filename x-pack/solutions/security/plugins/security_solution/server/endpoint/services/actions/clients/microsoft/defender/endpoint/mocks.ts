@@ -268,15 +268,12 @@ const createMicrosoftMachineActionMock = (
         errors: [],
         command: {
           type: 'RunScript',
-          params: [
-            { key: 'ScriptName', value: 'hello.sh' },
-            { key: 'Args', value: '--noargs' },
-          ],
+          params: [{ key: 'ScriptName', value: 'hello.sh' }],
         },
       },
     ],
-    cancellationRequestor: '',
-    cancellationComment: '',
+    cancellationRequestor: 'elastic',
+    cancellationComment: 'test cancel data',
     cancellationDateTimeUtc: '',
     title: '',
 
