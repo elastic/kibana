@@ -7,55 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  AsCodeConditionFilter,
+  AsCodeGroupFilter,
+  AsCodeDSLFilter,
+} from '@kbn/es-query-server';
 import { isConditionFilter, isGroupFilter, isDSLFilter, isNestedFilterGroup } from './type_guards';
 
 describe('Type Guards', () => {
   describe('SimpleFilter type guards', () => {
     describe('isConditionFilter', () => {
       it('should detect condition filters', () => {
-        const filter = {
+        const filter: AsCodeConditionFilter = {
           condition: { field: 'test', operator: 'is', value: 'value' },
         };
-        expect(isConditionFilter(filter as any)).toBe(true);
+        expect(isConditionFilter(filter)).toBe(true);
       });
 
       it('should reject non-condition filters', () => {
-        const filter = {
+        const filter: AsCodeGroupFilter = {
           group: { type: 'and', conditions: [] },
         };
-        expect(isConditionFilter(filter as any)).toBe(false);
+        expect(isConditionFilter(filter)).toBe(false);
       });
     });
 
     describe('isGroupFilter', () => {
       it('should detect group filters', () => {
-        const filter = {
+        const filter: AsCodeGroupFilter = {
           group: { type: 'and', conditions: [] },
         };
-        expect(isGroupFilter(filter as any)).toBe(true);
+        expect(isGroupFilter(filter)).toBe(true);
       });
 
       it('should reject non-group filters', () => {
-        const filter = {
+        const filter: AsCodeConditionFilter = {
           condition: { field: 'test', operator: 'is', value: 'value' },
         };
-        expect(isGroupFilter(filter as any)).toBe(false);
+        expect(isGroupFilter(filter)).toBe(false);
       });
     });
 
     describe('isDSLFilter', () => {
       it('should detect DSL filters', () => {
-        const filter = {
+        const filter: AsCodeDSLFilter = {
           dsl: { query: { term: { field: 'value' } } },
         };
-        expect(isDSLFilter(filter as any)).toBe(true);
+        expect(isDSLFilter(filter)).toBe(true);
       });
 
       it('should reject non-DSL filters', () => {
-        const filter = {
+        const filter: AsCodeConditionFilter = {
           condition: { field: 'test', operator: 'is', value: 'value' },
         };
-        expect(isDSLFilter(filter as any)).toBe(false);
+        expect(isDSLFilter(filter)).toBe(false);
       });
     });
   });
@@ -63,16 +68,20 @@ describe('Type Guards', () => {
   describe('Condition type guards', () => {
     describe('isNestedFilterGroup', () => {
       it('should detect nested filter groups', () => {
-        const group = {
+        const group: AsCodeGroupFilter['group'] = {
           type: 'and',
           conditions: [{ field: 'test', operator: 'is', value: 'test' }],
         };
-        expect(isNestedFilterGroup(group as any)).toBe(true);
+        expect(isNestedFilterGroup(group)).toBe(true);
       });
 
       it('should reject simple conditions', () => {
-        const condition = { field: 'test', operator: 'is', value: 'test' };
-        expect(isNestedFilterGroup(condition as any)).toBe(false);
+        const condition: AsCodeConditionFilter['condition'] = {
+          field: 'test',
+          operator: 'is',
+          value: 'test',
+        };
+        expect(isNestedFilterGroup(condition)).toBe(false);
       });
     });
   });
