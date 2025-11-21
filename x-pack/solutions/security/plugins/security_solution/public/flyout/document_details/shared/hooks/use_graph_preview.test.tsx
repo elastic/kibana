@@ -17,6 +17,10 @@ import { useHasGraphVisualizationAccess } from '../../../../common/hooks/use_has
 jest.mock('../../../../common/hooks/use_has_graph_visualization_access');
 const mockUseHasGraphVisualizationAccess = useHasGraphVisualizationAccess as jest.Mock;
 
+jest.mock('@kbn/kibana-react-plugin/public');
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+const mockUseUiSetting = useUiSetting$ as jest.Mock;
+
 const alertMockGetFieldsData: GetFieldsData = (field: string) => {
   if (field === 'kibana.alert.uuid') {
     return 'alertId';
@@ -56,6 +60,8 @@ describe('useGraphPreview', () => {
     jest.clearAllMocks();
     // Default mock: graph visualization feature is available
     mockUseHasGraphVisualizationAccess.mockReturnValue(true);
+    // Default mock: UI setting is enabled
+    mockUseUiSetting.mockReturnValue([true, jest.fn()]);
   });
   it(`should return false when missing actor`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
@@ -336,33 +342,50 @@ describe('useGraphPreview', () => {
     });
   });
 
-  describe('License checking', () => {
-    it('should return false when all conditions are met but env does not have required license', () => {
-      mockUseHasGraphVisualizationAccess.mockReturnValue(false);
+  it('should return false when all conditions are met but env does not have required license', () => {
+    mockUseHasGraphVisualizationAccess.mockReturnValue(false);
 
-      const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
-        initialProps: {
-          getFieldsData: alertMockGetFieldsData,
-          ecsData: {
-            _id: 'id',
-            event: {
-              action: ['action'],
-            },
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData: alertMockGetFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
           },
-          dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
         },
-      });
-
-      expect(hookResult.result.current.hasGraphRepresentation).toBe(false);
-      expect(hookResult.result.current).toStrictEqual({
-        hasGraphRepresentation: false,
-        timestamp: mockFieldData['@timestamp'][0],
-        eventIds: ['eventId'],
-        actorIds: ['actorId'],
-        action: ['action'],
-        targetIds: ['targetId'],
-        isAlert: true,
-      });
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
     });
+
+    expect(hookResult.result.current.hasGraphRepresentation).toBe(false);
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: false,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['actorId'],
+      action: ['action'],
+      targetIds: ['targetId'],
+      isAlert: true,
+    });
+  });
+
+  it('should return false for hasGraphRepresentation when UI setting is disabled', () => {
+    mockUseUiSetting.mockReturnValue([false, jest.fn()]);
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData: alertMockGetFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current.hasGraphRepresentation).toBe(false);
   });
 });
