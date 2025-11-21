@@ -26,7 +26,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { distinctUntilChanged, from, map, merge } from 'rxjs';
+import { distinctUntilChanged, from, map, merge, skip } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { FilterStateStore, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
@@ -445,7 +445,7 @@ export function getDiscoverStateContainer({
 
       internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
     },
-    state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual)),
+    state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual), skip(1)),
   };
 
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
@@ -474,7 +474,7 @@ export function getDiscoverStateContainer({
         })
       );
     },
-    state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual)),
+    state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual), skip(1)),
   };
 
   const initializeAndSyncUrlState = () => {
@@ -605,22 +605,17 @@ export function getDiscoverStateContainer({
     const unsubscribeUrlState = initializeAndSyncUrlState();
 
     // subscribing to state changes of appStateContainer, triggering data fetching
-    const appStateSubscription = from(internalState)
-      .pipe(
-        map(() => getCurrentTab().appState),
-        distinctUntilChanged((a, b) => isEqual(a, b))
-      )
-      .subscribe(
-        buildStateSubscribe({
-          savedSearchState: savedSearchContainer,
-          dataState: dataStateContainer,
-          internalState,
-          runtimeStateManager,
-          services,
-          setDataView,
-          getCurrentTab,
-        })
-      );
+    const appStateSubscription = appStateContainer.state$.subscribe(
+      buildStateSubscribe({
+        savedSearchState: savedSearchContainer,
+        dataState: dataStateContainer,
+        internalState,
+        runtimeStateManager,
+        services,
+        setDataView,
+        getCurrentTab,
+      })
+    );
 
     const savedSearchChangesSubscription = savedSearchContainer
       .getCurrent$()
