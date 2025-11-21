@@ -45,7 +45,7 @@ export function getLensStateMetricSharedProps(
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),
     label: options.label ?? LENS_DEFAULT_LABEL,
-    // TODO: improve default label logic
+    // TODO: improve default label logic, this is an api thing not a lens SO thing
     // customLabel: options.label != null,
   };
 }
@@ -59,7 +59,7 @@ export function getLensAPIMetricSharedProps(options: {
   label?: string;
 }) {
   return {
-    ...(options.customLabel ? { label: options.label } : {}),
+    ...(options.customLabel || options.label ? { label: options.label } : {}),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
     ...(options.timeShift ? { time_shift: options.timeShift } : {}),
