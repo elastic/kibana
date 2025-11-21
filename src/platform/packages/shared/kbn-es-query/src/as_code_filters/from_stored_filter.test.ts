@@ -145,7 +145,7 @@ describe('fromStoredFilter', () => {
     });
   });
 
-  describe('Strategy 1: Simple Conditions (metadata-only)', () => {
+  describe('Type-based routing: Condition filters (phrase, exists, range)', () => {
     it('should convert phrase filters from meta.params', () => {
       const storedFilter = {
         meta: {
@@ -182,7 +182,7 @@ describe('fromStoredFilter', () => {
     });
   });
 
-  describe('Strategy 2: Filters without meta.type (preserved as DSL)', () => {
+  describe('Fallback behavior: Filters without meta.type (preserved as DSL)', () => {
     it('should preserve match_phrase query as DSL when meta.type is missing', () => {
       const storedFilter = {
         meta: { key: 'message' },
@@ -270,7 +270,7 @@ describe('fromStoredFilter', () => {
     });
   });
 
-  describe('Strategy 3: Filter Groups (combined/bool filters)', () => {
+  describe('Type-based routing: Group filters (combined filters)', () => {
     it('should preserve boolean group filters without meta.type as DSL (not group)', () => {
       // Bool queries without meta.type='combined' are preserved as DSL to prevent data loss
       const storedFilter = {
@@ -479,40 +479,36 @@ describe('fromStoredFilter', () => {
 
       expect(isGroupFilter(result)).toBe(true);
       if (isGroupFilter(result)) {
-        expect(result.group).toMatchInlineSnapshot(`
-          Object {
-            "conditions": Array [
-              Object {
-                "field": "machine.os.keyword",
-                "operator": "is_not",
-                "value": "win 7",
-              },
-              Object {
-                "conditions": Array [
-                  Object {
-                    "field": "geo.src",
-                    "operator": "is_one_of",
-                    "value": Array [
-                      "US",
-                    ],
-                  },
-                  Object {
-                    "field": "host.keyword",
-                    "operator": "is",
-                    "value": "www.elastic.co",
-                  },
-                ],
-                "type": "or",
-              },
-            ],
-            "type": "and",
-          }
-        `);
+        expect(result.group).toEqual({
+          type: 'and',
+          conditions: [
+            {
+              field: 'machine.os.keyword',
+              operator: 'is_not',
+              value: 'win 7',
+            },
+            {
+              type: 'or',
+              conditions: [
+                {
+                  field: 'geo.src',
+                  operator: 'is_one_of',
+                  value: ['US'],
+                },
+                {
+                  field: 'host.keyword',
+                  operator: 'is',
+                  value: 'www.elastic.co',
+                },
+              ],
+            },
+          ],
+        });
       }
     });
   });
 
-  describe('Strategy 4: DSL Fallback (preserve complex filters)', () => {
+  describe('Type-based routing: DSL filters (custom, spatial, script queries)', () => {
     it('should preserve script queries as DSL', () => {
       const storedFilter = {
         meta: {},

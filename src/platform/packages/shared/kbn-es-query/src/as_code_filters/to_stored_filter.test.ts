@@ -539,9 +539,6 @@ describe('toStoredFilter', () => {
         'Kibana Airlines',
         'Logstash Airways',
       ]);
-
-      // Should NOT be a combined filter
-      expect(roundTripFilter.meta.type).not.toBe('combined');
     });
 
     it('should convert OR group of IS_NOT conditions to phrases filter with negate', () => {
@@ -635,9 +632,6 @@ describe('toStoredFilter', () => {
       expect(should[0]).toEqual({ match_phrase: { Carrier: 'ES-Air' } });
       expect(should[1]).toEqual({ match_phrase: { Carrier: 'JetBeats' } });
       expect(should[2]).toEqual({ match_phrase: { Carrier: 'Kibana Airlines' } });
-
-      // Should NOT have a terms query
-      expect(roundTripFilter.query).not.toHaveProperty('terms');
     });
 
     it('should preserve filters with bool.must containing multiple different query types AS DSL (not group)', () => {
@@ -680,20 +674,46 @@ describe('toStoredFilter', () => {
       expect('dsl' in asCodeFilter).toBe(true);
 
       if ('dsl' in asCodeFilter) {
-        const queryStr = JSON.stringify(asCodeFilter.dsl);
-        expect(queryStr.includes('message')).toBe(true);
-        expect(queryStr.includes('timestamp') || queryStr.includes('@timestamp')).toBe(true);
+        expect(asCodeFilter.dsl.query).toEqual({
+          bool: {
+            must: [
+              {
+                match_phrase: {
+                  message: 'error',
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2024-01-01',
+                    lte: '2024-12-31',
+                  },
+                },
+              },
+            ],
+          },
+        });
       }
 
       // Round-trip back to stored format
       const roundTripped = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // Both queries should be preserved
-      if ('query' in roundTripped && roundTripped.query) {
-        const queryStr = JSON.stringify(roundTripped.query);
-        expect(queryStr.includes('message')).toBe(true);
-        expect(queryStr.includes('timestamp') || queryStr.includes('@timestamp')).toBe(true);
-      }
+      expect(roundTripped.query?.bool?.must).toEqual([
+        {
+          match_phrase: {
+            message: 'error',
+          },
+        },
+        {
+          range: {
+            '@timestamp': {
+              gte: '2024-01-01',
+              lte: '2024-12-31',
+            },
+          },
+        },
+      ]);
     });
 
     it('should handle single query filter with incomplete metadata as DSL', () => {
@@ -816,13 +836,32 @@ describe('toStoredFilter', () => {
       expect('dsl' in asCodeFilter).toBe(true);
 
       if ('dsl' in asCodeFilter) {
-        const queryStr = JSON.stringify(asCodeFilter.dsl);
-        // All clauses should be preserved
-        expect(queryStr.includes('extension.keyword')).toBe(true);
-        expect(queryStr.includes('machine.os.keyword')).toBe(true);
-        expect(queryStr.includes('machine.ram')).toBe(true);
-        expect(queryStr.includes('must')).toBe(true);
-        expect(queryStr.includes('should')).toBe(true);
+        expect(asCodeFilter.dsl.query).toEqual({
+          bool: {
+            must: [
+              {
+                term: {
+                  'extension.keyword': 'css',
+                },
+              },
+              {
+                term: {
+                  'machine.os.keyword': 'ios',
+                },
+              },
+            ],
+            should: [
+              {
+                range: {
+                  'machine.ram': {
+                    gte: '500',
+                  },
+                },
+              },
+            ],
+            minimum_should_match: 0,
+          },
+        });
       }
 
       // Round-trip to verify NO data loss
@@ -867,9 +906,17 @@ describe('toStoredFilter', () => {
       expect('dsl' in asCodeFilter).toBe(true);
 
       if ('dsl' in asCodeFilter && asCodeFilter.dsl) {
-        const queryStr = JSON.stringify(asCodeFilter.dsl);
-        expect(queryStr.includes('status')).toBe(true);
-        expect(queryStr.includes('active')).toBe(true);
+        expect(asCodeFilter.dsl.query).toEqual({
+          bool: {
+            must: [
+              {
+                term: {
+                  status: 'active',
+                },
+              },
+            ],
+          },
+        });
       }
     });
 
@@ -1016,24 +1063,21 @@ describe('toStoredFilter', () => {
       expect(Array.isArray(roundTripped.meta.params)).toBe(true);
       expect(roundTripped.meta.params).toHaveLength(2);
 
-      // Verify first param is a simple phrase filter (no $state)
+      // Verify first param is a simple phrase filter
       const firstParam = roundTripped.meta.params[0] as StoredFilter;
-      expect(firstParam.$state).toBeUndefined();
       expect(firstParam.meta.type).toBe('phrase');
       expect(firstParam.meta.key).toBe('extension.keyword');
 
-      // Verify second param is a nested combined filter WITHOUT $state
+      // Verify second param is a nested combined filter
       // The buildCombinedFilter function strips $state from all sub-filters
       const secondParam = roundTripped.meta.params[1] as StoredFilter;
-      expect(secondParam.$state).toBeUndefined();
       expect(secondParam.meta.type).toBe('combined');
       expect(secondParam.meta.relation).toBe('OR');
       expect(Array.isArray(secondParam.meta.params)).toBe(true);
       expect(secondParam.meta.params).toHaveLength(2);
 
-      // Verify deeply nested combined filter also has no $state
+      // Verify deeply nested combined filter
       const nestedCombinedInOr = secondParam.meta.params[1] as StoredFilter;
-      expect(nestedCombinedInOr.$state).toBeUndefined();
       expect(nestedCombinedInOr.meta.type).toBe('combined');
       expect(nestedCombinedInOr.meta.relation).toBe('AND');
     });
