@@ -61,6 +61,13 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
     (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => undefined,
+        },
+      },
+    });
   });
 
   it('should render wrapper component', () => {
@@ -70,7 +77,26 @@ describe('<PrevalenceOverview />', () => {
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
     expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Time range applied');
+  });
+
+  it('should show default time range badge', () => {
+    const { getByTestId } = renderPrevalenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Time range applied');
+  });
+
+  it('should show custom time range badge', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => ({ from: 'now-7d', to: 'now-3d' }),
+        },
+      },
+    });
+
+    const { getByTestId } = renderPrevalenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Custom time range applied');
   });
 
   it('should render link without icon if isPreviewMode is true', () => {

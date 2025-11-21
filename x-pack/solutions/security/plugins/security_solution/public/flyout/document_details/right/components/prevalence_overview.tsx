@@ -26,6 +26,30 @@ const UNCOMMON = (
     defaultMessage="Uncommon"
   />
 );
+const DEFAULT_TIME_RANGE_LABEL = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeApplied.badgeLabel"
+    defaultMessage="Time range applied"
+  />
+);
+const CUSTOM_TIME_RANGE_LABEL = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeApplied.badgeLabel"
+    defaultMessage="Custom time range applied"
+  />
+);
+const DEFAULT_TIME_RANGE_TOOLTIP = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.custom-time-range-applied-tooltip"
+    defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the last 30 days. To choose a custom time range, click the section title, then use the date time picker in the left panel."
+  />
+);
+const CUSTOM_TIME_RANGE_TOOLTIP = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.custom-time-range-applied-tooltip"
+    defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the time range that you chose. To choose a different custom time range, click the section title, then use the date time picker in the left panel."
+  />
+);
 
 const PERCENTAGE_THRESHOLD = 0.1; // we show the prevalence if its value is below 10%
 const DEFAULT_FROM = 'now-30d';
@@ -95,17 +119,11 @@ export const PrevalenceOverview: FC = () => {
         headerContent: (
           <EuiToolTip
             content={
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.prevalence.custom-time-range-applied-tooltip"
-                defaultMessage="The prevalence is calculated from a specific time range. To change it, click on the Prevalence title (to the left) and use the date picker."
-              />
+              timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_TOOLTIP : DEFAULT_TIME_RANGE_TOOLTIP
             }
           >
             <EuiBadge color="hollow" iconSide="left" iconType="clock" tabIndex={0}>
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.prevalence.custom-time-range-applied-badge-label"
-                defaultMessage="Time range applied"
-              />
+              {timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_LABEL : DEFAULT_TIME_RANGE_LABEL}
             </EuiBadge>
           </EuiToolTip>
         ),
