@@ -8,14 +8,14 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
 import { MacrosFileUpload } from './macros_file_upload';
-import { TestProviders } from '../../../../../../../../common/mock';
-import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
+import { TestProviders } from '../../../../../../../common/mock';
+import { useParseFileInput } from '../../../../../hooks/use_parse_file_input';
 
-jest.mock('../../../../../../../common/hooks/use_parse_file_input', () => ({
+jest.mock('../../../../../hooks/use_parse_file_input', () => ({
   useParseFileInput: jest.fn(),
 }));
 
-jest.mock('../../../../../../../common/components/migration_steps', () => ({
+jest.mock('../../../upload_file_button', () => ({
   UploadFileButton: ({
     onClick,
     isLoading,

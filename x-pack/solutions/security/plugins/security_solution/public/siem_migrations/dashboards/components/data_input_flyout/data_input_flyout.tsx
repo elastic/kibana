@@ -27,9 +27,11 @@ import {
 import * as i18n from './translations';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { DashboardsUploadStep } from './steps/upload_dashboards';
-import { MacrosDataInput } from './steps/macros/macros_data_input';
+import {
+  MacrosDataInput,
+  DataInputStep as DashboardUploadSteps,
+} from '../../../common/components/migration_steps/macros/macros_data_input';
 import { LookupsDataInput } from './steps/lookups/lookups_data_input';
-import { DashboardUploadSteps } from './steps/constants';
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import type { DashboardMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
@@ -65,7 +67,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
     const [dataInputStep, setDataInputStep] = useState<DashboardUploadSteps>(
-      DashboardUploadSteps.DashboardsUpload
+      DashboardUploadSteps.Items
     );
 
     const onMigrationCreated = useCallback(
@@ -90,11 +92,11 @@ export const DashboardMigrationDataInputFlyout = React.memo(
         );
         setMissingResourcesIndexed(newMissingResourcesIndexed);
         if (newMissingResourcesIndexed.macros.length) {
-          setDataInputStep(DashboardUploadSteps.MacrosUpload);
+          setDataInputStep(DashboardUploadSteps.Macros);
           return;
         }
         if (newMissingResourcesIndexed.lookups.length) {
-          setDataInputStep(DashboardUploadSteps.LookupsUpload);
+          setDataInputStep(DashboardUploadSteps.Lookups);
           return;
         }
         setDataInputStep(DashboardUploadSteps.End);
@@ -167,6 +169,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
                   missingMacros={missingResourcesIndexed?.macros}
                   migrationStats={migrationStats}
                   onMissingResourcesFetched={onMissingResourcesFetched}
+                  resourceType="dashboard"
                 />
               </EuiFlexItem>
               <EuiFlexItem>

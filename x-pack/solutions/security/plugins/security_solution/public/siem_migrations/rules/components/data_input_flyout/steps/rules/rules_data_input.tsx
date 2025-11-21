@@ -13,10 +13,10 @@ import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_statu
 import { useKibana } from '../../../../../../common/lib/kibana';
 import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
 import * as i18n from './translations';
-import { DataInputStep } from '../constants';
+import { DataInputStep } from '../../../../../common/components/migration_steps/macros/macros_data_input';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
-import { useCheckResourcesStep } from './sub_steps/check_resources';
+import { useCheckResourcesStep } from '../../../../../common/components/migration_steps/macros/sub_steps/check_resources';
 import type { RuleMigrationStats } from '../../../../types';
 
 interface RulesDataInputSubStepsProps {
@@ -30,7 +30,7 @@ interface RulesDataInputProps extends RulesDataInputSubStepsProps {
 export const RulesDataInput = React.memo<RulesDataInputProps>(
   ({ dataInputStep, migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(DataInputStep.Rules, dataInputStep),
+      () => getEuiStepStatus(DataInputStep.Items, dataInputStep),
       [dataInputStep]
     );
 
@@ -42,7 +42,7 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
                   titleSize="xs"
-                  number={DataInputStep.Rules}
+                  number={DataInputStep.Items}
                   status={dataInputStatus}
                   data-test-subj="rulesDataInputStepNumber"
                 />
@@ -137,6 +137,7 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
       status: getEuiStepStatus(4, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
+      resourceType: 'rule',
     });
 
     const steps = useMemo<EuiStepProps[]>(

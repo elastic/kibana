@@ -19,8 +19,3 @@ export const RULES_SPLUNK_QUERY = `| rest /servicesNS/-/-/saved/searches
 | search action.correlationsearch.enabled = "1" OR (eai:acl.app = "Splunk_Security_Essentials" AND is_scheduled=1)
 | where disabled=0
 | table ${SPLUNK_RULES_COLUMNS.join(', ')}`;
-
-export const SPLUNK_MACROS_COLUMNS = ['title', 'definition'] as const;
-
-export const MACROS_SPLUNK_QUERY = `| rest /servicesNS/-/-/admin/macros count=0
-| table ${SPLUNK_MACROS_COLUMNS.join(', ')}`;

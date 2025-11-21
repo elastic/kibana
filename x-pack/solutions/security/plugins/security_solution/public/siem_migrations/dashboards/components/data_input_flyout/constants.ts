@@ -21,8 +21,3 @@ export const SPLUNK_DASHBOARD_COLUMNS = [
 export const DASHBOARDS_SPLUNK_QUERY = `| rest /servicesNS/-/-/data/ui/views
 | search eai:acl.app != "SplunkEnterpriseSecuritySuite" author != "nobody" isDashboard=1
 | table ${SPLUNK_DASHBOARD_COLUMNS.join(', ')}`;
-
-export const SPLUNK_MACROS_COLUMNS = ['title', 'definition'] as const;
-
-export const MACROS_SPLUNK_QUERY = `| rest /servicesNS/-/-/admin/macros count=0
-| table ${SPLUNK_MACROS_COLUMNS.join(', ')}`;

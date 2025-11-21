@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
-import { DashboardUploadSteps } from '../constants';
+import { DataInputStep } from '../../../../../common/components/migration_steps/macros/macros_data_input';
 import * as i18n from '../translations';
 import { DashboardsUploadSubSteps } from './sub_steps';
 import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
@@ -28,7 +28,7 @@ export const DashboardsUploadStep = ({
   onMissingResourcesFetched,
 }: DashboardsUploadStepProps) => {
   const dataInputStatus = useMemo(
-    () => getEuiStepStatus(DashboardUploadSteps.DashboardsUpload, dataInputStep),
+    () => getEuiStepStatus(DataInputStep.Items, dataInputStep),
     [dataInputStep]
   );
 

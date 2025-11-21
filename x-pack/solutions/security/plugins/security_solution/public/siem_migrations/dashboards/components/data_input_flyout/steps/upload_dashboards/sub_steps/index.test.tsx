@@ -38,13 +38,16 @@ jest.mock('./dashboards_file_upload', () => ({
     children: <div>{'Dashboards File Upload Content'}</div>,
   }),
 }));
-jest.mock('../../common/check_resources', () => ({
-  useCheckResourcesStep: () => ({
-    title: CHECK_RESOURCES_TITLE,
-    status: 'incomplete',
-    children: <div>{'Check Resources Content'}</div>,
-  }),
-}));
+jest.mock(
+  '../../../../../../common/components/migration_steps/macros/sub_steps/check_resources',
+  () => ({
+    useCheckResourcesStep: () => ({
+      title: CHECK_RESOURCES_TITLE,
+      status: 'incomplete',
+      children: <div>{'Check Resources Content'}</div>,
+    }),
+  })
+);
 
 describe('DashboardsUploadSubSteps', () => {
   const defaultProps = {
