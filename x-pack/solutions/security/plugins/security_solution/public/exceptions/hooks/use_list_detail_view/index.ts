@@ -112,11 +112,11 @@ export const useListDetailsView = (exceptionListId: string) => {
   const initializeListRules = useCallback(
     async (result: Awaited<ReturnType<typeof getListById>>) => {
       if (result) {
-        const listRules = await getListRules(result.list_id);
+        const listRules = canReadRules ? await getListRules(result.list_id) : [];
         setLinkedRules(listRules);
       }
     },
-    []
+    [canReadRules]
   );
 
   const initializeList = useCallback(async () => {
@@ -411,7 +411,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   return {
     isLoading,
     invalidListId,
-    isReadOnly: !!(!canUserWriteCurrentList && canReadRules),
+    isReadOnly: !canUserWriteCurrentList,
     list,
     listName: list?.name,
     listDescription: list?.description,
