@@ -764,5 +764,160 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsReadParamsRoleAuth);
       await samlAuth.deleteCustomRole();
     });
+
+    it('should handle bulk deleting params', async () => {
+      await kServer.savedObjects.clean({ types: [syntheticsParamType] });
+
+      const params = [
+        { key: 'param1', value: 'value1' },
+        { key: 'param2', value: 'value2' },
+        { key: 'param3', value: 'value3' },
+      ];
+
+      for (const param of params) {
+        await supertest
+          .post(SYNTHETICS_API_URLS.PARAMS)
+          .set(syntheticsAllAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send(param)
+          .expect(200);
+      }
+
+      const getResponse = await supertest
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      expect(getResponse.body.length).to.eql(3);
+
+      const ids = getResponse.body.map((param: any) => param.id);
+
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS + '/_bulk_delete')
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ ids })
+        .expect(200);
+
+      const getResponseAfterDelete = await supertest
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      expect(getResponseAfterDelete.body.length).to.eql(0);
+    });
+
+    it('handles single parameter deletion', async () => {
+      const postResp = await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ key: 'to-be-deleted', value: 'value' })
+        .expect(200);
+
+      const paramId = postResp.body.id;
+
+      const getResp = await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}/${paramId}`)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+      expect(getResp.body.key).to.eql('to-be-deleted');
+
+      await supertest
+        .delete(`${SYNTHETICS_API_URLS.PARAMS}/${paramId}`)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      await supertest
+        .get(`${SYNTHETICS_API_URLS.PARAMS}/${paramId}`)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(404);
+    });
+
+    // it does not work like this today - need to check how duplicates are handled
+    // Bug ticket https://github.com/elastic/kibana/issues/243894
+    it.skip('returns a 409 conflict when creating a duplicate key', async () => {
+      const param = { key: 'duplicate-key', value: 'value1' };
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(param)
+        .expect(200);
+
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ ...param, value: 'value2' })
+        .expect(409);
+
+      const getAllResp = await supertest
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      const noDuplicates = getAllResp.body.filter((p: any) => p.key === param.key);
+      expect(noDuplicates.length).to.eql(1);
+    });
+
+    it('returns 403 for a user with no synthetics privileges', async () => {
+      const noSyntheticsRole = {
+        kibana: [
+          {
+            base: [],
+            spaces: ['*'],
+            feature: {
+              dashboard: ['read'],
+            },
+          },
+        ],
+        elasticsearch: {
+          indices: [
+            {
+              names: ['log-*'],
+              privileges: ['read'],
+            },
+          ],
+        },
+      };
+      await samlAuth.setCustomRole(noSyntheticsRole);
+      const noSyntheticsAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+
+      await supertest
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set(noSyntheticsAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(403);
+
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(noSyntheticsAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ key: 'foo', value: 'bar' })
+        .expect(403);
+
+      await supertest
+        .put(`${SYNTHETICS_API_URLS.PARAMS}/some-id`)
+        .set(noSyntheticsAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ key: 'foo', value: 'bar' })
+        .expect(403);
+
+      await supertest
+        .delete(`${SYNTHETICS_API_URLS.PARAMS}/some-id`)
+        .set(noSyntheticsAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(403);
+
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(noSyntheticsAuthc);
+      await samlAuth.deleteCustomRole();
+    });
   });
 }
