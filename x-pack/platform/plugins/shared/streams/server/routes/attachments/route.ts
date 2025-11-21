@@ -39,6 +39,40 @@ const listAttachmentsRoute = createServerRoute({
     availability: {
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              listAttachmentsExample: {
+                value: {},
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Successfully retrieved attachments',
+          content: {
+            'application/json': {
+              examples: {
+                listAttachmentsResponse: {
+                  value: {
+                    attachments: [
+                      {
+                        id: 'dashboard-123',
+                        type: 'dashboard',
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
@@ -80,6 +114,35 @@ const linkAttachmentRoute = createServerRoute({
     availability: {
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              linkAttachmentExample: {
+                value: {},
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Successfully linked attachment',
+          content: {
+            'application/json': {
+              examples: {
+                linkAttachmentResponse: {
+                  value: {
+                    acknowledged: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -123,6 +186,35 @@ const unlinkAttachmentRoute = createServerRoute({
     availability: {
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              unlinkAttachmentExample: {
+                value: {},
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Successfully unlinked attachment',
+          content: {
+            'application/json': {
+              examples: {
+                unlinkAttachmentResponse: {
+                  value: {
+                    acknowledged: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -171,6 +263,50 @@ const bulkAttachmentsRoute = createServerRoute({
     availability: {
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              bulkAttachmentsExample: {
+                value: {
+                  operations: [
+                    {
+                      index: {
+                        id: 'dashboard-123',
+                        type: 'dashboard',
+                      },
+                    },
+                    {
+                      delete: {
+                        id: 'rule-456',
+                        type: 'rule',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Successfully performed bulk operations',
+          content: {
+            'application/json': {
+              examples: {
+                bulkAttachmentsResponse: {
+                  value: {
+                    acknowledged: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
