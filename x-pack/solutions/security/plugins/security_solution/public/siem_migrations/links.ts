@@ -50,7 +50,7 @@ const subLinks: LinkItem[] = [
     ),
     landingIcon: IconDashboards,
     path: SIEM_MIGRATIONS_DASHBOARDS_PATH,
-    // dashboard page will only show up is user has security show privilege so we need to include both
+    // dashboard page requires both the Security:Read and Dashboard:Read privileges
     capabilities: [
       [`dashboard_v2.show`, SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
     ],
