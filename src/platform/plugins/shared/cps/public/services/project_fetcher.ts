@@ -14,10 +14,15 @@ import type { ProjectTagsResponse, ProjectsData } from '@kbn/cps-utils';
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
+export interface ProjectFetcher {
+  fetchProjects: () => Promise<ProjectsData | null>;
+  refresh: () => Promise<ProjectsData | null>;
+}
+
 /**
  * Creates project fetcher with caching and retry logic
  */
-export function createProjectFetcher(http: HttpSetup, logger: Logger) {
+export function createProjectFetcher(http: HttpSetup, logger: Logger): ProjectFetcher {
   let fetchPromise: Promise<ProjectsData | null> | null = null;
   let cachedData: ProjectsData | null = null;
 

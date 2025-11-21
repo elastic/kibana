@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
 import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
 import { type ICPSManager, type ProjectsData, PROJECT_ROUTING } from '@kbn/cps-utils';
+import type { ProjectFetcher } from './project_fetcher';
 
 /**
  * This should be configured on spaces level.
@@ -30,7 +31,7 @@ export class CPSManager implements ICPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
   private readonly application: ApplicationStart;
-  private projectFetcherPromise: Promise<any> | null = null;
+  private projectFetcherPromise: Promise<ProjectFetcher> | null = null;
   private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
     DEFAULT_PROJECT_ROUTING
   );
