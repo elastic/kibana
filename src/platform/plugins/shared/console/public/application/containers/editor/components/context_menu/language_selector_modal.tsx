@@ -92,7 +92,7 @@ export const LanguageSelectorModal = ({
 
   const onSetAsDefault = () => {
     changeDefaultLanguage(selectedLanguage);
-    closeModal();
+    // Keep modal open after setting default
   };
 
   return (
