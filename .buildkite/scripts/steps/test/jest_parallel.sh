@@ -77,10 +77,17 @@ export JEST_ALL_CHECKPOINT_PATH="$CHECKPOINT_FILE"
 # Try to download existing checkpoint from previous run (if job was restarted)
 if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
   echo "--- Downloading checkpoint from previous run attempt"
+  echo "Checkpoint: Searching for $CHECKPOINT_FILE"
+  
+  # Debug: List all available checkpoint artifacts
+  echo "Checkpoint: Available checkpoint artifacts:"
   set +e
-  # Don't restrict to specific step ID - the step ID changes on retry
-  # Search for the checkpoint file across all steps in this build
-  buildkite-agent artifact download "$CHECKPOINT_FILE" .
+  buildkite-agent artifact search "target/jest_checkpoint_*.json" --include-retried-jobs || echo "No checkpoint artifacts found"
+  set -e
+  
+  # Try to download checkpoint using the standard helper (includes retry logic)
+  set +e
+  download_artifact "$CHECKPOINT_FILE" . --include-retried-jobs
   checkpoint_download_code=$?
   set -e
   
@@ -108,13 +115,7 @@ eval "$full_command"
 code=$?
 set -e
 
-# Upload checkpoint file as artifact (final upload, redundant with progressive uploads during test run)
-# Note: The Node.js script uploads the checkpoint after each successful config,
-# but we upload again here as a final backup in case any uploads were missed
-if [ -f "$CHECKPOINT_FILE" ]; then
-  echo "--- Uploading final checkpoint file"
-  buildkite-agent artifact upload "$CHECKPOINT_FILE" || true
-fi
+
 
 if [ $code -ne 0 ]; then
   exitCode=10
