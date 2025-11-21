@@ -88,130 +88,154 @@ describe('getGapsSummaryByRuleIds', () => {
     });
   });
 
-  test('should successfully get gaps summary for rules', async () => {
+  describe('success', () => {
     const ruleIds = ['1', '2'];
     const start = '2023-11-16T08:00:00.000Z';
     const end = '2023-11-16T09:00:00.000Z';
 
-    unsecuredSavedObjectsClient.find.mockResolvedValue({
-      aggregations: {
-        alertTypeId: {
-          buckets: [{ key: ['myType', 'myApp'], doc_count: 1 }],
-        },
-      },
-      saved_objects: [],
-      per_page: 0,
-      page: 0,
-      total: 1,
-    });
-
-    eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValue({
-      aggregations: {
-        unique_rule_ids: {
-          buckets: [
-            {
-              key: '1',
-              totalUnfilledDurationMs: { value: 1000 },
-              totalInProgressDurationMs: { value: 2000 },
-              totalFilledDurationMs: { value: 3000 },
-              totalDurationMs: { value: 6000 },
-            },
-            {
-              key: '2',
-              totalUnfilledDurationMs: { value: 4000 },
-              totalInProgressDurationMs: { value: 5000 },
-              totalFilledDurationMs: { value: 6000 },
-              totalDurationMs: { value: 15000 },
-            },
-          ],
-        },
-      },
-    });
-
-    const result = await rulesClient.getGapsSummaryByRuleIds({
-      ruleIds,
-      start,
-      end,
-    });
-
-    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
-      authorizationEntity: 'rule',
-      filterOpts: {
-        fieldNames: {
-          consumer: 'alert.attributes.consumer',
-          ruleTypeId: 'alert.attributes.alertTypeId',
-        },
-        type: 'kql',
-      },
-    });
-
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filter: expect.any(Object),
-        aggs: {
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        aggregations: {
           alertTypeId: {
-            multi_terms: {
-              terms: [
-                { field: 'alert.attributes.alertTypeId' },
-                { field: 'alert.attributes.consumer' },
-              ],
-            },
+            buckets: [{ key: ['myType', 'myApp'], doc_count: 1 }],
           },
         },
-      })
-    );
+        saved_objects: [],
+        per_page: 0,
+        page: 0,
+        total: 1,
+      });
 
-    expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledWith('alert', ruleIds, {
-      filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2023-11-16T09:00:00.000Z" AND kibana.alert.rule.gap.range >= "2023-11-16T08:00:00.000Z"`,
-      aggs: {
-        unique_rule_ids: {
-          terms: {
-            field: 'rule.id',
-            size: 10000,
-          },
-          aggs: {
-            totalUnfilledDurationMs: {
-              sum: {
-                field: 'kibana.alert.rule.gap.unfilled_duration_ms',
+      eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValue({
+        aggregations: {
+          unique_rule_ids: {
+            buckets: [
+              {
+                key: '1',
+                totalUnfilledDurationMs: { value: 1000 },
+                totalInProgressDurationMs: { value: 2000 },
+                totalFilledDurationMs: { value: 3000 },
+                totalDurationMs: { value: 6000 },
               },
-            },
-            totalInProgressDurationMs: {
-              sum: {
-                field: 'kibana.alert.rule.gap.in_progress_duration_ms',
+              {
+                key: '2',
+                totalUnfilledDurationMs: { value: 4000 },
+                totalInProgressDurationMs: { value: 5000 },
+                totalFilledDurationMs: { value: 6000 },
+                totalDurationMs: { value: 15000 },
               },
-            },
-            totalFilledDurationMs: {
-              sum: {
-                field: 'kibana.alert.rule.gap.filled_duration_ms',
-              },
-            },
-            totalDurationMs: {
-              sum: {
-                field: 'kibana.alert.rule.gap.total_gap_duration_ms',
-              },
-            },
+            ],
           },
         },
-      },
+      });
     });
 
-    expect(result).toEqual({
-      data: [
+    test('returns gaps summary response', async () => {
+      const result = await rulesClient.getGapsSummaryByRuleIds({
+        ruleIds,
+        start,
+        end,
+      });
+
+      expect(result).toEqual({
+        data: [
+          {
+            ruleId: '1',
+            totalUnfilledDurationMs: 1000,
+            totalInProgressDurationMs: 2000,
+            totalFilledDurationMs: 3000,
+            gapFillStatus: 'unfilled',
+          },
+          {
+            ruleId: '2',
+            totalUnfilledDurationMs: 4000,
+            totalInProgressDurationMs: 5000,
+            totalFilledDurationMs: 6000,
+            gapFillStatus: 'unfilled',
+          },
+        ],
+      });
+    });
+
+    test('requests expected event log aggregations', async () => {
+      await rulesClient.getGapsSummaryByRuleIds({
+        ruleIds,
+        start,
+        end,
+      });
+
+      expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledWith(
+        'alert',
+        ruleIds,
         {
-          ruleId: '1',
-          totalUnfilledDurationMs: 1000,
-          totalInProgressDurationMs: 2000,
-          totalFilledDurationMs: 3000,
-          gapFillStatus: 'unfilled',
+          filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2023-11-16T09:00:00.000Z" AND kibana.alert.rule.gap.range >= "2023-11-16T08:00:00.000Z"`,
+          aggs: {
+            unique_rule_ids: {
+              terms: {
+                field: 'rule.id',
+                size: 10000,
+              },
+              aggs: {
+                totalUnfilledDurationMs: {
+                  sum: {
+                    field: 'kibana.alert.rule.gap.unfilled_duration_ms',
+                  },
+                },
+                totalInProgressDurationMs: {
+                  sum: {
+                    field: 'kibana.alert.rule.gap.in_progress_duration_ms',
+                  },
+                },
+                totalFilledDurationMs: {
+                  sum: {
+                    field: 'kibana.alert.rule.gap.filled_duration_ms',
+                  },
+                },
+                totalDurationMs: {
+                  sum: {
+                    field: 'kibana.alert.rule.gap.total_gap_duration_ms',
+                  },
+                },
+              },
+            },
+          },
+        }
+      );
+    });
+
+    test('requests required authorizations', async () => {
+      await rulesClient.getGapsSummaryByRuleIds({
+        ruleIds,
+        start,
+        end,
+      });
+
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        authorizationEntity: 'rule',
+        filterOpts: {
+          fieldNames: {
+            consumer: 'alert.attributes.consumer',
+            ruleTypeId: 'alert.attributes.alertTypeId',
+          },
+          type: 'kql',
         },
-        {
-          ruleId: '2',
-          totalUnfilledDurationMs: 4000,
-          totalInProgressDurationMs: 5000,
-          totalFilledDurationMs: 6000,
-          gapFillStatus: 'unfilled',
-        },
-      ],
+      });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.any(Object),
+          aggs: {
+            alertTypeId: {
+              multi_terms: {
+                terms: [
+                  { field: 'alert.attributes.alertTypeId' },
+                  { field: 'alert.attributes.consumer' },
+                ],
+              },
+            },
+          },
+        })
+      );
     });
   });
 
