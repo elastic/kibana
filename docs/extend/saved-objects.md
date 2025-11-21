@@ -1258,7 +1258,7 @@ This command will:
 
 The error message will look like:
 
-```log
+```shell
 ❌ The following SO types are no longer registered: 'my-removed-type'.
 Updated 'removed_types.json' to prevent the same names from being reused in the future.
 ```
@@ -1314,14 +1314,14 @@ Whenever a new SO type is added, or a new field is added to an existing type, a 
 
 Please find your error in the list below, to understand what scenario your PR is falling into:
 
-```log
+```shell
 ❌ Modifications have been detected in the '<soType>.migrations'. This property is deprected and no modifications are allowed.
 ```
 
 **Problem:** Migration functions cannot be altered. The `migrations` property was deprecated in favor of `modelVersions`, but the existing `migrations` must be kept in order to allow importing old documents.
 **Solution:** Do not perform any modifications in the `migrations` property of your SO type. If you haven't modified the field, please check that your PR branch is up-to-date and consider updating.
 
-```log
+```shell
 ❌ Some modelVersions have been updated for SO type '<soType>' after they were defined: 5.
 ```
 
@@ -1330,28 +1330,28 @@ Please find your error in the list below, to understand what scenario your PR is
 **Scenario 1:** I am not modifying an existing `modelVersion`, but rather trying to create a new one. Most likely someone else added another `modelVersion` for the same SO type which then got released in Serverless (baseline for comparison).
 **Scenario 2:** I detected a bug and wanted to modify the `modelVersion`. Unfortunately, it might already be to late to fix it. Once a `modelVersion` is defined in a PR, and that PR is merged, it could be released in Serverless anytime (or in a Customer Zero deployment). Thus, some deployments/projects might already updated to that `modelVersion`. Either you just merged the PR and can guarantee nobody has loaded it, or you'll probably have to create a new model version.
 
-```log
+```shell
 ❌ Some model versions have been deleted for SO type '<soType>'.
 ```
 
 **Problem:** For the same reasons as the previous error, `modelVersions` cannot be deleted. In this scenario, it could happen that your PR stems from a commit that is older than the current serverless release, and is missing `modelVersions` for some SO types.
 **Solution:** Rebase your PR to get the latest SO type definitions.
 
-```log
+```shell
 ❌ Invalid model version 'five' for SO type '<soType>'. Model versions must be consecutive integer numbers starting at 1.
 ❌ The '<soType>' SO type is missing model version '4'. Model versions defined: 1,2,3,5.
 ```
 
 These errors are pretty obvious. Model versions must be defined as consecutive numeric strings, e.g. '1', '2', '3', ...
 
-```log
+```shell
 ❌ The '<soType>' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.
 ```
 
 **Problem:** Whenever we update the mappings for a SO type, we must signal the migration logic that this types' mappings must be updated in the SO index.
 **Solution:** Create a new `modelVersion` that includes the `type: 'mappings_addition'`, as well as the `schemas.forwardCompatibility` properties.
 
-```log
+```shell
 ❌ The SO type '<soType>' is defining two (or more) new model versions.
 ```
 
@@ -1364,14 +1364,14 @@ These errors are pretty obvious. Model versions must be defined as consecutive n
   * **Scenario 2.1**: {{kib}} has been rolled back. Please wait until the situation goes back to normal, i.e. an emergency release is performed after the rollback, and {{kib}} gets to a normal release state.
   * **Scenario 2.2**: {{kib}} has NOT been rolled back. Reach out to `#kibana-core` and we will help you figure out what's going on.
 
-```log
+```shell
 ❌ The following SO types are no longer registered: '<soType>'. Please run with --fix to update 'removed_types.json'.
 ```
 
 **Problem:** You removed a Saved Object type but didn't update the `removed_types.json` file to track the removal.
 **Solution:** Run `node scripts/check_saved_objects --baseline <mergeBase> --fix` locally to automatically update the `removed_types.json` file, then commit the changes. See the [Removing a Saved Object type](#removing-saved-object-types) section for detailed instructions on how to determine the correct merge-base commit.
 
-```log
+```shell
 ❌ Cannot re-register previously removed type(s): <soType>. Please use a different name.
 ```
 
