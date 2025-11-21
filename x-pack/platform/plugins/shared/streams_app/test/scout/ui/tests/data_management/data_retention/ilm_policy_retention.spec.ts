@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import {
   closeToastsIfPresent,
   openRetentionModal,
+  saveRetentionChanges,
   toggleInheritSwitch,
   verifyRetentionBadge,
   BADGE_TEXT,
@@ -41,22 +43,58 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
   test('should show ILM policy button', async ({ page }) => {
     await openRetentionModal(page);
     await toggleInheritSwitch(page, false);
-    await page.getByRole('button', { name: 'ILM policy' }).isVisible();
+    await expect(page.getByRole('button', { name: 'ILM policy' })).toBeVisible();
   });
 
-  test('should display ILM badge when policy is selected', async ({ page }) => {
+  test('should select and save ILM policy', async ({ page }) => {
     await openRetentionModal(page);
     await toggleInheritSwitch(page, false);
-    // Note: This test requires actual ILM policies to be available
-    // The exact test implementation depends on having test ILM policies set up
-    await verifyRetentionBadge(page, BADGE_TEXT.ilmPolicy);
+
+    // Click ILM policy button
+    await page.getByRole('button', { name: 'ILM policy' }).click();
+
+    // Wait for the listbox to appear and select the first available policy
+    await page.getByRole('listbox', { name: 'Filter options' }).waitFor();
+    await page.getByRole('option', { name: /.alerts-ilm-policy/ }).click();
+
+    // Save changes
+    await saveRetentionChanges(page);
+
+    // Verify ILM policy is displayed in subtitle
+    await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
   });
 
-  // Note: Additional ILM tests require:
-  // 1. Test ILM policies to be created in beforeAll
-  // 2. ILM policy selection dropdown to be populated
-  // 3. Ability to select and save ILM policies
-  // 4. Verification of ILM policy links to management
-  //
-  // These tests are marked @ess only as ILM is not available in serverless
+  test('should display selected ILM policy name', async ({ page }) => {
+    await openRetentionModal(page);
+    await toggleInheritSwitch(page, false);
+
+    // Click ILM policy button and select policy
+    await page.getByRole('button', { name: 'ILM policy' }).click();
+    await page.getByRole('listbox', { name: 'Filter options' }).waitFor();
+    await page.getByRole('option', { name: /.alerts-ilm-policy/ }).click();
+
+    // Save changes
+    await saveRetentionChanges(page);
+
+    // Verify the policy name is displayed using the badge test ID
+    await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText('.alerts-ilm-policy');
+  });
+
+  test('should persist ILM policy selection across page reload', async ({ page, pageObjects }) => {
+    await openRetentionModal(page);
+    await toggleInheritSwitch(page, false);
+
+    // Select ILM policy
+    await page.getByRole('button', { name: 'ILM policy' }).click();
+    await page.getByRole('listbox', { name: 'Filter options' }).waitFor();
+    await page.getByRole('option', { name: /.alerts-ilm-policy/ }).click();
+    await saveRetentionChanges(page);
+
+    // Reload page
+    await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+
+    // Verify ILM policy persists
+    await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
+    await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText('.alerts-ilm-policy');
+  });
 });
