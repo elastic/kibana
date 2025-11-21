@@ -53,6 +53,7 @@ export async function createLogRateAnalysisSpikeData({
     .generator((timestamp, index) => {
       const tenantId = index % 2 === 0 ? 'acme-bank' : 'omega-shop';
       const provider = index % 2 === 0 ? 'adyen-edge' : 'worldpay-plus';
+      const region = index % 10 === 0 ? 'us-east-1' : 'us-west-2';
       const baseMessage = `PAYMENT_RESPONSE tenant=${tenantId} outcome=OK`;
       const spikeMessage = `PAYMENT_TIMEOUT tenant=${tenantId} provider=${provider} status=504 reason=gateway_timeout`;
 
@@ -68,7 +69,7 @@ export async function createLogRateAnalysisSpikeData({
             'event.dataset': DATASET,
             'event.category': 'application',
             'http.request.method': 'POST',
-            'cloud.region': 'us-east-1',
+            'cloud.region': region,
             'client.ip': '10.8.0.10',
             'error.message': baseMessage,
             'trace.id': generateShortId(),
@@ -92,7 +93,7 @@ export async function createLogRateAnalysisSpikeData({
                 'event.dataset': DATASET,
                 'event.category': 'application',
                 'http.request.method': 'POST',
-                'cloud.region': 'us-east-1',
+                'cloud.region': region,
                 'client.ip': '10.8.0.10',
                 'error.message': spikeMessage,
                 'trace.id': generateShortId(),

@@ -88,6 +88,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('when filtering the analysis with searchQuery', () => {
+      function executeToolWithRegionFilter(region?: string) {
+        return agentBuilderApiClient.executeTool<RunLogRateAnalysisToolResult>({
+          id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
+          params: {
+            index: LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM,
+            baseline: LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW,
+            deviation: LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW,
+            ...(region ? { searchQuery: { term: { 'cloud.region': region } } } : {}),
+          },
+        });
+      }
+
+      it('only analyzes the logs that match the filter', async () => {
+        const [all, west, east] = await Promise.all([
+          executeToolWithRegionFilter(),
+          executeToolWithRegionFilter('us-west-2'),
+          executeToolWithRegionFilter('us-east-1'),
+        ]);
+
+        const allChange = all[0].data.items[0].change;
+        const westChange = west[0].data.items[0].change;
+        const eastChange = east[0].data.items[0].change;
+
+        expect(westChange.deviation).not.to.be(eastChange.deviation);
+        expect(westChange.deviation).to.be.below(allChange.deviation);
+        expect(eastChange.deviation).to.be.below(allChange.deviation);
+      });
+    });
+
     describe('when baseline and deviation time ranges are swapped', () => {
       let toolResults: RunLogRateAnalysisToolResult[];
 
@@ -102,14 +132,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('finds a single significant item', () => {
-        expect(toolResults[0].data.items.length).to.be(1);
+      it('finds at least one significant item', () => {
+        expect(toolResults[0].data.items.length).to.be.greaterThan(0);
       });
 
       it('shows that the change is caused by log.level=error', () => {
-        const item = toolResults[0].data.items[0];
-        expect(item.fieldName).to.be('log.level');
-        expect(item.fieldValue).to.be('error');
+        const { fieldName, fieldValue } = toolResults[0].data.items[0];
+        expect(fieldName).to.be('log.level');
+        expect(fieldValue).to.be('error');
       });
 
       it('classifies the analysis as a dip', () => {
