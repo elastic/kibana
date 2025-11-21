@@ -59,7 +59,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await openFlyout();
 
       // Verify the title field is pre-filled with the dashboard name
-      const titleInput = await testSubjects.find('input');
+      const titleInput = await testSubjects.find('reportTitleInput');
       const titleValue = await titleInput.getAttribute('value');
       expect(titleValue).to.equal('Ecom Dashboard');
 
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await openFlyout();
 
       // Fill required fields with a future date
-      await testSubjects.setValue('input', 'Test Report');
+      await testSubjects.setValue('reportTitleInput', 'Test Report');
       await fillInSchedule();
 
       // Enable email
