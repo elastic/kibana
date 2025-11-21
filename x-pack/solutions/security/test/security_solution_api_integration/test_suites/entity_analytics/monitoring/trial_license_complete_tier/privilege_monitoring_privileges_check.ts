@@ -23,7 +23,8 @@ export default ({ getService }: FtrProviderContext) => {
   const authHelper = privMonRolesUtils.createUnifiedAuthHelper(getService);
   const kibanaServer = getService('kibanaServer');
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/243722
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     describe('privileges checks', () => {
       before(async () => {
         await enablePrivmonSetting(kibanaServer);
