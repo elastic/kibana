@@ -86,8 +86,17 @@ describe('useOverviewTrendsRequests', () => {
     );
   });
 
-  it('should only request monitors within maxItem range', () => {
-    const monitorsSortedByStatus = [mockMonitor1, mockMonitor2, mockMonitor3, mockMonitor4];
+  it('should only request monitors within (maxItem + 1) range', () => {
+    const monitorsSortedByStatus = [
+      mockMonitor1,
+      mockMonitor2,
+
+      mockMonitor3,
+      mockMonitor4,
+
+      mockMonitor1,
+      mockMonitor2,
+    ];
     mockUseSelector.mockReturnValue({});
 
     renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus, 1, 2), {
@@ -101,10 +110,12 @@ describe('useOverviewTrendsRequests', () => {
         payload: expect.arrayContaining([
           { configId: 'monitor-1', locationId: 'us-east', schedule: '3m' },
           { configId: 'monitor-2', locationId: 'us-west', schedule: '5m' },
+          { configId: 'monitor-3', locationId: 'eu-central', schedule: '10m' },
+          { configId: 'monitor-4', locationId: 'us-east', schedule: '3m' },
         ]),
       })
     );
-    expect(mockDispatch.mock.calls[0][0].payload).toHaveLength(2);
+    expect(mockDispatch.mock.calls[0][0].payload).toHaveLength(4);
   });
 
   it('should not request monitors that already have trendData', () => {
@@ -185,9 +196,14 @@ describe('useOverviewTrendsRequests', () => {
       mockMonitor1,
       mockMonitor2,
       mockMonitor3,
+
       mockMonitor4,
       mockMonitor1,
       mockMonitor2,
+
+      mockMonitor2,
+      mockMonitor3,
+      mockMonitor4,
     ];
     mockUseSelector.mockReturnValue({});
 
@@ -195,10 +211,10 @@ describe('useOverviewTrendsRequests', () => {
       wrapper: createWrapper(),
     });
 
-    expect(mockDispatch.mock.calls[0][0].payload).toHaveLength(3);
+    expect(mockDispatch.mock.calls[0][0].payload).toHaveLength(6);
   });
 
-  it('should handle maxItem of 0 by not requesting any trends', () => {
+  it('should handle maxItem of 0 by requesting only one batch', () => {
     const monitorsSortedByStatus = [mockMonitor1, mockMonitor2];
     mockUseSelector.mockReturnValue({});
 
@@ -206,6 +222,16 @@ describe('useOverviewTrendsRequests', () => {
       wrapper: createWrapper(),
     });
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'batchTrendStats',
+        payload: expect.arrayContaining([
+          { configId: 'monitor-1', locationId: 'us-east', schedule: '3m' },
+          { configId: 'monitor-2', locationId: 'us-west', schedule: '5m' },
+        ]),
+      })
+    );
+    expect(mockDispatch.mock.calls[0][0].payload).toHaveLength(2);
   });
 });

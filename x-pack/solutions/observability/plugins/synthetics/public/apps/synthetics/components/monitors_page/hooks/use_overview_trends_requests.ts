@@ -21,7 +21,9 @@ export const useOverviewTrendsRequests = (
   const trendData = useSelector(selectOverviewTrends);
 
   useEffect(() => {
-    const visibleMonitors = monitorsSortedByStatus.slice(0, maxItem * rowCount);
+    // We add 1 to maxItem to fetch one extra row so the scrolling looks smooth
+    const visibleMonitors = monitorsSortedByStatus.slice(0, (maxItem + 1) * rowCount);
+
     const trendRequests = visibleMonitors.reduce((acc, item) => {
       if (trendData[item.configId + item.locationId] === undefined) {
         acc.push({
