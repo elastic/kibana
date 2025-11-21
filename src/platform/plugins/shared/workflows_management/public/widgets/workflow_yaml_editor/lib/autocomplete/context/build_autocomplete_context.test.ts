@@ -9,7 +9,7 @@
 
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
 import { buildAutocompleteContext } from './build_autocomplete_context';
 import { expectZodSchemaEqual } from '../../../../../../common/lib/zod';

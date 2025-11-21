@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { ZodFirstPartySchemaTypes } from '@kbn/zod/v4';
+import type { ZodType } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import type { WorkflowZodSchemaLooseType } from '../../schema';
 
 export function parsePath(path: string) {
   const segments = path
@@ -20,7 +18,7 @@ export function parsePath(path: string) {
 }
 
 interface GetSchemaAtPathResult {
-  schema: z.ZodType | null;
+  schema: ZodType | null;
   scopedToPath: string | null;
 }
 
@@ -34,7 +32,7 @@ interface GetSchemaAtPathResult {
  */
 // eslint-disable-next-line complexity
 export function getSchemaAtPath(
-  schema: WorkflowZodSchemaLooseType,
+  schema: ZodType,
   path: string,
   { partial = false }: { partial?: boolean } = {}
 ): GetSchemaAtPathResult {
@@ -44,7 +42,7 @@ export function getSchemaAtPath(
       return { schema: null, scopedToPath: null };
     }
 
-    let current = schema;
+    let current: ZodType = schema;
 
     for (const [index, segment] of segments.entries()) {
       if (current instanceof z.ZodOptional) {
@@ -87,13 +85,14 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
 
+        // TODO: find out if zodv4 has a way to get the max length of an array
         // Only enforce bounds checking for arrays with explicit length constraints
-        const maxLength = current._def.maxLength?.value ?? current._def.exactLength?.value;
-        if (maxLength !== undefined && arrayIndex >= maxLength) {
-          return partial
-            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
-            : { schema: null, scopedToPath: null };
-        }
+        // const maxLength = current._def.maxLength?.value ?? current._def.exactLength?.value;
+        // if (maxLength !== undefined && arrayIndex >= maxLength) {
+        //   return partial
+        //     ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+        //     : { schema: null, scopedToPath: null };
+        // }
 
         // For unconstrained arrays, we allow any non-negative index for schema introspection
         // This is because we're validating schema paths, not runtime data
@@ -109,15 +108,11 @@ export function getSchemaAtPath(
       }
     }
 
-    if (current instanceof z.ZodOptional) {
-      return { schema: current.unwrap(), scopedToPath: segments.join('.') };
+    if (current instanceof z.ZodOptional || current instanceof z.ZodDefault) {
+      return { schema: current.unwrap() as ZodType, scopedToPath: segments.join('.') };
     }
 
-    if (current instanceof z.ZodDefault) {
-      return { schema: current.removeDefault(), scopedToPath: segments.join('.') };
-    }
-
-    return { schema: current as z.ZodType, scopedToPath: segments.join('.') };
+    return { schema: current as ZodType, scopedToPath: segments.join('.') };
   } catch {
     return { schema: null, scopedToPath: null };
   }
@@ -185,43 +180,39 @@ export function inferZodType(
 }
 
 export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
-  expect(zodToJsonSchema(a)).toEqual(zodToJsonSchema(b));
+  expect(z.toJSONSchema(a)).toEqual(z.toJSONSchema(b));
 }
 
 export function getZodTypeName(schema: z.ZodType) {
   // Unwrap ZodOptional and ZodDefault to get the actual schema type
   let unwrappedSchema = schema;
-  if (unwrappedSchema instanceof z.ZodOptional) {
-    unwrappedSchema = unwrappedSchema.unwrap();
-  }
-  if (unwrappedSchema instanceof z.ZodDefault) {
-    unwrappedSchema = unwrappedSchema.removeDefault();
+  if (unwrappedSchema instanceof z.ZodOptional || unwrappedSchema instanceof z.ZodDefault) {
+    unwrappedSchema = unwrappedSchema.unwrap() as ZodType;
   }
 
-  const typedSchema = unwrappedSchema as ZodFirstPartySchemaTypes;
-  const def = typedSchema._def;
-  switch (def.typeName) {
-    case 'ZodString':
+  const def = unwrappedSchema.def;
+  switch (def.type) {
+    case 'string':
       return 'string';
-    case 'ZodNumber':
+    case 'number':
       return 'number';
-    case 'ZodBoolean':
+    case 'boolean':
       return 'boolean';
-    case 'ZodArray':
+    case 'array':
       return 'array';
-    case 'ZodObject':
+    case 'object':
       return 'object';
-    case 'ZodDate':
+    case 'date':
       return 'date';
-    case 'ZodAny':
+    case 'any':
       return 'any';
-    case 'ZodNull':
+    case 'null':
       return 'null';
-    case 'ZodUnknown':
+    case 'unknown':
       return 'unknown';
-    case 'ZodLiteral':
+    case 'literal':
       return 'literal';
-    case 'ZodUnion': {
+    case 'union': {
       // Check if all union members are arrays - if so, treat as array type
       const unionSchema = unwrappedSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
       const allMembersAreArrays = unionSchema.options.every(

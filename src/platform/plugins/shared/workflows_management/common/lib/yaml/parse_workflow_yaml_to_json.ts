@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod/v4';
+import type { ZodSafeParseResult, ZodTypeAny } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { getYamlDocumentErrors } from './validate_yaml_document';
@@ -15,10 +15,10 @@ import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';
 import { isDynamicValue, isVariableValue } from '../regex';
 import { formatZodError } from '../zod/format_zod_error';
 
-export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
+export function parseWorkflowYamlToJSON<T extends ZodTypeAny>(
   yamlString: string,
   schema: T
-): z.SafeParseReturnType<z.input<T>, z.output<T>> | { success: false; error: Error } {
+): ZodSafeParseResult<T> | { success: false; error: Error } {
   const parseResult = parseYamlToJSONWithoutValidation(yamlString);
   if (!parseResult.success) {
     return {
@@ -59,8 +59,8 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
     if (filteredIssues.length === 0) {
       return {
         success: true,
-        data: parseResult.json as z.output<T>,
-      } as z.SafeParseReturnType<z.input<T>, z.output<T>>;
+        data: parseResult.json as T['_output'],
+      } as ZodSafeParseResult<T>;
     }
 
     // Use custom error formatter for better user experience
@@ -71,5 +71,5 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
       error: new InvalidYamlSchemaError(message, formattedError),
     };
   }
-  return result;
+  return result as ZodSafeParseResult<T>;
 }

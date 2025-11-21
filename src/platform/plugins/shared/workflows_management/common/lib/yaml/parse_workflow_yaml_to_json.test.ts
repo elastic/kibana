@@ -9,8 +9,8 @@
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
-import type { SafeParseReturnType } from '@kbn/zod';
-import { z } from '@kbn/zod';
+import type { ZodSafeParseResult } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
 
 describe('parseWorkflowYamlToJSON', () => {
@@ -36,14 +36,9 @@ describe('parseWorkflowYamlToJSON', () => {
     `;
     const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
-    expect(
-      (
-        result as SafeParseReturnType<
-          z.input<typeof yamlSchemaLoose>,
-          z.output<typeof yamlSchemaLoose>
-        >
-      ).data
-    ).toEqual({
+    expect((result as ZodSafeParseResult<typeof yamlSchemaLoose>).data).toEqual({
+      version: '1',
+      enabled: true,
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, world!' } }],
     });
   });
@@ -84,6 +79,8 @@ describe('parseWorkflowYamlToJSON', () => {
         >
       ).data
     ).toEqual({
+      version: '1',
+      enabled: true,
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, {{event.message}}' } }],
     });
   });

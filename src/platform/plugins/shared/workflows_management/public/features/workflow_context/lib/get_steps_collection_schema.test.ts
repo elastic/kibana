@@ -9,7 +9,7 @@
 
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
 
