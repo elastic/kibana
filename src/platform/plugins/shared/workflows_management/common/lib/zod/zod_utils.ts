@@ -46,10 +46,10 @@ export function getSchemaAtPath(
 
     for (const [index, segment] of segments.entries()) {
       if (current instanceof z.ZodOptional) {
-        current = current.unwrap();
+        current = current.unwrap() as ZodType;
       }
       if (current instanceof z.ZodDefault) {
-        current = current.removeDefault();
+        current = current.unwrap() as ZodType;
       }
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
@@ -61,15 +61,15 @@ export function getSchemaAtPath(
         current = shape[segment];
       } else if (current instanceof z.ZodUnion) {
         const branches = current.options;
-        const validBranch = branches.find((branch: z.ZodType) =>
-          isValidSchemaPath(branch, segment)
+        const validBranch = branches.find((branch) =>
+          isValidSchemaPath(branch as z.ZodType, segment)
         );
         if (!validBranch) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
             : { schema: null, scopedToPath: null };
         }
-        current = validBranch;
+        current = validBranch as ZodType;
       } else if (current instanceof z.ZodArray) {
         if (!/^\d+$/.test(segment)) {
           return partial
@@ -96,7 +96,7 @@ export function getSchemaAtPath(
 
         // For unconstrained arrays, we allow any non-negative index for schema introspection
         // This is because we're validating schema paths, not runtime data
-        current = current.element;
+        current = current.element as ZodType;
       } else if (current instanceof z.ZodAny) {
         // pass through any to preserve the description
         return { schema: current, scopedToPath: segments.slice(0, index).join('.') };
