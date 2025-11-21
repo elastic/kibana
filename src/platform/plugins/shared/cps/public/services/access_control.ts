@@ -8,6 +8,7 @@
  */
 
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Rule for determining access based on route pattern
@@ -55,6 +56,7 @@ export type AccessControlConfig = Record<string, AppAccessConfig>;
  * | visualize  | type:vega in route     | EDITABLE     | Vega visualizations only           |
  * | visualize  | other routes           | DISABLED     | Other visualization types          |
  * | lens       | all routes             | READONLY     | All lens pages (read-only)         |
+ * | maps       | all routes             | EDITABLE     | All maps pages (read-only)         |
  * | all others | all routes             | DISABLED     | Default behavior for unknown apps  |
  */
 export const DEFAULT_ACCESS_CONTROL_CONFIG: AccessControlConfig = {
@@ -81,7 +83,12 @@ export const DEFAULT_ACCESS_CONTROL_CONFIG: AccessControlConfig = {
   },
   lens: {
     defaultAccess: ProjectRoutingAccess.READONLY,
-    readonlyMessage: 'Please adjust project scope for each layer in the Lens editor.',
+    readonlyMessage: i18n.translate('cps.accessControl.lensReadonlyMessage', {
+      defaultMessage: 'Please adjust project scope for each layer in the Lens editor.',
+    }),
+  },
+  maps: {
+    defaultAccess: ProjectRoutingAccess.EDITABLE,
   },
 };
 
