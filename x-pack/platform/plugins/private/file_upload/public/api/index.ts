@@ -23,7 +23,7 @@ import type {
 import { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
 import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
 
-export interface FileUploadStartApi {
+export interface FileUploadPluginStartApi {
   FileUploadComponent: typeof GeoUploadWizardAsyncWrapper;
   IndexNameFormComponent: typeof IndexNameFormAsyncWrapper;
   importerFactory: typeof importerFactory;
