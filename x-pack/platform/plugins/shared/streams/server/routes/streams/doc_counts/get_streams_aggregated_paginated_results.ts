@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { QueryDslBoolQuery, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslBoolQuery,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { StreamDocsStat } from '../../../../common';
 
@@ -53,7 +56,11 @@ export async function getDocCountsForStreams(options: {
           bool: {
             ...query,
             filter: [
-              ...(query?.filter ? (Array.isArray(query.filter) ? query.filter : [query.filter]) : []),
+              ...(query?.filter
+                ? Array.isArray(query.filter)
+                  ? query.filter
+                  : [query.filter]
+                : []),
               rangeFilter,
             ],
           },

@@ -37,11 +37,7 @@ const degradedDocCountsRoute = createServerRoute({
 
     const { start, end, streams, datasetQuery } = params.query;
 
-    const streamNames = datasetQuery
-      ? [datasetQuery]
-      : streams
-      ? streams.split(',')
-      : [];
+    const streamNames = datasetQuery ? [datasetQuery] : streams ? streams.split(',') : [];
 
     return await getDocCountsForStreams({
       esClient,
@@ -114,11 +110,7 @@ const totalDocCountsRoute = createServerRoute({
 
     const { start, end, streams, datasetQuery } = params.query;
 
-    const streamNames = datasetQuery
-      ? [datasetQuery]
-      : streams
-      ? streams.split(',')
-      : [];
+    const streamNames = datasetQuery ? [datasetQuery] : streams ? streams.split(',') : [];
 
     return await getDocCountsForStreams({
       esClient,
