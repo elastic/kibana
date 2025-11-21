@@ -18,6 +18,7 @@ import {
 import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
+import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
@@ -67,6 +68,8 @@ import {
 } from './translations';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
+
+type GapSummaryEntry = GetGapsSummaryByRuleIdsResponseBody['data'][number];
 
 interface ColumnsProps {
   hasCRUDPermissions: boolean;
@@ -494,17 +497,8 @@ export const useGapStatusColumn = (): TableColumn => {
     () => ({
       field: 'gap_info',
       name: GAP_STATUS_HEADER,
-      render: (
-        gapInfo:
-          | {
-              total_unfilled_duration_ms: number;
-              total_in_progress_duration_ms: number;
-              total_filled_duration_ms: number;
-              gap_fill_status?: GapFillStatus;
-            }
-          | undefined
-      ) => {
-        const status = gapInfo?.gap_fill_status;
+      render: (gapInfo: GapSummaryEntry | undefined) => {
+        const status = (gapInfo?.gap_fill_status ?? undefined) as GapFillStatus | undefined;
         if (!gapInfo || !status) return getEmptyTagValue();
 
         const totalInProgressDurationMs = gapInfo.total_in_progress_duration_ms;
