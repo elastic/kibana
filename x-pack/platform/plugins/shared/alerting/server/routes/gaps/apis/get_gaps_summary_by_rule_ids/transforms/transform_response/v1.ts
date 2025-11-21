@@ -16,6 +16,6 @@ export const transformResponse = (
     total_unfilled_duration_ms: gap.totalUnfilledDurationMs,
     total_in_progress_duration_ms: gap.totalInProgressDurationMs,
     total_filled_duration_ms: gap.totalFilledDurationMs,
-    gap_fill_status: gap.gapFillStatus ?? '',
+    gap_fill_status: gap.gapFillStatus,
   })),
 });
