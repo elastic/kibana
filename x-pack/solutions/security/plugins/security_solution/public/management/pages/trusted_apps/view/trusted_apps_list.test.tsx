@@ -143,8 +143,7 @@ describe('When on the trusted applications page', () => {
         expect(renderResult.queryByTestId(`${prefix}-tooltipText`)?.textContent).toContain(
           'event.category is process'
         );
-      })
-
+      });
     });
   });
 

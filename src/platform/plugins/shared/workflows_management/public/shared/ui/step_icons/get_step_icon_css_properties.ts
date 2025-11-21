@@ -46,7 +46,7 @@ export const getStepIconCssProperties = async (connectorType: string): Promise<s
               background-color: currentColor;`;
     }
   }
-  const base64String = await getStepIconBase64(connectorType);
+  const base64String = await getStepIconBase64({ actionTypeId: connectorType });
   if (base64String) {
     return `background-image: url('data:image/svg+xml;base64,${base64String}');`;
   }
