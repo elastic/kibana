@@ -6,10 +6,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import {
-  RULES_UI_READ_PRIVILEGE,
-  SIEM_MIGRATIONS_FEATURE_ID,
-} from '@kbn/security-solution-features/constants';
+import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { i18n } from '@kbn/i18n';
 import { CapabilitiesChecker } from '../../../common/lib/capabilities';
 
@@ -24,13 +21,6 @@ const minimumSiemMigrationCapabilities: MissingCapability[] = [
     description: i18n.translate(
       'xpack.securitySolution.siemMigrations.service.capabilities.siemMigrationsAll',
       { defaultMessage: 'Security > SIEM migrations: All' }
-    ),
-  },
-  {
-    capability: RULES_UI_READ_PRIVILEGE,
-    description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.rulesRead',
-      { defaultMessage: 'Security > Rules: Read' }
     ),
   },
 ];
@@ -56,7 +46,7 @@ export type CapabilitiesLevel = 'minimum' | 'all';
 
 export type CapabilitiesByLevel = Record<CapabilitiesLevel, MissingCapability[]>;
 
-export const requiredSiemMigrationCapabilities: CapabilitiesByLevel = {
+export const requiredSiemMigrationCapabilities = {
   minimum: minimumSiemMigrationCapabilities,
   all: allCapabilities,
 };
