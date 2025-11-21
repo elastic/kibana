@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQueryKql, SystemFeature } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 
 export function defaultQuery(): StreamQueryKql {
@@ -19,4 +19,9 @@ export function defaultQuery(): StreamQueryKql {
   };
 }
 
-export const NO_FEATURE = { filter: { always: {} }, name: '_NO_FEATURE' };
+export const NO_FEATURE: SystemFeature = {
+  type: 'system',
+  filter: { always: {} },
+  name: '_NO_FEATURE',
+  description: 'No feature',
+};
