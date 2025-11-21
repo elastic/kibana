@@ -57,12 +57,12 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
         signal,
       }),
     getFields: (
-      params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/fields'>['params']['query'],
+      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/fields'>['params']['body'],
       signal?: AbortSignal | null
     ) =>
-      request('GET /internal/metrics_experience/fields', {
+      request('POST /internal/metrics_experience/fields', {
         params: {
-          query: params,
+          body: params,
         },
         signal,
       }),

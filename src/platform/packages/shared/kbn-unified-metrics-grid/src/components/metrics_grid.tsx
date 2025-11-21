@@ -254,9 +254,10 @@ const ChartItem = React.memo(
               metric,
               dimensions,
               filters,
+              requestParams,
             })
           : '';
-      }, [metric, dimensions, filters]);
+      }, [metric, dimensions, filters, requestParams]);
 
       const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
       const chartLayers = useChartLayers({ dimensions, metric, color });

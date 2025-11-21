@@ -21,7 +21,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -258,6 +258,8 @@ export interface ChartSectionProps {
    * The current time range
    */
   timeRange?: TimeRange;
+
+  columns?: DatatableColumn[];
 }
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover

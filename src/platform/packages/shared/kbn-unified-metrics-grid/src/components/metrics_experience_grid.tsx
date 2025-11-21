@@ -34,6 +34,7 @@ export const MetricsExperienceGrid = ({
   services,
   input$,
   isChartLoading: isDiscoverLoading,
+  columns,
   isComponentVisible,
   abortController,
   timeRange,
@@ -41,10 +42,16 @@ export const MetricsExperienceGrid = ({
   const { searchTerm, isFullscreen, valueFilters, onSearchTermChange, onToggleFullscreen } =
     useMetricsExperienceState();
 
+  const fieldNames = useMemo(
+    () => columns?.filter((column) => !column.isNull).map((column) => column.name) ?? [],
+    [columns]
+  );
+
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
   const { data: fields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
     index: indexPattern,
     timeRange,
+    fields: fieldNames,
   });
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({

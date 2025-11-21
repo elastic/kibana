@@ -17,10 +17,10 @@ import { createRoute } from '../create_route';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getFieldsRoute = createRoute({
-  endpoint: 'GET /internal/metrics_experience/fields',
+  endpoint: 'POST /internal/metrics_experience/fields',
   security: { authz: { enabled: false, reason: 'Authorization provided by Elasticsearch' } },
   params: z.object({
-    query: z.object({
+    body: z.object({
       index: z.string().default('metrics-*'),
       to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
       from: z
@@ -38,8 +38,8 @@ export const getFieldsRoute = createRoute({
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
     const esClient = elasticsearch.client.asCurrentUser;
-    const page = params.query.page;
-    const size = params.query.size;
+    const page = params.body.page;
+    const size = params.body.size;
 
     const { fields, total } = await getMetricFields({
       esClient: createTracedEsClient({
@@ -48,9 +48,9 @@ export const getFieldsRoute = createRoute({
         plugin: 'metrics_experience',
         abortSignal: getRequestAbortedSignal(request.events.aborted$),
       }),
-      indexPattern: params.query.index,
-      timerange: { from: params.query.from, to: params.query.to },
-      fields: params.query.fields,
+      indexPattern: params.body.index,
+      timerange: { from: params.body.from, to: params.body.to },
+      fields: params.body.fields,
       page,
       size,
       logger,

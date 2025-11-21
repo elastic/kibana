@@ -14,6 +14,7 @@ import { usePaginatedMetricFieldsQuery } from './use_paginated_metric_fields_que
 
 export const useMetricFieldsQuery = (params?: {
   index: string;
+  fields?: string[];
   timeRange: TimeRange | undefined;
 }) => {
   const { client } = useMetricsExperienceClient();
@@ -22,6 +23,7 @@ export const useMetricFieldsQuery = (params?: {
     queryKey: [
       'metricFields',
       params?.index,
+      params?.fields,
       params?.timeRange?.from,
       params?.timeRange?.to,
     ] as const,
@@ -29,15 +31,16 @@ export const useMetricFieldsQuery = (params?: {
       queryKey,
       pageParam = 1,
       signal,
-    }: QueryFunctionContext<readonly [string, string?, string?, string?], number>) => {
+    }: QueryFunctionContext<readonly [string, string?, string[]?, string?, string?], number>) => {
       try {
-        const [, index, from, to] = queryKey;
+        const [, index, fields, from, to] = queryKey;
 
         const response = await client.getFields(
           {
             index,
             from,
             to,
+            fields,
             page: pageParam,
             size: 200,
           },

@@ -8,7 +8,7 @@
  */
 
 import type { QueryOperator } from '@kbn/esql-composer';
-import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
+import { drop, evaluate, stats, timeseries, where, append } from '@kbn/esql-composer';
 import type {
   MetricField,
   Dimension,
@@ -16,10 +16,13 @@ import type {
 } from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import { Walker, Parser, BasicPrettyPrinter } from '@kbn/esql-ast';
+import type { AggregateQuery } from '@kbn/es-query';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
-interface CreateESQLQueryParams {
+interface CreateESQLQueryParams extends Pick<ChartSectionProps, 'requestParams'> {
   metric: MetricField;
   dimensions?: Dimension[];
   filters?: DimensionFilters;
@@ -65,7 +68,19 @@ function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): st
  * @param filters - A map of field names to arrays of values to filter by.
  * @returns A complete ESQL query string.
  */
-export function createESQLQuery({ metric, dimensions = [], filters = {} }: CreateESQLQueryParams) {
+export function createESQLQuery({
+  metric,
+  dimensions = [],
+  filters = {},
+  requestParams,
+}: CreateESQLQueryParams) {
+  const { query: discoverQuery } = requestParams;
+
+  const whereCommands = Walker.findAll(
+    Parser.parse((discoverQuery as AggregateQuery).esql).root,
+    (node) => node.type === 'command' && node.name === 'where'
+  );
+
   const { name: metricField, instrument, index } = metric;
   const source = timeseries(index);
 
@@ -86,6 +101,7 @@ export function createESQLQuery({ metric, dimensions = [], filters = {} }: Creat
   const unfilteredDimensions = (dimensions ?? []).filter((dim) => !(dim.name in filters));
   const queryPipeline = source.pipe(
     ...whereConditions,
+    append({ command: BasicPrettyPrinter.print(whereCommands[0]) }),
     unfilteredDimensions.length > 0
       ? where(
           unfilteredDimensions
