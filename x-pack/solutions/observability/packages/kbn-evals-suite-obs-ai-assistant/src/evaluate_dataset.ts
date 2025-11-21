@@ -14,12 +14,19 @@ import {
 } from '@kbn/evals';
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { ChatClient } from './clients/chat';
 
 interface ObservabilityAIAssistantDatasetExample extends Example {
   input: {
     question: string;
     scope?: AssistantScope;
+    /**
+     * Optional: Pass raw contextual insights payload directly from UI interception.
+     * When provided, this takes precedence over the question field.
+     * This ensures the exact message format from the UI (including @timestamp, etc.) is preserved.
+     */
+    contextualInsightsPayload?: Message[];
   };
   output: {
     criteria: string[];
@@ -70,8 +77,14 @@ export function createEvaluateObservabilityAIAssistantDataset({
       {
         dataset,
         task: async ({ input, output, metadata }) => {
+          // Use contextualInsightsPayload if provided (for UI-captured payloads),
+          // otherwise use the question field
+          const messagesToSend = input.contextualInsightsPayload
+            ? JSON.stringify(input.contextualInsightsPayload.map((msg) => msg.message))
+            : input.question;
+
           const response = await chatClient.converse({
-            messages: input.question,
+            messages: messagesToSend,
             scope: input.scope,
           });
 

@@ -135,7 +135,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   phoenixClient: [
     async (
-      { log, connector, evaluationConnector, repetitions, esClient, reportModelScore },
+      { log, connector, evaluationConnector, repetitions, evaluationsEsClient, reportModelScore },
       use
     ) => {
       const config = getPhoenixConfig();
@@ -183,7 +183,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       });
 
       try {
-        await exportEvaluations(report, esClient, log);
+        await exportEvaluations(report, evaluationsEsClient, log);
       } catch (error) {
         log.error(
           new Error(
@@ -194,7 +194,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         throw error;
       }
 
-      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       await reportModelScore(scoreRepository, report.runId, log);
     },
     {
@@ -267,6 +267,17 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
+  evaluationsEsClient: [
+    async ({ esClient }, use) => {
+      const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
+        ? createEsClientForTesting({
+            esUrl: process.env.EVALUATIONS_ES_URL,
+          })
+        : esClient;
+      await use(evaluationsEsClient);
+    },
+    { scope: 'worker' },
+  ],
   repetitions: [
     async ({}, use, testInfo) => {
       // Get repetitions from test options (set in playwright config)
@@ -276,8 +287,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     { scope: 'worker' },
   ],
   evaluationAnalysisService: [
-    async ({ esClient, log }, use) => {
-      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+    async ({ evaluationsEsClient, log }, use) => {
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       const helper = new EvaluationAnalysisService(scoreRepository, log);
       await use(helper);
     },
