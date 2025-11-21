@@ -16,7 +16,11 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type {
+  DatatableColumn,
+  DatatableColumnMeta,
+  DatatableColumnType,
+} from '@kbn/expressions-plugin/common';
 import { groupBy, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
@@ -92,13 +96,13 @@ function isDocDelete(update: unknown): update is DeleteDocAction {
 
 interface ColumnAddition {
   name: string;
-  fieldType?: string;
+  fieldType?: DatatableColumnMeta['esType'];
 }
 
 interface ColumnUpdate {
   name: string;
   previousName?: string;
-  fieldType?: string;
+  fieldType?: DatatableColumnMeta['esType'];
 }
 
 interface DeleteDocAction {
