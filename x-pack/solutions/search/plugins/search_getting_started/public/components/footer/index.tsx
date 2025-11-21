@@ -55,7 +55,7 @@ export const GettingStartedFooter = () => {
           'Access expert-led trainings, interactive labs, comprehensive certification programs, and flexible self-paced learning courses.',
       }),
       buttonLabel: i18n.translate('xpack.gettingStarted.elasticTraining.buttonText', {
-        defaultMessage: 'Elastic Training',
+        defaultMessage: 'Learn Elasticsearch',
       }),
       buttonHref: docLinks.elasticTraining,
       dataTestSubj: 'gettingStartedElasticTraining',
