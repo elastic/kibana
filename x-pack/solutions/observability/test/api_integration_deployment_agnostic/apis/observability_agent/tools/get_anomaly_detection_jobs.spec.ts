@@ -62,8 +62,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: { start: START_ISO, end: END_ISO },
           });
 
-        const hasAnomalies = toolResults[0].data.jobs[0].topAnomalies.length > 0;
-        return hasAnomalies;
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        const hasLatencyAnomaly = topAnomalies.some(
+          ({ fieldName }) => fieldName === 'transaction_latency'
+        );
+        const hasThroughputAnomaly = topAnomalies.some(
+          ({ fieldName }) => fieldName === 'transaction_throughput'
+        );
+
+        return hasLatencyAnomaly && hasThroughputAnomaly;
       });
     });
 
@@ -104,7 +111,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it.only('should contain an anomaly for transaction_throughput with expected values', async () => {
+      it('should contain an anomaly for transaction_throughput with expected values', async () => {
         const jobs = toolResults[0].data.jobs;
         const { topAnomalies } = jobs[0];
 
@@ -172,8 +179,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
     });
 
-    it.only('returns job without anomalies when time range excludes them', async () => {
-      const EARLY_START_ISO = START_ISO;
+    it('returns job without anomalies when time range excludes them', async () => {
+      // Start check 4 hours before spike to avoid start of dataset initialization noise
+      const EARLY_START_ISO = new Date(
+        SPIKE_START - moment.duration(4, 'hours').asMilliseconds()
+      ).toISOString();
       const EARLY_END_ISO = new Date(
         SPIKE_START - moment.duration(30, 'minutes').asMilliseconds()
       ).toISOString();
