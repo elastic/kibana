@@ -907,7 +907,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     (rule: RuleTableItem) => {
       const selectedClass = isRowSelected(rule) ? 'euiTableRow-isSelected' : '';
       return {
-        'data-test-subj': `rule-row${rule.isEditable ? '' : '-isNotEditable'}`,
+        'data-test-subj': 'rule-row',
         className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
           ? `actRulesList__tableRowDisabled ${selectedClass}`
           : selectedClass,
