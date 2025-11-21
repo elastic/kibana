@@ -124,6 +124,7 @@ export const createMockEndpointAppContextService = (
   const messageSigningService = createMessageSigningServiceMock();
   const licenseServiceMock = createLicenseServiceMock();
   const telemetryServiceMock = analyticsServiceMock.createAnalyticsServiceSetup();
+  const scriptsClient = ScriptsLibraryMock.getMockedClient();
 
   return {
     start: jest.fn(),
@@ -161,7 +162,7 @@ export const createMockEndpointAppContextService = (
     getSpaceId: jest.fn().mockReturnValue('default'),
     getReferenceDataClient: jest.fn().mockReturnValue(referenceDataMocks.createClient()),
     getServerConfigValue: jest.fn(),
-    getScriptsLibraryClient: jest.fn().mockReturnValue(ScriptsLibraryMock.getMockedClient()),
+    getScriptsLibraryClient: jest.fn().mockReturnValue(scriptsClient),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 

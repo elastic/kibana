@@ -6,6 +6,7 @@
  */
 
 import { Readable } from 'stream';
+import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
 import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointScript } from '../../../../common/endpoint/types';
 import type { ScriptsLibraryClientInterface } from './types';
@@ -30,12 +31,27 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
   };
 };
 
+const generateCreateScriptBodyMock = (
+  overrides: Partial<CreateScriptRequestBody> = {}
+): CreateScriptRequestBody => {
+  return {
+    name: 'script one',
+    platform: ['linux', 'macos'],
+    description: 'does some stuff',
+    instructions: 'just execute it',
+    example: 'bash -c script_one.sh',
+    requiresInput: false,
+    file: Readable.from(['test']),
+    ...overrides,
+  };
+};
+
 const getScriptsLibraryClientMock = (): jest.Mocked<ScriptsLibraryClientInterface> => {
   return {
-    create: jest.fn().mockResolvedValue({ data: generateScriptEntryMock() }),
-    update: jest.fn().mockResolvedValue({ data: generateScriptEntryMock() }),
-    get: jest.fn().mockResolvedValue({ data: generateScriptEntryMock() }),
-    list: jest.fn().mockResolvedValue({ data: [generateScriptEntryMock()] }),
+    create: jest.fn().mockResolvedValue(generateScriptEntryMock()),
+    update: jest.fn().mockResolvedValue(generateScriptEntryMock()),
+    get: jest.fn().mockResolvedValue(generateScriptEntryMock()),
+    list: jest.fn().mockResolvedValue([generateScriptEntryMock()]),
     delete: jest.fn().mockResolvedValue(null),
     download: jest.fn(async (_) => {
       return {
@@ -50,4 +66,5 @@ const getScriptsLibraryClientMock = (): jest.Mocked<ScriptsLibraryClientInterfac
 export const ScriptsLibraryMock = Object.freeze({
   getMockedClient: getScriptsLibraryClientMock,
   generateScriptEntry: generateScriptEntryMock,
+  generateCreateScriptBody: generateCreateScriptBodyMock,
 });
