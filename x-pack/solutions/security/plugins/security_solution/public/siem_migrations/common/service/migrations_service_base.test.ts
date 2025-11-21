@@ -62,21 +62,11 @@ class TestMigrationsService extends SiemMigrationsServiceBase<MigrationTaskStats
   protected fetchMigrationStats = mockFetchMigrationStats;
   protected fetchMigrationsStatsAll = mockFetchMigrationsStatsAll;
   protected sendFinishedMigrationNotification = mockSendFinishedMigrationNotification;
-
   public isAvailable(): boolean {
-    const { siemMigrationsDisabled } = ExperimentalFeaturesService.get();
-    return (
-      !siemMigrationsDisabled &&
-      licenseService.isEnterprise() &&
-      !this.hasMissingCapabilities('minimum')
-    );
+    return true;
   }
 
-  /** Returns any missing capabilities for the user to use this feature */
-  public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
-    const getMissingCapabilities = getMissingCapabilitiesChecker(requiredSiemMigrationCapabilities);
-    return getMissingCapabilities(this.core.application.capabilities, level);
-  }
+  public getMissingCapabilities = mockGetMissingCapabilitiesChecker;
 }
 
 // --- End of mocks ---
