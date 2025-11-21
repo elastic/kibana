@@ -23,18 +23,23 @@ interface UseDocCountFetchProps {
   groupTotalCountByTimestamp: boolean;
   canReadFailureStore: boolean;
   numDataPoints: number;
+  streamNames?: string[];
 }
 
 export function useStreamDocCountsFetch({
   groupTotalCountByTimestamp: _groupTotalCountByTimestamp,
   canReadFailureStore,
   numDataPoints,
+  streamNames,
 }: UseDocCountFetchProps): {
   getStreamDocCounts(): StreamDocCountsFetch;
   getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse>;
 } {
   const { timeState, timeState$ } = useTimefilter();
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
+  const {
+    streams: { streamsRepositoryClient },
+    data,
+  } = useKibana().dependencies.start;
   const docCountsPromiseCache = useRef<StreamDocCountsFetch | null>(null);
   const histogramPromiseCache = useRef<Promise<UnparsedEsqlResponse> | null>(null);
   const abortControllerRef = useRef<AbortController>();
@@ -86,18 +91,14 @@ export function useStreamDocCountsFetch({
         throw new Error('Abort controller not set');
       }
 
-      const types: Array<'logs' | 'metrics' | 'traces' | 'synthetics' | 'profiling'> = [
-        'logs',
-        'metrics',
-        'traces',
-        'synthetics',
-        'profiling',
-      ];
+      if (!streamNames || streamNames.length === 0) {
+        throw new Error('Stream names are required for fetching doc counts');
+      }
 
       const commonQueryParams = {
         start: timeState.start.toString(),
         end: timeState.end.toString(),
-        types,
+        streams: streamNames.join(','),
       };
 
       const countPromise = streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
@@ -105,8 +106,6 @@ export function useStreamDocCountsFetch({
           query: commonQueryParams,
         },
         signal: abortController.signal,
-        start: timeState.start,
-        end: timeState.end,
       });
 
       const failedCountPromise = canReadFailureStore
@@ -115,8 +114,6 @@ export function useStreamDocCountsFetch({
               query: commonQueryParams,
             },
             signal: abortController.signal,
-            start: timeState.start,
-            end: timeState.end,
           })
         : Promise.reject(new Error('Cannot read failed doc count, insufficient privileges'));
 
@@ -154,16 +151,12 @@ export function useStreamDocCountsFetch({
 
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
 
-      const histogramPromise = streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_doc_count_for_stream',
-            query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
-            start: timeState.start,
-            end: timeState.end,
-          },
-        },
+      const histogramPromise = executeEsqlQuery({
+        query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+        search: data.search.search,
         signal: abortController.signal,
+        start: timeState.start,
+        end: timeState.end,
       }) as Promise<UnparsedEsqlResponse>;
 
       histogramPromiseCache.current = histogramPromise;

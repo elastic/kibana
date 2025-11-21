@@ -9,14 +9,12 @@ import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES, FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import type { StreamDocsStat } from '../../../../common';
 import { createServerRoute } from '../../create_server_route';
-import { getAggregatedDatasetPaginatedResults } from './get_streams_aggregated_paginated_results';
-
-const DATASET_TYPES = ['logs', 'metrics', 'traces', 'synthetics', 'profiling'] as const;
+import { getDocCountsForStreams } from './get_streams_aggregated_paginated_results';
 
 const docCountsQuerySchema = z.object({
   start: z.string(),
   end: z.string(),
-  types: z.array(z.enum(DATASET_TYPES)),
+  streams: z.string().optional(),
   datasetQuery: z.string().optional(),
 });
 
@@ -25,25 +23,29 @@ const degradedDocCountsRoute = createServerRoute({
   options: {
     access: 'internal',
   },
+  params: z.object({
+    query: docCountsQuerySchema,
+  }),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    query: docCountsQuerySchema,
-  }),
   handler: async ({ params, getScopedClients, request }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { start, end, types, datasetQuery } = params.query;
+    const { start, end, streams, datasetQuery } = params.query;
 
-    const indexPatterns = datasetQuery ? [datasetQuery] : types.map((type) => `${type}-*-*`);
+    const streamNames = datasetQuery
+      ? [datasetQuery]
+      : streams
+      ? streams.split(',')
+      : [];
 
-    return await getAggregatedDatasetPaginatedResults({
+    return await getDocCountsForStreams({
       esClient,
-      index: indexPatterns.join(','),
+      streamNames,
       start,
       end,
       query: {
@@ -58,30 +60,38 @@ const failedDocCountsRoute = createServerRoute({
   options: {
     access: 'internal',
   },
+  params: z.object({
+    query: docCountsQuerySchema,
+  }),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    query: docCountsQuerySchema,
-  }),
   handler: async ({ params, getScopedClients, request }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { start, end, types, datasetQuery } = params.query;
+    const { start, end, streams, datasetQuery } = params.query;
 
-    const indexPatterns = datasetQuery
+    const streamNames = datasetQuery
       ? [`${datasetQuery}${FAILURE_STORE_SELECTOR}`]
-      : types.map((type) => `${type}-*-*${FAILURE_STORE_SELECTOR}`);
+      : streams
+      ? streams.split(',').map((stream) => `${stream}${FAILURE_STORE_SELECTOR}`)
+      : [];
 
-    return await getAggregatedDatasetPaginatedResults({
+    const results = await getDocCountsForStreams({
       esClient,
-      index: indexPatterns.join(','),
+      streamNames,
       start,
       end,
     });
+
+    // Strip the ::failures suffix from dataset names so they match the base stream names
+    return results.map((result) => ({
+      ...result,
+      dataset: result.dataset.replace(FAILURE_STORE_SELECTOR, ''),
+    }));
   },
 });
 
@@ -90,25 +100,29 @@ const totalDocCountsRoute = createServerRoute({
   options: {
     access: 'internal',
   },
+  params: z.object({
+    query: docCountsQuerySchema,
+  }),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    query: docCountsQuerySchema,
-  }),
   handler: async ({ params, getScopedClients, request }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { start, end, types, datasetQuery } = params.query;
+    const { start, end, streams, datasetQuery } = params.query;
 
-    const indexPatterns = datasetQuery ? [datasetQuery] : types.map((type) => `${type}-*-*`);
+    const streamNames = datasetQuery
+      ? [datasetQuery]
+      : streams
+      ? streams.split(',')
+      : [];
 
-    return await getAggregatedDatasetPaginatedResults({
+    return await getDocCountsForStreams({
       esClient,
-      index: indexPatterns.join(','),
+      streamNames,
       start,
       end,
     });

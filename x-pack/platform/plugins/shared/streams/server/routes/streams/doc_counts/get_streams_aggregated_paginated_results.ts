@@ -5,110 +5,87 @@
  * 2.0.
  */
 
-import type {
-  AggregationsCompositeAggregateKey,
-  QueryDslBoolQuery,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslBoolQuery, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { StreamDocsStat } from '../../../../common';
 
-interface Dataset extends AggregationsCompositeAggregateKey {
-  dataset: string;
-}
+const BATCH_SIZE = 100;
 
-const SIZE_LIMIT = 10000;
-
-export async function getAggregatedDatasetPaginatedResults(options: {
+/**
+ * Fetches document counts for multiple streams using msearch to batch requests.
+ * This approach queries each stream individually, avoiding reliance on backing index naming patterns.
+ */
+export async function getDocCountsForStreams(options: {
   esClient: ElasticsearchClient;
-  index: string;
+  streamNames: string[];
   start: string;
   end: string;
   query?: QueryDslBoolQuery;
-  after?: Dataset;
-  prevResults?: StreamDocsStat[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, index, query, start, end, after, prevResults = [] } = options;
+  const { esClient, streamNames, start, end, query } = options;
 
-  const aggs = (afterKey?: Dataset) => ({
-    datasets: {
-      composite: {
-        ...(afterKey ? { after: afterKey } : {}),
-        size: SIZE_LIMIT,
-        sources: [{ dataset: { terms: { field: '_index' } } }],
+  if (streamNames.length === 0) {
+    return [];
+  }
+
+  const rangeFilter: QueryDslQueryContainer = {
+    range: {
+      '@timestamp': {
+        gte: start,
+        lte: end,
       },
     },
-  });
-
-  const rangeFilter: QueryDslQueryContainer[] = [
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-        },
-      },
-    },
-  ];
-
-  const bool: QueryDslBoolQuery = {
-    ...query,
-    filter: [
-      ...(query?.filter ? (Array.isArray(query.filter) ? query.filter : [query.filter]) : []),
-      ...rangeFilter,
-    ],
   };
 
-  const response = await esClient.search({
-    index,
-    size: 0,
-    query: {
-      bool,
-    },
-    aggs: aggs(after),
-    ignore_unavailable: true,
-  });
+  const results: StreamDocsStat[] = [];
 
-  const currResults: StreamDocsStat[] =
-    response.aggregations?.datasets.buckets.map((bucket) => ({
-      dataset: bucket.key.dataset as string,
-      count: bucket.doc_count,
-    })) ?? [];
+  // Process streams in batches to avoid overwhelming Elasticsearch
+  for (let i = 0; i < streamNames.length; i += BATCH_SIZE) {
+    const batch = streamNames.slice(i, i + BATCH_SIZE);
 
-  const results = [...prevResults, ...currResults];
+    // Build msearch body: alternating index line and query body
+    const searches = batch.flatMap((streamName) => [
+      { index: streamName },
+      {
+        size: 0,
+        track_total_hits: true,
+        query: {
+          bool: {
+            ...query,
+            filter: [
+              ...(query?.filter ? (Array.isArray(query.filter) ? query.filter : [query.filter]) : []),
+              rangeFilter,
+            ],
+          },
+        },
+      },
+    ]);
 
-  if (
-    response.aggregations?.datasets.after_key &&
-    response.aggregations?.datasets.buckets.length === SIZE_LIMIT
-  ) {
-    return getAggregatedDatasetPaginatedResults({
-      esClient,
-      index,
-      start,
-      end,
-      after:
-        (response.aggregations?.datasets.after_key as {
-          dataset: string;
-        }) || after,
-      prevResults: results,
+    const { responses } = await esClient.msearch({
+      searches,
+    });
+
+    // Map responses back to stream names by position
+    responses.forEach((response, index) => {
+      const streamName = batch[index];
+      if ('error' in response) {
+        // Skip streams that error (e.g., don't exist or no permissions)
+        return;
+      }
+
+      const count =
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value ?? 0;
+
+      if (count > 0) {
+        results.push({
+          dataset: streamName,
+          count,
+        });
+      }
     });
   }
 
-  const aggregatedResults: Record<string, number> = results.reduce((acc, curr) => {
-    const dataset = extractIndexNameFromBackingIndex(curr.dataset);
-    acc[dataset] = (acc[dataset] ?? 0) + curr.count;
-    return acc;
-  }, {} as Record<string, number>);
-
-  return Object.entries(aggregatedResults).map(([dataset, count]) => ({
-    dataset,
-    count,
-  }));
-}
-
-const backingIndexPattern = /.(?:ds|fs)-(.*?)-[0-9]{4}\.[0-9]{2}\.[0-9]{2}-[0-9]{6}/;
-
-function extractIndexNameFromBackingIndex(indexString: string): string {
-  const match = indexString.match(backingIndexPattern);
-  return match ? match[1] : indexString;
+  return results;
 }

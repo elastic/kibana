@@ -70,6 +70,8 @@ export function Wrapper({
     canReadFailureStore: Streams.ingest.all.GetResponse.is(definition)
       ? definition.privileges.read_failure_store
       : true,
+    numDataPoints: 25,
+    streamNames: [streamId],
   });
   const docCountsFetch = getStreamDocCounts();
 
