@@ -113,7 +113,6 @@ export const ScheduledReportForm = ({
     actions: { validateEmailAddresses },
     userProfile: userProfileService,
   } = useKibana().services;
-  console.log({ validateEmailAddresses });
   const { data: userProfile, isLoading: isUserProfileLoading } = useGetUserProfileQuery({
     userProfileService,
   });
