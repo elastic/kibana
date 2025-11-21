@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
+import { useBoolean } from '@kbn/react-hooks';
 import {
   GAP_FILL_STATUS_FILTER_LABEL,
   GAP_FILL_STATUS_FILLED,
@@ -27,7 +28,7 @@ export const GapFillStatusSelector = ({
   selectedStatuses,
   onSelectedStatusesChanged,
 }: GapFillStatusSelectorProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, { off: close, toggle }] = useBoolean(false);
 
   const options: EuiSelectableOption[] = useMemo(
     () => [
@@ -62,7 +63,7 @@ export const GapFillStatusSelector = ({
     <EuiFilterButton
       grow
       iconType="arrowDown"
-      onClick={() => setIsOpen(!isOpen)}
+      onClick={toggle}
       numFilters={options.length}
       isSelected={isOpen}
       hasActiveFilters={selectedStatuses.length > 0}
@@ -78,7 +79,7 @@ export const GapFillStatusSelector = ({
       ownFocus
       button={trigger}
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={close}
       panelPaddingSize="none"
       repositionOnScroll
     >
