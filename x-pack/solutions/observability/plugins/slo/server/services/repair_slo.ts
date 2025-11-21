@@ -7,21 +7,15 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { type Logger } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { RepairParams } from '@kbn/slo-schema';
 import pLimit from 'p-limit';
-import { KibanaSavedObjectsSLORepository } from './slo_repository';
 import { computeHealth, getTransformStatsForSLO } from './slo_transform_health';
 import { getSLOTransformId, getSLOSummaryTransformId } from '../../common/constants';
-import { DefaultTransformManager } from './transform_manager';
-import { DefaultSummaryTransformManager } from './summay_transform_manager';
-import { DefaultSummaryTransformGenerator } from './summary_transform_generator/summary_transform_generator';
-import { createTransformGenerators } from './transform_generators';
-import { SO_SLO_TYPE } from '../saved_objects';
-import type { SLODefinition, StoredSLODefinition } from '../domain/models/slo';
+import type { DefaultTransformManager } from './transform_manager';
+import type { DefaultSummaryTransformManager } from './summay_transform_manager';
+import type { SLODefinition } from '../domain/models/slo';
+import type { SLORepository } from './slo_repository';
 
 interface RepairAction {
   sloId: string;
@@ -34,13 +28,22 @@ interface RepairAction {
 export class RepairSLO {
   constructor(
     private logger: Logger,
-    private internalSoClient: SavedObjectsClientContract,
     private scopedClusterClient: IScopedClusterClient,
-    private dataViewService: DataViewsService
+    private repository: SLORepository,
+    private transformManager: DefaultTransformManager,
+    private summaryTransformManager: DefaultSummaryTransformManager
   ) {}
 
   public async execute(params: RepairParams): Promise<unknown> {
+    if (params.list.length > 100) {
+      throw new Error('Cannot repair more than 100 SLOs at once');
+    }
+
     try {
+      // use pLimiter(10)
+      // find definitions for the provided list, dedup/filter out the inexistant tuples (ids.)
+      // definitions.map({...definition, instanceId})
+
       const healthData = await Promise.all(
         params.list.map(async (item) => {
           const transformStatsById = await getTransformStatsForSLO(this.scopedClusterClient, {
@@ -101,39 +104,15 @@ export class RepairSLO {
             continue;
           }
 
-          const sloDefinition = await this.findSloDefinition(
-            this.internalSoClient,
-            sloId,
-            revision
-          );
+          const sloDefinition = await this.repository.findById(sloId);
 
+          // alreasdy done at the beginning
           if (!sloDefinition) {
             this.logger.warn(`SLO [${sloId}] revision [${revision}] not found, skipping repairs`);
             errorCount++;
             allResults.push({ id: sloId, success: false, error: 'SLO not found' });
             continue;
           }
-
-          const spaceId = sloDefinition.namespace || 'default';
-
-          const isServerless = false;
-          const transformGenerators = createTransformGenerators(
-            spaceId,
-            this.dataViewService,
-            isServerless
-          );
-
-          const transformManager = new DefaultTransformManager(
-            transformGenerators,
-            this.scopedClusterClient,
-            this.logger
-          );
-
-          const summaryTransformManager = new DefaultSummaryTransformManager(
-            new DefaultSummaryTransformGenerator(),
-            this.scopedClusterClient,
-            this.logger
-          );
 
           const limiter = pLimit(3);
 
@@ -142,9 +121,9 @@ export class RepairSLO {
               try {
                 await this.executeRepairAction(
                   action,
-                  sloDefinition.slo,
-                  transformManager,
-                  summaryTransformManager
+                  sloDefinition,
+                  this.transformManager,
+                  this.summaryTransformManager
                 );
                 successCount++;
                 return { id: sloId, success: true };
@@ -221,23 +200,13 @@ export class RepairSLO {
           sloEnabled,
         });
       } else if (health.rollup.match === false) {
-        if (health.rollup.transformState === 'stopped' && sloEnabled) {
-          actions.push({
-            sloId,
-            sloRevision,
-            action: 'start-transform',
-            transformType: 'rollup',
-            sloEnabled,
-          });
-        } else if (health.rollup.transformState === 'started' && !sloEnabled) {
-          actions.push({
-            sloId,
-            sloRevision,
-            action: 'stop-transform',
-            transformType: 'rollup',
-            sloEnabled,
-          });
-        }
+        actions.push({
+          sloId,
+          sloRevision,
+          action: sloEnabled ? 'start-transform' : 'stop-transform',
+          transformType: 'rollup',
+          sloEnabled,
+        });
       }
 
       // Check summary transform
@@ -250,65 +219,17 @@ export class RepairSLO {
           sloEnabled,
         });
       } else if (health.summary.match === false) {
-        if (health.summary.transformState === 'stopped' && sloEnabled) {
-          actions.push({
-            sloId,
-            sloRevision,
-            action: 'start-transform',
-            transformType: 'summary',
-            sloEnabled,
-          });
-        } else if (health.summary.transformState === 'started' && !sloEnabled) {
-          actions.push({
-            sloId,
-            sloRevision,
-            action: 'stop-transform',
-            transformType: 'summary',
-            sloEnabled,
-          });
-        }
+        actions.push({
+          sloId,
+          sloRevision,
+          action: sloEnabled ? 'start-transform' : 'stop-transform',
+          transformType: 'summary',
+          sloEnabled,
+        });
       }
     }
 
     return actions;
-  }
-
-  private async findSloDefinition(
-    soClient: SavedObjectsClientContract,
-    sloId: string,
-    revision: number
-  ): Promise<{ slo: SLODefinition; namespace: string } | null> {
-    try {
-      const response = await soClient.find({
-        type: SO_SLO_TYPE,
-        page: 1,
-        perPage: 1,
-        filter: `slo.attributes.id:(${sloId})`,
-        namespaces: [ALL_SPACES_ID],
-      });
-
-      if (response.total === 0) {
-        return null;
-      }
-
-      const savedObject = response.saved_objects[0] as (typeof response.saved_objects)[0] & {
-        attributes: StoredSLODefinition;
-      };
-      const repository = new KibanaSavedObjectsSLORepository(soClient, this.logger);
-      const slo = repository.toSLO(savedObject);
-
-      if (!slo || slo.revision !== revision) {
-        return null;
-      }
-
-      return {
-        slo,
-        namespace: savedObject.namespaces?.[0] || 'default',
-      };
-    } catch (err) {
-      this.logger.error(`Failed to find SLO definition for [${sloId}]: ${err}`);
-      return null;
-    }
   }
 
   private async executeRepairAction(
