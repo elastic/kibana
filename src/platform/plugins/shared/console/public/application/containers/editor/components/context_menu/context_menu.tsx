@@ -13,6 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
@@ -275,11 +276,21 @@ export const ContextMenu = ({
             id="selectLanguage"
             onClick={() => setLanguageSelectorVisibility(true)}
             icon="editorCodeBlock"
+            disabled={isRequestConverterLoading}
           >
-            <FormattedMessage
-              id="console.monaco.requestOptions.selectLanguageButtonLabel"
-              defaultMessage="Select language"
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={true}>
+                <FormattedMessage
+                  id="console.monaco.requestOptions.selectLanguageButtonLabel"
+                  defaultMessage="Select language"
+                />
+              </EuiFlexItem>
+              {isRequestConverterLoading && (
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="s" />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiContextMenuItem>,
         ]
       : []),
