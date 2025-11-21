@@ -31,6 +31,5 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/task-manager-plugin",
     "@kbn/inference-langchain",
-    "@kbn/management-settings-ids"
   ]
 }
