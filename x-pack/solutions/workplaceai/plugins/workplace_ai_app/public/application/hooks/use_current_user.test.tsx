@@ -34,9 +34,7 @@ describe('useCurrentUser', () => {
   };
 
   it('returns undefined initially while loading', () => {
-    mockGetCurrentUser.mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({ username: 'test' }), 100))
-    );
+    mockGetCurrentUser.mockResolvedValue({ username: 'test' });
 
     mockUseKibana.mockReturnValue({
       services: {
