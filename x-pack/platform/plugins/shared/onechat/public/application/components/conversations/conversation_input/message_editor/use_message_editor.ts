@@ -37,9 +37,8 @@ export const useMessageEditor = (): MessageEditorInstance => {
   const [isEmpty, setIsEmpty] = useState(true);
 
   const syncIsEmpty = useCallback(() => {
-    const content = ref.current?.textContent ?? '';
-    const nextIsEmpty = content.trim() === '';
-    setIsEmpty(nextIsEmpty);
+    const content = ref.current?.textContent?.trim() ?? '';
+    setIsEmpty(content === '');
   }, []);
 
   const instance = useMemo(

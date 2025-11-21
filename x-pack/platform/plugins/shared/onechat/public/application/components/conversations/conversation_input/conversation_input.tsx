@@ -25,7 +25,38 @@ import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id'
 import { ConversationInputActions } from './conversation_input_actions';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 
-const MIN_HEIGHT = 150;
+const INPUT_MIN_HEIGHT = '150px';
+// Non-standard EUI border radius
+const INPUT_BORDER_RADIUS = '6px';
+const useInputBorderStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return css`
+    border: ${euiTheme.border.thin};
+    border-radius: ${INPUT_BORDER_RADIUS};
+    border-color: ${euiTheme.colors.borderBaseSubdued};
+    &:focus-within[aria-disabled='false'] {
+      border-color: ${euiTheme.colors.primary};
+    }
+  `;
+};
+const useInputShadowStyles = () => {
+  return css`
+    ${useEuiShadow('s')}
+    &:hover {
+      ${useEuiShadowHover('s')}
+    }
+    &:focus-within[aria-disabled='false'] {
+      ${useEuiShadow('xl')}
+      :hover {
+        ${useEuiShadowHover('xl')}
+      }
+    }
+  `;
+};
+
+const containerAriaLabel = i18n.translate('xpack.onechat.conversationInput.container.label', {
+  defaultMessage: 'Message input form',
+});
 
 const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
   children,
@@ -34,25 +65,14 @@ const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
   const { euiTheme } = useEuiTheme();
   const inputContainerStyles = css`
     width: 100%;
-    min-height: ${MIN_HEIGHT}px;
+    min-height: ${INPUT_MIN_HEIGHT};
     padding: ${euiTheme.size.base};
+    flex-grow: 0;
     transition: box-shadow 250ms, border-color 250ms;
 
-    ${useEuiShadow('s')}
-    border: ${euiTheme.border.thin};
-    border-color: ${euiTheme.colors.borderBaseSubdued};
-    border-radius: 6px;
-    flex-grow: 0;
-    &:focus-within[aria-disabled='false'] {
-      ${useEuiShadow('xl')}
-      border-color: ${euiTheme.colors.primary};
-      :hover {
-        ${useEuiShadowHover('xl')}
-      }
-    }
-    &:hover {
-      ${useEuiShadowHover('s')}
-    }
+    ${useInputBorderStyles()}
+    ${useInputShadowStyles()}
+
     &[aria-disabled='true'] {
       background-color: ${euiTheme.colors.backgroundBaseDisabled};
     }
@@ -67,9 +87,7 @@ const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
       alignItems="stretch"
       justifyContent="center"
       data-test-subj="agentBuilderConversationInputForm"
-      aria-label={i18n.translate('xpack.onechat.conversationInput.container.label', {
-        defaultMessage: 'Message input form',
-      })}
+      aria-label={containerAriaLabel}
       aria-disabled={isDisabled}
     >
       {children}
