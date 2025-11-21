@@ -40,6 +40,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Dataset quality table', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/243760
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
