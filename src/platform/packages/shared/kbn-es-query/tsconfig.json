@@ -19,7 +19,8 @@
     "@kbn/esql-types",
     "@kbn/es-query-server",
     "@kbn/es-query-constants",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/logging"
   ],
   "exclude": [
     "target/**/*",
