@@ -16,6 +16,7 @@ import { BehaviorSubject } from 'rxjs';
 import { registerReactEmbeddableFactory } from './react_embeddable_registry';
 import { EmbeddableRenderer } from './react_embeddable_renderer';
 import type { EmbeddableFactory } from './types';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
   type: 'test',
@@ -204,17 +205,20 @@ describe('embeddable renderer', () => {
     setupPresentationPanelServices();
 
     const onApiAvailable = jest.fn();
+    // EuiThemeProvider is necessary to get around the complex way the error panel is rendered
     const embeddable = render(
-      <EmbeddableRenderer
-        type={'errorInBuildEmbeddable'}
-        maybeId={'12345'}
-        onApiAvailable={onApiAvailable}
-        getParentApi={() => ({
-          getSerializedStateForChild: () => ({
-            rawState: {},
-          }),
-        })}
-      />
+      <EuiThemeProvider>
+        <EmbeddableRenderer
+          type={'errorInBuildEmbeddable'}
+          maybeId={'12345'}
+          onApiAvailable={onApiAvailable}
+          getParentApi={() => ({
+            getSerializedStateForChild: () => ({
+              rawState: {},
+            }),
+          })}
+        />
+      </EuiThemeProvider>
     );
 
     await waitFor(() =>
