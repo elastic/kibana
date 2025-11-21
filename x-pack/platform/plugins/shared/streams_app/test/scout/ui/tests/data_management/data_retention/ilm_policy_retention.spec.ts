@@ -12,8 +12,6 @@ import {
   openRetentionModal,
   saveRetentionChanges,
   toggleInheritSwitch,
-  verifyRetentionBadge,
-  BADGE_TEXT,
 } from '../../../fixtures/retention_helpers';
 
 test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
