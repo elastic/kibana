@@ -8408,6 +8408,15 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:synthetics-privates-locations/share_to_space",
                 "ui:uptime/canManagePrivateLocations",
               ],
+              "can_read_params": Array [
+                "login:",
+                "saved_object:synthetics-param/bulk_get",
+                "saved_object:synthetics-param/get",
+                "saved_object:synthetics-param/find",
+                "saved_object:synthetics-param/open_point_in_time",
+                "saved_object:synthetics-param/close_point_in_time",
+                "ui:uptime/canReadParams",
+              ],
               "elastic_managed_locations_enabled": Array [
                 "login:",
                 "ui:uptime/elasticManagedLocationsEnabled",
