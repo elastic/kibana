@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * Describes the raw status of individual gap documents regarding to the gap fill process.
+ */
 export const gapStatus = {
   UNFILLED: 'unfilled',
   FILLED: 'filled',
@@ -13,6 +16,12 @@ export const gapStatus = {
 
 export type GapStatus = (typeof gapStatus)[keyof typeof gapStatus];
 
+/**
+ * Represents the status of a gap fill process for a rule.
+ * This is a derived, per-rule aggregation that summarizes how well
+ * the set of gaps for a rule has been filled. It is calculated from the gap
+ * duration sums with precedence: unfilled > in_progress > filled.
+ */
 export const gapFillStatus = {
   UNFILLED: 'unfilled',
   IN_PROGRESS: 'in_progress',

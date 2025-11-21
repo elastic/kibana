@@ -11,6 +11,8 @@ import { gapFillStatus, gapStatus } from '../../../../../../common';
 export const getRuleIdsWithGapsParamsSchema = schema.object({
   start: schema.maybe(schema.string()),
   end: schema.maybe(schema.string()),
+  // Filters the underlying gap documents before aggregation. Matches the raw
+  // per-gap statuses.
   statuses: schema.maybe(
     schema.arrayOf(
       schema.oneOf([
@@ -20,6 +22,8 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
       ])
     )
   ),
+  // Derived, per-rule status filter computed from the aggregated gap duration
+  // sums with precedence: unfilled > in_progress > filled.
   highestPriorityGapFillStatuses: schema.maybe(
     schema.arrayOf(
       schema.oneOf([

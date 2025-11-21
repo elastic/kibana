@@ -11,6 +11,8 @@ export const getRuleIdsWithGapBodySchema = schema.object(
   {
     end: schema.string(),
     start: schema.string(),
+    // Filters the underlying gap documents before aggregation. Matches the raw
+    // per-gap statuses.
     statuses: schema.maybe(
       schema.arrayOf(
         schema.oneOf([
@@ -20,6 +22,8 @@ export const getRuleIdsWithGapBodySchema = schema.object(
         ])
       )
     ),
+    // Filters by the derived, per-rule status that is calculated from gap
+    // duration sums (unfilled > in_progress > filled precedence).
     highest_priority_gap_fill_statuses: schema.maybe(
       schema.arrayOf(
         schema.oneOf([
