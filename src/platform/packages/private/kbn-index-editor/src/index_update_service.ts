@@ -976,6 +976,10 @@ export class IndexUpdateService {
     bulkOperations: Exclude<BulkRequest['operations'], undefined>;
     bulkResponse: BulkResponse;
   }> {
+    const indexName = this.getIndexName();
+    if (!indexName) {
+      throw new Error('Index name is not set');
+    }
     const deletingDocIds: string[] = updates
       .filter(isDocDelete)
       .map((v) => v.payload.ids)
@@ -1028,7 +1032,7 @@ export class IndexUpdateService {
     });
 
     const bulkResponse = await this.http.post<BulkResponse>(
-      `${LOOKUP_INDEX_UPDATE_ROUTE}/${encodeURIComponent(this.getIndexName()!)}`,
+      `${LOOKUP_INDEX_UPDATE_ROUTE}/${encodeURIComponent(indexName)}`,
       {
         body,
       }
@@ -1041,13 +1045,17 @@ export class IndexUpdateService {
   }
 
   private async updateIndexMappings(newFields: Record<string, { type: string }>): Promise<void> {
+    const indexName = this.getIndexName();
+    if (!indexName) {
+      throw new Error('Index name is not set');
+    }
     const body = JSON.stringify({
       properties: newFields,
     });
 
     try {
       await this.http.put(
-        `${LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE}/${encodeURIComponent(this.getIndexName()!)}`,
+        `${LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE}/${encodeURIComponent(indexName)}`,
         {
           body,
         }
