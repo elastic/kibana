@@ -34,7 +34,7 @@ export const findMaintenanceWindowsQuerySchema = schema.object(
       schema.oneOf([maintenanceWindowStatusSchema, schema.arrayOf(maintenanceWindowStatusSchema)], {
         meta: {
           description:
-            'The status of the maintenance window. One of "running", "upcoming", "finished" or "archived" or "disabled".',
+            'The status of the maintenance window. One of "running", "upcoming", "finished", "archived" or "disabled".',
         },
       })
     ),
