@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, EuiThemeProvider, useIsDarkMode } from '@elastic/eui';
+import { EuiBetaBadge, EuiThemeProvider } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -25,7 +25,6 @@ interface BetaBadgeProps {
  * It can be aligned to the middle or bottom of the text.
  */
 export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeProps) => {
-  const isDarkMode = useIsDarkMode();
   const betaBadgeStyles = css`
     vertical-align: ${alignment === 'text-bottom' ? 'text-bottom' : 'bottom'};
   `;
@@ -47,7 +46,7 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
 
   return (
     <EuiThemeProvider
-      colorMode={isInverted && !isDarkMode ? 'inverse' : undefined}
+      colorMode={isInverted ? 'dark' : undefined}
       wrapperProps={{ cloneElement: true }}
     >
       <EuiBetaBadge
