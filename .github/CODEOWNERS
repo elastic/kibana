@@ -1683,7 +1683,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality @elastic/obs-onboarding-team
 /x-pack/solutions/observability/plugins/observability/public/pages/landing @elastic/obs-onboarding-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/data_quality/ @elastic/obs-onboarding
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/ @elastic/obs-onboarding
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/ @elastic/obs-onboarding
 
 # Observability-ui
