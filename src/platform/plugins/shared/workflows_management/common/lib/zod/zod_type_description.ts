@@ -193,20 +193,24 @@ function generateDetailedDescription(
 
     case 'default': {
       const defaultSchema = schema as z.ZodDefault<z.ZodType>;
-      const innerType = generateDetailedDescription(defaultSchema.removeDefault(), currentDepth, {
-        maxDepth,
-        showOptional,
-        includeDescriptions,
-        indentSpacesNumber,
-        singleLine,
-      });
+      const innerType = generateDetailedDescription(
+        defaultSchema.unwrap() as z.ZodType,
+        currentDepth,
+        {
+          maxDepth,
+          showOptional,
+          includeDescriptions,
+          indentSpacesNumber,
+          singleLine,
+        }
+      );
       return innerType;
     }
 
     case 'record': {
       const recordSchema = schema as z.ZodRecord;
       const valueType = generateDetailedDescription(
-        recordSchema.valueType || z.any(),
+        (recordSchema.valueType as z.ZodType) || z.any(),
         currentDepth + 1,
         {
           maxDepth,
