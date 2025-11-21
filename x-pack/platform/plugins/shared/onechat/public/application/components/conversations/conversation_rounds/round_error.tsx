@@ -23,6 +23,7 @@ import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { isContextLengthExceededAgentError } from '@kbn/onechat-common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { docLinks } from '../../../../../common/doc_links';
 
 interface RoundErrorProps {
   error: unknown;
@@ -102,7 +103,7 @@ const ContextExceededError: React.FC<{ onRetry: () => void }> = ({ onRetry }) =>
                 values={{
                   docsLink: (
                     <EuiLink
-                      href="https://www.elastic.co/docs/solutions/search/agent-builder/limitations-known-issues#conversation-length-exceeded"
+                      href={`${docLinks.limitationsKnownIssues}#conversation-length-exceeded`}
                       external
                       target="_blank"
                     >
