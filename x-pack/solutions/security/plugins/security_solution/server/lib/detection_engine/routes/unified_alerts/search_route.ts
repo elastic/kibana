@@ -7,7 +7,11 @@
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
+  UPGRADE_LICENSE_MESSAGE,
+  hasAIAssistantLicense,
+} from '@kbn/elastic-assistant-common';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 
 import { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
@@ -39,6 +43,16 @@ export const searchUnifiedAlertsRoute = (
         },
       },
       async (context, request, response) => {
+        // Accessing attacks requires assistant license
+        const license = (await context.licensing).license;
+        if (!hasAIAssistantLicense(license)) {
+          return response.forbidden({
+            body: {
+              message: UPGRADE_LICENSE_MESSAGE,
+            },
+          });
+        }
+
         const getIndexPattern = async () => {
           const spaceId = (await context.securitySolution).getSpaceId();
           const alertsIndex = ruleDataClient?.indexNameWithNamespace(spaceId);

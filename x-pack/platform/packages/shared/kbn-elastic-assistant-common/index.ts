@@ -54,6 +54,11 @@ export {
 
 export * from './constants';
 
+/**
+ * Licensing requirements check
+ */
+export { hasAIAssistantLicense } from './impl/utils/has_assistant_license';
+
 /** currently the same shape as "fields" property in the ES response */
 export { type MaybeRawData } from './impl/alerts/helpers/types';
 
