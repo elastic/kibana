@@ -12,10 +12,10 @@ describe('getErrorCountByDocId', () => {
   it('counts errors grouped by doc id from apmErrors and unprocessedOtelErrors', () => {
     const unifiedTraceErrors = {
       apmErrors: [
-        { parent: { id: 'a' } },
-        { parent: { id: 'a' } },
-        { parent: { id: 'b' } },
-        { parent: { id: undefined } },
+        { parentId: 'a' },
+        { parentId: 'a' },
+        { parentId: 'b' },
+        { parentId: undefined },
       ],
       unprocessedOtelErrors: [{ id: 'a' }, { id: 'c' }, { id: undefined }],
       totalErrors: 5,
@@ -42,7 +42,7 @@ describe('getErrorCountByDocId', () => {
 
   it('ignores errors with undefined ids', () => {
     const unifiedTraceErrors = {
-      apmErrors: [{ parent: { id: undefined } }],
+      apmErrors: [{ parentId: undefined }],
       unprocessedOtelErrors: [{ id: undefined }],
       totalErrors: 0,
     } as unknown as UnifiedTraceErrors;
