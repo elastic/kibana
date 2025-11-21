@@ -350,7 +350,6 @@ describe('attackDiscoveryScheduleExecutor', () => {
           'Critical Malware and Phishing Alerts on host e1cb3cf0-30f3-4f99-a9c8-518b955c6f90',
         'kibana.alert.attack_discovery.title_with_replacements':
           'Critical Malware and Phishing Alerts on host Test-Host-1',
-        'kibana.alert.attack_ids': ['fake-alert'],
       },
       context: {
         attack: {
