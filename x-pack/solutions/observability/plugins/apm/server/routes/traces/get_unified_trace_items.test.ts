@@ -15,10 +15,12 @@ describe('getErrorsByDocId', () => {
         { spanId: 'a', id: 'error-1' },
         { spanId: 'a', id: 'error-2' },
         { spanId: 'b', id: 'error-3' },
+        { spanId: undefined, id: 'error-4' },
       ],
       unprocessedOtelErrors: [
         { spanId: 'a', id: 'error-5' },
         { spanId: 'c', id: 'error-6' },
+        { spanId: undefined, id: 'error-7' },
       ],
       totalErrors: 7,
     } as UnifiedTraceErrors;
