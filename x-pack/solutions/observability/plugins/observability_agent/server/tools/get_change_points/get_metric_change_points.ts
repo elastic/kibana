@@ -7,7 +7,7 @@
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateOf, AggregateOfMap, ChangePointType } from '@kbn/es-types/src/search';
+import type { AggregateOf, AggregateOfMap } from '@kbn/es-types/src/search';
 import { orderBy } from 'lodash';
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
@@ -19,8 +19,9 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../../types';
-import { dateHistogram, getFilters } from './common';
+import { dateHistogram, getFilters, type ChangePoint } from './common';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
+import { getTypedSearch } from '../../utils/get_typed_search';
 
 export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
   'observability.get_metric_change_points';
@@ -149,7 +150,9 @@ export async function getMetricChangePoints({
       } as AggregationsAggregationContainer,
     };
 
-    const response = await esClient.asCurrentUser.search({
+    const search = getTypedSearch(esClient.asCurrentUser);
+
+    const response = await search({
       index,
       size: 0,
       track_total_hits: false,
@@ -172,7 +175,7 @@ export async function getMetricChangePoints({
         : []
     ) as Array<AggregateOfMap<typeof subAggs, unknown> & { key?: string; key_as_string?: string }>;
 
-    const series = groups.map((group) => {
+    const series = groups.reduce((acc, group) => {
       const key = group.key ?? 'all';
 
       const changes = group.changes as AggregateOf<
@@ -180,7 +183,14 @@ export async function getMetricChangePoints({
         unknown
       >;
 
-      return {
+      const [changeType, value] = Object.entries(changes.type)[0];
+
+      // filter out indeterminable changes
+      if (changes.type.indeterminable || !changes.bucket?.key) {
+        return acc;
+      }
+
+      const changePoint = {
         key,
         over_time: group.over_time.buckets.map((bucket) => {
           return {
@@ -188,16 +198,15 @@ export async function getMetricChangePoints({
             y: bucket.value?.value as number | null,
           };
         }),
-        changes:
-          changes.type.indeterminable || !changes.bucket?.key
-            ? { type: 'indeterminable' as ChangePointType }
-            : {
-                time: new Date(changes.bucket.key).toISOString(),
-                type: Object.keys(changes.type)[0] as keyof typeof changes.type,
-                ...Object.values(changes.type)[0],
-              },
+        changes: {
+          time: new Date(changes.bucket.key).toISOString(),
+          type: changeType,
+          ...value,
+        },
       };
-    });
+
+      return [...acc, changePoint];
+    }, [] as ChangePoint[]);
 
     return series;
   } catch (error) {

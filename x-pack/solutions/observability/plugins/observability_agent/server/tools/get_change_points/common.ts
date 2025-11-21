@@ -38,3 +38,16 @@ export const getFilters = ({
   ];
   return [...filters, ...(kqlFilter ? [toElasticsearchQuery(fromKueryExpression(kqlFilter))] : [])];
 };
+
+export interface ChangePoint {
+  key: string;
+  over_time: Array<{ x: number; y: number | null }>;
+  changes: {
+    time: string;
+    type: string;
+    change_point?: number;
+    r_value?: number;
+    trend?: string;
+    p_value?: number;
+  };
+}
