@@ -18,6 +18,7 @@ import {
   euiDragDropReorder,
   EuiSpacer,
   useEuiTheme,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -157,6 +158,38 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
       `}
     >
       <CurrentStreamEntry definition={definition} />
+
+      <EuiButtonGroup
+        className={css`
+          display: flex;
+          position: relative;
+          margin-top: ${euiTheme.size.s};
+          &::before {
+            content: '';
+            margin-top: -${euiTheme.size.s};
+            border-left: ${euiTheme.border.thin};
+            position: absolute;
+            top: 0;
+            left: ${euiTheme.size.base};
+            height: ${euiTheme.size.s};
+          }
+        `}
+        legend="Child streams type selector"
+        options={[
+          {
+            id: 'index',
+            label: 'Index',
+          },
+          {
+            id: 'query',
+            label: 'Query',
+          },
+        ]}
+        idSelected="index"
+        onChange={(id) => {}}
+        buttonSize="compressed"
+        color="primary"
+      />
 
       {/* Scrollable routing rules container */}
       <EuiFlexItem
