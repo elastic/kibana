@@ -104,17 +104,19 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             )}
           </>
         )}
-        <EuiFlexItem>
-          <HeaderMenu
-            emptyButton
-            useCustomActions
-            iconType="list"
-            actions={referencedLinks}
-            disableActions={false}
-            text={i18n.AFFECTED_RULES(rules.length)}
-            dataTestSubj={dataTestSubj}
-          />
-        </EuiFlexItem>
+        {referencedLinks != null && (
+          <EuiFlexItem>
+            <HeaderMenu
+              emptyButton
+              useCustomActions
+              iconType="list"
+              actions={referencedLinks}
+              disableActions={false}
+              text={i18n.AFFECTED_RULES(rules.length)}
+              dataTestSubj={dataTestSubj}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }

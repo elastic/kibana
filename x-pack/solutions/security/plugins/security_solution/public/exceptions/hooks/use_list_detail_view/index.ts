@@ -54,8 +54,10 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { navigateToApp } = services.application;
 
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
-  const { read: canReadExceptions, crud: canCrudExceptions } =
-    useUserPrivileges().rulesPrivileges.exceptions;
+  const {
+    exceptions: { crud: canCrudExceptions },
+    rules: { read: canReadRules },
+  } = useUserPrivileges().rulesPrivileges;
 
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canUserWriteCurrentList =
@@ -113,11 +115,11 @@ export const useListDetailsView = (exceptionListId: string) => {
   const initializeListRules = useCallback(
     async (result: Awaited<ReturnType<typeof getListById>>) => {
       if (result) {
-        const listRules = await getListRules(result.list_id);
+        const listRules = canReadRules ? await getListRules(result.list_id) : [];
         setLinkedRules(listRules);
       }
     },
-    []
+    [canReadRules]
   );
 
   const initializeList = useCallback(async () => {
@@ -412,7 +414,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   return {
     isLoading,
     invalidListId,
-    isReadOnly: !!(!canUserWriteCurrentList && canReadExceptions),
+    isReadOnly: !canUserWriteCurrentList,
     list,
     listName: list?.name,
     listDescription: list?.description,
