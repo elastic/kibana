@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../../helpers';
-import type { NodeAllocationTestBed } from './cold_phase.helpers';
-import { setupColdPhaseNodeAllocation } from './cold_phase.helpers';
+import { screen } from '@testing-library/react';
+import { setupEnvironment } from '../../../helpers/setup_environment';
+import { renderEditPolicy } from '../../../helpers/render_edit_policy';
+import { createTogglePhaseAction } from '../../../helpers/actions/toggle_phase_action';
+import { createNodeAllocationActions } from '../../../helpers/actions/node_allocation_actions';
 
 describe('<EditPolicy /> node allocation in the cold phase', () => {
-  let testBed: NodeAllocationTestBed;
-  const { httpSetup, setDelayResponse, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -23,12 +23,11 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
   });
 
   const setup = async () => {
-    await act(async () => {
-      testBed = await setupColdPhaseNodeAllocation(httpSetup);
-    });
+    renderEditPolicy(httpSetup);
+    await screen.findByTestId('savePolicyButton');
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     httpRequestsMockHelpers.setLoadPolicies([]);
     httpRequestsMockHelpers.setListNodes({
       nodesByRoles: { data: ['node1'] },
@@ -38,11 +37,6 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
     httpRequestsMockHelpers.setNodesDetails('attribute:true', [
       { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
     ]);
-
-    await setup();
-
-    const { component } = testBed;
-    component.update();
   });
 
   test(`doesn't offer allocation guidance when node with deprecated "data" role exists`, async () => {
@@ -52,10 +46,13 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
       isUsingDeprecatedDataRoleConfig: false,
     });
     await setup();
-    const { actions, component } = testBed;
 
-    component.update();
-    await actions.toggleColdPhase();
+    const togglePhase = createTogglePhaseAction();
+    const actions = createNodeAllocationActions('cold');
+
+    await togglePhase('cold');
+
+    await screen.findByTestId('cold-phase');
 
     expect(actions.isAllocationLoading()).toBeFalsy();
     expect(actions.hasWillUseFallbackTierNotice()).toBeFalsy();
@@ -63,30 +60,33 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
 
   describe('when using node attributes', () => {
     test('shows spinner for node attributes input when loading', async () => {
-      // We don't want the request to resolve immediately.
-      setDelayResponse(true);
+      await setup();
+      const togglePhase = createTogglePhaseAction();
+      const actions = createNodeAllocationActions('cold');
 
-      const { actions } = testBed;
-      await actions.toggleColdPhase();
+      // Override HTTP mock to freeze the node details request
+      httpSetup.get.mockImplementationOnce(() => new Promise(() => {}));
+
+      await togglePhase('cold');
 
       expect(actions.isAllocationLoading()).toBeTruthy();
       expect(actions.hasDataTierAllocationControls()).toBeTruthy();
       expect(actions.hasNodeAttributesSelect()).toBeFalsy();
 
-      // No notices will be shown.
       expect(actions.hasDefaultToDataTiersNotice()).toBeFalsy();
       expect(actions.hasWillUseFallbackTierUsingNodeAttributesNotice()).toBeFalsy();
       expect(actions.hasDefaultToDataNodesNotice()).toBeFalsy();
       expect(actions.hasNoTiersAvailableUsingNodeAttributesNotice()).toBeFalsy();
-
-      // Reset delayed response status
-      setDelayResponse(false);
     });
 
     describe('and some are defined', () => {
       test('shows the node attributes input', async () => {
-        const { actions } = testBed;
-        await actions.toggleColdPhase();
+        await setup();
+        const togglePhase = createTogglePhaseAction();
+        const actions = createNodeAllocationActions('cold');
+        await togglePhase('cold');
+
+        await screen.findByTestId('cold-phase');
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
@@ -96,9 +96,13 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
       });
 
       test('shows view node attributes link when an attribute is selected and shows flyout when clicked', async () => {
-        const { actions } = testBed;
+        await setup();
+        const togglePhase = createTogglePhaseAction();
+        const actions = createNodeAllocationActions('cold');
 
-        await actions.toggleColdPhase();
+        await togglePhase('cold');
+
+        await screen.findByTestId('cold-phase');
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
@@ -116,14 +120,19 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
 
     describe('and none are defined', () => {
       const commonSetupAndBaselineAssertions = async () => {
+        // Each test sets custom mocks before calling this helper
         await setup();
-        const { actions, component } = testBed;
-        component.update();
-        await actions.toggleColdPhase();
+        const togglePhase = createTogglePhaseAction();
+        const actions = createNodeAllocationActions('cold');
+        await togglePhase('cold');
+
+        await screen.findByTestId('cold-phase');
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
         expect(actions.hasNodeAttributesSelect()).toBeFalsy();
+
+        return { actions };
       };
 
       test('and data tiers are available, shows DefaultToDataTiersNotice', async () => {
@@ -133,8 +142,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
           isUsingDeprecatedDataRoleConfig: false,
         });
 
-        await commonSetupAndBaselineAssertions();
-        const { actions } = testBed;
+        const { actions } = await commonSetupAndBaselineAssertions();
         expect(actions.hasDefaultToDataTiersNotice()).toBeTruthy();
       });
 
@@ -145,8 +153,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
           isUsingDeprecatedDataRoleConfig: false,
         });
 
-        await commonSetupAndBaselineAssertions();
-        const { actions } = testBed;
+        const { actions } = await commonSetupAndBaselineAssertions();
         expect(actions.hasWillUseFallbackTierUsingNodeAttributesNotice()).toBeTruthy();
       });
 
@@ -157,8 +164,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
           isUsingDeprecatedDataRoleConfig: true,
         });
 
-        await commonSetupAndBaselineAssertions();
-        const { actions } = testBed;
+        const { actions } = await commonSetupAndBaselineAssertions();
         expect(actions.hasDefaultToDataNodesNotice()).toBeTruthy();
       });
 
@@ -170,8 +176,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
           isUsingDeprecatedDataRoleConfig: false,
         });
 
-        await commonSetupAndBaselineAssertions();
-        const { actions } = testBed;
+        const { actions } = await commonSetupAndBaselineAssertions();
         expect(actions.hasNoTiersAvailableUsingNodeAttributesNotice()).toBeTruthy();
       });
     });
@@ -186,10 +191,12 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
       });
 
       await setup();
-      const { actions, component } = testBed;
+      const togglePhase = createTogglePhaseAction();
+      const actions = createNodeAllocationActions('cold');
 
-      component.update();
-      await actions.toggleColdPhase();
+      await togglePhase('cold');
+
+      await screen.findByTestId('cold-phase');
 
       expect(actions.isAllocationLoading()).toBeFalsy();
       expect(actions.hasNoTiersAvailableNotice()).toBeTruthy();
@@ -213,10 +220,12 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
         });
 
         await setup();
-        const { actions, component } = testBed;
+        const togglePhase = createTogglePhaseAction();
+        const actions = createNodeAllocationActions('cold');
 
-        component.update();
-        await actions.toggleColdPhase();
+        await togglePhase('cold');
+
+        await screen.findByTestId('cold-phase');
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         expect(actions.hasWillUseFallbackTierNotice()).toBeTruthy();

@@ -135,6 +135,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               },
               routing: [],
             },
+            failure_store: { inherit: {} },
           } as WiredIngest,
         } as WiredStream.Definition);
       } catch (error) {
