@@ -24,7 +24,7 @@ import type {
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportService } from './services';
-import { TaskManagerService } from './services/task_manager';
+import { TaskManagerService } from './services/task_manager/task_manager_service';
 
 export class AutomaticImportV2Plugin
   implements

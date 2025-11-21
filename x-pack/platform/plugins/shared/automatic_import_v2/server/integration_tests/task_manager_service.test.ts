@@ -14,7 +14,7 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 import { AutomaticImportService } from '../services/automatic_import_service';
 import type { AutomaticImportSavedObjectService } from '../services/saved_objects/saved_objects_service';
-import { TaskManagerService } from '../services/task_manager';
+import { TaskManagerService } from '../services/task_manager/task_manager_service';
 import { TASK_STATUSES, INPUT_TYPES } from '../services/saved_objects/constants';
 import { createMockSecurity } from './__mocks__/security';
 import { httpServerMock } from '@kbn/core/server/mocks';

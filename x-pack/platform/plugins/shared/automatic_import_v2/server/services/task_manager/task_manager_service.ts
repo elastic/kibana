@@ -12,8 +12,8 @@ import type {
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
-import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from './constants';
-import { TASK_STATUSES } from './saved_objects/constants';
+import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
+import { TASK_STATUSES } from '../saved_objects/constants';
 
 const TASK_TYPE = 'autoImport-task';
 
@@ -127,7 +127,6 @@ export class TaskManagerService {
         this.logger.debug(`Task ${taskId}: Workflow executed`);
       } else {
         this.logger.warn(`Task ${taskId}: No workflow provided, using mock delay`);
-        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
 
       this.logger.info(`Task ${taskId} completed successfully`);
