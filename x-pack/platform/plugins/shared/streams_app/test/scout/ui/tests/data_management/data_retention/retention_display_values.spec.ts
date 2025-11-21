@@ -8,10 +8,12 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import {
+  closeToastsIfPresent,
   openRetentionModal,
   saveRetentionChanges,
   setCustomRetention,
   setIndefiniteRetention,
+  testRetentionConfigurations,
   toggleInheritSwitch,
   verifyRetentionDisplay,
   verifyRetentionBadge,
@@ -35,14 +37,7 @@ test.describe('Stream data retention - display values', { tag: ['@ess', '@svlObl
   });
 
   test.afterEach(async ({ apiServices, page }) => {
-    // Only close toasts if they exist
-    const toasts = page.locator('.euiToast');
-    if ((await toasts.count()) > 0) {
-      await page
-        .locator('.euiToast__closeButton')
-        .click({ timeout: 1000 })
-        .catch(() => {});
-    }
+    await closeToastsIfPresent(page);
     await apiServices.streams.clearStreamChildren('logs');
   });
 
@@ -82,20 +77,12 @@ test.describe('Stream data retention - display values', { tag: ['@ess', '@svlObl
   });
 
   test('should display all time units consistently', async ({ page }) => {
-    const testCases = [
-      { value: '7', unit: 'd' as const, display: '7 days' },
-      { value: '24', unit: 'h' as const, display: '24 hours' },
-      { value: '60', unit: 'm' as const, display: '60 minutes' },
-      { value: '3600', unit: 's' as const, display: '3600 seconds' },
-    ];
-
-    for (const testCase of testCases) {
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
-      await setCustomRetention(page, testCase.value, testCase.unit);
-      await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, testCase.display);
-    }
+    await testRetentionConfigurations(page, [
+      { value: '7', unit: 'd', display: '7 days' },
+      { value: '24', unit: 'h', display: '24 hours' },
+      { value: '60', unit: 'm', display: '60 minutes' },
+      { value: '3600', unit: 's', display: '3600 seconds' },
+    ]);
   });
 
   test('should display retention metric prominently', async ({ page }) => {

@@ -12,6 +12,8 @@ import {
   openRetentionModal,
   saveRetentionChanges,
   setCustomRetention,
+  setFailureStoreRetention,
+  toggleFailureStore,
   toggleInheritSwitch,
   verifyRetentionDisplay,
 } from '../../../fixtures/retention_helpers';
@@ -58,15 +60,8 @@ test.describe(
     }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      // Update the retention period
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('custom').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByTestId('selectFailureStorePeriodValue').fill('7');
-      await page.getByTestId('failureStoreModalSaveButton').click();
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('7 days')
-      ).toBeVisible();
+      await setFailureStoreRetention(page, '7', 'd');
+      await verifyRetentionDisplay(page, '7 days', true);
       await expect(
         page
           .getByTestId('failureStoreRetention-metric-subtitle')
@@ -77,10 +72,7 @@ test.describe(
     test('should disable failure store for classic streams', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      // Disable failure store
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await toggleFailureStore(page, false);
       await expect(
         page.getByTestId('disabledFailureStorePanel').getByText('Failure store disabled')
       ).toBeVisible();
@@ -89,13 +81,8 @@ test.describe(
     test('should enable failure store for classic streams', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      // Enable failure store again
-      await page.getByTestId('streamsAppFailureStoreEnableButton').click();
-      await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('30 days')
-      ).toBeVisible();
+      await toggleFailureStore(page, true);
+      await verifyRetentionDisplay(page, '30 days', true);
       await expect(
         page
           .getByTestId('failureStoreRetention-metric-subtitle')
@@ -161,12 +148,7 @@ test.describe(
       await verifyRetentionDisplay(page, '30 days');
 
       // Set failure store retention to 7 days
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('custom').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByTestId('selectFailureStorePeriodValue').clear();
-      await dialog.getByTestId('selectFailureStorePeriodValue').fill('7');
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await setFailureStoreRetention(page, '7', 'd');
 
       // Verify both are set correctly
       await verifyRetentionDisplay(page, '30 days');
@@ -179,19 +161,13 @@ test.describe(
     }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('custom').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByTestId('selectFailureStorePeriodValue').fill('21');
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await setFailureStoreRetention(page, '21', 'd');
 
       // Reload page
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
       // Verify value persists
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('21 days')
-      ).toBeVisible();
+      await verifyRetentionDisplay(page, '21 days', true);
     });
 
     test('should cancel failure store retention edit', async ({ page, pageObjects }) => {
@@ -216,9 +192,7 @@ test.describe(
     test('should show failure store disabled state', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await toggleFailureStore(page, false);
 
       await expect(page.getByTestId('disabledFailureStorePanel')).toBeVisible();
       await expect(page.getByText('Failure store disabled')).toBeVisible();

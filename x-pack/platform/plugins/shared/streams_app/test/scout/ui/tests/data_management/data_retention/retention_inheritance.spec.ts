@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import {
+  closeToastsIfPresent,
   openRetentionModal,
   saveRetentionChanges,
   setCustomRetention,
@@ -28,14 +29,7 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
   });
 
   test.afterEach(async ({ apiServices, page }) => {
-    // Only close toasts if they exist
-    const toasts = page.locator('.euiToast');
-    if ((await toasts.count()) > 0) {
-      await page
-        .locator('.euiToast__closeButton')
-        .click({ timeout: 1000 })
-        .catch(() => {});
-    }
+    await closeToastsIfPresent(page);
     await apiServices.streams.clearStreamChildren('logs');
   });
 

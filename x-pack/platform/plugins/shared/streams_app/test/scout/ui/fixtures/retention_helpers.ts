@@ -326,3 +326,68 @@ export async function verifyInheritSwitchVisible(page: ScoutPage): Promise<void>
 export async function verifyInheritSwitchNotVisible(page: ScoutPage): Promise<void> {
   await expect(page.getByTestId(RETENTION_TEST_IDS.inheritSwitch)).toBeHidden();
 }
+
+/**
+ * Closes toasts if they exist (safe cleanup helper)
+ */
+export async function closeToastsIfPresent(page: ScoutPage): Promise<void> {
+  const toasts = page.locator('.euiToast');
+  if ((await toasts.count()) > 0) {
+    await page
+      .locator('.euiToast__closeButton')
+      .click({ timeout: 1000 })
+      .catch(() => {});
+  }
+}
+
+/**
+ * Sets failure store retention with custom value
+ */
+export async function setFailureStoreRetention(
+  page: ScoutPage,
+  value: string,
+  unit: 'd' | 'h' | 'm' | 's' = 'd'
+): Promise<void> {
+  await page.getByTestId('streamFailureStoreEditRetention').click();
+  await page.getByTestId('custom').click();
+  const dialog = page.getByRole('dialog');
+  const field = dialog.getByTestId('selectFailureStorePeriodValue');
+  await field.fill('');
+  await field.fill(value);
+  
+  if (unit !== 'd') {
+    await dialog.getByTestId('failureStoreDslUnitButton').click();
+    await dialog.getByTestId(`failureStoreDslUnitOption-${unit}`).click();
+  }
+  
+  await page.getByTestId('failureStoreModalSaveButton').click();
+}
+
+/**
+ * Toggles failure store enabled/disabled
+ */
+export async function toggleFailureStore(page: ScoutPage, enabled: boolean): Promise<void> {
+  if (enabled) {
+    await page.getByTestId('streamsAppFailureStoreEnableButton').click();
+  } else {
+    await page.getByTestId('streamFailureStoreEditRetention').click();
+  }
+  await page.getByTestId('enableFailureStoreToggle').click();
+  await page.getByTestId('failureStoreModalSaveButton').click();
+}
+
+/**
+ * Test a list of retention configurations
+ */
+export async function testRetentionConfigurations(
+  page: ScoutPage,
+  configs: Array<{ value: string; unit: 'd' | 'h' | 'm' | 's'; display: string }>
+): Promise<void> {
+  for (const config of configs) {
+    await openRetentionModal(page);
+    await toggleInheritSwitch(page, false);
+    await setCustomRetention(page, config.value, config.unit);
+    await saveRetentionChanges(page);
+    await verifyRetentionDisplay(page, config.display);
+  }
+}
