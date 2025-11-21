@@ -169,12 +169,7 @@ function computeHealth(
   );
 
   const overall: 'healthy' | 'unhealthy' =
-    rollup.status === 'healthy' &&
-    rollup.transformState === 'started' &&
-    summary.status === 'healthy' &&
-    summary.transformState === 'started'
-      ? 'healthy'
-      : 'unhealthy';
+    rollup === 'healthy' && summary === 'healthy' ? 'healthy' : 'unhealthy';
 
   return { overall, rollup, summary };
 }
