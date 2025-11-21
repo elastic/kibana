@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod';
+
+import type { GenerationPrompts } from '../prompts';
+
+// TODO: Define schema for LLM to select candidates
+export const getSelectCandidatesSchema = () =>
+  z.object({
+    selectedEntityIds: z
+      .array(z.string())
+      .describe('Array of entity IDs that should be enriched for further analysis'),
+  });
+
+// TODO: Define schema for LLM to generate final priorities
+export const getThreatHuntingPrioritiesGenerationSchema = (prompts: GenerationPrompts) =>
+  z.object({
+    priorities: z
+      .array(
+        z.object({
+          title: z
+            .string()
+            .describe('A concise title for this threat hunting priority (e.g., "Lateral Movement Detected")'),
+          description: z
+            .string()
+            .describe(
+              'A detailed description explaining why this is a priority and what threat hunting actions should be taken'
+            ),
+          entities: z
+            .array(
+              z.object({
+                type: z.enum(['user', 'host']).describe('The type of entity'),
+                idField: z
+                  .string()
+                  .describe('The field name that identifies this entity (e.g., "host.name", "user.name")'),
+                idValue: z.string().describe('The actual entity identifier value'),
+              })
+            )
+            .describe('Array of entities associated with this priority (can include multiple entities)'),
+          tags: z
+            .array(z.string())
+            .describe(
+              'Array of tags for key themes or MITRE ATT&CK techniques (e.g., ["Lateral Movement", "Credential Access", "T1021"])'
+            ),
+          priority: z
+            .number()
+            .min(1)
+            .max(10)
+            .describe(prompts.priority || 'Priority score from 1-10, where 10 is highest priority'),
+        })
+      )
+      .describe('Array of prioritized threat hunting priorities'),
+  });
+

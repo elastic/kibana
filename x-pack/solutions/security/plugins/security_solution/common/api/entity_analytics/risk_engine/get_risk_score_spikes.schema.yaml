@@ -1,0 +1,57 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Risk Scoring API
+  description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
+paths: 
+  /api/risk_score/spikes:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetRiskScoreSpikes
+      summary: get the entities with the highest risk score spikes
+      description: Returns the entities with the highest risk score spikes.
+      deprecated: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - spikes
+                properties:
+                  spikesAboveBaseline:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SpikeEntity'
+                  newScoreSpikes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SpikeEntity'
+        '400':
+          description: Invalid request
+
+components:
+  schemas:
+    SpikeEntity:
+      type: object
+      required:
+        - identifier
+        - identifierKey
+        - spike
+        - baseline
+      properties:
+        identifier:
+          type: string
+          description: The identifier of the entity.
+        identifierKey:
+          type: string
+          description: The key of the identifier.
+        spike:
+          type: number
+          description: The spike value.
+        baseline:
+          type: number
+          description: The baseline value.

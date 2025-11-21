@@ -344,6 +344,7 @@ import type {
   TriggerRiskScoreCalculationResponse,
 } from './entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { RiskEngineGetPrivilegesResponse } from './entity_analytics/risk_engine/get_risk_engine_privileges.gen';
+import type { GetRiskScoreSpikesResponse } from './entity_analytics/risk_engine/get_risk_score_spikes.gen';
 import type {
   PreviewRiskScoreRequestBodyInput,
   PreviewRiskScoreResponse,
@@ -1874,6 +1875,21 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Returns the entities with the highest risk score spikes.
+   */
+  async getRiskScoreSpikes() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRiskScoreSpikes`);
+    return this.kbnClient
+      .request<GetRiskScoreSpikesResponse>({
+        path: '/api/risk_score/spikes',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }

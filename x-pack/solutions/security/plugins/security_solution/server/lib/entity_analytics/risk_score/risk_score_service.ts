@@ -8,7 +8,10 @@
 import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import { ENABLE_ESQL_RISK_SCORING } from '../../../../common/constants';
 import type { ExperimentalFeatures } from '../../../../common';
-import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
+import type {
+  RiskScoresPreviewResponse,
+  GetRiskScoreSpikesResponse,
+} from '../../../../common/api/entity_analytics';
 import type {
   CalculateAndPersistScoresParams,
   CalculateScoresParams,
@@ -41,6 +44,9 @@ export interface RiskScoreService {
   getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
   scheduleLatestTransformNow: () => Promise<void>;
   refreshRiskScoreIndex: () => Promise<void>;
+  getRiskScoreSpikes: (params: {
+    countPerCategory?: number;
+  }) => Promise<GetRiskScoreSpikesResponse>;
   resetToZero: (
     deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'excludedEntities'>
   ) => Promise<{ scoresWritten: number }>;
@@ -130,4 +136,5 @@ export const riskScoreServiceFactory = ({
   scheduleLatestTransformNow: () =>
     scheduleLatestTransformNow({ namespace: spaceId, esClient, logger }),
   refreshRiskScoreIndex: () => riskScoreDataClient.refreshRiskScoreIndex(),
+  getRiskScoreSpikes: (params) => riskScoreDataClient.getRiskScoreSpikes(params),
 });
