@@ -19,6 +19,7 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -71,6 +72,7 @@ describe('ValueControlForm', () => {
     esqlVariables: [],
     ariaLabelledBy: 'esqlControlsFlyoutTitle',
     telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
+    telemetryService: new ESQLEditorTelemetryService(services.core.analytics),
   };
 
   describe('Interval type', () => {

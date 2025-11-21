@@ -4461,6 +4461,10 @@
                 "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/lib/get_user_info.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
               },
@@ -4597,6 +4601,10 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/services/user_profiles/index.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/lib/get_user_info.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
