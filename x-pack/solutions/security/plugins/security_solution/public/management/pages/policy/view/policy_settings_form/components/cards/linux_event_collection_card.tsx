@@ -15,19 +15,16 @@ import { EventCollectionCard } from '../event_collection_card';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
   {
+    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.dns', {
+      defaultMessage: 'DNS',
+    }),
+    protectionField: 'dns',
+  },
+  {
     name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.file', {
       defaultMessage: 'File',
     }),
     protectionField: 'file',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
-      {
-        defaultMessage: 'Network',
-      }
-    ),
-    protectionField: 'network',
   },
   {
     name: i18n.translate(
@@ -37,6 +34,15 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
       }
     ),
     protectionField: 'process',
+  },
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
+      {
+        defaultMessage: 'Network',
+      }
+    ),
+    protectionField: 'network',
   },
 ];
 

@@ -109,6 +109,7 @@ describe('Policy Config helpers', () => {
       };
 
       const linuxEvents: typeof defaultPolicy.linux.events = {
+        dns: false,
         file: false,
         process: false,
         network: false,
@@ -506,8 +507,9 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
   },
   linux: {
     events: {
-      process: true,
+      dns: true,
       file: true,
+      process: true,
       network: true,
       session_data: false,
       tty_io: false,

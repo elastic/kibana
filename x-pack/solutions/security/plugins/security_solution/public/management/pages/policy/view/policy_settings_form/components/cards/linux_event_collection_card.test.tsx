@@ -41,7 +41,7 @@ describe('Policy Linux Event Collection Card', () => {
 
     expect(
       getByTestId(testSubj.optionsContainer).querySelectorAll('input[type="checkbox"]')
-    ).toHaveLength(3);
+    ).toHaveLength(4);
     expect(getByTestId(testSubj.fileCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.networkCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
@@ -66,11 +66,12 @@ describe('Policy Linux Event Collection Card', () => {
             'Event collection' +
             'Operating system' +
             'Linux ' +
-            '3 / 3 event collections enabled' +
+            '4 / 4 event collections enabled' +
             'Events' +
+            'DNS' +
             'File' +
-            'Network' +
             'Process' +
+            'Network' +
             'Session data' +
             'Collect session data' +
             'Capture terminal output' +
@@ -94,11 +95,12 @@ describe('Policy Linux Event Collection Card', () => {
             'Event collection' +
             'Operating system' +
             'Linux ' +
-            '2 / 3 event collections enabled' +
+            '3 / 4 event collections enabled' +
             'Events' +
+            'DNS' +
             'File' +
-            'Network' +
             'Process' +
+            'Network' +
             'Session data' +
             'Collect session data' +
             'Capture terminal output' +
