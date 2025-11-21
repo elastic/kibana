@@ -26,9 +26,11 @@ import type { PropsWithChildren } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldSelect } from '@kbn/field-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 import { isPlaceholderColumn } from '../../utils';
+import type { KibanaContextExtra } from '../../types';
 
 interface ColumnHeaderPopoverProps {
   isColumnInEditMode: boolean;
@@ -56,6 +58,11 @@ export const ColumnHeaderPopover = ({
   originalColumnDisplay,
 }: PropsWithChildren<ColumnHeaderPopoverProps>) => {
   const { euiTheme } = useEuiTheme();
+
+  const {
+    services: { docLinks },
+  } = useKibana<KibanaContextExtra>();
+
   const { columnType, setColumnType, columnName, setColumnName, saveColumn, validationError } =
     useAddColumnName(initialColumnName, initialColumnType);
 
@@ -195,6 +202,7 @@ export const ColumnHeaderPopover = ({
             selectedType={columnType || null}
             onTypeChange={setColumnType}
             data-test-subj="indexEditorColumnTypeSelect"
+            docLinks={docLinks}
           />
         </EuiFormRow>
         {columnType && (

@@ -12,10 +12,9 @@ import { EuiComboBox, EuiFlexGroup, EuiHighlight, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import React, { useCallback, useMemo } from 'react';
+import type { DocLinksStart } from '@kbn/core/public';
 import { TYPE_GROUPS, getFieldIconType, getFieldLabel } from './utils';
 
-const ES_TYPES_DOCS_URL =
-  'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html';
 const DOCUMENTATION_VALUE = 'documentation';
 
 const OPTIONS: EuiComboBoxOptionOption[] = TYPE_GROUPS.flatMap((group) => [
@@ -37,13 +36,19 @@ const OPTIONS: EuiComboBoxOptionOption[] = TYPE_GROUPS.flatMap((group) => [
 export interface FieldSelectProps {
   selectedType: string | null;
   onTypeChange: (type: string | null) => void;
+  docLinks?: DocLinksStart;
 }
 
 /**
  * A ComboBox component for selecting field types.
  * Renders icons next to field types and groups them into categories.
  */
-export const FieldSelect = ({ selectedType, onTypeChange, ...restOfProps }: FieldSelectProps) => {
+export const FieldSelect = ({
+  selectedType,
+  onTypeChange,
+  docLinks,
+  ...restOfProps
+}: FieldSelectProps) => {
   const handleChange = useCallback(
     (selectedOptions: EuiComboBoxOptionOption[]) => {
       if (selectedOptions.length === 0) {
@@ -51,7 +56,7 @@ export const FieldSelect = ({ selectedType, onTypeChange, ...restOfProps }: Fiel
         return;
       }
       const selected = selectedOptions[0];
-      if (selected && selected.value !== 'documentation') {
+      if (selected && selected.value !== DOCUMENTATION_VALUE) {
         onTypeChange(selected.value as string);
       }
     },
@@ -62,6 +67,33 @@ export const FieldSelect = ({ selectedType, onTypeChange, ...restOfProps }: Fiel
     const opt = OPTIONS.find((option) => option.value === selectedType);
     return opt ? [opt] : [];
   }, [selectedType]);
+
+  const renderOption = useMemo(
+    () => (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
+      if (option.value === DOCUMENTATION_VALUE) {
+        if (!docLinks) {
+          return null;
+        }
+        return (
+          <EuiLink href={docLinks.links.discover.fieldTypeHelp} target="_blank" external>
+            {option.label}
+          </EuiLink>
+        );
+      }
+
+      const fieldType = getFieldIconType(option.value as string);
+
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+          <FieldIcon type={fieldType} label={option.label} />
+          <span className={contentClassName}>
+            <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+          </span>
+        </EuiFlexGroup>
+      );
+    },
+    [docLinks]
+  );
 
   return (
     <EuiComboBox
@@ -85,30 +117,5 @@ export const FieldSelect = ({ selectedType, onTypeChange, ...restOfProps }: Fiel
       singleSelection
       {...restOfProps}
     />
-  );
-};
-
-const renderOption = (
-  option: EuiComboBoxOptionOption,
-  searchValue: string,
-  contentClassName: string
-) => {
-  if (option.value === DOCUMENTATION_VALUE) {
-    return (
-      <EuiLink href={ES_TYPES_DOCS_URL} target="_blank" external>
-        {option.label}
-      </EuiLink>
-    );
-  }
-
-  const fieldType = getFieldIconType(option.value as string);
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
-      <FieldIcon type={fieldType} label={option.label} />
-      <span className={contentClassName}>
-        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-      </span>
-    </EuiFlexGroup>
   );
 };
