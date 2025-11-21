@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
@@ -76,8 +76,9 @@ export async function getErrorGroupSampleIds({
       { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
     ] as const),
   });
+
   const errorSampleIds = resp.hits.hits.map((item) => {
-    const event = unflattenKnownApmEventFields(item.fields, requiredFields);
+    const event = accessKnownApmEventFields(item.fields).requireFields(requiredFields).unflatten();
     return event.error?.id ?? event._id;
   });
 
