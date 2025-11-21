@@ -1,51 +1,89 @@
+import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { StreamableHTTPClientTransport, StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 
 class McpClient {
   private client: Client;
   private transport: StreamableHTTPClientTransport;
 
-  constructor(url: string, customHeaders?: Record<string, string>) {
+  public connected: boolean = false;
+
+  constructor(client_details: { name: string, version: string, url: string }, customHeaders?: Record<string, string>) {
+    const details: Record<string, string> = {
+      ...client_details,
+    }
+
     const headers: Record<string, string> = {
       ...(customHeaders ?? {}),
     };
 
     this.transport = new StreamableHTTPClientTransport(
-      new URL(url),
+      new URL(details.url),
       {
         requestInit: {
           headers,
+        },
+        reconnectionOptions: {
+          maxRetries: 3,
+          reconnectionDelayGrowFactor: 1.5,
+          initialReconnectionDelay: 1000,
+          maxReconnectionDelay: 10000,
         },
       },
     );
 
     this.client = new Client({
-      name: "mcp-client",
-      version: "1.0.0"
+      name: details.name,
+      version: details.version,
     });
   }
 
   async connect() {
-    await this.client.connect(this.transport);
+    if (!this.connected) {
+      try {
+        await this.client.connect(this.transport)
+        this.connected = true;
+      } catch (error) {
+        if (error instanceof StreamableHTTPError) {
+          throw new Error(`StreamableHTTP error: ${error.message}`);
+        } else if (error instanceof UnauthorizedError) {
+          throw new Error(`Unauthorized error: ${error.message}`);
+        } else {
+          throw new Error(`Error connecting to MCP client: ${error.message}`);
+        }
+      }
+    }
+    return this.connected;
   }
 
   async disconnect() {
-    await this.client.close();
+    if (this.connected) {
+      await this.client.close();
+      this.connected = false;
+    }
+    return this.connected;
   }
 
   async list_tools() {
-    return await this.client.listTools();
+    if (this.connected) {
+      return await this.client.listTools();
+    }
+
+    return {
+      error: 'MCP client not connected',
+    };
   }
 
   async call_tool(params: { name: string, arguments: Record<string, unknown> }) {
-    // We expect params to contain:
-    // - name: the name of the tool to call
-    // - arguments: the arguments to pass to the tool
-    // We expect the caller of this function to handle input and schema validation.
+    if (this.connected) {
+      return await this.client.callTool({
+        name: params.name,
+        arguments: params.arguments
+      })
+    }
 
-    return await this.client.callTool({
-      name: params.name,
-      arguments: params.arguments
-    })
+    return {
+      error: 'MCP client not connected',
+    };
   }
 }
