@@ -86,6 +86,7 @@ function fromCompareAPIToLensState(compareToConfig: MetricApiCompareType): {
 
 function buildVisualizationState(config: MetricState): MetricVisualizationState {
   const layer = config;
+  const subtitle = layer.metric.sub_label;
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -98,8 +99,8 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? { palette: fromColorByValueAPIToLensState(layer.metric.color) }
       : {}),
     ...(layer.metric.apply_color_to ? { applyColorTo: layer.metric.apply_color_to } : {}),
-    subtitle: layer.metric.sub_label ?? '',
-    showBar: false,
+    ...(subtitle && { subtitle }),
+    showBar: false, // connect this to state property
     valueFontMode: layer.metric.fit ? 'fit' : 'default',
     ...(layer.metric.alignments
       ? {
@@ -132,10 +133,11 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           maxCols: layer.breakdown_by.columns,
         }
       : {}),
-    collapseFn:
-      layer.breakdown_by && layer.breakdown_by.collapse_by
-        ? layer.breakdown_by.collapse_by
-        : undefined,
+    ...(layer.breakdown_by && layer.breakdown_by.collapse_by
+      ? {
+          collapseFn: layer.breakdown_by.collapse_by,
+        }
+      : undefined),
     ...(layer.metric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
