@@ -1,7 +1,7 @@
 ---
 navigation_title: Advanced settings
 mapped_pages:
-  - https://www.elastic.co/guide/en/{{product.kibana}}/current/advanced-options.html
+  - https://www.elastic.co/guide/en/kibana/current/advanced-options.html
 applies_to: 
   stack: ga
   serverless: ga
