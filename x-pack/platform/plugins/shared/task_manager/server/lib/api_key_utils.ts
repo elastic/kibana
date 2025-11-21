@@ -61,13 +61,15 @@ export const createApiKey = async (
     throw Error('API keys are not enabled, cannot create API key.');
   }
 
+  const user = security.authc.getCurrentUser(request);
+  if (!user) {
+    throw Error('Cannot authenticate current user.');
+  }
+
   const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
 
   // If the user passed in their own API key, simply return it
-  if (
-    typeof request.headers.authorization === 'string' &&
-    request.headers.authorization.startsWith('ApiKey')
-  ) {
+  if (isRequestApiKeyType(user)) {
     const apiKeyCreateResult = getApiKeyFromRequest(request);
 
     if (!apiKeyCreateResult) {
@@ -85,12 +87,6 @@ export const createApiKey = async (
 
     return apiKeyByTaskIdMap;
   }
-  const user = security.authc.getCurrentUser(request);
-
-  if (!user) {
-    throw Error('Cannot authenticate current user.');
-  }
-
   // If the user did not pass in their own API key, we need to create 1 key per task
   // type (due to naming requirements).
   const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
