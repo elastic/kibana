@@ -566,13 +566,10 @@ const ESQLEditorInternal = function ESQLEditor({
     [telemetryService, setIsHistoryOpen]
   );
 
-  const esqlCallbacksLatestRef = useRef(fixedQuery);
-  esqlCallbacksLatestRef.current = fixedQuery;
-
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        clearCacheWhenOld(dataSourcesCache, esqlCallbacksLatestRef.current);
+        clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
         const getLicense = kibana.services?.esql?.getLicense;
         const sources = await memoizedSources(core, getLicense).result;
         return sources;
