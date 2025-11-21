@@ -490,6 +490,33 @@ export const useGapDurationColumn = () => {
   };
 };
 
+const GapFillStatusTooltip = ({
+  totalInProgressDurationMs,
+  totalUnfilledDurationMs,
+  totalFilledDurationMs,
+}: {
+  totalInProgressDurationMs: number;
+  totalUnfilledDurationMs: number;
+  totalFilledDurationMs: number;
+}) => {
+  const formatDurationHumanized = (duration: number) => {
+    return duration === 0 ? '0 ms' : moment.duration(duration, 'ms').humanize();
+  };
+  return (
+    <div>
+      <EuiText size="s">
+        {gapStatusTooltipInProgress(formatDurationHumanized(totalInProgressDurationMs ?? 0))}
+      </EuiText>
+      <EuiText size="s">
+        {gapStatusTooltipUnfilled(formatDurationHumanized(totalUnfilledDurationMs ?? 0))}
+      </EuiText>
+      <EuiText size="s">
+        {gapStatusTooltipFilled(formatDurationHumanized(totalFilledDurationMs ?? 0))}
+      </EuiText>
+    </div>
+  );
+};
+
 export const useGapStatusColumn = (): TableColumn => {
   const { euiTheme } = useEuiTheme();
 
@@ -504,10 +531,6 @@ export const useGapStatusColumn = (): TableColumn => {
         const totalInProgressDurationMs = gapInfo.total_in_progress_duration_ms;
         const totalUnfilledDurationMs = gapInfo.total_unfilled_duration_ms;
         const totalFilledDurationMs = gapInfo.total_filled_duration_ms;
-
-        const formatDurationHumanized = (duration: number) => {
-          return duration === 0 ? '0ms' : moment.duration(duration, 'ms').humanize();
-        };
 
         let color;
         let label;
@@ -534,22 +557,17 @@ export const useGapStatusColumn = (): TableColumn => {
           label = match.label;
         }
 
-        const tooltip = (
-          <div>
-            <EuiText size="s">
-              {gapStatusTooltipInProgress(formatDurationHumanized(totalInProgressDurationMs ?? 0))}
-            </EuiText>
-            <EuiText size="s">
-              {gapStatusTooltipUnfilled(formatDurationHumanized(totalUnfilledDurationMs ?? 0))}
-            </EuiText>
-            <EuiText size="s">
-              {gapStatusTooltipFilled(formatDurationHumanized(totalFilledDurationMs ?? 0))}
-            </EuiText>
-          </div>
-        );
-
         return (
-          <EuiToolTip position="top" content={tooltip}>
+          <EuiToolTip
+            position="top"
+            content={
+              <GapFillStatusTooltip
+                totalInProgressDurationMs={totalInProgressDurationMs}
+                totalUnfilledDurationMs={totalUnfilledDurationMs}
+                totalFilledDurationMs={totalFilledDurationMs}
+              />
+            }
+          >
             <EuiBadge tabIndex={0} color={color} data-test-subj="gapStatusBadge">
               {label}
             </EuiBadge>
