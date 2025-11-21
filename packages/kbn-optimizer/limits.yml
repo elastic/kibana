@@ -13,6 +13,7 @@ pageLoadAssetSize:
   charts: 40269
   cloud: 10648
   cloudDataMigration: 5687
+  cloudDefend: 18697
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
@@ -109,7 +110,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 12923
+  navigation: 14742
   newsfeed: 12371
   noDataPage: 1749
   observability: 107955
