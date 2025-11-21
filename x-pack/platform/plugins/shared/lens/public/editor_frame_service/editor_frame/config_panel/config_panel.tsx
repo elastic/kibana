@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, memo, useCallback } from 'react';
+import React, { useMemo, memo, useCallback } from 'react';
 import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
+import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
@@ -83,7 +84,9 @@ export function ConfigPanel(
     }, 0);
   };
 
-  useEffect(() => {
+  // need to use this instead of plain useEffect to compare actual values of layerIds
+  // not just comparing the array references.
+  useShallowCompareEffect(() => {
     if (selectedLayerId) {
       focusLayerTabsContent();
     }
