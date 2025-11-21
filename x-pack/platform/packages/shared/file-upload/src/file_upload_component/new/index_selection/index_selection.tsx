@@ -14,13 +14,10 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { UPLOAD_TYPE, useFileUploadContext } from '../../../..';
 import { IndexInput } from './index_input';
 
