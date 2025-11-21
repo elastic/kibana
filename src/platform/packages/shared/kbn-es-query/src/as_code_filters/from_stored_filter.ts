@@ -447,7 +447,6 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
     dataViewId: meta?.index || undefined,
     negate: meta?.negate === true ? true : meta?.negate === false ? false : undefined,
     label: meta?.alias || undefined,
-    // New properties for preserving metadata
     isMultiIndex:
       meta?.isMultiIndex === true ? true : meta?.isMultiIndex === false ? false : undefined,
     filterType: meta?.type || undefined,

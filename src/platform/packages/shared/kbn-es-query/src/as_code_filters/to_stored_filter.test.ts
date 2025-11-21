@@ -27,15 +27,17 @@ describe('toStoredFilter', () => {
 
       const result = toStoredFilter(simplified) as StoredFilter;
 
-      expect(result.$state).toEqual({ store: 'appState' });
+      // Properties not set in AsCodeFilter should not be present in StoredFilter
+      expect(result.$state).toBeUndefined();
       expect(result.meta).toMatchObject({
         key: 'status',
         field: 'status',
         type: 'phrase',
-        alias: null,
-        disabled: false,
-        negate: false,
       });
+      // Optional properties should not be present when not set
+      expect(result.meta.alias).toBeUndefined();
+      expect(result.meta.disabled).toBeUndefined();
+      expect(result.meta.negate).toBeUndefined();
       expect(result.query).toEqual({
         match_phrase: {
           status: 'active',
