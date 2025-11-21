@@ -318,29 +318,44 @@ async function runConfigs(
                 JSON.stringify({ completedConfigs: Array.from(completedConfigs) }, null, 2),
                 'utf8'
               );
-              log.debug(`Checkpoint: Saved progress (${completedConfigs.size} completed configs)`);
+              log.info(`Checkpoint: Saved progress (${completedConfigs.size} completed configs)`);
 
               // Upload checkpoint to Buildkite immediately (so it survives agent crashes)
-              if (process.env.BUILDKITE && process.env.CI) {
+              if (process.env.BUILDKITE) {
+                log.info(`Checkpoint: Attempting upload to Buildkite...`);
                 try {
-                  const uploadProc = spawn(
-                    'buildkite-agent',
-                    ['artifact', 'upload', checkpointPath],
-                    {
-                      stdio: 'ignore',
-                    }
-                  );
+                  await new Promise<void>((resolve) => {
+                    const uploadProc = spawn(
+                      'buildkite-agent',
+                      ['artifact', 'upload', checkpointPath],
+                      {
+                        stdio: 'pipe',
+                      }
+                    );
 
-                  // Don't wait for upload to complete, let it run in background
-                  uploadProc.on('exit', (uploadCode) => {
-                    if (uploadCode === 0) {
-                      log.debug(`Checkpoint: Uploaded to Buildkite`);
-                    } else {
-                      log.debug(`Checkpoint: Upload failed with code ${uploadCode}`);
-                    }
+                    let uploadOutput = '';
+                    uploadProc.stdout?.on('data', (d) => {
+                      uploadOutput += d.toString();
+                    });
+                    uploadProc.stderr?.on('data', (d) => {
+                      uploadOutput += d.toString();
+                    });
+
+                    uploadProc.on('exit', (uploadCode) => {
+                      if (uploadCode === 0) {
+                        log.info(
+                          `Checkpoint: Uploaded to Buildkite (${completedConfigs.size} configs)`
+                        );
+                      } else {
+                        log.warning(
+                          `Checkpoint: Upload failed with code ${uploadCode}: ${uploadOutput}`
+                        );
+                      }
+                      resolve();
+                    });
                   });
                 } catch (uploadErr) {
-                  log.debug(`Checkpoint: Upload error: ${(uploadErr as Error).message}`);
+                  log.warning(`Checkpoint: Upload error: ${(uploadErr as Error).message}`);
                 }
               }
             } catch (err) {

@@ -715,7 +715,6 @@ describe('run_all.ts', () => {
       it('should upload checkpoint to Buildkite after each successful config', async () => {
         process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
         process.env.BUILDKITE = 'true';
-        process.env.CI = 'true';
 
         mockGetJestConfigs.mockResolvedValue({
           configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
@@ -732,6 +731,8 @@ describe('run_all.ts', () => {
           if (cmd === 'buildkite-agent') {
             // Mock buildkite-agent upload process
             const mockUploadProcess = new EventEmitter() as any;
+            mockUploadProcess.stdout = new EventEmitter();
+            mockUploadProcess.stderr = new EventEmitter();
             process.nextTick(() => {
               mockUploadProcess.emit('exit', 0); // Successful upload
             });
@@ -758,12 +759,16 @@ describe('run_all.ts', () => {
         expect(mockSpawn).toHaveBeenCalledWith(
           'buildkite-agent',
           ['artifact', 'upload', '/tmp/checkpoint.json'],
-          expect.objectContaining({ stdio: 'ignore' })
+          expect.objectContaining({ stdio: 'pipe' })
+        );
+
+        // Should log successful upload
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringContaining('Checkpoint: Uploaded to Buildkite')
         );
 
         // Clean up env vars
         delete process.env.BUILDKITE;
-        delete process.env.CI;
       });
 
       it('should not write checkpoint when config fails', async () => {
