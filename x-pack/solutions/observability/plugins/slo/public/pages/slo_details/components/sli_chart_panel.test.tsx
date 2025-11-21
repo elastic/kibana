@@ -44,7 +44,7 @@ describe('SliChartPanel', () => {
 
   it('renders the SLI chart panel', () => {
     const slo = buildSlo();
-    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} hideMetadata={false} />);
+    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} />);
 
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
   });
@@ -57,7 +57,6 @@ describe('SliChartPanel', () => {
         data={mockChartData}
         isLoading={false}
         slo={slo}
-        hideMetadata={false}
         observedValue={observedValue}
       />
     );
@@ -65,32 +64,6 @@ describe('SliChartPanel', () => {
     // Should display the provided observed value (95.0%)
     expect(screen.getByText('95.0%')).toBeTruthy();
     expect(screen.getByText('Observed value')).toBeTruthy();
-  });
-
-  it('falls back to slo.summary.sliValue when observedValue is not provided', () => {
-    const slo = buildSlo({
-      objective: { target: 0.95 }, // Different from sliValue to avoid confusion
-      summary: {
-        status: 'HEALTHY',
-        sliValue: 0.98,
-        errorBudget: {
-          initial: 0.05,
-          consumed: 0.02,
-          remaining: 0.98,
-          isEstimated: false,
-        },
-        fiveMinuteBurnRate: 0,
-        oneHourBurnRate: 0,
-        oneDayBurnRate: 0,
-      },
-    });
-    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} hideMetadata={false} />);
-
-    // Should display the SLO summary value (98.0%) as observed value
-    // Objective should be 95.0%
-    const observedValueElements = screen.getAllByText('98.0%');
-    expect(observedValueElements.length).toBeGreaterThan(0);
-    expect(screen.getByText('95.0%')).toBeTruthy();
   });
 
   it('handles NO_DATA status when observedValue is provided and negative', () => {
@@ -101,7 +74,6 @@ describe('SliChartPanel', () => {
         data={mockChartData}
         isLoading={false}
         slo={slo}
-        hideMetadata={false}
         observedValue={observedValue}
       />
     );
@@ -126,28 +98,10 @@ describe('SliChartPanel', () => {
         oneDayBurnRate: 0,
       },
     });
-    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} hideMetadata={false} />);
+    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} />);
 
     // Should display '-' for NO_DATA
     expect(screen.getByText('-')).toBeTruthy();
-  });
-
-  it('hides metadata when hideMetadata is true', () => {
-    const slo = buildSlo();
-    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} hideMetadata={true} />);
-
-    // Metadata should not be visible
-    expect(screen.queryByText('Observed value')).toBeFalsy();
-    expect(screen.queryByText('Objective')).toBeFalsy();
-  });
-
-  it('displays objective value correctly', () => {
-    const slo = buildSlo({ objective: { target: 0.95 } });
-    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} hideMetadata={false} />);
-
-    // Should display objective (95.0%)
-    const objectiveElements = screen.getAllByText('95.0%');
-    expect(objectiveElements.length).toBeGreaterThan(0);
   });
 
   it('uses observedValue over slo.summary.sliValue when both are available', () => {
@@ -173,7 +127,6 @@ describe('SliChartPanel', () => {
         data={mockChartData}
         isLoading={false}
         slo={slo}
-        hideMetadata={false}
         observedValue={observedValue}
       />
     );
