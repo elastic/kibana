@@ -350,8 +350,10 @@ export class RequestContextFactory implements IRequestContextFactory {
           getSpaceId(),
           coreContext.elasticsearch.client.asCurrentUser,
           coreContext.savedObjects.client,
-          getEntityStoreApiKeyManager(),
           options.logger,
+          dataViewsService,
+          getAppClient(),
+          getEntityStoreApiKeyManager(),
           startPlugins.taskManager
         );
       }),

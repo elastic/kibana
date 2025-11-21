@@ -15,8 +15,10 @@ import type {
 import { schema, type TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
 import { ENTITY_STORE_ESQL_VERSION } from './constants';
-import { runEntityStoreCycle } from './entity_store_esql_runner';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { EntityStoreESQLService } from '.';
+import { getApiKeyManager } from '../auth/api_key';
+import type { AppClientFactory } from '../../../../client';
 
 const SCOPE = ['securitySolution'];
 const INTERVAL = '10s';
@@ -28,6 +30,7 @@ const getTaskId = (namespace: string): string =>
 
 export const registerEntityStoreESQLExecuteTask = (
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  appClientFactory: AppClientFactory,
   logger: Logger,
   taskManager?: TaskManagerSetupContract
 ): void => {
@@ -40,7 +43,7 @@ export const registerEntityStoreESQLExecuteTask = (
 
   taskManager.registerTaskDefinitions({
     [TASK_NAME]: {
-      title: 'Entity Analytics Entity Store - Execute Data View Refresh Task',
+      title: 'Entity Analytics Entity Store - Execute ESQL Cycle Execute Task',
       timeout: TIMEOUT,
       stateSchemaByVersion,
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
@@ -48,7 +51,13 @@ export const registerEntityStoreESQLExecuteTask = (
         const isCancelled = () => cancelled;
         return {
           run: async () =>
-            doRunEntityStoreCycle(taskInstance, getStartServices, isCancelled, logger),
+            doRunEntityStoreCycle(
+              taskInstance,
+              getStartServices,
+              appClientFactory,
+              isCancelled,
+              logger
+            ),
           cancel: async () => {
             cancelled = true;
           },
@@ -61,6 +70,7 @@ export const registerEntityStoreESQLExecuteTask = (
 const doRunEntityStoreCycle = async (
   taskInstance: ConcreteTaskInstance,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  appClientFactory: AppClientFactory,
   isCancelled: () => boolean,
   logger: Logger
 ): Promise<{
@@ -69,28 +79,63 @@ const doRunEntityStoreCycle = async (
   const state = taskInstance.state as LatestTaskStateSchema;
   const taskId = taskInstance.id;
   const log = entityStoreTaskLogFactory(logger, taskId);
+  const namespace = state.namespace;
 
   log('Running cycle');
 
   const taskStartTime = moment().utc().toISOString();
   const updatedState = {
     lastExecutionTimestamp: taskStartTime,
-    namespace: state.namespace,
+    namespace,
     runs: state.runs + 1,
   };
 
-  if (taskId !== getTaskId(state.namespace)) {
+  if (taskId !== getTaskId(namespace)) {
     log('outdated task; exiting');
     return { state: updatedState };
   }
 
+  const [core, { dataViews, taskManager, security, encryptedSavedObjects }] =
+    await getStartServices();
+
+  const apiKeyManager = getApiKeyManager({
+    core,
+    logger,
+    security,
+    encryptedSavedObjects,
+    namespace,
+  });
+
+  const apiKey = await apiKeyManager.getApiKey();
+
+  if (!apiKey) {
+    throw new Error(`[Entity Store] No API key found, skipping esql run in ${namespace} namespace`);
+  }
+
+  const { clusterClient, soClient } = await apiKeyManager.getClientFromApiKey(apiKey);
+  const internalUserClient = core.elasticsearch.client.asInternalUser;
+  const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, internalUserClient);
+  const request = await apiKeyManager.getRequestFromApiKey(apiKey);
+  const appClient = appClientFactory.create(request);
+
+  const service = new EntityStoreESQLService(
+    namespace,
+    clusterClient.asCurrentUser,
+    soClient,
+    logger,
+    dataViewsService,
+    appClient,
+    apiKeyManager,
+    taskManager
+  );
+
   const start = Date.now();
   log(`Executing cycle`);
   try {
-    await runEntityStoreCycle(state.namespace, log, isCancelled);
-    log(`Executed data view refresh in ${Date.now() - start}ms`);
+    await service.runEntityStoreCycleForAllEntities();
+    log(`Executed esql cycle execute in ${Date.now() - start}ms`);
   } catch (e) {
-    log(`Error executing data view refresh: ${e.message}`);
+    log(`Error executing esql cycle execute: ${e.message}`);
   }
 
   const taskCompletionTime = moment().utc().toISOString();
