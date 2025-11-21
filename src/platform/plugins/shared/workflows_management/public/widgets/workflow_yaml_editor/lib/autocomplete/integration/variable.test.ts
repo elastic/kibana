@@ -58,7 +58,6 @@ steps:
     );
   });
 
-  // TODO: fix, this is failing because we now trying to fix yaml syntax before passing yaml to the autocomplete context
   it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', async () => {
     const yamlContent = `
 version: "1"
@@ -102,8 +101,17 @@ steps:
       message: hey, this is @|<-
 `.trim();
     const suggestions = await getSuggestions(yamlContent);
-    expect(suggestions.map((s) => s.label)).toEqual(
-      expect.arrayContaining([expect.not.stringMatching(/^"[^"]*$/)])
+    expect(suggestions.map((s) => s.insertText).sort()).toEqual(
+      [
+        '{{ event$0 }}',
+        '{{ execution$0 }}',
+        '{{ kibanaUrl$0 }}',
+        '{{ workflow$0 }}',
+        '{{ inputs$0 }}',
+        '{{ consts$0 }}',
+        '{{ now$0 }}',
+        '{{ steps$0 }}',
+      ].sort()
     );
   });
 
@@ -124,6 +132,29 @@ steps:
     expect(suggestions.map((s) => s.label)).toEqual(
       expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution', 'inputs'])
     );
+    expect(suggestions.map((s) => s.insertText)).toEqual(
+      expect.arrayContaining([expect.not.stringMatching(/^"[^"]*$/)])
+    );
+  });
+
+  it('should not quote insertText automatically if cursor is in curly braces already', async () => {
+    const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  people:
+    - Alice
+    - Bob
+    - Charlie
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hey {{consts.|<-}}
+`.trim();
+
+    const suggestions = await getSuggestions(yamlContent);
+    expect(suggestions.map((s) => s.insertText)).toEqual(['people']);
   });
 
   it('should provide const completion with type', async () => {
@@ -213,6 +244,7 @@ steps:
 
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(['step0']));
+    expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(['step0']));
   });
 
   it('should not provide unreachable step', async () => {

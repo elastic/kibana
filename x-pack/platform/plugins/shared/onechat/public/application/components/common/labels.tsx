@@ -16,13 +16,24 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 
 const LabelGroup: React.FC<{ labels: string[] }> = ({ labels }) => {
   return (
-    <EuiBadgeGroup gutterSize="s">
+    <EuiBadgeGroup
+      gutterSize="s"
+      role="list"
+      aria-label="Labels"
+      data-test-subj="agentBuilderLabelsList"
+    >
       {labels.map((label) => (
-        <EuiBadge key={label} color="hollow">
+        <EuiBadge
+          key={label}
+          color="hollow"
+          role="listitem"
+          data-test-subj={`agentBuilderLabel-${label}`}
+        >
           {label}
         </EuiBadge>
       ))}
@@ -30,12 +41,25 @@ const LabelGroup: React.FC<{ labels: string[] }> = ({ labels }) => {
   );
 };
 
-const ViewMorePopover: React.FC<{ labels: string[] }> = ({ labels }) => {
+const ViewMorePopover: React.FC<{
+  labels: string[];
+  totalLabels: number;
+}> = ({ labels, totalLabels }) => {
   const { euiTheme } = useEuiTheme();
   const popoverPanelStyles = css`
     max-inline-size: calc(${euiTheme.size.xxxxl} * 5);
   `;
   const [isOpen, setIsOpen] = useState(false);
+
+  const viewMoreAriaLabel = i18n.translate('xpack.onechat.labels.viewMore.ariaLabel', {
+    defaultMessage:
+      'View {hiddenCount} more {hiddenCount, plural, one {label} other {labels}} ({totalCount} total)',
+    values: {
+      hiddenCount: labels.length,
+      totalCount: totalLabels,
+    },
+  });
+
   return (
     <EuiPopover
       panelProps={{ css: popoverPanelStyles }}
@@ -43,12 +67,17 @@ const ViewMorePopover: React.FC<{ labels: string[] }> = ({ labels }) => {
       closePopover={() => {
         setIsOpen(false);
       }}
+      data-test-subj="agentBuilderLabelsViewMorePopover"
+      aria-label="Additional labels"
       button={
         <EuiButtonEmpty
           size="s"
           onClick={() => {
             setIsOpen((open) => !open);
           }}
+          aria-label={viewMoreAriaLabel}
+          aria-expanded={isOpen}
+          data-test-subj="agentBuilderLabelsViewMoreButton"
         >
           <FormattedMessage
             id="xpack.onechat.labels.viewMore.buttonLabel"
@@ -64,10 +93,10 @@ const ViewMorePopover: React.FC<{ labels: string[] }> = ({ labels }) => {
 
 const NUM_VISIBLE_LABELS = 4;
 
-export const Labels: React.FC<{ labels: string[]; numVisible?: number }> = ({
-  labels,
-  numVisible = NUM_VISIBLE_LABELS,
-}) => {
+export const Labels: React.FC<{
+  labels: string[];
+  numVisible?: number;
+}> = ({ labels, numVisible = NUM_VISIBLE_LABELS }) => {
   if (labels.length === 0) {
     return null;
   }
@@ -80,12 +109,12 @@ export const Labels: React.FC<{ labels: string[]; numVisible?: number }> = ({
   }
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj={'agentBuilderLabelsContainer'}>
       <EuiFlexItem grow={false}>
         <LabelGroup labels={visibleLabels} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ViewMorePopover labels={hiddenLabels} />
+        <ViewMorePopover labels={hiddenLabels} totalLabels={labels.length} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

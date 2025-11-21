@@ -21,6 +21,7 @@ export function getVersions(
   return [
     '0.0.0',
     ...typeSnapshot.migrationVersions,
+    ...(typeSnapshot.modelVersions.length ? ['10.0.0'] : []),
     ...typeSnapshot.modelVersions.map(({ version }) => `10.${version}.0`),
   ].reverse() as string[];
 }

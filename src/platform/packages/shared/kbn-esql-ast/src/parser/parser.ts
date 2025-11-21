@@ -10,7 +10,7 @@
 import { CharStreams, type Token } from 'antlr4';
 import { CommonTokenStream, type CharStream } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
-import { attachDecorations, collectDecorations } from './formatting';
+import { attachDecorations, collectDecorations } from './decorations';
 import { Builder } from '../builder';
 import { CstToAstConverter } from './cst_to_ast_converter';
 import { default as ESQLLexer } from '../antlr/esql_lexer';

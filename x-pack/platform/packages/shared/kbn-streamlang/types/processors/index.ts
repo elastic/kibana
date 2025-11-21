@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { NonEmptyOrWhitespaceString, NonEmptyString } from '@kbn/zod-helpers';
 import { createIsNarrowSchema } from '@kbn/zod-helpers';
 import type { Condition } from '../conditions';
 import { conditionSchema } from '../conditions';
@@ -268,9 +268,48 @@ export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<RemoveProcessor>;
 
+/**
+ * Drop processor
+ */
+
+export interface DropDocumentProcessor extends ProcessorBaseWithWhere {
+  action: 'drop_document';
+}
+
+export const dropDocumentProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('drop_document'),
+  })
+  .refine((schema) => schema.where !== undefined, {
+    message: 'where clause is required in drop_document.',
+  }) satisfies z.Schema<DropDocumentProcessor>;
+
+/**
+ * Replace processor
+ */
+
+export interface ReplaceProcessor extends ProcessorBaseWithWhere {
+  action: 'replace';
+  from: string;
+  pattern: string;
+  replacement: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('replace'),
+  from: StreamlangSourceField,
+  pattern: NonEmptyOrWhitespaceString, // Allows space " " as valid pattern
+  replacement: z.string(), // Required, should be '' for empty replacement
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<ReplaceProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
+  | DropDocumentProcessor
   | GrokProcessor
   | RenameProcessor
   | SetProcessor
@@ -278,17 +317,20 @@ export type StreamlangProcessorDefinition =
   | ConvertProcessor
   | RemoveByPrefixProcessor
   | RemoveProcessor
+  | ReplaceProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
+  dropDocumentProcessorSchema,
   renameProcessorSchema,
   setProcessorSchema,
   appendProcessorSchema,
   removeByPrefixProcessorSchema,
   removeProcessorSchema,
+  replaceProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
@@ -305,6 +347,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     grokProcessorSchema,
     dissectProcessorSchema,
     convertProcessorSchema,
+    replaceProcessorSchema,
   ])
 );
 

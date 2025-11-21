@@ -36,14 +36,17 @@ describe('createIndex', () => {
     });
 
     expect(esClient.indices.create).toHaveBeenCalledTimes(1);
-    expect(esClient.indices.create).toHaveBeenCalledWith({
-      index: indexName,
-      mappings,
-      settings: {
-        auto_expand_replicas: '0-1',
-        'index.mapping.semantic_text.use_legacy_format': false,
+    expect(esClient.indices.create).toHaveBeenCalledWith(
+      {
+        index: indexName,
+        mappings,
+        settings: {
+          auto_expand_replicas: '0-1',
+          'index.mapping.semantic_text.use_legacy_format': false,
+        },
       },
-    });
+      { signal: undefined }
+    );
   });
 
   it('calls esClient.indices.create with the right parameters for the manifest version 1.0.0', async () => {
@@ -61,14 +64,17 @@ describe('createIndex', () => {
     });
 
     expect(esClient.indices.create).toHaveBeenCalledTimes(1);
-    expect(esClient.indices.create).toHaveBeenCalledWith({
-      index: indexName,
-      mappings,
-      settings: {
-        auto_expand_replicas: '0-1',
-        'index.mapping.semantic_text.use_legacy_format': true,
+    expect(esClient.indices.create).toHaveBeenCalledWith(
+      {
+        index: indexName,
+        mappings,
+        settings: {
+          auto_expand_replicas: '0-1',
+          'index.mapping.semantic_text.use_legacy_format': true,
+        },
       },
-    });
+      { signal: undefined }
+    );
   });
 
   it('calls esClient.indices.create with the right parameters for serverless', async () => {
@@ -87,10 +93,13 @@ describe('createIndex', () => {
     });
 
     expect(esClient.indices.create).toHaveBeenCalledTimes(1);
-    expect(esClient.indices.create).toHaveBeenCalledWith({
-      index: indexName,
-      mappings,
-    });
+    expect(esClient.indices.create).toHaveBeenCalledWith(
+      {
+        index: indexName,
+        mappings,
+      },
+      { signal: undefined }
+    );
   });
 
   it('rewrites the inference_id attribute of semantic_text fields in the mapping', async () => {
@@ -127,7 +136,8 @@ describe('createIndex', () => {
             },
           },
         },
-      })
+      }),
+      { signal: undefined }
     );
   });
 });

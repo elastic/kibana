@@ -57,7 +57,7 @@ export interface IndexDataVisualizerESQLProps {
 const DEFAULT_ESQL_QUERY = { esql: '' };
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { data } = services;
+  const { data, http } = services;
   const { euiTheme } = useEuiTheme();
 
   // Query that has been typed, but has not submitted with cmd + enter
@@ -119,7 +119,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         const dv = await getOrCreateDataViewByIndexPattern(
           data.dataViews,
           query.esql,
-          currentDataView
+          currentDataView,
+          http
         );
 
         if (dv) {

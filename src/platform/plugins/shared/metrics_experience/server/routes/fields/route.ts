@@ -64,6 +64,58 @@ export const getFieldsRoute = createRoute({
   },
 });
 
+export const searchFieldsRoute = createRoute({
+  endpoint: 'POST /internal/metrics_experience/fields/_search',
+  security: { authz: { requiredPrivileges: ['read'] } },
+  params: z.object({
+    body: z.object({
+      index: z.string().default('metrics-*'),
+      to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
+      from: z
+        .string()
+        .datetime()
+        .default(dateMathParse('now-15m', { roundUp: true })!.toISOString())
+        .transform(isoToEpoch),
+      fields: z.union([z.string(), z.array(z.string())]).default('*'),
+      page: z.coerce.number().int().positive().default(1),
+      size: z.coerce.number().int().positive().default(100),
+      filters: z.record(z.string(), z.array(z.string()).max(100)).optional().default({}),
+    }),
+  }),
+  handler: async ({ context, params, logger }) => {
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
+
+    const esClient = elasticsearch.client.asCurrentUser;
+    const { index, from, to, fields, page, size, filters } = params.body;
+
+    const { fields: resultFields, total } = await getMetricFields({
+      esClient: createTracedEsClient({
+        logger,
+        client: esClient,
+        plugin: 'metrics_experience',
+      }),
+      indexPattern: index,
+      timerange: { from, to },
+      fields:
+        fields === '*'
+          ? fields
+          : (Array.isArray(fields) ? fields : [fields]).concat(Object.keys(filters)),
+      page,
+      size,
+      filters,
+      logger,
+    });
+
+    return {
+      fields: resultFields,
+      total,
+      page,
+    };
+  },
+});
+
 export const fieldsRoutes = {
   ...getFieldsRoute,
+  ...searchFieldsRoute,
 };
