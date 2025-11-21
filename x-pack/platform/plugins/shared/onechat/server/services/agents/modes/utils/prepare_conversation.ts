@@ -10,11 +10,15 @@ import { createInternalError } from '@kbn/onechat-common';
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import { getToolResultId } from '@kbn/onechat-server/tools';
-import type { AttachmentRepresentation } from '@kbn/onechat-server/attachments';
+import type {
+  AttachmentRepresentation,
+  AttachmentScopedTool,
+} from '@kbn/onechat-server/attachments';
 
 export interface ProcessedAttachment {
   attachment: Attachment;
   representation: AttachmentRepresentation;
+  tools: AttachmentScopedTool[];
 }
 
 export interface ProcessedAttachmentType {
@@ -35,6 +39,7 @@ export interface ProcessedConversation {
   previousRounds: ProcessedConversationRound[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
+  attachments: ProcessedAttachment[];
 }
 
 export const prepareConversation = async ({
@@ -53,20 +58,19 @@ export const prepareConversation = async ({
     })
   );
 
+  const allAttachments = [
+    ...processedNextInput.attachments,
+    ...processedRounds.flatMap((round) => round.input.attachments),
+  ];
+
   const attachmentTypeIds = [
-    ...new Set<string>([
-      ...processedNextInput.attachments.map((attachment) => attachment.attachment.type),
-      ...processedRounds.flatMap((round) =>
-        round.input.attachments.map((attachment) => attachment.attachment.type)
-      ),
-    ]),
+    ...new Set<string>([...allAttachments.map((attachment) => attachment.attachment.type)]),
   ];
 
   const attachmentTypes = await Promise.all(
     attachmentTypeIds.map<Promise<ProcessedAttachmentType>>(async (type) => {
       const definition = attachmentsService.getTypeDefinition(type);
       const description = definition?.getAgentDescription?.() ?? '';
-
       return {
         type,
         description,
@@ -78,6 +82,7 @@ export const prepareConversation = async ({
     nextInput: processedNextInput,
     previousRounds: processedRounds,
     attachmentTypes,
+    attachments: allAttachments,
   };
 };
 
@@ -129,10 +134,12 @@ const prepareAttachment = async ({
 
   const attachment = inputToFinal(input);
   const formatted = await definition.format(attachment);
+  const tools = formatted.getAttachmentTools ? await formatted.getAttachmentTools() : [];
 
   return {
     attachment,
     representation: await formatted.getRepresentation(),
+    tools,
   };
 };
 

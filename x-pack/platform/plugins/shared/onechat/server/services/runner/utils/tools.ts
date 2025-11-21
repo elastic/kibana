@@ -7,16 +7,16 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolProvider, Runner } from '@kbn/onechat-server';
-import type { ToolRegistry } from '../tool_registry';
-import { toExecutableTool } from './tool_conversion';
+import type { ToolRegistry } from '../../tools/tool_registry';
+import { toExecutableTool } from '../../tools/utils/tool_conversion';
 
-export const registryToProvider = ({
+export const createToolProvider = ({
   registry,
-  getRunner,
+  runner,
   request,
 }: {
   registry: ToolRegistry;
-  getRunner: () => Runner;
+  runner: Runner;
   request: KibanaRequest;
 }): ToolProvider => {
   return {
@@ -25,11 +25,11 @@ export const registryToProvider = ({
     },
     get: async ({ toolId }) => {
       const tool = await registry.get(toolId);
-      return toExecutableTool({ tool, runner: getRunner(), request });
+      return toExecutableTool({ tool, runner, request });
     },
     list: async () => {
       const tools = await registry.list();
-      return tools.map((tool) => toExecutableTool({ tool, runner: getRunner(), request }));
+      return tools.map((tool) => toExecutableTool({ tool, runner, request }));
     },
   };
 };

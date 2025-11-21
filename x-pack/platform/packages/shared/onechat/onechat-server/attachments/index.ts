@@ -12,3 +12,4 @@ export type {
   AttachmentValidationResult,
   AgentFormattedAttachment,
 } from './type_definition';
+export type { AttachmentScopedTool } from './tools';

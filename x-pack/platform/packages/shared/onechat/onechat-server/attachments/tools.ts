@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { toDescriptorWithSchema, toExecutableTool } from './tool_conversion';
-export { getToolTypeInfo } from './get_tool_type_info';
+import type { ZodObject } from '@kbn/zod';
+import type { StaticToolRegistration } from '../tools/builtin';
+
+export type AttachmentScopedTool<RunInput extends ZodObject<any> = ZodObject<any>> =
+  StaticToolRegistration<RunInput>;

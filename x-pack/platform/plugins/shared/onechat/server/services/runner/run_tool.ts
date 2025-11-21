@@ -18,9 +18,7 @@ import type {
 import { createErrorResult } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import { ToolCallSource } from '../../telemetry';
-import { registryToProvider } from '../tools/utils';
-import { forkContextForToolRun } from './utils/run_context';
-import { createToolEventEmitter } from './utils/events';
+import { forkContextForToolRun, createToolEventEmitter, createToolProvider } from './utils';
 import type { RunnerManager } from './runner';
 import type { InternalToolDefinition } from '../tools/tool_provider';
 
@@ -112,9 +110,9 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     esClient: elasticsearch.client.asScoped(request),
     modelProvider,
     runner: manager.getRunner(),
-    toolProvider: registryToProvider({
+    toolProvider: createToolProvider({
       registry: await toolsService.getRegistry({ request }),
-      getRunner: manager.getRunner,
+      runner: manager.getRunner(),
       request,
     }),
     resultStore: resultStore.asReadonly(),

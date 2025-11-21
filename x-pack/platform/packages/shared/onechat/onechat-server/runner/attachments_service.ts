@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '../attachments';
+import type { AttachmentScopedTool, AttachmentTypeDefinition } from '../attachments';
+import type { ExecutableTool } from './tool_provider';
 
+/**
+ * Service to access attachment types definitions.
+ */
 export interface AttachmentsService {
+  /**
+   * Returns the full definition for an attachment type
+   */
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
+  /**
+   * Convert an attachment-scoped tool to a generic executable tool
+   */
+  convertAttachmentTool(tool: AttachmentScopedTool): Promise<ExecutableTool>;
 }
