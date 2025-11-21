@@ -6,6 +6,7 @@
  */
 
 import { test } from '../../../fixtures';
+import { generateLogsData } from '../../../fixtures/generators';
 import {
   closeToastsIfPresent,
   openRetentionModal,
@@ -104,6 +105,23 @@ test.describe(
 
       // Verify the value persists
       await verifyRetentionDisplay(page, '30 days');
+    });
+
+    test('should set retention on classic stream', async ({
+      page,
+      pageObjects,
+      logsSynthtraceEsClient,
+      apiServices,
+    }) => {
+      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
+      await apiServices.streams.clearStreamProcessors('logs-generic-default');
+      await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
+
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '7', 'd');
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '7 days');
     });
   }
 );
