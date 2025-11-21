@@ -113,7 +113,7 @@ describe('getLogFieldWithFallback', () => {
 
     expect(result).toEqual({
       field: 'log.level',
-      value: 0,
+      value: '0',
     });
   });
 });
