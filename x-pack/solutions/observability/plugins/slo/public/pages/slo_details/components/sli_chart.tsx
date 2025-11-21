@@ -19,42 +19,28 @@ export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  hideMetadata?: boolean;
   observedValue?: number;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function SliChart({
-  data,
-  isLoading,
-  slo,
-  hideMetadata = false,
-  observedValue,
-  onBrushed,
-}: Props) {
+export function SliChart({ data, isLoading, slo, observedValue, onBrushed }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
 
-  // Use observedValue if provided, otherwise fall back to slo.summary.sliValue
-  // If observedValue is undefined, check if we should show NO_DATA
-  const displaySliValue = React.useMemo(() => {
-    return observedValue !== undefined ? observedValue : slo.summary.sliValue;
-  }, [observedValue, slo.summary.sliValue]);
-
   const hasNoData = React.useMemo(() => {
     if (observedValue !== undefined) {
-      return observedValue < 0 || displaySliValue === undefined;
+      return observedValue < 0;
     }
     return slo.summary.status === 'NO_DATA';
-  }, [observedValue, slo.summary.status, displaySliValue]);
+  }, [observedValue, slo.summary.status]);
 
   const metadata = (
     <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiStat
           titleColor={isSloFailed ? 'danger' : 'success'}
-          title={hasNoData ? '-' : numeral(displaySliValue).format(percentFormat)}
+          title={hasNoData ? '-' : numeral(observedValue).format(percentFormat)}
           titleSize="s"
           description={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.current', {
             defaultMessage: 'Observed value',
@@ -80,7 +66,6 @@ export function SliChart({
       data={data}
       isLoading={isLoading}
       slo={slo}
-      hideMetadata={hideMetadata}
       onBrushed={onBrushed}
       chartType="line"
       chartId={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.chartTitle', {

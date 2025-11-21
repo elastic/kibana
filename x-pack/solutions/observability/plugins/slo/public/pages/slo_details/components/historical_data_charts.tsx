@@ -38,20 +38,8 @@ export function HistoricalDataCharts({ slo, range, isAutoRefreshing, onBrushed }
   );
   const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
 
-  // Calculate observed value from the latest entry in historical data within the time range
-  // Historical data is already filtered by the time range when fetched
-  const observedValue = React.useMemo(() => {
-    if (!sloHistoricalSummary?.data || sloHistoricalSummary.data.length === 0) {
-      return undefined;
-    }
-
-    // Find the latest entry that is not NO_DATA
-    const validEntries = sloHistoricalSummary.data
-      .filter((entry) => entry.status !== 'NO_DATA')
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    return validEntries.length > 0 ? validEntries[0].sliValue : undefined;
-  }, [sloHistoricalSummary?.data]);
+  const lastObservedValue = sloHistoricalSummary?.data?.at(-1)?.sliValue;
+  const lastErrorBudgetRemaining = sloHistoricalSummary?.data?.at(-1)?.errorBudget.remaining;
 
   return (
     <>
@@ -60,8 +48,7 @@ export function HistoricalDataCharts({ slo, range, isAutoRefreshing, onBrushed }
           data={historicalSliData}
           isLoading={isLoading}
           slo={slo}
-          hideMetadata={false}
-          observedValue={observedValue}
+          observedValue={lastObservedValue}
           onBrushed={onBrushed}
         />
       </EuiFlexItem>
@@ -70,8 +57,8 @@ export function HistoricalDataCharts({ slo, range, isAutoRefreshing, onBrushed }
           data={errorBudgetBurnDownData}
           isLoading={isLoading}
           slo={slo}
-          hideMetadata={false}
           onBrushed={onBrushed}
+          lastErrorBudgetRemaining={lastErrorBudgetRemaining}
         />
       </EuiFlexItem>
     </>

@@ -35,11 +35,17 @@ export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  hideMetadata?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  lastErrorBudgetRemaining?: number;
 }
 
-export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, onBrushed }: Props) {
+export function ErrorBudgetChart({
+  data,
+  isLoading,
+  slo,
+  onBrushed,
+  lastErrorBudgetRemaining,
+}: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
@@ -69,7 +75,9 @@ export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, o
       <EuiFlexItem grow={false}>
         <EuiStat
           titleColor={isSloFailed ? 'danger' : 'success'}
-          title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
+          title={
+            lastErrorBudgetRemaining ? numeral(lastErrorBudgetRemaining).format(percentFormat) : '-'
+          }
           titleSize="s"
           description={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.remaining', {
             defaultMessage: 'Remaining',
@@ -98,7 +106,6 @@ export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, o
       data={data}
       isLoading={isLoading}
       slo={slo}
-      hideMetadata={hideMetadata}
       onBrushed={onBrushed}
       chartType="area"
       chartId={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.chartTitle', {

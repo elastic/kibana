@@ -19,19 +19,11 @@ export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  hideMetadata?: boolean;
   observedValue?: number;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function SliChartPanel({
-  data,
-  isLoading,
-  slo,
-  hideMetadata = false,
-  observedValue,
-  onBrushed,
-}: Props) {
+export function SliChartPanel({ data, isLoading, slo, observedValue, onBrushed }: Props) {
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="sliChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -45,25 +37,22 @@ export function SliChartPanel({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          {!hideMetadata && (
-            <EuiFlexItem>
-              <EuiText color="subdued" size="s">
-                {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-                  ? i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.duration', {
-                      defaultMessage: 'Last {duration}',
-                      values: { duration: toDurationLabel(slo.timeWindow.duration) },
-                    })
-                  : toDurationAdverbLabel(slo.timeWindow.duration)}
-              </EuiText>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem>
+            <EuiText color="subdued" size="s">
+              {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+                ? i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.duration', {
+                    defaultMessage: 'Last {duration}',
+                    values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                  })
+                : toDurationAdverbLabel(slo.timeWindow.duration)}
+            </EuiText>
+          </EuiFlexItem>
         </EuiFlexGroup>
 
         <SliChart
           data={data}
           isLoading={isLoading}
           slo={slo}
-          hideMetadata={hideMetadata}
           observedValue={observedValue}
           onBrushed={onBrushed}
         />

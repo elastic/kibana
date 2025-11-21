@@ -19,7 +19,6 @@ export interface BaseChartProps {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  hideMetadata?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
   chartType: ChartType;
   chartId: string;
@@ -30,7 +29,6 @@ export function BaseChart({
   data,
   isLoading,
   slo,
-  hideMetadata = false,
   chartType,
   chartId,
   metadata,
@@ -41,7 +39,7 @@ export function BaseChart({
 
   return (
     <>
-      {!hideMetadata && metadata}
+      {metadata}
 
       <EuiFlexItem>
         <WideChart

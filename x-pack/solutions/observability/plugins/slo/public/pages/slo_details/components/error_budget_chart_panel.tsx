@@ -26,16 +26,16 @@ export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  hideMetadata?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  lastErrorBudgetRemaining?: number;
 }
 
 export function ErrorBudgetChartPanel({
   data,
   isLoading,
   slo,
-  hideMetadata = false,
   onBrushed,
+  lastErrorBudgetRemaining,
 }: Props) {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
@@ -90,15 +90,14 @@ export function ErrorBudgetChartPanel({
             slo={slo}
             isMouseOver={isMouseOver}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
-            hideMetadata={hideMetadata}
           />
 
           <ErrorBudgetChart
             slo={slo}
             data={data}
             isLoading={isLoading}
-            hideMetadata={hideMetadata}
             onBrushed={onBrushed}
+            lastErrorBudgetRemaining={lastErrorBudgetRemaining}
           />
         </EuiFlexGroup>
       </EuiPanel>

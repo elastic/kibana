@@ -108,6 +108,8 @@ export function SloErrorBudget({
   }
 
   const hasGroupBy = slo.instanceId !== ALL_VALUE;
+  const lastErrorBudgetRemaining = sloHistoricalSummary?.data?.at(-1)?.errorBudget.remaining;
+
   return (
     <div data-shared-item="" ref={containerRef} style={{ width: '100%', padding: 10 }}>
       <EuiFlexGroup direction="column" gutterSize="xs">
@@ -131,12 +133,12 @@ export function SloErrorBudget({
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="column" gutterSize="l">
-        <ErrorBudgetHeader hideTitle={true} slo={slo} hideMetadata={false} />
+        <ErrorBudgetHeader hideTitle={true} slo={slo} />
         <ErrorBudgetChart
           data={errorBudgetBurnDownData}
           isLoading={historicalSummaryLoading}
           slo={slo!}
-          hideMetadata={false}
+          lastErrorBudgetRemaining={lastErrorBudgetRemaining}
         />
       </EuiFlexGroup>
 

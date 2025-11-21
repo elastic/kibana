@@ -20,13 +20,11 @@ interface Props {
   hideTitle?: boolean;
   isMouseOver?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
-  hideMetadata?: boolean;
 }
 
 export function ErrorBudgetHeader({
   slo,
   hideTitle = false,
-  hideMetadata = false,
   isMouseOver,
   setDashboardAttachmentReady,
 }: Props) {
@@ -60,18 +58,16 @@ export function ErrorBudgetHeader({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!hideMetadata && (
-        <EuiFlexItem>
-          <EuiText color="subdued" size="s">
-            {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-              ? i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.duration', {
-                  defaultMessage: 'Last {duration}',
-                  values: { duration: toDurationLabel(slo.timeWindow.duration) },
-                })
-              : toDurationAdverbLabel(slo.timeWindow.duration)}
-          </EuiText>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem>
+        <EuiText color="subdued" size="s">
+          {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+            ? i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.duration', {
+                defaultMessage: 'Last {duration}',
+                values: { duration: toDurationLabel(slo.timeWindow.duration) },
+              })
+            : toDurationAdverbLabel(slo.timeWindow.duration)}
+        </EuiText>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
