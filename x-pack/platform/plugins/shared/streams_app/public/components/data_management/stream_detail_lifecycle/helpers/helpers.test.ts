@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseDuration, parseDurationInSeconds, orderIlmPhases } from './helpers';
+import { parseDuration, parseDurationInSeconds, orderIlmPhases, getILMRatios } from './helpers';
 import type { IlmPolicyPhases } from '@kbn/streams-schema';
 
 describe('helpers', () => {
@@ -176,6 +176,55 @@ describe('helpers', () => {
       expect(result[0].name).toBe('hot');
       expect(result[1].name).toBe('frozen');
       expect(result[2].name).toBe('delete');
+    });
+  });
+
+  describe('getILMRatios', () => {
+    it('should return undefined if no phases', () => {
+      expect(getILMRatios(undefined)).toBeUndefined();
+    });
+
+    it('should calculate grow ratios correctly for multiple phases', () => {
+      const phases: IlmPolicyPhases = {
+        hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+        warm: { name: 'warm', min_age: '1d', size_in_bytes: 1000 },
+        cold: { name: 'cold', min_age: '7d', size_in_bytes: 1000 },
+        delete: { name: 'delete', min_age: '30d' },
+      };
+
+      const result = getILMRatios({ phases });
+
+      expect(result).toHaveLength(4);
+      expect(result?.[0]).toMatchObject({ name: 'delete', grow: false });
+      expect(result?.[1]).toMatchObject({ name: 'cold', grow: 2 });
+      expect(result?.[2]).toMatchObject({ name: 'warm', grow: 2 });
+      expect(result?.[3]).toMatchObject({ name: 'hot', grow: 2 });
+    });
+
+    it('should assign default grow value for single phase', () => {
+      const phases: IlmPolicyPhases = {
+        hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+      };
+
+      const result = getILMRatios({ phases });
+
+      expect(result).toHaveLength(1);
+      expect(result?.[0]).toMatchObject({ name: 'hot', grow: 2 });
+    });
+
+    it('should handle when all phases with 0 min_age correctly', () => {
+      const phases: IlmPolicyPhases = {
+        hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+        warm: { name: 'warm', min_age: '0d', size_in_bytes: 1000 },
+        cold: { name: 'cold', min_age: '0d', size_in_bytes: 1000 },
+      };
+
+      const result = getILMRatios({ phases });
+
+      expect(result).toHaveLength(3);
+      expect(result?.[0]).toMatchObject({ name: 'delete', grow: false });
+      expect(result?.[1]).toMatchObject({ name: 'warm', grow: 2 });
+      expect(result?.[2]).toMatchObject({ name: 'hot', grow: 2 });
     });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import type { IlmPolicyDeletePhase, IlmPolicyPhase, IlmPolicyPhases } from '@kbn/streams-schema';
+import { first } from 'lodash';
 
 export const parseDuration = (duration: string = '') => {
   const result = /^(\d+)([d|m|s|h])$/.exec(duration);
@@ -38,4 +39,27 @@ export function orderIlmPhases(phases: IlmPolicyPhases) {
     phase?: IlmPolicyPhase | IlmPolicyDeletePhase
   ): phase is IlmPolicyPhase | IlmPolicyDeletePhase => Boolean(phase);
   return [phases.hot, phases.warm, phases.cold, phases.frozen, phases.delete].filter(isPhase);
+}
+
+export const getILMRatios = (value: {
+    phases: IlmPolicyPhases;
+} | undefined) => {
+    if (!value) return undefined;
+
+    const orderedPhases = orderIlmPhases(value.phases).reverse();
+    const totalDuration = parseDurationInSeconds(first(orderedPhases)!.min_age);
+
+    return orderedPhases.map((phase, index, phases) => {
+        const prevPhase = phases[index - 1];
+        if (!prevPhase) {
+            return { ...phase, grow: phase.name === 'delete' ? false : 2 };
+        }
+
+        const phaseDuration =
+        parseDurationInSeconds(prevPhase!.min_age) - parseDurationInSeconds(phase!.min_age);
+        return {
+            ...phase,
+            grow: totalDuration ? Math.max(2, Math.round((phaseDuration / totalDuration) * 10)) : 2,
+        };
+    });
 }
