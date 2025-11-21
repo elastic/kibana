@@ -26,6 +26,9 @@ export const createGapAutoFillSchedulerSchema = schema.object({
     schema.object({
       type: schema.string(),
       consumer: schema.string(),
-    })
+    }),
+    {
+      minSize: 1,
+    }
   ),
 });
