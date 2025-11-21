@@ -8,12 +8,11 @@
  */
 
 import { stringify, type ToStringOptions } from 'yaml';
-import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { getConnectorsCache } from '../../../../../common/connectors_contracts/cache';
 import { getZodTypeName } from '../../../../../common/lib/zod';
 import { isMac } from '../../../../shared/utils/is_mac';
 import { getConnectorInstancesForType } from '../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
-import { getCachedAllConnectors } from '../connectors_cache';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
 
 interface GenerateConnectorSnippetOptions {
@@ -31,20 +30,17 @@ interface GenerateConnectorSnippetOptions {
  */
 export function generateConnectorSnippet(
   connectorType: string,
-  { full, withStepsSection }: GenerateConnectorSnippetOptions = {},
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  { full, withStepsSection }: GenerateConnectorSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, unknown>;
 
-  const isConnectorIdRequired = getCachedAllConnectors().find(
-    (c) => c.type === connectorType
-  )?.connectorIdRequired;
+  const isConnectorIdRequired = getConnectorsCache().map.get(connectorType)?.connectorIdRequired;
 
   // Generate smart connector-id value based on available instances
   let connectorIdValue: string | undefined;
   if (isConnectorIdRequired) {
-    const instances = getConnectorInstancesForType(connectorType, dynamicConnectorTypes);
+    const instances = getConnectorInstancesForType(connectorType);
     if (instances.length > 0) {
       // Use the first non-deprecated instance as default, or first instance if all are deprecated
       const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];
@@ -56,7 +52,7 @@ export function generateConnectorSnippet(
   }
 
   // Get required parameters for this connector type
-  const requiredParams = getRequiredParamsForConnector(connectorType, dynamicConnectorTypes);
+  const requiredParams = getRequiredParamsForConnector(connectorType);
 
   if (requiredParams.length === 0) {
     // No required params, just add empty with block with a placeholder comment

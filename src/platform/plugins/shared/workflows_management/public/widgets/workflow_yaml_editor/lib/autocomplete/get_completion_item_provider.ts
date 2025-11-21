@@ -40,7 +40,6 @@ export function getCompletionItemProvider(
       }
 
       const suggestions = getSuggestions({ ...autocompleteContext, model, position });
-
       return {
         suggestions,
         incomplete: false,

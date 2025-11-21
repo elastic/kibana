@@ -64,7 +64,7 @@ import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
-import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
+import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connectors_contracts/connector_sub_actions_map';
 import {
   InvalidYamlSchemaError,
   WorkflowConflictError,

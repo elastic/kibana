@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
+import type { BuiltInStepType } from '@kbn/workflows';
 import {
   ForEachStepSchema,
   HttpStepSchema,
@@ -17,7 +17,7 @@ import {
   ParallelStepSchema,
   WaitStepSchema,
 } from '@kbn/workflows';
-import { getCachedAllConnectors } from '../../../connectors_cache';
+import { getConnectorsCache } from '../../../../../../../common/connectors_contracts/cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
 import { generateConnectorSnippet } from '../../../snippets/generate_connector_snippet';
 
@@ -29,8 +29,7 @@ const connectorTypeSuggestionsCache = new Map<string, monaco.languages.Completio
  */
 export function getConnectorTypeSuggestions(
   typePrefix: string,
-  range: monaco.IRange,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  range: monaco.IRange
 ): monaco.languages.CompletionItem[] {
   // Create a cache key based on the type prefix and context
   const cacheKey = `${typePrefix}|${JSON.stringify(range)}`;
@@ -46,11 +45,12 @@ export function getConnectorTypeSuggestions(
   const builtInStepTypes = getBuiltInStepTypesFromSchema();
 
   // Get all connectors
-  const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
+  const allConnectorsMap = getConnectorsCache().map;
+  const allConnectorsList = getConnectorsCache().list;
 
   // Helper function to create a suggestion with snippet
   const createSnippetSuggestion = (connectorType: string): monaco.languages.CompletionItem => {
-    const snippetText = generateConnectorSnippet(connectorType, {}, dynamicConnectorTypes);
+    const snippetText = generateConnectorSnippet(connectorType, {});
 
     // For YAML, we insert the actual text without snippet placeholders
     const simpleText = snippetText;
@@ -64,7 +64,7 @@ export function getConnectorTypeSuggestions(
     };
 
     // Find display name for this connector type - only for dynamic connectors
-    const connector = allConnectors.find((c) => c.type === connectorType);
+    const connector = allConnectorsMap.get(connectorType);
 
     // Only use display names for dynamic connectors (not elasticsearch.* or kibana.*)
     const isDynamicConnector =
@@ -97,7 +97,7 @@ export function getConnectorTypeSuggestions(
     const [namespace] = typePrefix.split('.');
     const namespacePrefix = `${namespace}.`;
 
-    const apis = allConnectors
+    const apis = allConnectorsList
       .filter((c) => c.type.startsWith(namespacePrefix))
       .map((c) => c.type)
       .filter((api) => api.toLowerCase().includes(typePrefix.toLowerCase()));
@@ -135,7 +135,7 @@ export function getConnectorTypeSuggestions(
     });
 
     // Then add matching connectors
-    const matchingConnectors = allConnectors
+    const matchingConnectors = allConnectorsList
       .map((c) => c.type)
       .filter((connectorType) => {
         const lowerType = connectorType.toLowerCase();

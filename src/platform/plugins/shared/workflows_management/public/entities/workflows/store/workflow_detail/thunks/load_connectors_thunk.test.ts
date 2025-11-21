@@ -17,12 +17,17 @@ import { setConnectors } from '../slice';
 
 // Mock the schema functions
 jest.mock('../../../../../../common/schema', () => ({
-  addDynamicConnectorsToCache: jest.fn(),
   getWorkflowZodSchema: jest.fn(() => ({})),
 }));
 
-const { addDynamicConnectorsToCache, getWorkflowZodSchema } = jest.requireMock(
-  '../../../../../../common/schema'
+jest.mock('../../../../../../common/connectors_contracts/cache', () => ({
+  addDynamicConnectorsToCache: jest.fn(),
+}));
+
+const { getWorkflowZodSchema } = jest.requireMock('../../../../../../common/schema');
+
+const { addDynamicConnectorsToCache } = jest.requireMock(
+  '../../../../../../common/connectors_contracts/cache'
 );
 
 // Mock connector data

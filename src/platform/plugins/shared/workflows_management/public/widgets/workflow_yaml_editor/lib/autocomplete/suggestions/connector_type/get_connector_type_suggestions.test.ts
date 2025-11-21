@@ -8,12 +8,15 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
+import { z } from '@kbn/zod';
 import { getConnectorTypeSuggestions } from './get_connector_type_suggestions';
+import { convertDynamicConnectorsToContracts } from '../../../../../../../common/connectors_contracts/convert_dynamic_conectors_to_contracts';
+import { getConnectorsCacheFromList } from '../../../../../../../common/connectors_contracts/utils';
 
 // Mock the dependencies
-jest.mock('../../../connectors_cache', () => ({
-  getCachedAllConnectors: jest.fn(),
+jest.mock('../../../../../../../common/connectors_contracts/cache', () => ({
+  getConnectorsCache: jest.fn(),
 }));
 
 jest.mock('../../../snippets/generate_builtin_step_snippet', () => ({
@@ -24,7 +27,8 @@ jest.mock('../../../snippets/generate_connector_snippet', () => ({
   generateConnectorSnippet: jest.fn(),
 }));
 
-import { getCachedAllConnectors } from '../../../connectors_cache';
+// eslint-disable-next-line import/order
+import { getConnectorsCache } from '../../../../../../../common/connectors_contracts/cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
 import { generateConnectorSnippet } from '../../../snippets/generate_connector_snippet';
 
@@ -61,17 +65,31 @@ describe('getConnectorTypeSuggestions', () => {
     },
   };
 
-  const mockConnectors = [
-    { type: '.slack', description: 'Slack connector' },
-    { type: '.inference', description: 'Inference connector (no instances configured)' },
-    { type: 'elasticsearch.index', description: 'Index documents' },
-    { type: 'elasticsearch.search', description: 'Search documents' },
-    { type: 'kibana.alert', description: 'Create alerts' },
-  ];
+  const mockConnectorsCache = getConnectorsCacheFromList([
+    ...convertDynamicConnectorsToContracts(mockDynamicConnectorTypes),
+    {
+      type: 'elasticsearch.index',
+      description: 'Index documents',
+      paramsSchema: z.object({}),
+      outputSchema: z.object({}),
+    },
+    {
+      type: 'elasticsearch.search',
+      description: 'Search documents',
+      paramsSchema: z.object({}),
+      outputSchema: z.object({}),
+    },
+    {
+      type: 'kibana.alert',
+      description: 'Create alerts',
+      paramsSchema: z.object({}),
+      outputSchema: z.object({}),
+    },
+  ]);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (getCachedAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
+    (getConnectorsCache as jest.Mock).mockReturnValue(mockConnectorsCache);
     (generateBuiltInStepSnippet as jest.Mock).mockImplementation((type) => `${type}:\n  # snippet`);
     (generateConnectorSnippet as jest.Mock).mockImplementation(
       (type) => `${type}:\n  connector-id: my-connector`
@@ -143,11 +161,11 @@ describe('getConnectorTypeSuggestions', () => {
 
     it('should filter connectors by prefix', () => {
       const result = getConnectorTypeSuggestions('sla', mockRange);
-      const slackSuggestion = result.find((s) => s.detail === '.slack');
+      const slackSuggestion = result.find((s) => s.detail === 'slack');
       expect(slackSuggestion).toBeDefined();
       expect(slackSuggestion).toMatchObject({
         label: 'Slack',
-        detail: '.slack',
+        detail: 'slack',
         documentation: 'Slack connector',
       });
     });
@@ -197,14 +215,10 @@ describe('getConnectorTypeSuggestions', () => {
     });
 
     it('should generate snippets for connectors', () => {
-      const result = getConnectorTypeSuggestions('slack', mockRange, mockDynamicConnectorTypes);
-      const slackSuggestion = result.find((s) => s.detail === '.slack');
-      expect(slackSuggestion?.insertText).toBe('.slack:\n  connector-id: my-connector');
-      expect(generateConnectorSnippet).toHaveBeenCalledWith(
-        '.slack',
-        {},
-        mockDynamicConnectorTypes
-      );
+      const result = getConnectorTypeSuggestions('slack', mockRange);
+      const slackSuggestion = result.find((s) => s.detail === 'slack');
+      expect(slackSuggestion?.insertText).toBe('slack:\n  connector-id: my-connector');
+      expect(generateConnectorSnippet).toHaveBeenCalledWith('slack', {});
     });
 
     it('should use extended range for multi-line insertions', () => {
@@ -221,25 +235,25 @@ describe('getConnectorTypeSuggestions', () => {
 
   describe('dynamic connector types', () => {
     it('should use display names for dynamic connectors', () => {
-      const result = getConnectorTypeSuggestions('', mockRange, mockDynamicConnectorTypes);
-      const slackSuggestion = result.find((s) => s.detail === '.slack');
+      const result = getConnectorTypeSuggestions('', mockRange);
+      const slackSuggestion = result.find((s) => s.detail === 'slack');
       expect(slackSuggestion).toMatchObject({
         label: 'Slack',
-        detail: '.slack',
+        detail: 'slack',
       });
     });
 
     it('should strip "connector" and "(no instances configured)" from display names', () => {
-      const result = getConnectorTypeSuggestions('inf', mockRange, mockDynamicConnectorTypes);
-      const inferenceSuggestion = result.find((s) => s.detail === '.inference');
+      const result = getConnectorTypeSuggestions('inf', mockRange);
+      const inferenceSuggestion = result.find((s) => s.detail === 'inference');
       expect(inferenceSuggestion).toMatchObject({
         label: 'Inference',
-        detail: '.inference',
+        detail: 'inference',
       });
     });
 
     it('should not use display names for elasticsearch connectors', () => {
-      const result = getConnectorTypeSuggestions('', mockRange, mockDynamicConnectorTypes);
+      const result = getConnectorTypeSuggestions('', mockRange);
       const elasticsearchSuggestion = result.find((s) => s.label === 'elasticsearch.index');
       expect(elasticsearchSuggestion).toMatchObject({
         label: 'elasticsearch.index',
@@ -248,7 +262,7 @@ describe('getConnectorTypeSuggestions', () => {
     });
 
     it('should not use display names for kibana connectors', () => {
-      const result = getConnectorTypeSuggestions('', mockRange, mockDynamicConnectorTypes);
+      const result = getConnectorTypeSuggestions('', mockRange);
       const kibanaSuggestion = result.find((s) => s.label === 'kibana.alert');
       expect(kibanaSuggestion).toMatchObject({
         label: 'kibana.alert',
@@ -267,7 +281,7 @@ describe('getConnectorTypeSuggestions', () => {
       const kibanaSuggestion = result.find((s) => s.label === 'kibana.alert');
       expect(kibanaSuggestion?.kind).toBe(monaco.languages.CompletionItemKind.Module);
 
-      const slackSuggestion = result.find((s) => s.detail === '.slack');
+      const slackSuggestion = result.find((s) => s.detail === 'slack');
       expect(slackSuggestion?.kind).toBe(monaco.languages.CompletionItemKind.Function);
     });
 
@@ -286,8 +300,8 @@ describe('getConnectorTypeSuggestions', () => {
       const ifSuggestion = result.find((s) => s.label === 'if');
       expect(ifSuggestion?.sortText).toBe('!if');
 
-      const slackSuggestion = result.find((s) => s.detail === '.slack');
-      expect(slackSuggestion?.sortText).toBe('!.slack');
+      const slackSuggestion = result.find((s) => s.detail === 'slack');
+      expect(slackSuggestion?.sortText).toBe('!slack');
     });
 
     it('should set filterText to match the type', () => {
@@ -296,8 +310,8 @@ describe('getConnectorTypeSuggestions', () => {
       const ifSuggestion = result.find((s) => s.label === 'if');
       expect(ifSuggestion?.filterText).toBe('if');
 
-      const slackSuggestion = result.find((s) => s.detail === '.slack');
-      expect(slackSuggestion?.filterText).toBe('.slack');
+      const slackSuggestion = result.find((s) => s.detail === 'slack');
+      expect(slackSuggestion?.filterText).toBe('slack');
     });
 
     it('should not set preselect', () => {
@@ -323,11 +337,11 @@ describe('getConnectorTypeSuggestions', () => {
 
       // First call
       const result1 = getConnectorTypeSuggestions(uniquePrefix, mockRange);
-      const callCount1 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount1 = (getConnectorsCache as jest.Mock).mock.calls.length;
 
       // Second call with same parameters - should use cache
       const result2 = getConnectorTypeSuggestions(uniquePrefix, mockRange);
-      const callCount2 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount2 = (getConnectorsCache as jest.Mock).mock.calls.length;
 
       // Due to caching, getCachedAllConnectors should NOT be called again
       expect(callCount2).toBe(callCount1);
@@ -340,10 +354,10 @@ describe('getConnectorTypeSuggestions', () => {
       const prefix2 = 'uniquetest3';
 
       getConnectorTypeSuggestions(prefix1, mockRange);
-      const callCount1 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount1 = (getConnectorsCache as jest.Mock).mock.calls.length;
 
       getConnectorTypeSuggestions(prefix2, mockRange);
-      const callCount2 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount2 = (getConnectorsCache as jest.Mock).mock.calls.length;
 
       // Different prefix means new function call, so getCachedAllConnectors is called again
       expect(callCount2).toBe(callCount1 + 1);
@@ -354,10 +368,10 @@ describe('getConnectorTypeSuggestions', () => {
       const uniquePrefix = 'uniquetest4';
 
       getConnectorTypeSuggestions(uniquePrefix, mockRange);
-      const callCount1 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount1 = (getConnectorsCache as jest.Mock).mock.calls.length;
 
       getConnectorTypeSuggestions(uniquePrefix, differentRange);
-      const callCount2 = (getCachedAllConnectors as jest.Mock).mock.calls.length;
+      const callCount2 = (getConnectorsCache as jest.Mock).mock.calls.length;
 
       // Different range means new cache key, so getCachedAllConnectors is called again
       expect(callCount2).toBe(callCount1 + 1);
@@ -367,7 +381,7 @@ describe('getConnectorTypeSuggestions', () => {
   describe('edge cases', () => {
     it('should handle case-insensitive matching', () => {
       const result = getConnectorTypeSuggestions('SLACK', mockRange);
-      const slackSuggestion = result.find((s) => s.detail === '.slack');
+      const slackSuggestion = result.find((s) => s.detail === 'slack');
       expect(slackSuggestion).toBeDefined();
     });
 
@@ -378,16 +392,18 @@ describe('getConnectorTypeSuggestions', () => {
     });
 
     it('should handle empty connector list', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+      (getConnectorsCache as jest.Mock).mockReturnValue([]);
       const result = getConnectorTypeSuggestions('', mockRange);
       // Should still have built-in steps
       expect(result.length).toBeGreaterThanOrEqual(6);
     });
 
     it('should handle connectors without descriptions', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
-        { type: '.custom' }, // No description
-      ]);
+      (getConnectorsCache as jest.Mock).mockReturnValue(
+        getConnectorsCacheFromList([
+          { type: '.custom' } as ConnectorContractUnion, // No description
+        ])
+      );
       const result = getConnectorTypeSuggestions('custom', mockRange);
       const customSuggestion = result.find((s) => s.detail === '.custom');
       expect(customSuggestion).toMatchObject({

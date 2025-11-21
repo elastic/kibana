@@ -12,8 +12,8 @@ import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { isBuiltInStepType } from '@kbn/workflows';
+import { getConnectorsCache } from '../../../../../common/connectors_contracts/cache';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml';
-import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { getBaseConnectorType } from '../../../../shared/ui/step_icons/get_base_connector_type';
 
 interface UseConnectorTypeDecorationsProps {
@@ -31,7 +31,7 @@ export const useConnectorTypeDecorations = ({
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   const typeExists = useCallback((type: string) => {
-    const dynamicConnectorTypes = getCachedAllConnectorsMap() || new Map();
+    const dynamicConnectorTypes = getConnectorsCache().types;
     return isBuiltInStepType(type) || dynamicConnectorTypes.has(type);
   }, []);
 

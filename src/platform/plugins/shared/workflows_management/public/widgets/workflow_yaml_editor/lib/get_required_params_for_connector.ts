@@ -9,9 +9,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { type ConnectorTypeInfo, isEnhancedInternalConnector } from '@kbn/workflows';
+import { isEnhancedInternalConnector } from '@kbn/workflows';
 import { z } from '@kbn/zod';
-import { getCachedAllConnectors } from './connectors_cache';
+import { getConnectorsCache } from '../../../../common/connectors_contracts/cache';
 
 export interface RequiredParamForConnector {
   name: string;
@@ -22,15 +22,12 @@ export interface RequiredParamForConnector {
 /**
  * Get required parameters for a connector type from generated schemas
  */
-export function getRequiredParamsForConnector(
-  connectorType: string,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
-): RequiredParamForConnector[] {
+export function getRequiredParamsForConnector(connectorType: string): RequiredParamForConnector[] {
   // Get all connectors (both static and generated)
-  const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
+  const allConnectorsCache = getConnectorsCache();
 
   // Find the connector by type
-  const connector = allConnectors.find((c) => c.type === connectorType);
+  const connector = allConnectorsCache.map.get(connectorType);
 
   if (connector && connector.paramsSchema) {
     try {
