@@ -65,7 +65,7 @@ export async function getRuleIdsWithGaps(
       throw error;
     }
 
-    const { start, end, statuses, highestPriorityGapFillStatuses } = params;
+    const { start, end, statuses, highestPriorityGapFillStatuses = [] } = params;
     const eventLogClient = await context.getEventLogClient();
 
     const filter = buildGapsFilter({
@@ -96,7 +96,7 @@ export async function getRuleIdsWithGaps(
     const buckets = byRuleAgg?.buckets ?? [];
 
     const ruleIds: string[] = [];
-    if (highestPriorityGapFillStatuses?.length ?? 0 > 0) {
+    if (highestPriorityGapFillStatuses.length > 0) {
       for (const b of buckets) {
         const sums = extractGapDurationSums(b);
         const gapFillStatus = calculateHighestPriorityGapFillStatus(sums);
