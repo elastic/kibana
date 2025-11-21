@@ -49,7 +49,7 @@ const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] =
   });
 };
 
-export interface TabsMenuProps {
+export interface TabsBarMenuProps {
   items: TabItem[];
   selectedItem: TabItem | null;
   recentlyClosedItems: TabItem[];
@@ -58,7 +58,7 @@ export interface TabsMenuProps {
   onClearRecentlyClosed: () => void;
 }
 
-export const TabsMenu: React.FC<TabsMenuProps> = React.memo(
+export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
   ({
     items,
     selectedItem,
@@ -79,8 +79,8 @@ export const TabsMenu: React.FC<TabsMenuProps> = React.memo(
     const [isPopoverOpen, setPopover] = useState(false);
     const contextMenuPopoverId = useGeneratedHtmlId();
 
-    const menuButtonLabel = i18n.translate('unifiedTabs.tabsMenu.tabsMenuButton', {
-      defaultMessage: 'Tabs menu',
+    const menuButtonLabel = i18n.translate('unifiedTabs.tabsBarMenu.tabsBarMenuButton', {
+      defaultMessage: 'Tabs bar menu',
     });
 
     const closePopover = useCallback(() => {
@@ -96,7 +96,7 @@ export const TabsMenu: React.FC<TabsMenuProps> = React.memo(
 
     return (
       <EuiPopover
-        data-test-subj="unifiedTabs_tabsMenu"
+        data-test-subj="unifiedTabs_tabsBarMenu"
         id={contextMenuPopoverId}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -105,14 +105,14 @@ export const TabsMenu: React.FC<TabsMenuProps> = React.memo(
         hasArrow={false}
         panelProps={{
           css: popoverCss,
-          ['data-test-subj']: 'unifiedTabs_tabsMenuPanel',
+          ['data-test-subj']: 'unifiedTabs_tabsBarMenuPanel',
         }}
         button={
           <EuiToolTip content={menuButtonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={menuButtonLabel}
               color="text"
-              data-test-subj="unifiedTabs_tabsMenuButton"
+              data-test-subj="unifiedTabs_tabsBarMenuButton"
               iconType="boxesVertical"
               onClick={() => setPopover((prev) => !prev)}
             />
@@ -120,7 +120,7 @@ export const TabsMenu: React.FC<TabsMenuProps> = React.memo(
         }
       >
         <EuiSelectable
-          aria-label={i18n.translate('unifiedTabs.tabsMenu.openedTabsList', {
+          aria-label={i18n.translate('unifiedTabs.tabsBarMenu.openedTabsList', {
             defaultMessage: 'Opened tabs list',
           })}
           options={openedTabsList}
@@ -138,7 +138,7 @@ export const TabsMenu: React.FC<TabsMenuProps> = React.memo(
           {(tabs) => (
             <>
               <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('unifiedTabs.tabsMenu.openedItems', {
+                {i18n.translate('unifiedTabs.tabsBarMenu.openedItems', {
                   defaultMessage: 'Opened tabs',
                 })}
               </EuiPopoverTitle>
@@ -150,7 +150,7 @@ export const TabsMenu: React.FC<TabsMenuProps> = React.memo(
           <>
             <EuiHorizontalRule margin="none" />
             <EuiSelectable
-              aria-label={i18n.translate('unifiedTabs.tabsMenu.recentlyClosedTabsList', {
+              aria-label={i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosedTabsList', {
                 defaultMessage: 'Recently closed tabs list',
               })}
               options={recentlyClosedTabsList}
@@ -175,7 +175,7 @@ export const TabsMenu: React.FC<TabsMenuProps> = React.memo(
                       justifyContent="spaceBetween"
                     >
                       <EuiFlexItem grow>
-                        {i18n.translate('unifiedTabs.tabsMenu.recentlyClosed', {
+                        {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
                           defaultMessage: 'Recently closed',
                         })}
                       </EuiFlexItem>
@@ -184,12 +184,15 @@ export const TabsMenu: React.FC<TabsMenuProps> = React.memo(
                           size="xs"
                           flush="both"
                           data-test-subj="unifiedTabs_tabsMenu_clearRecentlyClosed"
-                          aria-label={i18n.translate('unifiedTabs.tabsMenu.clearRecentlyClosed', {
-                            defaultMessage: 'Clear',
-                          })}
+                          aria-label={i18n.translate(
+                            'unifiedTabs.tabsBarMenu.clearRecentlyClosed',
+                            {
+                              defaultMessage: 'Clear',
+                            }
+                          )}
                           onClick={onClearRecentlyClosed}
                         >
-                          {i18n.translate('unifiedTabs.tabsMenu.clearRecentlyClosed', {
+                          {i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
                             defaultMessage: 'Clear',
                           })}
                         </EuiButtonEmpty>

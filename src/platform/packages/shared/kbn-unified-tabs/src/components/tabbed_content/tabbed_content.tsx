@@ -39,7 +39,7 @@ export interface TabbedContentProps
     | 'disableCloseButton'
     | 'disableInlineLabelEditing'
     | 'disableDragAndDrop'
-    | 'disableTabsMenu'
+    | 'disableTabsBarMenu'
   > {
   items: TabItem[];
   selectedItemId?: string;
@@ -80,7 +80,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableCloseButton = false,
   disableInlineLabelEditing = false,
   disableDragAndDrop = false,
-  disableTabsMenu = false,
+  disableTabsBarMenu = false,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [generatedId] = useState(() => tabContentIdOverride ?? htmlIdGenerator()());
@@ -346,7 +346,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       disableCloseButton={disableCloseButton}
       disableInlineLabelEditing={disableInlineLabelEditing}
       disableDragAndDrop={disableDragAndDrop}
-      disableTabsMenu={disableTabsMenu}
+      disableTabsBarMenu={disableTabsBarMenu}
     />
   );
 
