@@ -67,15 +67,19 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
     }
 
     // Build base stored filter structure
+    // Only include properties that are explicitly set in AsCodeFilter (minimize round-trip differences)
     const storedFilter: StoredFilter = {
-      $state: {
-        store: filter.pinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
-      },
+      ...(filter.pinned !== undefined
+        ? {
+            $state: {
+              store: filter.pinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+            },
+          }
+        : {}),
       meta: {
-        alias: filter.label || null,
-        disabled: filter.disabled || false,
-        negate: filter.negate || false,
-        // Only add optional properties if they have defined values (round-trip compatibility)
+        ...(filter.label !== undefined ? { alias: filter.label } : {}),
+        ...(filter.disabled !== undefined ? { disabled: filter.disabled } : {}),
+        ...(filter.negate !== undefined ? { negate: filter.negate } : {}),
         ...(filter.controlledBy !== undefined ? { controlledBy: filter.controlledBy } : {}),
         ...(filter.dataViewId !== undefined ? { index: filter.dataViewId } : {}),
         ...(filter.isMultiIndex !== undefined ? { isMultiIndex: filter.isMultiIndex } : {}),
@@ -288,13 +292,11 @@ function convertFromFilterGroup(
       | AsCodeGroupFilter['group'];
 
     // Create a clean base for sub-filters
+    // Sub-filters inherit index and $state when present
     const cleanBase = {
-      $state: baseStored.$state,
+      ...(baseStored.$state ? { $state: baseStored.$state } : {}),
       meta: {
-        index: baseStored.meta.index,
-        disabled: false,
-        negate: false,
-        alias: null,
+        ...(baseStored.meta.index ? { index: baseStored.meta.index } : {}),
       },
     };
 
