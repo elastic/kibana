@@ -100,6 +100,7 @@ export function useFailureStoreModal() {
           isCurrentlyInherited,
         },
       }),
+      showIlmDescription: !isServerless,
       canShowDisableLifecycle: !isServerless,
     });
   };
