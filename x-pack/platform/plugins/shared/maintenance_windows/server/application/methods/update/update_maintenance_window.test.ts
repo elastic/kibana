@@ -29,7 +29,7 @@ const secondTimestamp = '2023-03-26T00:00:00.000Z';
 
 const updatedAttributes = {
   title: 'updated-title',
-  enabled: false,
+  enabled: true,
   duration: 2 * 60 * 60 * 1000,
   rRule: {
     tzid: 'CET',

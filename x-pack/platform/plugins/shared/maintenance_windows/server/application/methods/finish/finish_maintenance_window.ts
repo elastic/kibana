@@ -84,6 +84,7 @@ async function finishWithOCC(
       events,
       dateToCompare: now,
       expirationDate,
+      enabled: maintenanceWindow.enabled,
     });
 
     // Throw if the maintenance window is not running, or event doesn't exist

@@ -17,7 +17,9 @@ import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { getProcessedAttachments } from './get_processed_attachments';
+import { AppLeaveContext } from '../app_leave_context';
 
+const noopOnAppLeave = () => {};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
 }
@@ -162,9 +164,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <OnechatServicesContext.Provider value={services}>
-            <ConversationContext.Provider value={conversationContextValue}>
-              <SendMessageProvider>{children}</SendMessageProvider>
-            </ConversationContext.Provider>
+            <AppLeaveContext.Provider value={noopOnAppLeave}>
+              <ConversationContext.Provider value={conversationContextValue}>
+                <SendMessageProvider>{children}</SendMessageProvider>
+              </ConversationContext.Provider>
+            </AppLeaveContext.Provider>
           </OnechatServicesContext.Provider>
         </QueryClientProvider>
       </I18nProvider>
