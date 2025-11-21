@@ -26,12 +26,9 @@ export const getCreationErrorMessage = (creationError: IHttpFetchError) => {
 };
 
 export const EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS = {
-  title: i18n.translate(
-    'xpack.securitySolution.eventFilter.processDescendantsIndicator.title',
-    {
-      defaultMessage: 'Filtering descendants of process',
-    }
-  ),
+  title: i18n.translate('xpack.securitySolution.eventFilter.processDescendantsIndicator.title', {
+    defaultMessage: 'Filtering descendants of process',
+  }),
   tooltipText: i18n.translate(
     'xpack.securitySolution.eventFilter.processDescendantsIndicator.tooltipText',
     {

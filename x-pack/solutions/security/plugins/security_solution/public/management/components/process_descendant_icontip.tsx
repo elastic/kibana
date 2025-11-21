@@ -33,9 +33,7 @@ export const ProcessDescendantsIconTip = memo<ProcessDescendantsIconTipProps>(
         {...commonProps}
         content={
           <EuiText size="s">
-            <p>
-              {tooltipText}
-            </p>
+            <p>{tooltipText}</p>
             {indicateExtraEntry && (
               <>
                 <p>
@@ -49,9 +47,7 @@ export const ProcessDescendantsIconTip = memo<ProcessDescendantsIconTipProps>(
                 </p>
               </>
             )}
-            <p>
-              {versionInfo}
-            </p>
+            <p>{versionInfo}</p>
           </EuiText>
         }
         data-test-subj={getTestId('tooltipText')}
