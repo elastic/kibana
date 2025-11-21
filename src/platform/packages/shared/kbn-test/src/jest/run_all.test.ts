@@ -712,6 +712,60 @@ describe('run_all.ts', () => {
         );
       });
 
+      it('should upload checkpoint to Buildkite after each successful config', async () => {
+        process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        process.env.BUILDKITE = 'true';
+        process.env.CI = 'true';
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const mockJestProcess = new EventEmitter() as any;
+        mockJestProcess.stdout = new EventEmitter();
+        mockJestProcess.stderr = new EventEmitter();
+
+        // Mock spawn to handle both jest and buildkite-agent calls
+        let spawnCallCount = 0;
+        mockSpawn.mockImplementation((cmd: string, args: string[]) => {
+          if (cmd === 'buildkite-agent') {
+            // Mock buildkite-agent upload process
+            const mockUploadProcess = new EventEmitter() as any;
+            process.nextTick(() => {
+              mockUploadProcess.emit('exit', 0); // Successful upload
+            });
+            return mockUploadProcess;
+          } else {
+            // Mock jest process
+            spawnCallCount++;
+            if (spawnCallCount === 1) {
+              process.nextTick(() => {
+                mockJestProcess.emit('exit', 0); // Success
+              });
+            }
+            return mockJestProcess;
+          }
+        });
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        await runPromise;
+
+        // Should have called buildkite-agent to upload checkpoint
+        expect(mockSpawn).toHaveBeenCalledWith(
+          'buildkite-agent',
+          ['artifact', 'upload', '/tmp/checkpoint.json'],
+          expect.objectContaining({ stdio: 'ignore' })
+        );
+
+        // Clean up env vars
+        delete process.env.BUILDKITE;
+        delete process.env.CI;
+      });
+
       it('should not write checkpoint when config fails', async () => {
         process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
 

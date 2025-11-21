@@ -319,6 +319,30 @@ async function runConfigs(
                 'utf8'
               );
               log.debug(`Checkpoint: Saved progress (${completedConfigs.size} completed configs)`);
+
+              // Upload checkpoint to Buildkite immediately (so it survives agent crashes)
+              if (process.env.BUILDKITE && process.env.CI) {
+                try {
+                  const uploadProc = spawn(
+                    'buildkite-agent',
+                    ['artifact', 'upload', checkpointPath],
+                    {
+                      stdio: 'ignore',
+                    }
+                  );
+
+                  // Don't wait for upload to complete, let it run in background
+                  uploadProc.on('exit', (uploadCode) => {
+                    if (uploadCode === 0) {
+                      log.debug(`Checkpoint: Uploaded to Buildkite`);
+                    } else {
+                      log.debug(`Checkpoint: Upload failed with code ${uploadCode}`);
+                    }
+                  });
+                } catch (uploadErr) {
+                  log.debug(`Checkpoint: Upload error: ${(uploadErr as Error).message}`);
+                }
+              }
             } catch (err) {
               log.warning(`Checkpoint: Unable to write checkpoint file: ${(err as Error).message}`);
             }

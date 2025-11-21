@@ -108,10 +108,12 @@ eval "$full_command"
 code=$?
 set -e
 
-# Upload checkpoint file as artifact (even if tests failed, so we can resume)
+# Upload checkpoint file as artifact (final upload, redundant with progressive uploads during test run)
+# Note: The Node.js script uploads the checkpoint after each successful config,
+# but we upload again here as a final backup in case any uploads were missed
 if [ -f "$CHECKPOINT_FILE" ]; then
-  echo "--- Uploading checkpoint file"
-  buildkite-agent artifact upload "$CHECKPOINT_FILE"
+  echo "--- Uploading final checkpoint file"
+  buildkite-agent artifact upload "$CHECKPOINT_FILE" || true
 fi
 
 if [ $code -ne 0 ]; then
