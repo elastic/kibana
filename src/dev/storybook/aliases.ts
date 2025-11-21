@@ -19,6 +19,7 @@ export const storybookAliases = {
   cloud: 'src/platform/packages/shared/cloud/.storybook',
   coloring: 'src/platform/packages/shared/kbn-coloring/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
+  classic_stream_flyout: 'x-pack/platform/packages/shared/kbn-classic-stream-flyout/.storybook',
   custom_icons: 'src/platform/packages/shared/kbn-custom-icons/.storybook',
   custom_integrations: 'src/platform/plugins/shared/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/platform/plugins/shared/dashboard_enhanced/.storybook',

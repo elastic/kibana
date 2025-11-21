@@ -14,13 +14,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import {
-  DEFAULT_GEMINI_MODEL,
-  DEFAULT_GEMINI_URL,
+  DEFAULT_MODEL,
+  DEFAULT_URL,
   DEFAULT_TOKEN_LIMIT,
   DEFAULT_GCP_REGION,
-} from '../../../common/gemini/constants';
+} from '@kbn/connector-schemas/gemini/constants';
 import * as i18n from './translations';
-import { contextWindowLengthField } from '../../common/genai_connectors';
+import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
 
 const generationConfig = {
   temperature: 0,
@@ -48,7 +48,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
     isUrlField: true,
-    defaultValue: DEFAULT_GEMINI_URL,
+    defaultValue: DEFAULT_URL,
     helpText: (
       <FormattedMessage
         defaultMessage="The Google Gemini API endpoint URL. For more information on the URL, refer to the {geminiAPIUrlDocs}."
@@ -116,9 +116,10 @@ export const geminiConfig: ConfigFieldSchema[] = [
         }}
       />
     ),
-    defaultValue: DEFAULT_GEMINI_MODEL,
+    defaultValue: DEFAULT_MODEL,
   },
   contextWindowLengthField,
+  temperatureField,
 ];
 
 export const geminiSecrets: SecretsFieldSchema[] = [

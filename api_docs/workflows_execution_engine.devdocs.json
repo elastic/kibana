@@ -137,7 +137,9 @@
               "section": "def-common.WorkflowExecutionEngineModel",
               "text": "WorkflowExecutionEngineModel"
             },
-            ", stepId: string, contextOverride: Record<string, any>) => Promise<",
+            ", stepId: string, contextOverride: Record<string, any>, request?: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any> | undefined) => Promise<",
             "ExecuteWorkflowStepResponse",
             ">"
           ],
@@ -195,6 +197,22 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
+            },
+            {
+              "parentPluginId": "workflowsExecutionEngine",
+              "id": "def-server.WorkflowsExecutionEnginePluginStart.executeWorkflowStep.$4",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any> | undefined"
+              ],
+              "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
             }
           ],
           "returnComment": []
@@ -253,40 +271,44 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "workflowsExecutionEngine",
+        "id": "def-common.createIndexes",
+        "type": "Function",
+        "tags": [],
+        "label": "createIndexes",
+        "description": [],
+        "signature": [
+          "(options: CreateIndexesOptions) => Promise<void>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_execution_engine/common/create_indexes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExecutionEngine",
+            "id": "def-common.createIndexes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "CreateIndexesOptions"
+            ],
+            "path": "src/platform/plugins/shared/workflows_execution_engine/common/create_indexes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "workflowsExecutionEngine",
-        "id": "def-common.PLUGIN_ID",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_ID",
-        "description": [],
-        "signature": [
-          "\"workflowsExecutionEngine\""
-        ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workflowsExecutionEngine",
-        "id": "def-common.PLUGIN_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_NAME",
-        "description": [],
-        "signature": [
-          "\"Workflows Execution Engine\""
-        ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "workflowsExecutionEngine",
         "id": "def-common.WORKFLOWS_EXECUTION_LOGS_INDEX",
@@ -297,7 +319,7 @@
         "signature": [
           "\".workflows-execution-logs\""
         ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
+        "path": "src/platform/plugins/shared/workflows_execution_engine/common/mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -312,7 +334,7 @@
         "signature": [
           "\".workflows-executions\""
         ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
+        "path": "src/platform/plugins/shared/workflows_execution_engine/common/mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -327,733 +349,12 @@
         "signature": [
           "\".workflows-step-executions\""
         ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
+        "path": "src/platform/plugins/shared/workflows_execution_engine/common/mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "workflowsExecutionEngine",
-        "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS",
-        "type": "Object",
-        "tags": [],
-        "label": "WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS",
-        "description": [],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "workflowsExecutionEngine",
-            "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.dynamic",
-            "type": "boolean",
-            "tags": [],
-            "label": "dynamic",
-            "description": [],
-            "signature": [
-              "false"
-            ],
-            "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsExecutionEngine",
-            "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties",
-            "type": "Object",
-            "tags": [],
-            "label": "properties",
-            "description": [],
-            "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.spaceId",
-                "type": "Object",
-                "tags": [],
-                "label": "spaceId",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.spaceId.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.id",
-                "type": "Object",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.id.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.workflowId",
-                "type": "Object",
-                "tags": [],
-                "label": "workflowId",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.workflowId.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.status",
-                "type": "Object",
-                "tags": [],
-                "label": "status",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.status.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.workflowDefinition",
-                "type": "Object",
-                "tags": [],
-                "label": "workflowDefinition",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.workflowDefinition.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"object\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.workflowDefinition.enabled",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "enabled",
-                    "description": [],
-                    "signature": [
-                      "false"
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.createdAt",
-                "type": "Object",
-                "tags": [],
-                "label": "createdAt",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.createdAt.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"date\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.error",
-                "type": "Object",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.error.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"text\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.error.index",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "index",
-                    "description": [],
-                    "signature": [
-                      "false"
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.createdBy",
-                "type": "Object",
-                "tags": [],
-                "label": "createdBy",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.createdBy.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.startedAt",
-                "type": "Object",
-                "tags": [],
-                "label": "startedAt",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.startedAt.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"date\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.finishedAt",
-                "type": "Object",
-                "tags": [],
-                "label": "finishedAt",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.finishedAt.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"date\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.duration",
-                "type": "Object",
-                "tags": [],
-                "label": "duration",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.duration.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"long\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.triggeredBy",
-                "type": "Object",
-                "tags": [],
-                "label": "triggeredBy",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties.triggeredBy.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workflowsExecutionEngine",
-        "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS",
-        "type": "Object",
-        "tags": [],
-        "label": "WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS",
-        "description": [],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "workflowsExecutionEngine",
-            "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.dynamic",
-            "type": "boolean",
-            "tags": [],
-            "label": "dynamic",
-            "description": [],
-            "signature": [
-              "false"
-            ],
-            "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsExecutionEngine",
-            "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties",
-            "type": "Object",
-            "tags": [],
-            "label": "properties",
-            "description": [],
-            "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.spaceId",
-                "type": "Object",
-                "tags": [],
-                "label": "spaceId",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.spaceId.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.id",
-                "type": "Object",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.id.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.stepId",
-                "type": "Object",
-                "tags": [],
-                "label": "stepId",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.stepId.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.workflowRunId",
-                "type": "Object",
-                "tags": [],
-                "label": "workflowRunId",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.workflowRunId.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.workflowId",
-                "type": "Object",
-                "tags": [],
-                "label": "workflowId",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.workflowId.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.status",
-                "type": "Object",
-                "tags": [],
-                "label": "status",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.status.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"keyword\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.startedAt",
-                "type": "Object",
-                "tags": [],
-                "label": "startedAt",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.startedAt.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"date\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.finishedAt",
-                "type": "Object",
-                "tags": [],
-                "label": "finishedAt",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.finishedAt.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"date\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.duration",
-                "type": "Object",
-                "tags": [],
-                "label": "duration",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.duration.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [
-                      "// milliseconds"
-                    ],
-                    "signature": [
-                      "\"long\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "workflowsExecutionEngine",
-                "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.output",
-                "type": "Object",
-                "tags": [],
-                "label": "output",
-                "description": [],
-                "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.output.type",
-                    "type": "string",
-                    "tags": [],
-                    "label": "type",
-                    "description": [],
-                    "signature": [
-                      "\"object\""
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "workflowsExecutionEngine",
-                    "id": "def-common.WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties.output.enabled",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "enabled",
-                    "description": [],
-                    "signature": [
-                      "false"
-                    ],
-                    "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

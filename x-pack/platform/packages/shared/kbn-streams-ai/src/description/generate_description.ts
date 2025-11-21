@@ -21,6 +21,7 @@ export async function generateStreamDescription({
   end,
   esClient,
   inferenceClient,
+  signal,
 }: {
   stream: Streams.all.Definition;
   feature?: Feature;
@@ -28,6 +29,7 @@ export async function generateStreamDescription({
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
+  signal: AbortSignal;
 }): Promise<string> {
   const analysis = await describeDataset({
     start,
@@ -45,6 +47,7 @@ export async function generateStreamDescription({
       ),
     },
     prompt: GenerateStreamDescriptionPrompt,
+    abortSignal: signal,
   });
 
   return response.content;

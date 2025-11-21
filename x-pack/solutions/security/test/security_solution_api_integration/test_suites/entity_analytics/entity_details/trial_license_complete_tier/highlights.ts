@@ -9,8 +9,9 @@ import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DEFAULT_ANOMALY_SCORE } from '@kbn/security-solution-plugin/common/constants';
 import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services/rules';
+import { createAlertsIndex, deleteAllAlerts } from '@kbn/detections-response-ftr-services/alerts';
 import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
-import { deleteAllRules } from '../../../../config/services/detections_response/rules';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   assetCriticalityRouteHelpersFactory,
@@ -21,10 +22,6 @@ import {
   riskEngineRouteHelpersFactory,
   waitForRiskScoresToBePresent,
 } from '../../utils';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-} from '../../../../config/services/detections_response/alerts';
 import {
   dataGeneratorFactory,
   forceStartDatafeeds,
@@ -132,6 +129,13 @@ export default function ({ getService }: FtrProviderContext) {
       await riskEngineRoutes.init();
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+
+      await supertest
+        .post(`/api/fleet/setup`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
@@ -304,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         anomalies: [],
       });
-      expect(body.replacements).toEqual(expect.any(Object));
+      expect(Object.values(body.replacements)).toEqual(['un-existent-host']);
       expect(body.prompt).toContain('Generate markdown text with most important information');
     });
 

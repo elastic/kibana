@@ -74,6 +74,10 @@ const configSchema = schema.object(
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
+    object_src: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+    }),
     frame_ancestors: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
@@ -142,4 +146,17 @@ export const cspConfig: ServiceConfigDescriptor<CspConfigType> = {
   // ? https://github.com/elastic/kibana/pull/52251
   path: 'csp',
   schema: configSchema,
+  deprecations: ({ unusedFromRoot, deprecateFromRoot }) => [
+    unusedFromRoot('csp.report_only.object_src', { level: 'warning' }),
+    deprecateFromRoot('csp.disableUnsafeEval', '10.0.0', {
+      level: 'warning',
+      message: '`csp.disableUnsafeEval` has been replaced by the `csp.script_src` setting.',
+      correctiveActions: {
+        manualSteps: [
+          'Remove the `csp.disableUnsafeEval` setting from your kibana configuration file.',
+          "Use `csp.script_src: ['unsafe-eval']` instead if you wish to enable `unsafe-eval`.",
+        ],
+      },
+    }),
+  ],
 };

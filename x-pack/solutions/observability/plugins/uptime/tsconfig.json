@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -19,7 +19,6 @@
     "@kbn/fleet-plugin",
     "@kbn/alerting-plugin",
     "@kbn/datemath",
-    "@kbn/stack-connectors-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/observability-shared-plugin",

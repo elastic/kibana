@@ -79,7 +79,7 @@ export const buildEsqlFetchSubscribe = ({
     if (next.fetchStatus === FetchStatus.LOADING) {
       // We have to grab the current query from appState
       // here since nextQuery has not been updated yet
-      const appStateQuery = appStateContainer.getState().query;
+      const appStateQuery = appStateContainer.get().query;
 
       if (isOfAggregateQueryType(appStateQuery)) {
         if (prevEsqlData.initialFetch) {
@@ -147,7 +147,7 @@ export const buildEsqlFetchSubscribe = ({
     const changeDefaultColumns =
       indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
 
-    const { viewMode } = appStateContainer.getState();
+    const { viewMode } = appStateContainer.get();
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
     // If the index pattern hasn't changed, but the available columns have changed

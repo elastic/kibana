@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { AttachmentRepresentation } from '../attachments';
+import type { AttachmentTypeDefinition } from '../attachments';
 
 export interface AttachmentsService {
-  format(attachment: AttachmentInput): Promise<AttachmentRepresentation>;
+  getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
 }

@@ -21,6 +21,52 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.2.1 [kibana-9.2.1-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.2.1-features-enhancements]
+
+**{{product.kibana}} platform**:
+* The `defaultRoute` advanced setting now controls the target of the Elastic logo link for spaces using a solution view [#241571]({{kib-pull}}241571).
+* Enforces the `object_src 'none'` directive in {{product.kibana}}'s Content Security Policy and introduces a new `csp.object_src` configuration option to control its behavior [#241029]({{kib-pull}}241029).
+
+**Machine Learning**:
+* Improves layout wrapping in the **Overview** and **Notifications** tabs on the {{product.machine-learning}} Overview page [#239113]({{kib-pull}}239113).
+
+
+### Fixes [kibana-9.2.1-fixes]
+
+**Alerting**:
+* Fixes missing accessibility announcements in Cases [#240132]({{kib-pull}}240132).
+
+**Dashboards and visualizations**:
+* Fixes an issue where references were being lost in Links, Maps, and legacy Visualize panels when updating a dashboard [#241893]({{kib-pull}}241893).
+* Fixes layout issues for markdown content in small panels [#240806]({{kib-pull}}240806).
+
+**Data ingestion and Fleet**:
+* Shows warnings in the integrations synchronization UI when referencing other entities [#241623]({{kib-pull}}241623).
+* Adds proxy SSL options to download sources [#241115]({{kib-pull}}241115).
+* Omits system properties when syncing ingest pipelines [#241096]({{kib-pull}}241096).
+* Fixes Fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
+
+**{{esql}} editor**:
+* Fixes the autocomplete suggestion of time series sources in `TS` commands after a comma [#241402]({{kib-pull}}241402).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.2.1 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{product.security}} solution**:
+For the {{product.security}} 9.2.1 release information, refer to [{{product.security}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{product.kibana}} platform**:
+* Ensures all authentication fields show up correctly when setting up an AI connector [#240913]({{kib-pull}}240913).
+
+**Search**:
+* Fixes an issue with Agents and Playground icons not rendering correctly in the {{product.elasticsearch}} solution side navigation when using dark mode [#240475]({{kib-pull}}240475).
+
 ## 9.2.0 [kibana-9.2.0-release-notes]
 
 ### Features and enhancements [kibana-9.2.0-features-enhancements]
@@ -164,6 +210,46 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset [#237877]({{kib-pull}}237877).
 * Fixes an issue with a null property being read in Playground [#230729]({{kib-pull}}230729).
 
+
+## 9.1.7 [kibana-9.1.7-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.1.7-features-enhancements]
+
+**Machine Learning**:
+* Adds a feedback button to Anomaly Explorer and Single Metric Viewer [#239883]({{kib-pull}}239883).
+
+
+### Fixes [kibana-9.1.7-fixes]
+
+**Alerting**:
+* In Cases, tables no longer flash when the page is loading [#240155]({{kib-pull}}240155).
+* Fixes an infinite loop issue occurring when the Investigation guide of a rule's details is too long [#240472]({{kib-pull}}240472).
+
+**Dashboards and visualizations**:
+* Labels in Maps' **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after saving), without requiring a scaling toggle [#240728]({{kib-pull}}240728).
+* Fixes an issue occurring when resetting a dashboard with unsaved changes after enabling `timeRestore` and setting a time range [#239992]({{kib-pull}}239992).
+
+**Data ingestion and Fleet**:
+* Shows warnings in the integrations synchronization UI when referencing other entities [#241623]({{kib-pull}}241623).
+* Adds proxy SSL options to download sources [#241115]({{kib-pull}}241115).
+* Fixes Fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
+
+**{{product.kibana}} platform**:
+* Ensures that the `max_tokens` parameter is correctly passed as expected when connecting to Anthropic [#241212]({{kib-pull}}241212) & [#241188]({{kib-pull}}241188).
+* Removes the default fallback region for the Amazon Bedrock connector [#241157]({{kib-pull}}241157).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.1.7 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{product.security}} solution**:
+For the {{product.security}} 9.1.7 release information, refer to [{{product.security}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* Ensures that the inference endpoints list loads properly even when using a custom inference provider [#240189]({{kib-pull}}240189).
 
 ## 9.1.6 [kibana-9.1.6-release-notes]
 

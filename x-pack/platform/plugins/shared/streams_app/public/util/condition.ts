@@ -17,6 +17,7 @@ import {
   getFilterOperator,
   getFilterValue,
   isAlwaysCondition,
+  isCondition,
   isFilterConditionObject,
 } from '@kbn/streamlang';
 
@@ -109,3 +110,16 @@ export function isShorthandBooleanFilterCondition(
 export function conditionNeedsValueField(condition: FilterCondition): boolean {
   return !isShorthandBooleanFilterCondition(condition);
 }
+
+/**
+ * Get the field name from a filter condition.
+ * @param condition condition to extract field name from
+ * @returns field name or undefined if not a filter condition
+ */
+export const getFilterConditionField = (condition: Condition) => {
+  return isCondition(condition) && alwaysToEmptyEquals(condition)
+    ? isPlainObject(condition) && isFilterConditionObject(condition)
+      ? condition.field
+      : undefined
+    : undefined;
+};

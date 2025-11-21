@@ -23,6 +23,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { runFeatureIdentification } from '../../../../lib/streams/feature/run_feature_identification';
 import type { IdentifiedFeaturesEvent, StreamDescriptionEvent } from './types';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -318,6 +319,7 @@ export const identifyFeaturesRoute = createServerRoute({
     const esClient = scopedClusterClient.asCurrentUser;
 
     const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+    const signal = getRequestAbortSignal(request);
 
     return from(
       runFeatureIdentification({
@@ -328,6 +330,7 @@ export const identifyFeaturesRoute = createServerRoute({
         logger,
         stream,
         features: hits,
+        signal,
       })
     ).pipe(
       switchMap(({ features }) => {
@@ -344,6 +347,7 @@ export const identifyFeaturesRoute = createServerRoute({
                   ...feature,
                   description: '',
                 },
+                signal,
               });
 
               return {
@@ -419,6 +423,7 @@ export const describeStreamRoute = createServerRoute({
         inferenceClient: inferenceClient.bindTo({ connectorId }),
         start: start.valueOf(),
         end: end.valueOf(),
+        signal: getRequestAbortSignal(request),
       })
     ).pipe(
       map((description) => {

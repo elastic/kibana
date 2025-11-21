@@ -34,6 +34,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     timeRange,
     query,
     filters,
+    nonHighlightingFilters,
     index,
     timestampField,
     columns,
@@ -64,6 +65,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('index', dataView);
           searchSource.setField('query', query);
           searchSource.setField('filter', filters);
+          searchSource.setField('nonHighlightingFilters', nonHighlightingFilters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
           const savedSearch: SavedSearch = {
@@ -106,6 +108,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     dataViews,
     documentViewerEnabled,
     filters,
+    nonHighlightingFilters,
     filtersEnabled,
     index,
     query,

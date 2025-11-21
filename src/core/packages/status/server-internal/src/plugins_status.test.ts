@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import type { PluginName } from '@kbn/core-base-common';
 import { PluginsStatusService } from './plugins_status';
 import type { Observable } from 'rxjs';
@@ -394,8 +395,6 @@ describe('PluginStatusService', () => {
   });
 
   describe('getDependenciesStatus$', () => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
     it('only includes dependencies of specified plugin', async () => {
       const service = new PluginsStatusService({
         core$: coreAllAvailable$,
@@ -454,7 +453,7 @@ describe('PluginStatusService', () => {
       expect(statusUpdates).toStrictEqual([]);
 
       // Waiting for the debounce timeout should cut a new update
-      await delay(25);
+      await timer(25);
       subscription.unsubscribe();
 
       expect(statusUpdates).toStrictEqual([{ a: { ...available, reported: true } }]);
@@ -489,9 +488,9 @@ describe('PluginStatusService', () => {
       pluginA$.next(available);
       pluginA$.next(degraded);
       // Waiting for the debounce timeout should cut a new update
-      await delay(25);
+      await timer(25);
       pluginA$.next(available);
-      await delay(25);
+      await timer(25);
       subscription.unsubscribe();
 
       expect(statusUpdates).toMatchInlineSnapshot(`
