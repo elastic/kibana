@@ -970,4 +970,26 @@ FROM index`;
       assertReprint(query, expected);
     });
   });
+
+  describe('FORK', () => {
+    test('preserves comments in various positions', () => {
+      const query = `FROM index
+  /* before FORK */
+  | FORK
+      /* first branch */
+      (
+          KEEP field1, field2, field3 /* important fields */
+        | WHERE x > 100 /* filter */
+      )
+      /* second branch */
+      (
+          DROP field4, field5 /* not needed */
+        | LIMIT 50
+      )`;
+
+      const text = reprint(query, { multiline: true }).text;
+
+      expect(text).toBe(query);
+    });
+  });
 });

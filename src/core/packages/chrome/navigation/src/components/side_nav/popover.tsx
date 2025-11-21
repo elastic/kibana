@@ -19,6 +19,7 @@ import type {
 } from 'react';
 import { EuiPopover, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import {
   BOTTOM_POPOVER_GAP,
@@ -201,9 +202,8 @@ export const Popover = ({
         Boolean(
           triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused)
         );
-      const isTrappedByFlyout = (nextFocused as HTMLElement)?.classList.contains('euiFlyout');
 
-      if (isStayingInComponent === false && isTrappedByFlyout === false) {
+      if (isStayingInComponent === false) {
         handleClose();
       }
     },
@@ -272,6 +272,10 @@ export const Popover = ({
         ownFocus={false}
         panelPaddingSize="none"
         repositionOnScroll
+        panelProps={{
+          ...euiIncludeSelectorInFocusTrap.prop,
+          'data-test-subj': `side-nav-popover-${label}`,
+        }}
       >
         <div
           ref={(ref) => {
