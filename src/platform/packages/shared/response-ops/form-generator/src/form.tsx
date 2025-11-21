@@ -29,6 +29,7 @@ export interface FieldDefinition {
   schema: z.ZodType;
   formConfig: FormConfig;
   options?: Record<string, unknown>;
+  defaultValue?: unknown;
 }
 
 interface GetFieldFromSchemaProps {
@@ -36,11 +37,24 @@ interface GetFieldFromSchemaProps {
   path: string;
   formConfig: FormConfig;
 }
-export const getFieldFromSchema = ({ schema, path, formConfig }: GetFieldFromSchemaProps) => {
+export const getFieldFromSchema = ({
+  schema: outerSchema,
+  path,
+  formConfig,
+}: GetFieldFromSchemaProps) => {
+  // Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
+  const { schema, defaultValue: zodDefault } = unwrap(outerSchema);
+
+  let defaultValue: unknown;
+  if (schema instanceof z.ZodLiteral) {
+    defaultValue = schema.value;
+  }
+
   return {
     path,
     schema,
     formConfig,
+    defaultValue: zodDefault ?? defaultValue,
     validate: (
       ...args: Parameters<ValidationFunc>
     ): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
@@ -91,16 +105,12 @@ interface RenderFieldComponentProps {
   field: FieldDefinition;
 }
 export const renderFieldComponent = ({ field }: RenderFieldComponentProps) => {
-  const { schema: outerSchema, validate, path, formConfig } = field;
+  const { schema, validate, path, formConfig } = field;
 
-  // Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
-  const { schema, defaultValue: zodDefault } = unwrap(outerSchema);
-  let defaultValue: unknown;
-  if (schema instanceof z.ZodLiteral) {
-    defaultValue = schema.value;
-  }
-  const meta = getMeta(schema);
   const WidgetComponent = getWidgetComponent(schema);
+
+  // getWidgetComponent might update meta information, therefore we get the meta after calling it
+  const meta = getMeta(schema);
 
   return (
     <React.Fragment key={path}>
@@ -110,7 +120,7 @@ export const renderFieldComponent = ({ field }: RenderFieldComponentProps) => {
         schema={schema}
         formConfig={formConfig}
         fieldConfig={{
-          defaultValue: zodDefault || defaultValue,
+          defaultValue: field.defaultValue,
           validations: [
             {
               validator: validate,
@@ -122,7 +132,7 @@ export const renderFieldComponent = ({ field }: RenderFieldComponentProps) => {
           helpText: meta.helpText,
           fullWidth: true,
           euiFieldProps: {
-            readOnly: formConfig.readOnly,
+            readOnly: formConfig.readOnly || meta.readOnly,
             placeholder: meta.placeholder,
             ['data-test-subj']: `generator-field-${path.replace(/\./g, '-')}`,
           },

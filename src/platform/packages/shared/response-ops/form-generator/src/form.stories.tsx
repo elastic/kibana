@@ -125,13 +125,16 @@ export const VirusTotalConnector: StoryObj<StoryArgs> = {
 };
 
 const webhookConnectorFormSchema = z.object({
-  method: z.enum(['POST', 'PUT', 'GET', 'DELETE']).meta({
-    label: 'Method',
-  }),
-  url: z.url().meta({ widget: 'text', label: 'URL', placeholder: 'https://...' }),
+  method: z
+    .enum(['POST', 'PUT', 'GET', 'DELETE'])
+    .meta({
+      label: 'Method',
+    })
+    .default('GET'),
+  url: z.url().meta({ label: 'URL', placeholder: 'https://...' }),
   secrets: z
     .discriminatedUnion('authType', [
-      z.object({ authType: z.literal('none').meta({ hidden: true }) }).meta({
+      z.object({ authType: z.literal('none') }).meta({
         label: 'None',
       }),
       z

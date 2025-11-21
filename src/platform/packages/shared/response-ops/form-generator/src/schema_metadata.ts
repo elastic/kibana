@@ -11,4 +11,4 @@
 // Packages using this shared package should be able to define their own metadata
 import type { BaseMetadata } from '@kbn/connector-specs/src/connector_spec_ui';
 export type { BaseMetadata };
-export { getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
+export { getMeta, addMeta } from '@kbn/connector-specs/src/connector_spec_ui';

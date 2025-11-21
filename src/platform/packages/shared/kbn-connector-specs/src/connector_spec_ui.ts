@@ -37,7 +37,7 @@ export interface BaseMetadata {
   label?: string;
   placeholder?: string;
   helpText?: string;
-  isDisabled?: boolean;
+  readOnly?: boolean;
   sensitive?: boolean;
   order?: number;
   hidden?: boolean;
@@ -45,11 +45,14 @@ export interface BaseMetadata {
 }
 
 export function getMeta(schema: z.ZodType): BaseMetadata {
+  if (!z.globalRegistry.has(schema)) {
+    return {};
+  }
   return z.globalRegistry.get(schema) || {};
 }
 
 export function addMeta<T extends z.ZodType>(schema: T, meta: Partial<BaseMetadata>): T {
-  const existing = z.globalRegistry.get(schema) || {};
+  const existing = getMeta(schema);
   z.globalRegistry.add(schema, { ...existing, ...meta } as Record<string, unknown>);
   return schema;
 }

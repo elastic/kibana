@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { BaseWidgetProps } from './types';
 import { WidgetType } from './types';
-import { getMeta } from '../schema_metadata';
+import { addMeta, getMeta } from '../schema_metadata';
 import { TextField } from './fields/text_field';
 import { SelectField } from './fields/select_field';
 import { PasswordField } from './fields/password_field';
@@ -39,6 +39,11 @@ const getDefaultWidgetForSchema = (schema: z.ZodType) => {
     return WidgetType.Select;
   } else if (schema instanceof z.ZodDiscriminatedUnion) {
     return WidgetType.FormFieldset;
+  } else if (schema instanceof z.ZodLiteral) {
+    addMeta(schema, { readOnly: true });
+    return WidgetType.Text;
+  } else if (schema instanceof z.ZodURL) {
+    return WidgetType.Text;
   }
 
   return undefined;
