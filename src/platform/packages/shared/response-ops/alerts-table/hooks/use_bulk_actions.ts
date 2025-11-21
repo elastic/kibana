@@ -396,7 +396,7 @@ export function useBulkActions({
     return [
       ...caseBulkActions,
       ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions),
-      ...tagsBulkActions,
+      ...(ruleTypeIds?.some(isSiemRuleType) ? [] : tagsBulkActions),
     ];
   }, [caseBulkActions, ruleTypeIds, untrackBulkActions, tagsBulkActions]);
 
