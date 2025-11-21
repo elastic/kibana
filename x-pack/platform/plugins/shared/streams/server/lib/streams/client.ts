@@ -11,11 +11,10 @@ import type {
   IndicesDataStream,
   IndicesGetDataStreamResponse,
   QueryDslQueryContainer,
+  Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import type { LockManagerService } from '@kbn/lock-manager';
-import type { Condition } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import {
   Streams,
@@ -36,6 +35,7 @@ import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
+import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 import type { FeatureClient } from './feature/feature_client';

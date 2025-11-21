@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
+import React from 'react';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
@@ -69,21 +69,11 @@ export function StreamNameFormRow({
   const prefix = parentStreamName + '.';
   const partitionName = value.replace(prefix, '');
 
-  const isLengthValid = value.length > prefix.length && value.length <= MAX_NAME_LENGTH;
+  const isStreamNameEmpty = value.length <= prefix.length;
+  const isStreamNameTooLong = value.length > MAX_STREAM_NAME_LENGTH;
+  const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
 
-  const helpText =
-    value.length >= MAX_NAME_LENGTH && !readOnly
-      ? i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
-          defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
-          values: {
-            maxLength: MAX_NAME_LENGTH,
-          },
-        })
-      : value.length <= prefix.length && !readOnly
-      ? i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
-          defaultMessage: `Stream name is required.`,
-        })
-      : undefined;
+  const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
 
   const isDotPresent = !readOnly && partitionName.includes('.');
   const dotErrorMessage = isDotPresent
