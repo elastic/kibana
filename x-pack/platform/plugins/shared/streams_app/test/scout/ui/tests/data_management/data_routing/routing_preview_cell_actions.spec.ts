@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
-test.describe(
+test.describe.only(
   'Stream data routing - preview table cell actions',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -25,6 +25,8 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoPartitioningTab('logs');
       await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
+      await pageObjects.streams.expectPreviewPanelVisible();
+      await pageObjects.streams.switchToColumnsView();
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
@@ -33,8 +35,6 @@ test.describe(
     });
 
     test('should create equals condition using cell action', async ({ page, pageObjects }) => {
-      await pageObjects.streams.expectPreviewPanelVisible();
-
       const dataGrid = page.getByTestId('streamsAppRoutingPreviewPanelWithResults');
 
       const cell = dataGrid
@@ -60,8 +60,6 @@ test.describe(
     });
 
     test('should create not-equals condition using cell action', async ({ page, pageObjects }) => {
-      await pageObjects.streams.expectPreviewPanelVisible();
-
       const dataGrid = page.getByTestId('streamsAppRoutingPreviewPanelWithResults');
 
       const cell = dataGrid
@@ -97,8 +95,6 @@ test.describe(
         operator: 'neq',
         value: 'initial',
       });
-
-      await pageObjects.streams.expectPreviewPanelVisible();
 
       const fieldInput = page.getByTestId('streamsAppConditionEditorFieldText').locator('input');
       await expect(fieldInput).toHaveValue('service.name');
