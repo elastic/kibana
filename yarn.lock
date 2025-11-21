@@ -2641,7 +2641,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-5.0.0.tgz#a6bacd76a8d54fe33b623f2fc93f64ae4fd976b8"
   integrity sha512-87LIeV/KQPB4aBe08/r//7uSOqDdnaSa4e3rAaxSwwQT1dXku/00uwXOWYgZ52otjzF+4t6vTmyqdgQGnLurNQ==
 
-"@elastic/eui-theme-common@file:elastic-eui-theme-common-7.0.0.tgz":
+"@elastic/eui-theme-common@7.0.0":
   version "7.0.0"
   resolved "file:elastic-eui-theme-common-7.0.0.tgz#c335966c9cef44558304ed67661b1dba5736c343"
   dependencies:
