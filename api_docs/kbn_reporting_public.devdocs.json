@@ -2015,6 +2015,20 @@
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

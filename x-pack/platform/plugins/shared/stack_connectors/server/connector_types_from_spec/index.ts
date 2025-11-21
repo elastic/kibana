@@ -7,10 +7,8 @@
 
 import { type PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
-import { connectorsSpecs, type ConnectorSpec } from '@kbn/connector-specs';
-import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { z } from '@kbn/zod';
-import type { ActionTypeConfig, ActionTypeSecrets } from '@kbn/actions-plugin/server/types';
+import { connectorsSpecs } from '@kbn/connector-specs';
+import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 
 export function registerConnectorTypesFromSpecs({
   actions,
@@ -19,25 +17,6 @@ export function registerConnectorTypesFromSpecs({
 }) {
   // Register connector specs
   for (const spec of Object.values(connectorsSpecs)) {
-    actions.registerSubActionConnectorType(createConnectorTypeFromSpec(spec));
+    actions.registerType(createConnectorTypeFromSpec(spec, actions));
   }
 }
-
-const createConnectorTypeFromSpec = (
-  spec: ConnectorSpec
-): SubActionConnectorType<ActionTypeConfig, ActionTypeSecrets> => {
-  return {
-    id: spec.metadata.id,
-    minimumLicenseRequired: spec.metadata.minimumLicense,
-    name: spec.metadata.displayName,
-    supportedFeatureIds: spec.metadata.supportedFeatureIds,
-    // TODO: Implement the rest of the properties
-    getService: (params) => {
-      throw new Error('Not implemented');
-    },
-    schema: {
-      config: z.object({}),
-      secrets: z.object({}),
-    },
-  };
-};
