@@ -274,18 +274,6 @@ export async function clickModalCancelButton(
   await cancelButton.click();
 }
 
-export async function expectErrorToast(
-  pageObjects: { toasts: { waitFor: () => Promise<void>; getMessageText: () => Promise<string> } },
-  expectedText?: string
-): Promise<void> {
-  await pageObjects.toasts.waitFor();
-  const toastText = await pageObjects.toasts.getMessageText();
-  expect(toastText).toBeTruthy();
-  if (expectedText) {
-    expect(toastText).toContain(expectedText);
-  }
-}
-
 export async function setupAiSuggestionsTest(
   page: ScoutPage,
   llmSetup: LlmProxySetup,

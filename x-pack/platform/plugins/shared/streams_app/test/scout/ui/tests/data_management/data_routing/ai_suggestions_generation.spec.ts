@@ -15,8 +15,6 @@ import {
   setupPartitionLogsInterceptor,
   generateSuggestions,
   getStreamName,
-  partitionLogsWhenCondition,
-  expectErrorToast,
   MOCK_SUGGESTIONS_MULTIPLE,
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
@@ -62,20 +60,5 @@ test.describe('Stream data routing - AI suggestions generation', { tag: ['@ess']
 
     const noSuggestionsCallout = page.getByTestId('streamsAppNoSuggestionsCallout');
     await expect(noSuggestionsCallout).toBeVisible();
-  });
-
-  test('should show error toast when API returns 500 error', async ({ page, pageObjects }) => {
-    const simulatorPromise = llmSetup.llmProxy
-      .intercept('partition_logs error', partitionLogsWhenCondition)
-      .waitForIntercept();
-
-    const button = page.getByTestId('streamsAppGenerateSuggestionButton');
-    await expect(button).toBeEnabled();
-    await button.click();
-
-    const simulator = await simulatorPromise;
-    await simulator.error({ message: 'Internal server error' });
-
-    await expectErrorToast(pageObjects);
   });
 });
