@@ -31,6 +31,8 @@ import { useSorting } from '../hooks/use_sorting';
 import { CellPopoverHost } from './cell_popover_host';
 import { NonVirtualizedGridBody } from './non_virtualized_grid_body';
 import type { AlertDetailFlyout as AlertDetailFlyoutType } from './alert_detail_flyout';
+import { EditTagsFlyout } from './tags/edit_tags_flyout';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 const AlertDetailFlyout = lazy(
   () => import('./alert_detail_flyout')
@@ -111,6 +113,7 @@ export const AlertsDataGrid = typedMemo(
       bulkActions,
       setIsBulkActionsLoading,
       clearSelection,
+      bulkEditTagsFlyout,
     } = useBulkActions({
       ruleTypeIds,
       query,
@@ -326,6 +329,15 @@ export const AlertsDataGrid = typedMemo(
         : // Overriding the simplified type here to avoid cyclic problems with generics
           (AlertDetailFlyout as NonNullable<typeof renderExpandedAlertView>);
 
+    const {
+      bulkActionsStore: [{ rowSelection }],
+    } = useAlertsTableContext();
+
+    const selectedAlertsForFlyout = useMemo(() => {
+      const selectedIndices = Array.from(rowSelection.keys());
+      return selectedIndices.map((index) => alerts[index]).filter(Boolean);
+    }, [alerts, rowSelection]);
+
     return (
       <InspectButtonContainer>
         <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
@@ -334,6 +346,13 @@ export const AlertsDataGrid = typedMemo(
               <ExpandedAlertView {...renderContext} expandedAlertIndex={expandedAlertIndex} />
             )}
           </Suspense>
+          {bulkEditTagsFlyout.isFlyoutOpen && selectedAlertsForFlyout.length > 0 && (
+            <EditTagsFlyout
+              selectedAlerts={selectedAlertsForFlyout}
+              onClose={bulkEditTagsFlyout.onFlyoutClosed}
+              onSaveTags={bulkEditTagsFlyout.onSaveTags}
+            />
+          )}
           {alertsCount > 0 && (
             <EuiDataGrid
               {...euiDataGridProps}

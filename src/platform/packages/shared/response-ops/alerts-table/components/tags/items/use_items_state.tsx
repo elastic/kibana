@@ -193,6 +193,8 @@ const createItemsCounterMapping = ({
   for (const alert of selectedAlerts) {
     const items = fieldSelector(alert);
 
+    if (!items) continue;
+
     for (const item of items) {
       counterMap.set(item, (counterMap.get(item) ?? 0) + 1);
     }

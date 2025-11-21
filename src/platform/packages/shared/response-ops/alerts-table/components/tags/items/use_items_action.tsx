@@ -54,6 +54,8 @@ export const useItemsAction = <T,>({
       const alertsToUpdate = selectedAlertsToEdit.reduce((acc, alert) => {
         const alertFieldValue = fieldSelector(alert);
 
+        if (!alertFieldValue) return acc;
+
         const itemsWithoutUnselectedItems = difference(
           alertFieldValue,
           itemsSelection.unSelectedItems

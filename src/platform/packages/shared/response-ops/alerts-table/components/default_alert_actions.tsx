@@ -16,6 +16,7 @@ import { ViewAlertDetailsAlertAction } from './view_alert_details_alert_action';
 import { MuteAlertAction } from './mute_alert_action';
 import { MarkAsUntrackedAlertAction } from './mark_as_untracked_alert_action';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
+import { EditTagsAction } from './edit_tags_action';
 
 /**
  * Common alerts table row actions
@@ -42,6 +43,7 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
       <ViewAlertDetailsAlertAction {...props} />
       {authorizedToCreateAnyRules && <MarkAsUntrackedAlertAction {...props} />}
       {authorizedToCreateAnyRules && <MuteAlertAction {...props} />}
+      {authorizedToCreateAnyRules && <EditTagsAction {...props} />}
     </>
   );
 };

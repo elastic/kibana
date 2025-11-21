@@ -14,6 +14,7 @@ import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { Alert } from '@kbn/alerting-types';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type {
   BulkActionsConfig,
@@ -21,6 +22,7 @@ import type {
   BulkActionsState,
   BulkActionsReducerAction,
   TimelineItem,
+  BulkEditTagsFlyout,
 } from '../types';
 import { BulkActionsVerbs } from '../types';
 import type { CasesService, PublicAlertsDataGridProps } from '../types';
@@ -28,11 +30,13 @@ import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
+  EDIT_TAGS,
   MARK_AS_UNTRACKED,
   NO_ALERTS_ADDED_TO_CASE,
 } from '../translations';
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
+import { useTagsAction } from '../components/tags/use_tags_action';
 
 interface BulkActionsProps {
   ruleTypeIds?: string[];
@@ -55,6 +59,7 @@ export interface UseBulkActions {
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   clearSelection: () => void;
   updateBulkActionsState: React.Dispatch<BulkActionsReducerAction>;
+  bulkEditTagsFlyout: BulkEditTagsFlyout;
 }
 
 type UseBulkAddToCaseActionsProps = Pick<
@@ -64,6 +69,14 @@ type UseBulkAddToCaseActionsProps = Pick<
   Pick<UseBulkActions, 'clearSelection'>;
 
 type UseBulkUntrackActionsProps = Pick<
+  BulkActionsProps,
+  'refresh' | 'query' | 'ruleTypeIds' | 'application' | 'http' | 'notifications'
+> &
+  Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'> & {
+    isAllSelected: boolean;
+  };
+
+type UseBulkTagsActionsProps = Pick<
   BulkActionsProps,
   'refresh' | 'query' | 'ruleTypeIds' | 'application' | 'http' | 'notifications'
 > &
@@ -290,6 +303,23 @@ export const useBulkUntrackActions = ({
   ]);
 };
 
+export const useBulkTagsActions = ({ refresh, clearSelection }: UseBulkTagsActionsProps) => {
+  const onActionSuccess = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
+  const onAction = useCallback(() => {}, []);
+
+  const tagsAction = useTagsAction({
+    onAction,
+    onActionSuccess,
+    isDisabled: false,
+  });
+
+  return { tagsAction };
+};
+
 const EMPTY_BULK_ACTIONS_CONFIG: BulkActionsPanelConfig[] = [];
 
 export function useBulkActions({
@@ -337,10 +367,44 @@ export function useBulkActions({
     http,
     notifications,
   });
+  const { tagsAction } = useBulkTagsActions({
+    application,
+    setIsBulkActionsLoading,
+    refresh,
+    clearSelection,
+    query,
+    ruleTypeIds,
+    isAllSelected: bulkActionsState.isAllSelected,
+    http,
+    notifications,
+  });
+
+  const tagsBulkActions = useMemo(() => {
+    return [
+      {
+        label: EDIT_TAGS,
+        key: 'edit-tags',
+        disableOnQuery: true,
+        disabledLabel: EDIT_TAGS,
+        'data-test-subj': 'edit-tags',
+        onClick: (alerts?: TimelineItem[]) => {
+          if (!alerts) return;
+
+          const alertsForFlyout = alerts as unknown as Alert[];
+          const action = tagsAction.getAction(alertsForFlyout);
+          action.onClick();
+        },
+      },
+    ];
+  }, [tagsAction]);
 
   const initialItems = useMemo(() => {
-    return [...caseBulkActions, ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions)];
-  }, [caseBulkActions, ruleTypeIds, untrackBulkActions]);
+    return [
+      ...caseBulkActions,
+      ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions),
+      ...tagsBulkActions,
+    ];
+  }, [caseBulkActions, ruleTypeIds, untrackBulkActions, tagsBulkActions]);
 
   const bulkActions = useMemo(() => {
     if (hideBulkActions) {
@@ -364,6 +428,14 @@ export function useBulkActions({
     });
   }, [alertsCount, updateBulkActionsState]);
 
+  const bulkEditTagsFlyout = useMemo(() => {
+    return {
+      isFlyoutOpen: tagsAction.isFlyoutOpen,
+      onFlyoutClosed: tagsAction.onFlyoutClosed,
+      onSaveTags: tagsAction.onSaveTags,
+    };
+  }, [tagsAction]);
+
   return useMemo(() => {
     return {
       isBulkActionsColumnActive,
@@ -372,6 +444,7 @@ export function useBulkActions({
       setIsBulkActionsLoading,
       clearSelection,
       updateBulkActionsState,
+      bulkEditTagsFlyout,
     };
   }, [
     bulkActions,
@@ -380,5 +453,6 @@ export function useBulkActions({
     isBulkActionsColumnActive,
     setIsBulkActionsLoading,
     updateBulkActionsState,
+    bulkEditTagsFlyout,
   ]);
 }

@@ -271,6 +271,10 @@ export const MARK_AS_UNTRACKED = i18n.translate(
   }
 );
 
+export const EDIT_TAGS = i18n.translate('xpack.responseOpsAlertsTable.actions.editTags', {
+  defaultMessage: 'Edit tags',
+});
+
 export const MUTE = i18n.translate('xpack.responseOpsAlertsTable.actions.mute', {
   defaultMessage: 'Mute',
 });

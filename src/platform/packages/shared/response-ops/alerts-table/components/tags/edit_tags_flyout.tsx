@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -51,9 +51,18 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({
   onSaveTags,
   focusButtonRef,
 }) => {
-  // const { data: tags, isLoading } = useGetTags();
+  const tags = useMemo(() => {
+    const tagSet = new Set<string>();
+    for (const alert of selectedAlerts) {
+      const alertTags = alert['kibana.alert.workflow_tags'] as string[] | undefined;
+      if (alertTags && Array.isArray(alertTags)) {
+        alertTags.forEach((tag) => tagSet.add(tag));
+      }
+    }
+    return Array.from(tagSet).sort();
+  }, [selectedAlerts]);
+
   const isLoading = false;
-  const tags: string[] = [];
 
   const [tagsSelection, setTagsSelection] = useState<ItemsSelectionState>({
     selectedItems: [],

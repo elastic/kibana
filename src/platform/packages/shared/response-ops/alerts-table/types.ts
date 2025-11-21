@@ -57,6 +57,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Case } from './apis/bulk_get_cases';
+import type { ItemsSelectionState } from './components/tags/items/types';
 
 export interface Consumer {
   id: AlertConsumers;
@@ -686,6 +687,12 @@ export interface BulkActionsState {
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
   updatedAt: number;
+}
+
+export interface BulkEditTagsFlyout {
+  isFlyoutOpen: boolean;
+  onFlyoutClosed: () => void;
+  onSaveTags: (itemsSelection: ItemsSelectionState) => void;
 }
 
 export interface AlertsTableFlyoutBaseProps {
