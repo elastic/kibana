@@ -305,7 +305,7 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     const focusTrapShards = useMemo(() => {
       return new Proxy([], {
-        get(target, prop) {
+        get(_, prop) {
           const elements = Array.from(
             document.querySelectorAll(euiIncludeSelectorInFocusTrap.selector)
           );
