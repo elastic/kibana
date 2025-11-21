@@ -1,16 +1,15 @@
 ---
 mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/saved-objects-service.html
+  - https://www.elastic.co/guide/en/kibana/current/saved-objects.html
 ---
 
-# Saved Objects service [saved-objects-service]
+# Saved Objects [saved-objects]
+
+`Saved Objects` allow {{kib}} plugins to use {{es}} like a primary database. Think of them as an Object Document Mapper for {{es}}. Once a plugin has registered one or more Saved Object types, the Saved Objects client can be used to query or perform create, read, update and delete operations on each type.
 
 ::::{note}
-The Saved Objects service is available both server and client side.
+The Saved Objects service is available on server side. Client side services and APIs have been deprecated for some time and will be removed in the near future.
 ::::
-
-
-`Saved Objects service` allows {{kib}} plugins to use {{es}} like a primary database. Think of it as an Object Document Mapper for {{es}}. Once a plugin has registered one or more Saved Object types, the Saved Objects client can be used to query or perform create, read, update and delete operations on each type.
 
 By using Saved Objects your plugin can take advantage of the following features:
 
@@ -23,9 +22,7 @@ By using Saved Objects your plugin can take advantage of the following features:
 
 This document contains developer guidelines and best-practices for plugins wanting to use Saved Objects.
 
-## Server side usage [_server_side_usage_2]
-
-### Registering a Saved Object type [saved-objects-type-registration]
+## Registering a Saved Object type [saved-objects-type-registration]
 
 Saved object type definitions should be defined in their own `my_plugin/server/saved_objects` directory.
 
@@ -36,8 +33,8 @@ import { SavedObjectsType } from 'src/core/server';
 
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', <1>
-  hidden: true,
   namespaceType: 'multiple-isolated', <2>
+  hidden: true, <3>
   modelVersions: {
     1: modelVersion1,
     2: modelVersion2,
@@ -59,7 +56,8 @@ export const dashboardVisualization: SavedObjectsType = {
 
 1. Since the name of a Saved Object type may form part of the URL path for the public Saved Objects HTTP API, these should follow our API URL path convention and always be written in snake case.
 2. This field determines "space behavior", whether these objects can exist in one space, multiple spaces, or all spaces. This value means that objects of this type can only exist in a single space. See [Sharing Saved Objects](/extend/sharing-saved-objects.md) for more information.
-
+3. This field determines whether repositories have access to the type by default. Hidden types will not be automatically exposed via the Saved Objects Client APIs.
+Hidden types must be listed in `SavedObjectsClientProviderOptions[includedHiddenTypes]` to be accessible by the client.
 
 ```typescript
 export { dashboardVisualization } from './dashboard_visualization';
@@ -77,8 +75,7 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-
-### Mappings [_mappings]
+## Mappings [_mappings]
 
 Each Saved Object type can define it’s own {{es}} field mappings. Because multiple Saved Object types can share the same index, mappings defined by a type will be nested under a top-level field that matches the type name.
 
@@ -107,7 +104,6 @@ export function getSavedSearchObjectType: SavedObjectsType = { <1>
 
 1. Simplification
 
-
 Will result in the following mappings being applied to the `.kibana_analytics` index:
 
 ```json
@@ -134,20 +130,96 @@ Will result in the following mappings being applied to the `.kibana_analytics` i
 
 Do not use field mappings like you would use data types for the columns of a SQL database. Instead, field mappings are analogous to a SQL index. Only specify field mappings for the fields you wish to search on or query. By specifying `dynamic: false` in any level of your mappings, {{es}} will accept and store any other fields even if they are not specified in your mappings.
 
+Never use `enabled: false` or `index: false` in your mappings. {{es}} does not support toggling these mapping options, so if your plugin ever needs to query the data, you will not be able to do so. Since these fields cannot be queried, they would require migrating to a new field and making associated code changes. Instead, use `dynamic: false` which provides the same flexibility while maintaining the future ability to query fields if necessary.
+
+Here's an example of what NOT to do:
+
+```typescript
+export const dashboardVisualization: SavedObjectsType = {
+  name: 'dashboard_visualization',
+  ...
+  mappings: {
+    properties: {
+      metadata: {
+        enabled: false,  // ❌ Don't do this
+        properties: {
+          created_by: { type: 'keyword' }
+        }
+      },
+      description: {
+        index: false,    // ❌ Don't do this
+        type: 'text'
+      }
+    }
+  }
+};
+```
+
+Instead, use `dynamic: false` if you want to persist data which does not need to be queryable.
+
+```typescript
+export const dashboardVisualization: SavedObjectsType = {
+  name: 'dashboard_visualization',
+  ...
+  mappings: {
+    properties: {
+      dynamic: false,  // ✅ Do this instead
+      metadata: {
+        // dynamic: false gets inherited from above
+        properties: {
+          // `created_by` can now be stored but won't be queryable
+        }
+      },
+      // `description` can now be stored but won't be queryable
+    }
+  }
+};
+```
+
+This approach maintains flexibility while ensuring all fields remain queryable if needed in the future.
+
 Since {{es}} has a default limit of 1000 fields per index, plugins should carefully consider the fields they add to the mappings. Similarly, Saved Object types should never use `dynamic: true` as this can cause an arbitrary amount of fields to be added to the `.kibana` index.
 
+## References [references]
 
-### Writing Migrations by defining model versions [saved-objects-service-writing-migrations]
+Declare Saved Object references by adding an id, type and name to the `references` array.
 
-Saved Objects support changes using `modelVersions`. The modelVersion API is a new way to define transformations (*'migrations'*) for your savedObject types, and will replace the legacy migration API after Kibana version `8.10.0`. The legacy migration API has been deprecated, meaning it is no longer possible to register migrations using the legacy system.
+```typescript
+router.get(
+  { path: '/some-path', validate: false },
+  async (context, req, res) => {
+    const object = await context.core.savedObjects.client.create(
+      'dashboard',
+      {
+        title: 'my dashboard',
+        panels: [
+          { visualization: 'vis1' }, [1]
+        ],
+        indexPattern: 'indexPattern1'
+      },
+      { references: [
+          { id: '...', type: 'visualization', name: 'vis1' },
+          { id: '...', type: 'index_pattern', name: 'indexPattern1' },
+        ]
+      }
+    )
+    ...
+  }
+);
+```
+
+[1] Note how `dashboard.panels[0].visualization` stores the name property of the reference (not the id directly) to be able to uniquely
+identify this reference. This guarantees that the id the reference points to always remains up to date. If a
+ visualization id was directly stored in `dashboard.panels[0].visualization` there is a risk that this id gets updated without
+ updating the reference in the references array.
+
+## Defining model versions [defining-model-versions]
+
+Saved Objects support changes using `modelVersions`. The modelVersion API is a new way to define transformations (*'migrations'*) for your savedObject types, and replaces the legacy migration API after {{kib}} version `8.10.0`. The legacy migration API has been deprecated, meaning it is no longer possible to register migrations using the legacy system.
 
 Model versions are decoupled from the stack version and satisfy the requirements for zero downtime and backward-compatibility.
 
 Each Saved Object type may define model versions for its schema and are bound to a given [savedObject type](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L22-L27). Changes to a saved object type are specified by defining a new model.
-
-
-
-## Defining model versions [_defining_model_versions]
 
 As for old migrations, model versions are bound to a given [savedObject type](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L22-L27)
 
@@ -158,8 +230,8 @@ This map follows a similar `{ [version number] => version definition }` format a
 The first version must be numbered as version 1, incrementing by one for each new version.
 
 That way:
-- SO type versions are decoupled from stack versioning
-- SO type versions are independent between types
+*SO type versions are decoupled from stack versioning
+*SO type versions are independent between types
 
 *a **valid** version numbering:*
 
@@ -186,7 +258,6 @@ const myType: SavedObjectsType = {
   // ...other mandatory properties
 };
 ```
-
 
 ## Structure of a model version [_structure_of_a_model_version]
 
@@ -282,7 +353,6 @@ const change: SavedObjectsModelMappingsAdditionChange = {
 When adding mappings, the root `type.mappings` must also be updated accordingly (as it was done previously).
 :::
 
-
 #### mappings_deprecation [_mappings_deprecation]
 
 Used to flag mappings as no longer being used and ready to be removed.
@@ -299,7 +369,6 @@ let change: SavedObjectsModelMappingsDeprecationChange = {
 :::{note}
 It is currently not possible to remove fields from an existing index’s mapping (without reindexing into another index), so the mappings flagged with this change type won’t be deleted for now, but this should still be used to allow our system to clean the mappings once upstream (ES) unblock us.
 :::
-
 
 #### data_backfill [_data_backfill]
 
@@ -320,7 +389,6 @@ let change: SavedObjectsModelDataBackfillChange = {
 Even if no check is performed to ensure it, this type of model change should only be used to backfill newly introduced fields.
 :::
 
-
 #### data_removal [_data_removal]
 
 Used to remove data (unset fields) from all documents of the type.
@@ -337,7 +405,6 @@ let change: SavedObjectsModelDataRemovalChange = {
 :::{note}
 Due to backward compatibility, field utilization must be stopped in a prior release before actual data removal (in case of rollback). Please refer to the field removal migration example below in this document
 :::
-
 
 #### unsafe_transform [_unsafe_transform]
 
@@ -371,8 +438,6 @@ const change: SavedObjectsModelUnsafeTransformChange = {
 Using such transformations is potentially unsafe, given the migration system will have no knowledge of which kind of operations will effectively be executed against the documents. Those should only be used when there’s no other way to cover one’s migration needs. **Please reach out to the development team if you think you need to use this, as you theoretically shouldn’t.**
 :::
 
-
-
 ### schemas [_schemas]
 
 [link to the TS doc for `schemas`](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/model_version/schemas.ts#L11-L16)
@@ -385,7 +450,7 @@ The currently available schemas are:
 
 This is a new concept introduced by model versions. This schema is used for inter-version compatibility.
 
-When retrieving a savedObject document from an index, if the version of the document is higher than the latest version known of the Kibana instance, the document will go through the `forwardCompatibility` schema of the associated model version.
+When retrieving a savedObject document from an index, if the version of the document is higher than the latest version known of the {{kib}} instance, the document will go through the `forwardCompatibility` schema of the associated model version.
 
 **Important:** These conversion mechanism shouldn’t assert the data itself, and only strip unknown fields to convert the document to the **shape** of the document at the given version.
 
@@ -426,7 +491,6 @@ Forward compatibility schema can be implemented in two different ways.
     Even if highly recommended, implementing this schema is not strictly required. Type owners can manage unknown fields and inter-version compatibility themselves in their service layer instead.
     :::
 
-
 #### create [_create]
 
 This is a direct replacement for [the old SavedObjectType.schemas](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L75-L82) definition, now directly included in the model version definition.
@@ -437,11 +501,9 @@ As a refresher the `create` schema is a `@kbn/config-schema` object-type schema,
 Implementing this schema is optional, but still recommended, as otherwise there will be no validating when importing objects.
 :::
 
-For implementation examples, refer to [Use case examples](#saved-objects-service-use-case-examples).
+For implementation examples, refer to [Use case examples](#saved-objects-use-case-examples).
 
-
-
-### Use-case examples [saved-objects-service-use-case-examples]
+### Use-case examples [saved-objects-use-case-examples]
 
 These are example of the migration scenario currently supported (out of the box) by the system.
 
@@ -550,7 +612,6 @@ const myType: SavedObjectsType = {
 };
 ```
 
-
 #### Adding an indexed field without default value [_adding_an_indexed_field_without_default_value]
 
 This scenario is fairly close to the previous one. The difference being that working with an indexed field means adding a `mappings_addition` change and to also update the root mappings accordingly.
@@ -653,7 +714,6 @@ const myType: SavedObjectsType = {
   },
 };
 ```
-
 
 #### Adding an indexed field with a default value [_adding_an_indexed_field_with_a_default_value]
 
@@ -759,7 +819,6 @@ const myType: SavedObjectsType = {
 If the field was non-indexed, we would just not use the `mappings_addition` change or update the mappings (as done in example 1)
 :::
 
-
 #### Removing an existing field [_removing_an_existing_field]
 
 We are currently in model version 1, and our type has 2 indexed fields defined: `kept` and `removed`.
@@ -798,11 +857,11 @@ const myType: SavedObjectsType = {
 
 From here, say we want to remove the `removed` field, as our application doesn’t need it anymore since a recent change.
 
-The first thing to understand here is the impact toward backward compatibility: Say that Kibana version `X` was still using this field, and that we stopped utilizing the field in version `X+1`.
+The first thing to understand here is the impact toward backward compatibility: Say that {{kib}} version `X` was still using this field, and that we stopped utilizing the field in version `X+1`.
 
 We can’t remove the data in version `X+1`, as we need to be able to rollback to the prior version at **any time**. If we were to delete the data of this `removed` field during the upgrade to version `X+1`, and if then, for any reason, we’d need to rollback to version `X`, it would cause a data loss, as version `X` was still using this field, but it would no longer present in our document after the rollback.
 
-Which is why we need to perform any field removal as a 2-step operation: - release `X`: Kibana still utilize the field - release `X+1`: Kibana no longer utilize the field, but the data is still present in the documents - release `X+2`: The data is effectively deleted from the documents.
+Which is why we need to perform any field removal as a 2-step operation: - release `X`: {{kib}} still utilize the field - release `X+1`: {{kib}} no longer utilize the field, but the data is still present in the documents - release `X+2`: The data is effectively deleted from the documents.
 
 That way, any prior-version rollback (`X+2` to `X+1` **or** `X+1` to `X` is safe in term of data integrity)
 
@@ -956,8 +1015,6 @@ const myType: SavedObjectsType = {
 };
 ```
 
-
-
 ### Testing model versions [_testing_model_versions]
 
 Model versions definitions are more structured than the legacy migration functions, which makes them harder to test without the proper tooling. This is why a set of testing tools and utilities are exposed from the `@kbn/core-test-helpers-model-versions` package, to help properly test the logic associated with model version and their associated transformations.
@@ -1015,11 +1072,9 @@ describe('mySoTypeDefinition model version transformations', () => {
 });
 ```
 
-
-
 #### Tooling for integration tests [_tooling_for_integration_tests]
 
-During integration tests, we can boot a real Elasticsearch cluster, allowing us to manipulate SO documents in a way almost similar to how it would be done on production runtime. With integration tests, we can even simulate the cohabitation of two Kibana instances with different model versions to assert the behavior of their interactions.
+During integration tests, we can boot a real {{es}} cluster, allowing us to manipulate SO documents in a way almost similar to how it would be done on production runtime. With integration tests, we can even simulate the cohabitation of two {{kib}} instances with different model versions to assert the behavior of their interactions.
 
 ##### Model version test bed [_model_version_test_bed]
 
@@ -1085,20 +1140,115 @@ Because the test bed is only creating the parts of Core required to instantiate 
 
 * no extensions are enabled
 
-    * no security
-    * no encryption
-    * no spaces
+  * no security
+  * no encryption
+  * no spaces
 
 * all SO types will be using the same SO index
 
+## How to opt-out of the global savedObjects APIs?
 
+There are 2 options, depending on the amount of flexibility you need:
+For complete control over your HTTP APIs and custom handling, declare your type as `hidden`, as shown in the example.
+The other option that allows you to build your own HTTP APIs and still use the client as-is is to declare your type as hidden from the global saved objects HTTP APIs as `hiddenFromHttpApis: true`
 
+```ts
+import { SavedObjectsType } from 'src/core/server';
 
-### Limitations and edge cases in serverless environments [_limitations_and_edge_cases_in_serverless_environments]
+export const foo: SavedObjectsType = {
+  name: 'foo',
+  hidden: false, [1]
+  hiddenFromHttpApis: true, [2]
+  namespaceType: 'multiple-isolated',
+  mappings: { ... },
+  modelVersions: { ... },
+  ...
+};
+```
+
+[1] Needs to be `false` to use the `hiddenFromHttpApis` option
+
+[2] Set this to `true` to build your own HTTP API and have complete control over the route handler.
+
+## Removing a Saved Object type [removing-saved-object-types]
+
+When you need to remove a Saved Object type from your plugin, there are important steps to follow to ensure the type name cannot be accidentally reused in the future.
+
+### Why do we track removed types?
+
+Once a Saved Object type has been registered and used in production, its name becomes "reserved" for that purpose. If we allowed the same name to be reused for a different type later:
+
+* **Migration conflicts**: Old documents with the removed type name could interfere with new documents using the same name
+* **Upgrade failures**: Users upgrading from older versions could experience migration failures if type names are reused
+
+To prevent these issues, {{kib}} maintains a list of all removed type names in `packages/kbn-check-saved-objects-cli/removed_types.json`. This ensures type names are never reused.
+
+### How to remove a Saved Object type
+
+#### Step 1: Remove the type registration
+
+First, remove the type registration from your plugin. Also remove the type definition file and any references to it.
+
+#### Step 2: Run the automated check
+
+{{kib}} includes an automated check that detects when types are removed. Run it locally to update the `removed_types.json` file:
+
+```bash
+# Get your current commit ID
+git log -n 1
+
+# Get the merge-base commit with main
+git merge-base -a <currentCommitSha> main
+
+# Run the check with the baseline
+node scripts/check_saved_objects --baseline <mergeBase> --fix
+```
+
+Replace `<currentCommitSha>` with your actual commit SHA from the first command, and `<mergeBase>` with the merge-base commit SHA from the second command.
+
+This command will:
+
+1. Compare the current registered types against the baseline (merge-base with main)
+2. Detect any types that were removed
+3. Automatically add the removed type name(s) to `removed_types.json`
+4. Exit with an error message indicating which types were added
+
+The error message will look like:
+
+```log
+❌ The following SO types are no longer registered: 'my-removed-type'.
+Updated 'removed_types.json' to prevent the same names from being reused in the future.
+```
+
+#### Step 3: Commit the changes
+
+Include both your code changes and the updated `removed_types.json` file in your commit.
+
+### Manual update (alternative)
+
+If you prefer to update `removed_types.json` manually, you can:
+
+1. Open `packages/kbn-check-saved-objects-cli/removed_types.json`
+2. Add your removed type name to the array in alphabetical order
+3. Save the file
+
+### Important considerations
+
+::::{warning}
+  Once a type name is added to `removed_types.json`, it cannot be used again for a new Saved Object type. Choose type names carefully when creating new types.
+::::
+
+Before removing a type, ensure:
+
+* **No references exist**: Check that no other Saved Object types reference the type you're removing
+* **Data migration is complete**: If users have documents of this type, ensure they've been migrated to a new type or are no longer needed
+* **Coordinate with stakeholders**: Confirm with your team and any dependent teams that the removal is expected
+
+## Limitations and edge cases in serverless environments [_limitations_and_edge_cases_in_serverless_environments]
 
 The serverless environment, and the fact that upgrade in such environments are performed in a way where, at some point, the old and new version of the application are living in cohabitation, leads to some particularities regarding the way the SO APIs works, and to some limitations / edge case that we need to document
 
-#### Using the `fields` option of the `find` savedObjects API [_using_the_fields_option_of_the_find_savedobjects_api]
+### Using the `fields` option of the `find` savedObjects API [_using_the_fields_option_of_the_find_savedobjects_api]
 
 By default, the `find` API (as any other SO API returning documents) will migrate all documents before returning them, to ensure that documents can be used by both versions during a cohabitation (e.g an old node searching for documents already migrated, or a new node searching for documents not yet migrated).
 
@@ -1106,9 +1256,81 @@ However, when using the `fields` option of the `find` API, the documents can’t
 
 Which is why, when using this option, the API consumer needs to make sure that *all* the fields passed to the `fields` option **were already present in the prior model version**. Otherwise, it may lead to inconsistencies during upgrades, where newly introduced or backfilled fields may not necessarily appear in the documents returned from the `search` API when the option is used.
 
-(*note*: both the previous and next version of Kibana must follow this rule then)
+(*note*: both the previous and next version of {{kib}} must follow this rule then)
 
-
-#### Using `bulkUpdate` for fields with large `json` blobs [_using_bulkupdate_for_fields_with_large_json_blobs]
+### Using `bulkUpdate` for fields with large `json` blobs [_using_bulkupdate_for_fields_with_large_json_blobs]
 
 The savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents. These update operations are done in-memory, and cause memory constraint issues when updating many objects with large `json` blobs stored in some fields. As such, we recommend against using `bulkUpdate` for savedObjects that: - use arrays (as these tend to be large objects) - store large `json` blobs in some fields
+
+## Troubleshooting
+
+### CI is failing for my PR
+
+CI automatically performs some validations on *Saved Object* type definitions.
+Whenever a new SO type is added, or a new field is added to an existing type, a CI step will *Check changes in saved objects*.
+
+Please find your error in the list below, to understand what scenario your PR is falling into:
+
+```log
+❌ Modifications have been detected in the '<soType>.migrations'. This property is deprected and no modifications are allowed.
+```
+
+**Problem:** Migration functions cannot be altered. The `migrations` property was deprecated in favor of `modelVersions`, but the existing `migrations` must be kept in order to allow importing old documents.
+**Solution:** Do not perform any modifications in the `migrations` property of your SO type. If you haven't modified the field, please check that your PR branch is up-to-date and consider updating.
+
+```log
+❌ Some modelVersions have been updated for SO type '<soType>' after they were defined: 5.
+```
+
+**Problem:** The existing `modelVersions` cannot be mutated. This would cause inconsistencies between deployments.
+
+**Scenario 1:** I am not modifying an existing `modelVersion`, but rather trying to create a new one. Most likely someone else added another `modelVersion` for the same SO type which then got released in Serverless (baseline for comparison).
+**Scenario 2:** I detected a bug and wanted to modify the `modelVersion`. Unfortunately, it might already be to late to fix it. Once a `modelVersion` is defined in a PR, and that PR is merged, it could be released in Serverless anytime (or in a Customer Zero deployment). Thus, some deployments/projects might already updated to that `modelVersion`. Either you just merged the PR and can guarantee nobody has loaded it, or you'll probably have to create a new model version.
+
+```log
+❌ Some model versions have been deleted for SO type '<soType>'.
+```
+
+**Problem:** For the same reasons as the previous error, `modelVersions` cannot be deleted. In this scenario, it could happen that your PR stems from a commit that is older than the current serverless release, and is missing `modelVersions` for some SO types.
+**Solution:** Rebase your PR to get the latest SO type definitions.
+
+```log
+❌ Invalid model version 'five' for SO type '<soType>'. Model versions must be consecutive integer numbers starting at 1.
+❌ The '<soType>' SO type is missing model version '4'. Model versions defined: 1,2,3,5.
+```
+
+These errors are pretty obvious. Model versions must be defined as consecutive numeric strings, e.g. '1', '2', '3', ...
+
+```log
+❌ The '<soType>' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.
+```
+
+**Problem:** Whenever we update the mappings for a SO type, we must signal the migration logic that this types' mappings must be updated in the SO index.
+**Solution:** Create a new `modelVersion` that includes the `type: 'mappings_addition'`, as well as the `schemas.forwardCompatibility` properties.
+
+```log
+❌ The SO type '<soType>' is defining two (or more) new model versions.
+```
+
+**Problem:** To ensure seamless rollouts, and safe rollbacks, some features need to be rolled out as several incremental changes where each incremental change is guaranteed to be released before the next. See more details in [this document](https://docs.google.com/document/d/1e1vZldfwqUXEdbspSSO3C3ltGQTErp7oKhzUDNSG01Y/edit?tab=t.0).
+**Scenario 1:** I am developing a large feature and including multiple changes in my SO type. If changes are unrelated (in the sense that they don't require a 2-step rollout), you should be able to condense them into a single `modelVersion`.
+**Scenario 2:** I have only defined 1 new `modelVersion`. My PR was green before and all of a sudden it started failing :shrug:. The sanity checks on SO changes are performed against 2 baselines:
+
+* Your PR merge base commit (or one of its ancestors). This should not change, so likely not the culprit.
+* The current serverless release. If a high-severity issue occurs, Serverless might be rolled back to a previous version. This could in turn impact CI pipelines for PRs that would otherwise be fine. In other words, *"from the current serverless standpoint, your PR is not releasable at the moment"* . This should only happen exceptionally. Please take a look at the `#kibana-mission-control` channel to see if something is going on.
+  * **Scenario 2.1**: {{kib}} has been rolled back. Please wait until the situation goes back to normal, i.e. an emergency release is performed after the rollback, and {{kib}} gets to a normal release state.
+  * **Scenario 2.2**: {{kib}} has NOT been rolled back. Reach out to `#kibana-core` and we will help you figure out what's going on.
+
+```log
+❌ The following SO types are no longer registered: '<soType>'. Please run with --fix to update 'removed_types.json'.
+```
+
+**Problem:** You removed a Saved Object type but didn't update the `removed_types.json` file to track the removal.
+**Solution:** Run `node scripts/check_saved_objects --baseline <mergeBase> --fix` locally to automatically update the `removed_types.json` file, then commit the changes. See the [Removing a Saved Object type](#removing-saved-object-types) section for detailed instructions on how to determine the correct merge-base commit.
+
+```log
+❌ Cannot re-register previously removed type(s): <soType>. Please use a different name.
+```
+
+**Problem:** You're trying to create a new Saved Object type using a name that was previously used and removed. Type names cannot be reused to prevent migration conflicts.
+**Solution:** Choose a different name for your Saved Object type. Once a type name is added to `packages/kbn-check-saved-objects-cli/removed_types.json`, it's permanently reserved and cannot be reused.
