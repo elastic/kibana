@@ -19,7 +19,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/data-plugin/common';
 import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
@@ -74,6 +74,7 @@ export interface BoundsRequestMeta {
   isFeatureEditorOpenForLayer: boolean;
   joinKeyFilter?: Filter;
   executionContext: KibanaExecutionContext;
+  projectRouting?: ProjectRouting;
 }
 
 export interface GetFeatureActionsArgs {
