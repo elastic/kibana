@@ -94,22 +94,6 @@ describe('useFetchTraceRootSpan hook', () => {
     );
   });
 
-  it('should return undefined when traceId is empty', async () => {
-    const emptyTraceIdWrapper = ({ children }: { children: React.ReactNode }) => (
-      <TraceRootSpanProvider traceId="">{children}</TraceRootSpanProvider>
-    );
-
-    const { result } = renderHook(() => useFetchTraceRootSpanContext(), {
-      wrapper: emptyTraceIdWrapper,
-    });
-
-    await waitFor(() => !result.current.loading);
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.span).toBeUndefined();
-    expect(mockFetchRootSpanByTraceId).not.toHaveBeenCalled();
-  });
-
   it('should update item when data is fetched successfully', async () => {
     const mockSpan: TraceRootSpan = { duration: 1000 };
     mockFetchRootSpanByTraceId.mockResolvedValue(mockSpan);

@@ -26,7 +26,7 @@ const useFetchTraceRootSpan = ({ traceId }: UseFetchTraceRootItemParams) => {
 
   const { loading, error, value } = useAbortableAsync<TraceRootSpan | undefined>(
     async ({ signal }) => {
-      if (!fetchRootSpanByTraceId || !traceId) {
+      if (!fetchRootSpanByTraceId) {
         return undefined;
       }
 
