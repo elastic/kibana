@@ -12,6 +12,7 @@ export enum MaintenanceWindowStatus {
   Upcoming = 'upcoming',
   Finished = 'finished',
   Archived = 'archived',
+  Disabled = 'disabled',
 }
 
 export const MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE = 'maintenance-window';
