@@ -137,7 +137,10 @@ export const ScheduledReportForm = ({
     [http.basePath]
   );
   const { defaultTimezone } = useDefaultTimezone();
-  const [showCcBccFields, setShowCcBccFields] = useState(false);
+  const hasCcBcc =
+    Boolean(scheduledReport.emailCcRecipients?.length) ||
+    Boolean(scheduledReport.emailBccRecipients?.length);
+  const [showCcBccFields, setShowCcBccFields] = useState(editMode ? hasCcBcc : false);
   const schema = useMemo(
     () =>
       getScheduledReportFormSchema(
@@ -414,7 +417,6 @@ export const ScheduledReportForm = ({
                       editMode ||
                       !reportingHealth.areNotificationsEnabled ||
                       (!hasManageReportingPrivilege && !userProfile?.user.email),
-                    'data-test-subj': 'sendByEmailToggle',
                   },
                 }}
               />
@@ -432,7 +434,7 @@ export const ScheduledReportForm = ({
                               ? i18n.SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT
                               : i18n.SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT
                             : undefined,
-                          labelAppend: hasManageReportingPrivilege && (
+                          labelAppend: hasManageReportingPrivilege && !editMode && (
                             <EuiButtonEmpty
                               size="xs"
                               data-test-subj="showCcBccButton"

@@ -20,6 +20,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import userEvent from '@testing-library/user-event';
 import moment from 'moment';
 import * as i18n from '../translations';
+import { transformScheduledReport } from '../utils';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@kbn/reporting-public', () => ({
@@ -63,7 +64,7 @@ describe('ScheduledReportForm', () => {
 
   const defaultProps = {
     apiClient,
-    scheduledReport: mockScheduledReports[0],
+    scheduledReport: transformScheduledReport(mockScheduledReports[0]),
     availableReportTypes: [],
     onClose,
     onSubmitForm,
@@ -203,6 +204,35 @@ describe('ScheduledReportForm', () => {
       renderWithProviders(<ScheduledReportForm {...props} />);
 
       expect(await screen.findByTestId('sendByEmailToggle')).toBeDisabled();
+    });
+
+    it('disables email fields in edit mode and hides cc bcc toggle button', async () => {
+      user = userEvent.setup({ delay: null });
+      renderWithProviders(
+        <ScheduledReportForm
+          {...defaultProps}
+          editMode
+          scheduledReport={{
+            ...defaultProps.scheduledReport,
+            sendByEmail: true,
+            emailRecipients: ['to@email.com'],
+            emailCcRecipients: ['cc@email.com'],
+            emailBccRecipients: ['bccemail.com'],
+          }}
+        />
+      );
+
+      expect(await screen.findByTestId('sendByEmailToggle')).toBeDisabled();
+      const emailField = await screen.findByTestId('emailRecipientsCombobox');
+      const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
+      expect(emailInput).toBeDisabled();
+      expect(screen.queryByTestId('showCcBccButton')).not.toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('emailCcRecipientsCombobox')).getByTestId('comboBoxSearchInput')
+      ).toBeDisabled();
+      expect(
+        within(screen.getByTestId('emailBccRecipientsCombobox')).getByTestId('comboBoxSearchInput')
+      ).toBeDisabled();
     });
 
     it('calls onSubmit correctly in edit mode', async () => {
