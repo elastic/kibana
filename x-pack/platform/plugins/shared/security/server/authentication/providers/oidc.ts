@@ -311,7 +311,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
           body: params,
         })) as any;
 
-      if (realm !== this.realm) {
+      if (realm && this.realm && realm !== this.realm) {
         this.logger.debug(
           `Realm "${realm}" returned by Elasticsearch does not match the configured realm "${this.realm}" ` +
             `for provider "${this.options.name}". Returning not handled result.`
