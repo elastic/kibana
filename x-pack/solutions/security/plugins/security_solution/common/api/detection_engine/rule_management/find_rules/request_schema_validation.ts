@@ -16,18 +16,17 @@ export const validateFindRulesRequestQuery = (query: FindRulesRequestQueryInput)
       return ['when "sort_order" and "sort_field" must exist together or not at all'];
     }
   }
-  const hasGapFillStatuses =
-    Array.isArray(query.gap_fill_statuses) && query.gap_fill_statuses.length > 0;
-  if (hasGapFillStatuses) {
-    if (query.gaps_range_start == null || query.gaps_range_end == null) {
-      return [
-        'when "gap_fill_statuses" is present, "gaps_range_start" and "gaps_range_end" must also be present',
-      ];
-    }
-  }
-  if (!hasGapFillStatuses && (query.gaps_range_start || query.gaps_range_end)) {
+  const ruleExecutionGapQueryParamsSet = new Set([
+    Array.isArray(query.gap_fill_statuses) && query.gap_fill_statuses.length > 0,
+    Boolean(query.gaps_range_start),
+    Boolean(query.gaps_range_end),
+  ]);
+
+  // All rule execution gap query params should be specified or omitted (set.size == 1)
+  // return an error otherwise
+  if (ruleExecutionGapQueryParamsSet.size > 1) {
     return [
-      'when "gap_fill_statuses" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
+      'Query fields "gap_fill_statuses", "gaps_range_start" and "gaps_range_end" has to be specified together',
     ];
   }
   return [];

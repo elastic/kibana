@@ -75,14 +75,13 @@ const validateBulkAction = (
     };
   }
 
-  const hasGapFillStatuses =
-    Array.isArray(body.gap_fill_statuses) && body.gap_fill_statuses.length > 0;
-  const hasAnyGapParam =
-    Boolean(body.gaps_range_start) || Boolean(body.gaps_range_end) || hasGapFillStatuses;
-  const hasAllGapParams =
-    Boolean(body.gaps_range_start) && Boolean(body.gaps_range_end) && hasGapFillStatuses;
+  const ruleExecutionGapBodyParamsSet = new Set([
+    Array.isArray(body.gap_fill_statuses) && body.gap_fill_statuses.length > 0,
+    Boolean(body.gaps_range_start),
+    Boolean(body.gaps_range_end),
+  ]);
 
-  if (hasAnyGapParam && !hasAllGapParams) {
+  if (ruleExecutionGapBodyParamsSet.size > 1) {
     return {
       body: `gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.`,
       statusCode: 400,
@@ -90,7 +89,7 @@ const validateBulkAction = (
   }
 
   // Validate that ids and gap range params are not used together
-  if (body?.ids && hasAnyGapParam) {
+  if (body?.ids && ruleExecutionGapBodyParamsSet.has(true)) {
     return {
       body: `Cannot use both ids and gaps_range_start/gaps_range_end in request payload.`,
       statusCode: 400,
