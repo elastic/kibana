@@ -87,7 +87,7 @@ export const SimulationPlayground = ({
                       />
                     </EuiFlexItem>
                     {hasOutdatedDocuments && (
-                      <EuiFlexItem>
+                      <EuiFlexItem data-test-subj="streamsAppProcessingOutdatedDocumentsTipAnchor">
                         <EuiIconTip
                           content={i18n.translate(
                             'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.outdatedDocumentsTooltip.content',
