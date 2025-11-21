@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-11-21T22:07:27.338Z
+ * Generated at: 2025-11-21T23:40:14.001Z
  * Source: /oas_docs/output/kibana.yaml (undefined APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
@@ -1065,7 +1065,7 @@ import {
   upsert_entity_response,
 } from './schemas/kibana_openapi_zod.gen';
 import type { InternalConnectorContract } from '../../types/latest';
-import { getShape } from '../utils';
+import { getLooseObjectFromProperty, getShape } from '../utils';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 
@@ -1089,13 +1089,11 @@ You do not need any Kibana feature privileges to run this API.`,
     urlParams: ['feature_id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_actions_connector_types_request).body),
-      ...getShape(getShape(get_actions_connector_types_request).path),
-      ...getShape(getShape(get_actions_connector_types_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_actions_connector_types_request, 'body'),
+    getLooseObjectFromProperty(get_actions_connector_types_request, 'path'),
+    getLooseObjectFromProperty(get_actions_connector_types_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_actions_connector_types_response)),
@@ -1122,13 +1120,11 @@ WARNING: When you delete a connector, it cannot be recovered.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_actions_connector_id_request).body),
-      ...getShape(getShape(delete_actions_connector_id_request).path),
-      ...getShape(getShape(delete_actions_connector_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_actions_connector_id_request, 'body'),
+    getLooseObjectFromProperty(delete_actions_connector_id_request, 'path'),
+    getLooseObjectFromProperty(delete_actions_connector_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_actions_connector_id_response)),
@@ -1153,13 +1149,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_actions_connector_id_request).body),
-      ...getShape(getShape(get_actions_connector_id_request).path),
-      ...getShape(getShape(get_actions_connector_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_actions_connector_id_request, 'body'),
+    getLooseObjectFromProperty(get_actions_connector_id_request, 'path'),
+    getLooseObjectFromProperty(get_actions_connector_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_actions_connector_id_response)),
@@ -1184,13 +1178,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_actions_connector_id_request).body),
-      ...getShape(getShape(post_actions_connector_id_request).path),
-      ...getShape(getShape(post_actions_connector_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_actions_connector_id_request, 'body'),
+    getLooseObjectFromProperty(post_actions_connector_id_request, 'path'),
+    getLooseObjectFromProperty(post_actions_connector_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_actions_connector_id_response)),
@@ -1215,13 +1207,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_actions_connector_id_request).body),
-      ...getShape(getShape(put_actions_connector_id_request).path),
-      ...getShape(getShape(put_actions_connector_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_actions_connector_id_request, 'body'),
+    getLooseObjectFromProperty(put_actions_connector_id_request, 'path'),
+    getLooseObjectFromProperty(put_actions_connector_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_actions_connector_id_response)),
@@ -1248,13 +1238,11 @@ You can use this API to test an action that involves interaction with Kibana ser
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_actions_connector_id_execute_request).body),
-      ...getShape(getShape(post_actions_connector_id_execute_request).path),
-      ...getShape(getShape(post_actions_connector_id_execute_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_actions_connector_id_execute_request, 'body'),
+    getLooseObjectFromProperty(post_actions_connector_id_execute_request, 'path'),
+    getLooseObjectFromProperty(post_actions_connector_id_execute_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_actions_connector_id_execute_response)),
@@ -1279,13 +1267,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_actions_connectors_request).body),
-      ...getShape(getShape(get_actions_connectors_request).path),
-      ...getShape(getShape(get_actions_connectors_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_actions_connectors_request, 'body'),
+    getLooseObjectFromProperty(get_actions_connectors_request, 'path'),
+    getLooseObjectFromProperty(get_actions_connectors_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_actions_connectors_response)),
@@ -1312,13 +1298,11 @@ WARNING: This endpoint is designed for A2A protocol clients and should not be us
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_agent_builder_a2a_agentid_request).body),
-      ...getShape(getShape(post_agent_builder_a2a_agentid_request).path),
-      ...getShape(getShape(post_agent_builder_a2a_agentid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'body'),
+    getLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'path'),
+    getLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_agent_builder_a2a_agentid_response)),
@@ -1345,13 +1329,11 @@ Get agent discovery metadata in JSON format. Use this endpoint to provide agent 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_agent_builder_a2a_agentid_json_request).body),
-      ...getShape(getShape(get_agent_builder_a2a_agentid_json_request).path),
-      ...getShape(getShape(get_agent_builder_a2a_agentid_json_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'body'),
+    getLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'path'),
+    getLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_agent_builder_a2a_agentid_json_response)),
@@ -1378,13 +1360,11 @@ List all available agents. Use this endpoint to retrieve complete agent informat
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_agent_builder_agents_request).body),
-      ...getShape(getShape(get_agent_builder_agents_request).path),
-      ...getShape(getShape(get_agent_builder_agents_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_agent_builder_agents_request, 'body'),
+    getLooseObjectFromProperty(get_agent_builder_agents_request, 'path'),
+    getLooseObjectFromProperty(get_agent_builder_agents_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_agent_builder_agents_response)),
@@ -1411,13 +1391,11 @@ Create a new agent. Use this endpoint to define the agent's behavior, appearance
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_agent_builder_agents_request).body),
-      ...getShape(getShape(post_agent_builder_agents_request).path),
-      ...getShape(getShape(post_agent_builder_agents_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_agent_builder_agents_request, 'body'),
+    getLooseObjectFromProperty(post_agent_builder_agents_request, 'path'),
+    getLooseObjectFromProperty(post_agent_builder_agents_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_agent_builder_agents_response)),
@@ -1444,13 +1422,11 @@ Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authoriz
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_agent_builder_agents_id_request).body),
-      ...getShape(getShape(delete_agent_builder_agents_id_request).path),
-      ...getShape(getShape(delete_agent_builder_agents_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'body'),
+    getLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'path'),
+    getLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_agent_builder_agents_id_response)),
@@ -1477,13 +1453,11 @@ Get a specific agent by ID. Use this endpoint to retrieve the complete agent def
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_agent_builder_agents_id_request).body),
-      ...getShape(getShape(get_agent_builder_agents_id_request).path),
-      ...getShape(getShape(get_agent_builder_agents_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_agent_builder_agents_id_request, 'body'),
+    getLooseObjectFromProperty(get_agent_builder_agents_id_request, 'path'),
+    getLooseObjectFromProperty(get_agent_builder_agents_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_agent_builder_agents_id_response)),
@@ -1510,13 +1484,11 @@ Update an existing agent configuration. Use this endpoint to modify any aspect o
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_agent_builder_agents_id_request).body),
-      ...getShape(getShape(put_agent_builder_agents_id_request).path),
-      ...getShape(getShape(put_agent_builder_agents_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_agent_builder_agents_id_request, 'body'),
+    getLooseObjectFromProperty(put_agent_builder_agents_id_request, 'path'),
+    getLooseObjectFromProperty(put_agent_builder_agents_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_agent_builder_agents_id_response)),
@@ -1543,13 +1515,11 @@ List all conversations for a user. Use the optional agent ID to filter conversat
     urlParams: ['agent_id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_agent_builder_conversations_request).body),
-      ...getShape(getShape(get_agent_builder_conversations_request).path),
-      ...getShape(getShape(get_agent_builder_conversations_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_agent_builder_conversations_request, 'body'),
+    getLooseObjectFromProperty(get_agent_builder_conversations_request, 'path'),
+    getLooseObjectFromProperty(get_agent_builder_conversations_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_agent_builder_conversations_response)),
@@ -1576,13 +1546,11 @@ Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required au
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_agent_builder_conversations_conversation_id_request).body),
-      ...getShape(getShape(delete_agent_builder_conversations_conversation_id_request).path),
-      ...getShape(getShape(delete_agent_builder_conversations_conversation_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_agent_builder_conversations_conversation_id_request, 'body'),
+    getLooseObjectFromProperty(delete_agent_builder_conversations_conversation_id_request, 'path'),
+    getLooseObjectFromProperty(delete_agent_builder_conversations_conversation_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_agent_builder_conversations_conversation_id_response)),
@@ -1609,13 +1577,11 @@ Get a specific conversation by ID. Use this endpoint to retrieve the complete co
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_agent_builder_conversations_conversation_id_request).body),
-      ...getShape(getShape(get_agent_builder_conversations_conversation_id_request).path),
-      ...getShape(getShape(get_agent_builder_conversations_conversation_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'body'),
+    getLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'path'),
+    getLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_agent_builder_conversations_conversation_id_response)),
@@ -1642,13 +1608,11 @@ Send a message to an agent and receive a complete response. This synchronous end
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_agent_builder_converse_request).body),
-      ...getShape(getShape(post_agent_builder_converse_request).path),
-      ...getShape(getShape(post_agent_builder_converse_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_agent_builder_converse_request, 'body'),
+    getLooseObjectFromProperty(post_agent_builder_converse_request, 'path'),
+    getLooseObjectFromProperty(post_agent_builder_converse_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_agent_builder_converse_response)),
@@ -1851,13 +1815,11 @@ A typical conversation round emits events in this sequence:
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_agent_builder_converse_async_request).body),
-      ...getShape(getShape(post_agent_builder_converse_async_request).path),
-      ...getShape(getShape(post_agent_builder_converse_async_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_agent_builder_converse_async_request, 'body'),
+    getLooseObjectFromProperty(post_agent_builder_converse_async_request, 'path'),
+    getLooseObjectFromProperty(post_agent_builder_converse_async_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_agent_builder_converse_async_response)),
@@ -1884,13 +1846,11 @@ WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS C
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_agent_builder_mcp_request).body),
-      ...getShape(getShape(post_agent_builder_mcp_request).path),
-      ...getShape(getShape(post_agent_builder_mcp_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_agent_builder_mcp_request, 'body'),
+    getLooseObjectFromProperty(post_agent_builder_mcp_request, 'path'),
+    getLooseObjectFromProperty(post_agent_builder_mcp_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_agent_builder_mcp_response)),
@@ -1917,13 +1877,11 @@ List all available tools. Use this endpoint to retrieve complete tool definition
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_agent_builder_tools_request).body),
-      ...getShape(getShape(get_agent_builder_tools_request).path),
-      ...getShape(getShape(get_agent_builder_tools_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_agent_builder_tools_request, 'body'),
+    getLooseObjectFromProperty(get_agent_builder_tools_request, 'path'),
+    getLooseObjectFromProperty(get_agent_builder_tools_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_agent_builder_tools_response)),
@@ -1950,13 +1908,11 @@ Create a new tool. Use this endpoint to define a custom tool with specific funct
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_agent_builder_tools_request).body),
-      ...getShape(getShape(post_agent_builder_tools_request).path),
-      ...getShape(getShape(post_agent_builder_tools_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_agent_builder_tools_request, 'body'),
+    getLooseObjectFromProperty(post_agent_builder_tools_request, 'path'),
+    getLooseObjectFromProperty(post_agent_builder_tools_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_agent_builder_tools_response)),
@@ -1983,13 +1939,11 @@ Execute a tool with parameters. Use this endpoint to run a tool directly with sp
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_agent_builder_tools_execute_request).body),
-      ...getShape(getShape(post_agent_builder_tools_execute_request).path),
-      ...getShape(getShape(post_agent_builder_tools_execute_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'body'),
+    getLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'path'),
+    getLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_agent_builder_tools_execute_response)),
@@ -2016,13 +1970,11 @@ Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorizat
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_agent_builder_tools_id_request).body),
-      ...getShape(getShape(delete_agent_builder_tools_id_request).path),
-      ...getShape(getShape(delete_agent_builder_tools_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_agent_builder_tools_id_request, 'body'),
+    getLooseObjectFromProperty(delete_agent_builder_tools_id_request, 'path'),
+    getLooseObjectFromProperty(delete_agent_builder_tools_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_agent_builder_tools_id_response)),
@@ -2049,13 +2001,11 @@ Get a specific tool by ID. Use this endpoint to retrieve the complete tool defin
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_agent_builder_tools_id_request).body),
-      ...getShape(getShape(get_agent_builder_tools_id_request).path),
-      ...getShape(getShape(get_agent_builder_tools_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_agent_builder_tools_id_request, 'body'),
+    getLooseObjectFromProperty(get_agent_builder_tools_id_request, 'path'),
+    getLooseObjectFromProperty(get_agent_builder_tools_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_agent_builder_tools_id_response)),
@@ -2082,13 +2032,11 @@ Update an existing tool. Use this endpoint to modify any aspect of the tool's co
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_agent_builder_tools_toolid_request).body),
-      ...getShape(getShape(put_agent_builder_tools_toolid_request).path),
-      ...getShape(getShape(put_agent_builder_tools_toolid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'body'),
+    getLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'path'),
+    getLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_agent_builder_tools_toolid_response)),
@@ -2116,13 +2064,11 @@ You must have \`read\` privileges for the **Management > Stack Rules** feature o
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_alerting_health_request).body),
-      ...getShape(getShape(get_alerting_health_request).path),
-      ...getShape(getShape(get_alerting_health_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_alerting_health_request, 'body'),
+    getLooseObjectFromProperty(get_alerting_health_request, 'path'),
+    getLooseObjectFromProperty(get_alerting_health_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_alerting_health_response)),
@@ -2150,13 +2096,11 @@ If you have \`read\` privileges for one or more Kibana features, the API respons
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_rule_types_request).body),
-      ...getShape(getShape(get_rule_types_request).path),
-      ...getShape(getShape(get_rule_types_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_rule_types_request, 'body'),
+    getLooseObjectFromProperty(get_rule_types_request, 'path'),
+    getLooseObjectFromProperty(get_rule_types_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_rule_types_response)),
@@ -2181,13 +2125,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_alerting_rule_id_request).body),
-      ...getShape(getShape(delete_alerting_rule_id_request).path),
-      ...getShape(getShape(delete_alerting_rule_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_alerting_rule_id_request, 'body'),
+    getLooseObjectFromProperty(delete_alerting_rule_id_request, 'path'),
+    getLooseObjectFromProperty(delete_alerting_rule_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_alerting_rule_id_response)),
@@ -2212,13 +2154,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_alerting_rule_id_request).body),
-      ...getShape(getShape(get_alerting_rule_id_request).path),
-      ...getShape(getShape(get_alerting_rule_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_alerting_rule_id_request, 'body'),
+    getLooseObjectFromProperty(get_alerting_rule_id_request, 'path'),
+    getLooseObjectFromProperty(get_alerting_rule_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_alerting_rule_id_response)),
@@ -2243,13 +2183,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_alerting_rule_id_request).body),
-      ...getShape(getShape(post_alerting_rule_id_request).path),
-      ...getShape(getShape(post_alerting_rule_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_alerting_rule_id_request, 'body'),
+    getLooseObjectFromProperty(post_alerting_rule_id_request, 'path'),
+    getLooseObjectFromProperty(post_alerting_rule_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_alerting_rule_id_response)),
@@ -2274,13 +2212,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_alerting_rule_id_request).body),
-      ...getShape(getShape(put_alerting_rule_id_request).path),
-      ...getShape(getShape(put_alerting_rule_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_alerting_rule_id_request, 'body'),
+    getLooseObjectFromProperty(put_alerting_rule_id_request, 'path'),
+    getLooseObjectFromProperty(put_alerting_rule_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_alerting_rule_id_response)),
@@ -2305,13 +2241,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_alerting_rule_id_disable_request).body),
-      ...getShape(getShape(post_alerting_rule_id_disable_request).path),
-      ...getShape(getShape(post_alerting_rule_id_disable_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'body'),
+    getLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'path'),
+    getLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_alerting_rule_id_disable_response)),
@@ -2336,13 +2270,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_alerting_rule_id_enable_request).body),
-      ...getShape(getShape(post_alerting_rule_id_enable_request).path),
-      ...getShape(getShape(post_alerting_rule_id_enable_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'body'),
+    getLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'path'),
+    getLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_alerting_rule_id_enable_response)),
@@ -2367,13 +2299,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_alerting_rule_id_mute_all_request).body),
-      ...getShape(getShape(post_alerting_rule_id_mute_all_request).path),
-      ...getShape(getShape(post_alerting_rule_id_mute_all_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'body'),
+    getLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'path'),
+    getLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_alerting_rule_id_mute_all_response)),
@@ -2398,13 +2328,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_alerting_rule_id_unmute_all_request).body),
-      ...getShape(getShape(post_alerting_rule_id_unmute_all_request).path),
-      ...getShape(getShape(post_alerting_rule_id_unmute_all_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'body'),
+    getLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'path'),
+    getLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_alerting_rule_id_unmute_all_response)),
@@ -2429,13 +2357,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_alerting_rule_id_update_api_key_request).body),
-      ...getShape(getShape(post_alerting_rule_id_update_api_key_request).path),
-      ...getShape(getShape(post_alerting_rule_id_update_api_key_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'body'),
+    getLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'path'),
+    getLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_alerting_rule_id_update_api_key_response)),
@@ -2462,13 +2388,11 @@ When you snooze a rule, the rule checks continue to run but alerts will not gene
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_alerting_rule_id_snooze_schedule_request).body),
-      ...getShape(getShape(post_alerting_rule_id_snooze_schedule_request).path),
-      ...getShape(getShape(post_alerting_rule_id_snooze_schedule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'body'),
+    getLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'path'),
+    getLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_alerting_rule_id_snooze_schedule_response)),
@@ -2493,13 +2417,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_mute_request).body),
-      ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_mute_request).path),
-      ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_mute_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'body'),
+    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'path'),
+    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_mute_response)),
@@ -2524,13 +2446,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_unmute_request).body),
-      ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_unmute_request).path),
-      ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_unmute_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'body'),
+    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'path'),
+    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_unmute_response)),
@@ -2555,13 +2475,20 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request).body),
-      ...getShape(getShape(delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request).path),
-      ...getShape(getShape(delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(
+      delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
+      'body'
+    ),
+    getLooseObjectFromProperty(
+      delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
+      'path'
+    ),
+    getLooseObjectFromProperty(
+      delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
+      'query'
+    ),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_alerting_rule_ruleid_snooze_schedule_scheduleid_response)),
@@ -2598,13 +2525,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_alerting_rules_find_request).body),
-      ...getShape(getShape(get_alerting_rules_find_request).path),
-      ...getShape(getShape(get_alerting_rules_find_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_alerting_rules_find_request, 'body'),
+    getLooseObjectFromProperty(get_alerting_rules_find_request, 'path'),
+    getLooseObjectFromProperty(get_alerting_rules_find_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_alerting_rules_find_response)),
@@ -2634,13 +2559,11 @@ After it is created, you can copy the API key (Base64 encoded) and use it to to 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_agent_key_request).body),
-      ...getShape(getShape(create_agent_key_request).path),
-      ...getShape(getShape(create_agent_key_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_agent_key_request, 'body'),
+    getLooseObjectFromProperty(create_agent_key_request, 'path'),
+    getLooseObjectFromProperty(create_agent_key_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_agent_key_response)),
@@ -2665,13 +2588,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(save_apm_server_schema_request).body),
-      ...getShape(getShape(save_apm_server_schema_request).path),
-      ...getShape(getShape(save_apm_server_schema_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(save_apm_server_schema_request, 'body'),
+    getLooseObjectFromProperty(save_apm_server_schema_request, 'path'),
+    getLooseObjectFromProperty(save_apm_server_schema_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(save_apm_server_schema_response)),
@@ -2698,13 +2619,11 @@ Create a new annotation for a specific service.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_annotation_request).body),
-      ...getShape(getShape(create_annotation_request).path),
-      ...getShape(getShape(create_annotation_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_annotation_request, 'body'),
+    getLooseObjectFromProperty(create_annotation_request, 'path'),
+    getLooseObjectFromProperty(create_annotation_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_annotation_response)),
@@ -2731,13 +2650,11 @@ Search for annotations related to a specific service.`,
     urlParams: ['environment', 'start', 'end'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_annotation_request).body),
-      ...getShape(getShape(get_annotation_request).path),
-      ...getShape(getShape(get_annotation_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_annotation_request, 'body'),
+    getLooseObjectFromProperty(get_annotation_request, 'path'),
+    getLooseObjectFromProperty(get_annotation_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_annotation_response)),
@@ -2762,13 +2679,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_agent_configuration_request).body),
-      ...getShape(getShape(delete_agent_configuration_request).path),
-      ...getShape(getShape(delete_agent_configuration_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_agent_configuration_request, 'body'),
+    getLooseObjectFromProperty(delete_agent_configuration_request, 'path'),
+    getLooseObjectFromProperty(delete_agent_configuration_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_agent_configuration_response)),
@@ -2793,13 +2708,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_agent_configurations_request).body),
-      ...getShape(getShape(get_agent_configurations_request).path),
-      ...getShape(getShape(get_agent_configurations_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_agent_configurations_request, 'body'),
+    getLooseObjectFromProperty(get_agent_configurations_request, 'path'),
+    getLooseObjectFromProperty(get_agent_configurations_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_agent_configurations_response)),
@@ -2824,13 +2737,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['overwrite'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_update_agent_configuration_request).body),
-      ...getShape(getShape(create_update_agent_configuration_request).path),
-      ...getShape(getShape(create_update_agent_configuration_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_update_agent_configuration_request, 'body'),
+    getLooseObjectFromProperty(create_update_agent_configuration_request, 'path'),
+    getLooseObjectFromProperty(create_update_agent_configuration_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_update_agent_configuration_response)),
@@ -2857,13 +2768,11 @@ Retrieve \`agentName\` for a service.`,
     urlParams: ['serviceName'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_agent_name_for_service_request).body),
-      ...getShape(getShape(get_agent_name_for_service_request).path),
-      ...getShape(getShape(get_agent_name_for_service_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_agent_name_for_service_request, 'body'),
+    getLooseObjectFromProperty(get_agent_name_for_service_request, 'path'),
+    getLooseObjectFromProperty(get_agent_name_for_service_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_agent_name_for_service_response)),
@@ -2888,13 +2797,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['serviceName'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_environments_for_service_request).body),
-      ...getShape(getShape(get_environments_for_service_request).path),
-      ...getShape(getShape(get_environments_for_service_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_environments_for_service_request, 'body'),
+    getLooseObjectFromProperty(get_environments_for_service_request, 'path'),
+    getLooseObjectFromProperty(get_environments_for_service_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_environments_for_service_response)),
@@ -2922,13 +2829,11 @@ This endpoint enables you to search for a single agent configuration and update 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_single_configuration_request).body),
-      ...getShape(getShape(search_single_configuration_request).path),
-      ...getShape(getShape(search_single_configuration_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_single_configuration_request, 'body'),
+    getLooseObjectFromProperty(search_single_configuration_request, 'path'),
+    getLooseObjectFromProperty(search_single_configuration_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_single_configuration_response)),
@@ -2953,13 +2858,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['name', 'environment'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_single_agent_configuration_request).body),
-      ...getShape(getShape(get_single_agent_configuration_request).path),
-      ...getShape(getShape(get_single_agent_configuration_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_single_agent_configuration_request, 'body'),
+    getLooseObjectFromProperty(get_single_agent_configuration_request, 'path'),
+    getLooseObjectFromProperty(get_single_agent_configuration_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_single_agent_configuration_response)),
@@ -2987,13 +2890,11 @@ Get an array of Fleet artifacts, including source map uploads. You must have \`r
     urlParams: ['page', 'perPage'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_source_maps_request).body),
-      ...getShape(getShape(get_source_maps_request).path),
-      ...getShape(getShape(get_source_maps_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_source_maps_request, 'body'),
+    getLooseObjectFromProperty(get_source_maps_request, 'path'),
+    getLooseObjectFromProperty(get_source_maps_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_source_maps_response)),
@@ -3022,13 +2923,11 @@ The maximum payload size is \`1mb\`. If you attempt to upload a source map that 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(upload_source_map_request).body),
-      ...getShape(getShape(upload_source_map_request).path),
-      ...getShape(getShape(upload_source_map_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(upload_source_map_request, 'body'),
+    getLooseObjectFromProperty(upload_source_map_request, 'path'),
+    getLooseObjectFromProperty(upload_source_map_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(upload_source_map_response)),
@@ -3056,13 +2955,11 @@ Delete a previously uploaded source map. You must have \`all\` Kibana privileges
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_source_map_request).body),
-      ...getShape(getShape(delete_source_map_request).path),
-      ...getShape(getShape(delete_source_map_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_source_map_request, 'body'),
+    getLooseObjectFromProperty(delete_source_map_request, 'path'),
+    getLooseObjectFromProperty(delete_source_map_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_source_map_response)),
@@ -3089,13 +2986,11 @@ Delete the asset criticality record for a specific entity.`,
     urlParams: ['id_value', 'id_field', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_asset_criticality_record_request).body),
-      ...getShape(getShape(delete_asset_criticality_record_request).path),
-      ...getShape(getShape(delete_asset_criticality_record_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_asset_criticality_record_request, 'body'),
+    getLooseObjectFromProperty(delete_asset_criticality_record_request, 'path'),
+    getLooseObjectFromProperty(delete_asset_criticality_record_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_asset_criticality_record_response)),
@@ -3122,13 +3017,11 @@ Get the asset criticality record for a specific entity.`,
     urlParams: ['id_value', 'id_field'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_asset_criticality_record_request).body),
-      ...getShape(getShape(get_asset_criticality_record_request).path),
-      ...getShape(getShape(get_asset_criticality_record_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_asset_criticality_record_request, 'body'),
+    getLooseObjectFromProperty(get_asset_criticality_record_request, 'path'),
+    getLooseObjectFromProperty(get_asset_criticality_record_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_asset_criticality_record_response)),
@@ -3158,13 +3051,11 @@ If a record already exists for the specified entity, that record is overwritten 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_asset_criticality_record_request).body),
-      ...getShape(getShape(create_asset_criticality_record_request).path),
-      ...getShape(getShape(create_asset_criticality_record_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_asset_criticality_record_request, 'body'),
+    getLooseObjectFromProperty(create_asset_criticality_record_request, 'path'),
+    getLooseObjectFromProperty(create_asset_criticality_record_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_asset_criticality_record_response)),
@@ -3194,13 +3085,11 @@ If asset criticality records already exist for the specified entities, those rec
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(bulk_upsert_asset_criticality_records_request).body),
-      ...getShape(getShape(bulk_upsert_asset_criticality_records_request).path),
-      ...getShape(getShape(bulk_upsert_asset_criticality_records_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'body'),
+    getLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'path'),
+    getLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(bulk_upsert_asset_criticality_records_response)),
@@ -3227,13 +3116,11 @@ List asset criticality records, paging, sorting and filtering as needed.`,
     urlParams: ['sort_field', 'sort_direction', 'page', 'per_page', 'kuery'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_asset_criticality_records_request).body),
-      ...getShape(getShape(find_asset_criticality_records_request).path),
-      ...getShape(getShape(find_asset_criticality_records_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_asset_criticality_records_request, 'body'),
+    getLooseObjectFromProperty(find_asset_criticality_records_request, 'path'),
+    getLooseObjectFromProperty(find_asset_criticality_records_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_asset_criticality_records_response)),
@@ -3260,13 +3147,11 @@ Performs bulk updates on multiple Attack discoveries, including workflow status 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_attack_discovery_bulk_request).body),
-      ...getShape(getShape(post_attack_discovery_bulk_request).path),
-      ...getShape(getShape(post_attack_discovery_bulk_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_attack_discovery_bulk_request, 'body'),
+    getLooseObjectFromProperty(post_attack_discovery_bulk_request, 'path'),
+    getLooseObjectFromProperty(post_attack_discovery_bulk_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_attack_discovery_bulk_response)),
@@ -3309,13 +3194,11 @@ Find Attack discoveries that match the search criteria. Supports free text searc
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(attack_discovery_find_request).body),
-      ...getShape(getShape(attack_discovery_find_request).path),
-      ...getShape(getShape(attack_discovery_find_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(attack_discovery_find_request, 'body'),
+    getLooseObjectFromProperty(attack_discovery_find_request, 'path'),
+    getLooseObjectFromProperty(attack_discovery_find_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(attack_discovery_find_response)),
@@ -3342,13 +3225,11 @@ Initiates the generation of attack discoveries by analyzing security alerts usin
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_attack_discovery_generate_request).body),
-      ...getShape(getShape(post_attack_discovery_generate_request).path),
-      ...getShape(getShape(post_attack_discovery_generate_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_attack_discovery_generate_request, 'body'),
+    getLooseObjectFromProperty(post_attack_discovery_generate_request, 'path'),
+    getLooseObjectFromProperty(post_attack_discovery_generate_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_attack_discovery_generate_response)),
@@ -3375,13 +3256,11 @@ Get the latest attack discovery generations metadata (that are not dismissed) fo
     urlParams: ['end', 'size', 'start'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_attack_discovery_generations_request).body),
-      ...getShape(getShape(get_attack_discovery_generations_request).path),
-      ...getShape(getShape(get_attack_discovery_generations_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_attack_discovery_generations_request, 'body'),
+    getLooseObjectFromProperty(get_attack_discovery_generations_request, 'path'),
+    getLooseObjectFromProperty(get_attack_discovery_generations_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_attack_discovery_generations_response)),
@@ -3408,13 +3287,11 @@ Returns a specific Attack discovery generation, including all generated Attack d
     urlParams: ['enable_field_rendering', 'with_replacements'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_attack_discovery_generation_request).body),
-      ...getShape(getShape(get_attack_discovery_generation_request).path),
-      ...getShape(getShape(get_attack_discovery_generation_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_attack_discovery_generation_request, 'body'),
+    getLooseObjectFromProperty(get_attack_discovery_generation_request, 'path'),
+    getLooseObjectFromProperty(get_attack_discovery_generation_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_attack_discovery_generation_response)),
@@ -3441,13 +3318,11 @@ Dismisses an attack discovery generation for the current user, indicating that i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_attack_discovery_generations_dismiss_request).body),
-      ...getShape(getShape(post_attack_discovery_generations_dismiss_request).path),
-      ...getShape(getShape(post_attack_discovery_generations_dismiss_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'body'),
+    getLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'path'),
+    getLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_attack_discovery_generations_dismiss_response)),
@@ -3474,13 +3349,11 @@ Creates a new Attack discovery schedule that analyzes security alerts at specifi
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_attack_discovery_schedules_request).body),
-      ...getShape(getShape(create_attack_discovery_schedules_request).path),
-      ...getShape(getShape(create_attack_discovery_schedules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_attack_discovery_schedules_request, 'body'),
+    getLooseObjectFromProperty(create_attack_discovery_schedules_request, 'path'),
+    getLooseObjectFromProperty(create_attack_discovery_schedules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_attack_discovery_schedules_response)),
@@ -3507,13 +3380,11 @@ Finds Attack discovery schedules that match the search criteria. Supports pagina
     urlParams: ['page', 'per_page', 'sort_field', 'sort_direction'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_attack_discovery_schedules_request).body),
-      ...getShape(getShape(find_attack_discovery_schedules_request).path),
-      ...getShape(getShape(find_attack_discovery_schedules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_attack_discovery_schedules_request, 'body'),
+    getLooseObjectFromProperty(find_attack_discovery_schedules_request, 'path'),
+    getLooseObjectFromProperty(find_attack_discovery_schedules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_attack_discovery_schedules_response)),
@@ -3540,13 +3411,11 @@ Permanently deletes an Attack discovery schedule and all associated configuratio
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_attack_discovery_schedules_request).body),
-      ...getShape(getShape(delete_attack_discovery_schedules_request).path),
-      ...getShape(getShape(delete_attack_discovery_schedules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'body'),
+    getLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'path'),
+    getLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_attack_discovery_schedules_response)),
@@ -3573,13 +3442,11 @@ Retrieves a specific Attack discovery schedule by its unique identifier. Returns
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_attack_discovery_schedules_request).body),
-      ...getShape(getShape(get_attack_discovery_schedules_request).path),
-      ...getShape(getShape(get_attack_discovery_schedules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_attack_discovery_schedules_request, 'body'),
+    getLooseObjectFromProperty(get_attack_discovery_schedules_request, 'path'),
+    getLooseObjectFromProperty(get_attack_discovery_schedules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_attack_discovery_schedules_response)),
@@ -3606,13 +3473,11 @@ Updates an existing Attack discovery schedule with new configuration. All schedu
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_attack_discovery_schedules_request).body),
-      ...getShape(getShape(update_attack_discovery_schedules_request).path),
-      ...getShape(getShape(update_attack_discovery_schedules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_attack_discovery_schedules_request, 'body'),
+    getLooseObjectFromProperty(update_attack_discovery_schedules_request, 'path'),
+    getLooseObjectFromProperty(update_attack_discovery_schedules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_attack_discovery_schedules_response)),
@@ -3639,13 +3504,11 @@ Disables an Attack discovery schedule, preventing it from running according to i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(disable_attack_discovery_schedules_request).body),
-      ...getShape(getShape(disable_attack_discovery_schedules_request).path),
-      ...getShape(getShape(disable_attack_discovery_schedules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'body'),
+    getLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'path'),
+    getLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(disable_attack_discovery_schedules_response)),
@@ -3672,13 +3535,11 @@ Enables a previously disabled Attack discovery schedule, allowing it to run acco
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(enable_attack_discovery_schedules_request).body),
-      ...getShape(getShape(enable_attack_discovery_schedules_request).path),
-      ...getShape(getShape(enable_attack_discovery_schedules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'body'),
+    getLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'path'),
+    getLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(enable_attack_discovery_schedules_response)),
@@ -3706,13 +3567,11 @@ You must have \`read\` or \`all\` privileges and the \`delete\` sub-feature priv
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_case_default_space_request).body),
-      ...getShape(getShape(delete_case_default_space_request).path),
-      ...getShape(getShape(delete_case_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_case_default_space_request, 'body'),
+    getLooseObjectFromProperty(delete_case_default_space_request, 'path'),
+    getLooseObjectFromProperty(delete_case_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_case_default_space_response)),
@@ -3740,13 +3599,11 @@ You must have \`all\` privileges for the **Cases** feature in the  **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_case_default_space_request).body),
-      ...getShape(getShape(update_case_default_space_request).path),
-      ...getShape(getShape(update_case_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_case_default_space_request, 'body'),
+    getLooseObjectFromProperty(update_case_default_space_request, 'path'),
+    getLooseObjectFromProperty(update_case_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_case_default_space_response)),
@@ -3774,13 +3631,11 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_case_default_space_request).body),
-      ...getShape(getShape(create_case_default_space_request).path),
-      ...getShape(getShape(create_case_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_case_default_space_request, 'body'),
+    getLooseObjectFromProperty(create_case_default_space_request, 'path'),
+    getLooseObjectFromProperty(create_case_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_case_default_space_response)),
@@ -3808,13 +3663,11 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_cases_default_space_request).body),
-      ...getShape(getShape(find_cases_default_space_request).path),
-      ...getShape(getShape(find_cases_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_cases_default_space_request, 'body'),
+    getLooseObjectFromProperty(find_cases_default_space_request, 'path'),
+    getLooseObjectFromProperty(find_cases_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_cases_default_space_response)),
@@ -3842,13 +3695,11 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_case_default_space_request).body),
-      ...getShape(getShape(get_case_default_space_request).path),
-      ...getShape(getShape(get_case_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_case_default_space_request, 'body'),
+    getLooseObjectFromProperty(get_case_default_space_request, 'path'),
+    getLooseObjectFromProperty(get_case_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_case_default_space_response)),
@@ -3876,13 +3727,11 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_case_alerts_default_space_request).body),
-      ...getShape(getShape(get_case_alerts_default_space_request).path),
-      ...getShape(getShape(get_case_alerts_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_case_alerts_default_space_request, 'body'),
+    getLooseObjectFromProperty(get_case_alerts_default_space_request, 'path'),
+    getLooseObjectFromProperty(get_case_alerts_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_case_alerts_default_space_response)),
@@ -3910,13 +3759,11 @@ Deletes all comments and alerts from a case. You must have \`all\` privileges fo
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_case_comments_default_space_request).body),
-      ...getShape(getShape(delete_case_comments_default_space_request).path),
-      ...getShape(getShape(delete_case_comments_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_case_comments_default_space_request, 'body'),
+    getLooseObjectFromProperty(delete_case_comments_default_space_request, 'path'),
+    getLooseObjectFromProperty(delete_case_comments_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_case_comments_default_space_response)),
@@ -3944,13 +3791,11 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_case_comment_default_space_request).body),
-      ...getShape(getShape(update_case_comment_default_space_request).path),
-      ...getShape(getShape(update_case_comment_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_case_comment_default_space_request, 'body'),
+    getLooseObjectFromProperty(update_case_comment_default_space_request, 'path'),
+    getLooseObjectFromProperty(update_case_comment_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_case_comment_default_space_response)),
@@ -3978,13 +3823,11 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(add_case_comment_default_space_request).body),
-      ...getShape(getShape(add_case_comment_default_space_request).path),
-      ...getShape(getShape(add_case_comment_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(add_case_comment_default_space_request, 'body'),
+    getLooseObjectFromProperty(add_case_comment_default_space_request, 'path'),
+    getLooseObjectFromProperty(add_case_comment_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(add_case_comment_default_space_response)),
@@ -4012,13 +3855,11 @@ Retrieves a paginated list of comments for a case. You must have \`read\` privil
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_case_comments_default_space_request).body),
-      ...getShape(getShape(find_case_comments_default_space_request).path),
-      ...getShape(getShape(find_case_comments_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_case_comments_default_space_request, 'body'),
+    getLooseObjectFromProperty(find_case_comments_default_space_request, 'path'),
+    getLooseObjectFromProperty(find_case_comments_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_case_comments_default_space_response)),
@@ -4046,13 +3887,11 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_case_comment_default_space_request).body),
-      ...getShape(getShape(delete_case_comment_default_space_request).path),
-      ...getShape(getShape(delete_case_comment_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_case_comment_default_space_request, 'body'),
+    getLooseObjectFromProperty(delete_case_comment_default_space_request, 'path'),
+    getLooseObjectFromProperty(delete_case_comment_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_case_comment_default_space_response)),
@@ -4080,13 +3919,11 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_case_comment_default_space_request).body),
-      ...getShape(getShape(get_case_comment_default_space_request).path),
-      ...getShape(getShape(get_case_comment_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_case_comment_default_space_request, 'body'),
+    getLooseObjectFromProperty(get_case_comment_default_space_request, 'path'),
+    getLooseObjectFromProperty(get_case_comment_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_case_comment_default_space_response)),
@@ -4114,13 +3951,11 @@ You must have \`all\` privileges for the **Actions and Connectors** feature in t
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(push_case_default_space_request).body),
-      ...getShape(getShape(push_case_default_space_request).path),
-      ...getShape(getShape(push_case_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(push_case_default_space_request, 'body'),
+    getLooseObjectFromProperty(push_case_default_space_request, 'path'),
+    getLooseObjectFromProperty(push_case_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(push_case_default_space_response)),
@@ -4150,13 +3985,11 @@ Attach a file to a case. You must have \`all\` privileges for the **Cases** feat
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(add_case_file_default_space_request).body),
-      ...getShape(getShape(add_case_file_default_space_request).path),
-      ...getShape(getShape(add_case_file_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(add_case_file_default_space_request, 'body'),
+    getLooseObjectFromProperty(add_case_file_default_space_request, 'path'),
+    getLooseObjectFromProperty(add_case_file_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(add_case_file_default_space_response)),
@@ -4184,13 +4017,11 @@ Retrives a paginated list of user activity for a case. You must have \`read\` pr
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_case_activity_default_space_request).body),
-      ...getShape(getShape(find_case_activity_default_space_request).path),
-      ...getShape(getShape(find_case_activity_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_case_activity_default_space_request, 'body'),
+    getLooseObjectFromProperty(find_case_activity_default_space_request, 'path'),
+    getLooseObjectFromProperty(find_case_activity_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_case_activity_default_space_response)),
@@ -4218,13 +4049,11 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_cases_by_alert_default_space_request).body),
-      ...getShape(getShape(get_cases_by_alert_default_space_request).path),
-      ...getShape(getShape(get_cases_by_alert_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'body'),
+    getLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'path'),
+    getLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_cases_by_alert_default_space_response)),
@@ -4252,13 +4081,11 @@ Get setting details such as the closure type, custom fields, templatse, and the 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_case_configuration_default_space_request).body),
-      ...getShape(getShape(get_case_configuration_default_space_request).path),
-      ...getShape(getShape(get_case_configuration_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_case_configuration_default_space_request, 'body'),
+    getLooseObjectFromProperty(get_case_configuration_default_space_request, 'path'),
+    getLooseObjectFromProperty(get_case_configuration_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_case_configuration_default_space_response)),
@@ -4286,13 +4113,11 @@ Case settings include external connection details, custom fields, and templates.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(set_case_configuration_default_space_request).body),
-      ...getShape(getShape(set_case_configuration_default_space_request).path),
-      ...getShape(getShape(set_case_configuration_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(set_case_configuration_default_space_request, 'body'),
+    getLooseObjectFromProperty(set_case_configuration_default_space_request, 'path'),
+    getLooseObjectFromProperty(set_case_configuration_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(set_case_configuration_default_space_response)),
@@ -4320,13 +4145,11 @@ Updates setting details such as the closure type, custom fields, templates, and 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_case_configuration_default_space_request).body),
-      ...getShape(getShape(update_case_configuration_default_space_request).path),
-      ...getShape(getShape(update_case_configuration_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_case_configuration_default_space_request, 'body'),
+    getLooseObjectFromProperty(update_case_configuration_default_space_request, 'path'),
+    getLooseObjectFromProperty(update_case_configuration_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_case_configuration_default_space_response)),
@@ -4354,13 +4177,11 @@ Get information about connectors that are supported for use in cases. You must h
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_case_connectors_default_space_request).body),
-      ...getShape(getShape(find_case_connectors_default_space_request).path),
-      ...getShape(getShape(find_case_connectors_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_case_connectors_default_space_request, 'body'),
+    getLooseObjectFromProperty(find_case_connectors_default_space_request, 'path'),
+    getLooseObjectFromProperty(find_case_connectors_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_case_connectors_default_space_response)),
@@ -4382,13 +4203,11 @@ const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_case_reporters_default_space_request).body),
-      ...getShape(getShape(get_case_reporters_default_space_request).path),
-      ...getShape(getShape(get_case_reporters_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_case_reporters_default_space_request, 'body'),
+    getLooseObjectFromProperty(get_case_reporters_default_space_request, 'path'),
+    getLooseObjectFromProperty(get_case_reporters_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_case_reporters_default_space_response)),
@@ -4416,13 +4235,11 @@ Aggregates and returns a list of case tags. You must have read privileges for th
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_case_tags_default_space_request).body),
-      ...getShape(getShape(get_case_tags_default_space_request).path),
-      ...getShape(getShape(get_case_tags_default_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_case_tags_default_space_request, 'body'),
+    getLooseObjectFromProperty(get_case_tags_default_space_request, 'path'),
+    getLooseObjectFromProperty(get_case_tags_default_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_case_tags_default_space_response)),
@@ -4447,13 +4264,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_all_data_views_default_request).body),
-      ...getShape(getShape(get_all_data_views_default_request).path),
-      ...getShape(getShape(get_all_data_views_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_all_data_views_default_request, 'body'),
+    getLooseObjectFromProperty(get_all_data_views_default_request, 'path'),
+    getLooseObjectFromProperty(get_all_data_views_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_all_data_views_default_response)),
@@ -4478,13 +4293,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_data_view_defaultw_request).body),
-      ...getShape(getShape(create_data_view_defaultw_request).path),
-      ...getShape(getShape(create_data_view_defaultw_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_data_view_defaultw_request, 'body'),
+    getLooseObjectFromProperty(create_data_view_defaultw_request, 'path'),
+    getLooseObjectFromProperty(create_data_view_defaultw_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_data_view_defaultw_response)),
@@ -4512,13 +4325,11 @@ WARNING: When you delete a data view, it cannot be recovered.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_data_view_default_request).body),
-      ...getShape(getShape(delete_data_view_default_request).path),
-      ...getShape(getShape(delete_data_view_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_data_view_default_request, 'body'),
+    getLooseObjectFromProperty(delete_data_view_default_request, 'path'),
+    getLooseObjectFromProperty(delete_data_view_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_data_view_default_response)),
@@ -4543,13 +4354,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_data_view_default_request).body),
-      ...getShape(getShape(get_data_view_default_request).path),
-      ...getShape(getShape(get_data_view_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_data_view_default_request, 'body'),
+    getLooseObjectFromProperty(get_data_view_default_request, 'path'),
+    getLooseObjectFromProperty(get_data_view_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_data_view_default_response)),
@@ -4574,13 +4383,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_data_view_default_request).body),
-      ...getShape(getShape(update_data_view_default_request).path),
-      ...getShape(getShape(update_data_view_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_data_view_default_request, 'body'),
+    getLooseObjectFromProperty(update_data_view_default_request, 'path'),
+    getLooseObjectFromProperty(update_data_view_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_data_view_default_response)),
@@ -4608,13 +4415,11 @@ Update fields presentation metadata such as count, customLabel, customDescriptio
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_fields_metadata_default_request).body),
-      ...getShape(getShape(update_fields_metadata_default_request).path),
-      ...getShape(getShape(update_fields_metadata_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_fields_metadata_default_request, 'body'),
+    getLooseObjectFromProperty(update_fields_metadata_default_request, 'path'),
+    getLooseObjectFromProperty(update_fields_metadata_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_fields_metadata_default_response)),
@@ -4639,13 +4444,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_runtime_field_default_request).body),
-      ...getShape(getShape(create_runtime_field_default_request).path),
-      ...getShape(getShape(create_runtime_field_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_runtime_field_default_request, 'body'),
+    getLooseObjectFromProperty(create_runtime_field_default_request, 'path'),
+    getLooseObjectFromProperty(create_runtime_field_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_runtime_field_default_response)),
@@ -4670,13 +4473,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_update_runtime_field_default_request).body),
-      ...getShape(getShape(create_update_runtime_field_default_request).path),
-      ...getShape(getShape(create_update_runtime_field_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_update_runtime_field_default_request, 'body'),
+    getLooseObjectFromProperty(create_update_runtime_field_default_request, 'path'),
+    getLooseObjectFromProperty(create_update_runtime_field_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_update_runtime_field_default_response)),
@@ -4701,13 +4502,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_runtime_field_default_request).body),
-      ...getShape(getShape(delete_runtime_field_default_request).path),
-      ...getShape(getShape(delete_runtime_field_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_runtime_field_default_request, 'body'),
+    getLooseObjectFromProperty(delete_runtime_field_default_request, 'path'),
+    getLooseObjectFromProperty(delete_runtime_field_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_runtime_field_default_response)),
@@ -4732,13 +4531,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_runtime_field_default_request).body),
-      ...getShape(getShape(get_runtime_field_default_request).path),
-      ...getShape(getShape(get_runtime_field_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_runtime_field_default_request, 'body'),
+    getLooseObjectFromProperty(get_runtime_field_default_request, 'path'),
+    getLooseObjectFromProperty(get_runtime_field_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_runtime_field_default_response)),
@@ -4763,13 +4560,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_runtime_field_default_request).body),
-      ...getShape(getShape(update_runtime_field_default_request).path),
-      ...getShape(getShape(update_runtime_field_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_runtime_field_default_request, 'body'),
+    getLooseObjectFromProperty(update_runtime_field_default_request, 'path'),
+    getLooseObjectFromProperty(update_runtime_field_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_runtime_field_default_response)),
@@ -4794,13 +4589,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_default_data_view_default_request).body),
-      ...getShape(getShape(get_default_data_view_default_request).path),
-      ...getShape(getShape(get_default_data_view_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_default_data_view_default_request, 'body'),
+    getLooseObjectFromProperty(get_default_data_view_default_request, 'path'),
+    getLooseObjectFromProperty(get_default_data_view_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_default_data_view_default_response)),
@@ -4825,13 +4618,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(set_default_datail_view_default_request).body),
-      ...getShape(getShape(set_default_datail_view_default_request).path),
-      ...getShape(getShape(set_default_datail_view_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(set_default_datail_view_default_request, 'body'),
+    getLooseObjectFromProperty(set_default_datail_view_default_request, 'path'),
+    getLooseObjectFromProperty(set_default_datail_view_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(set_default_datail_view_default_response)),
@@ -4859,13 +4650,11 @@ Changes saved object references from one data view identifier to another. WARNIN
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(swap_data_views_default_request).body),
-      ...getShape(getShape(swap_data_views_default_request).path),
-      ...getShape(getShape(swap_data_views_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(swap_data_views_default_request, 'body'),
+    getLooseObjectFromProperty(swap_data_views_default_request, 'path'),
+    getLooseObjectFromProperty(swap_data_views_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(swap_data_views_default_response)),
@@ -4893,13 +4682,11 @@ Preview the impact of swapping saved object references from one data view identi
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(preview_swap_data_views_default_request).body),
-      ...getShape(getShape(preview_swap_data_views_default_request).path),
-      ...getShape(getShape(preview_swap_data_views_default_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(preview_swap_data_views_default_request, 'body'),
+    getLooseObjectFromProperty(preview_swap_data_views_default_request, 'path'),
+    getLooseObjectFromProperty(preview_swap_data_views_default_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(preview_swap_data_views_default_response)),
@@ -4924,13 +4711,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_alerts_index_request).body),
-      ...getShape(getShape(delete_alerts_index_request).path),
-      ...getShape(getShape(delete_alerts_index_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_alerts_index_request, 'body'),
+    getLooseObjectFromProperty(delete_alerts_index_request, 'path'),
+    getLooseObjectFromProperty(delete_alerts_index_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_alerts_index_response)),
@@ -4955,13 +4740,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_alerts_index_request).body),
-      ...getShape(getShape(read_alerts_index_request).path),
-      ...getShape(getShape(read_alerts_index_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_alerts_index_request, 'body'),
+    getLooseObjectFromProperty(read_alerts_index_request, 'path'),
+    getLooseObjectFromProperty(read_alerts_index_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_alerts_index_response)),
@@ -4986,13 +4769,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_alerts_index_request).body),
-      ...getShape(getShape(create_alerts_index_request).path),
-      ...getShape(getShape(create_alerts_index_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_alerts_index_request, 'body'),
+    getLooseObjectFromProperty(create_alerts_index_request, 'path'),
+    getLooseObjectFromProperty(create_alerts_index_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_alerts_index_response)),
@@ -5023,13 +4804,11 @@ detection engine rules.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_privileges_request).body),
-      ...getShape(getShape(read_privileges_request).path),
-      ...getShape(getShape(read_privileges_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_privileges_request, 'body'),
+    getLooseObjectFromProperty(read_privileges_request, 'path'),
+    getLooseObjectFromProperty(read_privileges_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_privileges_response)),
@@ -5064,13 +4843,11 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     urlParams: ['id', 'rule_id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_rule_request).body),
-      ...getShape(getShape(delete_rule_request).path),
-      ...getShape(getShape(delete_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_rule_request, 'body'),
+    getLooseObjectFromProperty(delete_rule_request, 'path'),
+    getLooseObjectFromProperty(delete_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_rule_response)),
@@ -5105,13 +4882,11 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     urlParams: ['id', 'rule_id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_rule_request).body),
-      ...getShape(getShape(read_rule_request).path),
-      ...getShape(getShape(read_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_rule_request, 'body'),
+    getLooseObjectFromProperty(read_rule_request, 'path'),
+    getLooseObjectFromProperty(read_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_rule_response)),
@@ -5145,13 +4920,11 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(patch_rule_request).body),
-      ...getShape(getShape(patch_rule_request).path),
-      ...getShape(getShape(patch_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(patch_rule_request, 'body'),
+    getLooseObjectFromProperty(patch_rule_request, 'path'),
+    getLooseObjectFromProperty(patch_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(patch_rule_response)),
@@ -5232,13 +5005,11 @@ For detailed information on Kibana actions and alerting, and additional API call
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_rule_request).body),
-      ...getShape(getShape(create_rule_request).path),
-      ...getShape(getShape(create_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_rule_request, 'body'),
+    getLooseObjectFromProperty(create_rule_request, 'path'),
+    getLooseObjectFromProperty(create_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_rule_response)),
@@ -5272,13 +5043,11 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_rule_request).body),
-      ...getShape(getShape(update_rule_request).path),
-      ...getShape(getShape(update_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_rule_request, 'body'),
+    getLooseObjectFromProperty(update_rule_request, 'path'),
+    getLooseObjectFromProperty(update_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_rule_response)),
@@ -5313,13 +5082,11 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     urlParams: ['dry_run'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(perform_rules_bulk_action_request).body),
-      ...getShape(getShape(perform_rules_bulk_action_request).path),
-      ...getShape(getShape(perform_rules_bulk_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(perform_rules_bulk_action_request, 'body'),
+    getLooseObjectFromProperty(perform_rules_bulk_action_request, 'path'),
+    getLooseObjectFromProperty(perform_rules_bulk_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(perform_rules_bulk_action_response)),
@@ -5355,13 +5122,11 @@ Export detection rules to an \`.ndjson\` file. The following configuration items
     urlParams: ['exclude_export_details', 'file_name'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(export_rules_request).body),
-      ...getShape(getShape(export_rules_request).path),
-      ...getShape(getShape(export_rules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(export_rules_request, 'body'),
+    getLooseObjectFromProperty(export_rules_request, 'path'),
+    getLooseObjectFromProperty(export_rules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(export_rules_response)),
@@ -5397,13 +5162,11 @@ Retrieve a paginated list of detection rules. By default, the first page is retu
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_rules_request).body),
-      ...getShape(getShape(find_rules_request).path),
-      ...getShape(getShape(find_rules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_rules_request, 'body'),
+    getLooseObjectFromProperty(find_rules_request, 'path'),
+    getLooseObjectFromProperty(find_rules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_rules_response)),
@@ -5446,13 +5209,11 @@ Import detection rules from an \`.ndjson\` file, including actions and exception
     urlParams: ['overwrite', 'overwrite_exceptions', 'overwrite_action_connectors', 'as_new_list'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(import_rules_request).body),
-      ...getShape(getShape(import_rules_request).path),
-      ...getShape(getShape(import_rules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(import_rules_request, 'body'),
+    getLooseObjectFromProperty(import_rules_request, 'path'),
+    getLooseObjectFromProperty(import_rules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(import_rules_response)),
@@ -5479,13 +5240,11 @@ Create exception items that apply to a single detection rule.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_rule_exception_list_items_request).body),
-      ...getShape(getShape(create_rule_exception_list_items_request).path),
-      ...getShape(getShape(create_rule_exception_list_items_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_rule_exception_list_items_request, 'body'),
+    getLooseObjectFromProperty(create_rule_exception_list_items_request, 'path'),
+    getLooseObjectFromProperty(create_rule_exception_list_items_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_rule_exception_list_items_response)),
@@ -5523,13 +5282,11 @@ providing you with the most current and effective threat detection capabilities.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(install_prebuilt_rules_and_timelines_request).body),
-      ...getShape(getShape(install_prebuilt_rules_and_timelines_request).path),
-      ...getShape(getShape(install_prebuilt_rules_and_timelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'body'),
+    getLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'path'),
+    getLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(install_prebuilt_rules_and_timelines_response)),
@@ -5559,13 +5316,11 @@ This endpoint provides detailed information about the number of custom rules, in
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_prebuilt_rules_and_timelines_status_request).body),
-      ...getShape(getShape(read_prebuilt_rules_and_timelines_status_request).path),
-      ...getShape(getShape(read_prebuilt_rules_and_timelines_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'body'),
+    getLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'path'),
+    getLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_prebuilt_rules_and_timelines_status_response)),
@@ -5590,13 +5345,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['enable_logged_requests'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rule_preview_request).body),
-      ...getShape(getShape(rule_preview_request).path),
-      ...getShape(getShape(rule_preview_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rule_preview_request, 'body'),
+    getLooseObjectFromProperty(rule_preview_request, 'path'),
+    getLooseObjectFromProperty(rule_preview_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rule_preview_response)),
@@ -5626,13 +5379,11 @@ Assign users to detection alerts, and unassign them from alerts.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(set_alert_assignees_request).body),
-      ...getShape(getShape(set_alert_assignees_request).path),
-      ...getShape(getShape(set_alert_assignees_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(set_alert_assignees_request, 'body'),
+    getLooseObjectFromProperty(set_alert_assignees_request, 'path'),
+    getLooseObjectFromProperty(set_alert_assignees_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(set_alert_assignees_response)),
@@ -5662,13 +5413,11 @@ finalize it.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(finalize_alerts_migration_request).body),
-      ...getShape(getShape(finalize_alerts_migration_request).path),
-      ...getShape(getShape(finalize_alerts_migration_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(finalize_alerts_migration_request, 'body'),
+    getLooseObjectFromProperty(finalize_alerts_migration_request, 'path'),
+    getLooseObjectFromProperty(finalize_alerts_migration_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(finalize_alerts_migration_response)),
@@ -5702,13 +5451,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(alerts_migration_cleanup_request).body),
-      ...getShape(getShape(alerts_migration_cleanup_request).path),
-      ...getShape(getShape(alerts_migration_cleanup_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(alerts_migration_cleanup_request, 'body'),
+    getLooseObjectFromProperty(alerts_migration_cleanup_request, 'path'),
+    getLooseObjectFromProperty(alerts_migration_cleanup_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(alerts_migration_cleanup_response)),
@@ -5737,13 +5484,11 @@ Migrations are initiated per index. While the process is neither destructive nor
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_alerts_migration_request).body),
-      ...getShape(getShape(create_alerts_migration_request).path),
-      ...getShape(getShape(create_alerts_migration_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_alerts_migration_request, 'body'),
+    getLooseObjectFromProperty(create_alerts_migration_request, 'path'),
+    getLooseObjectFromProperty(create_alerts_migration_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_alerts_migration_response)),
@@ -5770,13 +5515,11 @@ Retrieve indices that contain detection alerts of a particular age, along with m
     urlParams: ['from'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_alerts_migration_status_request).body),
-      ...getShape(getShape(read_alerts_migration_status_request).path),
-      ...getShape(getShape(read_alerts_migration_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_alerts_migration_status_request, 'body'),
+    getLooseObjectFromProperty(read_alerts_migration_status_request, 'path'),
+    getLooseObjectFromProperty(read_alerts_migration_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_alerts_migration_status_response)),
@@ -5803,13 +5546,11 @@ Find and/or aggregate detection alerts that match the given query.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_alerts_request).body),
-      ...getShape(getShape(search_alerts_request).path),
-      ...getShape(getShape(search_alerts_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_alerts_request, 'body'),
+    getLooseObjectFromProperty(search_alerts_request, 'path'),
+    getLooseObjectFromProperty(search_alerts_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_alerts_response)),
@@ -5836,13 +5577,11 @@ Set the status of one or more detection alerts.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(set_alerts_status_request).body),
-      ...getShape(getShape(set_alerts_status_request).path),
-      ...getShape(getShape(set_alerts_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(set_alerts_status_request, 'body'),
+    getLooseObjectFromProperty(set_alerts_status_request, 'path'),
+    getLooseObjectFromProperty(set_alerts_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(set_alerts_status_response)),
@@ -5872,13 +5611,11 @@ And tags to detection alerts, and remove them from alerts.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(set_alert_tags_request).body),
-      ...getShape(getShape(set_alert_tags_request).path),
-      ...getShape(getShape(set_alert_tags_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(set_alert_tags_request, 'body'),
+    getLooseObjectFromProperty(set_alert_tags_request, 'path'),
+    getLooseObjectFromProperty(set_alert_tags_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(set_alert_tags_response)),
@@ -5905,13 +5642,11 @@ List all unique tags from all detection rules.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_tags_request).body),
-      ...getShape(getShape(read_tags_request).path),
-      ...getShape(getShape(read_tags_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_tags_request, 'body'),
+    getLooseObjectFromProperty(read_tags_request, 'path'),
+    getLooseObjectFromProperty(read_tags_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_tags_response)),
@@ -5937,13 +5672,11 @@ This functionality is in technical preview and may be changed or removed in a fu
     urlParams: ['batch_size', 'type'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rotate_encryption_key_request).body),
-      ...getShape(getShape(rotate_encryption_key_request).path),
-      ...getShape(getShape(rotate_encryption_key_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rotate_encryption_key_request, 'body'),
+    getLooseObjectFromProperty(rotate_encryption_key_request, 'path'),
+    getLooseObjectFromProperty(rotate_encryption_key_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rotate_encryption_key_response)),
@@ -5970,13 +5703,11 @@ Create the exception list for Elastic Endpoint rule exceptions. When you create 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_endpoint_list_request).body),
-      ...getShape(getShape(create_endpoint_list_request).path),
-      ...getShape(getShape(create_endpoint_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_endpoint_list_request, 'body'),
+    getLooseObjectFromProperty(create_endpoint_list_request, 'path'),
+    getLooseObjectFromProperty(create_endpoint_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_endpoint_list_response)),
@@ -6003,13 +5734,11 @@ Delete an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
     urlParams: ['id', 'item_id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_endpoint_list_item_request).body),
-      ...getShape(getShape(delete_endpoint_list_item_request).path),
-      ...getShape(getShape(delete_endpoint_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_endpoint_list_item_request, 'body'),
+    getLooseObjectFromProperty(delete_endpoint_list_item_request, 'path'),
+    getLooseObjectFromProperty(delete_endpoint_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_endpoint_list_item_response)),
@@ -6036,13 +5765,11 @@ Get the details of an Elastic Endpoint exception list item, specified by the \`i
     urlParams: ['id', 'item_id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_endpoint_list_item_request).body),
-      ...getShape(getShape(read_endpoint_list_item_request).path),
-      ...getShape(getShape(read_endpoint_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_endpoint_list_item_request, 'body'),
+    getLooseObjectFromProperty(read_endpoint_list_item_request, 'path'),
+    getLooseObjectFromProperty(read_endpoint_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_endpoint_list_item_response)),
@@ -6069,13 +5796,11 @@ Create an Elastic Endpoint exception list item, and associate it with the Elasti
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_endpoint_list_item_request).body),
-      ...getShape(getShape(create_endpoint_list_item_request).path),
-      ...getShape(getShape(create_endpoint_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_endpoint_list_item_request, 'body'),
+    getLooseObjectFromProperty(create_endpoint_list_item_request, 'path'),
+    getLooseObjectFromProperty(create_endpoint_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_endpoint_list_item_response)),
@@ -6102,13 +5827,11 @@ Update an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_endpoint_list_item_request).body),
-      ...getShape(getShape(update_endpoint_list_item_request).path),
-      ...getShape(getShape(update_endpoint_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_endpoint_list_item_request, 'body'),
+    getLooseObjectFromProperty(update_endpoint_list_item_request, 'path'),
+    getLooseObjectFromProperty(update_endpoint_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_endpoint_list_item_response)),
@@ -6135,13 +5858,11 @@ Get a list of all Elastic Endpoint exception list items.`,
     urlParams: ['filter', 'page', 'per_page', 'sort_field', 'sort_order'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_endpoint_list_items_request).body),
-      ...getShape(getShape(find_endpoint_list_items_request).path),
-      ...getShape(getShape(find_endpoint_list_items_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_endpoint_list_items_request, 'body'),
+    getLooseObjectFromProperty(find_endpoint_list_items_request, 'path'),
+    getLooseObjectFromProperty(find_endpoint_list_items_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_endpoint_list_items_response)),
@@ -6179,13 +5900,11 @@ Get a list of all response actions.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_get_actions_list_request).body),
-      ...getShape(getShape(endpoint_get_actions_list_request).path),
-      ...getShape(getShape(endpoint_get_actions_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_get_actions_list_request, 'body'),
+    getLooseObjectFromProperty(endpoint_get_actions_list_request, 'path'),
+    getLooseObjectFromProperty(endpoint_get_actions_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_get_actions_list_response)),
@@ -6212,13 +5931,11 @@ Get the status of response actions for the specified agent IDs.`,
     urlParams: ['query'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_get_actions_status_request).body),
-      ...getShape(getShape(endpoint_get_actions_status_request).path),
-      ...getShape(getShape(endpoint_get_actions_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_get_actions_status_request, 'body'),
+    getLooseObjectFromProperty(endpoint_get_actions_status_request, 'path'),
+    getLooseObjectFromProperty(endpoint_get_actions_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_get_actions_status_response)),
@@ -6245,13 +5962,11 @@ Get the details of a response action using the action ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_get_actions_details_request).body),
-      ...getShape(getShape(endpoint_get_actions_details_request).path),
-      ...getShape(getShape(endpoint_get_actions_details_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_get_actions_details_request, 'body'),
+    getLooseObjectFromProperty(endpoint_get_actions_details_request, 'path'),
+    getLooseObjectFromProperty(endpoint_get_actions_details_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_get_actions_details_response)),
@@ -6279,13 +5994,11 @@ Get information for the specified response action file download.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_file_info_request).body),
-      ...getShape(getShape(endpoint_file_info_request).path),
-      ...getShape(getShape(endpoint_file_info_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_file_info_request, 'body'),
+    getLooseObjectFromProperty(endpoint_file_info_request, 'path'),
+    getLooseObjectFromProperty(endpoint_file_info_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_file_info_response)),
@@ -6313,13 +6026,11 @@ Download a file associated with a response action.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_file_download_request).body),
-      ...getShape(getShape(endpoint_file_download_request).path),
-      ...getShape(getShape(endpoint_file_download_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_file_download_request, 'body'),
+    getLooseObjectFromProperty(endpoint_file_download_request, 'path'),
+    getLooseObjectFromProperty(endpoint_file_download_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_file_download_response)),
@@ -6346,13 +6057,11 @@ Cancel a running or pending response action (Applies only to some agent types).`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cancel_action_request).body),
-      ...getShape(getShape(cancel_action_request).path),
-      ...getShape(getShape(cancel_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cancel_action_request, 'body'),
+    getLooseObjectFromProperty(cancel_action_request, 'path'),
+    getLooseObjectFromProperty(cancel_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cancel_action_response)),
@@ -6379,13 +6088,11 @@ Run a shell command on an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_execute_action_request).body),
-      ...getShape(getShape(endpoint_execute_action_request).path),
-      ...getShape(getShape(endpoint_execute_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_execute_action_request, 'body'),
+    getLooseObjectFromProperty(endpoint_execute_action_request, 'path'),
+    getLooseObjectFromProperty(endpoint_execute_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_execute_action_response)),
@@ -6412,13 +6119,11 @@ Get a file from an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_get_file_action_request).body),
-      ...getShape(getShape(endpoint_get_file_action_request).path),
-      ...getShape(getShape(endpoint_get_file_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_get_file_action_request, 'body'),
+    getLooseObjectFromProperty(endpoint_get_file_action_request, 'path'),
+    getLooseObjectFromProperty(endpoint_get_file_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_get_file_action_response)),
@@ -6445,13 +6150,11 @@ Isolate an endpoint from the network. The endpoint remains isolated until it's r
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_isolate_action_request).body),
-      ...getShape(getShape(endpoint_isolate_action_request).path),
-      ...getShape(getShape(endpoint_isolate_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_isolate_action_request, 'body'),
+    getLooseObjectFromProperty(endpoint_isolate_action_request, 'path'),
+    getLooseObjectFromProperty(endpoint_isolate_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_isolate_action_response)),
@@ -6478,13 +6181,11 @@ Terminate a running process on an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_kill_process_action_request).body),
-      ...getShape(getShape(endpoint_kill_process_action_request).path),
-      ...getShape(getShape(endpoint_kill_process_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_kill_process_action_request, 'body'),
+    getLooseObjectFromProperty(endpoint_kill_process_action_request, 'path'),
+    getLooseObjectFromProperty(endpoint_kill_process_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_kill_process_action_response)),
@@ -6511,13 +6212,11 @@ Get a list of all processes running on an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_get_processes_action_request).body),
-      ...getShape(getShape(endpoint_get_processes_action_request).path),
-      ...getShape(getShape(endpoint_get_processes_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_get_processes_action_request, 'body'),
+    getLooseObjectFromProperty(endpoint_get_processes_action_request, 'path'),
+    getLooseObjectFromProperty(endpoint_get_processes_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_get_processes_action_response)),
@@ -6544,13 +6243,11 @@ Run a script on a host. Currently supported only for some agent types.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(run_script_action_request).body),
-      ...getShape(getShape(run_script_action_request).path),
-      ...getShape(getShape(run_script_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(run_script_action_request, 'body'),
+    getLooseObjectFromProperty(run_script_action_request, 'path'),
+    getLooseObjectFromProperty(run_script_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(run_script_action_response)),
@@ -6577,13 +6274,11 @@ Scan a specific file or directory on an endpoint for malware.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_scan_action_request).body),
-      ...getShape(getShape(endpoint_scan_action_request).path),
-      ...getShape(getShape(endpoint_scan_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_scan_action_request, 'body'),
+    getLooseObjectFromProperty(endpoint_scan_action_request, 'path'),
+    getLooseObjectFromProperty(endpoint_scan_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_scan_action_response)),
@@ -6610,13 +6305,11 @@ Get a response actions state, which reports whether encryption is enabled.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_get_actions_state_request).body),
-      ...getShape(getShape(endpoint_get_actions_state_request).path),
-      ...getShape(getShape(endpoint_get_actions_state_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_get_actions_state_request, 'body'),
+    getLooseObjectFromProperty(endpoint_get_actions_state_request, 'path'),
+    getLooseObjectFromProperty(endpoint_get_actions_state_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_get_actions_state_response)),
@@ -6643,13 +6336,11 @@ Suspend a running process on an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_suspend_process_action_request).body),
-      ...getShape(getShape(endpoint_suspend_process_action_request).path),
-      ...getShape(getShape(endpoint_suspend_process_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_suspend_process_action_request, 'body'),
+    getLooseObjectFromProperty(endpoint_suspend_process_action_request, 'path'),
+    getLooseObjectFromProperty(endpoint_suspend_process_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_suspend_process_action_response)),
@@ -6676,13 +6367,11 @@ Release an isolated endpoint, allowing it to rejoin a network.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_unisolate_action_request).body),
-      ...getShape(getShape(endpoint_unisolate_action_request).path),
-      ...getShape(getShape(endpoint_unisolate_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_unisolate_action_request, 'body'),
+    getLooseObjectFromProperty(endpoint_unisolate_action_request, 'path'),
+    getLooseObjectFromProperty(endpoint_unisolate_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_unisolate_action_response)),
@@ -6709,13 +6398,11 @@ Upload a file to an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(endpoint_upload_action_request).body),
-      ...getShape(getShape(endpoint_upload_action_request).path),
-      ...getShape(getShape(endpoint_upload_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(endpoint_upload_action_request, 'body'),
+    getLooseObjectFromProperty(endpoint_upload_action_request, 'path'),
+    getLooseObjectFromProperty(endpoint_upload_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(endpoint_upload_action_response)),
@@ -6740,13 +6427,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['page', 'pageSize', 'kuery', 'hostStatuses', 'sortField', 'sortDirection'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_endpoint_metadata_list_request).body),
-      ...getShape(getShape(get_endpoint_metadata_list_request).path),
-      ...getShape(getShape(get_endpoint_metadata_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_endpoint_metadata_list_request, 'body'),
+    getLooseObjectFromProperty(get_endpoint_metadata_list_request, 'path'),
+    getLooseObjectFromProperty(get_endpoint_metadata_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_endpoint_metadata_list_response)),
@@ -6771,13 +6456,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_endpoint_metadata_request).body),
-      ...getShape(getShape(get_endpoint_metadata_request).path),
-      ...getShape(getShape(get_endpoint_metadata_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_endpoint_metadata_request, 'body'),
+    getLooseObjectFromProperty(get_endpoint_metadata_request, 'path'),
+    getLooseObjectFromProperty(get_endpoint_metadata_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_endpoint_metadata_response)),
@@ -6802,13 +6485,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['query'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_policy_response_request).body),
-      ...getShape(getShape(get_policy_response_request).path),
-      ...getShape(getShape(get_policy_response_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_policy_response_request, 'body'),
+    getLooseObjectFromProperty(get_policy_response_request, 'path'),
+    getLooseObjectFromProperty(get_policy_response_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_policy_response_response)),
@@ -6833,13 +6514,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_protection_updates_note_request).body),
-      ...getShape(getShape(get_protection_updates_note_request).path),
-      ...getShape(getShape(get_protection_updates_note_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_protection_updates_note_request, 'body'),
+    getLooseObjectFromProperty(get_protection_updates_note_request, 'path'),
+    getLooseObjectFromProperty(get_protection_updates_note_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_protection_updates_note_response)),
@@ -6864,13 +6543,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_update_protection_updates_note_request).body),
-      ...getShape(getShape(create_update_protection_updates_note_request).path),
-      ...getShape(getShape(create_update_protection_updates_note_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_update_protection_updates_note_request, 'body'),
+    getLooseObjectFromProperty(create_update_protection_updates_note_request, 'path'),
+    getLooseObjectFromProperty(create_update_protection_updates_note_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_update_protection_updates_note_response)),
@@ -6895,13 +6572,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['data'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_monitoring_engine_request).body),
-      ...getShape(getShape(delete_monitoring_engine_request).path),
-      ...getShape(getShape(delete_monitoring_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_monitoring_engine_request, 'body'),
+    getLooseObjectFromProperty(delete_monitoring_engine_request, 'path'),
+    getLooseObjectFromProperty(delete_monitoring_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_monitoring_engine_response)),
@@ -6926,13 +6601,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(disable_monitoring_engine_request).body),
-      ...getShape(getShape(disable_monitoring_engine_request).path),
-      ...getShape(getShape(disable_monitoring_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(disable_monitoring_engine_request, 'body'),
+    getLooseObjectFromProperty(disable_monitoring_engine_request, 'path'),
+    getLooseObjectFromProperty(disable_monitoring_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(disable_monitoring_engine_response)),
@@ -6957,13 +6630,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(init_monitoring_engine_request).body),
-      ...getShape(getShape(init_monitoring_engine_request).path),
-      ...getShape(getShape(init_monitoring_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(init_monitoring_engine_request, 'body'),
+    getLooseObjectFromProperty(init_monitoring_engine_request, 'path'),
+    getLooseObjectFromProperty(init_monitoring_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(init_monitoring_engine_response)),
@@ -6988,13 +6659,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(schedule_monitoring_engine_request).body),
-      ...getShape(getShape(schedule_monitoring_engine_request).path),
-      ...getShape(getShape(schedule_monitoring_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(schedule_monitoring_engine_request, 'body'),
+    getLooseObjectFromProperty(schedule_monitoring_engine_request, 'path'),
+    getLooseObjectFromProperty(schedule_monitoring_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(schedule_monitoring_engine_response)),
@@ -7019,13 +6688,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(priv_mon_health_request).body),
-      ...getShape(getShape(priv_mon_health_request).path),
-      ...getShape(getShape(priv_mon_health_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(priv_mon_health_request, 'body'),
+    getLooseObjectFromProperty(priv_mon_health_request, 'path'),
+    getLooseObjectFromProperty(priv_mon_health_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(priv_mon_health_response)),
@@ -7052,13 +6719,11 @@ Check if the current user has all required permissions for Privilege Monitoring`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(priv_mon_privileges_request).body),
-      ...getShape(getShape(priv_mon_privileges_request).path),
-      ...getShape(getShape(priv_mon_privileges_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(priv_mon_privileges_request, 'body'),
+    getLooseObjectFromProperty(priv_mon_privileges_request, 'path'),
+    getLooseObjectFromProperty(priv_mon_privileges_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(priv_mon_privileges_response)),
@@ -7083,13 +6748,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_priv_mon_user_request).body),
-      ...getShape(getShape(create_priv_mon_user_request).path),
-      ...getShape(getShape(create_priv_mon_user_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_priv_mon_user_request, 'body'),
+    getLooseObjectFromProperty(create_priv_mon_user_request, 'path'),
+    getLooseObjectFromProperty(create_priv_mon_user_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_priv_mon_user_response)),
@@ -7114,13 +6777,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(privmon_bulk_upload_users_c_s_v_request).body),
-      ...getShape(getShape(privmon_bulk_upload_users_c_s_v_request).path),
-      ...getShape(getShape(privmon_bulk_upload_users_c_s_v_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'body'),
+    getLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'path'),
+    getLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(privmon_bulk_upload_users_c_s_v_response)),
@@ -7145,13 +6806,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_priv_mon_user_request).body),
-      ...getShape(getShape(delete_priv_mon_user_request).path),
-      ...getShape(getShape(delete_priv_mon_user_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_priv_mon_user_request, 'body'),
+    getLooseObjectFromProperty(delete_priv_mon_user_request, 'path'),
+    getLooseObjectFromProperty(delete_priv_mon_user_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_priv_mon_user_response)),
@@ -7176,13 +6835,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_priv_mon_user_request).body),
-      ...getShape(getShape(update_priv_mon_user_request).path),
-      ...getShape(getShape(update_priv_mon_user_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_priv_mon_user_request, 'body'),
+    getLooseObjectFromProperty(update_priv_mon_user_request, 'path'),
+    getLooseObjectFromProperty(update_priv_mon_user_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_priv_mon_user_response)),
@@ -7207,13 +6864,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['kql'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(list_priv_mon_users_request).body),
-      ...getShape(getShape(list_priv_mon_users_request).path),
-      ...getShape(getShape(list_priv_mon_users_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(list_priv_mon_users_request, 'body'),
+    getLooseObjectFromProperty(list_priv_mon_users_request, 'path'),
+    getLooseObjectFromProperty(list_priv_mon_users_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(list_priv_mon_users_response)),
@@ -7238,13 +6893,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(install_privileged_access_detection_package_request).body),
-      ...getShape(getShape(install_privileged_access_detection_package_request).path),
-      ...getShape(getShape(install_privileged_access_detection_package_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(install_privileged_access_detection_package_request, 'body'),
+    getLooseObjectFromProperty(install_privileged_access_detection_package_request, 'path'),
+    getLooseObjectFromProperty(install_privileged_access_detection_package_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(install_privileged_access_detection_package_response)),
@@ -7269,13 +6922,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_privileged_access_detection_package_status_request).body),
-      ...getShape(getShape(get_privileged_access_detection_package_status_request).path),
-      ...getShape(getShape(get_privileged_access_detection_package_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'body'),
+    getLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'path'),
+    getLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_privileged_access_detection_package_status_response)),
@@ -7300,13 +6951,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(init_entity_store_request).body),
-      ...getShape(getShape(init_entity_store_request).path),
-      ...getShape(getShape(init_entity_store_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(init_entity_store_request, 'body'),
+    getLooseObjectFromProperty(init_entity_store_request, 'path'),
+    getLooseObjectFromProperty(init_entity_store_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(init_entity_store_response)),
@@ -7331,13 +6980,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['entityTypes', 'delete_data'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_entity_engines_request).body),
-      ...getShape(getShape(delete_entity_engines_request).path),
-      ...getShape(getShape(delete_entity_engines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_entity_engines_request, 'body'),
+    getLooseObjectFromProperty(delete_entity_engines_request, 'path'),
+    getLooseObjectFromProperty(delete_entity_engines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_entity_engines_response)),
@@ -7362,13 +7009,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(list_entity_engines_request).body),
-      ...getShape(getShape(list_entity_engines_request).path),
-      ...getShape(getShape(list_entity_engines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(list_entity_engines_request, 'body'),
+    getLooseObjectFromProperty(list_entity_engines_request, 'path'),
+    getLooseObjectFromProperty(list_entity_engines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(list_entity_engines_response)),
@@ -7393,13 +7038,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['delete_data', 'data'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_entity_engine_request).body),
-      ...getShape(getShape(delete_entity_engine_request).path),
-      ...getShape(getShape(delete_entity_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_entity_engine_request, 'body'),
+    getLooseObjectFromProperty(delete_entity_engine_request, 'path'),
+    getLooseObjectFromProperty(delete_entity_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_entity_engine_response)),
@@ -7424,13 +7067,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_entity_engine_request).body),
-      ...getShape(getShape(get_entity_engine_request).path),
-      ...getShape(getShape(get_entity_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_entity_engine_request, 'body'),
+    getLooseObjectFromProperty(get_entity_engine_request, 'path'),
+    getLooseObjectFromProperty(get_entity_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_entity_engine_response)),
@@ -7455,13 +7096,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(init_entity_engine_request).body),
-      ...getShape(getShape(init_entity_engine_request).path),
-      ...getShape(getShape(init_entity_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(init_entity_engine_request, 'body'),
+    getLooseObjectFromProperty(init_entity_engine_request, 'path'),
+    getLooseObjectFromProperty(init_entity_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(init_entity_engine_response)),
@@ -7486,13 +7125,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(start_entity_engine_request).body),
-      ...getShape(getShape(start_entity_engine_request).path),
-      ...getShape(getShape(start_entity_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(start_entity_engine_request, 'body'),
+    getLooseObjectFromProperty(start_entity_engine_request, 'path'),
+    getLooseObjectFromProperty(start_entity_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(start_entity_engine_response)),
@@ -7517,13 +7154,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(stop_entity_engine_request).body),
-      ...getShape(getShape(stop_entity_engine_request).path),
-      ...getShape(getShape(stop_entity_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(stop_entity_engine_request, 'body'),
+    getLooseObjectFromProperty(stop_entity_engine_request, 'path'),
+    getLooseObjectFromProperty(stop_entity_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(stop_entity_engine_response)),
@@ -7548,13 +7183,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(apply_entity_engine_dataview_indices_request).body),
-      ...getShape(getShape(apply_entity_engine_dataview_indices_request).path),
-      ...getShape(getShape(apply_entity_engine_dataview_indices_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'body'),
+    getLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'path'),
+    getLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(apply_entity_engine_dataview_indices_response)),
@@ -7583,13 +7216,11 @@ The entity will be immediately deleted from the latest index.  It will remain av
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_single_entity_request).body),
-      ...getShape(getShape(delete_single_entity_request).path),
-      ...getShape(getShape(delete_single_entity_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_single_entity_request, 'body'),
+    getLooseObjectFromProperty(delete_single_entity_request, 'path'),
+    getLooseObjectFromProperty(delete_single_entity_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_single_entity_response)),
@@ -7620,13 +7251,11 @@ If the specified entity already exists, it is updated with the provided values. 
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(upsert_entity_request).body),
-      ...getShape(getShape(upsert_entity_request).path),
-      ...getShape(getShape(upsert_entity_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(upsert_entity_request, 'body'),
+    getLooseObjectFromProperty(upsert_entity_request, 'path'),
+    getLooseObjectFromProperty(upsert_entity_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(upsert_entity_response)),
@@ -7656,13 +7285,11 @@ The creation is asynchronous. The time for a document to be present in the  fina
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(upsert_entities_bulk_request).body),
-      ...getShape(getShape(upsert_entities_bulk_request).path),
-      ...getShape(getShape(upsert_entities_bulk_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(upsert_entities_bulk_request, 'body'),
+    getLooseObjectFromProperty(upsert_entities_bulk_request, 'path'),
+    getLooseObjectFromProperty(upsert_entities_bulk_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(upsert_entities_bulk_response)),
@@ -7689,13 +7316,11 @@ List entities records, paging, sorting and filtering as needed.`,
     urlParams: ['sort_field', 'sort_order', 'page', 'per_page', 'filterQuery', 'entity_types'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(list_entities_request).body),
-      ...getShape(getShape(list_entities_request).path),
-      ...getShape(getShape(list_entities_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(list_entities_request, 'body'),
+    getLooseObjectFromProperty(list_entities_request, 'path'),
+    getLooseObjectFromProperty(list_entities_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(list_entities_response)),
@@ -7720,13 +7345,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['include_components'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_entity_store_status_request).body),
-      ...getShape(getShape(get_entity_store_status_request).path),
-      ...getShape(getShape(get_entity_store_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_entity_store_status_request, 'body'),
+    getLooseObjectFromProperty(get_entity_store_status_request, 'path'),
+    getLooseObjectFromProperty(get_entity_store_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_entity_store_status_response)),
@@ -7753,13 +7376,11 @@ Delete an exception list using the \`id\` or \`list_id\` field.`,
     urlParams: ['id', 'list_id', 'namespace_type'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_exception_list_request).body),
-      ...getShape(getShape(delete_exception_list_request).path),
-      ...getShape(getShape(delete_exception_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_exception_list_request, 'body'),
+    getLooseObjectFromProperty(delete_exception_list_request, 'path'),
+    getLooseObjectFromProperty(delete_exception_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_exception_list_response)),
@@ -7786,13 +7407,11 @@ Get the details of an exception list using the \`id\` or \`list_id\` field.`,
     urlParams: ['id', 'list_id', 'namespace_type'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_exception_list_request).body),
-      ...getShape(getShape(read_exception_list_request).path),
-      ...getShape(getShape(read_exception_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_exception_list_request, 'body'),
+    getLooseObjectFromProperty(read_exception_list_request, 'path'),
+    getLooseObjectFromProperty(read_exception_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_exception_list_response)),
@@ -7822,13 +7441,11 @@ An exception list groups exception items and can be associated with detection ru
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_exception_list_request).body),
-      ...getShape(getShape(create_exception_list_request).path),
-      ...getShape(getShape(create_exception_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_exception_list_request, 'body'),
+    getLooseObjectFromProperty(create_exception_list_request, 'path'),
+    getLooseObjectFromProperty(create_exception_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_exception_list_response)),
@@ -7855,13 +7472,11 @@ Update an exception list using the \`id\` or \`list_id\` field.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_exception_list_request).body),
-      ...getShape(getShape(update_exception_list_request).path),
-      ...getShape(getShape(update_exception_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_exception_list_request, 'body'),
+    getLooseObjectFromProperty(update_exception_list_request, 'path'),
+    getLooseObjectFromProperty(update_exception_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_exception_list_response)),
@@ -7888,13 +7503,11 @@ Duplicate an existing exception list.`,
     urlParams: ['list_id', 'namespace_type', 'include_expired_exceptions'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(duplicate_exception_list_request).body),
-      ...getShape(getShape(duplicate_exception_list_request).path),
-      ...getShape(getShape(duplicate_exception_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(duplicate_exception_list_request, 'body'),
+    getLooseObjectFromProperty(duplicate_exception_list_request, 'path'),
+    getLooseObjectFromProperty(duplicate_exception_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(duplicate_exception_list_response)),
@@ -7921,13 +7534,11 @@ Export an exception list and its associated items to an NDJSON file.`,
     urlParams: ['id', 'list_id', 'namespace_type', 'include_expired_exceptions'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(export_exception_list_request).body),
-      ...getShape(getShape(export_exception_list_request).path),
-      ...getShape(getShape(export_exception_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(export_exception_list_request, 'body'),
+    getLooseObjectFromProperty(export_exception_list_request, 'path'),
+    getLooseObjectFromProperty(export_exception_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(export_exception_list_response)),
@@ -7954,13 +7565,11 @@ Get a list of all exception list containers.`,
     urlParams: ['filter', 'namespace_type', 'page', 'per_page', 'sort_field', 'sort_order'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_exception_lists_request).body),
-      ...getShape(getShape(find_exception_lists_request).path),
-      ...getShape(getShape(find_exception_lists_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_exception_lists_request, 'body'),
+    getLooseObjectFromProperty(find_exception_lists_request, 'path'),
+    getLooseObjectFromProperty(find_exception_lists_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_exception_lists_response)),
@@ -7987,13 +7596,11 @@ Import an exception list and its associated items from an NDJSON file.`,
     urlParams: ['overwrite', 'as_new_list'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(import_exception_list_request).body),
-      ...getShape(getShape(import_exception_list_request).path),
-      ...getShape(getShape(import_exception_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(import_exception_list_request, 'body'),
+    getLooseObjectFromProperty(import_exception_list_request, 'path'),
+    getLooseObjectFromProperty(import_exception_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(import_exception_list_response)),
@@ -8020,13 +7627,11 @@ Delete an exception list item using the \`id\` or \`item_id\` field.`,
     urlParams: ['id', 'item_id', 'namespace_type'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_exception_list_item_request).body),
-      ...getShape(getShape(delete_exception_list_item_request).path),
-      ...getShape(getShape(delete_exception_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_exception_list_item_request, 'body'),
+    getLooseObjectFromProperty(delete_exception_list_item_request, 'path'),
+    getLooseObjectFromProperty(delete_exception_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_exception_list_item_response)),
@@ -8053,13 +7658,11 @@ Get the details of an exception list item using the \`id\` or \`item_id\` field.
     urlParams: ['id', 'item_id', 'namespace_type'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_exception_list_item_request).body),
-      ...getShape(getShape(read_exception_list_item_request).path),
-      ...getShape(getShape(read_exception_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_exception_list_item_request, 'body'),
+    getLooseObjectFromProperty(read_exception_list_item_request, 'path'),
+    getLooseObjectFromProperty(read_exception_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_exception_list_item_response)),
@@ -8089,13 +7692,11 @@ Create an exception item and associate it with the specified exception list.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_exception_list_item_request).body),
-      ...getShape(getShape(create_exception_list_item_request).path),
-      ...getShape(getShape(create_exception_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_exception_list_item_request, 'body'),
+    getLooseObjectFromProperty(create_exception_list_item_request, 'path'),
+    getLooseObjectFromProperty(create_exception_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_exception_list_item_response)),
@@ -8122,13 +7723,11 @@ Update an exception list item using the \`id\` or \`item_id\` field.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_exception_list_item_request).body),
-      ...getShape(getShape(update_exception_list_item_request).path),
-      ...getShape(getShape(update_exception_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_exception_list_item_request, 'body'),
+    getLooseObjectFromProperty(update_exception_list_item_request, 'path'),
+    getLooseObjectFromProperty(update_exception_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_exception_list_item_response)),
@@ -8164,13 +7763,11 @@ Get a list of all exception list items in the specified list.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_exception_list_items_request).body),
-      ...getShape(getShape(find_exception_list_items_request).path),
-      ...getShape(getShape(find_exception_list_items_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_exception_list_items_request, 'body'),
+    getLooseObjectFromProperty(find_exception_list_items_request, 'path'),
+    getLooseObjectFromProperty(find_exception_list_items_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_exception_list_items_response)),
@@ -8197,13 +7794,11 @@ Get a summary of the specified exception list.`,
     urlParams: ['id', 'list_id', 'namespace_type', 'filter'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_exception_list_summary_request).body),
-      ...getShape(getShape(read_exception_list_summary_request).path),
-      ...getShape(getShape(read_exception_list_summary_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_exception_list_summary_request, 'body'),
+    getLooseObjectFromProperty(read_exception_list_summary_request, 'path'),
+    getLooseObjectFromProperty(read_exception_list_summary_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_exception_list_summary_response)),
@@ -8233,13 +7828,11 @@ An exception list groups exception items and can be associated with detection ru
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_shared_exception_list_request).body),
-      ...getShape(getShape(create_shared_exception_list_request).path),
-      ...getShape(getShape(create_shared_exception_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_shared_exception_list_request, 'body'),
+    getLooseObjectFromProperty(create_shared_exception_list_request, 'path'),
+    getLooseObjectFromProperty(create_shared_exception_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_shared_exception_list_response)),
@@ -8261,13 +7854,11 @@ const GET_FEATURES_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_features_request).body),
-      ...getShape(getShape(get_features_request).path),
-      ...getShape(getShape(get_features_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_features_request, 'body'),
+    getLooseObjectFromProperty(get_features_request, 'path'),
+    getLooseObjectFromProperty(get_features_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_features_response)),
@@ -8294,13 +7885,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agent_download_sources_request).body),
-      ...getShape(getShape(get_fleet_agent_download_sources_request).path),
-      ...getShape(getShape(get_fleet_agent_download_sources_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agent_download_sources_response)),
@@ -8327,13 +7916,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agent_download_sources_request).body),
-      ...getShape(getShape(post_fleet_agent_download_sources_request).path),
-      ...getShape(getShape(post_fleet_agent_download_sources_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agent_download_sources_response)),
@@ -8360,13 +7947,11 @@ Delete an agent binary download source by ID.<br/><br/>[Required authorization] 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_agent_download_sources_sourceid_request).body),
-      ...getShape(getShape(delete_fleet_agent_download_sources_sourceid_request).path),
-      ...getShape(getShape(delete_fleet_agent_download_sources_sourceid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_agent_download_sources_sourceid_response)),
@@ -8393,13 +7978,11 @@ Get an agent binary download source by ID.<br/><br/>[Required authorization] Rou
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agent_download_sources_sourceid_request).body),
-      ...getShape(getShape(get_fleet_agent_download_sources_sourceid_request).path),
-      ...getShape(getShape(get_fleet_agent_download_sources_sourceid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agent_download_sources_sourceid_response)),
@@ -8426,13 +8009,11 @@ Update an agent binary download source by ID.<br/><br/>[Required authorization] 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_agent_download_sources_sourceid_request).body),
-      ...getShape(getShape(put_fleet_agent_download_sources_sourceid_request).path),
-      ...getShape(getShape(put_fleet_agent_download_sources_sourceid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_agent_download_sources_sourceid_response)),
@@ -8470,13 +8051,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_request).body),
-      ...getShape(getShape(get_fleet_agent_policies_request).path),
-      ...getShape(getShape(get_fleet_agent_policies_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agent_policies_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agent_policies_response)),
@@ -8503,13 +8082,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['sys_monitoring'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_request).body),
-      ...getShape(getShape(post_fleet_agent_policies_request).path),
-      ...getShape(getShape(post_fleet_agent_policies_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agent_policies_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agent_policies_response)),
@@ -8536,13 +8113,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_bulk_get_request).body),
-      ...getShape(getShape(post_fleet_agent_policies_bulk_get_request).path),
-      ...getShape(getShape(post_fleet_agent_policies_bulk_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agent_policies_bulk_get_response)),
@@ -8569,13 +8144,11 @@ Get an agent policy by ID.<br/><br/>[Required authorization] Route required priv
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_request).body),
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_request).path),
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_response)),
@@ -8602,13 +8175,11 @@ Update an agent policy by ID.<br/><br/>[Required authorization] Route required p
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_agent_policies_agentpolicyid_request).body),
-      ...getShape(getShape(put_fleet_agent_policies_agentpolicyid_request).path),
-      ...getShape(getShape(put_fleet_agent_policies_agentpolicyid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_agent_policies_agentpolicyid_response)),
@@ -8636,19 +8207,20 @@ Get auto upgrade agent status<br/><br/>[Required authorization] Route required p
       urlParams: [],
       bodyParams: [],
     },
-    paramsSchema: z
-      .looseObject({
-        ...getShape(
-          getShape(get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request).body
-        ),
-        ...getShape(
-          getShape(get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request).path
-        ),
-        ...getShape(
-          getShape(get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request).query
-        ),
-      })
-      .partial(),
+    paramsSchema: z.union([
+      getLooseObjectFromProperty(
+        get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
+        'body'
+      ),
+      getLooseObjectFromProperty(
+        get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
+        'path'
+      ),
+      getLooseObjectFromProperty(
+        get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
+        'query'
+      ),
+    ]),
     outputSchema: z.object({
       output: z.looseObject({
         ...getShape(
@@ -8677,13 +8249,11 @@ Copy an agent policy by ID.<br/><br/>[Required authorization] Route required pri
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_agentpolicyid_copy_request).body),
-      ...getShape(getShape(post_fleet_agent_policies_agentpolicyid_copy_request).path),
-      ...getShape(getShape(post_fleet_agent_policies_agentpolicyid_copy_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agent_policies_agentpolicyid_copy_response)),
@@ -8710,13 +8280,11 @@ Download an agent policy by ID.<br/><br/>[Required authorization] Route required
     urlParams: ['download', 'standalone', 'kubernetes'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_download_request).body),
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_download_request).path),
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_download_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_download_response)),
@@ -8743,13 +8311,11 @@ Get a full agent policy by ID.<br/><br/>[Required authorization] Route required 
     urlParams: ['download', 'standalone', 'kubernetes'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_full_request).body),
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_full_request).path),
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_full_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_full_response)),
@@ -8776,13 +8342,11 @@ Get a list of outputs associated with agent policy by policy id.<br/><br/>[Requi
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_outputs_request).body),
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_outputs_request).path),
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_outputs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_outputs_response)),
@@ -8809,13 +8373,11 @@ Delete an agent policy by ID.<br/><br/>[Required authorization] Route required p
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_delete_request).body),
-      ...getShape(getShape(post_fleet_agent_policies_delete_request).path),
-      ...getShape(getShape(post_fleet_agent_policies_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agent_policies_delete_response)),
@@ -8842,13 +8404,11 @@ Get a list of outputs associated with agent policies.<br/><br/>[Required authori
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_outputs_request).body),
-      ...getShape(getShape(post_fleet_agent_policies_outputs_request).path),
-      ...getShape(getShape(post_fleet_agent_policies_outputs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agent_policies_outputs_response)),
@@ -8873,13 +8433,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['policyId', 'policyIds', 'kuery'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agent_status_request).body),
-      ...getShape(getShape(get_fleet_agent_status_request).path),
-      ...getShape(getShape(get_fleet_agent_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agent_status_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agent_status_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agent_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agent_status_response)),
@@ -8906,13 +8464,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['agentsIds', 'pkgName', 'pkgVersion', 'previewData'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agent_status_data_request).body),
-      ...getShape(getShape(get_fleet_agent_status_data_request).path),
-      ...getShape(getShape(get_fleet_agent_status_data_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agent_status_data_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agent_status_data_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agent_status_data_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agent_status_data_response)),
@@ -8939,13 +8495,11 @@ Create an agentless policy`,
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agentless_policies_request).body),
-      ...getShape(getShape(post_fleet_agentless_policies_request).path),
-      ...getShape(getShape(post_fleet_agentless_policies_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agentless_policies_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agentless_policies_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agentless_policies_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agentless_policies_response)),
@@ -8972,13 +8526,11 @@ Delete an agentless policy`,
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_agentless_policies_policyid_request).body),
-      ...getShape(getShape(delete_fleet_agentless_policies_policyid_request).path),
-      ...getShape(getShape(delete_fleet_agentless_policies_policyid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_agentless_policies_policyid_response)),
@@ -9020,13 +8572,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agents_request).body),
-      ...getShape(getShape(get_fleet_agents_request).path),
-      ...getShape(getShape(get_fleet_agents_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agents_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agents_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agents_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agents_response)),
@@ -9053,13 +8603,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_request).body),
-      ...getShape(getShape(post_fleet_agents_request).path),
-      ...getShape(getShape(post_fleet_agents_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_response)),
@@ -9086,13 +8634,11 @@ Delete an agent by ID.<br/><br/>[Required authorization] Route required privileg
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_agents_agentid_request).body),
-      ...getShape(getShape(delete_fleet_agents_agentid_request).path),
-      ...getShape(getShape(delete_fleet_agents_agentid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_agents_agentid_response)),
@@ -9119,13 +8665,11 @@ Get an agent by ID.<br/><br/>[Required authorization] Route required privileges:
     urlParams: ['withMetrics'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agents_agentid_request).body),
-      ...getShape(getShape(get_fleet_agents_agentid_request).path),
-      ...getShape(getShape(get_fleet_agents_agentid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agents_agentid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agents_agentid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agents_agentid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agents_agentid_response)),
@@ -9152,13 +8696,11 @@ Update an agent by ID.<br/><br/>[Required authorization] Route required privileg
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_agents_agentid_request).body),
-      ...getShape(getShape(put_fleet_agents_agentid_request).path),
-      ...getShape(getShape(put_fleet_agents_agentid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_agents_agentid_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_agents_agentid_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_agents_agentid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_agents_agentid_response)),
@@ -9185,13 +8727,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_actions_request).body),
-      ...getShape(getShape(post_fleet_agents_agentid_actions_request).path),
-      ...getShape(getShape(post_fleet_agents_agentid_actions_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_agentid_actions_response)),
@@ -9218,13 +8758,11 @@ Migrate a single agent to another cluster.<br/><br/>[Required authorization] Rou
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_migrate_request).body),
-      ...getShape(getShape(post_fleet_agents_agentid_migrate_request).path),
-      ...getShape(getShape(post_fleet_agents_agentid_migrate_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_agentid_migrate_response)),
@@ -9251,13 +8789,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_reassign_request).body),
-      ...getShape(getShape(post_fleet_agents_agentid_reassign_request).path),
-      ...getShape(getShape(post_fleet_agents_agentid_reassign_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_agentid_reassign_response)),
@@ -9284,13 +8820,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_request_diagnostics_request).body),
-      ...getShape(getShape(post_fleet_agents_agentid_request_diagnostics_request).path),
-      ...getShape(getShape(post_fleet_agents_agentid_request_diagnostics_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_agentid_request_diagnostics_response)),
@@ -9317,13 +8851,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_unenroll_request).body),
-      ...getShape(getShape(post_fleet_agents_agentid_unenroll_request).path),
-      ...getShape(getShape(post_fleet_agents_agentid_unenroll_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_agentid_unenroll_response)),
@@ -9350,13 +8882,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_upgrade_request).body),
-      ...getShape(getShape(post_fleet_agents_agentid_upgrade_request).path),
-      ...getShape(getShape(post_fleet_agents_agentid_upgrade_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_agentid_upgrade_response)),
@@ -9383,13 +8913,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agents_agentid_uploads_request).body),
-      ...getShape(getShape(get_fleet_agents_agentid_uploads_request).path),
-      ...getShape(getShape(get_fleet_agents_agentid_uploads_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agents_agentid_uploads_response)),
@@ -9416,13 +8944,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['page', 'perPage', 'date', 'latest', 'errorSize'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agents_action_status_request).body),
-      ...getShape(getShape(get_fleet_agents_action_status_request).path),
-      ...getShape(getShape(get_fleet_agents_action_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agents_action_status_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agents_action_status_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agents_action_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agents_action_status_response)),
@@ -9449,13 +8975,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_actions_actionid_cancel_request).body),
-      ...getShape(getShape(post_fleet_agents_actions_actionid_cancel_request).path),
-      ...getShape(getShape(post_fleet_agents_actions_actionid_cancel_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_actions_actionid_cancel_response)),
@@ -9482,13 +9006,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agents_available_versions_request).body),
-      ...getShape(getShape(get_fleet_agents_available_versions_request).path),
-      ...getShape(getShape(get_fleet_agents_available_versions_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agents_available_versions_response)),
@@ -9515,13 +9037,11 @@ Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_migrate_request).body),
-      ...getShape(getShape(post_fleet_agents_bulk_migrate_request).path),
-      ...getShape(getShape(post_fleet_agents_bulk_migrate_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_bulk_migrate_response)),
@@ -9548,13 +9068,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_reassign_request).body),
-      ...getShape(getShape(post_fleet_agents_bulk_reassign_request).path),
-      ...getShape(getShape(post_fleet_agents_bulk_reassign_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_bulk_reassign_response)),
@@ -9581,13 +9099,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_request_diagnostics_request).body),
-      ...getShape(getShape(post_fleet_agents_bulk_request_diagnostics_request).path),
-      ...getShape(getShape(post_fleet_agents_bulk_request_diagnostics_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_bulk_request_diagnostics_response)),
@@ -9614,13 +9130,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_unenroll_request).body),
-      ...getShape(getShape(post_fleet_agents_bulk_unenroll_request).path),
-      ...getShape(getShape(post_fleet_agents_bulk_unenroll_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_bulk_unenroll_response)),
@@ -9647,13 +9161,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_update_agent_tags_request).body),
-      ...getShape(getShape(post_fleet_agents_bulk_update_agent_tags_request).path),
-      ...getShape(getShape(post_fleet_agents_bulk_update_agent_tags_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_bulk_update_agent_tags_response)),
@@ -9680,13 +9192,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_upgrade_request).body),
-      ...getShape(getShape(post_fleet_agents_bulk_upgrade_request).path),
-      ...getShape(getShape(post_fleet_agents_bulk_upgrade_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_bulk_upgrade_response)),
@@ -9713,13 +9223,11 @@ Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route requ
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_agents_files_fileid_request).body),
-      ...getShape(getShape(delete_fleet_agents_files_fileid_request).path),
-      ...getShape(getShape(delete_fleet_agents_files_fileid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_agents_files_fileid_response)),
@@ -9746,13 +9254,11 @@ Get a file uploaded by an agent.<br/><br/>[Required authorization] Route require
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agents_files_fileid_filename_request).body),
-      ...getShape(getShape(get_fleet_agents_files_fileid_filename_request).path),
-      ...getShape(getShape(get_fleet_agents_files_fileid_filename_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agents_files_fileid_filename_response)),
@@ -9779,13 +9285,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agents_setup_request).body),
-      ...getShape(getShape(get_fleet_agents_setup_request).path),
-      ...getShape(getShape(get_fleet_agents_setup_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agents_setup_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agents_setup_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agents_setup_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agents_setup_response)),
@@ -9812,13 +9316,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_agents_setup_request).body),
-      ...getShape(getShape(post_fleet_agents_setup_request).path),
-      ...getShape(getShape(post_fleet_agents_setup_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_agents_setup_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_agents_setup_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_agents_setup_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_agents_setup_response)),
@@ -9845,13 +9347,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['kuery', 'showInactive'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_agents_tags_request).body),
-      ...getShape(getShape(get_fleet_agents_tags_request).path),
-      ...getShape(getShape(get_fleet_agents_tags_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_agents_tags_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_agents_tags_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_agents_tags_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_agents_tags_response)),
@@ -9876,13 +9376,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['fleetServerSetup'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_check_permissions_request).body),
-      ...getShape(getShape(get_fleet_check_permissions_request).path),
-      ...getShape(getShape(get_fleet_check_permissions_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_check_permissions_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_check_permissions_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_check_permissions_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_check_permissions_response)),
@@ -9909,13 +9407,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['page', 'perPage', 'kuery'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_cloud_connectors_request).body),
-      ...getShape(getShape(get_fleet_cloud_connectors_request).path),
-      ...getShape(getShape(get_fleet_cloud_connectors_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_cloud_connectors_response)),
@@ -9942,13 +9438,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_cloud_connectors_request).body),
-      ...getShape(getShape(post_fleet_cloud_connectors_request).path),
-      ...getShape(getShape(post_fleet_cloud_connectors_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_cloud_connectors_response)),
@@ -9975,13 +9469,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_cloud_connectors_cloudconnectorid_request).body),
-      ...getShape(getShape(delete_fleet_cloud_connectors_cloudconnectorid_request).path),
-      ...getShape(getShape(delete_fleet_cloud_connectors_cloudconnectorid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_cloud_connectors_cloudconnectorid_response)),
@@ -10008,13 +9500,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_cloud_connectors_cloudconnectorid_request).body),
-      ...getShape(getShape(get_fleet_cloud_connectors_cloudconnectorid_request).path),
-      ...getShape(getShape(get_fleet_cloud_connectors_cloudconnectorid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_cloud_connectors_cloudconnectorid_response)),
@@ -10041,13 +9531,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_cloud_connectors_cloudconnectorid_request).body),
-      ...getShape(getShape(put_fleet_cloud_connectors_cloudconnectorid_request).path),
-      ...getShape(getShape(put_fleet_cloud_connectors_cloudconnectorid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_cloud_connectors_cloudconnectorid_response)),
@@ -10074,13 +9562,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_data_streams_request).body),
-      ...getShape(getShape(get_fleet_data_streams_request).path),
-      ...getShape(getShape(get_fleet_data_streams_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_data_streams_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_data_streams_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_data_streams_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_data_streams_response)),
@@ -10107,13 +9593,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['page', 'perPage', 'kuery'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_enrollment_api_keys_request).body),
-      ...getShape(getShape(get_fleet_enrollment_api_keys_request).path),
-      ...getShape(getShape(get_fleet_enrollment_api_keys_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_enrollment_api_keys_response)),
@@ -10140,13 +9624,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_enrollment_api_keys_request).body),
-      ...getShape(getShape(post_fleet_enrollment_api_keys_request).path),
-      ...getShape(getShape(post_fleet_enrollment_api_keys_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_enrollment_api_keys_response)),
@@ -10173,13 +9655,11 @@ Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_enrollment_api_keys_keyid_request).body),
-      ...getShape(getShape(delete_fleet_enrollment_api_keys_keyid_request).path),
-      ...getShape(getShape(delete_fleet_enrollment_api_keys_keyid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_enrollment_api_keys_keyid_response)),
@@ -10206,13 +9686,11 @@ Get an enrollment API key by ID.<br/><br/>[Required authorization] Route require
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_enrollment_api_keys_keyid_request).body),
-      ...getShape(getShape(get_fleet_enrollment_api_keys_keyid_request).path),
-      ...getShape(getShape(get_fleet_enrollment_api_keys_keyid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_enrollment_api_keys_keyid_response)),
@@ -10239,13 +9717,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_bulk_assets_request).body),
-      ...getShape(getShape(post_fleet_epm_bulk_assets_request).path),
-      ...getShape(getShape(post_fleet_epm_bulk_assets_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_bulk_assets_response)),
@@ -10272,13 +9748,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['prerelease', 'include_policy_templates'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_categories_request).body),
-      ...getShape(getShape(get_fleet_epm_categories_request).path),
-      ...getShape(getShape(get_fleet_epm_categories_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_categories_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_categories_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_categories_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_categories_response)),
@@ -10305,13 +9779,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_custom_integrations_request).body),
-      ...getShape(getShape(post_fleet_epm_custom_integrations_request).path),
-      ...getShape(getShape(post_fleet_epm_custom_integrations_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_custom_integrations_response)),
@@ -10338,13 +9810,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_epm_custom_integrations_pkgname_request).body),
-      ...getShape(getShape(put_fleet_epm_custom_integrations_pkgname_request).path),
-      ...getShape(getShape(put_fleet_epm_custom_integrations_pkgname_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_epm_custom_integrations_pkgname_response)),
@@ -10371,13 +9841,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['type', 'datasetQuery', 'sortOrder', 'uncategorisedOnly'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_data_streams_request).body),
-      ...getShape(getShape(get_fleet_epm_data_streams_request).path),
-      ...getShape(getShape(get_fleet_epm_data_streams_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_data_streams_response)),
@@ -10404,13 +9872,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['category', 'prerelease', 'excludeInstallStatus', 'withPackagePoliciesCount'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_request).body),
-      ...getShape(getShape(get_fleet_epm_packages_request).path),
-      ...getShape(getShape(get_fleet_epm_packages_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_packages_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_packages_response)),
@@ -10437,13 +9903,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['ignoreMappingUpdateErrors', 'skipDataStreamRollover'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_request).body),
-      ...getShape(getShape(post_fleet_epm_packages_request).path),
-      ...getShape(getShape(post_fleet_epm_packages_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_epm_packages_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_packages_response)),
@@ -10470,13 +9934,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['prerelease'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_bulk_request).body),
-      ...getShape(getShape(post_fleet_epm_packages_bulk_request).path),
-      ...getShape(getShape(post_fleet_epm_packages_bulk_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_packages_bulk_response)),
@@ -10503,13 +9965,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_bulk_rollback_request).body),
-      ...getShape(getShape(post_fleet_epm_packages_bulk_rollback_request).path),
-      ...getShape(getShape(post_fleet_epm_packages_bulk_rollback_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_packages_bulk_rollback_response)),
@@ -10536,13 +9996,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_bulk_rollback_taskid_request).body),
-      ...getShape(getShape(get_fleet_epm_packages_bulk_rollback_taskid_request).path),
-      ...getShape(getShape(get_fleet_epm_packages_bulk_rollback_taskid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_packages_bulk_rollback_taskid_response)),
@@ -10569,13 +10027,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_bulk_uninstall_request).body),
-      ...getShape(getShape(post_fleet_epm_packages_bulk_uninstall_request).path),
-      ...getShape(getShape(post_fleet_epm_packages_bulk_uninstall_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_packages_bulk_uninstall_response)),
@@ -10602,13 +10058,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_bulk_uninstall_taskid_request).body),
-      ...getShape(getShape(get_fleet_epm_packages_bulk_uninstall_taskid_request).path),
-      ...getShape(getShape(get_fleet_epm_packages_bulk_uninstall_taskid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_packages_bulk_uninstall_taskid_response)),
@@ -10635,13 +10089,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_bulk_upgrade_request).body),
-      ...getShape(getShape(post_fleet_epm_packages_bulk_upgrade_request).path),
-      ...getShape(getShape(post_fleet_epm_packages_bulk_upgrade_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_packages_bulk_upgrade_response)),
@@ -10668,13 +10120,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_bulk_upgrade_taskid_request).body),
-      ...getShape(getShape(get_fleet_epm_packages_bulk_upgrade_taskid_request).path),
-      ...getShape(getShape(get_fleet_epm_packages_bulk_upgrade_taskid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_packages_bulk_upgrade_taskid_response)),
@@ -10701,13 +10151,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_epm_packages_pkgname_pkgversion_request).body),
-      ...getShape(getShape(delete_fleet_epm_packages_pkgname_pkgversion_request).path),
-      ...getShape(getShape(delete_fleet_epm_packages_pkgname_pkgversion_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_epm_packages_pkgname_pkgversion_response)),
@@ -10732,13 +10180,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['ignoreUnverified', 'prerelease', 'full', 'withMetadata'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_request).body),
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_request).path),
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_response)),
@@ -10765,13 +10211,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['prerelease', 'ignoreMappingUpdateErrors', 'skipDataStreamRollover'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_request).body),
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_request).path),
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_response)),
@@ -10798,13 +10242,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_epm_packages_pkgname_pkgversion_request).body),
-      ...getShape(getShape(put_fleet_epm_packages_pkgname_pkgversion_request).path),
-      ...getShape(getShape(put_fleet_epm_packages_pkgname_pkgversion_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_epm_packages_pkgname_pkgversion_response)),
@@ -10831,13 +10273,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_filepath_request).body),
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_filepath_request).path),
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_filepath_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_filepath_response)),
@@ -10865,19 +10305,20 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: ['packagePolicyId'],
       bodyParams: [],
     },
-    paramsSchema: z
-      .looseObject({
-        ...getShape(
-          getShape(delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request).body
-        ),
-        ...getShape(
-          getShape(delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request).path
-        ),
-        ...getShape(
-          getShape(delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request).query
-        ),
-      })
-      .partial(),
+    paramsSchema: z.union([
+      getLooseObjectFromProperty(
+        delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request,
+        'body'
+      ),
+      getLooseObjectFromProperty(
+        delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request,
+        'path'
+      ),
+      getLooseObjectFromProperty(
+        delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request,
+        'query'
+      ),
+    ]),
     outputSchema: z.object({
       output: z.looseObject({
         ...getShape(
@@ -10907,19 +10348,20 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: [],
       bodyParams: [],
     },
-    paramsSchema: z
-      .looseObject({
-        ...getShape(
-          getShape(delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request).body
-        ),
-        ...getShape(
-          getShape(delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request).path
-        ),
-        ...getShape(
-          getShape(delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request).query
-        ),
-      })
-      .partial(),
+    paramsSchema: z.union([
+      getLooseObjectFromProperty(
+        delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
+        'body'
+      ),
+      getLooseObjectFromProperty(
+        delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
+        'path'
+      ),
+      getLooseObjectFromProperty(
+        delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
+        'query'
+      ),
+    ]),
     outputSchema: z.object({
       output: z.looseObject({
         ...getShape(getShape(delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_response)),
@@ -10947,19 +10389,20 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: [],
       bodyParams: [],
     },
-    paramsSchema: z
-      .looseObject({
-        ...getShape(
-          getShape(post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request).body
-        ),
-        ...getShape(
-          getShape(post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request).path
-        ),
-        ...getShape(
-          getShape(post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request).query
-        ),
-      })
-      .partial(),
+    paramsSchema: z.union([
+      getLooseObjectFromProperty(
+        post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
+        'body'
+      ),
+      getLooseObjectFromProperty(
+        post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
+        'path'
+      ),
+      getLooseObjectFromProperty(
+        post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
+        'query'
+      ),
+    ]),
     outputSchema: z.object({
       output: z.looseObject({
         ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_response)),
@@ -10986,13 +10429,20 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request).body),
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request).path),
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(
+      post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
+      'body'
+    ),
+    getLooseObjectFromProperty(
+      post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
+      'path'
+    ),
+    getLooseObjectFromProperty(
+      post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
+      'query'
+    ),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_rule_assets_response)),
@@ -11018,19 +10468,20 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: ['prerelease'],
       bodyParams: [],
     },
-    paramsSchema: z
-      .looseObject({
-        ...getShape(
-          getShape(post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request).body
-        ),
-        ...getShape(
-          getShape(post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request).path
-        ),
-        ...getShape(
-          getShape(post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request).query
-        ),
-      })
-      .partial(),
+    paramsSchema: z.union([
+      getLooseObjectFromProperty(
+        post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request,
+        'body'
+      ),
+      getLooseObjectFromProperty(
+        post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request,
+        'path'
+      ),
+      getLooseObjectFromProperty(
+        post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request,
+        'query'
+      ),
+    ]),
     outputSchema: z.object({
       output: z.looseObject({
         ...getShape(
@@ -11059,13 +10510,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_rollback_request).body),
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_rollback_request).path),
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_rollback_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_epm_packages_pkgname_rollback_response)),
@@ -11092,13 +10541,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_stats_request).body),
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_stats_request).path),
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_packages_pkgname_stats_response)),
@@ -11132,13 +10579,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_installed_request).body),
-      ...getShape(getShape(get_fleet_epm_packages_installed_request).path),
-      ...getShape(getShape(get_fleet_epm_packages_installed_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_packages_installed_response)),
@@ -11165,13 +10610,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_limited_request).body),
-      ...getShape(getShape(get_fleet_epm_packages_limited_request).path),
-      ...getShape(getShape(get_fleet_epm_packages_limited_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_packages_limited_response)),
@@ -11198,13 +10641,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['format', 'prerelease', 'ignoreUnverified'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_templates_pkgname_pkgversion_inputs_request).body),
-      ...getShape(getShape(get_fleet_epm_templates_pkgname_pkgversion_inputs_request).path),
-      ...getShape(getShape(get_fleet_epm_templates_pkgname_pkgversion_inputs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_templates_pkgname_pkgversion_inputs_response)),
@@ -11231,13 +10672,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_epm_verification_key_id_request).body),
-      ...getShape(getShape(get_fleet_epm_verification_key_id_request).path),
-      ...getShape(getShape(get_fleet_epm_verification_key_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_epm_verification_key_id_response)),
@@ -11264,13 +10703,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_fleet_server_hosts_request).body),
-      ...getShape(getShape(get_fleet_fleet_server_hosts_request).path),
-      ...getShape(getShape(get_fleet_fleet_server_hosts_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_fleet_server_hosts_response)),
@@ -11297,13 +10734,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_fleet_server_hosts_request).body),
-      ...getShape(getShape(post_fleet_fleet_server_hosts_request).path),
-      ...getShape(getShape(post_fleet_fleet_server_hosts_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_fleet_server_hosts_response)),
@@ -11330,13 +10765,11 @@ Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route requir
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_fleet_server_hosts_itemid_request).body),
-      ...getShape(getShape(delete_fleet_fleet_server_hosts_itemid_request).path),
-      ...getShape(getShape(delete_fleet_fleet_server_hosts_itemid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_fleet_server_hosts_itemid_response)),
@@ -11363,13 +10796,11 @@ Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_fleet_server_hosts_itemid_request).body),
-      ...getShape(getShape(get_fleet_fleet_server_hosts_itemid_request).path),
-      ...getShape(getShape(get_fleet_fleet_server_hosts_itemid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_fleet_server_hosts_itemid_response)),
@@ -11396,13 +10827,11 @@ Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route requir
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_fleet_server_hosts_itemid_request).body),
-      ...getShape(getShape(put_fleet_fleet_server_hosts_itemid_request).path),
-      ...getShape(getShape(put_fleet_fleet_server_hosts_itemid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_fleet_server_hosts_itemid_response)),
@@ -11429,13 +10858,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_health_check_request).body),
-      ...getShape(getShape(post_fleet_health_check_request).path),
-      ...getShape(getShape(post_fleet_health_check_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_health_check_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_health_check_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_health_check_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_health_check_response)),
@@ -11462,13 +10889,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['download', 'fleetServer', 'enrolToken'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_kubernetes_request).body),
-      ...getShape(getShape(get_fleet_kubernetes_request).path),
-      ...getShape(getShape(get_fleet_kubernetes_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_kubernetes_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_kubernetes_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_kubernetes_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_kubernetes_response)),
@@ -11495,13 +10920,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['download', 'fleetServer', 'enrolToken'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_kubernetes_download_request).body),
-      ...getShape(getShape(get_fleet_kubernetes_download_request).path),
-      ...getShape(getShape(get_fleet_kubernetes_download_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_kubernetes_download_response)),
@@ -11528,13 +10951,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_logstash_api_keys_request).body),
-      ...getShape(getShape(post_fleet_logstash_api_keys_request).path),
-      ...getShape(getShape(post_fleet_logstash_api_keys_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_logstash_api_keys_response)),
@@ -11561,13 +10982,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['acknowledge'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_message_signing_service_rotate_key_pair_request).body),
-      ...getShape(getShape(post_fleet_message_signing_service_rotate_key_pair_request).path),
-      ...getShape(getShape(post_fleet_message_signing_service_rotate_key_pair_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_message_signing_service_rotate_key_pair_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_message_signing_service_rotate_key_pair_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_message_signing_service_rotate_key_pair_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_message_signing_service_rotate_key_pair_response)),
@@ -11594,13 +11013,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_outputs_request).body),
-      ...getShape(getShape(get_fleet_outputs_request).path),
-      ...getShape(getShape(get_fleet_outputs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_outputs_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_outputs_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_outputs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_outputs_response)),
@@ -11627,13 +11044,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_outputs_request).body),
-      ...getShape(getShape(post_fleet_outputs_request).path),
-      ...getShape(getShape(post_fleet_outputs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_outputs_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_outputs_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_outputs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_outputs_response)),
@@ -11660,13 +11075,11 @@ Delete output by ID.<br/><br/>[Required authorization] Route required privileges
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_outputs_outputid_request).body),
-      ...getShape(getShape(delete_fleet_outputs_outputid_request).path),
-      ...getShape(getShape(delete_fleet_outputs_outputid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_outputs_outputid_response)),
@@ -11693,13 +11106,11 @@ Get output by ID.<br/><br/>[Required authorization] Route required privileges: f
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_outputs_outputid_request).body),
-      ...getShape(getShape(get_fleet_outputs_outputid_request).path),
-      ...getShape(getShape(get_fleet_outputs_outputid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_outputs_outputid_response)),
@@ -11726,13 +11137,11 @@ Update output by ID.<br/><br/>[Required authorization] Route required privileges
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_outputs_outputid_request).body),
-      ...getShape(getShape(put_fleet_outputs_outputid_request).path),
-      ...getShape(getShape(put_fleet_outputs_outputid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_outputs_outputid_response)),
@@ -11759,13 +11168,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_outputs_outputid_health_request).body),
-      ...getShape(getShape(get_fleet_outputs_outputid_health_request).path),
-      ...getShape(getShape(get_fleet_outputs_outputid_health_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_outputs_outputid_health_response)),
@@ -11799,13 +11206,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_package_policies_request).body),
-      ...getShape(getShape(get_fleet_package_policies_request).path),
-      ...getShape(getShape(get_fleet_package_policies_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_package_policies_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_package_policies_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_package_policies_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_package_policies_response)),
@@ -11830,13 +11235,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_package_policies_request).body),
-      ...getShape(getShape(post_fleet_package_policies_request).path),
-      ...getShape(getShape(post_fleet_package_policies_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_package_policies_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_package_policies_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_package_policies_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_package_policies_response)),
@@ -11861,13 +11264,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_package_policies_bulk_get_request).body),
-      ...getShape(getShape(post_fleet_package_policies_bulk_get_request).path),
-      ...getShape(getShape(post_fleet_package_policies_bulk_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_package_policies_bulk_get_response)),
@@ -11894,13 +11295,11 @@ Delete a package policy by ID.<br/><br/>[Required authorization] Route required 
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_package_policies_packagepolicyid_request).body),
-      ...getShape(getShape(delete_fleet_package_policies_packagepolicyid_request).path),
-      ...getShape(getShape(delete_fleet_package_policies_packagepolicyid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_package_policies_packagepolicyid_response)),
@@ -11927,13 +11326,11 @@ Get a package policy by ID.`,
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_package_policies_packagepolicyid_request).body),
-      ...getShape(getShape(get_fleet_package_policies_packagepolicyid_request).path),
-      ...getShape(getShape(get_fleet_package_policies_packagepolicyid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_package_policies_packagepolicyid_response)),
@@ -11960,13 +11357,11 @@ Update a package policy by ID.`,
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_package_policies_packagepolicyid_request).body),
-      ...getShape(getShape(put_fleet_package_policies_packagepolicyid_request).path),
-      ...getShape(getShape(put_fleet_package_policies_packagepolicyid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_package_policies_packagepolicyid_response)),
@@ -11993,13 +11388,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_package_policies_delete_request).body),
-      ...getShape(getShape(post_fleet_package_policies_delete_request).path),
-      ...getShape(getShape(post_fleet_package_policies_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_package_policies_delete_response)),
@@ -12026,13 +11419,11 @@ Upgrade a package policy to a newer package version.<br/><br/>[Required authoriz
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_package_policies_upgrade_request).body),
-      ...getShape(getShape(post_fleet_package_policies_upgrade_request).path),
-      ...getShape(getShape(post_fleet_package_policies_upgrade_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_package_policies_upgrade_response)),
@@ -12059,13 +11450,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_package_policies_upgrade_dryrun_request).body),
-      ...getShape(getShape(post_fleet_package_policies_upgrade_dryrun_request).path),
-      ...getShape(getShape(post_fleet_package_policies_upgrade_dryrun_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_package_policies_upgrade_dryrun_response)),
@@ -12092,13 +11481,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_proxies_request).body),
-      ...getShape(getShape(get_fleet_proxies_request).path),
-      ...getShape(getShape(get_fleet_proxies_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_proxies_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_proxies_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_proxies_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_proxies_response)),
@@ -12125,13 +11512,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_proxies_request).body),
-      ...getShape(getShape(post_fleet_proxies_request).path),
-      ...getShape(getShape(post_fleet_proxies_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_proxies_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_proxies_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_proxies_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_proxies_response)),
@@ -12158,13 +11543,11 @@ Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_fleet_proxies_itemid_request).body),
-      ...getShape(getShape(delete_fleet_proxies_itemid_request).path),
-      ...getShape(getShape(delete_fleet_proxies_itemid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'body'),
+    getLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'path'),
+    getLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_fleet_proxies_itemid_response)),
@@ -12191,13 +11574,11 @@ Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_proxies_itemid_request).body),
-      ...getShape(getShape(get_fleet_proxies_itemid_request).path),
-      ...getShape(getShape(get_fleet_proxies_itemid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_proxies_itemid_response)),
@@ -12224,13 +11605,11 @@ Update a proxy by ID.<br/><br/>[Required authorization] Route required privilege
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_proxies_itemid_request).body),
-      ...getShape(getShape(put_fleet_proxies_itemid_request).path),
-      ...getShape(getShape(put_fleet_proxies_itemid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_proxies_itemid_response)),
@@ -12258,19 +11637,20 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: [],
       bodyParams: [],
     },
-    paramsSchema: z
-      .looseObject({
-        ...getShape(
-          getShape(get_fleet_remote_synced_integrations_outputid_remote_status_request).body
-        ),
-        ...getShape(
-          getShape(get_fleet_remote_synced_integrations_outputid_remote_status_request).path
-        ),
-        ...getShape(
-          getShape(get_fleet_remote_synced_integrations_outputid_remote_status_request).query
-        ),
-      })
-      .partial(),
+    paramsSchema: z.union([
+      getLooseObjectFromProperty(
+        get_fleet_remote_synced_integrations_outputid_remote_status_request,
+        'body'
+      ),
+      getLooseObjectFromProperty(
+        get_fleet_remote_synced_integrations_outputid_remote_status_request,
+        'path'
+      ),
+      getLooseObjectFromProperty(
+        get_fleet_remote_synced_integrations_outputid_remote_status_request,
+        'query'
+      ),
+    ]),
     outputSchema: z.object({
       output: z.looseObject({
         ...getShape(getShape(get_fleet_remote_synced_integrations_outputid_remote_status_response)),
@@ -12297,13 +11677,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_remote_synced_integrations_status_request).body),
-      ...getShape(getShape(get_fleet_remote_synced_integrations_status_request).path),
-      ...getShape(getShape(get_fleet_remote_synced_integrations_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_remote_synced_integrations_status_response)),
@@ -12330,13 +11708,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_service_tokens_request).body),
-      ...getShape(getShape(post_fleet_service_tokens_request).path),
-      ...getShape(getShape(post_fleet_service_tokens_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_service_tokens_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_service_tokens_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_service_tokens_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_service_tokens_response)),
@@ -12363,13 +11739,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_settings_request).body),
-      ...getShape(getShape(get_fleet_settings_request).path),
-      ...getShape(getShape(get_fleet_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_settings_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_settings_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_settings_response)),
@@ -12396,13 +11770,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_settings_request).body),
-      ...getShape(getShape(put_fleet_settings_request).path),
-      ...getShape(getShape(put_fleet_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_settings_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_settings_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_settings_response)),
@@ -12429,13 +11801,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_fleet_setup_request).body),
-      ...getShape(getShape(post_fleet_setup_request).path),
-      ...getShape(getShape(post_fleet_setup_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_fleet_setup_request, 'body'),
+    getLooseObjectFromProperty(post_fleet_setup_request, 'path'),
+    getLooseObjectFromProperty(post_fleet_setup_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_fleet_setup_response)),
@@ -12460,13 +11830,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_space_settings_request).body),
-      ...getShape(getShape(get_fleet_space_settings_request).path),
-      ...getShape(getShape(get_fleet_space_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_space_settings_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_space_settings_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_space_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_space_settings_response)),
@@ -12493,13 +11861,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_fleet_space_settings_request).body),
-      ...getShape(getShape(put_fleet_space_settings_request).path),
-      ...getShape(getShape(put_fleet_space_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_fleet_space_settings_request, 'body'),
+    getLooseObjectFromProperty(put_fleet_space_settings_request, 'path'),
+    getLooseObjectFromProperty(put_fleet_space_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_fleet_space_settings_response)),
@@ -12526,13 +11892,11 @@ List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Re
     urlParams: ['policyId', 'search', 'perPage', 'page'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_uninstall_tokens_request).body),
-      ...getShape(getShape(get_fleet_uninstall_tokens_request).path),
-      ...getShape(getShape(get_fleet_uninstall_tokens_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_uninstall_tokens_response)),
@@ -12559,13 +11923,11 @@ Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] R
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_fleet_uninstall_tokens_uninstalltokenid_request).body),
-      ...getShape(getShape(get_fleet_uninstall_tokens_uninstalltokenid_request).path),
-      ...getShape(getShape(get_fleet_uninstall_tokens_uninstalltokenid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'body'),
+    getLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'path'),
+    getLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_fleet_uninstall_tokens_uninstalltokenid_response)),
@@ -12595,13 +11957,11 @@ Delete a value list using the list ID.
     urlParams: ['id', 'deleteReferences', 'ignoreReferences'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_list_request).body),
-      ...getShape(getShape(delete_list_request).path),
-      ...getShape(getShape(delete_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_list_request, 'body'),
+    getLooseObjectFromProperty(delete_list_request, 'path'),
+    getLooseObjectFromProperty(delete_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_list_response)),
@@ -12628,13 +11988,11 @@ Get the details of a value list using the list ID.`,
     urlParams: ['id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_list_request).body),
-      ...getShape(getShape(read_list_request).path),
-      ...getShape(getShape(read_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_list_request, 'body'),
+    getLooseObjectFromProperty(read_list_request, 'path'),
+    getLooseObjectFromProperty(read_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_list_response)),
@@ -12661,13 +12019,11 @@ Update specific fields of an existing list using the list \`id\`.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(patch_list_request).body),
-      ...getShape(getShape(patch_list_request).path),
-      ...getShape(getShape(patch_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(patch_list_request, 'body'),
+    getLooseObjectFromProperty(patch_list_request, 'path'),
+    getLooseObjectFromProperty(patch_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(patch_list_response)),
@@ -12694,13 +12050,11 @@ Create a new value list.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_list_request).body),
-      ...getShape(getShape(create_list_request).path),
-      ...getShape(getShape(create_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_list_request, 'body'),
+    getLooseObjectFromProperty(create_list_request, 'path'),
+    getLooseObjectFromProperty(create_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_list_response)),
@@ -12730,13 +12084,11 @@ Update a value list using the list \`id\`. The original list is replaced, and al
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_list_request).body),
-      ...getShape(getShape(update_list_request).path),
-      ...getShape(getShape(update_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_list_request, 'body'),
+    getLooseObjectFromProperty(update_list_request, 'path'),
+    getLooseObjectFromProperty(update_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_list_response)),
@@ -12763,13 +12115,11 @@ Get a paginated subset of value lists. By default, the first page is returned, w
     urlParams: ['page', 'per_page', 'sort_field', 'sort_order', 'cursor', 'filter'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_lists_request).body),
-      ...getShape(getShape(find_lists_request).path),
-      ...getShape(getShape(find_lists_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_lists_request, 'body'),
+    getLooseObjectFromProperty(find_lists_request, 'path'),
+    getLooseObjectFromProperty(find_lists_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_lists_response)),
@@ -12796,13 +12146,11 @@ Delete the \`.lists\` and \`.items\` data streams.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_list_index_request).body),
-      ...getShape(getShape(delete_list_index_request).path),
-      ...getShape(getShape(delete_list_index_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_list_index_request, 'body'),
+    getLooseObjectFromProperty(delete_list_index_request, 'path'),
+    getLooseObjectFromProperty(delete_list_index_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_list_index_response)),
@@ -12829,13 +12177,11 @@ Verify that \`.lists\` and \`.items\` data streams exist.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_list_index_request).body),
-      ...getShape(getShape(read_list_index_request).path),
-      ...getShape(getShape(read_list_index_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_list_index_request, 'body'),
+    getLooseObjectFromProperty(read_list_index_request, 'path'),
+    getLooseObjectFromProperty(read_list_index_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_list_index_response)),
@@ -12862,13 +12208,11 @@ Create \`.lists\` and \`.items\` data streams in the relevant space.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_list_index_request).body),
-      ...getShape(getShape(create_list_index_request).path),
-      ...getShape(getShape(create_list_index_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_list_index_request, 'body'),
+    getLooseObjectFromProperty(create_list_index_request, 'path'),
+    getLooseObjectFromProperty(create_list_index_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_list_index_response)),
@@ -12895,13 +12239,11 @@ Delete a value list item using its \`id\`, or its \`list_id\` and \`value\` fiel
     urlParams: ['id', 'list_id', 'value', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_list_item_request).body),
-      ...getShape(getShape(delete_list_item_request).path),
-      ...getShape(getShape(delete_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_list_item_request, 'body'),
+    getLooseObjectFromProperty(delete_list_item_request, 'path'),
+    getLooseObjectFromProperty(delete_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_list_item_response)),
@@ -12928,13 +12270,11 @@ Get the details of a value list item.`,
     urlParams: ['id', 'list_id', 'value'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_list_item_request).body),
-      ...getShape(getShape(read_list_item_request).path),
-      ...getShape(getShape(read_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_list_item_request, 'body'),
+    getLooseObjectFromProperty(read_list_item_request, 'path'),
+    getLooseObjectFromProperty(read_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_list_item_response)),
@@ -12961,13 +12301,11 @@ Update specific fields of an existing value list item using the item \`id\`.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(patch_list_item_request).body),
-      ...getShape(getShape(patch_list_item_request).path),
-      ...getShape(getShape(patch_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(patch_list_item_request, 'body'),
+    getLooseObjectFromProperty(patch_list_item_request, 'path'),
+    getLooseObjectFromProperty(patch_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(patch_list_item_response)),
@@ -12999,13 +12337,11 @@ All value list items in the same list must be the same type. For example, each l
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_list_item_request).body),
-      ...getShape(getShape(create_list_item_request).path),
-      ...getShape(getShape(create_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_list_item_request, 'body'),
+    getLooseObjectFromProperty(create_list_item_request, 'path'),
+    getLooseObjectFromProperty(create_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_list_item_response)),
@@ -13035,13 +12371,11 @@ Update a value list item using the list item ID. The original list item is repla
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_list_item_request).body),
-      ...getShape(getShape(update_list_item_request).path),
-      ...getShape(getShape(update_list_item_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_list_item_request, 'body'),
+    getLooseObjectFromProperty(update_list_item_request, 'path'),
+    getLooseObjectFromProperty(update_list_item_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_list_item_response)),
@@ -13068,13 +12402,11 @@ Export list item values from the specified value list.`,
     urlParams: ['list_id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(export_list_items_request).body),
-      ...getShape(getShape(export_list_items_request).path),
-      ...getShape(getShape(export_list_items_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(export_list_items_request, 'body'),
+    getLooseObjectFromProperty(export_list_items_request, 'path'),
+    getLooseObjectFromProperty(export_list_items_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(export_list_items_response)),
@@ -13101,13 +12433,11 @@ Get all value list items in the specified list.`,
     urlParams: ['list_id', 'page', 'per_page', 'sort_field', 'sort_order', 'cursor', 'filter'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_list_items_request).body),
-      ...getShape(getShape(find_list_items_request).path),
-      ...getShape(getShape(find_list_items_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_list_items_request, 'body'),
+    getLooseObjectFromProperty(find_list_items_request, 'path'),
+    getLooseObjectFromProperty(find_list_items_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_list_items_response)),
@@ -13137,13 +12467,11 @@ You can import items to a new or existing list.
     urlParams: ['list_id', 'type', 'serializer', 'deserializer', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(import_list_items_request).body),
-      ...getShape(getShape(import_list_items_request).path),
-      ...getShape(getShape(import_list_items_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(import_list_items_request, 'body'),
+    getLooseObjectFromProperty(import_list_items_request, 'path'),
+    getLooseObjectFromProperty(import_list_items_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(import_list_items_response)),
@@ -13168,13 +12496,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_list_privileges_request).body),
-      ...getShape(getShape(read_list_privileges_request).path),
-      ...getShape(getShape(read_list_privileges_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_list_privileges_request, 'body'),
+    getLooseObjectFromProperty(read_list_privileges_request, 'path'),
+    getLooseObjectFromProperty(read_list_privileges_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_list_privileges_response)),
@@ -13197,13 +12523,11 @@ If your Elasticsearch cluster is protected with basic authentication, you must h
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_logstash_pipeline_request).body),
-      ...getShape(getShape(delete_logstash_pipeline_request).path),
-      ...getShape(getShape(delete_logstash_pipeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_logstash_pipeline_request, 'body'),
+    getLooseObjectFromProperty(delete_logstash_pipeline_request, 'path'),
+    getLooseObjectFromProperty(delete_logstash_pipeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_logstash_pipeline_response)),
@@ -13226,13 +12550,11 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_logstash_pipeline_request).body),
-      ...getShape(getShape(get_logstash_pipeline_request).path),
-      ...getShape(getShape(get_logstash_pipeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_logstash_pipeline_request, 'body'),
+    getLooseObjectFromProperty(get_logstash_pipeline_request, 'path'),
+    getLooseObjectFromProperty(get_logstash_pipeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_logstash_pipeline_response)),
@@ -13255,13 +12577,11 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_logstash_pipeline_request).body),
-      ...getShape(getShape(put_logstash_pipeline_request).path),
-      ...getShape(getShape(put_logstash_pipeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_logstash_pipeline_request, 'body'),
+    getLooseObjectFromProperty(put_logstash_pipeline_request, 'path'),
+    getLooseObjectFromProperty(put_logstash_pipeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_logstash_pipeline_response)),
@@ -13289,13 +12609,11 @@ The \`username\` property appears in the response when security is enabled and d
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_logstash_pipelines_request).body),
-      ...getShape(getShape(get_logstash_pipelines_request).path),
-      ...getShape(getShape(get_logstash_pipelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_logstash_pipelines_request, 'body'),
+    getLooseObjectFromProperty(get_logstash_pipelines_request, 'path'),
+    getLooseObjectFromProperty(get_logstash_pipelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_logstash_pipelines_response)),
@@ -13322,13 +12640,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_maintenance_window_request).body),
-      ...getShape(getShape(post_maintenance_window_request).path),
-      ...getShape(getShape(post_maintenance_window_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_maintenance_window_request, 'body'),
+    getLooseObjectFromProperty(post_maintenance_window_request, 'path'),
+    getLooseObjectFromProperty(post_maintenance_window_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_maintenance_window_response)),
@@ -13355,13 +12671,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['title', 'created_by', 'status', 'page', 'per_page'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_maintenance_window_find_request).body),
-      ...getShape(getShape(get_maintenance_window_find_request).path),
-      ...getShape(getShape(get_maintenance_window_find_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_maintenance_window_find_request, 'body'),
+    getLooseObjectFromProperty(get_maintenance_window_find_request, 'path'),
+    getLooseObjectFromProperty(get_maintenance_window_find_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_maintenance_window_find_response)),
@@ -13388,13 +12702,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_maintenance_window_id_request).body),
-      ...getShape(getShape(delete_maintenance_window_id_request).path),
-      ...getShape(getShape(delete_maintenance_window_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_maintenance_window_id_request, 'body'),
+    getLooseObjectFromProperty(delete_maintenance_window_id_request, 'path'),
+    getLooseObjectFromProperty(delete_maintenance_window_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_maintenance_window_id_response)),
@@ -13421,13 +12733,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_maintenance_window_id_request).body),
-      ...getShape(getShape(get_maintenance_window_id_request).path),
-      ...getShape(getShape(get_maintenance_window_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_maintenance_window_id_request, 'body'),
+    getLooseObjectFromProperty(get_maintenance_window_id_request, 'path'),
+    getLooseObjectFromProperty(get_maintenance_window_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_maintenance_window_id_response)),
@@ -13454,13 +12764,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(patch_maintenance_window_id_request).body),
-      ...getShape(getShape(patch_maintenance_window_id_request).path),
-      ...getShape(getShape(patch_maintenance_window_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(patch_maintenance_window_id_request, 'body'),
+    getLooseObjectFromProperty(patch_maintenance_window_id_request, 'path'),
+    getLooseObjectFromProperty(patch_maintenance_window_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(patch_maintenance_window_id_response)),
@@ -13487,13 +12795,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_maintenance_window_id_archive_request).body),
-      ...getShape(getShape(post_maintenance_window_id_archive_request).path),
-      ...getShape(getShape(post_maintenance_window_id_archive_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'body'),
+    getLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'path'),
+    getLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_maintenance_window_id_archive_response)),
@@ -13520,13 +12826,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_maintenance_window_id_unarchive_request).body),
-      ...getShape(getShape(post_maintenance_window_id_unarchive_request).path),
-      ...getShape(getShape(post_maintenance_window_id_unarchive_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'body'),
+    getLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'path'),
+    getLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_maintenance_window_id_unarchive_response)),
@@ -13554,13 +12858,11 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_sync_request).body),
-      ...getShape(getShape(ml_sync_request).path),
-      ...getShape(getShape(ml_sync_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_sync_request, 'body'),
+    getLooseObjectFromProperty(ml_sync_request, 'path'),
+    getLooseObjectFromProperty(ml_sync_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_sync_response)),
@@ -13587,13 +12889,11 @@ Delete a note from a Timeline using the note ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_note_request).body),
-      ...getShape(getShape(delete_note_request).path),
-      ...getShape(getShape(delete_note_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_note_request, 'body'),
+    getLooseObjectFromProperty(delete_note_request, 'path'),
+    getLooseObjectFromProperty(delete_note_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_note_response)),
@@ -13631,13 +12931,11 @@ Get all notes for a given document.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_notes_request).body),
-      ...getShape(getShape(get_notes_request).path),
-      ...getShape(getShape(get_notes_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_notes_request, 'body'),
+    getLooseObjectFromProperty(get_notes_request, 'path'),
+    getLooseObjectFromProperty(get_notes_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_notes_response)),
@@ -13664,13 +12962,11 @@ Add a note to a Timeline or update an existing note.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(persist_note_route_request).body),
-      ...getShape(getShape(persist_note_route_request).path),
-      ...getShape(getShape(persist_note_route_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(persist_note_route_request, 'body'),
+    getLooseObjectFromProperty(persist_note_route_request, 'path'),
+    getLooseObjectFromProperty(persist_note_route_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(persist_note_route_response)),
@@ -13704,13 +13000,11 @@ This functionality is in technical preview and may be changed or removed in a fu
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(observability_ai_assistant_chat_complete_request).body),
-      ...getShape(getShape(observability_ai_assistant_chat_complete_request).path),
-      ...getShape(getShape(observability_ai_assistant_chat_complete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'body'),
+    getLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'path'),
+    getLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(observability_ai_assistant_chat_complete_response)),
@@ -13737,13 +13031,11 @@ Get a list of all live queries.`,
     urlParams: ['kuery', 'page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_find_live_queries_request).body),
-      ...getShape(getShape(osquery_find_live_queries_request).path),
-      ...getShape(getShape(osquery_find_live_queries_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_find_live_queries_request, 'body'),
+    getLooseObjectFromProperty(osquery_find_live_queries_request, 'path'),
+    getLooseObjectFromProperty(osquery_find_live_queries_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_find_live_queries_response)),
@@ -13770,13 +13062,11 @@ Create and run a live query.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_create_live_query_request).body),
-      ...getShape(getShape(osquery_create_live_query_request).path),
-      ...getShape(getShape(osquery_create_live_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_create_live_query_request, 'body'),
+    getLooseObjectFromProperty(osquery_create_live_query_request, 'path'),
+    getLooseObjectFromProperty(osquery_create_live_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_create_live_query_response)),
@@ -13803,13 +13093,11 @@ Get the details of a live query using the query ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_get_live_query_details_request).body),
-      ...getShape(getShape(osquery_get_live_query_details_request).path),
-      ...getShape(getShape(osquery_get_live_query_details_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_get_live_query_details_request, 'body'),
+    getLooseObjectFromProperty(osquery_get_live_query_details_request, 'path'),
+    getLooseObjectFromProperty(osquery_get_live_query_details_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_get_live_query_details_response)),
@@ -13836,13 +13124,11 @@ Get the results of a live query using the query action ID.`,
     urlParams: ['kuery', 'page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_get_live_query_results_request).body),
-      ...getShape(getShape(osquery_get_live_query_results_request).path),
-      ...getShape(getShape(osquery_get_live_query_results_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_get_live_query_results_request, 'body'),
+    getLooseObjectFromProperty(osquery_get_live_query_results_request, 'path'),
+    getLooseObjectFromProperty(osquery_get_live_query_results_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_get_live_query_results_response)),
@@ -13869,13 +13155,11 @@ Get a list of all query packs.`,
     urlParams: ['page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_find_packs_request).body),
-      ...getShape(getShape(osquery_find_packs_request).path),
-      ...getShape(getShape(osquery_find_packs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_find_packs_request, 'body'),
+    getLooseObjectFromProperty(osquery_find_packs_request, 'path'),
+    getLooseObjectFromProperty(osquery_find_packs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_find_packs_response)),
@@ -13902,13 +13186,11 @@ Create a query pack.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_create_packs_request).body),
-      ...getShape(getShape(osquery_create_packs_request).path),
-      ...getShape(getShape(osquery_create_packs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_create_packs_request, 'body'),
+    getLooseObjectFromProperty(osquery_create_packs_request, 'path'),
+    getLooseObjectFromProperty(osquery_create_packs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_create_packs_response)),
@@ -13935,13 +13217,11 @@ Delete a query pack using the pack ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_delete_packs_request).body),
-      ...getShape(getShape(osquery_delete_packs_request).path),
-      ...getShape(getShape(osquery_delete_packs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_delete_packs_request, 'body'),
+    getLooseObjectFromProperty(osquery_delete_packs_request, 'path'),
+    getLooseObjectFromProperty(osquery_delete_packs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_delete_packs_response)),
@@ -13968,13 +13248,11 @@ Get the details of a query pack using the pack ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_get_packs_details_request).body),
-      ...getShape(getShape(osquery_get_packs_details_request).path),
-      ...getShape(getShape(osquery_get_packs_details_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_get_packs_details_request, 'body'),
+    getLooseObjectFromProperty(osquery_get_packs_details_request, 'path'),
+    getLooseObjectFromProperty(osquery_get_packs_details_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_get_packs_details_response)),
@@ -14004,13 +13282,11 @@ Update a query pack using the pack ID.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_update_packs_request).body),
-      ...getShape(getShape(osquery_update_packs_request).path),
-      ...getShape(getShape(osquery_update_packs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_update_packs_request, 'body'),
+    getLooseObjectFromProperty(osquery_update_packs_request, 'path'),
+    getLooseObjectFromProperty(osquery_update_packs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_update_packs_response)),
@@ -14037,13 +13313,11 @@ Get a list of all saved queries.`,
     urlParams: ['page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_find_saved_queries_request).body),
-      ...getShape(getShape(osquery_find_saved_queries_request).path),
-      ...getShape(getShape(osquery_find_saved_queries_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_find_saved_queries_request, 'body'),
+    getLooseObjectFromProperty(osquery_find_saved_queries_request, 'path'),
+    getLooseObjectFromProperty(osquery_find_saved_queries_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_find_saved_queries_response)),
@@ -14070,13 +13344,11 @@ Create and run a saved query.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_create_saved_query_request).body),
-      ...getShape(getShape(osquery_create_saved_query_request).path),
-      ...getShape(getShape(osquery_create_saved_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_create_saved_query_request, 'body'),
+    getLooseObjectFromProperty(osquery_create_saved_query_request, 'path'),
+    getLooseObjectFromProperty(osquery_create_saved_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_create_saved_query_response)),
@@ -14103,13 +13375,11 @@ Delete a saved query using the query ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_delete_saved_query_request).body),
-      ...getShape(getShape(osquery_delete_saved_query_request).path),
-      ...getShape(getShape(osquery_delete_saved_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_delete_saved_query_request, 'body'),
+    getLooseObjectFromProperty(osquery_delete_saved_query_request, 'path'),
+    getLooseObjectFromProperty(osquery_delete_saved_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_delete_saved_query_response)),
@@ -14136,13 +13406,11 @@ Get the details of a saved query using the query ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_get_saved_query_details_request).body),
-      ...getShape(getShape(osquery_get_saved_query_details_request).path),
-      ...getShape(getShape(osquery_get_saved_query_details_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_get_saved_query_details_request, 'body'),
+    getLooseObjectFromProperty(osquery_get_saved_query_details_request, 'path'),
+    getLooseObjectFromProperty(osquery_get_saved_query_details_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_get_saved_query_details_response)),
@@ -14172,13 +13440,11 @@ Update a saved query using the query ID.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(osquery_update_saved_query_request).body),
-      ...getShape(getShape(osquery_update_saved_query_request).path),
-      ...getShape(getShape(osquery_update_saved_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(osquery_update_saved_query_request, 'body'),
+    getLooseObjectFromProperty(osquery_update_saved_query_request, 'path'),
+    getLooseObjectFromProperty(osquery_update_saved_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(osquery_update_saved_query_response)),
@@ -14205,13 +13471,11 @@ Pin/unpin an event to/from an existing Timeline.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(persist_pinned_event_route_request).body),
-      ...getShape(getShape(persist_pinned_event_route_request).path),
-      ...getShape(getShape(persist_pinned_event_route_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(persist_pinned_event_route_request, 'body'),
+    getLooseObjectFromProperty(persist_pinned_event_route_request, 'path'),
+    getLooseObjectFromProperty(persist_pinned_event_route_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(persist_pinned_event_route_response)),
@@ -14238,13 +13502,11 @@ Cleaning up the the Risk Engine by removing the indices, mapping and transforms`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(clean_up_risk_engine_request).body),
-      ...getShape(getShape(clean_up_risk_engine_request).path),
-      ...getShape(getShape(clean_up_risk_engine_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(clean_up_risk_engine_request, 'body'),
+    getLooseObjectFromProperty(clean_up_risk_engine_request, 'path'),
+    getLooseObjectFromProperty(clean_up_risk_engine_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(clean_up_risk_engine_response)),
@@ -14271,13 +13533,11 @@ Configuring the Risk Engine Saved Object`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(configure_risk_engine_saved_object_request).body),
-      ...getShape(getShape(configure_risk_engine_saved_object_request).path),
-      ...getShape(getShape(configure_risk_engine_saved_object_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'body'),
+    getLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'path'),
+    getLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(configure_risk_engine_saved_object_response)),
@@ -14304,13 +13564,11 @@ Schedule the risk scoring engine to run as soon as possible. You can use this to
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(schedule_risk_engine_now_request).body),
-      ...getShape(getShape(schedule_risk_engine_now_request).path),
-      ...getShape(getShape(schedule_risk_engine_now_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(schedule_risk_engine_now_request, 'body'),
+    getLooseObjectFromProperty(schedule_risk_engine_now_request, 'path'),
+    getLooseObjectFromProperty(schedule_risk_engine_now_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(schedule_risk_engine_now_response)),
@@ -14335,13 +13593,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['overwrite'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(bulk_create_saved_objects_request).body),
-      ...getShape(getShape(bulk_create_saved_objects_request).path),
-      ...getShape(getShape(bulk_create_saved_objects_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(bulk_create_saved_objects_request, 'body'),
+    getLooseObjectFromProperty(bulk_create_saved_objects_request, 'path'),
+    getLooseObjectFromProperty(bulk_create_saved_objects_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(bulk_create_saved_objects_response)),
@@ -14369,13 +13625,11 @@ WARNING: When you delete a saved object, it cannot be recovered.
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(bulk_delete_saved_objects_request).body),
-      ...getShape(getShape(bulk_delete_saved_objects_request).path),
-      ...getShape(getShape(bulk_delete_saved_objects_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(bulk_delete_saved_objects_request, 'body'),
+    getLooseObjectFromProperty(bulk_delete_saved_objects_request, 'path'),
+    getLooseObjectFromProperty(bulk_delete_saved_objects_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(bulk_delete_saved_objects_response)),
@@ -14400,13 +13654,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(bulk_get_saved_objects_request).body),
-      ...getShape(getShape(bulk_get_saved_objects_request).path),
-      ...getShape(getShape(bulk_get_saved_objects_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(bulk_get_saved_objects_request, 'body'),
+    getLooseObjectFromProperty(bulk_get_saved_objects_request, 'path'),
+    getLooseObjectFromProperty(bulk_get_saved_objects_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(bulk_get_saved_objects_response)),
@@ -14434,13 +13686,11 @@ Retrieve multiple Kibana saved objects by identifier using any legacy URL aliase
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(bulk_resolve_saved_objects_request).body),
-      ...getShape(getShape(bulk_resolve_saved_objects_request).path),
-      ...getShape(getShape(bulk_resolve_saved_objects_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'body'),
+    getLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'path'),
+    getLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(bulk_resolve_saved_objects_response)),
@@ -14467,13 +13717,11 @@ Update the attributes for multiple Kibana saved objects.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(bulk_update_saved_objects_request).body),
-      ...getShape(getShape(bulk_update_saved_objects_request).path),
-      ...getShape(getShape(bulk_update_saved_objects_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(bulk_update_saved_objects_request, 'body'),
+    getLooseObjectFromProperty(bulk_update_saved_objects_request, 'path'),
+    getLooseObjectFromProperty(bulk_update_saved_objects_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(bulk_update_saved_objects_response)),
@@ -14504,13 +13752,11 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_saved_objects_export_request).body),
-      ...getShape(getShape(post_saved_objects_export_request).path),
-      ...getShape(getShape(post_saved_objects_export_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_saved_objects_export_request, 'body'),
+    getLooseObjectFromProperty(post_saved_objects_export_request, 'path'),
+    getLooseObjectFromProperty(post_saved_objects_export_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_saved_objects_export_response)),
@@ -14552,13 +13798,11 @@ Retrieve a paginated set of Kibana saved objects.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_saved_objects_request).body),
-      ...getShape(getShape(find_saved_objects_request).path),
-      ...getShape(getShape(find_saved_objects_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_saved_objects_request, 'body'),
+    getLooseObjectFromProperty(find_saved_objects_request, 'path'),
+    getLooseObjectFromProperty(find_saved_objects_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_saved_objects_response)),
@@ -14587,13 +13831,11 @@ Exported saved objects are not backwards compatible and cannot be imported into 
     urlParams: ['overwrite', 'createNewCopies', 'compatibilityMode'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_saved_objects_import_request).body),
-      ...getShape(getShape(post_saved_objects_import_request).path),
-      ...getShape(getShape(post_saved_objects_import_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_saved_objects_import_request, 'body'),
+    getLooseObjectFromProperty(post_saved_objects_import_request, 'path'),
+    getLooseObjectFromProperty(post_saved_objects_import_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_saved_objects_import_response)),
@@ -14625,13 +13867,11 @@ To resolve errors from the Import objects API, you can:
     urlParams: ['compatibilityMode', 'createNewCopies'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(resolve_import_errors_request).body),
-      ...getShape(getShape(resolve_import_errors_request).path),
-      ...getShape(getShape(resolve_import_errors_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(resolve_import_errors_request, 'body'),
+    getLooseObjectFromProperty(resolve_import_errors_request, 'path'),
+    getLooseObjectFromProperty(resolve_import_errors_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(resolve_import_errors_response)),
@@ -14658,13 +13898,11 @@ Create a Kibana saved object with a randomly generated identifier.`,
     urlParams: ['overwrite'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_saved_object_request).body),
-      ...getShape(getShape(create_saved_object_request).path),
-      ...getShape(getShape(create_saved_object_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_saved_object_request, 'body'),
+    getLooseObjectFromProperty(create_saved_object_request, 'path'),
+    getLooseObjectFromProperty(create_saved_object_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_saved_object_response)),
@@ -14691,13 +13929,11 @@ Retrieve a single Kibana saved object by identifier.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_saved_object_request).body),
-      ...getShape(getShape(get_saved_object_request).path),
-      ...getShape(getShape(get_saved_object_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_saved_object_request, 'body'),
+    getLooseObjectFromProperty(get_saved_object_request, 'path'),
+    getLooseObjectFromProperty(get_saved_object_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_saved_object_response)),
@@ -14724,13 +13960,11 @@ Create a Kibana saved object and specify its identifier instead of using a rando
     urlParams: ['overwrite'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_saved_object_id_request).body),
-      ...getShape(getShape(create_saved_object_id_request).path),
-      ...getShape(getShape(create_saved_object_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_saved_object_id_request, 'body'),
+    getLooseObjectFromProperty(create_saved_object_id_request, 'path'),
+    getLooseObjectFromProperty(create_saved_object_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_saved_object_id_response)),
@@ -14757,13 +13991,11 @@ Update the attributes for Kibana saved objects.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_saved_object_request).body),
-      ...getShape(getShape(update_saved_object_request).path),
-      ...getShape(getShape(update_saved_object_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_saved_object_request, 'body'),
+    getLooseObjectFromProperty(update_saved_object_request, 'path'),
+    getLooseObjectFromProperty(update_saved_object_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_saved_object_response)),
@@ -14791,13 +14023,11 @@ Retrieve a single Kibana saved object by identifier using any legacy URL alias i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(resolve_saved_object_request).body),
-      ...getShape(getShape(resolve_saved_object_request).path),
-      ...getShape(getShape(resolve_saved_object_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(resolve_saved_object_request, 'body'),
+    getLooseObjectFromProperty(resolve_saved_object_request, 'path'),
+    getLooseObjectFromProperty(resolve_saved_object_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(resolve_saved_object_response)),
@@ -14824,13 +14054,11 @@ Apply a bulk action to multiple anonymization fields. The bulk action is applied
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(perform_anonymization_fields_bulk_action_request).body),
-      ...getShape(getShape(perform_anonymization_fields_bulk_action_request).path),
-      ...getShape(getShape(perform_anonymization_fields_bulk_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'body'),
+    getLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'path'),
+    getLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(perform_anonymization_fields_bulk_action_response)),
@@ -14857,13 +14085,11 @@ Get a list of all anonymization fields.`,
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page', 'all_data'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_anonymization_fields_request).body),
-      ...getShape(getShape(find_anonymization_fields_request).path),
-      ...getShape(getShape(find_anonymization_fields_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_anonymization_fields_request, 'body'),
+    getLooseObjectFromProperty(find_anonymization_fields_request, 'path'),
+    getLooseObjectFromProperty(find_anonymization_fields_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_anonymization_fields_response)),
@@ -14890,13 +14116,11 @@ Create a model response for the given chat conversation.`,
     urlParams: ['content_references_disabled'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(chat_complete_request).body),
-      ...getShape(getShape(chat_complete_request).path),
-      ...getShape(getShape(chat_complete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(chat_complete_request, 'body'),
+    getLooseObjectFromProperty(chat_complete_request, 'path'),
+    getLooseObjectFromProperty(chat_complete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(chat_complete_response)),
@@ -14923,13 +14147,11 @@ This endpoint allows users to permanently delete all conversations.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_all_conversations_request).body),
-      ...getShape(getShape(delete_all_conversations_request).path),
-      ...getShape(getShape(delete_all_conversations_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_all_conversations_request, 'body'),
+    getLooseObjectFromProperty(delete_all_conversations_request, 'path'),
+    getLooseObjectFromProperty(delete_all_conversations_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_all_conversations_response)),
@@ -14956,13 +14178,11 @@ Create a new Security AI Assistant conversation. This endpoint allows the user t
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_conversation_request).body),
-      ...getShape(getShape(create_conversation_request).path),
-      ...getShape(getShape(create_conversation_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_conversation_request, 'body'),
+    getLooseObjectFromProperty(create_conversation_request, 'path'),
+    getLooseObjectFromProperty(create_conversation_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_conversation_response)),
@@ -14989,13 +14209,11 @@ Get a list of all conversations for the current user. This endpoint allows users
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page', 'is_owner'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_conversations_request).body),
-      ...getShape(getShape(find_conversations_request).path),
-      ...getShape(getShape(find_conversations_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_conversations_request, 'body'),
+    getLooseObjectFromProperty(find_conversations_request, 'path'),
+    getLooseObjectFromProperty(find_conversations_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_conversations_response)),
@@ -15022,13 +14240,11 @@ Delete an existing conversation using the conversation ID. This endpoint allows 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_conversation_request).body),
-      ...getShape(getShape(delete_conversation_request).path),
-      ...getShape(getShape(delete_conversation_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_conversation_request, 'body'),
+    getLooseObjectFromProperty(delete_conversation_request, 'path'),
+    getLooseObjectFromProperty(delete_conversation_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_conversation_response)),
@@ -15055,13 +14271,11 @@ Get the details of an existing conversation using the conversation ID. This allo
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_conversation_request).body),
-      ...getShape(getShape(read_conversation_request).path),
-      ...getShape(getShape(read_conversation_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_conversation_request, 'body'),
+    getLooseObjectFromProperty(read_conversation_request, 'path'),
+    getLooseObjectFromProperty(read_conversation_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_conversation_response)),
@@ -15088,13 +14302,11 @@ Update an existing conversation using the conversation ID. This endpoint allows 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_conversation_request).body),
-      ...getShape(getShape(update_conversation_request).path),
-      ...getShape(getShape(update_conversation_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_conversation_request, 'body'),
+    getLooseObjectFromProperty(update_conversation_request, 'path'),
+    getLooseObjectFromProperty(update_conversation_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_conversation_response)),
@@ -15121,13 +14333,11 @@ Read a single KB`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_knowledge_base_request).body),
-      ...getShape(getShape(get_knowledge_base_request).path),
-      ...getShape(getShape(get_knowledge_base_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_knowledge_base_request, 'body'),
+    getLooseObjectFromProperty(get_knowledge_base_request, 'path'),
+    getLooseObjectFromProperty(get_knowledge_base_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_knowledge_base_response)),
@@ -15152,13 +14362,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['modelId', 'ignoreSecurityLabs'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_knowledge_base_request).body),
-      ...getShape(getShape(post_knowledge_base_request).path),
-      ...getShape(getShape(post_knowledge_base_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_knowledge_base_request, 'body'),
+    getLooseObjectFromProperty(post_knowledge_base_request, 'path'),
+    getLooseObjectFromProperty(post_knowledge_base_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_knowledge_base_response)),
@@ -15185,13 +14393,11 @@ Read a knowledge base with a specific resource identifier.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_knowledge_base_request).body),
-      ...getShape(getShape(read_knowledge_base_request).path),
-      ...getShape(getShape(read_knowledge_base_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_knowledge_base_request, 'body'),
+    getLooseObjectFromProperty(read_knowledge_base_request, 'path'),
+    getLooseObjectFromProperty(read_knowledge_base_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_knowledge_base_response)),
@@ -15218,13 +14424,11 @@ Create a knowledge base with a specific resource identifier.`,
     urlParams: ['modelId', 'ignoreSecurityLabs'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_knowledge_base_request).body),
-      ...getShape(getShape(create_knowledge_base_request).path),
-      ...getShape(getShape(create_knowledge_base_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_knowledge_base_request, 'body'),
+    getLooseObjectFromProperty(create_knowledge_base_request, 'path'),
+    getLooseObjectFromProperty(create_knowledge_base_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_knowledge_base_response)),
@@ -15251,13 +14455,11 @@ Create a Knowledge Base Entry`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_knowledge_base_entry_request).body),
-      ...getShape(getShape(create_knowledge_base_entry_request).path),
-      ...getShape(getShape(create_knowledge_base_entry_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_knowledge_base_entry_request, 'body'),
+    getLooseObjectFromProperty(create_knowledge_base_entry_request, 'path'),
+    getLooseObjectFromProperty(create_knowledge_base_entry_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_knowledge_base_entry_response)),
@@ -15284,13 +14486,11 @@ The bulk action is applied to all Knowledge Base Entries that match the filter o
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(perform_knowledge_base_entry_bulk_action_request).body),
-      ...getShape(getShape(perform_knowledge_base_entry_bulk_action_request).path),
-      ...getShape(getShape(perform_knowledge_base_entry_bulk_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'body'),
+    getLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'path'),
+    getLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(perform_knowledge_base_entry_bulk_action_response)),
@@ -15317,13 +14517,11 @@ Finds Knowledge Base Entries that match the given query.`,
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_knowledge_base_entries_request).body),
-      ...getShape(getShape(find_knowledge_base_entries_request).path),
-      ...getShape(getShape(find_knowledge_base_entries_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_knowledge_base_entries_request, 'body'),
+    getLooseObjectFromProperty(find_knowledge_base_entries_request, 'path'),
+    getLooseObjectFromProperty(find_knowledge_base_entries_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_knowledge_base_entries_response)),
@@ -15350,13 +14548,11 @@ Delete a Knowledge Base Entry by its unique \`id\`.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_knowledge_base_entry_request).body),
-      ...getShape(getShape(delete_knowledge_base_entry_request).path),
-      ...getShape(getShape(delete_knowledge_base_entry_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_knowledge_base_entry_request, 'body'),
+    getLooseObjectFromProperty(delete_knowledge_base_entry_request, 'path'),
+    getLooseObjectFromProperty(delete_knowledge_base_entry_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_knowledge_base_entry_response)),
@@ -15383,13 +14579,11 @@ Retrieve a Knowledge Base Entry by its unique \`id\`.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(read_knowledge_base_entry_request).body),
-      ...getShape(getShape(read_knowledge_base_entry_request).path),
-      ...getShape(getShape(read_knowledge_base_entry_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(read_knowledge_base_entry_request, 'body'),
+    getLooseObjectFromProperty(read_knowledge_base_entry_request, 'path'),
+    getLooseObjectFromProperty(read_knowledge_base_entry_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(read_knowledge_base_entry_response)),
@@ -15416,13 +14610,11 @@ Update an existing Knowledge Base Entry by its unique \`id\`.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_knowledge_base_entry_request).body),
-      ...getShape(getShape(update_knowledge_base_entry_request).path),
-      ...getShape(getShape(update_knowledge_base_entry_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_knowledge_base_entry_request, 'body'),
+    getLooseObjectFromProperty(update_knowledge_base_entry_request, 'path'),
+    getLooseObjectFromProperty(update_knowledge_base_entry_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_knowledge_base_entry_response)),
@@ -15449,13 +14641,11 @@ Apply a bulk action to multiple prompts. The bulk action is applied to all promp
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(perform_prompts_bulk_action_request).body),
-      ...getShape(getShape(perform_prompts_bulk_action_request).path),
-      ...getShape(getShape(perform_prompts_bulk_action_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(perform_prompts_bulk_action_request, 'body'),
+    getLooseObjectFromProperty(perform_prompts_bulk_action_request, 'path'),
+    getLooseObjectFromProperty(perform_prompts_bulk_action_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(perform_prompts_bulk_action_response)),
@@ -15482,13 +14672,11 @@ Get a list of all prompts based on optional filters, sorting, and pagination.`,
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_prompts_request).body),
-      ...getShape(getShape(find_prompts_request).path),
-      ...getShape(getShape(find_prompts_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_prompts_request, 'body'),
+    getLooseObjectFromProperty(find_prompts_request, 'path'),
+    getLooseObjectFromProperty(find_prompts_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_prompts_response)),
@@ -15509,13 +14697,11 @@ const GET_SECURITY_ROLE_CONTRACT: InternalConnectorContract = {
     urlParams: ['replaceDeprecatedPrivileges'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_security_role_request).body),
-      ...getShape(getShape(get_security_role_request).path),
-      ...getShape(getShape(get_security_role_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_security_role_request, 'body'),
+    getLooseObjectFromProperty(get_security_role_request, 'path'),
+    getLooseObjectFromProperty(get_security_role_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_security_role_response)),
@@ -15536,13 +14722,11 @@ const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_security_role_query_request).body),
-      ...getShape(getShape(post_security_role_query_request).path),
-      ...getShape(getShape(post_security_role_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_security_role_query_request, 'body'),
+    getLooseObjectFromProperty(post_security_role_query_request, 'path'),
+    getLooseObjectFromProperty(post_security_role_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_security_role_query_response)),
@@ -15563,13 +14747,11 @@ const DELETE_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_security_role_name_request).body),
-      ...getShape(getShape(delete_security_role_name_request).path),
-      ...getShape(getShape(delete_security_role_name_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_security_role_name_request, 'body'),
+    getLooseObjectFromProperty(delete_security_role_name_request, 'path'),
+    getLooseObjectFromProperty(delete_security_role_name_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_security_role_name_response)),
@@ -15590,13 +14772,11 @@ const GET_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
     urlParams: ['replaceDeprecatedPrivileges'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_security_role_name_request).body),
-      ...getShape(getShape(get_security_role_name_request).path),
-      ...getShape(getShape(get_security_role_name_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_security_role_name_request, 'body'),
+    getLooseObjectFromProperty(get_security_role_name_request, 'path'),
+    getLooseObjectFromProperty(get_security_role_name_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_security_role_name_response)),
@@ -15617,13 +14797,11 @@ const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
     urlParams: ['createOnly'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_security_role_name_request).body),
-      ...getShape(getShape(put_security_role_name_request).path),
-      ...getShape(getShape(put_security_role_name_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_security_role_name_request, 'body'),
+    getLooseObjectFromProperty(put_security_role_name_request, 'path'),
+    getLooseObjectFromProperty(put_security_role_name_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_security_role_name_response)),
@@ -15644,13 +14822,11 @@ const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_security_roles_request).body),
-      ...getShape(getShape(post_security_roles_request).path),
-      ...getShape(getShape(post_security_roles_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_security_roles_request, 'body'),
+    getLooseObjectFromProperty(post_security_roles_request, 'path'),
+    getLooseObjectFromProperty(post_security_roles_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_security_roles_response)),
@@ -15672,13 +14848,11 @@ const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_security_session_invalidate_request).body),
-      ...getShape(getShape(post_security_session_invalidate_request).path),
-      ...getShape(getShape(post_security_session_invalidate_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_security_session_invalidate_request, 'body'),
+    getLooseObjectFromProperty(post_security_session_invalidate_request, 'path'),
+    getLooseObjectFromProperty(post_security_session_invalidate_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_security_session_invalidate_response)),
@@ -15701,13 +14875,11 @@ Short URLs are created by specifying the locator ID and locator parameters. When
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_url_request).body),
-      ...getShape(getShape(post_url_request).path),
-      ...getShape(getShape(post_url_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_url_request, 'body'),
+    getLooseObjectFromProperty(post_url_request, 'path'),
+    getLooseObjectFromProperty(post_url_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_url_response)),
@@ -15729,13 +14901,11 @@ const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(resolve_url_request).body),
-      ...getShape(getShape(resolve_url_request).path),
-      ...getShape(getShape(resolve_url_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(resolve_url_request, 'body'),
+    getLooseObjectFromProperty(resolve_url_request, 'path'),
+    getLooseObjectFromProperty(resolve_url_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(resolve_url_response)),
@@ -15757,13 +14927,11 @@ const DELETE_URL_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_url_request).body),
-      ...getShape(getShape(delete_url_request).path),
-      ...getShape(getShape(delete_url_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_url_request, 'body'),
+    getLooseObjectFromProperty(delete_url_request, 'path'),
+    getLooseObjectFromProperty(delete_url_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_url_response)),
@@ -15785,13 +14953,11 @@ const GET_URL_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_url_request).body),
-      ...getShape(getShape(get_url_request).path),
-      ...getShape(getShape(get_url_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_url_request, 'body'),
+    getLooseObjectFromProperty(get_url_request, 'path'),
+    getLooseObjectFromProperty(get_url_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_url_response)),
@@ -15812,13 +14978,11 @@ const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_spaces_copy_saved_objects_request).body),
-      ...getShape(getShape(post_spaces_copy_saved_objects_request).path),
-      ...getShape(getShape(post_spaces_copy_saved_objects_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'body'),
+    getLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'path'),
+    getLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_spaces_copy_saved_objects_response)),
@@ -15839,13 +15003,11 @@ const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_spaces_disable_legacy_url_aliases_request).body),
-      ...getShape(getShape(post_spaces_disable_legacy_url_aliases_request).path),
-      ...getShape(getShape(post_spaces_disable_legacy_url_aliases_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'body'),
+    getLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'path'),
+    getLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_spaces_disable_legacy_url_aliases_response)),
@@ -15866,13 +15028,11 @@ const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract =
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_spaces_get_shareable_references_request).body),
-      ...getShape(getShape(post_spaces_get_shareable_references_request).path),
-      ...getShape(getShape(post_spaces_get_shareable_references_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'body'),
+    getLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'path'),
+    getLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_spaces_get_shareable_references_response)),
@@ -15893,13 +15053,11 @@ const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorC
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_spaces_resolve_copy_saved_objects_errors_request).body),
-      ...getShape(getShape(post_spaces_resolve_copy_saved_objects_errors_request).path),
-      ...getShape(getShape(post_spaces_resolve_copy_saved_objects_errors_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'body'),
+    getLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'path'),
+    getLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_spaces_resolve_copy_saved_objects_errors_response)),
@@ -15920,13 +15078,11 @@ const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_spaces_update_objects_spaces_request).body),
-      ...getShape(getShape(post_spaces_update_objects_spaces_request).path),
-      ...getShape(getShape(post_spaces_update_objects_spaces_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'body'),
+    getLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'path'),
+    getLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_spaces_update_objects_spaces_response)),
@@ -15947,13 +15103,11 @@ const GET_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
     urlParams: ['purpose', 'include_authorized_purposes'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_spaces_space_request).body),
-      ...getShape(getShape(get_spaces_space_request).path),
-      ...getShape(getShape(get_spaces_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_spaces_space_request, 'body'),
+    getLooseObjectFromProperty(get_spaces_space_request, 'path'),
+    getLooseObjectFromProperty(get_spaces_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_spaces_space_response)),
@@ -15974,13 +15128,11 @@ const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_spaces_space_request).body),
-      ...getShape(getShape(post_spaces_space_request).path),
-      ...getShape(getShape(post_spaces_space_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_spaces_space_request, 'body'),
+    getLooseObjectFromProperty(post_spaces_space_request, 'path'),
+    getLooseObjectFromProperty(post_spaces_space_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_spaces_space_response)),
@@ -16001,13 +15153,11 @@ const DELETE_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_spaces_space_id_request).body),
-      ...getShape(getShape(delete_spaces_space_id_request).path),
-      ...getShape(getShape(delete_spaces_space_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_spaces_space_id_request, 'body'),
+    getLooseObjectFromProperty(delete_spaces_space_id_request, 'path'),
+    getLooseObjectFromProperty(delete_spaces_space_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_spaces_space_id_response)),
@@ -16028,13 +15178,11 @@ const GET_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_spaces_space_id_request).body),
-      ...getShape(getShape(get_spaces_space_id_request).path),
-      ...getShape(getShape(get_spaces_space_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_spaces_space_id_request, 'body'),
+    getLooseObjectFromProperty(get_spaces_space_id_request, 'path'),
+    getLooseObjectFromProperty(get_spaces_space_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_spaces_space_id_response)),
@@ -16055,13 +15203,11 @@ const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_spaces_space_id_request).body),
-      ...getShape(getShape(put_spaces_space_id_request).path),
-      ...getShape(getShape(put_spaces_space_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_spaces_space_id_request, 'body'),
+    getLooseObjectFromProperty(put_spaces_space_id_request, 'path'),
+    getLooseObjectFromProperty(put_spaces_space_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_spaces_space_id_response)),
@@ -16082,13 +15228,11 @@ const GET_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: ['v7format', 'v8format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_status_request).body),
-      ...getShape(getShape(get_status_request).path),
-      ...getShape(getShape(get_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_status_request, 'body'),
+    getLooseObjectFromProperty(get_status_request, 'path'),
+    getLooseObjectFromProperty(get_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_status_response)),
@@ -16115,13 +15259,11 @@ Fetches list of all streams<br/><br/>[Required authorization] Route required pri
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_streams_request).body),
-      ...getShape(getShape(get_streams_request).path),
-      ...getShape(getShape(get_streams_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_streams_request, 'body'),
+    getLooseObjectFromProperty(get_streams_request, 'path'),
+    getLooseObjectFromProperty(get_streams_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_streams_response)),
@@ -16148,13 +15290,11 @@ Disables wired streams and deletes all existing stream definitions. The data of 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_disable_request).body),
-      ...getShape(getShape(post_streams_disable_request).path),
-      ...getShape(getShape(post_streams_disable_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_disable_request, 'body'),
+    getLooseObjectFromProperty(post_streams_disable_request, 'path'),
+    getLooseObjectFromProperty(post_streams_disable_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_disable_response)),
@@ -16181,13 +15321,11 @@ Enables wired streams<br/><br/>[Required authorization] Route required privilege
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_enable_request).body),
-      ...getShape(getShape(post_streams_enable_request).path),
-      ...getShape(getShape(post_streams_enable_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_enable_request, 'body'),
+    getLooseObjectFromProperty(post_streams_enable_request, 'path'),
+    getLooseObjectFromProperty(post_streams_enable_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_enable_response)),
@@ -16214,13 +15352,11 @@ Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><b
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_resync_request).body),
-      ...getShape(getShape(post_streams_resync_request).path),
-      ...getShape(getShape(post_streams_resync_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_resync_request, 'body'),
+    getLooseObjectFromProperty(post_streams_resync_request, 'path'),
+    getLooseObjectFromProperty(post_streams_resync_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_resync_response)),
@@ -16247,13 +15383,11 @@ Deletes a stream definition and the underlying data stream<br/><br/>[Required au
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_streams_name_request).body),
-      ...getShape(getShape(delete_streams_name_request).path),
-      ...getShape(getShape(delete_streams_name_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_streams_name_request, 'body'),
+    getLooseObjectFromProperty(delete_streams_name_request, 'path'),
+    getLooseObjectFromProperty(delete_streams_name_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_streams_name_response)),
@@ -16280,13 +15414,11 @@ Fetches a stream definition and associated dashboards<br/><br/>[Required authori
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_streams_name_request).body),
-      ...getShape(getShape(get_streams_name_request).path),
-      ...getShape(getShape(get_streams_name_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_streams_name_request, 'body'),
+    getLooseObjectFromProperty(get_streams_name_request, 'path'),
+    getLooseObjectFromProperty(get_streams_name_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_streams_name_response)),
@@ -16313,13 +15445,11 @@ Creates or updates a stream definition. Classic streams can not be created throu
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_streams_name_request).body),
-      ...getShape(getShape(put_streams_name_request).path),
-      ...getShape(getShape(put_streams_name_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_streams_name_request, 'body'),
+    getLooseObjectFromProperty(put_streams_name_request, 'path'),
+    getLooseObjectFromProperty(put_streams_name_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_streams_name_response)),
@@ -16346,13 +15476,11 @@ Forks a wired stream and creates a child stream<br/><br/>[Required authorization
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_name_fork_request).body),
-      ...getShape(getShape(post_streams_name_fork_request).path),
-      ...getShape(getShape(post_streams_name_fork_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_name_fork_request, 'body'),
+    getLooseObjectFromProperty(post_streams_name_fork_request, 'path'),
+    getLooseObjectFromProperty(post_streams_name_fork_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_name_fork_response)),
@@ -16379,13 +15507,11 @@ Fetches the group settings of a group stream definition<br/><br/>[Required autho
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_streams_name_group_request).body),
-      ...getShape(getShape(get_streams_name_group_request).path),
-      ...getShape(getShape(get_streams_name_group_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_streams_name_group_request, 'body'),
+    getLooseObjectFromProperty(get_streams_name_group_request, 'path'),
+    getLooseObjectFromProperty(get_streams_name_group_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_streams_name_group_response)),
@@ -16412,13 +15538,11 @@ Upserts the group settings of a group stream definition<br/><br/>[Required autho
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_streams_name_group_request).body),
-      ...getShape(getShape(put_streams_name_group_request).path),
-      ...getShape(getShape(put_streams_name_group_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_streams_name_group_request, 'body'),
+    getLooseObjectFromProperty(put_streams_name_group_request, 'path'),
+    getLooseObjectFromProperty(put_streams_name_group_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_streams_name_group_response)),
@@ -16445,13 +15569,11 @@ Fetches the ingest settings of an ingest stream definition<br/><br/>[Required au
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_streams_name_ingest_request).body),
-      ...getShape(getShape(get_streams_name_ingest_request).path),
-      ...getShape(getShape(get_streams_name_ingest_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_streams_name_ingest_request, 'body'),
+    getLooseObjectFromProperty(get_streams_name_ingest_request, 'path'),
+    getLooseObjectFromProperty(get_streams_name_ingest_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_streams_name_ingest_response)),
@@ -16478,13 +15600,11 @@ Upserts the ingest settings of an ingest stream definition<br/><br/>[Required au
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_streams_name_ingest_request).body),
-      ...getShape(getShape(put_streams_name_ingest_request).path),
-      ...getShape(getShape(put_streams_name_ingest_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_streams_name_ingest_request, 'body'),
+    getLooseObjectFromProperty(put_streams_name_ingest_request, 'path'),
+    getLooseObjectFromProperty(put_streams_name_ingest_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_streams_name_ingest_response)),
@@ -16511,13 +15631,11 @@ Exports the content associated to a stream.<br/><br/>[Required authorization] Ro
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_name_content_export_request).body),
-      ...getShape(getShape(post_streams_name_content_export_request).path),
-      ...getShape(getShape(post_streams_name_content_export_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_name_content_export_request, 'body'),
+    getLooseObjectFromProperty(post_streams_name_content_export_request, 'path'),
+    getLooseObjectFromProperty(post_streams_name_content_export_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_name_content_export_response)),
@@ -16544,13 +15662,11 @@ Links content objects to a stream.<br/><br/>[Required authorization] Route requi
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_name_content_import_request).body),
-      ...getShape(getShape(post_streams_name_content_import_request).path),
-      ...getShape(getShape(post_streams_name_content_import_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_name_content_import_request, 'body'),
+    getLooseObjectFromProperty(post_streams_name_content_import_request, 'path'),
+    getLooseObjectFromProperty(post_streams_name_content_import_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_name_content_import_response)),
@@ -16577,13 +15693,11 @@ Fetches all dashboards linked to a stream that are visible to the current user i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_streams_name_dashboards_request).body),
-      ...getShape(getShape(get_streams_name_dashboards_request).path),
-      ...getShape(getShape(get_streams_name_dashboards_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_streams_name_dashboards_request, 'body'),
+    getLooseObjectFromProperty(get_streams_name_dashboards_request, 'path'),
+    getLooseObjectFromProperty(get_streams_name_dashboards_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_streams_name_dashboards_response)),
@@ -16610,13 +15724,11 @@ Bulk update dashboards linked to a stream. Can link new dashboards and delete ex
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_name_dashboards_bulk_request).body),
-      ...getShape(getShape(post_streams_name_dashboards_bulk_request).path),
-      ...getShape(getShape(post_streams_name_dashboards_bulk_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'body'),
+    getLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'path'),
+    getLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_name_dashboards_bulk_response)),
@@ -16643,13 +15755,11 @@ Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the st
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_streams_name_dashboards_dashboardid_request).body),
-      ...getShape(getShape(delete_streams_name_dashboards_dashboardid_request).path),
-      ...getShape(getShape(delete_streams_name_dashboards_dashboardid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'body'),
+    getLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'path'),
+    getLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_streams_name_dashboards_dashboardid_response)),
@@ -16676,13 +15786,11 @@ Links a dashboard to a stream. Noop if the dashboard is already linked to the st
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_streams_name_dashboards_dashboardid_request).body),
-      ...getShape(getShape(put_streams_name_dashboards_dashboardid_request).path),
-      ...getShape(getShape(put_streams_name_dashboards_dashboardid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'body'),
+    getLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'path'),
+    getLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_streams_name_dashboards_dashboardid_response)),
@@ -16709,13 +15817,11 @@ Fetches all queries linked to a stream that are visible to the current user in t
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_streams_name_queries_request).body),
-      ...getShape(getShape(get_streams_name_queries_request).path),
-      ...getShape(getShape(get_streams_name_queries_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_streams_name_queries_request, 'body'),
+    getLooseObjectFromProperty(get_streams_name_queries_request, 'path'),
+    getLooseObjectFromProperty(get_streams_name_queries_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_streams_name_queries_response)),
@@ -16742,13 +15848,11 @@ Bulk update queries of a stream. Can add new queries and delete existing ones.<b
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_name_queries_bulk_request).body),
-      ...getShape(getShape(post_streams_name_queries_bulk_request).path),
-      ...getShape(getShape(post_streams_name_queries_bulk_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'body'),
+    getLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'path'),
+    getLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_name_queries_bulk_response)),
@@ -16775,13 +15879,11 @@ Remove a query from a stream. Noop if the query is not found on the stream.<br/>
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_streams_name_queries_queryid_request).body),
-      ...getShape(getShape(delete_streams_name_queries_queryid_request).path),
-      ...getShape(getShape(delete_streams_name_queries_queryid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'body'),
+    getLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'path'),
+    getLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_streams_name_queries_queryid_response)),
@@ -16808,13 +15910,11 @@ Adds a query to a stream. Noop if the query is already present on the stream.<br
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_streams_name_queries_queryid_request).body),
-      ...getShape(getShape(put_streams_name_queries_queryid_request).path),
-      ...getShape(getShape(put_streams_name_queries_queryid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'body'),
+    getLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'path'),
+    getLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_streams_name_queries_queryid_response)),
@@ -16841,13 +15941,11 @@ Fetches all rules linked to a stream that are visible to the current user in the
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_streams_name_rules_request).body),
-      ...getShape(getShape(get_streams_name_rules_request).path),
-      ...getShape(getShape(get_streams_name_rules_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_streams_name_rules_request, 'body'),
+    getLooseObjectFromProperty(get_streams_name_rules_request, 'path'),
+    getLooseObjectFromProperty(get_streams_name_rules_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_streams_name_rules_response)),
@@ -16874,13 +15972,11 @@ Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/>
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_streams_name_rules_ruleid_request).body),
-      ...getShape(getShape(delete_streams_name_rules_ruleid_request).path),
-      ...getShape(getShape(delete_streams_name_rules_ruleid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'body'),
+    getLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'path'),
+    getLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_streams_name_rules_ruleid_response)),
@@ -16907,13 +16003,11 @@ Links a rule to a stream. Noop if the rule is already linked to the stream.<br/>
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_streams_name_rules_ruleid_request).body),
-      ...getShape(getShape(put_streams_name_rules_ruleid_request).path),
-      ...getShape(getShape(put_streams_name_rules_ruleid_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'body'),
+    getLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'path'),
+    getLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_streams_name_rules_ruleid_response)),
@@ -16940,13 +16034,11 @@ Read the significant events<br/><br/>[Required authorization] Route required pri
     urlParams: ['from', 'to', 'bucketSize'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_streams_name_significant_events_request).body),
-      ...getShape(getShape(get_streams_name_significant_events_request).path),
-      ...getShape(getShape(get_streams_name_significant_events_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_streams_name_significant_events_request, 'body'),
+    getLooseObjectFromProperty(get_streams_name_significant_events_request, 'path'),
+    getLooseObjectFromProperty(get_streams_name_significant_events_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_streams_name_significant_events_response)),
@@ -16973,13 +16065,11 @@ Generate significant events queries based on the stream data<br/><br/>[Required 
     urlParams: ['connectorId', 'currentDate', 'from', 'to'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_name_significant_events_generate_request).body),
-      ...getShape(getShape(post_streams_name_significant_events_generate_request).path),
-      ...getShape(getShape(post_streams_name_significant_events_generate_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'body'),
+    getLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'path'),
+    getLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_name_significant_events_generate_response)),
@@ -17006,13 +16096,11 @@ Preview significant event results based on a given query<br/><br/>[Required auth
     urlParams: ['from', 'to', 'bucketSize'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_streams_name_significant_events_preview_request).body),
-      ...getShape(getShape(post_streams_name_significant_events_preview_request).path),
-      ...getShape(getShape(post_streams_name_significant_events_preview_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'body'),
+    getLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'path'),
+    getLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_streams_name_significant_events_preview_response)),
@@ -17040,13 +16128,11 @@ Trigger an immediate test execution for the specified monitor. The response incl
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_synthetics_monitor_test_request).body),
-      ...getShape(getShape(post_synthetics_monitor_test_request).path),
-      ...getShape(getShape(post_synthetics_monitor_test_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_synthetics_monitor_test_request, 'body'),
+    getLooseObjectFromProperty(post_synthetics_monitor_test_request, 'path'),
+    getLooseObjectFromProperty(post_synthetics_monitor_test_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_synthetics_monitor_test_response)),
@@ -17089,13 +16175,11 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_synthetic_monitors_request).body),
-      ...getShape(getShape(get_synthetic_monitors_request).path),
-      ...getShape(getShape(get_synthetic_monitors_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_synthetic_monitors_request, 'body'),
+    getLooseObjectFromProperty(get_synthetic_monitors_request, 'path'),
+    getLooseObjectFromProperty(get_synthetic_monitors_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_synthetic_monitors_response)),
@@ -17124,13 +16208,11 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_synthetic_monitors_request).body),
-      ...getShape(getShape(post_synthetic_monitors_request).path),
-      ...getShape(getShape(post_synthetic_monitors_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_synthetic_monitors_request, 'body'),
+    getLooseObjectFromProperty(post_synthetic_monitors_request, 'path'),
+    getLooseObjectFromProperty(post_synthetic_monitors_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_synthetic_monitors_response)),
@@ -17158,13 +16240,11 @@ Delete multiple monitors by sending a list of config IDs.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_synthetic_monitors_request).body),
-      ...getShape(getShape(delete_synthetic_monitors_request).path),
-      ...getShape(getShape(delete_synthetic_monitors_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_synthetic_monitors_request, 'body'),
+    getLooseObjectFromProperty(delete_synthetic_monitors_request, 'path'),
+    getLooseObjectFromProperty(delete_synthetic_monitors_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_synthetic_monitors_response)),
@@ -17193,13 +16273,11 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_synthetic_monitor_request).body),
-      ...getShape(getShape(delete_synthetic_monitor_request).path),
-      ...getShape(getShape(delete_synthetic_monitor_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_synthetic_monitor_request, 'body'),
+    getLooseObjectFromProperty(delete_synthetic_monitor_request, 'path'),
+    getLooseObjectFromProperty(delete_synthetic_monitor_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_synthetic_monitor_response)),
@@ -17224,13 +16302,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_synthetic_monitor_request).body),
-      ...getShape(getShape(get_synthetic_monitor_request).path),
-      ...getShape(getShape(get_synthetic_monitor_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_synthetic_monitor_request, 'body'),
+    getLooseObjectFromProperty(get_synthetic_monitor_request, 'path'),
+    getLooseObjectFromProperty(get_synthetic_monitor_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_synthetic_monitor_response)),
@@ -17260,13 +16336,11 @@ You can also partially update a monitor. This will only update the fields that a
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_synthetic_monitor_request).body),
-      ...getShape(getShape(put_synthetic_monitor_request).path),
-      ...getShape(getShape(put_synthetic_monitor_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_synthetic_monitor_request, 'body'),
+    getLooseObjectFromProperty(put_synthetic_monitor_request, 'path'),
+    getLooseObjectFromProperty(put_synthetic_monitor_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_synthetic_monitor_response)),
@@ -17294,13 +16368,11 @@ Get a list of all parameters. You must have \`read\` privileges for the Syntheti
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_parameters_request).body),
-      ...getShape(getShape(get_parameters_request).path),
-      ...getShape(getShape(get_parameters_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_parameters_request, 'body'),
+    getLooseObjectFromProperty(get_parameters_request, 'path'),
+    getLooseObjectFromProperty(get_parameters_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_parameters_response)),
@@ -17329,13 +16401,11 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_parameters_request).body),
-      ...getShape(getShape(post_parameters_request).path),
-      ...getShape(getShape(post_parameters_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_parameters_request, 'body'),
+    getLooseObjectFromProperty(post_parameters_request, 'path'),
+    getLooseObjectFromProperty(post_parameters_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_parameters_response)),
@@ -17364,13 +16434,11 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_parameters_request).body),
-      ...getShape(getShape(delete_parameters_request).path),
-      ...getShape(getShape(delete_parameters_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_parameters_request, 'body'),
+    getLooseObjectFromProperty(delete_parameters_request, 'path'),
+    getLooseObjectFromProperty(delete_parameters_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_parameters_response)),
@@ -17399,13 +16467,11 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_parameter_request).body),
-      ...getShape(getShape(delete_parameter_request).path),
-      ...getShape(getShape(delete_parameter_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_parameter_request, 'body'),
+    getLooseObjectFromProperty(delete_parameter_request, 'path'),
+    getLooseObjectFromProperty(delete_parameter_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_parameter_response)),
@@ -17434,13 +16500,11 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_parameter_request).body),
-      ...getShape(getShape(get_parameter_request).path),
-      ...getShape(getShape(get_parameter_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_parameter_request, 'body'),
+    getLooseObjectFromProperty(get_parameter_request, 'path'),
+    getLooseObjectFromProperty(get_parameter_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_parameter_response)),
@@ -17469,13 +16533,11 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_parameter_request).body),
-      ...getShape(getShape(put_parameter_request).path),
-      ...getShape(getShape(put_parameter_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_parameter_request, 'body'),
+    getLooseObjectFromProperty(put_parameter_request, 'path'),
+    getLooseObjectFromProperty(put_parameter_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_parameter_response)),
@@ -17504,13 +16566,11 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_private_locations_request).body),
-      ...getShape(getShape(get_private_locations_request).path),
-      ...getShape(getShape(get_private_locations_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_private_locations_request, 'body'),
+    getLooseObjectFromProperty(get_private_locations_request, 'path'),
+    getLooseObjectFromProperty(get_private_locations_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_private_locations_response)),
@@ -17537,13 +16597,11 @@ You must have \`all\` privileges for the Synthetics and Uptime feature in the Ob
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(post_private_location_request).body),
-      ...getShape(getShape(post_private_location_request).path),
-      ...getShape(getShape(post_private_location_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(post_private_location_request, 'body'),
+    getLooseObjectFromProperty(post_private_location_request, 'path'),
+    getLooseObjectFromProperty(post_private_location_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(post_private_location_response)),
@@ -17573,13 +16631,11 @@ A location cannot be deleted if it has associated monitors in use. You must dele
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_private_location_request).body),
-      ...getShape(getShape(delete_private_location_request).path),
-      ...getShape(getShape(delete_private_location_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_private_location_request, 'body'),
+    getLooseObjectFromProperty(delete_private_location_request, 'path'),
+    getLooseObjectFromProperty(delete_private_location_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_private_location_response)),
@@ -17607,13 +16663,11 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_private_location_request).body),
-      ...getShape(getShape(get_private_location_request).path),
-      ...getShape(getShape(get_private_location_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_private_location_request, 'body'),
+    getLooseObjectFromProperty(get_private_location_request, 'path'),
+    getLooseObjectFromProperty(get_private_location_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_private_location_response)),
@@ -17643,13 +16697,11 @@ When a private location's label is updated, all monitors using this location wil
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_private_location_request).body),
-      ...getShape(getShape(put_private_location_request).path),
-      ...getShape(getShape(put_private_location_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_private_location_request, 'body'),
+    getLooseObjectFromProperty(put_private_location_request, 'path'),
+    getLooseObjectFromProperty(put_private_location_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_private_location_response)),
@@ -17671,13 +16723,11 @@ const TASK_MANAGER_HEALTH_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(task_manager_health_request).body),
-      ...getShape(getShape(task_manager_health_request).path),
-      ...getShape(getShape(task_manager_health_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(task_manager_health_request, 'body'),
+    getLooseObjectFromProperty(task_manager_health_request, 'path'),
+    getLooseObjectFromProperty(task_manager_health_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(task_manager_health_response)),
@@ -17704,13 +16754,11 @@ Delete one or more Timelines or Timeline templates.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_timelines_request).body),
-      ...getShape(getShape(delete_timelines_request).path),
-      ...getShape(getShape(delete_timelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_timelines_request, 'body'),
+    getLooseObjectFromProperty(delete_timelines_request, 'path'),
+    getLooseObjectFromProperty(delete_timelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_timelines_response)),
@@ -17737,13 +16785,11 @@ Get the details of an existing saved Timeline or Timeline template.`,
     urlParams: ['template_timeline_id', 'id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_timeline_request).body),
-      ...getShape(getShape(get_timeline_request).path),
-      ...getShape(getShape(get_timeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_timeline_request, 'body'),
+    getLooseObjectFromProperty(get_timeline_request, 'path'),
+    getLooseObjectFromProperty(get_timeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_timeline_response)),
@@ -17770,13 +16816,11 @@ Update an existing Timeline. You can update the title, description, date range, 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(patch_timeline_request).body),
-      ...getShape(getShape(patch_timeline_request).path),
-      ...getShape(getShape(patch_timeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(patch_timeline_request, 'body'),
+    getLooseObjectFromProperty(patch_timeline_request, 'path'),
+    getLooseObjectFromProperty(patch_timeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(patch_timeline_response)),
@@ -17803,13 +16847,11 @@ Create a new Timeline or Timeline template.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_timelines_request).body),
-      ...getShape(getShape(create_timelines_request).path),
-      ...getShape(getShape(create_timelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_timelines_request, 'body'),
+    getLooseObjectFromProperty(create_timelines_request, 'path'),
+    getLooseObjectFromProperty(create_timelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_timelines_response)),
@@ -17837,13 +16879,11 @@ Copies and returns a timeline or timeline template.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(copy_timeline_request).body),
-      ...getShape(getShape(copy_timeline_request).path),
-      ...getShape(getShape(copy_timeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(copy_timeline_request, 'body'),
+    getLooseObjectFromProperty(copy_timeline_request, 'path'),
+    getLooseObjectFromProperty(copy_timeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(copy_timeline_response)),
@@ -17870,13 +16910,11 @@ Get the details of the draft Timeline  or Timeline template for the current user
     urlParams: ['timelineType'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_draft_timelines_request).body),
-      ...getShape(getShape(get_draft_timelines_request).path),
-      ...getShape(getShape(get_draft_timelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_draft_timelines_request, 'body'),
+    getLooseObjectFromProperty(get_draft_timelines_request, 'path'),
+    getLooseObjectFromProperty(get_draft_timelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_draft_timelines_response)),
@@ -17906,13 +16944,11 @@ Create a clean draft Timeline or Timeline template for the current user.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(clean_draft_timelines_request).body),
-      ...getShape(getShape(clean_draft_timelines_request).path),
-      ...getShape(getShape(clean_draft_timelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(clean_draft_timelines_request, 'body'),
+    getLooseObjectFromProperty(clean_draft_timelines_request, 'path'),
+    getLooseObjectFromProperty(clean_draft_timelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(clean_draft_timelines_response)),
@@ -17939,13 +16975,11 @@ Export Timelines as an NDJSON file.`,
     urlParams: ['file_name'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(export_timelines_request).body),
-      ...getShape(getShape(export_timelines_request).path),
-      ...getShape(getShape(export_timelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(export_timelines_request, 'body'),
+    getLooseObjectFromProperty(export_timelines_request, 'path'),
+    getLooseObjectFromProperty(export_timelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(export_timelines_response)),
@@ -17972,13 +17006,11 @@ Favorite a Timeline or Timeline template for the current user.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(persist_favorite_route_request).body),
-      ...getShape(getShape(persist_favorite_route_request).path),
-      ...getShape(getShape(persist_favorite_route_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(persist_favorite_route_request, 'body'),
+    getLooseObjectFromProperty(persist_favorite_route_request, 'path'),
+    getLooseObjectFromProperty(persist_favorite_route_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(persist_favorite_route_response)),
@@ -18005,13 +17037,11 @@ Import Timelines.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(import_timelines_request).body),
-      ...getShape(getShape(import_timelines_request).path),
-      ...getShape(getShape(import_timelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(import_timelines_request, 'body'),
+    getLooseObjectFromProperty(import_timelines_request, 'path'),
+    getLooseObjectFromProperty(import_timelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(import_timelines_response)),
@@ -18038,13 +17068,11 @@ Install or update prepackaged Timelines.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(install_prepacked_timelines_request).body),
-      ...getShape(getShape(install_prepacked_timelines_request).path),
-      ...getShape(getShape(install_prepacked_timelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(install_prepacked_timelines_request, 'body'),
+    getLooseObjectFromProperty(install_prepacked_timelines_request, 'path'),
+    getLooseObjectFromProperty(install_prepacked_timelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(install_prepacked_timelines_response)),
@@ -18069,13 +17097,11 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['template_timeline_id', 'id'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(resolve_timeline_request).body),
-      ...getShape(getShape(resolve_timeline_request).path),
-      ...getShape(getShape(resolve_timeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(resolve_timeline_request, 'body'),
+    getLooseObjectFromProperty(resolve_timeline_request, 'path'),
+    getLooseObjectFromProperty(resolve_timeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(resolve_timeline_response)),
@@ -18111,13 +17137,11 @@ Get a list of all saved Timelines or Timeline templates.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_timelines_request).body),
-      ...getShape(getShape(get_timelines_request).path),
-      ...getShape(getShape(get_timelines_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_timelines_request, 'body'),
+    getLooseObjectFromProperty(get_timelines_request, 'path'),
+    getLooseObjectFromProperty(get_timelines_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_timelines_response)),
@@ -18138,13 +17162,11 @@ const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_upgrade_status_request).body),
-      ...getShape(getShape(get_upgrade_status_request).path),
-      ...getShape(getShape(get_upgrade_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_upgrade_status_request, 'body'),
+    getLooseObjectFromProperty(get_upgrade_status_request, 'path'),
+    getLooseObjectFromProperty(get_upgrade_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_upgrade_status_response)),
@@ -18172,13 +17194,11 @@ You must have \`read\` privileges for the uptime feature in the Observability se
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_uptime_settings_request).body),
-      ...getShape(getShape(get_uptime_settings_request).path),
-      ...getShape(getShape(get_uptime_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_uptime_settings_request, 'body'),
+    getLooseObjectFromProperty(get_uptime_settings_request, 'path'),
+    getLooseObjectFromProperty(get_uptime_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_uptime_settings_response)),
@@ -18206,13 +17226,11 @@ Update uptime setting attributes like \`heartbeatIndices\`, \`certExpirationThre
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_uptime_settings_request).body),
-      ...getShape(getShape(put_uptime_settings_request).path),
-      ...getShape(getShape(put_uptime_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_uptime_settings_request, 'body'),
+    getLooseObjectFromProperty(put_uptime_settings_request, 'path'),
+    getLooseObjectFromProperty(put_uptime_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_uptime_settings_response)),
@@ -18243,13 +17261,11 @@ const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(find_slos_op_request).body),
-      ...getShape(getShape(find_slos_op_request).path),
-      ...getShape(getShape(find_slos_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(find_slos_op_request, 'body'),
+    getLooseObjectFromProperty(find_slos_op_request, 'path'),
+    getLooseObjectFromProperty(find_slos_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(find_slos_op_response)),
@@ -18271,13 +17287,11 @@ const CREATESLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_slo_op_request).body),
-      ...getShape(getShape(create_slo_op_request).path),
-      ...getShape(getShape(create_slo_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_slo_op_request, 'body'),
+    getLooseObjectFromProperty(create_slo_op_request, 'path'),
+    getLooseObjectFromProperty(create_slo_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_slo_op_response)),
@@ -18299,13 +17313,11 @@ const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(bulk_delete_op_request).body),
-      ...getShape(getShape(bulk_delete_op_request).path),
-      ...getShape(getShape(bulk_delete_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(bulk_delete_op_request, 'body'),
+    getLooseObjectFromProperty(bulk_delete_op_request, 'path'),
+    getLooseObjectFromProperty(bulk_delete_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(bulk_delete_op_response)),
@@ -18327,13 +17339,11 @@ const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(bulk_delete_status_op_request).body),
-      ...getShape(getShape(bulk_delete_status_op_request).path),
-      ...getShape(getShape(bulk_delete_status_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(bulk_delete_status_op_request, 'body'),
+    getLooseObjectFromProperty(bulk_delete_status_op_request, 'path'),
+    getLooseObjectFromProperty(bulk_delete_status_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(bulk_delete_status_op_response)),
@@ -18355,13 +17365,11 @@ const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_rollup_data_op_request).body),
-      ...getShape(getShape(delete_rollup_data_op_request).path),
-      ...getShape(getShape(delete_rollup_data_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_rollup_data_op_request, 'body'),
+    getLooseObjectFromProperty(delete_rollup_data_op_request, 'path'),
+    getLooseObjectFromProperty(delete_rollup_data_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_rollup_data_op_response)),
@@ -18383,13 +17391,11 @@ const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_slo_instances_op_request).body),
-      ...getShape(getShape(delete_slo_instances_op_request).path),
-      ...getShape(getShape(delete_slo_instances_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_slo_instances_op_request, 'body'),
+    getLooseObjectFromProperty(delete_slo_instances_op_request, 'path'),
+    getLooseObjectFromProperty(delete_slo_instances_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_slo_instances_op_response)),
@@ -18411,13 +17417,11 @@ const DELETESLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_slo_op_request).body),
-      ...getShape(getShape(delete_slo_op_request).path),
-      ...getShape(getShape(delete_slo_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_slo_op_request, 'body'),
+    getLooseObjectFromProperty(delete_slo_op_request, 'path'),
+    getLooseObjectFromProperty(delete_slo_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_slo_op_response)),
@@ -18439,13 +17443,11 @@ const GETSLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: ['instanceId'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_slo_op_request).body),
-      ...getShape(getShape(get_slo_op_request).path),
-      ...getShape(getShape(get_slo_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_slo_op_request, 'body'),
+    getLooseObjectFromProperty(get_slo_op_request, 'path'),
+    getLooseObjectFromProperty(get_slo_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_slo_op_response)),
@@ -18467,13 +17469,11 @@ const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_slo_op_request).body),
-      ...getShape(getShape(update_slo_op_request).path),
-      ...getShape(getShape(update_slo_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_slo_op_request, 'body'),
+    getLooseObjectFromProperty(update_slo_op_request, 'path'),
+    getLooseObjectFromProperty(update_slo_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_slo_op_response)),
@@ -18495,13 +17495,11 @@ const RESETSLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(reset_slo_op_request).body),
-      ...getShape(getShape(reset_slo_op_request).path),
-      ...getShape(getShape(reset_slo_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(reset_slo_op_request, 'body'),
+    getLooseObjectFromProperty(reset_slo_op_request, 'path'),
+    getLooseObjectFromProperty(reset_slo_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(reset_slo_op_response)),
@@ -18523,13 +17521,11 @@ const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(disable_slo_op_request).body),
-      ...getShape(getShape(disable_slo_op_request).path),
-      ...getShape(getShape(disable_slo_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(disable_slo_op_request, 'body'),
+    getLooseObjectFromProperty(disable_slo_op_request, 'path'),
+    getLooseObjectFromProperty(disable_slo_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(disable_slo_op_response)),
@@ -18551,13 +17547,11 @@ const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(enable_slo_op_request).body),
-      ...getShape(getShape(enable_slo_op_request).path),
-      ...getShape(getShape(enable_slo_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(enable_slo_op_request, 'body'),
+    getLooseObjectFromProperty(enable_slo_op_request, 'path'),
+    getLooseObjectFromProperty(enable_slo_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(enable_slo_op_response)),
@@ -18579,13 +17573,11 @@ const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
     urlParams: ['includeOutdatedOnly', 'includeHealth', 'tags', 'search', 'page', 'perPage'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_definitions_op_request).body),
-      ...getShape(getShape(get_definitions_op_request).path),
-      ...getShape(getShape(get_definitions_op_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_definitions_op_request, 'body'),
+    getLooseObjectFromProperty(get_definitions_op_request, 'path'),
+    getLooseObjectFromProperty(get_definitions_op_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_definitions_op_response)),

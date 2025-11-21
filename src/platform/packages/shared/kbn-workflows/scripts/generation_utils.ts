@@ -37,10 +37,9 @@ export function generateContractBlock(contract: ContractMeta): string {
 }
 
 // TODO: unwrap and combine the shapes at the build time instead of at the runtime
-// using union gives us 32Mb schema size, while using object gives us 14.9Mb
-// however, if we use object we override parameters from "body", "path", "query" with the same name with the latest one
+// Union is important because if we use object we override parameters from "body", "path", "query" with the same name with the latest one
 export function generateParamsSchemaString(operationIds: string[]): string {
-  return generateParamsSchemaStringObject(operationIds);
+  return generateParamsSchemaStringUnion(operationIds);
 }
 
 function generateParamsSchemaStringUnion(operationIds: string[]): string {
@@ -50,9 +49,9 @@ function generateParamsSchemaStringUnion(operationIds: string[]): string {
   return `z.union([${operationIds
     .map(
       (operationId) =>
-        `getZodObjectProperty(${getRequestSchemaName(operationId)}, 'body', z.looseObject({})),
-          getZodObjectProperty(${getRequestSchemaName(operationId)}, 'path', z.looseObject({})),
-          getZodObjectProperty(${getRequestSchemaName(operationId)}, 'query', z.looseObject({})),`
+        `getLooseObjectFromProperty(${getRequestSchemaName(operationId)}, 'body'),
+          getLooseObjectFromProperty(${getRequestSchemaName(operationId)}, 'path'),
+          getLooseObjectFromProperty(${getRequestSchemaName(operationId)}, 'query'),`
     )
     .join('\n')}])`;
 }

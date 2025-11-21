@@ -48,7 +48,6 @@ export function compileJSONSchema(jsonSchema: JSONSchema.JSONSchema) {
   const ajv = new Ajv({
     strict: false,
     validateFormats: false,
-    allErrors: true,
     inlineRefs: false,
   });
   return ajv.compile(jsonSchema);

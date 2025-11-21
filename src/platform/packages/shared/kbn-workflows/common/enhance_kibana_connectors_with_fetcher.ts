@@ -28,7 +28,7 @@ export function enhanceKibanaConnectorsWithFetcher(
     const enhancedParamsSchema =
       connector.paramsSchema instanceof z.ZodObject
         ? connector.paramsSchema.extend({ fetcher: FetcherConfigSchema })
-        : z.intersection(connector.paramsSchema, z.object({ fetcher: FetcherConfigSchema }));
+        : z.intersection(connector.paramsSchema, z.looseObject({ fetcher: FetcherConfigSchema }));
 
     return {
       ...connector,

@@ -77,7 +77,7 @@ export const generateAndSaveEsConnectors = () => {
 
 import type { InternalConnectorContract } from '../../types/latest';
 import { z } from '@kbn/zod/v4';
-import { getShape } from '../utils';
+import { getLooseObjectFromProperty, getShape } from '../utils';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import { ${contracts

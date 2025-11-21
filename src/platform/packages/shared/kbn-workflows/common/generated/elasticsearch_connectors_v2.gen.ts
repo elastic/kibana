@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
- * Generated at: 2025-11-21T22:09:19.982Z
+ * Generated at: 2025-11-21T23:10:44.492Z
  * Source: elasticsearch-specification repository (582 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -1639,7 +1639,7 @@ import {
   xpack_usage_response,
 } from './schemas/es_openapi_zod.gen';
 import type { InternalConnectorContract } from '../../types/latest';
-import { getShape } from '../utils';
+import { getLooseObjectFromProperty, getShape } from '../utils';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 
@@ -1662,13 +1662,11 @@ If the Elasticsearch security features are enabled, the deletion of a specific a
     urlParams: ['keep_alive', 'typed_keys', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(async_search_delete_request).body),
-      ...getShape(getShape(async_search_delete_request).path),
-      ...getShape(getShape(async_search_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(async_search_delete_request, 'body'),
+    getLooseObjectFromProperty(async_search_delete_request, 'path'),
+    getLooseObjectFromProperty(async_search_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(async_search_delete_response)),
@@ -1693,13 +1691,11 @@ If the Elasticsearch security features are enabled, access to the results of a s
     urlParams: ['keep_alive', 'typed_keys', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(async_search_get_request).body),
-      ...getShape(getShape(async_search_get_request).path),
-      ...getShape(getShape(async_search_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(async_search_get_request, 'body'),
+    getLooseObjectFromProperty(async_search_get_request, 'path'),
+    getLooseObjectFromProperty(async_search_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(async_search_get_response)),
@@ -1727,13 +1723,11 @@ If the Elasticsearch security features are enabled, the access to the status of 
     urlParams: ['keep_alive'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(async_search_status_request).body),
-      ...getShape(getShape(async_search_status_request).path),
-      ...getShape(getShape(async_search_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(async_search_status_request, 'body'),
+    getLooseObjectFromProperty(async_search_status_request, 'path'),
+    getLooseObjectFromProperty(async_search_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(async_search_status_response)),
@@ -1762,16 +1756,14 @@ The maximum allowed size for a stored async search response can be set by changi
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(async_search_submit_request).body),
-      ...getShape(getShape(async_search_submit_request).path),
-      ...getShape(getShape(async_search_submit_request).query),
-      ...getShape(getShape(async_search_submit1_request).body),
-      ...getShape(getShape(async_search_submit1_request).path),
-      ...getShape(getShape(async_search_submit1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(async_search_submit_request, 'body'),
+    getLooseObjectFromProperty(async_search_submit_request, 'path'),
+    getLooseObjectFromProperty(async_search_submit_request, 'query'),
+    getLooseObjectFromProperty(async_search_submit1_request, 'body'),
+    getLooseObjectFromProperty(async_search_submit1_request, 'path'),
+    getLooseObjectFromProperty(async_search_submit1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(async_search_submit_response)),
@@ -2005,22 +1997,20 @@ Refer to the linked documentation for step-by-step instructions using the index 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(bulk_request).body),
-      ...getShape(getShape(bulk_request).path),
-      ...getShape(getShape(bulk_request).query),
-      ...getShape(getShape(bulk1_request).body),
-      ...getShape(getShape(bulk1_request).path),
-      ...getShape(getShape(bulk1_request).query),
-      ...getShape(getShape(bulk2_request).body),
-      ...getShape(getShape(bulk2_request).path),
-      ...getShape(getShape(bulk2_request).query),
-      ...getShape(getShape(bulk3_request).body),
-      ...getShape(getShape(bulk3_request).path),
-      ...getShape(getShape(bulk3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(bulk_request, 'body'),
+    getLooseObjectFromProperty(bulk_request, 'path'),
+    getLooseObjectFromProperty(bulk_request, 'query'),
+    getLooseObjectFromProperty(bulk1_request, 'body'),
+    getLooseObjectFromProperty(bulk1_request, 'path'),
+    getLooseObjectFromProperty(bulk1_request, 'query'),
+    getLooseObjectFromProperty(bulk2_request, 'body'),
+    getLooseObjectFromProperty(bulk2_request, 'path'),
+    getLooseObjectFromProperty(bulk2_request, 'query'),
+    getLooseObjectFromProperty(bulk3_request, 'body'),
+    getLooseObjectFromProperty(bulk3_request, 'path'),
+    getLooseObjectFromProperty(bulk3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(bulk_response)),
@@ -2070,16 +2060,14 @@ IMPORTANT: CAT APIs are only intended for human consumption using the command li
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_aliases_request).body),
-      ...getShape(getShape(cat_aliases_request).path),
-      ...getShape(getShape(cat_aliases_request).query),
-      ...getShape(getShape(cat_aliases1_request).body),
-      ...getShape(getShape(cat_aliases1_request).path),
-      ...getShape(getShape(cat_aliases1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_aliases_request, 'body'),
+    getLooseObjectFromProperty(cat_aliases_request, 'path'),
+    getLooseObjectFromProperty(cat_aliases_request, 'query'),
+    getLooseObjectFromProperty(cat_aliases1_request, 'body'),
+    getLooseObjectFromProperty(cat_aliases1_request, 'path'),
+    getLooseObjectFromProperty(cat_aliases1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_aliases_response)),
@@ -2106,16 +2094,14 @@ IMPORTANT: CAT APIs are only intended for human consumption using the command li
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_allocation_request).body),
-      ...getShape(getShape(cat_allocation_request).path),
-      ...getShape(getShape(cat_allocation_request).query),
-      ...getShape(getShape(cat_allocation1_request).body),
-      ...getShape(getShape(cat_allocation1_request).path),
-      ...getShape(getShape(cat_allocation1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_allocation_request, 'body'),
+    getLooseObjectFromProperty(cat_allocation_request, 'path'),
+    getLooseObjectFromProperty(cat_allocation_request, 'query'),
+    getLooseObjectFromProperty(cat_allocation1_request, 'body'),
+    getLooseObjectFromProperty(cat_allocation1_request, 'path'),
+    getLooseObjectFromProperty(cat_allocation1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_allocation_response)),
@@ -2163,16 +2149,14 @@ They are not intended for use by applications. For application consumption, use 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_component_templates_request).body),
-      ...getShape(getShape(cat_component_templates_request).path),
-      ...getShape(getShape(cat_component_templates_request).query),
-      ...getShape(getShape(cat_component_templates1_request).body),
-      ...getShape(getShape(cat_component_templates1_request).path),
-      ...getShape(getShape(cat_component_templates1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_component_templates_request, 'body'),
+    getLooseObjectFromProperty(cat_component_templates_request, 'path'),
+    getLooseObjectFromProperty(cat_component_templates_request, 'query'),
+    getLooseObjectFromProperty(cat_component_templates1_request, 'body'),
+    getLooseObjectFromProperty(cat_component_templates1_request, 'path'),
+    getLooseObjectFromProperty(cat_component_templates1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_component_templates_response)),
@@ -2200,16 +2184,14 @@ They are not intended for use by applications. For application consumption, use 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_count_request).body),
-      ...getShape(getShape(cat_count_request).path),
-      ...getShape(getShape(cat_count_request).query),
-      ...getShape(getShape(cat_count1_request).body),
-      ...getShape(getShape(cat_count1_request).path),
-      ...getShape(getShape(cat_count1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_count_request, 'body'),
+    getLooseObjectFromProperty(cat_count_request, 'path'),
+    getLooseObjectFromProperty(cat_count_request, 'query'),
+    getLooseObjectFromProperty(cat_count1_request, 'body'),
+    getLooseObjectFromProperty(cat_count1_request, 'path'),
+    getLooseObjectFromProperty(cat_count1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_count_response)),
@@ -2237,16 +2219,14 @@ They are not intended for use by applications. For application consumption, use 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_fielddata_request).body),
-      ...getShape(getShape(cat_fielddata_request).path),
-      ...getShape(getShape(cat_fielddata_request).query),
-      ...getShape(getShape(cat_fielddata1_request).body),
-      ...getShape(getShape(cat_fielddata1_request).path),
-      ...getShape(getShape(cat_fielddata1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_fielddata_request, 'body'),
+    getLooseObjectFromProperty(cat_fielddata_request, 'path'),
+    getLooseObjectFromProperty(cat_fielddata_request, 'query'),
+    getLooseObjectFromProperty(cat_fielddata1_request, 'body'),
+    getLooseObjectFromProperty(cat_fielddata1_request, 'path'),
+    getLooseObjectFromProperty(cat_fielddata1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_fielddata_response)),
@@ -2278,13 +2258,11 @@ You also can use the API to track the recovery of a large cluster over a longer 
     urlParams: ['ts', 'h', 's'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_health_request).body),
-      ...getShape(getShape(cat_health_request).path),
-      ...getShape(getShape(cat_health_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_health_request, 'body'),
+    getLooseObjectFromProperty(cat_health_request, 'path'),
+    getLooseObjectFromProperty(cat_health_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_health_response)),
@@ -2307,13 +2285,11 @@ Get help for the CAT APIs.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_help_request).body),
-      ...getShape(getShape(cat_help_request).path),
-      ...getShape(getShape(cat_help_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_help_request, 'body'),
+    getLooseObjectFromProperty(cat_help_request, 'path'),
+    getLooseObjectFromProperty(cat_help_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_help_response)),
@@ -2350,16 +2326,14 @@ They are not intended for use by applications. For application consumption, use 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_indices_request).body),
-      ...getShape(getShape(cat_indices_request).path),
-      ...getShape(getShape(cat_indices_request).query),
-      ...getShape(getShape(cat_indices1_request).body),
-      ...getShape(getShape(cat_indices1_request).path),
-      ...getShape(getShape(cat_indices1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_indices_request, 'body'),
+    getLooseObjectFromProperty(cat_indices_request, 'path'),
+    getLooseObjectFromProperty(cat_indices_request, 'query'),
+    getLooseObjectFromProperty(cat_indices1_request, 'body'),
+    getLooseObjectFromProperty(cat_indices1_request, 'path'),
+    getLooseObjectFromProperty(cat_indices1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_indices_response)),
@@ -2385,13 +2359,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_master_request).body),
-      ...getShape(getShape(cat_master_request).path),
-      ...getShape(getShape(cat_master_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_master_request, 'body'),
+    getLooseObjectFromProperty(cat_master_request, 'path'),
+    getLooseObjectFromProperty(cat_master_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_master_response)),
@@ -2419,16 +2391,14 @@ application consumption, use the get data frame analytics jobs statistics API.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_ml_data_frame_analytics_request).body),
-      ...getShape(getShape(cat_ml_data_frame_analytics_request).path),
-      ...getShape(getShape(cat_ml_data_frame_analytics_request).query),
-      ...getShape(getShape(cat_ml_data_frame_analytics1_request).body),
-      ...getShape(getShape(cat_ml_data_frame_analytics1_request).path),
-      ...getShape(getShape(cat_ml_data_frame_analytics1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'body'),
+    getLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'path'),
+    getLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'query'),
+    getLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'body'),
+    getLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'path'),
+    getLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_ml_data_frame_analytics_response)),
@@ -2460,16 +2430,14 @@ application consumption, use the get datafeed statistics API.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_ml_datafeeds_request).body),
-      ...getShape(getShape(cat_ml_datafeeds_request).path),
-      ...getShape(getShape(cat_ml_datafeeds_request).query),
-      ...getShape(getShape(cat_ml_datafeeds1_request).body),
-      ...getShape(getShape(cat_ml_datafeeds1_request).path),
-      ...getShape(getShape(cat_ml_datafeeds1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_ml_datafeeds_request, 'body'),
+    getLooseObjectFromProperty(cat_ml_datafeeds_request, 'path'),
+    getLooseObjectFromProperty(cat_ml_datafeeds_request, 'query'),
+    getLooseObjectFromProperty(cat_ml_datafeeds1_request, 'body'),
+    getLooseObjectFromProperty(cat_ml_datafeeds1_request, 'path'),
+    getLooseObjectFromProperty(cat_ml_datafeeds1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_ml_datafeeds_response)),
@@ -2501,16 +2469,14 @@ application consumption, use the get anomaly detection job statistics API.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_ml_jobs_request).body),
-      ...getShape(getShape(cat_ml_jobs_request).path),
-      ...getShape(getShape(cat_ml_jobs_request).query),
-      ...getShape(getShape(cat_ml_jobs1_request).body),
-      ...getShape(getShape(cat_ml_jobs1_request).path),
-      ...getShape(getShape(cat_ml_jobs1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_ml_jobs_request, 'body'),
+    getLooseObjectFromProperty(cat_ml_jobs_request, 'path'),
+    getLooseObjectFromProperty(cat_ml_jobs_request, 'query'),
+    getLooseObjectFromProperty(cat_ml_jobs1_request, 'body'),
+    getLooseObjectFromProperty(cat_ml_jobs1_request, 'path'),
+    getLooseObjectFromProperty(cat_ml_jobs1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_ml_jobs_response)),
@@ -2539,16 +2505,14 @@ application consumption, use the get trained models statistics API.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_ml_trained_models_request).body),
-      ...getShape(getShape(cat_ml_trained_models_request).path),
-      ...getShape(getShape(cat_ml_trained_models_request).query),
-      ...getShape(getShape(cat_ml_trained_models1_request).body),
-      ...getShape(getShape(cat_ml_trained_models1_request).path),
-      ...getShape(getShape(cat_ml_trained_models1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_ml_trained_models_request, 'body'),
+    getLooseObjectFromProperty(cat_ml_trained_models_request, 'path'),
+    getLooseObjectFromProperty(cat_ml_trained_models_request, 'query'),
+    getLooseObjectFromProperty(cat_ml_trained_models1_request, 'body'),
+    getLooseObjectFromProperty(cat_ml_trained_models1_request, 'path'),
+    getLooseObjectFromProperty(cat_ml_trained_models1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_ml_trained_models_response)),
@@ -2574,13 +2538,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_nodeattrs_request).body),
-      ...getShape(getShape(cat_nodeattrs_request).path),
-      ...getShape(getShape(cat_nodeattrs_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_nodeattrs_request, 'body'),
+    getLooseObjectFromProperty(cat_nodeattrs_request, 'path'),
+    getLooseObjectFromProperty(cat_nodeattrs_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_nodeattrs_response)),
@@ -2604,13 +2566,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['full_id', 'include_unloaded_segments', 'h', 's', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_nodes_request).body),
-      ...getShape(getShape(cat_nodes_request).path),
-      ...getShape(getShape(cat_nodes_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_nodes_request, 'body'),
+    getLooseObjectFromProperty(cat_nodes_request, 'path'),
+    getLooseObjectFromProperty(cat_nodes_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_nodes_response)),
@@ -2635,13 +2595,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_pending_tasks_request).body),
-      ...getShape(getShape(cat_pending_tasks_request).path),
-      ...getShape(getShape(cat_pending_tasks_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_pending_tasks_request, 'body'),
+    getLooseObjectFromProperty(cat_pending_tasks_request, 'path'),
+    getLooseObjectFromProperty(cat_pending_tasks_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_pending_tasks_response)),
@@ -2666,13 +2624,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'include_bootstrap', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_plugins_request).body),
-      ...getShape(getShape(cat_plugins_request).path),
-      ...getShape(getShape(cat_plugins_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_plugins_request, 'body'),
+    getLooseObjectFromProperty(cat_plugins_request, 'path'),
+    getLooseObjectFromProperty(cat_plugins_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_plugins_response)),
@@ -2699,16 +2655,14 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_recovery_request).body),
-      ...getShape(getShape(cat_recovery_request).path),
-      ...getShape(getShape(cat_recovery_request).query),
-      ...getShape(getShape(cat_recovery1_request).body),
-      ...getShape(getShape(cat_recovery1_request).path),
-      ...getShape(getShape(cat_recovery1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_recovery_request, 'body'),
+    getLooseObjectFromProperty(cat_recovery_request, 'path'),
+    getLooseObjectFromProperty(cat_recovery_request, 'query'),
+    getLooseObjectFromProperty(cat_recovery1_request, 'body'),
+    getLooseObjectFromProperty(cat_recovery1_request, 'path'),
+    getLooseObjectFromProperty(cat_recovery1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_recovery_response)),
@@ -2734,13 +2688,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_repositories_request).body),
-      ...getShape(getShape(cat_repositories_request).path),
-      ...getShape(getShape(cat_repositories_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_repositories_request, 'body'),
+    getLooseObjectFromProperty(cat_repositories_request, 'path'),
+    getLooseObjectFromProperty(cat_repositories_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_repositories_response)),
@@ -2766,16 +2718,14 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_segments_request).body),
-      ...getShape(getShape(cat_segments_request).path),
-      ...getShape(getShape(cat_segments_request).query),
-      ...getShape(getShape(cat_segments1_request).body),
-      ...getShape(getShape(cat_segments1_request).path),
-      ...getShape(getShape(cat_segments1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_segments_request, 'body'),
+    getLooseObjectFromProperty(cat_segments_request, 'path'),
+    getLooseObjectFromProperty(cat_segments_request, 'query'),
+    getLooseObjectFromProperty(cat_segments1_request, 'body'),
+    getLooseObjectFromProperty(cat_segments1_request, 'path'),
+    getLooseObjectFromProperty(cat_segments1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_segments_response)),
@@ -2801,16 +2751,14 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_shards_request).body),
-      ...getShape(getShape(cat_shards_request).path),
-      ...getShape(getShape(cat_shards_request).query),
-      ...getShape(getShape(cat_shards1_request).body),
-      ...getShape(getShape(cat_shards1_request).path),
-      ...getShape(getShape(cat_shards1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_shards_request, 'body'),
+    getLooseObjectFromProperty(cat_shards_request, 'path'),
+    getLooseObjectFromProperty(cat_shards_request, 'query'),
+    getLooseObjectFromProperty(cat_shards1_request, 'body'),
+    getLooseObjectFromProperty(cat_shards1_request, 'path'),
+    getLooseObjectFromProperty(cat_shards1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_shards_response)),
@@ -2837,16 +2785,14 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_snapshots_request).body),
-      ...getShape(getShape(cat_snapshots_request).path),
-      ...getShape(getShape(cat_snapshots_request).query),
-      ...getShape(getShape(cat_snapshots1_request).body),
-      ...getShape(getShape(cat_snapshots1_request).path),
-      ...getShape(getShape(cat_snapshots1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_snapshots_request, 'body'),
+    getLooseObjectFromProperty(cat_snapshots_request, 'path'),
+    getLooseObjectFromProperty(cat_snapshots_request, 'query'),
+    getLooseObjectFromProperty(cat_snapshots1_request, 'body'),
+    getLooseObjectFromProperty(cat_snapshots1_request, 'path'),
+    getLooseObjectFromProperty(cat_snapshots1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_snapshots_response)),
@@ -2880,13 +2826,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_tasks_request).body),
-      ...getShape(getShape(cat_tasks_request).path),
-      ...getShape(getShape(cat_tasks_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_tasks_request, 'body'),
+    getLooseObjectFromProperty(cat_tasks_request, 'path'),
+    getLooseObjectFromProperty(cat_tasks_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_tasks_response)),
@@ -2912,16 +2856,14 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_templates_request).body),
-      ...getShape(getShape(cat_templates_request).path),
-      ...getShape(getShape(cat_templates_request).query),
-      ...getShape(getShape(cat_templates1_request).body),
-      ...getShape(getShape(cat_templates1_request).path),
-      ...getShape(getShape(cat_templates1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_templates_request, 'body'),
+    getLooseObjectFromProperty(cat_templates_request, 'path'),
+    getLooseObjectFromProperty(cat_templates_request, 'query'),
+    getLooseObjectFromProperty(cat_templates1_request, 'body'),
+    getLooseObjectFromProperty(cat_templates1_request, 'path'),
+    getLooseObjectFromProperty(cat_templates1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_templates_response)),
@@ -2948,16 +2890,14 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_thread_pool_request).body),
-      ...getShape(getShape(cat_thread_pool_request).path),
-      ...getShape(getShape(cat_thread_pool_request).query),
-      ...getShape(getShape(cat_thread_pool1_request).body),
-      ...getShape(getShape(cat_thread_pool1_request).path),
-      ...getShape(getShape(cat_thread_pool1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_thread_pool_request, 'body'),
+    getLooseObjectFromProperty(cat_thread_pool_request, 'path'),
+    getLooseObjectFromProperty(cat_thread_pool_request, 'query'),
+    getLooseObjectFromProperty(cat_thread_pool1_request, 'body'),
+    getLooseObjectFromProperty(cat_thread_pool1_request, 'path'),
+    getLooseObjectFromProperty(cat_thread_pool1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_thread_pool_response)),
@@ -2986,16 +2926,14 @@ application consumption, use the get transform statistics API.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cat_transforms_request).body),
-      ...getShape(getShape(cat_transforms_request).path),
-      ...getShape(getShape(cat_transforms_request).query),
-      ...getShape(getShape(cat_transforms1_request).body),
-      ...getShape(getShape(cat_transforms1_request).path),
-      ...getShape(getShape(cat_transforms1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cat_transforms_request, 'body'),
+    getLooseObjectFromProperty(cat_transforms_request, 'path'),
+    getLooseObjectFromProperty(cat_transforms_request, 'query'),
+    getLooseObjectFromProperty(cat_transforms1_request, 'body'),
+    getLooseObjectFromProperty(cat_transforms1_request, 'path'),
+    getLooseObjectFromProperty(cat_transforms1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cat_transforms_response)),
@@ -3020,13 +2958,11 @@ Delete a collection of cross-cluster replication auto-follow patterns.`,
     urlParams: ['master_timeout', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_delete_auto_follow_pattern_request).body),
-      ...getShape(getShape(ccr_delete_auto_follow_pattern_request).path),
-      ...getShape(getShape(ccr_delete_auto_follow_pattern_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'body'),
+    getLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'path'),
+    getLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_delete_auto_follow_pattern_response)),
@@ -3049,13 +2985,11 @@ When the API returns, the follower index exists and cross-cluster replication st
     urlParams: ['master_timeout', 'wait_for_active_shards'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_follow_request).body),
-      ...getShape(getShape(ccr_follow_request).path),
-      ...getShape(getShape(ccr_follow_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_follow_request, 'body'),
+    getLooseObjectFromProperty(ccr_follow_request, 'path'),
+    getLooseObjectFromProperty(ccr_follow_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_follow_response)),
@@ -3080,13 +3014,11 @@ For example, the results include follower index names, leader index names, repli
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_follow_info_request).body),
-      ...getShape(getShape(ccr_follow_info_request).path),
-      ...getShape(getShape(ccr_follow_info_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_follow_info_request, 'body'),
+    getLooseObjectFromProperty(ccr_follow_info_request, 'path'),
+    getLooseObjectFromProperty(ccr_follow_info_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_follow_info_response)),
@@ -3111,13 +3043,11 @@ The API returns shard-level stats about the "following tasks" associated with ea
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_follow_stats_request).body),
-      ...getShape(getShape(ccr_follow_stats_request).path),
-      ...getShape(getShape(ccr_follow_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_follow_stats_request, 'body'),
+    getLooseObjectFromProperty(ccr_follow_stats_request, 'path'),
+    getLooseObjectFromProperty(ccr_follow_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_follow_stats_response)),
@@ -3150,13 +3080,11 @@ The only purpose of this API is to handle the case of failure to remove the foll
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_forget_follower_request).body),
-      ...getShape(getShape(ccr_forget_follower_request).path),
-      ...getShape(getShape(ccr_forget_follower_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_forget_follower_request, 'body'),
+    getLooseObjectFromProperty(ccr_forget_follower_request, 'path'),
+    getLooseObjectFromProperty(ccr_forget_follower_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_forget_follower_response)),
@@ -3180,16 +3108,14 @@ Get cross-cluster replication auto-follow patterns.`,
     urlParams: ['master_timeout', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_get_auto_follow_pattern_request).body),
-      ...getShape(getShape(ccr_get_auto_follow_pattern_request).path),
-      ...getShape(getShape(ccr_get_auto_follow_pattern_request).query),
-      ...getShape(getShape(ccr_get_auto_follow_pattern1_request).body),
-      ...getShape(getShape(ccr_get_auto_follow_pattern1_request).path),
-      ...getShape(getShape(ccr_get_auto_follow_pattern1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'body'),
+    getLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'path'),
+    getLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'query'),
+    getLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'body'),
+    getLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'path'),
+    getLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_get_auto_follow_pattern_response)),
@@ -3220,13 +3146,11 @@ Remote indices that were created while the pattern was paused will also be follo
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_pause_auto_follow_pattern_request).body),
-      ...getShape(getShape(ccr_pause_auto_follow_pattern_request).path),
-      ...getShape(getShape(ccr_pause_auto_follow_pattern_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'body'),
+    getLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'path'),
+    getLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_pause_auto_follow_pattern_response)),
@@ -3253,13 +3177,11 @@ You can pause and resume a follower index to change the configuration of the fol
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_pause_follow_request).body),
-      ...getShape(getShape(ccr_pause_follow_request).path),
-      ...getShape(getShape(ccr_pause_follow_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_pause_follow_request, 'body'),
+    getLooseObjectFromProperty(ccr_pause_follow_request, 'path'),
+    getLooseObjectFromProperty(ccr_pause_follow_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_pause_follow_response)),
@@ -3287,13 +3209,11 @@ NOTE: Follower indices that were configured automatically before updating an aut
     urlParams: ['master_timeout', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_put_auto_follow_pattern_request).body),
-      ...getShape(getShape(ccr_put_auto_follow_pattern_request).path),
-      ...getShape(getShape(ccr_put_auto_follow_pattern_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'body'),
+    getLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'path'),
+    getLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_put_auto_follow_pattern_response)),
@@ -3319,13 +3239,11 @@ Remote indices created while the pattern was paused will also be followed unless
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_resume_auto_follow_pattern_request).body),
-      ...getShape(getShape(ccr_resume_auto_follow_pattern_request).path),
-      ...getShape(getShape(ccr_resume_auto_follow_pattern_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'body'),
+    getLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'path'),
+    getLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_resume_auto_follow_pattern_response)),
@@ -3351,13 +3269,11 @@ When this API returns, the follower index will resume fetching operations from t
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_resume_follow_request).body),
-      ...getShape(getShape(ccr_resume_follow_request).path),
-      ...getShape(getShape(ccr_resume_follow_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_resume_follow_request, 'body'),
+    getLooseObjectFromProperty(ccr_resume_follow_request, 'path'),
+    getLooseObjectFromProperty(ccr_resume_follow_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_resume_follow_response)),
@@ -3380,13 +3296,11 @@ This API returns stats about auto-following and the same shard-level stats as th
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_stats_request).body),
-      ...getShape(getShape(ccr_stats_request).path),
-      ...getShape(getShape(ccr_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_stats_request, 'body'),
+    getLooseObjectFromProperty(ccr_stats_request, 'path'),
+    getLooseObjectFromProperty(ccr_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_stats_response)),
@@ -3415,13 +3329,11 @@ The follower index must be paused and closed before you call the unfollow API.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ccr_unfollow_request).body),
-      ...getShape(getShape(ccr_unfollow_request).path),
-      ...getShape(getShape(ccr_unfollow_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ccr_unfollow_request, 'body'),
+    getLooseObjectFromProperty(ccr_unfollow_request, 'path'),
+    getLooseObjectFromProperty(ccr_unfollow_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ccr_unfollow_response)),
@@ -3444,16 +3356,14 @@ Clear the search context and results for a scrolling search.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(clear_scroll_request).body),
-      ...getShape(getShape(clear_scroll_request).path),
-      ...getShape(getShape(clear_scroll_request).query),
-      ...getShape(getShape(clear_scroll1_request).body),
-      ...getShape(getShape(clear_scroll1_request).path),
-      ...getShape(getShape(clear_scroll1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(clear_scroll_request, 'body'),
+    getLooseObjectFromProperty(clear_scroll_request, 'path'),
+    getLooseObjectFromProperty(clear_scroll_request, 'query'),
+    getLooseObjectFromProperty(clear_scroll1_request, 'body'),
+    getLooseObjectFromProperty(clear_scroll1_request, 'path'),
+    getLooseObjectFromProperty(clear_scroll1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(clear_scroll_response)),
@@ -3480,13 +3390,11 @@ However, keeping points in time has a cost; close them as soon as they are no lo
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(close_point_in_time_request).body),
-      ...getShape(getShape(close_point_in_time_request).path),
-      ...getShape(getShape(close_point_in_time_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(close_point_in_time_request, 'body'),
+    getLooseObjectFromProperty(close_point_in_time_request, 'path'),
+    getLooseObjectFromProperty(close_point_in_time_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(close_point_in_time_response)),
@@ -3514,16 +3422,14 @@ Refer to the linked documentation for examples of how to troubleshoot allocation
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_allocation_explain_request).body),
-      ...getShape(getShape(cluster_allocation_explain_request).path),
-      ...getShape(getShape(cluster_allocation_explain_request).query),
-      ...getShape(getShape(cluster_allocation_explain1_request).body),
-      ...getShape(getShape(cluster_allocation_explain1_request).path),
-      ...getShape(getShape(cluster_allocation_explain1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_allocation_explain_request, 'body'),
+    getLooseObjectFromProperty(cluster_allocation_explain_request, 'path'),
+    getLooseObjectFromProperty(cluster_allocation_explain_request, 'query'),
+    getLooseObjectFromProperty(cluster_allocation_explain1_request, 'body'),
+    getLooseObjectFromProperty(cluster_allocation_explain1_request, 'path'),
+    getLooseObjectFromProperty(cluster_allocation_explain1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_allocation_explain_response)),
@@ -3547,13 +3453,11 @@ Component templates are building blocks for constructing index templates that sp
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'local'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_delete_component_template_request).body),
-      ...getShape(getShape(cluster_delete_component_template_request).path),
-      ...getShape(getShape(cluster_delete_component_template_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_delete_component_template_request, 'body'),
+    getLooseObjectFromProperty(cluster_delete_component_template_request, 'path'),
+    getLooseObjectFromProperty(cluster_delete_component_template_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_delete_component_template_response)),
@@ -3583,13 +3487,11 @@ Remove master-eligible nodes from the voting configuration exclusion list.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_delete_voting_config_exclusions_request).body),
-      ...getShape(getShape(cluster_delete_voting_config_exclusions_request).path),
-      ...getShape(getShape(cluster_delete_voting_config_exclusions_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'body'),
+    getLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'path'),
+    getLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_delete_voting_config_exclusions_response)),
@@ -3612,13 +3514,11 @@ Returns information about whether a particular component template exists.`,
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'local'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_exists_component_template_request).body),
-      ...getShape(getShape(cluster_exists_component_template_request).path),
-      ...getShape(getShape(cluster_exists_component_template_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_exists_component_template_request, 'body'),
+    getLooseObjectFromProperty(cluster_exists_component_template_request, 'path'),
+    getLooseObjectFromProperty(cluster_exists_component_template_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_exists_component_template_response)),
@@ -3641,16 +3541,14 @@ Get information about component templates.`,
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'local'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_get_component_template_request).body),
-      ...getShape(getShape(cluster_get_component_template_request).path),
-      ...getShape(getShape(cluster_get_component_template_request).query),
-      ...getShape(getShape(cluster_get_component_template1_request).body),
-      ...getShape(getShape(cluster_get_component_template1_request).path),
-      ...getShape(getShape(cluster_get_component_template1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_get_component_template_request, 'body'),
+    getLooseObjectFromProperty(cluster_get_component_template_request, 'path'),
+    getLooseObjectFromProperty(cluster_get_component_template_request, 'query'),
+    getLooseObjectFromProperty(cluster_get_component_template1_request, 'body'),
+    getLooseObjectFromProperty(cluster_get_component_template1_request, 'path'),
+    getLooseObjectFromProperty(cluster_get_component_template1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_get_component_template_response)),
@@ -3683,13 +3581,11 @@ By default, it returns only settings that have been explicitly defined.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_get_settings_request).body),
-      ...getShape(getShape(cluster_get_settings_request).path),
-      ...getShape(getShape(cluster_get_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_get_settings_request, 'body'),
+    getLooseObjectFromProperty(cluster_get_settings_request, 'path'),
+    getLooseObjectFromProperty(cluster_get_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_get_settings_response)),
@@ -3721,16 +3617,14 @@ The cluster status is controlled by the worst index status.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_health_request).body),
-      ...getShape(getShape(cluster_health_request).path),
-      ...getShape(getShape(cluster_health_request).query),
-      ...getShape(getShape(cluster_health1_request).body),
-      ...getShape(getShape(cluster_health1_request).path),
-      ...getShape(getShape(cluster_health1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_health_request, 'body'),
+    getLooseObjectFromProperty(cluster_health_request, 'path'),
+    getLooseObjectFromProperty(cluster_health_request, 'query'),
+    getLooseObjectFromProperty(cluster_health1_request, 'body'),
+    getLooseObjectFromProperty(cluster_health1_request, 'path'),
+    getLooseObjectFromProperty(cluster_health1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_health_response)),
@@ -3754,13 +3648,11 @@ Returns basic information about the cluster.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_info_request).body),
-      ...getShape(getShape(cluster_info_request).path),
-      ...getShape(getShape(cluster_info_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_info_request, 'body'),
+    getLooseObjectFromProperty(cluster_info_request, 'path'),
+    getLooseObjectFromProperty(cluster_info_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_info_response)),
@@ -3787,13 +3679,11 @@ However, if a user-initiated task such as a create index command causes a cluste
     urlParams: ['local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_pending_tasks_request).body),
-      ...getShape(getShape(cluster_pending_tasks_request).path),
-      ...getShape(getShape(cluster_pending_tasks_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_pending_tasks_request, 'body'),
+    getLooseObjectFromProperty(cluster_pending_tasks_request, 'path'),
+    getLooseObjectFromProperty(cluster_pending_tasks_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_pending_tasks_response)),
@@ -3839,13 +3729,11 @@ They are not required when removing master-ineligible nodes or when removing few
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_post_voting_config_exclusions_request).body),
-      ...getShape(getShape(cluster_post_voting_config_exclusions_request).path),
-      ...getShape(getShape(cluster_post_voting_config_exclusions_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'body'),
+    getLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'path'),
+    getLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_post_voting_config_exclusions_response)),
@@ -3886,16 +3774,14 @@ To be applied, a component template must be included in an index template's \`co
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'local'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_put_component_template_request).body),
-      ...getShape(getShape(cluster_put_component_template_request).path),
-      ...getShape(getShape(cluster_put_component_template_request).query),
-      ...getShape(getShape(cluster_put_component_template1_request).body),
-      ...getShape(getShape(cluster_put_component_template1_request).path),
-      ...getShape(getShape(cluster_put_component_template1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_put_component_template_request, 'body'),
+    getLooseObjectFromProperty(cluster_put_component_template_request, 'path'),
+    getLooseObjectFromProperty(cluster_put_component_template_request, 'query'),
+    getLooseObjectFromProperty(cluster_put_component_template1_request, 'body'),
+    getLooseObjectFromProperty(cluster_put_component_template1_request, 'path'),
+    getLooseObjectFromProperty(cluster_put_component_template1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_put_component_template_response)),
@@ -3944,13 +3830,11 @@ If a cluster becomes unstable, transient settings can clear unexpectedly, result
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_put_settings_request).body),
-      ...getShape(getShape(cluster_put_settings_request).path),
-      ...getShape(getShape(cluster_put_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_put_settings_request, 'body'),
+    getLooseObjectFromProperty(cluster_put_settings_request, 'path'),
+    getLooseObjectFromProperty(cluster_put_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_put_settings_response)),
@@ -3981,13 +3865,11 @@ The API returns connection and endpoint information keyed by the configured remo
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_remote_info_request).body),
-      ...getShape(getShape(cluster_remote_info_request).path),
-      ...getShape(getShape(cluster_remote_info_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_remote_info_request, 'body'),
+    getLooseObjectFromProperty(cluster_remote_info_request, 'path'),
+    getLooseObjectFromProperty(cluster_remote_info_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_remote_info_response)),
@@ -4022,13 +3904,11 @@ Once the problem has been corrected, allocation can be manually retried by calli
     urlParams: ['dry_run', 'explain', 'metric', 'retry_failed', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_reroute_request).body),
-      ...getShape(getShape(cluster_reroute_request).path),
-      ...getShape(getShape(cluster_reroute_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_reroute_request, 'body'),
+    getLooseObjectFromProperty(cluster_reroute_request, 'path'),
+    getLooseObjectFromProperty(cluster_reroute_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_reroute_response)),
@@ -4068,19 +3948,17 @@ Instead, obtain the information you require using other more stable cluster APIs
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_state_request).body),
-      ...getShape(getShape(cluster_state_request).path),
-      ...getShape(getShape(cluster_state_request).query),
-      ...getShape(getShape(cluster_state1_request).body),
-      ...getShape(getShape(cluster_state1_request).path),
-      ...getShape(getShape(cluster_state1_request).query),
-      ...getShape(getShape(cluster_state2_request).body),
-      ...getShape(getShape(cluster_state2_request).path),
-      ...getShape(getShape(cluster_state2_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_state_request, 'body'),
+    getLooseObjectFromProperty(cluster_state_request, 'path'),
+    getLooseObjectFromProperty(cluster_state_request, 'query'),
+    getLooseObjectFromProperty(cluster_state1_request, 'body'),
+    getLooseObjectFromProperty(cluster_state1_request, 'path'),
+    getLooseObjectFromProperty(cluster_state1_request, 'query'),
+    getLooseObjectFromProperty(cluster_state2_request, 'body'),
+    getLooseObjectFromProperty(cluster_state2_request, 'path'),
+    getLooseObjectFromProperty(cluster_state2_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_state_response)),
@@ -4105,16 +3983,14 @@ Get basic index metrics (shard numbers, store size, memory usage) and informatio
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(cluster_stats_request).body),
-      ...getShape(getShape(cluster_stats_request).path),
-      ...getShape(getShape(cluster_stats_request).query),
-      ...getShape(getShape(cluster_stats1_request).body),
-      ...getShape(getShape(cluster_stats1_request).path),
-      ...getShape(getShape(cluster_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(cluster_stats_request, 'body'),
+    getLooseObjectFromProperty(cluster_stats_request, 'path'),
+    getLooseObjectFromProperty(cluster_stats_request, 'query'),
+    getLooseObjectFromProperty(cluster_stats1_request, 'body'),
+    getLooseObjectFromProperty(cluster_stats1_request, 'path'),
+    getLooseObjectFromProperty(cluster_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(cluster_stats_response)),
@@ -4139,13 +4015,11 @@ Update the \`last_seen\` field in the connector and set it to the current timest
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_check_in_request).body),
-      ...getShape(getShape(connector_check_in_request).path),
-      ...getShape(getShape(connector_check_in_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_check_in_request, 'body'),
+    getLooseObjectFromProperty(connector_check_in_request, 'path'),
+    getLooseObjectFromProperty(connector_check_in_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_check_in_response)),
@@ -4172,13 +4046,11 @@ These need to be removed manually.`,
     urlParams: ['include_deleted', 'delete_sync_jobs', 'hard'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_delete_request).body),
-      ...getShape(getShape(connector_delete_request).path),
-      ...getShape(getShape(connector_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_delete_request, 'body'),
+    getLooseObjectFromProperty(connector_delete_request, 'path'),
+    getLooseObjectFromProperty(connector_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_delete_response)),
@@ -4202,13 +4074,11 @@ Get the details about a connector.`,
     urlParams: ['include_deleted', 'delete_sync_jobs', 'hard'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_get_request).body),
-      ...getShape(getShape(connector_get_request).path),
-      ...getShape(getShape(connector_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_get_request, 'body'),
+    getLooseObjectFromProperty(connector_get_request, 'path'),
+    getLooseObjectFromProperty(connector_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_get_response)),
@@ -4263,13 +4133,11 @@ Get information about all connectors.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_list_request).body),
-      ...getShape(getShape(connector_list_request).path),
-      ...getShape(getShape(connector_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_list_request, 'body'),
+    getLooseObjectFromProperty(connector_list_request, 'path'),
+    getLooseObjectFromProperty(connector_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_list_response)),
@@ -4303,13 +4171,11 @@ Self-managed connectors (Connector clients) are self-managed on your infrastruct
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_post_request).body),
-      ...getShape(getShape(connector_post_request).path),
-      ...getShape(getShape(connector_post_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_post_request, 'body'),
+    getLooseObjectFromProperty(connector_post_request, 'path'),
+    getLooseObjectFromProperty(connector_post_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_post_response)),
@@ -4342,16 +4208,14 @@ const CONNECTOR_PUT_CONTRACT: InternalConnectorContract = {
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_put_request).body),
-      ...getShape(getShape(connector_put_request).path),
-      ...getShape(getShape(connector_put_request).query),
-      ...getShape(getShape(connector_put1_request).body),
-      ...getShape(getShape(connector_put1_request).path),
-      ...getShape(getShape(connector_put1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_put_request, 'body'),
+    getLooseObjectFromProperty(connector_put_request, 'path'),
+    getLooseObjectFromProperty(connector_put_request, 'query'),
+    getLooseObjectFromProperty(connector_put1_request, 'body'),
+    getLooseObjectFromProperty(connector_put1_request, 'path'),
+    getLooseObjectFromProperty(connector_put1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_put_response)),
@@ -4453,13 +4317,11 @@ The connector service is then responsible for setting the status of connector sy
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_sync_job_cancel_request).body),
-      ...getShape(getShape(connector_sync_job_cancel_request).path),
-      ...getShape(getShape(connector_sync_job_cancel_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_sync_job_cancel_request, 'body'),
+    getLooseObjectFromProperty(connector_sync_job_cancel_request, 'path'),
+    getLooseObjectFromProperty(connector_sync_job_cancel_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_sync_job_cancel_response)),
@@ -4485,13 +4347,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_sync_job_check_in_request).body),
-      ...getShape(getShape(connector_sync_job_check_in_request).path),
-      ...getShape(getShape(connector_sync_job_check_in_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_sync_job_check_in_request, 'body'),
+    getLooseObjectFromProperty(connector_sync_job_check_in_request, 'path'),
+    getLooseObjectFromProperty(connector_sync_job_check_in_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_sync_job_check_in_response)),
@@ -4521,13 +4381,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_sync_job_claim_request).body),
-      ...getShape(getShape(connector_sync_job_claim_request).path),
-      ...getShape(getShape(connector_sync_job_claim_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_sync_job_claim_request, 'body'),
+    getLooseObjectFromProperty(connector_sync_job_claim_request, 'path'),
+    getLooseObjectFromProperty(connector_sync_job_claim_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_sync_job_claim_response)),
@@ -4552,13 +4410,11 @@ This is a destructive action that is not recoverable.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_sync_job_delete_request).body),
-      ...getShape(getShape(connector_sync_job_delete_request).path),
-      ...getShape(getShape(connector_sync_job_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_sync_job_delete_request, 'body'),
+    getLooseObjectFromProperty(connector_sync_job_delete_request, 'path'),
+    getLooseObjectFromProperty(connector_sync_job_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_sync_job_delete_response)),
@@ -4584,13 +4440,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_sync_job_error_request).body),
-      ...getShape(getShape(connector_sync_job_error_request).path),
-      ...getShape(getShape(connector_sync_job_error_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_sync_job_error_request, 'body'),
+    getLooseObjectFromProperty(connector_sync_job_error_request, 'path'),
+    getLooseObjectFromProperty(connector_sync_job_error_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_sync_job_error_response)),
@@ -4612,13 +4466,11 @@ const CONNECTOR_SYNC_JOB_GET_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_sync_job_get_request).body),
-      ...getShape(getShape(connector_sync_job_get_request).path),
-      ...getShape(getShape(connector_sync_job_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_sync_job_get_request, 'body'),
+    getLooseObjectFromProperty(connector_sync_job_get_request, 'path'),
+    getLooseObjectFromProperty(connector_sync_job_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_sync_job_get_response)),
@@ -4642,13 +4494,11 @@ Get information about all stored connector sync jobs listed by their creation da
     urlParams: ['from', 'size', 'status', 'connector_id', 'job_type'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_sync_job_list_request).body),
-      ...getShape(getShape(connector_sync_job_list_request).path),
-      ...getShape(getShape(connector_sync_job_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_sync_job_list_request, 'body'),
+    getLooseObjectFromProperty(connector_sync_job_list_request, 'path'),
+    getLooseObjectFromProperty(connector_sync_job_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_sync_job_list_response)),
@@ -4672,13 +4522,11 @@ Create a connector sync job document in the internal index and initialize its co
     urlParams: ['from', 'size', 'status', 'connector_id', 'job_type'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_sync_job_post_request).body),
-      ...getShape(getShape(connector_sync_job_post_request).path),
-      ...getShape(getShape(connector_sync_job_post_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_sync_job_post_request, 'body'),
+    getLooseObjectFromProperty(connector_sync_job_post_request, 'path'),
+    getLooseObjectFromProperty(connector_sync_job_post_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_sync_job_post_response)),
@@ -4706,13 +4554,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_sync_job_update_stats_request).body),
-      ...getShape(getShape(connector_sync_job_update_stats_request).path),
-      ...getShape(getShape(connector_sync_job_update_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_sync_job_update_stats_request, 'body'),
+    getLooseObjectFromProperty(connector_sync_job_update_stats_request, 'path'),
+    getLooseObjectFromProperty(connector_sync_job_update_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_sync_job_update_stats_response)),
@@ -4736,13 +4582,11 @@ Activates the valid draft filtering for a connector.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_active_filtering_request).body),
-      ...getShape(getShape(connector_update_active_filtering_request).path),
-      ...getShape(getShape(connector_update_active_filtering_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_active_filtering_request, 'body'),
+    getLooseObjectFromProperty(connector_update_active_filtering_request, 'path'),
+    getLooseObjectFromProperty(connector_update_active_filtering_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_active_filtering_response)),
@@ -4769,13 +4613,11 @@ Self-managed connectors (connector clients) do not use this field.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_api_key_id_request).body),
-      ...getShape(getShape(connector_update_api_key_id_request).path),
-      ...getShape(getShape(connector_update_api_key_id_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_api_key_id_request, 'body'),
+    getLooseObjectFromProperty(connector_update_api_key_id_request, 'path'),
+    getLooseObjectFromProperty(connector_update_api_key_id_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_api_key_id_response)),
@@ -4799,13 +4641,11 @@ Update the configuration field in the connector document.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_configuration_request).body),
-      ...getShape(getShape(connector_update_configuration_request).path),
-      ...getShape(getShape(connector_update_configuration_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_configuration_request, 'body'),
+    getLooseObjectFromProperty(connector_update_configuration_request, 'path'),
+    getLooseObjectFromProperty(connector_update_configuration_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_configuration_response)),
@@ -4831,13 +4671,11 @@ Otherwise, if the error is reset to null, the connector status is updated to con
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_error_request).body),
-      ...getShape(getShape(connector_update_error_request).path),
-      ...getShape(getShape(connector_update_error_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_error_request, 'body'),
+    getLooseObjectFromProperty(connector_update_error_request, 'path'),
+    getLooseObjectFromProperty(connector_update_error_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_error_response)),
@@ -4872,13 +4710,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_features_request).body),
-      ...getShape(getShape(connector_update_features_request).path),
-      ...getShape(getShape(connector_update_features_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_features_request, 'body'),
+    getLooseObjectFromProperty(connector_update_features_request, 'path'),
+    getLooseObjectFromProperty(connector_update_features_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_features_response)),
@@ -4904,13 +4740,11 @@ The filtering property is used to configure sync rules (both basic and advanced)
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_filtering_request).body),
-      ...getShape(getShape(connector_update_filtering_request).path),
-      ...getShape(getShape(connector_update_filtering_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_filtering_request, 'body'),
+    getLooseObjectFromProperty(connector_update_filtering_request, 'path'),
+    getLooseObjectFromProperty(connector_update_filtering_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_filtering_response)),
@@ -4934,13 +4768,11 @@ Update the draft filtering validation info for a connector.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_filtering_validation_request).body),
-      ...getShape(getShape(connector_update_filtering_validation_request).path),
-      ...getShape(getShape(connector_update_filtering_validation_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_filtering_validation_request, 'body'),
+    getLooseObjectFromProperty(connector_update_filtering_validation_request, 'path'),
+    getLooseObjectFromProperty(connector_update_filtering_validation_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_filtering_validation_response)),
@@ -4964,13 +4796,11 @@ Update the \`index_name\` field of a connector, specifying the index where the d
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_index_name_request).body),
-      ...getShape(getShape(connector_update_index_name_request).path),
-      ...getShape(getShape(connector_update_index_name_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_index_name_request, 'body'),
+    getLooseObjectFromProperty(connector_update_index_name_request, 'path'),
+    getLooseObjectFromProperty(connector_update_index_name_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_index_name_response)),
@@ -4992,13 +4822,11 @@ const CONNECTOR_UPDATE_NAME_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_name_request).body),
-      ...getShape(getShape(connector_update_name_request).path),
-      ...getShape(getShape(connector_update_name_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_name_request, 'body'),
+    getLooseObjectFromProperty(connector_update_name_request, 'path'),
+    getLooseObjectFromProperty(connector_update_name_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_name_response)),
@@ -5020,13 +4848,11 @@ const CONNECTOR_UPDATE_NATIVE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_native_request).body),
-      ...getShape(getShape(connector_update_native_request).path),
-      ...getShape(getShape(connector_update_native_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_native_request, 'body'),
+    getLooseObjectFromProperty(connector_update_native_request, 'path'),
+    getLooseObjectFromProperty(connector_update_native_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_native_response)),
@@ -5050,13 +4876,11 @@ When you create a new connector, the configuration of an ingest pipeline is popu
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_pipeline_request).body),
-      ...getShape(getShape(connector_update_pipeline_request).path),
-      ...getShape(getShape(connector_update_pipeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_pipeline_request, 'body'),
+    getLooseObjectFromProperty(connector_update_pipeline_request, 'path'),
+    getLooseObjectFromProperty(connector_update_pipeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_pipeline_response)),
@@ -5078,13 +4902,11 @@ const CONNECTOR_UPDATE_SCHEDULING_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_scheduling_request).body),
-      ...getShape(getShape(connector_update_scheduling_request).path),
-      ...getShape(getShape(connector_update_scheduling_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_scheduling_request, 'body'),
+    getLooseObjectFromProperty(connector_update_scheduling_request, 'path'),
+    getLooseObjectFromProperty(connector_update_scheduling_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_scheduling_response)),
@@ -5106,13 +4928,11 @@ const CONNECTOR_UPDATE_SERVICE_TYPE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_service_type_request).body),
-      ...getShape(getShape(connector_update_service_type_request).path),
-      ...getShape(getShape(connector_update_service_type_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_service_type_request, 'body'),
+    getLooseObjectFromProperty(connector_update_service_type_request, 'path'),
+    getLooseObjectFromProperty(connector_update_service_type_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_service_type_response)),
@@ -5134,13 +4954,11 @@ const CONNECTOR_UPDATE_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(connector_update_status_request).body),
-      ...getShape(getShape(connector_update_status_request).path),
-      ...getShape(getShape(connector_update_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(connector_update_status_request, 'body'),
+    getLooseObjectFromProperty(connector_update_status_request, 'path'),
+    getLooseObjectFromProperty(connector_update_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(connector_update_status_response)),
@@ -5171,22 +4989,20 @@ This means that replicas increase the scalability of the count.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(count_request).body),
-      ...getShape(getShape(count_request).path),
-      ...getShape(getShape(count_request).query),
-      ...getShape(getShape(count1_request).body),
-      ...getShape(getShape(count1_request).path),
-      ...getShape(getShape(count1_request).query),
-      ...getShape(getShape(count2_request).body),
-      ...getShape(getShape(count2_request).path),
-      ...getShape(getShape(count2_request).query),
-      ...getShape(getShape(count3_request).body),
-      ...getShape(getShape(count3_request).path),
-      ...getShape(getShape(count3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(count_request, 'body'),
+    getLooseObjectFromProperty(count_request, 'path'),
+    getLooseObjectFromProperty(count_request, 'query'),
+    getLooseObjectFromProperty(count1_request, 'body'),
+    getLooseObjectFromProperty(count1_request, 'path'),
+    getLooseObjectFromProperty(count1_request, 'query'),
+    getLooseObjectFromProperty(count2_request, 'body'),
+    getLooseObjectFromProperty(count2_request, 'path'),
+    getLooseObjectFromProperty(count2_request, 'query'),
+    getLooseObjectFromProperty(count3_request, 'body'),
+    getLooseObjectFromProperty(count3_request, 'path'),
+    getLooseObjectFromProperty(count3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(count_response)),
@@ -5281,16 +5097,14 @@ The \`_shards\` section of the API response reveals the number of shard copies o
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(create_request).body),
-      ...getShape(getShape(create_request).path),
-      ...getShape(getShape(create_request).query),
-      ...getShape(getShape(create1_request).body),
-      ...getShape(getShape(create1_request).path),
-      ...getShape(getShape(create1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(create_request, 'body'),
+    getLooseObjectFromProperty(create_request, 'path'),
+    getLooseObjectFromProperty(create_request, 'query'),
+    getLooseObjectFromProperty(create1_request, 'body'),
+    getLooseObjectFromProperty(create1_request, 'path'),
+    getLooseObjectFromProperty(create1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(create_response)),
@@ -5322,13 +5136,11 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(dangling_indices_delete_dangling_index_request).body),
-      ...getShape(getShape(dangling_indices_delete_dangling_index_request).path),
-      ...getShape(getShape(dangling_indices_delete_dangling_index_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'body'),
+    getLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'path'),
+    getLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(dangling_indices_delete_dangling_index_response)),
@@ -5360,13 +5172,11 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(dangling_indices_import_dangling_index_request).body),
-      ...getShape(getShape(dangling_indices_import_dangling_index_request).path),
-      ...getShape(getShape(dangling_indices_import_dangling_index_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'body'),
+    getLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'path'),
+    getLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(dangling_indices_import_dangling_index_response)),
@@ -5393,13 +5203,11 @@ Use this API to list dangling indices, which you can then import or delete.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(dangling_indices_list_dangling_indices_request).body),
-      ...getShape(getShape(dangling_indices_list_dangling_indices_request).path),
-      ...getShape(getShape(dangling_indices_list_dangling_indices_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'body'),
+    getLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'path'),
+    getLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(dangling_indices_list_dangling_indices_response)),
@@ -5488,13 +5296,11 @@ It then gets redirected into the primary shard within that ID group and replicat
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_request).body),
-      ...getShape(getShape(delete_request).path),
-      ...getShape(getShape(delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_request, 'body'),
+    getLooseObjectFromProperty(delete_request, 'path'),
+    getLooseObjectFromProperty(delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_response)),
@@ -5625,13 +5431,11 @@ The get task status API will continue to list the delete by query task until thi
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_by_query_request).body),
-      ...getShape(getShape(delete_by_query_request).path),
-      ...getShape(getShape(delete_by_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_by_query_request, 'body'),
+    getLooseObjectFromProperty(delete_by_query_request, 'path'),
+    getLooseObjectFromProperty(delete_by_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_by_query_response)),
@@ -5656,13 +5460,11 @@ Rethrottling that speeds up the query takes effect immediately but rethrotting t
     urlParams: ['requests_per_second'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_by_query_rethrottle_request).body),
-      ...getShape(getShape(delete_by_query_rethrottle_request).path),
-      ...getShape(getShape(delete_by_query_rethrottle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_by_query_rethrottle_request, 'body'),
+    getLooseObjectFromProperty(delete_by_query_rethrottle_request, 'path'),
+    getLooseObjectFromProperty(delete_by_query_rethrottle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_by_query_rethrottle_response)),
@@ -5685,13 +5487,11 @@ Deletes a stored script or search template.`,
     urlParams: ['master_timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(delete_script_request).body),
-      ...getShape(getShape(delete_script_request).path),
-      ...getShape(getShape(delete_script_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(delete_script_request, 'body'),
+    getLooseObjectFromProperty(delete_script_request, 'path'),
+    getLooseObjectFromProperty(delete_script_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(delete_script_response)),
@@ -5714,13 +5514,11 @@ Deletes an existing enrich policy and its enrich index.`,
     urlParams: ['master_timeout', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(enrich_delete_policy_request).body),
-      ...getShape(getShape(enrich_delete_policy_request).path),
-      ...getShape(getShape(enrich_delete_policy_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(enrich_delete_policy_request, 'body'),
+    getLooseObjectFromProperty(enrich_delete_policy_request, 'path'),
+    getLooseObjectFromProperty(enrich_delete_policy_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(enrich_delete_policy_response)),
@@ -5743,13 +5541,11 @@ Create the enrich index for an existing enrich policy.`,
     urlParams: ['master_timeout', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(enrich_execute_policy_request).body),
-      ...getShape(getShape(enrich_execute_policy_request).path),
-      ...getShape(getShape(enrich_execute_policy_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(enrich_execute_policy_request, 'body'),
+    getLooseObjectFromProperty(enrich_execute_policy_request, 'path'),
+    getLooseObjectFromProperty(enrich_execute_policy_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(enrich_execute_policy_response)),
@@ -5772,16 +5568,14 @@ Returns information about an enrich policy.`,
     urlParams: ['master_timeout', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(enrich_get_policy_request).body),
-      ...getShape(getShape(enrich_get_policy_request).path),
-      ...getShape(getShape(enrich_get_policy_request).query),
-      ...getShape(getShape(enrich_get_policy1_request).body),
-      ...getShape(getShape(enrich_get_policy1_request).path),
-      ...getShape(getShape(enrich_get_policy1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(enrich_get_policy_request, 'body'),
+    getLooseObjectFromProperty(enrich_get_policy_request, 'path'),
+    getLooseObjectFromProperty(enrich_get_policy_request, 'query'),
+    getLooseObjectFromProperty(enrich_get_policy1_request, 'body'),
+    getLooseObjectFromProperty(enrich_get_policy1_request, 'path'),
+    getLooseObjectFromProperty(enrich_get_policy1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(enrich_get_policy_response)),
@@ -5805,13 +5599,11 @@ Creates an enrich policy.`,
     urlParams: ['master_timeout', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(enrich_put_policy_request).body),
-      ...getShape(getShape(enrich_put_policy_request).path),
-      ...getShape(getShape(enrich_put_policy_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(enrich_put_policy_request, 'body'),
+    getLooseObjectFromProperty(enrich_put_policy_request, 'path'),
+    getLooseObjectFromProperty(enrich_put_policy_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(enrich_put_policy_response)),
@@ -5834,13 +5626,11 @@ Returns enrich coordinator statistics and information about enrich policies that
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(enrich_stats_request).body),
-      ...getShape(getShape(enrich_stats_request).path),
-      ...getShape(getShape(enrich_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(enrich_stats_request, 'body'),
+    getLooseObjectFromProperty(enrich_stats_request, 'path'),
+    getLooseObjectFromProperty(enrich_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(enrich_stats_response)),
@@ -5863,13 +5653,11 @@ The API also deletes results for the search.`,
     urlParams: ['keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(eql_delete_request).body),
-      ...getShape(getShape(eql_delete_request).path),
-      ...getShape(getShape(eql_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(eql_delete_request, 'body'),
+    getLooseObjectFromProperty(eql_delete_request, 'path'),
+    getLooseObjectFromProperty(eql_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(eql_delete_response)),
@@ -5891,13 +5679,11 @@ Get the current status and available results for an async EQL search or a stored
     urlParams: ['keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(eql_get_request).body),
-      ...getShape(getShape(eql_get_request).path),
-      ...getShape(getShape(eql_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(eql_get_request, 'body'),
+    getLooseObjectFromProperty(eql_get_request, 'path'),
+    getLooseObjectFromProperty(eql_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(eql_get_response)),
@@ -5920,13 +5706,11 @@ Get the current status for an async EQL search or a stored synchronous EQL searc
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(eql_get_status_request).body),
-      ...getShape(getShape(eql_get_status_request).path),
-      ...getShape(getShape(eql_get_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(eql_get_status_request, 'body'),
+    getLooseObjectFromProperty(eql_get_status_request, 'path'),
+    getLooseObjectFromProperty(eql_get_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(eql_get_status_response)),
@@ -5949,16 +5733,14 @@ EQL assumes each document in a data stream or index corresponds to an event.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(eql_search_request).body),
-      ...getShape(getShape(eql_search_request).path),
-      ...getShape(getShape(eql_search_request).query),
-      ...getShape(getShape(eql_search1_request).body),
-      ...getShape(getShape(eql_search1_request).path),
-      ...getShape(getShape(eql_search1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(eql_search_request, 'body'),
+    getLooseObjectFromProperty(eql_search_request, 'path'),
+    getLooseObjectFromProperty(eql_search_request, 'query'),
+    getLooseObjectFromProperty(eql_search1_request, 'body'),
+    getLooseObjectFromProperty(eql_search1_request, 'path'),
+    getLooseObjectFromProperty(eql_search1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(eql_search_response)),
@@ -5984,13 +5766,11 @@ The API accepts the same parameters and request body as the synchronous query AP
     urlParams: ['allow_partial_results', 'delimiter', 'drop_null_columns', 'format'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(esql_async_query_request).body),
-      ...getShape(getShape(esql_async_query_request).path),
-      ...getShape(getShape(esql_async_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(esql_async_query_request, 'body'),
+    getLooseObjectFromProperty(esql_async_query_request, 'path'),
+    getLooseObjectFromProperty(esql_async_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(esql_async_query_response)),
@@ -6019,13 +5799,11 @@ If the Elasticsearch security features are enabled, only the following users can
     urlParams: ['drop_null_columns', 'format', 'keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(esql_async_query_delete_request).body),
-      ...getShape(getShape(esql_async_query_delete_request).path),
-      ...getShape(getShape(esql_async_query_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(esql_async_query_delete_request, 'body'),
+    getLooseObjectFromProperty(esql_async_query_delete_request, 'path'),
+    getLooseObjectFromProperty(esql_async_query_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(esql_async_query_delete_response)),
@@ -6049,13 +5827,11 @@ If the Elasticsearch security features are enabled, only the user who first subm
     urlParams: ['drop_null_columns', 'format', 'keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(esql_async_query_get_request).body),
-      ...getShape(getShape(esql_async_query_get_request).path),
-      ...getShape(getShape(esql_async_query_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(esql_async_query_get_request, 'body'),
+    getLooseObjectFromProperty(esql_async_query_get_request, 'path'),
+    getLooseObjectFromProperty(esql_async_query_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(esql_async_query_get_response)),
@@ -6080,13 +5856,11 @@ If the Elasticsearch security features are enabled, only the user who first subm
     urlParams: ['drop_null_columns'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(esql_async_query_stop_request).body),
-      ...getShape(getShape(esql_async_query_stop_request).path),
-      ...getShape(getShape(esql_async_query_stop_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(esql_async_query_stop_request, 'body'),
+    getLooseObjectFromProperty(esql_async_query_stop_request, 'path'),
+    getLooseObjectFromProperty(esql_async_query_stop_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(esql_async_query_stop_response)),
@@ -6109,13 +5883,11 @@ Returns an object extended information about a running ES|QL query.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(esql_get_query_request).body),
-      ...getShape(getShape(esql_get_query_request).path),
-      ...getShape(getShape(esql_get_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(esql_get_query_request, 'body'),
+    getLooseObjectFromProperty(esql_get_query_request, 'path'),
+    getLooseObjectFromProperty(esql_get_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(esql_get_query_response)),
@@ -6138,13 +5910,11 @@ Returns an object containing IDs and other information about the running ES|QL q
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(esql_list_queries_request).body),
-      ...getShape(getShape(esql_list_queries_request).path),
-      ...getShape(getShape(esql_list_queries_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(esql_list_queries_request, 'body'),
+    getLooseObjectFromProperty(esql_list_queries_request, 'path'),
+    getLooseObjectFromProperty(esql_list_queries_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(esql_list_queries_response)),
@@ -6166,13 +5936,11 @@ Get search results for an ES|QL (Elasticsearch query language) query.`,
     urlParams: ['format', 'delimiter', 'drop_null_columns', 'allow_partial_results'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(esql_query_request).body),
-      ...getShape(getShape(esql_query_request).path),
-      ...getShape(getShape(esql_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(esql_query_request, 'body'),
+    getLooseObjectFromProperty(esql_query_request, 'path'),
+    getLooseObjectFromProperty(esql_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(esql_query_response)),
@@ -6241,13 +6009,11 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(exists_request).body),
-      ...getShape(getShape(exists_request).path),
-      ...getShape(getShape(exists_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(exists_request, 'body'),
+    getLooseObjectFromProperty(exists_request, 'path'),
+    getLooseObjectFromProperty(exists_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(exists_response)),
@@ -6296,13 +6062,11 @@ A document's source is not available if it is disabled in the mapping.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(exists_source_request).body),
-      ...getShape(getShape(exists_source_request).path),
-      ...getShape(getShape(exists_source_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(exists_source_request, 'body'),
+    getLooseObjectFromProperty(exists_source_request, 'path'),
+    getLooseObjectFromProperty(exists_source_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(exists_source_response)),
@@ -6325,16 +6089,14 @@ It computes a score explanation for a query and a specific document.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(explain_request).body),
-      ...getShape(getShape(explain_request).path),
-      ...getShape(getShape(explain_request).query),
-      ...getShape(getShape(explain1_request).body),
-      ...getShape(getShape(explain1_request).path),
-      ...getShape(getShape(explain1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(explain_request, 'body'),
+    getLooseObjectFromProperty(explain_request, 'path'),
+    getLooseObjectFromProperty(explain_request, 'query'),
+    getLooseObjectFromProperty(explain1_request, 'body'),
+    getLooseObjectFromProperty(explain1_request, 'path'),
+    getLooseObjectFromProperty(explain1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(explain_response)),
@@ -6366,13 +6128,11 @@ In order for a feature state to be listed in this API and recognized as a valid 
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(features_get_features_request).body),
-      ...getShape(getShape(features_get_features_request).path),
-      ...getShape(getShape(features_get_features_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(features_get_features_request, 'body'),
+    getLooseObjectFromProperty(features_get_features_request, 'path'),
+    getLooseObjectFromProperty(features_get_features_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(features_get_features_response)),
@@ -6410,13 +6170,11 @@ IMPORTANT: The features installed on the node you submit this request to are the
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(features_reset_features_request).body),
-      ...getShape(getShape(features_reset_features_request).path),
-      ...getShape(getShape(features_reset_features_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(features_reset_features_request, 'body'),
+    getLooseObjectFromProperty(features_reset_features_request, 'path'),
+    getLooseObjectFromProperty(features_reset_features_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(features_reset_features_response)),
@@ -6443,22 +6201,20 @@ For example, a runtime field with a type of keyword is returned the same as any 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(field_caps_request).body),
-      ...getShape(getShape(field_caps_request).path),
-      ...getShape(getShape(field_caps_request).query),
-      ...getShape(getShape(field_caps1_request).body),
-      ...getShape(getShape(field_caps1_request).path),
-      ...getShape(getShape(field_caps1_request).query),
-      ...getShape(getShape(field_caps2_request).body),
-      ...getShape(getShape(field_caps2_request).path),
-      ...getShape(getShape(field_caps2_request).query),
-      ...getShape(getShape(field_caps3_request).body),
-      ...getShape(getShape(field_caps3_request).path),
-      ...getShape(getShape(field_caps3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(field_caps_request, 'body'),
+    getLooseObjectFromProperty(field_caps_request, 'path'),
+    getLooseObjectFromProperty(field_caps_request, 'query'),
+    getLooseObjectFromProperty(field_caps1_request, 'body'),
+    getLooseObjectFromProperty(field_caps1_request, 'path'),
+    getLooseObjectFromProperty(field_caps1_request, 'query'),
+    getLooseObjectFromProperty(field_caps2_request, 'body'),
+    getLooseObjectFromProperty(field_caps2_request, 'path'),
+    getLooseObjectFromProperty(field_caps2_request, 'query'),
+    getLooseObjectFromProperty(field_caps3_request, 'body'),
+    getLooseObjectFromProperty(field_caps3_request, 'path'),
+    getLooseObjectFromProperty(field_caps3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(field_caps_response)),
@@ -6523,13 +6279,11 @@ This API is designed for internal use by the Fleet server project.`,
     urlParams: ['wait_for_advance', 'wait_for_index', 'checkpoints', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(fleet_global_checkpoints_request).body),
-      ...getShape(getShape(fleet_global_checkpoints_request).path),
-      ...getShape(getShape(fleet_global_checkpoints_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(fleet_global_checkpoints_request, 'body'),
+    getLooseObjectFromProperty(fleet_global_checkpoints_request, 'path'),
+    getLooseObjectFromProperty(fleet_global_checkpoints_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(fleet_global_checkpoints_response)),
@@ -6554,22 +6308,20 @@ However, similar to the Fleet search API, it supports the \`wait_for_checkpoints
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(fleet_msearch_request).body),
-      ...getShape(getShape(fleet_msearch_request).path),
-      ...getShape(getShape(fleet_msearch_request).query),
-      ...getShape(getShape(fleet_msearch1_request).body),
-      ...getShape(getShape(fleet_msearch1_request).path),
-      ...getShape(getShape(fleet_msearch1_request).query),
-      ...getShape(getShape(fleet_msearch2_request).body),
-      ...getShape(getShape(fleet_msearch2_request).path),
-      ...getShape(getShape(fleet_msearch2_request).query),
-      ...getShape(getShape(fleet_msearch3_request).body),
-      ...getShape(getShape(fleet_msearch3_request).path),
-      ...getShape(getShape(fleet_msearch3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(fleet_msearch_request, 'body'),
+    getLooseObjectFromProperty(fleet_msearch_request, 'path'),
+    getLooseObjectFromProperty(fleet_msearch_request, 'query'),
+    getLooseObjectFromProperty(fleet_msearch1_request, 'body'),
+    getLooseObjectFromProperty(fleet_msearch1_request, 'path'),
+    getLooseObjectFromProperty(fleet_msearch1_request, 'query'),
+    getLooseObjectFromProperty(fleet_msearch2_request, 'body'),
+    getLooseObjectFromProperty(fleet_msearch2_request, 'path'),
+    getLooseObjectFromProperty(fleet_msearch2_request, 'query'),
+    getLooseObjectFromProperty(fleet_msearch3_request, 'body'),
+    getLooseObjectFromProperty(fleet_msearch3_request, 'path'),
+    getLooseObjectFromProperty(fleet_msearch3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(fleet_msearch_response)),
@@ -6615,16 +6367,14 @@ after the provided checkpoint has been processed and is visible for searches ins
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(fleet_search_request).body),
-      ...getShape(getShape(fleet_search_request).path),
-      ...getShape(getShape(fleet_search_request).query),
-      ...getShape(getShape(fleet_search1_request).body),
-      ...getShape(getShape(fleet_search1_request).path),
-      ...getShape(getShape(fleet_search1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(fleet_search_request, 'body'),
+    getLooseObjectFromProperty(fleet_search_request, 'path'),
+    getLooseObjectFromProperty(fleet_search_request, 'query'),
+    getLooseObjectFromProperty(fleet_search1_request, 'body'),
+    getLooseObjectFromProperty(fleet_search1_request, 'path'),
+    getLooseObjectFromProperty(fleet_search1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(fleet_search_response)),
@@ -6733,13 +6483,11 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_request).body),
-      ...getShape(getShape(get_request).path),
-      ...getShape(getShape(get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_request, 'body'),
+    getLooseObjectFromProperty(get_request, 'path'),
+    getLooseObjectFromProperty(get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_response)),
@@ -6761,13 +6509,11 @@ Retrieves a stored script or search template.`,
     urlParams: ['master_timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_script_request).body),
-      ...getShape(getShape(get_script_request).path),
-      ...getShape(getShape(get_script_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_script_request, 'body'),
+    getLooseObjectFromProperty(get_script_request, 'path'),
+    getLooseObjectFromProperty(get_script_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_script_response)),
@@ -6791,13 +6537,11 @@ Get a list of supported script contexts and their methods.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_script_context_request).body),
-      ...getShape(getShape(get_script_context_request).path),
-      ...getShape(getShape(get_script_context_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_script_context_request, 'body'),
+    getLooseObjectFromProperty(get_script_context_request, 'path'),
+    getLooseObjectFromProperty(get_script_context_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_script_context_response)),
@@ -6821,13 +6565,11 @@ Get a list of available script types, languages, and contexts.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_script_languages_request).body),
-      ...getShape(getShape(get_script_languages_request).path),
-      ...getShape(getShape(get_script_languages_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_script_languages_request, 'body'),
+    getLooseObjectFromProperty(get_script_languages_request, 'path'),
+    getLooseObjectFromProperty(get_script_languages_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_script_languages_response)),
@@ -6880,13 +6622,11 @@ GET my-index-000001/_source/1/?_source_includes=*.id&_source_excludes=entities
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(get_source_request).body),
-      ...getShape(getShape(get_source_request).path),
-      ...getShape(getShape(get_source_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(get_source_request, 'body'),
+    getLooseObjectFromProperty(get_source_request, 'path'),
+    getLooseObjectFromProperty(get_source_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(get_source_response)),
@@ -6912,16 +6652,14 @@ You can exclude vertices that have already been returned.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(graph_explore_request).body),
-      ...getShape(getShape(graph_explore_request).path),
-      ...getShape(getShape(graph_explore_request).query),
-      ...getShape(getShape(graph_explore1_request).body),
-      ...getShape(getShape(graph_explore1_request).path),
-      ...getShape(getShape(graph_explore1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(graph_explore_request, 'body'),
+    getLooseObjectFromProperty(graph_explore_request, 'path'),
+    getLooseObjectFromProperty(graph_explore_request, 'query'),
+    getLooseObjectFromProperty(graph_explore1_request, 'body'),
+    getLooseObjectFromProperty(graph_explore1_request, 'path'),
+    getLooseObjectFromProperty(graph_explore1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(graph_explore_response)),
@@ -6961,16 +6699,14 @@ When setting up automated polling of the API for health status, set verbose to f
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(health_report_request).body),
-      ...getShape(getShape(health_report_request).path),
-      ...getShape(getShape(health_report_request).query),
-      ...getShape(getShape(health_report1_request).body),
-      ...getShape(getShape(health_report1_request).path),
-      ...getShape(getShape(health_report1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(health_report_request, 'body'),
+    getLooseObjectFromProperty(health_report_request, 'path'),
+    getLooseObjectFromProperty(health_report_request, 'query'),
+    getLooseObjectFromProperty(health_report1_request, 'body'),
+    getLooseObjectFromProperty(health_report1_request, 'path'),
+    getLooseObjectFromProperty(health_report1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(health_report_response)),
@@ -6994,13 +6730,11 @@ You cannot delete policies that are currently in use. If the policy is being use
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_delete_lifecycle_request).body),
-      ...getShape(getShape(ilm_delete_lifecycle_request).path),
-      ...getShape(getShape(ilm_delete_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_delete_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(ilm_delete_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(ilm_delete_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_delete_lifecycle_response)),
@@ -7026,13 +6760,11 @@ The response indicates when the index entered each lifecycle state, provides the
     urlParams: ['only_errors', 'only_managed', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_explain_lifecycle_request).body),
-      ...getShape(getShape(ilm_explain_lifecycle_request).path),
-      ...getShape(getShape(ilm_explain_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_explain_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(ilm_explain_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(ilm_explain_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_explain_lifecycle_response)),
@@ -7054,16 +6786,14 @@ const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_get_lifecycle_request).body),
-      ...getShape(getShape(ilm_get_lifecycle_request).path),
-      ...getShape(getShape(ilm_get_lifecycle_request).query),
-      ...getShape(getShape(ilm_get_lifecycle1_request).body),
-      ...getShape(getShape(ilm_get_lifecycle1_request).path),
-      ...getShape(getShape(ilm_get_lifecycle1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_get_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(ilm_get_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(ilm_get_lifecycle_request, 'query'),
+    getLooseObjectFromProperty(ilm_get_lifecycle1_request, 'body'),
+    getLooseObjectFromProperty(ilm_get_lifecycle1_request, 'path'),
+    getLooseObjectFromProperty(ilm_get_lifecycle1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_get_lifecycle_response)),
@@ -7088,13 +6818,11 @@ Get the current index lifecycle management status.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_get_status_request).body),
-      ...getShape(getShape(ilm_get_status_request).path),
-      ...getShape(getShape(ilm_get_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_get_status_request, 'body'),
+    getLooseObjectFromProperty(ilm_get_status_request, 'path'),
+    getLooseObjectFromProperty(ilm_get_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_get_status_response)),
@@ -7129,13 +6857,11 @@ Use the stop ILM and get ILM status APIs to wait until the reported operation mo
     urlParams: ['dry_run', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_migrate_to_data_tiers_request).body),
-      ...getShape(getShape(ilm_migrate_to_data_tiers_request).path),
-      ...getShape(getShape(ilm_migrate_to_data_tiers_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'body'),
+    getLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'path'),
+    getLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_migrate_to_data_tiers_response)),
@@ -7170,13 +6896,11 @@ An index cannot move to a step that is not part of its policy.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_move_to_step_request).body),
-      ...getShape(getShape(ilm_move_to_step_request).path),
-      ...getShape(getShape(ilm_move_to_step_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_move_to_step_request, 'body'),
+    getLooseObjectFromProperty(ilm_move_to_step_request, 'path'),
+    getLooseObjectFromProperty(ilm_move_to_step_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_move_to_step_response)),
@@ -7201,13 +6925,11 @@ NOTE: Only the latest version of the policy is stored, you cannot revert to prev
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_put_lifecycle_request).body),
-      ...getShape(getShape(ilm_put_lifecycle_request).path),
-      ...getShape(getShape(ilm_put_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_put_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(ilm_put_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(ilm_put_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_put_lifecycle_response)),
@@ -7231,13 +6953,11 @@ It also stops managing the indices.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_remove_policy_request).body),
-      ...getShape(getShape(ilm_remove_policy_request).path),
-      ...getShape(getShape(ilm_remove_policy_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_remove_policy_request, 'body'),
+    getLooseObjectFromProperty(ilm_remove_policy_request, 'path'),
+    getLooseObjectFromProperty(ilm_remove_policy_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_remove_policy_response)),
@@ -7261,13 +6981,11 @@ Use the explain lifecycle state API to determine whether an index is in the ERRO
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_retry_request).body),
-      ...getShape(getShape(ilm_retry_request).path),
-      ...getShape(getShape(ilm_retry_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_retry_request, 'body'),
+    getLooseObjectFromProperty(ilm_retry_request, 'path'),
+    getLooseObjectFromProperty(ilm_retry_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_retry_response)),
@@ -7291,13 +7009,11 @@ Restarting ILM is necessary only when it has been stopped using the stop ILM API
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_start_request).body),
-      ...getShape(getShape(ilm_start_request).path),
-      ...getShape(getShape(ilm_start_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_start_request, 'body'),
+    getLooseObjectFromProperty(ilm_start_request, 'path'),
+    getLooseObjectFromProperty(ilm_start_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_start_response)),
@@ -7323,13 +7039,11 @@ Use the get ILM status API to check whether ILM is running.`,
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ilm_stop_request).body),
-      ...getShape(getShape(ilm_stop_request).path),
-      ...getShape(getShape(ilm_stop_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ilm_stop_request, 'body'),
+    getLooseObjectFromProperty(ilm_stop_request, 'path'),
+    getLooseObjectFromProperty(ilm_stop_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ilm_stop_response)),
@@ -7498,19 +7212,17 @@ Even the simple case of updating the Elasticsearch index using data from a datab
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(index_request).body),
-      ...getShape(getShape(index_request).path),
-      ...getShape(getShape(index_request).query),
-      ...getShape(getShape(index1_request).body),
-      ...getShape(getShape(index1_request).path),
-      ...getShape(getShape(index1_request).query),
-      ...getShape(getShape(index2_request).body),
-      ...getShape(getShape(index2_request).path),
-      ...getShape(getShape(index2_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(index_request, 'body'),
+    getLooseObjectFromProperty(index_request, 'path'),
+    getLooseObjectFromProperty(index_request, 'query'),
+    getLooseObjectFromProperty(index1_request, 'body'),
+    getLooseObjectFromProperty(index1_request, 'path'),
+    getLooseObjectFromProperty(index1_request, 'query'),
+    getLooseObjectFromProperty(index2_request, 'body'),
+    getLooseObjectFromProperty(index2_request, 'path'),
+    getLooseObjectFromProperty(index2_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(index_response)),
@@ -7548,13 +7260,11 @@ Index blocks limit the operations allowed on an index by blocking specific opera
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_add_block_request).body),
-      ...getShape(getShape(indices_add_block_request).path),
-      ...getShape(getShape(indices_add_block_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_add_block_request, 'body'),
+    getLooseObjectFromProperty(indices_add_block_request, 'path'),
+    getLooseObjectFromProperty(indices_add_block_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_add_block_response)),
@@ -7582,22 +7292,20 @@ The \`_analyze\` endpoint without a specified index will always use \`10000\` as
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_analyze_request).body),
-      ...getShape(getShape(indices_analyze_request).path),
-      ...getShape(getShape(indices_analyze_request).query),
-      ...getShape(getShape(indices_analyze1_request).body),
-      ...getShape(getShape(indices_analyze1_request).path),
-      ...getShape(getShape(indices_analyze1_request).query),
-      ...getShape(getShape(indices_analyze2_request).body),
-      ...getShape(getShape(indices_analyze2_request).path),
-      ...getShape(getShape(indices_analyze2_request).query),
-      ...getShape(getShape(indices_analyze3_request).body),
-      ...getShape(getShape(indices_analyze3_request).path),
-      ...getShape(getShape(indices_analyze3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_analyze_request, 'body'),
+    getLooseObjectFromProperty(indices_analyze_request, 'path'),
+    getLooseObjectFromProperty(indices_analyze_request, 'query'),
+    getLooseObjectFromProperty(indices_analyze1_request, 'body'),
+    getLooseObjectFromProperty(indices_analyze1_request, 'path'),
+    getLooseObjectFromProperty(indices_analyze1_request, 'query'),
+    getLooseObjectFromProperty(indices_analyze2_request, 'body'),
+    getLooseObjectFromProperty(indices_analyze2_request, 'path'),
+    getLooseObjectFromProperty(indices_analyze2_request, 'query'),
+    getLooseObjectFromProperty(indices_analyze3_request, 'body'),
+    getLooseObjectFromProperty(indices_analyze3_request, 'path'),
+    getLooseObjectFromProperty(indices_analyze3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_analyze_response)),
@@ -7624,13 +7332,11 @@ Cancel a migration reindex attempt for a data stream or index.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_cancel_migrate_reindex_request).body),
-      ...getShape(getShape(indices_cancel_migrate_reindex_request).path),
-      ...getShape(getShape(indices_cancel_migrate_reindex_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'body'),
+    getLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'path'),
+    getLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_cancel_migrate_reindex_response)),
@@ -7658,16 +7364,14 @@ To clear the cache only of specific fields, use the \`fields\` parameter.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_clear_cache_request).body),
-      ...getShape(getShape(indices_clear_cache_request).path),
-      ...getShape(getShape(indices_clear_cache_request).query),
-      ...getShape(getShape(indices_clear_cache1_request).body),
-      ...getShape(getShape(indices_clear_cache1_request).path),
-      ...getShape(getShape(indices_clear_cache1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_clear_cache_request, 'body'),
+    getLooseObjectFromProperty(indices_clear_cache_request, 'path'),
+    getLooseObjectFromProperty(indices_clear_cache_request, 'query'),
+    getLooseObjectFromProperty(indices_clear_cache1_request, 'body'),
+    getLooseObjectFromProperty(indices_clear_cache1_request, 'path'),
+    getLooseObjectFromProperty(indices_clear_cache1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_clear_cache_response)),
@@ -7734,16 +7438,14 @@ Because the clone operation creates a new index to clone the shards to, the wait
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_clone_request).body),
-      ...getShape(getShape(indices_clone_request).path),
-      ...getShape(getShape(indices_clone_request).query),
-      ...getShape(getShape(indices_clone1_request).body),
-      ...getShape(getShape(indices_clone1_request).path),
-      ...getShape(getShape(indices_clone1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_clone_request, 'body'),
+    getLooseObjectFromProperty(indices_clone_request, 'path'),
+    getLooseObjectFromProperty(indices_clone_request, 'query'),
+    getLooseObjectFromProperty(indices_clone1_request, 'body'),
+    getLooseObjectFromProperty(indices_clone1_request, 'path'),
+    getLooseObjectFromProperty(indices_clone1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_clone_response)),
@@ -7790,13 +7492,11 @@ Closing indices can be turned off with the cluster settings API by setting \`clu
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_close_request).body),
-      ...getShape(getShape(indices_close_request).path),
-      ...getShape(getShape(indices_close_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_close_request, 'body'),
+    getLooseObjectFromProperty(indices_close_request, 'path'),
+    getLooseObjectFromProperty(indices_close_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_close_response)),
@@ -7860,13 +7560,11 @@ Note that changing this setting will also affect the \`wait_for_active_shards\` 
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_create_request).body),
-      ...getShape(getShape(indices_create_request).path),
-      ...getShape(getShape(indices_create_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_create_request, 'body'),
+    getLooseObjectFromProperty(indices_create_request, 'path'),
+    getLooseObjectFromProperty(indices_create_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_create_response)),
@@ -7890,13 +7588,11 @@ You must have a matching index template with data stream enabled.`,
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'expand_wildcards'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_create_data_stream_request).body),
-      ...getShape(getShape(indices_create_data_stream_request).path),
-      ...getShape(getShape(indices_create_data_stream_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_create_data_stream_request, 'body'),
+    getLooseObjectFromProperty(indices_create_data_stream_request, 'path'),
+    getLooseObjectFromProperty(indices_create_data_stream_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_create_data_stream_response)),
@@ -7920,16 +7616,14 @@ Copy the mappings and settings from the source index to a destination index whil
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_create_from_request).body),
-      ...getShape(getShape(indices_create_from_request).path),
-      ...getShape(getShape(indices_create_from_request).query),
-      ...getShape(getShape(indices_create_from1_request).body),
-      ...getShape(getShape(indices_create_from1_request).path),
-      ...getShape(getShape(indices_create_from1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_create_from_request, 'body'),
+    getLooseObjectFromProperty(indices_create_from_request, 'path'),
+    getLooseObjectFromProperty(indices_create_from_request, 'query'),
+    getLooseObjectFromProperty(indices_create_from1_request, 'body'),
+    getLooseObjectFromProperty(indices_create_from1_request, 'path'),
+    getLooseObjectFromProperty(indices_create_from1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_create_from_response)),
@@ -7954,16 +7648,14 @@ Get statistics for one or more data streams.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_data_streams_stats_request).body),
-      ...getShape(getShape(indices_data_streams_stats_request).path),
-      ...getShape(getShape(indices_data_streams_stats_request).query),
-      ...getShape(getShape(indices_data_streams_stats1_request).body),
-      ...getShape(getShape(indices_data_streams_stats1_request).path),
-      ...getShape(getShape(indices_data_streams_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_data_streams_stats_request, 'body'),
+    getLooseObjectFromProperty(indices_data_streams_stats_request, 'path'),
+    getLooseObjectFromProperty(indices_data_streams_stats_request, 'query'),
+    getLooseObjectFromProperty(indices_data_streams_stats1_request, 'body'),
+    getLooseObjectFromProperty(indices_data_streams_stats1_request, 'path'),
+    getLooseObjectFromProperty(indices_data_streams_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_data_streams_stats_response)),
@@ -8015,13 +7707,11 @@ You can then use the delete index API to delete the previous write index.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_delete_request).body),
-      ...getShape(getShape(indices_delete_request).path),
-      ...getShape(getShape(indices_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_delete_request, 'body'),
+    getLooseObjectFromProperty(indices_delete_request, 'path'),
+    getLooseObjectFromProperty(indices_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_delete_response)),
@@ -8044,16 +7734,14 @@ Removes a data stream or index from an alias.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_delete_alias_request).body),
-      ...getShape(getShape(indices_delete_alias_request).path),
-      ...getShape(getShape(indices_delete_alias_request).query),
-      ...getShape(getShape(indices_delete_alias1_request).body),
-      ...getShape(getShape(indices_delete_alias1_request).path),
-      ...getShape(getShape(indices_delete_alias1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_delete_alias_request, 'body'),
+    getLooseObjectFromProperty(indices_delete_alias_request, 'path'),
+    getLooseObjectFromProperty(indices_delete_alias_request, 'query'),
+    getLooseObjectFromProperty(indices_delete_alias1_request, 'body'),
+    getLooseObjectFromProperty(indices_delete_alias1_request, 'path'),
+    getLooseObjectFromProperty(indices_delete_alias1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_delete_alias_response)),
@@ -8087,13 +7775,11 @@ Removes the data stream lifecycle from a data stream, rendering it not managed b
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_delete_data_lifecycle_request).body),
-      ...getShape(getShape(indices_delete_data_lifecycle_request).path),
-      ...getShape(getShape(indices_delete_data_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_delete_data_lifecycle_response)),
@@ -8116,13 +7802,11 @@ Deletes one or more data streams and their backing indices.`,
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'expand_wildcards'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_delete_data_stream_request).body),
-      ...getShape(getShape(indices_delete_data_stream_request).path),
-      ...getShape(getShape(indices_delete_data_stream_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_delete_data_stream_request, 'body'),
+    getLooseObjectFromProperty(indices_delete_data_stream_request, 'path'),
+    getLooseObjectFromProperty(indices_delete_data_stream_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_delete_data_stream_response)),
@@ -8154,13 +7838,11 @@ Removes the data stream options from a data stream.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_delete_data_stream_options_request).body),
-      ...getShape(getShape(indices_delete_data_stream_options_request).path),
-      ...getShape(getShape(indices_delete_data_stream_options_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_delete_data_stream_options_request, 'body'),
+    getLooseObjectFromProperty(indices_delete_data_stream_options_request, 'path'),
+    getLooseObjectFromProperty(indices_delete_data_stream_options_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_delete_data_stream_options_response)),
@@ -8185,13 +7867,11 @@ existing templates.`,
     urlParams: ['master_timeout', 'timeout', 'local', 'flat_settings', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_delete_index_template_request).body),
-      ...getShape(getShape(indices_delete_index_template_request).path),
-      ...getShape(getShape(indices_delete_index_template_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_delete_index_template_request, 'body'),
+    getLooseObjectFromProperty(indices_delete_index_template_request, 'path'),
+    getLooseObjectFromProperty(indices_delete_index_template_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_delete_index_template_response)),
@@ -8234,13 +7914,11 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     urlParams: ['master_timeout', 'timeout', 'flat_settings', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_delete_template_request).body),
-      ...getShape(getShape(indices_delete_template_request).path),
-      ...getShape(getShape(indices_delete_template_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_delete_template_request, 'body'),
+    getLooseObjectFromProperty(indices_delete_template_request, 'path'),
+    getLooseObjectFromProperty(indices_delete_template_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_delete_template_response)),
@@ -8277,13 +7955,11 @@ For usage examples see the External documentation or refer to [Analyze the index
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_disk_usage_request).body),
-      ...getShape(getShape(indices_disk_usage_request).path),
-      ...getShape(getShape(indices_disk_usage_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_disk_usage_request, 'body'),
+    getLooseObjectFromProperty(indices_disk_usage_request, 'path'),
+    getLooseObjectFromProperty(indices_disk_usage_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_disk_usage_response)),
@@ -8317,13 +7993,11 @@ The source index must be read-only (\`index.blocks.write: true\`).`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_downsample_request).body),
-      ...getShape(getShape(indices_downsample_request).path),
-      ...getShape(getShape(indices_downsample_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_downsample_request, 'body'),
+    getLooseObjectFromProperty(indices_downsample_request, 'path'),
+    getLooseObjectFromProperty(indices_downsample_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_downsample_response)),
@@ -8369,13 +8043,11 @@ Check if one or more indices, index aliases, or data streams exist.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_exists_request).body),
-      ...getShape(getShape(indices_exists_request).path),
-      ...getShape(getShape(indices_exists_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_exists_request, 'body'),
+    getLooseObjectFromProperty(indices_exists_request, 'path'),
+    getLooseObjectFromProperty(indices_exists_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_exists_response)),
@@ -8399,16 +8071,14 @@ Check if one or more data stream or index aliases exist.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_exists_alias_request).body),
-      ...getShape(getShape(indices_exists_alias_request).path),
-      ...getShape(getShape(indices_exists_alias_request).query),
-      ...getShape(getShape(indices_exists_alias1_request).body),
-      ...getShape(getShape(indices_exists_alias1_request).path),
-      ...getShape(getShape(indices_exists_alias1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_exists_alias_request, 'body'),
+    getLooseObjectFromProperty(indices_exists_alias_request, 'path'),
+    getLooseObjectFromProperty(indices_exists_alias_request, 'query'),
+    getLooseObjectFromProperty(indices_exists_alias1_request, 'body'),
+    getLooseObjectFromProperty(indices_exists_alias1_request, 'path'),
+    getLooseObjectFromProperty(indices_exists_alias1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_exists_alias_response)),
@@ -8433,13 +8103,11 @@ Check whether index templates exist.`,
     urlParams: ['master_timeout', 'timeout', 'local', 'flat_settings', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_exists_index_template_request).body),
-      ...getShape(getShape(indices_exists_index_template_request).path),
-      ...getShape(getShape(indices_exists_index_template_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_exists_index_template_request, 'body'),
+    getLooseObjectFromProperty(indices_exists_index_template_request, 'path'),
+    getLooseObjectFromProperty(indices_exists_index_template_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_exists_index_template_response)),
@@ -8465,13 +8133,11 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     urlParams: ['master_timeout', 'timeout', 'flat_settings', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_exists_template_request).body),
-      ...getShape(getShape(indices_exists_template_request).path),
-      ...getShape(getShape(indices_exists_template_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_exists_template_request, 'body'),
+    getLooseObjectFromProperty(indices_exists_template_request, 'path'),
+    getLooseObjectFromProperty(indices_exists_template_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_exists_template_response)),
@@ -8494,13 +8160,11 @@ Get information about an index or data stream's current data stream lifecycle st
     urlParams: ['include_defaults', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_explain_data_lifecycle_request).body),
-      ...getShape(getShape(indices_explain_data_lifecycle_request).path),
-      ...getShape(getShape(indices_explain_data_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_explain_data_lifecycle_response)),
@@ -8528,13 +8192,11 @@ A given request will increment each count by a maximum value of 1, even if the r
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'fields'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_field_usage_stats_request).body),
-      ...getShape(getShape(indices_field_usage_stats_request).path),
-      ...getShape(getShape(indices_field_usage_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_field_usage_stats_request, 'body'),
+    getLooseObjectFromProperty(indices_field_usage_stats_request, 'path'),
+    getLooseObjectFromProperty(indices_field_usage_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_field_usage_stats_response)),
@@ -8566,22 +8228,20 @@ If you call the flush API after indexing some documents then a successful respon
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_flush_request).body),
-      ...getShape(getShape(indices_flush_request).path),
-      ...getShape(getShape(indices_flush_request).query),
-      ...getShape(getShape(indices_flush1_request).body),
-      ...getShape(getShape(indices_flush1_request).path),
-      ...getShape(getShape(indices_flush1_request).query),
-      ...getShape(getShape(indices_flush2_request).body),
-      ...getShape(getShape(indices_flush2_request).path),
-      ...getShape(getShape(indices_flush2_request).query),
-      ...getShape(getShape(indices_flush3_request).body),
-      ...getShape(getShape(indices_flush3_request).path),
-      ...getShape(getShape(indices_flush3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_flush_request, 'body'),
+    getLooseObjectFromProperty(indices_flush_request, 'path'),
+    getLooseObjectFromProperty(indices_flush_request, 'query'),
+    getLooseObjectFromProperty(indices_flush1_request, 'body'),
+    getLooseObjectFromProperty(indices_flush1_request, 'path'),
+    getLooseObjectFromProperty(indices_flush1_request, 'query'),
+    getLooseObjectFromProperty(indices_flush2_request, 'body'),
+    getLooseObjectFromProperty(indices_flush2_request, 'path'),
+    getLooseObjectFromProperty(indices_flush2_request, 'query'),
+    getLooseObjectFromProperty(indices_flush3_request, 'body'),
+    getLooseObjectFromProperty(indices_flush3_request, 'path'),
+    getLooseObjectFromProperty(indices_flush3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_flush_response)),
@@ -8658,16 +8318,14 @@ POST /.ds-my-data-stream-2099.03.07-000001/_forcemerge?max_num_segments=1
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_forcemerge_request).body),
-      ...getShape(getShape(indices_forcemerge_request).path),
-      ...getShape(getShape(indices_forcemerge_request).query),
-      ...getShape(getShape(indices_forcemerge1_request).body),
-      ...getShape(getShape(indices_forcemerge1_request).path),
-      ...getShape(getShape(indices_forcemerge1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_forcemerge_request, 'body'),
+    getLooseObjectFromProperty(indices_forcemerge_request, 'path'),
+    getLooseObjectFromProperty(indices_forcemerge_request, 'query'),
+    getLooseObjectFromProperty(indices_forcemerge1_request, 'body'),
+    getLooseObjectFromProperty(indices_forcemerge1_request, 'path'),
+    getLooseObjectFromProperty(indices_forcemerge1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_forcemerge_response)),
@@ -8715,13 +8373,11 @@ stream’s backing indices.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_request).body),
-      ...getShape(getShape(indices_get_request).path),
-      ...getShape(getShape(indices_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_request, 'body'),
+    getLooseObjectFromProperty(indices_get_request, 'path'),
+    getLooseObjectFromProperty(indices_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_response)),
@@ -8744,22 +8400,20 @@ Retrieves information for one or more data stream or index aliases.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_alias_request).body),
-      ...getShape(getShape(indices_get_alias_request).path),
-      ...getShape(getShape(indices_get_alias_request).query),
-      ...getShape(getShape(indices_get_alias1_request).body),
-      ...getShape(getShape(indices_get_alias1_request).path),
-      ...getShape(getShape(indices_get_alias1_request).query),
-      ...getShape(getShape(indices_get_alias2_request).body),
-      ...getShape(getShape(indices_get_alias2_request).path),
-      ...getShape(getShape(indices_get_alias2_request).query),
-      ...getShape(getShape(indices_get_alias3_request).body),
-      ...getShape(getShape(indices_get_alias3_request).path),
-      ...getShape(getShape(indices_get_alias3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_alias_request, 'body'),
+    getLooseObjectFromProperty(indices_get_alias_request, 'path'),
+    getLooseObjectFromProperty(indices_get_alias_request, 'query'),
+    getLooseObjectFromProperty(indices_get_alias1_request, 'body'),
+    getLooseObjectFromProperty(indices_get_alias1_request, 'path'),
+    getLooseObjectFromProperty(indices_get_alias1_request, 'query'),
+    getLooseObjectFromProperty(indices_get_alias2_request, 'body'),
+    getLooseObjectFromProperty(indices_get_alias2_request, 'path'),
+    getLooseObjectFromProperty(indices_get_alias2_request, 'query'),
+    getLooseObjectFromProperty(indices_get_alias3_request, 'body'),
+    getLooseObjectFromProperty(indices_get_alias3_request, 'path'),
+    getLooseObjectFromProperty(indices_get_alias3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_alias_response)),
@@ -8816,13 +8470,11 @@ Get the data stream lifecycle configuration of one or more data streams.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_data_lifecycle_request).body),
-      ...getShape(getShape(indices_get_data_lifecycle_request).path),
-      ...getShape(getShape(indices_get_data_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_data_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(indices_get_data_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(indices_get_data_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_data_lifecycle_response)),
@@ -8845,13 +8497,11 @@ Get statistics about the data streams that are managed by a data stream lifecycl
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_data_lifecycle_stats_request).body),
-      ...getShape(getShape(indices_get_data_lifecycle_stats_request).path),
-      ...getShape(getShape(indices_get_data_lifecycle_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'body'),
+    getLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'path'),
+    getLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_data_lifecycle_stats_response)),
@@ -8875,16 +8525,14 @@ Get information about one or more data streams.`,
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'expand_wildcards'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_data_stream_request).body),
-      ...getShape(getShape(indices_get_data_stream_request).path),
-      ...getShape(getShape(indices_get_data_stream_request).query),
-      ...getShape(getShape(indices_get_data_stream1_request).body),
-      ...getShape(getShape(indices_get_data_stream1_request).path),
-      ...getShape(getShape(indices_get_data_stream1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_data_stream_request, 'body'),
+    getLooseObjectFromProperty(indices_get_data_stream_request, 'path'),
+    getLooseObjectFromProperty(indices_get_data_stream_request, 'query'),
+    getLooseObjectFromProperty(indices_get_data_stream1_request, 'body'),
+    getLooseObjectFromProperty(indices_get_data_stream1_request, 'path'),
+    getLooseObjectFromProperty(indices_get_data_stream1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_data_stream_response)),
@@ -8909,13 +8557,11 @@ Get mapping information for one or more data streams.`,
     urlParams: ['master_timeout', 'dry_run', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_data_stream_mappings_request).body),
-      ...getShape(getShape(indices_get_data_stream_mappings_request).path),
-      ...getShape(getShape(indices_get_data_stream_mappings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'body'),
+    getLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'path'),
+    getLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_data_stream_mappings_response)),
@@ -8948,13 +8594,11 @@ Get the data stream options configuration of one or more data streams.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_data_stream_options_request).body),
-      ...getShape(getShape(indices_get_data_stream_options_request).path),
-      ...getShape(getShape(indices_get_data_stream_options_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_data_stream_options_request, 'body'),
+    getLooseObjectFromProperty(indices_get_data_stream_options_request, 'path'),
+    getLooseObjectFromProperty(indices_get_data_stream_options_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_data_stream_options_response)),
@@ -8978,13 +8622,11 @@ Get setting information for one or more data streams.`,
     urlParams: ['master_timeout', 'dry_run', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_data_stream_settings_request).body),
-      ...getShape(getShape(indices_get_data_stream_settings_request).path),
-      ...getShape(getShape(indices_get_data_stream_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_data_stream_settings_request, 'body'),
+    getLooseObjectFromProperty(indices_get_data_stream_settings_request, 'path'),
+    getLooseObjectFromProperty(indices_get_data_stream_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_data_stream_settings_response)),
@@ -9010,16 +8652,14 @@ This API is useful if you don't need a complete mapping or if an index mapping c
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_field_mapping_request).body),
-      ...getShape(getShape(indices_get_field_mapping_request).path),
-      ...getShape(getShape(indices_get_field_mapping_request).query),
-      ...getShape(getShape(indices_get_field_mapping1_request).body),
-      ...getShape(getShape(indices_get_field_mapping1_request).path),
-      ...getShape(getShape(indices_get_field_mapping1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_field_mapping_request, 'body'),
+    getLooseObjectFromProperty(indices_get_field_mapping_request, 'path'),
+    getLooseObjectFromProperty(indices_get_field_mapping_request, 'query'),
+    getLooseObjectFromProperty(indices_get_field_mapping1_request, 'body'),
+    getLooseObjectFromProperty(indices_get_field_mapping1_request, 'path'),
+    getLooseObjectFromProperty(indices_get_field_mapping1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_field_mapping_response)),
@@ -9043,16 +8683,14 @@ Get information about one or more index templates.`,
     urlParams: ['master_timeout', 'timeout', 'local', 'flat_settings', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_index_template_request).body),
-      ...getShape(getShape(indices_get_index_template_request).path),
-      ...getShape(getShape(indices_get_index_template_request).query),
-      ...getShape(getShape(indices_get_index_template1_request).body),
-      ...getShape(getShape(indices_get_index_template1_request).path),
-      ...getShape(getShape(indices_get_index_template1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_index_template_request, 'body'),
+    getLooseObjectFromProperty(indices_get_index_template_request, 'path'),
+    getLooseObjectFromProperty(indices_get_index_template_request, 'query'),
+    getLooseObjectFromProperty(indices_get_index_template1_request, 'body'),
+    getLooseObjectFromProperty(indices_get_index_template1_request, 'path'),
+    getLooseObjectFromProperty(indices_get_index_template1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_index_template_response)),
@@ -9076,16 +8714,14 @@ For data streams, the API retrieves mappings for the stream’s backing indices.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_mapping_request).body),
-      ...getShape(getShape(indices_get_mapping_request).path),
-      ...getShape(getShape(indices_get_mapping_request).query),
-      ...getShape(getShape(indices_get_mapping1_request).body),
-      ...getShape(getShape(indices_get_mapping1_request).path),
-      ...getShape(getShape(indices_get_mapping1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_mapping_request, 'body'),
+    getLooseObjectFromProperty(indices_get_mapping_request, 'path'),
+    getLooseObjectFromProperty(indices_get_mapping_request, 'query'),
+    getLooseObjectFromProperty(indices_get_mapping1_request, 'body'),
+    getLooseObjectFromProperty(indices_get_mapping1_request, 'path'),
+    getLooseObjectFromProperty(indices_get_mapping1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_mapping_response)),
@@ -9109,13 +8745,11 @@ Get the status of a migration reindex attempt for a data stream or index.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_migrate_reindex_status_request).body),
-      ...getShape(getShape(indices_get_migrate_reindex_status_request).path),
-      ...getShape(getShape(indices_get_migrate_reindex_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'body'),
+    getLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'path'),
+    getLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_migrate_reindex_status_response)),
@@ -9197,22 +8831,20 @@ For data streams, it returns setting information for the stream's backing indice
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_settings_request).body),
-      ...getShape(getShape(indices_get_settings_request).path),
-      ...getShape(getShape(indices_get_settings_request).query),
-      ...getShape(getShape(indices_get_settings1_request).body),
-      ...getShape(getShape(indices_get_settings1_request).path),
-      ...getShape(getShape(indices_get_settings1_request).query),
-      ...getShape(getShape(indices_get_settings2_request).body),
-      ...getShape(getShape(indices_get_settings2_request).path),
-      ...getShape(getShape(indices_get_settings2_request).query),
-      ...getShape(getShape(indices_get_settings3_request).body),
-      ...getShape(getShape(indices_get_settings3_request).path),
-      ...getShape(getShape(indices_get_settings3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_settings_request, 'body'),
+    getLooseObjectFromProperty(indices_get_settings_request, 'path'),
+    getLooseObjectFromProperty(indices_get_settings_request, 'query'),
+    getLooseObjectFromProperty(indices_get_settings1_request, 'body'),
+    getLooseObjectFromProperty(indices_get_settings1_request, 'path'),
+    getLooseObjectFromProperty(indices_get_settings1_request, 'query'),
+    getLooseObjectFromProperty(indices_get_settings2_request, 'body'),
+    getLooseObjectFromProperty(indices_get_settings2_request, 'path'),
+    getLooseObjectFromProperty(indices_get_settings2_request, 'query'),
+    getLooseObjectFromProperty(indices_get_settings3_request, 'body'),
+    getLooseObjectFromProperty(indices_get_settings3_request, 'path'),
+    getLooseObjectFromProperty(indices_get_settings3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_settings_response)),
@@ -9240,16 +8872,14 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     urlParams: ['master_timeout', 'timeout', 'flat_settings', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_get_template_request).body),
-      ...getShape(getShape(indices_get_template_request).path),
-      ...getShape(getShape(indices_get_template_request).query),
-      ...getShape(getShape(indices_get_template1_request).body),
-      ...getShape(getShape(indices_get_template1_request).path),
-      ...getShape(getShape(indices_get_template1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_get_template_request, 'body'),
+    getLooseObjectFromProperty(indices_get_template_request, 'path'),
+    getLooseObjectFromProperty(indices_get_template_request, 'query'),
+    getLooseObjectFromProperty(indices_get_template1_request, 'body'),
+    getLooseObjectFromProperty(indices_get_template1_request, 'path'),
+    getLooseObjectFromProperty(indices_get_template1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_get_template_response)),
@@ -9276,13 +8906,11 @@ The persistent task ID is returned immediately and the reindexing work is comple
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_migrate_reindex_request).body),
-      ...getShape(getShape(indices_migrate_reindex_request).path),
-      ...getShape(getShape(indices_migrate_reindex_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_migrate_reindex_request, 'body'),
+    getLooseObjectFromProperty(indices_migrate_reindex_request, 'path'),
+    getLooseObjectFromProperty(indices_migrate_reindex_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_migrate_reindex_response)),
@@ -9314,13 +8942,11 @@ The write index for the alias becomes the write index for the stream.`,
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_migrate_to_data_stream_request).body),
-      ...getShape(getShape(indices_migrate_to_data_stream_request).path),
-      ...getShape(getShape(indices_migrate_to_data_stream_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'body'),
+    getLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'path'),
+    getLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_migrate_to_data_stream_response)),
@@ -9343,13 +8969,11 @@ Performs one or more data stream modification actions in a single atomic operati
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_modify_data_stream_request).body),
-      ...getShape(getShape(indices_modify_data_stream_request).path),
-      ...getShape(getShape(indices_modify_data_stream_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_modify_data_stream_request, 'body'),
+    getLooseObjectFromProperty(indices_modify_data_stream_request, 'path'),
+    getLooseObjectFromProperty(indices_modify_data_stream_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_modify_data_stream_response)),
@@ -9400,13 +9024,11 @@ Because opening or closing an index allocates its shards, the \`wait_for_active_
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_open_request).body),
-      ...getShape(getShape(indices_open_request).path),
-      ...getShape(getShape(indices_open_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_open_request, 'body'),
+    getLooseObjectFromProperty(indices_open_request, 'path'),
+    getLooseObjectFromProperty(indices_open_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_open_response)),
@@ -9438,13 +9060,11 @@ This will affect the lifecycle management of the data stream and interfere with 
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_promote_data_stream_request).body),
-      ...getShape(getShape(indices_promote_data_stream_request).path),
-      ...getShape(getShape(indices_promote_data_stream_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_promote_data_stream_request, 'body'),
+    getLooseObjectFromProperty(indices_promote_data_stream_request, 'path'),
+    getLooseObjectFromProperty(indices_promote_data_stream_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_promote_data_stream_response)),
@@ -9467,22 +9087,20 @@ Adds a data stream or index to an alias.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_put_alias_request).body),
-      ...getShape(getShape(indices_put_alias_request).path),
-      ...getShape(getShape(indices_put_alias_request).query),
-      ...getShape(getShape(indices_put_alias1_request).body),
-      ...getShape(getShape(indices_put_alias1_request).path),
-      ...getShape(getShape(indices_put_alias1_request).query),
-      ...getShape(getShape(indices_put_alias2_request).body),
-      ...getShape(getShape(indices_put_alias2_request).path),
-      ...getShape(getShape(indices_put_alias2_request).query),
-      ...getShape(getShape(indices_put_alias3_request).body),
-      ...getShape(getShape(indices_put_alias3_request).path),
-      ...getShape(getShape(indices_put_alias3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_put_alias_request, 'body'),
+    getLooseObjectFromProperty(indices_put_alias_request, 'path'),
+    getLooseObjectFromProperty(indices_put_alias_request, 'query'),
+    getLooseObjectFromProperty(indices_put_alias1_request, 'body'),
+    getLooseObjectFromProperty(indices_put_alias1_request, 'path'),
+    getLooseObjectFromProperty(indices_put_alias1_request, 'query'),
+    getLooseObjectFromProperty(indices_put_alias2_request, 'body'),
+    getLooseObjectFromProperty(indices_put_alias2_request, 'path'),
+    getLooseObjectFromProperty(indices_put_alias2_request, 'query'),
+    getLooseObjectFromProperty(indices_put_alias3_request, 'body'),
+    getLooseObjectFromProperty(indices_put_alias3_request, 'path'),
+    getLooseObjectFromProperty(indices_put_alias3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_put_alias_response)),
@@ -9518,13 +9136,11 @@ Update the data stream lifecycle of the specified data streams.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_put_data_lifecycle_request).body),
-      ...getShape(getShape(indices_put_data_lifecycle_request).path),
-      ...getShape(getShape(indices_put_data_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_put_data_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(indices_put_data_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(indices_put_data_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_put_data_lifecycle_response)),
@@ -9550,13 +9166,11 @@ that are created during rollover after this API is called. No indices are change
     urlParams: ['master_timeout', 'dry_run', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_put_data_stream_mappings_request).body),
-      ...getShape(getShape(indices_put_data_stream_mappings_request).path),
-      ...getShape(getShape(indices_put_data_stream_mappings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'body'),
+    getLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'path'),
+    getLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_put_data_stream_mappings_response)),
@@ -9588,13 +9202,11 @@ Update the data stream options of the specified data streams.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_put_data_stream_options_request).body),
-      ...getShape(getShape(indices_put_data_stream_options_request).path),
-      ...getShape(getShape(indices_put_data_stream_options_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_put_data_stream_options_request, 'body'),
+    getLooseObjectFromProperty(indices_put_data_stream_options_request, 'path'),
+    getLooseObjectFromProperty(indices_put_data_stream_options_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_put_data_stream_options_response)),
@@ -9621,13 +9233,11 @@ backing indices. Otherwise, it will be applied when the data stream is next roll
     urlParams: ['master_timeout', 'dry_run', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_put_data_stream_settings_request).body),
-      ...getShape(getShape(indices_put_data_stream_settings_request).path),
-      ...getShape(getShape(indices_put_data_stream_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_put_data_stream_settings_request, 'body'),
+    getLooseObjectFromProperty(indices_put_data_stream_settings_request, 'path'),
+    getLooseObjectFromProperty(indices_put_data_stream_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_put_data_stream_settings_response)),
@@ -9676,16 +9286,14 @@ If an entry already exists with the same key, then it is overwritten by the new 
     urlParams: ['master_timeout', 'timeout', 'local', 'flat_settings', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_put_index_template_request).body),
-      ...getShape(getShape(indices_put_index_template_request).path),
-      ...getShape(getShape(indices_put_index_template_request).query),
-      ...getShape(getShape(indices_put_index_template1_request).body),
-      ...getShape(getShape(indices_put_index_template1_request).path),
-      ...getShape(getShape(indices_put_index_template1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_put_index_template_request, 'body'),
+    getLooseObjectFromProperty(indices_put_index_template_request, 'path'),
+    getLooseObjectFromProperty(indices_put_index_template_request, 'query'),
+    getLooseObjectFromProperty(indices_put_index_template1_request, 'body'),
+    getLooseObjectFromProperty(indices_put_index_template1_request, 'path'),
+    getLooseObjectFromProperty(indices_put_index_template1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_put_index_template_response)),
@@ -9720,16 +9328,14 @@ Learn how to use the update mapping API with practical examples in the [Update m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_put_mapping_request).body),
-      ...getShape(getShape(indices_put_mapping_request).path),
-      ...getShape(getShape(indices_put_mapping_request).query),
-      ...getShape(getShape(indices_put_mapping1_request).body),
-      ...getShape(getShape(indices_put_mapping1_request).path),
-      ...getShape(getShape(indices_put_mapping1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_put_mapping_request, 'body'),
+    getLooseObjectFromProperty(indices_put_mapping_request, 'path'),
+    getLooseObjectFromProperty(indices_put_mapping_request, 'query'),
+    getLooseObjectFromProperty(indices_put_mapping1_request, 'body'),
+    getLooseObjectFromProperty(indices_put_mapping1_request, 'path'),
+    getLooseObjectFromProperty(indices_put_mapping1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_put_mapping_response)),
@@ -9826,16 +9432,14 @@ Refer to [updating analyzers on existing indices](https://www.elastic.co/docs/ma
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_put_settings_request).body),
-      ...getShape(getShape(indices_put_settings_request).path),
-      ...getShape(getShape(indices_put_settings_request).query),
-      ...getShape(getShape(indices_put_settings1_request).body),
-      ...getShape(getShape(indices_put_settings1_request).path),
-      ...getShape(getShape(indices_put_settings1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_put_settings_request, 'body'),
+    getLooseObjectFromProperty(indices_put_settings_request, 'path'),
+    getLooseObjectFromProperty(indices_put_settings_request, 'query'),
+    getLooseObjectFromProperty(indices_put_settings1_request, 'body'),
+    getLooseObjectFromProperty(indices_put_settings1_request, 'path'),
+    getLooseObjectFromProperty(indices_put_settings1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_put_settings_response)),
@@ -9878,16 +9482,14 @@ NOTE: Multiple matching templates with the same order value will result in a non
     urlParams: ['master_timeout', 'timeout', 'flat_settings', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_put_template_request).body),
-      ...getShape(getShape(indices_put_template_request).path),
-      ...getShape(getShape(indices_put_template_request).query),
-      ...getShape(getShape(indices_put_template1_request).body),
-      ...getShape(getShape(indices_put_template1_request).path),
-      ...getShape(getShape(indices_put_template1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_put_template_request, 'body'),
+    getLooseObjectFromProperty(indices_put_template_request, 'path'),
+    getLooseObjectFromProperty(indices_put_template_request, 'query'),
+    getLooseObjectFromProperty(indices_put_template1_request, 'body'),
+    getLooseObjectFromProperty(indices_put_template1_request, 'path'),
+    getLooseObjectFromProperty(indices_put_template1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_put_template_response)),
@@ -9932,16 +9534,14 @@ This means that if a shard copy completes a recovery and then Elasticsearch relo
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_recovery_request).body),
-      ...getShape(getShape(indices_recovery_request).path),
-      ...getShape(getShape(indices_recovery_request).query),
-      ...getShape(getShape(indices_recovery1_request).body),
-      ...getShape(getShape(indices_recovery1_request).path),
-      ...getShape(getShape(indices_recovery1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_recovery_request, 'body'),
+    getLooseObjectFromProperty(indices_recovery_request, 'path'),
+    getLooseObjectFromProperty(indices_recovery_request, 'query'),
+    getLooseObjectFromProperty(indices_recovery1_request, 'body'),
+    getLooseObjectFromProperty(indices_recovery1_request, 'path'),
+    getLooseObjectFromProperty(indices_recovery1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_recovery_response)),
@@ -9979,22 +9579,20 @@ This option ensures the indexing operation waits for a periodic refresh before r
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_refresh_request).body),
-      ...getShape(getShape(indices_refresh_request).path),
-      ...getShape(getShape(indices_refresh_request).query),
-      ...getShape(getShape(indices_refresh1_request).body),
-      ...getShape(getShape(indices_refresh1_request).path),
-      ...getShape(getShape(indices_refresh1_request).query),
-      ...getShape(getShape(indices_refresh2_request).body),
-      ...getShape(getShape(indices_refresh2_request).path),
-      ...getShape(getShape(indices_refresh2_request).query),
-      ...getShape(getShape(indices_refresh3_request).body),
-      ...getShape(getShape(indices_refresh3_request).path),
-      ...getShape(getShape(indices_refresh3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_refresh_request, 'body'),
+    getLooseObjectFromProperty(indices_refresh_request, 'path'),
+    getLooseObjectFromProperty(indices_refresh_request, 'query'),
+    getLooseObjectFromProperty(indices_refresh1_request, 'body'),
+    getLooseObjectFromProperty(indices_refresh1_request, 'path'),
+    getLooseObjectFromProperty(indices_refresh1_request, 'query'),
+    getLooseObjectFromProperty(indices_refresh2_request, 'body'),
+    getLooseObjectFromProperty(indices_refresh2_request, 'path'),
+    getLooseObjectFromProperty(indices_refresh2_request, 'query'),
+    getLooseObjectFromProperty(indices_refresh3_request, 'body'),
+    getLooseObjectFromProperty(indices_refresh3_request, 'path'),
+    getLooseObjectFromProperty(indices_refresh3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_refresh_response)),
@@ -10032,16 +9630,14 @@ This ensures the synonym file is updated everywhere in the cluster in case shard
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_reload_search_analyzers_request).body),
-      ...getShape(getShape(indices_reload_search_analyzers_request).path),
-      ...getShape(getShape(indices_reload_search_analyzers_request).query),
-      ...getShape(getShape(indices_reload_search_analyzers1_request).body),
-      ...getShape(getShape(indices_reload_search_analyzers1_request).path),
-      ...getShape(getShape(indices_reload_search_analyzers1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_reload_search_analyzers_request, 'body'),
+    getLooseObjectFromProperty(indices_reload_search_analyzers_request, 'path'),
+    getLooseObjectFromProperty(indices_reload_search_analyzers_request, 'query'),
+    getLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'body'),
+    getLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'path'),
+    getLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_reload_search_analyzers_response)),
@@ -10078,13 +9674,11 @@ Index blocks limit the operations allowed on an index by blocking specific opera
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_remove_block_request).body),
-      ...getShape(getShape(indices_remove_block_request).path),
-      ...getShape(getShape(indices_remove_block_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_remove_block_request, 'body'),
+    getLooseObjectFromProperty(indices_remove_block_request, 'path'),
+    getLooseObjectFromProperty(indices_remove_block_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_remove_block_response)),
@@ -10151,16 +9745,14 @@ If a connection was (re-)established, this will also cause the \`remote/info\` e
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_resolve_cluster_request).body),
-      ...getShape(getShape(indices_resolve_cluster_request).path),
-      ...getShape(getShape(indices_resolve_cluster_request).query),
-      ...getShape(getShape(indices_resolve_cluster1_request).body),
-      ...getShape(getShape(indices_resolve_cluster1_request).path),
-      ...getShape(getShape(indices_resolve_cluster1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_resolve_cluster_request, 'body'),
+    getLooseObjectFromProperty(indices_resolve_cluster_request, 'path'),
+    getLooseObjectFromProperty(indices_resolve_cluster_request, 'query'),
+    getLooseObjectFromProperty(indices_resolve_cluster1_request, 'body'),
+    getLooseObjectFromProperty(indices_resolve_cluster1_request, 'path'),
+    getLooseObjectFromProperty(indices_resolve_cluster1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_resolve_cluster_response)),
@@ -10185,13 +9777,11 @@ Multiple patterns and remote clusters are supported.`,
     urlParams: ['expand_wildcards', 'ignore_unavailable', 'allow_no_indices', 'mode'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_resolve_index_request).body),
-      ...getShape(getShape(indices_resolve_index_request).path),
-      ...getShape(getShape(indices_resolve_index_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_resolve_index_request, 'body'),
+    getLooseObjectFromProperty(indices_resolve_index_request, 'path'),
+    getLooseObjectFromProperty(indices_resolve_index_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_resolve_index_response)),
@@ -10250,16 +9840,14 @@ If you roll over the alias on May 7, 2099, the new index's name is \`my-index-20
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_rollover_request).body),
-      ...getShape(getShape(indices_rollover_request).path),
-      ...getShape(getShape(indices_rollover_request).query),
-      ...getShape(getShape(indices_rollover1_request).body),
-      ...getShape(getShape(indices_rollover1_request).path),
-      ...getShape(getShape(indices_rollover1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_rollover_request, 'body'),
+    getLooseObjectFromProperty(indices_rollover_request, 'path'),
+    getLooseObjectFromProperty(indices_rollover_request, 'query'),
+    getLooseObjectFromProperty(indices_rollover1_request, 'body'),
+    getLooseObjectFromProperty(indices_rollover1_request, 'path'),
+    getLooseObjectFromProperty(indices_rollover1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_rollover_response)),
@@ -10284,16 +9872,14 @@ For data streams, the API returns information about the stream's backing indices
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_segments_request).body),
-      ...getShape(getShape(indices_segments_request).path),
-      ...getShape(getShape(indices_segments_request).query),
-      ...getShape(getShape(indices_segments1_request).body),
-      ...getShape(getShape(indices_segments1_request).path),
-      ...getShape(getShape(indices_segments1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_segments_request, 'body'),
+    getLooseObjectFromProperty(indices_segments_request, 'path'),
+    getLooseObjectFromProperty(indices_segments_request, 'query'),
+    getLooseObjectFromProperty(indices_segments1_request, 'body'),
+    getLooseObjectFromProperty(indices_segments1_request, 'path'),
+    getLooseObjectFromProperty(indices_segments1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_segments_response)),
@@ -10327,16 +9913,14 @@ By default, the API returns store information only for primary shards that are u
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_shard_stores_request).body),
-      ...getShape(getShape(indices_shard_stores_request).path),
-      ...getShape(getShape(indices_shard_stores_request).query),
-      ...getShape(getShape(indices_shard_stores1_request).body),
-      ...getShape(getShape(indices_shard_stores1_request).path),
-      ...getShape(getShape(indices_shard_stores1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_shard_stores_request, 'body'),
+    getLooseObjectFromProperty(indices_shard_stores_request, 'path'),
+    getLooseObjectFromProperty(indices_shard_stores_request, 'query'),
+    getLooseObjectFromProperty(indices_shard_stores1_request, 'body'),
+    getLooseObjectFromProperty(indices_shard_stores1_request, 'path'),
+    getLooseObjectFromProperty(indices_shard_stores1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_shard_stores_response)),
@@ -10390,16 +9974,14 @@ IMPORTANT: Indices can only be shrunk if they satisfy the following requirements
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_shrink_request).body),
-      ...getShape(getShape(indices_shrink_request).path),
-      ...getShape(getShape(indices_shrink_request).query),
-      ...getShape(getShape(indices_shrink1_request).body),
-      ...getShape(getShape(indices_shrink1_request).path),
-      ...getShape(getShape(indices_shrink1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_shrink_request, 'body'),
+    getLooseObjectFromProperty(indices_shrink_request, 'path'),
+    getLooseObjectFromProperty(indices_shrink_request, 'query'),
+    getLooseObjectFromProperty(indices_shrink1_request, 'body'),
+    getLooseObjectFromProperty(indices_shrink1_request, 'path'),
+    getLooseObjectFromProperty(indices_shrink1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_shrink_response)),
@@ -10423,13 +10005,11 @@ Get the index configuration that would be applied to the specified index from an
     urlParams: ['create', 'cause', 'master_timeout', 'include_defaults'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_simulate_index_template_request).body),
-      ...getShape(getShape(indices_simulate_index_template_request).path),
-      ...getShape(getShape(indices_simulate_index_template_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_simulate_index_template_request, 'body'),
+    getLooseObjectFromProperty(indices_simulate_index_template_request, 'path'),
+    getLooseObjectFromProperty(indices_simulate_index_template_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_simulate_index_template_response)),
@@ -10452,16 +10032,14 @@ Get the index configuration that would be applied by a particular index template
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_simulate_template_request).body),
-      ...getShape(getShape(indices_simulate_template_request).path),
-      ...getShape(getShape(indices_simulate_template_request).query),
-      ...getShape(getShape(indices_simulate_template1_request).body),
-      ...getShape(getShape(indices_simulate_template1_request).path),
-      ...getShape(getShape(indices_simulate_template1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_simulate_template_request, 'body'),
+    getLooseObjectFromProperty(indices_simulate_template_request, 'path'),
+    getLooseObjectFromProperty(indices_simulate_template_request, 'query'),
+    getLooseObjectFromProperty(indices_simulate_template1_request, 'body'),
+    getLooseObjectFromProperty(indices_simulate_template1_request, 'path'),
+    getLooseObjectFromProperty(indices_simulate_template1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_simulate_template_response)),
@@ -10516,16 +10094,14 @@ IMPORTANT: Indices can only be split if they satisfy the following requirements:
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_split_request).body),
-      ...getShape(getShape(indices_split_request).path),
-      ...getShape(getShape(indices_split_request).query),
-      ...getShape(getShape(indices_split1_request).body),
-      ...getShape(getShape(indices_split1_request).path),
-      ...getShape(getShape(indices_split1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_split_request, 'body'),
+    getLooseObjectFromProperty(indices_split_request, 'path'),
+    getLooseObjectFromProperty(indices_split_request, 'query'),
+    getLooseObjectFromProperty(indices_split1_request, 'body'),
+    getLooseObjectFromProperty(indices_split1_request, 'path'),
+    getLooseObjectFromProperty(indices_split1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_split_response)),
@@ -10558,22 +10134,20 @@ Although the shard is no longer part of the node, that node retains any node-lev
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_stats_request).body),
-      ...getShape(getShape(indices_stats_request).path),
-      ...getShape(getShape(indices_stats_request).query),
-      ...getShape(getShape(indices_stats1_request).body),
-      ...getShape(getShape(indices_stats1_request).path),
-      ...getShape(getShape(indices_stats1_request).query),
-      ...getShape(getShape(indices_stats2_request).body),
-      ...getShape(getShape(indices_stats2_request).path),
-      ...getShape(getShape(indices_stats2_request).query),
-      ...getShape(getShape(indices_stats3_request).body),
-      ...getShape(getShape(indices_stats3_request).path),
-      ...getShape(getShape(indices_stats3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_stats_request, 'body'),
+    getLooseObjectFromProperty(indices_stats_request, 'path'),
+    getLooseObjectFromProperty(indices_stats_request, 'query'),
+    getLooseObjectFromProperty(indices_stats1_request, 'body'),
+    getLooseObjectFromProperty(indices_stats1_request, 'path'),
+    getLooseObjectFromProperty(indices_stats1_request, 'query'),
+    getLooseObjectFromProperty(indices_stats2_request, 'body'),
+    getLooseObjectFromProperty(indices_stats2_request, 'path'),
+    getLooseObjectFromProperty(indices_stats2_request, 'query'),
+    getLooseObjectFromProperty(indices_stats3_request, 'body'),
+    getLooseObjectFromProperty(indices_stats3_request, 'path'),
+    getLooseObjectFromProperty(indices_stats3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_stats_response)),
@@ -10599,13 +10173,11 @@ Adds a data stream or index to an alias.`,
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_update_aliases_request).body),
-      ...getShape(getShape(indices_update_aliases_request).path),
-      ...getShape(getShape(indices_update_aliases_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_update_aliases_request, 'body'),
+    getLooseObjectFromProperty(indices_update_aliases_request, 'path'),
+    getLooseObjectFromProperty(indices_update_aliases_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_update_aliases_response)),
@@ -10628,22 +10200,20 @@ Validates a query without running it.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(indices_validate_query_request).body),
-      ...getShape(getShape(indices_validate_query_request).path),
-      ...getShape(getShape(indices_validate_query_request).query),
-      ...getShape(getShape(indices_validate_query1_request).body),
-      ...getShape(getShape(indices_validate_query1_request).path),
-      ...getShape(getShape(indices_validate_query1_request).query),
-      ...getShape(getShape(indices_validate_query2_request).body),
-      ...getShape(getShape(indices_validate_query2_request).path),
-      ...getShape(getShape(indices_validate_query2_request).query),
-      ...getShape(getShape(indices_validate_query3_request).body),
-      ...getShape(getShape(indices_validate_query3_request).path),
-      ...getShape(getShape(indices_validate_query3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(indices_validate_query_request, 'body'),
+    getLooseObjectFromProperty(indices_validate_query_request, 'path'),
+    getLooseObjectFromProperty(indices_validate_query_request, 'query'),
+    getLooseObjectFromProperty(indices_validate_query1_request, 'body'),
+    getLooseObjectFromProperty(indices_validate_query1_request, 'path'),
+    getLooseObjectFromProperty(indices_validate_query1_request, 'query'),
+    getLooseObjectFromProperty(indices_validate_query2_request, 'body'),
+    getLooseObjectFromProperty(indices_validate_query2_request, 'path'),
+    getLooseObjectFromProperty(indices_validate_query2_request, 'query'),
+    getLooseObjectFromProperty(indices_validate_query3_request, 'body'),
+    getLooseObjectFromProperty(indices_validate_query3_request, 'path'),
+    getLooseObjectFromProperty(indices_validate_query3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(indices_validate_query_response)),
@@ -10677,13 +10247,11 @@ If you use the \`openai\`, \`hugging_face\` or the \`elastic\` service, use the 
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_chat_completion_unified_request).body),
-      ...getShape(getShape(inference_chat_completion_unified_request).path),
-      ...getShape(getShape(inference_chat_completion_unified_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_chat_completion_unified_request, 'body'),
+    getLooseObjectFromProperty(inference_chat_completion_unified_request, 'path'),
+    getLooseObjectFromProperty(inference_chat_completion_unified_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_chat_completion_unified_response)),
@@ -10712,13 +10280,11 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_completion_request).body),
-      ...getShape(getShape(inference_completion_request).path),
-      ...getShape(getShape(inference_completion_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_completion_request, 'body'),
+    getLooseObjectFromProperty(inference_completion_request, 'path'),
+    getLooseObjectFromProperty(inference_completion_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_completion_response)),
@@ -10742,16 +10308,14 @@ This API requires the manage_inference cluster privilege (the built-in \`inferen
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_delete_request).body),
-      ...getShape(getShape(inference_delete_request).path),
-      ...getShape(getShape(inference_delete_request).query),
-      ...getShape(getShape(inference_delete1_request).body),
-      ...getShape(getShape(inference_delete1_request).path),
-      ...getShape(getShape(inference_delete1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_delete_request, 'body'),
+    getLooseObjectFromProperty(inference_delete_request, 'path'),
+    getLooseObjectFromProperty(inference_delete_request, 'query'),
+    getLooseObjectFromProperty(inference_delete1_request, 'body'),
+    getLooseObjectFromProperty(inference_delete1_request, 'path'),
+    getLooseObjectFromProperty(inference_delete1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_delete_response)),
@@ -10776,19 +10340,17 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_get_request).body),
-      ...getShape(getShape(inference_get_request).path),
-      ...getShape(getShape(inference_get_request).query),
-      ...getShape(getShape(inference_get1_request).body),
-      ...getShape(getShape(inference_get1_request).path),
-      ...getShape(getShape(inference_get1_request).query),
-      ...getShape(getShape(inference_get2_request).body),
-      ...getShape(getShape(inference_get2_request).path),
-      ...getShape(getShape(inference_get2_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_get_request, 'body'),
+    getLooseObjectFromProperty(inference_get_request, 'path'),
+    getLooseObjectFromProperty(inference_get_request, 'query'),
+    getLooseObjectFromProperty(inference_get1_request, 'body'),
+    getLooseObjectFromProperty(inference_get1_request, 'path'),
+    getLooseObjectFromProperty(inference_get1_request, 'query'),
+    getLooseObjectFromProperty(inference_get2_request, 'body'),
+    getLooseObjectFromProperty(inference_get2_request, 'path'),
+    getLooseObjectFromProperty(inference_get2_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_get_response)),
@@ -10821,16 +10383,14 @@ For details about using this API with a service, such as Amazon Bedrock, Anthrop
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_inference_request).body),
-      ...getShape(getShape(inference_inference_request).path),
-      ...getShape(getShape(inference_inference_request).query),
-      ...getShape(getShape(inference_inference1_request).body),
-      ...getShape(getShape(inference_inference1_request).path),
-      ...getShape(getShape(inference_inference1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_inference_request, 'body'),
+    getLooseObjectFromProperty(inference_inference_request, 'path'),
+    getLooseObjectFromProperty(inference_inference_request, 'query'),
+    getLooseObjectFromProperty(inference_inference1_request, 'body'),
+    getLooseObjectFromProperty(inference_inference1_request, 'path'),
+    getLooseObjectFromProperty(inference_inference1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_inference_response)),
@@ -10879,16 +10439,14 @@ The following integrations are available through the inference API. You can find
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_request).body),
-      ...getShape(getShape(inference_put_request).path),
-      ...getShape(getShape(inference_put_request).query),
-      ...getShape(getShape(inference_put1_request).body),
-      ...getShape(getShape(inference_put1_request).path),
-      ...getShape(getShape(inference_put1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_request, 'body'),
+    getLooseObjectFromProperty(inference_put_request, 'path'),
+    getLooseObjectFromProperty(inference_put_request, 'query'),
+    getLooseObjectFromProperty(inference_put1_request, 'body'),
+    getLooseObjectFromProperty(inference_put1_request, 'path'),
+    getLooseObjectFromProperty(inference_put1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_response)),
@@ -10913,13 +10471,11 @@ Create an inference endpoint to perform an inference task with the \`ai21\` serv
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_ai21_request).body),
-      ...getShape(getShape(inference_put_ai21_request).path),
-      ...getShape(getShape(inference_put_ai21_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_ai21_request, 'body'),
+    getLooseObjectFromProperty(inference_put_ai21_request, 'path'),
+    getLooseObjectFromProperty(inference_put_ai21_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_ai21_response)),
@@ -10943,13 +10499,11 @@ Create an inference endpoint to perform an inference task with the \`alibabaclou
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_alibabacloud_request).body),
-      ...getShape(getShape(inference_put_alibabacloud_request).path),
-      ...getShape(getShape(inference_put_alibabacloud_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_alibabacloud_request, 'body'),
+    getLooseObjectFromProperty(inference_put_alibabacloud_request, 'path'),
+    getLooseObjectFromProperty(inference_put_alibabacloud_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_alibabacloud_response)),
@@ -10976,13 +10530,11 @@ Create an inference endpoint to perform an inference task with the \`amazonbedro
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_amazonbedrock_request).body),
-      ...getShape(getShape(inference_put_amazonbedrock_request).path),
-      ...getShape(getShape(inference_put_amazonbedrock_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_amazonbedrock_request, 'body'),
+    getLooseObjectFromProperty(inference_put_amazonbedrock_request, 'path'),
+    getLooseObjectFromProperty(inference_put_amazonbedrock_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_amazonbedrock_response)),
@@ -11006,13 +10558,11 @@ Create an inference endpoint to perform an inference task with the \`amazon_sage
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_amazonsagemaker_request).body),
-      ...getShape(getShape(inference_put_amazonsagemaker_request).path),
-      ...getShape(getShape(inference_put_amazonsagemaker_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'body'),
+    getLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'path'),
+    getLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_amazonsagemaker_response)),
@@ -11036,13 +10586,11 @@ Create an inference endpoint to perform an inference task with the \`anthropic\`
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_anthropic_request).body),
-      ...getShape(getShape(inference_put_anthropic_request).path),
-      ...getShape(getShape(inference_put_anthropic_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_anthropic_request, 'body'),
+    getLooseObjectFromProperty(inference_put_anthropic_request, 'path'),
+    getLooseObjectFromProperty(inference_put_anthropic_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_anthropic_response)),
@@ -11066,13 +10614,11 @@ Create an inference endpoint to perform an inference task with the \`azureaistud
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_azureaistudio_request).body),
-      ...getShape(getShape(inference_put_azureaistudio_request).path),
-      ...getShape(getShape(inference_put_azureaistudio_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_azureaistudio_request, 'body'),
+    getLooseObjectFromProperty(inference_put_azureaistudio_request, 'path'),
+    getLooseObjectFromProperty(inference_put_azureaistudio_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_azureaistudio_response)),
@@ -11103,13 +10649,11 @@ The list of embeddings models that you can choose from in your deployment can be
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_azureopenai_request).body),
-      ...getShape(getShape(inference_put_azureopenai_request).path),
-      ...getShape(getShape(inference_put_azureopenai_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_azureopenai_request, 'body'),
+    getLooseObjectFromProperty(inference_put_azureopenai_request, 'path'),
+    getLooseObjectFromProperty(inference_put_azureopenai_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_azureopenai_response)),
@@ -11133,13 +10677,11 @@ Create an inference endpoint to perform an inference task with the \`cohere\` se
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_cohere_request).body),
-      ...getShape(getShape(inference_put_cohere_request).path),
-      ...getShape(getShape(inference_put_cohere_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_cohere_request, 'body'),
+    getLooseObjectFromProperty(inference_put_cohere_request, 'path'),
+    getLooseObjectFromProperty(inference_put_cohere_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_cohere_response)),
@@ -11165,13 +10707,11 @@ To review the available \`rerank\` models, refer to <https://docs.contextual.ai/
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_contextualai_request).body),
-      ...getShape(getShape(inference_put_contextualai_request).path),
-      ...getShape(getShape(inference_put_contextualai_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_contextualai_request, 'body'),
+    getLooseObjectFromProperty(inference_put_contextualai_request, 'path'),
+    getLooseObjectFromProperty(inference_put_contextualai_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_contextualai_response)),
@@ -11234,13 +10774,11 @@ Pre-defined templates:
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_custom_request).body),
-      ...getShape(getShape(inference_put_custom_request).path),
-      ...getShape(getShape(inference_put_custom_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_custom_request, 'body'),
+    getLooseObjectFromProperty(inference_put_custom_request, 'path'),
+    getLooseObjectFromProperty(inference_put_custom_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_custom_response)),
@@ -11264,13 +10802,11 @@ Create an inference endpoint to perform an inference task with the \`deepseek\` 
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_deepseek_request).body),
-      ...getShape(getShape(inference_put_deepseek_request).path),
-      ...getShape(getShape(inference_put_deepseek_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_deepseek_request, 'body'),
+    getLooseObjectFromProperty(inference_put_deepseek_request, 'path'),
+    getLooseObjectFromProperty(inference_put_deepseek_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_deepseek_response)),
@@ -11307,13 +10843,11 @@ Avoid creating multiple endpoints for the same model unless required, as each en
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_elasticsearch_request).body),
-      ...getShape(getShape(inference_put_elasticsearch_request).path),
-      ...getShape(getShape(inference_put_elasticsearch_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_elasticsearch_request, 'body'),
+    getLooseObjectFromProperty(inference_put_elasticsearch_request, 'path'),
+    getLooseObjectFromProperty(inference_put_elasticsearch_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_elasticsearch_response)),
@@ -11351,13 +10885,11 @@ Avoid creating multiple endpoints for the same model unless required, as each en
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_elser_request).body),
-      ...getShape(getShape(inference_put_elser_request).path),
-      ...getShape(getShape(inference_put_elser_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_elser_request, 'body'),
+    getLooseObjectFromProperty(inference_put_elser_request, 'path'),
+    getLooseObjectFromProperty(inference_put_elser_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_elser_response)),
@@ -11381,13 +10913,11 @@ Create an inference endpoint to perform an inference task with the \`googleaistu
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_googleaistudio_request).body),
-      ...getShape(getShape(inference_put_googleaistudio_request).path),
-      ...getShape(getShape(inference_put_googleaistudio_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_googleaistudio_request, 'body'),
+    getLooseObjectFromProperty(inference_put_googleaistudio_request, 'path'),
+    getLooseObjectFromProperty(inference_put_googleaistudio_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_googleaistudio_response)),
@@ -11411,13 +10941,11 @@ Create an inference endpoint to perform an inference task with the \`googleverte
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_googlevertexai_request).body),
-      ...getShape(getShape(inference_put_googlevertexai_request).path),
-      ...getShape(getShape(inference_put_googlevertexai_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_googlevertexai_request, 'body'),
+    getLooseObjectFromProperty(inference_put_googlevertexai_request, 'path'),
+    getLooseObjectFromProperty(inference_put_googlevertexai_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_googlevertexai_response)),
@@ -11476,13 +11004,11 @@ Tested models for \`rerank\` task:
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_hugging_face_request).body),
-      ...getShape(getShape(inference_put_hugging_face_request).path),
-      ...getShape(getShape(inference_put_hugging_face_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_hugging_face_request, 'body'),
+    getLooseObjectFromProperty(inference_put_hugging_face_request, 'path'),
+    getLooseObjectFromProperty(inference_put_hugging_face_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_hugging_face_response)),
@@ -11509,13 +11035,11 @@ To review the available \`text_embedding\` models, refer to the <https://jina.ai
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_jinaai_request).body),
-      ...getShape(getShape(inference_put_jinaai_request).path),
-      ...getShape(getShape(inference_put_jinaai_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_jinaai_request, 'body'),
+    getLooseObjectFromProperty(inference_put_jinaai_request, 'path'),
+    getLooseObjectFromProperty(inference_put_jinaai_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_jinaai_response)),
@@ -11539,13 +11063,11 @@ Create an inference endpoint to perform an inference task with the \`llama\` ser
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_llama_request).body),
-      ...getShape(getShape(inference_put_llama_request).path),
-      ...getShape(getShape(inference_put_llama_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_llama_request, 'body'),
+    getLooseObjectFromProperty(inference_put_llama_request, 'path'),
+    getLooseObjectFromProperty(inference_put_llama_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_llama_response)),
@@ -11569,13 +11091,11 @@ Create an inference endpoint to perform an inference task with the \`mistral\` s
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_mistral_request).body),
-      ...getShape(getShape(inference_put_mistral_request).path),
-      ...getShape(getShape(inference_put_mistral_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_mistral_request, 'body'),
+    getLooseObjectFromProperty(inference_put_mistral_request, 'path'),
+    getLooseObjectFromProperty(inference_put_mistral_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_mistral_response)),
@@ -11599,13 +11119,11 @@ Create an inference endpoint to perform an inference task with the \`openai\` se
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_openai_request).body),
-      ...getShape(getShape(inference_put_openai_request).path),
-      ...getShape(getShape(inference_put_openai_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_openai_request, 'body'),
+    getLooseObjectFromProperty(inference_put_openai_request, 'path'),
+    getLooseObjectFromProperty(inference_put_openai_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_openai_response)),
@@ -11631,13 +11149,11 @@ Avoid creating multiple endpoints for the same model unless required, as each en
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_voyageai_request).body),
-      ...getShape(getShape(inference_put_voyageai_request).path),
-      ...getShape(getShape(inference_put_voyageai_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_voyageai_request, 'body'),
+    getLooseObjectFromProperty(inference_put_voyageai_request, 'path'),
+    getLooseObjectFromProperty(inference_put_voyageai_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_voyageai_response)),
@@ -11663,13 +11179,11 @@ You can provision one through the IBM catalog, the Cloud Databases CLI plug-in, 
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_put_watsonx_request).body),
-      ...getShape(getShape(inference_put_watsonx_request).path),
-      ...getShape(getShape(inference_put_watsonx_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_put_watsonx_request, 'body'),
+    getLooseObjectFromProperty(inference_put_watsonx_request, 'path'),
+    getLooseObjectFromProperty(inference_put_watsonx_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_put_watsonx_response)),
@@ -11691,13 +11205,11 @@ const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_rerank_request).body),
-      ...getShape(getShape(inference_rerank_request).path),
-      ...getShape(getShape(inference_rerank_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_rerank_request, 'body'),
+    getLooseObjectFromProperty(inference_rerank_request, 'path'),
+    getLooseObjectFromProperty(inference_rerank_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_rerank_response)),
@@ -11719,13 +11231,11 @@ const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_sparse_embedding_request).body),
-      ...getShape(getShape(inference_sparse_embedding_request).path),
-      ...getShape(getShape(inference_sparse_embedding_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_sparse_embedding_request, 'body'),
+    getLooseObjectFromProperty(inference_sparse_embedding_request, 'path'),
+    getLooseObjectFromProperty(inference_sparse_embedding_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_sparse_embedding_response)),
@@ -11754,13 +11264,11 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_stream_completion_request).body),
-      ...getShape(getShape(inference_stream_completion_request).path),
-      ...getShape(getShape(inference_stream_completion_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_stream_completion_request, 'body'),
+    getLooseObjectFromProperty(inference_stream_completion_request, 'path'),
+    getLooseObjectFromProperty(inference_stream_completion_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_stream_completion_response)),
@@ -11782,13 +11290,11 @@ const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_text_embedding_request).body),
-      ...getShape(getShape(inference_text_embedding_request).path),
-      ...getShape(getShape(inference_text_embedding_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_text_embedding_request, 'body'),
+    getLooseObjectFromProperty(inference_text_embedding_request, 'path'),
+    getLooseObjectFromProperty(inference_text_embedding_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_text_embedding_response)),
@@ -11819,16 +11325,14 @@ However, if you do not plan to use the inference APIs to use these models or if 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(inference_update_request).body),
-      ...getShape(getShape(inference_update_request).path),
-      ...getShape(getShape(inference_update_request).query),
-      ...getShape(getShape(inference_update1_request).body),
-      ...getShape(getShape(inference_update1_request).path),
-      ...getShape(getShape(inference_update1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(inference_update_request, 'body'),
+    getLooseObjectFromProperty(inference_update_request, 'path'),
+    getLooseObjectFromProperty(inference_update_request, 'query'),
+    getLooseObjectFromProperty(inference_update1_request, 'body'),
+    getLooseObjectFromProperty(inference_update1_request, 'path'),
+    getLooseObjectFromProperty(inference_update1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(inference_update_response)),
@@ -11852,13 +11356,11 @@ Get basic build, version, and cluster information.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(info_request).body),
-      ...getShape(getShape(info_request).path),
-      ...getShape(getShape(info_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(info_request, 'body'),
+    getLooseObjectFromProperty(info_request, 'path'),
+    getLooseObjectFromProperty(info_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(info_response)),
@@ -11882,13 +11384,11 @@ Delete one or more IP geolocation database configurations.`,
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_delete_geoip_database_request).body),
-      ...getShape(getShape(ingest_delete_geoip_database_request).path),
-      ...getShape(getShape(ingest_delete_geoip_database_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_delete_geoip_database_request, 'body'),
+    getLooseObjectFromProperty(ingest_delete_geoip_database_request, 'path'),
+    getLooseObjectFromProperty(ingest_delete_geoip_database_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_delete_geoip_database_response)),
@@ -11910,13 +11410,11 @@ const INGEST_DELETE_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_delete_ip_location_database_request).body),
-      ...getShape(getShape(ingest_delete_ip_location_database_request).path),
-      ...getShape(getShape(ingest_delete_ip_location_database_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'body'),
+    getLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'path'),
+    getLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_delete_ip_location_database_response)),
@@ -11939,13 +11437,11 @@ Delete one or more ingest pipelines.`,
     urlParams: ['master_timeout', 'timeout', 'if_version', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_delete_pipeline_request).body),
-      ...getShape(getShape(ingest_delete_pipeline_request).path),
-      ...getShape(getShape(ingest_delete_pipeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_delete_pipeline_request, 'body'),
+    getLooseObjectFromProperty(ingest_delete_pipeline_request, 'path'),
+    getLooseObjectFromProperty(ingest_delete_pipeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_delete_pipeline_response)),
@@ -11967,13 +11463,11 @@ Get download statistics for GeoIP2 databases that are used with the GeoIP proces
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_geo_ip_stats_request).body),
-      ...getShape(getShape(ingest_geo_ip_stats_request).path),
-      ...getShape(getShape(ingest_geo_ip_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_geo_ip_stats_request, 'body'),
+    getLooseObjectFromProperty(ingest_geo_ip_stats_request, 'path'),
+    getLooseObjectFromProperty(ingest_geo_ip_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_geo_ip_stats_response)),
@@ -11997,16 +11491,14 @@ Get information about one or more IP geolocation database configurations.`,
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_get_geoip_database_request).body),
-      ...getShape(getShape(ingest_get_geoip_database_request).path),
-      ...getShape(getShape(ingest_get_geoip_database_request).query),
-      ...getShape(getShape(ingest_get_geoip_database1_request).body),
-      ...getShape(getShape(ingest_get_geoip_database1_request).path),
-      ...getShape(getShape(ingest_get_geoip_database1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_get_geoip_database_request, 'body'),
+    getLooseObjectFromProperty(ingest_get_geoip_database_request, 'path'),
+    getLooseObjectFromProperty(ingest_get_geoip_database_request, 'query'),
+    getLooseObjectFromProperty(ingest_get_geoip_database1_request, 'body'),
+    getLooseObjectFromProperty(ingest_get_geoip_database1_request, 'path'),
+    getLooseObjectFromProperty(ingest_get_geoip_database1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_get_geoip_database_response)),
@@ -12029,16 +11521,14 @@ const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_get_ip_location_database_request).body),
-      ...getShape(getShape(ingest_get_ip_location_database_request).path),
-      ...getShape(getShape(ingest_get_ip_location_database_request).query),
-      ...getShape(getShape(ingest_get_ip_location_database1_request).body),
-      ...getShape(getShape(ingest_get_ip_location_database1_request).path),
-      ...getShape(getShape(ingest_get_ip_location_database1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_get_ip_location_database_request, 'body'),
+    getLooseObjectFromProperty(ingest_get_ip_location_database_request, 'path'),
+    getLooseObjectFromProperty(ingest_get_ip_location_database_request, 'query'),
+    getLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'body'),
+    getLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'path'),
+    getLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_get_ip_location_database_response)),
@@ -12064,16 +11554,14 @@ This API returns a local reference of the pipeline.`,
     urlParams: ['master_timeout', 'timeout', 'if_version', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_get_pipeline_request).body),
-      ...getShape(getShape(ingest_get_pipeline_request).path),
-      ...getShape(getShape(ingest_get_pipeline_request).query),
-      ...getShape(getShape(ingest_get_pipeline1_request).body),
-      ...getShape(getShape(ingest_get_pipeline1_request).path),
-      ...getShape(getShape(ingest_get_pipeline1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_get_pipeline_request, 'body'),
+    getLooseObjectFromProperty(ingest_get_pipeline_request, 'path'),
+    getLooseObjectFromProperty(ingest_get_pipeline_request, 'query'),
+    getLooseObjectFromProperty(ingest_get_pipeline1_request, 'body'),
+    getLooseObjectFromProperty(ingest_get_pipeline1_request, 'path'),
+    getLooseObjectFromProperty(ingest_get_pipeline1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_get_pipeline_response)),
@@ -12098,13 +11586,11 @@ A grok pattern is like a regular expression that supports aliased expressions th
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_processor_grok_request).body),
-      ...getShape(getShape(ingest_processor_grok_request).path),
-      ...getShape(getShape(ingest_processor_grok_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_processor_grok_request, 'body'),
+    getLooseObjectFromProperty(ingest_processor_grok_request, 'path'),
+    getLooseObjectFromProperty(ingest_processor_grok_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_processor_grok_response)),
@@ -12128,13 +11614,11 @@ Refer to the create or update IP geolocation database configuration API.`,
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_put_geoip_database_request).body),
-      ...getShape(getShape(ingest_put_geoip_database_request).path),
-      ...getShape(getShape(ingest_put_geoip_database_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_put_geoip_database_request, 'body'),
+    getLooseObjectFromProperty(ingest_put_geoip_database_request, 'path'),
+    getLooseObjectFromProperty(ingest_put_geoip_database_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_put_geoip_database_response)),
@@ -12156,13 +11640,11 @@ const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_put_ip_location_database_request).body),
-      ...getShape(getShape(ingest_put_ip_location_database_request).path),
-      ...getShape(getShape(ingest_put_ip_location_database_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_put_ip_location_database_request, 'body'),
+    getLooseObjectFromProperty(ingest_put_ip_location_database_request, 'path'),
+    getLooseObjectFromProperty(ingest_put_ip_location_database_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_put_ip_location_database_response)),
@@ -12184,13 +11666,11 @@ Changes made using this API take effect immediately.`,
     urlParams: ['master_timeout', 'timeout', 'if_version', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_put_pipeline_request).body),
-      ...getShape(getShape(ingest_put_pipeline_request).path),
-      ...getShape(getShape(ingest_put_pipeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_put_pipeline_request, 'body'),
+    getLooseObjectFromProperty(ingest_put_pipeline_request, 'path'),
+    getLooseObjectFromProperty(ingest_put_pipeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_put_pipeline_response)),
@@ -12215,22 +11695,20 @@ You can either specify an existing pipeline to use with the provided documents o
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ingest_simulate_request).body),
-      ...getShape(getShape(ingest_simulate_request).path),
-      ...getShape(getShape(ingest_simulate_request).query),
-      ...getShape(getShape(ingest_simulate1_request).body),
-      ...getShape(getShape(ingest_simulate1_request).path),
-      ...getShape(getShape(ingest_simulate1_request).query),
-      ...getShape(getShape(ingest_simulate2_request).body),
-      ...getShape(getShape(ingest_simulate2_request).path),
-      ...getShape(getShape(ingest_simulate2_request).query),
-      ...getShape(getShape(ingest_simulate3_request).body),
-      ...getShape(getShape(ingest_simulate3_request).path),
-      ...getShape(getShape(ingest_simulate3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ingest_simulate_request, 'body'),
+    getLooseObjectFromProperty(ingest_simulate_request, 'path'),
+    getLooseObjectFromProperty(ingest_simulate_request, 'query'),
+    getLooseObjectFromProperty(ingest_simulate1_request, 'body'),
+    getLooseObjectFromProperty(ingest_simulate1_request, 'path'),
+    getLooseObjectFromProperty(ingest_simulate1_request, 'query'),
+    getLooseObjectFromProperty(ingest_simulate2_request, 'body'),
+    getLooseObjectFromProperty(ingest_simulate2_request, 'path'),
+    getLooseObjectFromProperty(ingest_simulate2_request, 'query'),
+    getLooseObjectFromProperty(ingest_simulate3_request, 'body'),
+    getLooseObjectFromProperty(ingest_simulate3_request, 'path'),
+    getLooseObjectFromProperty(ingest_simulate3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ingest_simulate_response)),
@@ -12278,13 +11756,11 @@ If the operator privileges feature is enabled, only operator users can use this 
     urlParams: ['accept_enterprise', 'local', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(license_delete_request).body),
-      ...getShape(getShape(license_delete_request).path),
-      ...getShape(getShape(license_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(license_delete_request, 'body'),
+    getLooseObjectFromProperty(license_delete_request, 'path'),
+    getLooseObjectFromProperty(license_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(license_delete_response)),
@@ -12312,13 +11788,11 @@ Get information about your Elastic license including its type, its status, when 
     urlParams: ['accept_enterprise', 'local', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(license_get_request).body),
-      ...getShape(getShape(license_get_request).path),
-      ...getShape(getShape(license_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(license_get_request, 'body'),
+    getLooseObjectFromProperty(license_get_request, 'path'),
+    getLooseObjectFromProperty(license_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(license_get_response)),
@@ -12340,13 +11814,11 @@ const LICENSE_GET_BASIC_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(license_get_basic_status_request).body),
-      ...getShape(getShape(license_get_basic_status_request).path),
-      ...getShape(getShape(license_get_basic_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(license_get_basic_status_request, 'body'),
+    getLooseObjectFromProperty(license_get_basic_status_request, 'path'),
+    getLooseObjectFromProperty(license_get_basic_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(license_get_basic_status_response)),
@@ -12368,13 +11840,11 @@ const LICENSE_GET_TRIAL_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(license_get_trial_status_request).body),
-      ...getShape(getShape(license_get_trial_status_request).path),
-      ...getShape(getShape(license_get_trial_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(license_get_trial_status_request, 'body'),
+    getLooseObjectFromProperty(license_get_trial_status_request, 'path'),
+    getLooseObjectFromProperty(license_get_trial_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(license_get_trial_status_response)),
@@ -12404,16 +11874,14 @@ If the operator privileges feature is enabled, only operator users can use this 
     urlParams: ['accept_enterprise', 'local', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(license_post_request).body),
-      ...getShape(getShape(license_post_request).path),
-      ...getShape(getShape(license_post_request).query),
-      ...getShape(getShape(license_post1_request).body),
-      ...getShape(getShape(license_post1_request).path),
-      ...getShape(getShape(license_post1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(license_post_request, 'body'),
+    getLooseObjectFromProperty(license_post_request, 'path'),
+    getLooseObjectFromProperty(license_post_request, 'query'),
+    getLooseObjectFromProperty(license_post1_request, 'body'),
+    getLooseObjectFromProperty(license_post1_request, 'path'),
+    getLooseObjectFromProperty(license_post1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(license_post_response)),
@@ -12445,13 +11913,11 @@ To check the status of your basic license, use the get basic license API.`,
     urlParams: ['acknowledge', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(license_post_start_basic_request).body),
-      ...getShape(getShape(license_post_start_basic_request).path),
-      ...getShape(getShape(license_post_start_basic_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(license_post_start_basic_request, 'body'),
+    getLooseObjectFromProperty(license_post_start_basic_request, 'path'),
+    getLooseObjectFromProperty(license_post_start_basic_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(license_post_start_basic_response)),
@@ -12479,13 +11945,11 @@ To check the status of your trial, use the get trial status API.`,
     urlParams: ['acknowledge', 'type', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(license_post_start_trial_request).body),
-      ...getShape(getShape(license_post_start_trial_request).path),
-      ...getShape(getShape(license_post_start_trial_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(license_post_start_trial_request, 'body'),
+    getLooseObjectFromProperty(license_post_start_trial_request, 'path'),
+    getLooseObjectFromProperty(license_post_start_trial_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(license_post_start_trial_response)),
@@ -12509,13 +11973,11 @@ If the request succeeds, you receive an empty response with an appropriate statu
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(logstash_delete_pipeline_request).body),
-      ...getShape(getShape(logstash_delete_pipeline_request).path),
-      ...getShape(getShape(logstash_delete_pipeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(logstash_delete_pipeline_request, 'body'),
+    getLooseObjectFromProperty(logstash_delete_pipeline_request, 'path'),
+    getLooseObjectFromProperty(logstash_delete_pipeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(logstash_delete_pipeline_response)),
@@ -12538,16 +12000,14 @@ Get pipelines that are used for Logstash Central Management.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(logstash_get_pipeline_request).body),
-      ...getShape(getShape(logstash_get_pipeline_request).path),
-      ...getShape(getShape(logstash_get_pipeline_request).query),
-      ...getShape(getShape(logstash_get_pipeline1_request).body),
-      ...getShape(getShape(logstash_get_pipeline1_request).path),
-      ...getShape(getShape(logstash_get_pipeline1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(logstash_get_pipeline_request, 'body'),
+    getLooseObjectFromProperty(logstash_get_pipeline_request, 'path'),
+    getLooseObjectFromProperty(logstash_get_pipeline_request, 'query'),
+    getLooseObjectFromProperty(logstash_get_pipeline1_request, 'body'),
+    getLooseObjectFromProperty(logstash_get_pipeline1_request, 'path'),
+    getLooseObjectFromProperty(logstash_get_pipeline1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(logstash_get_pipeline_response)),
@@ -12573,13 +12033,11 @@ If the specified pipeline exists, it is replaced.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(logstash_put_pipeline_request).body),
-      ...getShape(getShape(logstash_put_pipeline_request).path),
-      ...getShape(getShape(logstash_put_pipeline_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(logstash_put_pipeline_request, 'body'),
+    getLooseObjectFromProperty(logstash_put_pipeline_request, 'path'),
+    getLooseObjectFromProperty(logstash_put_pipeline_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(logstash_put_pipeline_response)),
@@ -12616,22 +12074,20 @@ You can include the \`stored_fields\` query parameter in the request URI to spec
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(mget_request).body),
-      ...getShape(getShape(mget_request).path),
-      ...getShape(getShape(mget_request).query),
-      ...getShape(getShape(mget1_request).body),
-      ...getShape(getShape(mget1_request).path),
-      ...getShape(getShape(mget1_request).query),
-      ...getShape(getShape(mget2_request).body),
-      ...getShape(getShape(mget2_request).path),
-      ...getShape(getShape(mget2_request).query),
-      ...getShape(getShape(mget3_request).body),
-      ...getShape(getShape(mget3_request).path),
-      ...getShape(getShape(mget3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(mget_request, 'body'),
+    getLooseObjectFromProperty(mget_request, 'path'),
+    getLooseObjectFromProperty(mget_request, 'query'),
+    getLooseObjectFromProperty(mget1_request, 'body'),
+    getLooseObjectFromProperty(mget1_request, 'path'),
+    getLooseObjectFromProperty(mget1_request, 'query'),
+    getLooseObjectFromProperty(mget2_request, 'body'),
+    getLooseObjectFromProperty(mget2_request, 'path'),
+    getLooseObjectFromProperty(mget2_request, 'query'),
+    getLooseObjectFromProperty(mget3_request, 'body'),
+    getLooseObjectFromProperty(mget3_request, 'path'),
+    getLooseObjectFromProperty(mget3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(mget_response)),
@@ -12660,16 +12116,14 @@ You are strongly recommended to use the Upgrade Assistant.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(migration_deprecations_request).body),
-      ...getShape(getShape(migration_deprecations_request).path),
-      ...getShape(getShape(migration_deprecations_request).query),
-      ...getShape(getShape(migration_deprecations1_request).body),
-      ...getShape(getShape(migration_deprecations1_request).path),
-      ...getShape(getShape(migration_deprecations1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(migration_deprecations_request, 'body'),
+    getLooseObjectFromProperty(migration_deprecations_request, 'path'),
+    getLooseObjectFromProperty(migration_deprecations_request, 'query'),
+    getLooseObjectFromProperty(migration_deprecations1_request, 'body'),
+    getLooseObjectFromProperty(migration_deprecations1_request, 'path'),
+    getLooseObjectFromProperty(migration_deprecations1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(migration_deprecations_response)),
@@ -12697,13 +12151,11 @@ You are strongly recommended to use the Upgrade Assistant.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(migration_get_feature_upgrade_status_request).body),
-      ...getShape(getShape(migration_get_feature_upgrade_status_request).path),
-      ...getShape(getShape(migration_get_feature_upgrade_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'body'),
+    getLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'path'),
+    getLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(migration_get_feature_upgrade_status_response)),
@@ -12731,13 +12183,11 @@ TIP: The API is designed for indirect use by the Upgrade Assistant. We strongly 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(migration_post_feature_upgrade_request).body),
-      ...getShape(getShape(migration_post_feature_upgrade_request).path),
-      ...getShape(getShape(migration_post_feature_upgrade_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(migration_post_feature_upgrade_request, 'body'),
+    getLooseObjectFromProperty(migration_post_feature_upgrade_request, 'path'),
+    getLooseObjectFromProperty(migration_post_feature_upgrade_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(migration_post_feature_upgrade_response)),
@@ -12764,13 +12214,11 @@ Calling this API clears the caches without restarting the deployment.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_clear_trained_model_deployment_cache_request).body),
-      ...getShape(getShape(ml_clear_trained_model_deployment_cache_request).path),
-      ...getShape(getShape(ml_clear_trained_model_deployment_cache_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'body'),
+    getLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'path'),
+    getLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_clear_trained_model_deployment_cache_response)),
@@ -12797,13 +12245,11 @@ When a datafeed that has a specified end date stops, it automatically closes its
     urlParams: ['allow_no_match', 'force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_close_job_request).body),
-      ...getShape(getShape(ml_close_job_request).path),
-      ...getShape(getShape(ml_close_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_close_job_request, 'body'),
+    getLooseObjectFromProperty(ml_close_job_request, 'path'),
+    getLooseObjectFromProperty(ml_close_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_close_job_response)),
@@ -12827,13 +12273,11 @@ Remove all scheduled events from a calendar, then delete it.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_calendar_request).body),
-      ...getShape(getShape(ml_delete_calendar_request).path),
-      ...getShape(getShape(ml_delete_calendar_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_calendar_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_calendar_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_calendar_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_calendar_response)),
@@ -12855,13 +12299,11 @@ const ML_DELETE_CALENDAR_EVENT_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_calendar_event_request).body),
-      ...getShape(getShape(ml_delete_calendar_event_request).path),
-      ...getShape(getShape(ml_delete_calendar_event_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_calendar_event_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_calendar_event_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_calendar_event_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_calendar_event_response)),
@@ -12883,13 +12325,11 @@ const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_calendar_job_request).body),
-      ...getShape(getShape(ml_delete_calendar_job_request).path),
-      ...getShape(getShape(ml_delete_calendar_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_calendar_job_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_calendar_job_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_calendar_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_calendar_job_response)),
@@ -12911,13 +12351,11 @@ const ML_DELETE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_data_frame_analytics_request).body),
-      ...getShape(getShape(ml_delete_data_frame_analytics_request).path),
-      ...getShape(getShape(ml_delete_data_frame_analytics_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_data_frame_analytics_response)),
@@ -12945,13 +12383,11 @@ const ML_DELETE_DATAFEED_CONTRACT: InternalConnectorContract = {
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_datafeed_request).body),
-      ...getShape(getShape(ml_delete_datafeed_request).path),
-      ...getShape(getShape(ml_delete_datafeed_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_datafeed_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_datafeed_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_datafeed_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_datafeed_response)),
@@ -12982,16 +12418,14 @@ jobs by using \`_all\`, by specifying \`*\` as the \`<job_id>\`, or by omitting 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_expired_data_request).body),
-      ...getShape(getShape(ml_delete_expired_data_request).path),
-      ...getShape(getShape(ml_delete_expired_data_request).query),
-      ...getShape(getShape(ml_delete_expired_data1_request).body),
-      ...getShape(getShape(ml_delete_expired_data1_request).path),
-      ...getShape(getShape(ml_delete_expired_data1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_expired_data_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_expired_data_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_expired_data_request, 'query'),
+    getLooseObjectFromProperty(ml_delete_expired_data1_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_expired_data1_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_expired_data1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_expired_data_response)),
@@ -13017,13 +12451,11 @@ filter. You must update or delete the job before you can delete the filter.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_filter_request).body),
-      ...getShape(getShape(ml_delete_filter_request).path),
-      ...getShape(getShape(ml_delete_filter_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_filter_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_filter_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_filter_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_filter_response)),
@@ -13053,16 +12485,14 @@ forecasts before they expire.`,
     urlParams: ['duration', 'expires_in', 'max_model_memory'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_forecast_request).body),
-      ...getShape(getShape(ml_delete_forecast_request).path),
-      ...getShape(getShape(ml_delete_forecast_request).query),
-      ...getShape(getShape(ml_delete_forecast1_request).body),
-      ...getShape(getShape(ml_delete_forecast1_request).path),
-      ...getShape(getShape(ml_delete_forecast1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_forecast_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_forecast_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_forecast_request, 'query'),
+    getLooseObjectFromProperty(ml_delete_forecast1_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_forecast1_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_forecast1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_forecast_response)),
@@ -13100,13 +12530,11 @@ delete job request.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_job_request).body),
-      ...getShape(getShape(ml_delete_job_request).path),
-      ...getShape(getShape(ml_delete_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_job_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_job_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_job_response)),
@@ -13132,13 +12560,11 @@ the \`model_snapshot_id\` in the results from the get jobs API.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_model_snapshot_request).body),
-      ...getShape(getShape(ml_delete_model_snapshot_request).path),
-      ...getShape(getShape(ml_delete_model_snapshot_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_model_snapshot_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_model_snapshot_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_model_snapshot_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_model_snapshot_response)),
@@ -13162,13 +12588,11 @@ The request deletes a trained inference model that is not referenced by an inges
     urlParams: ['defer_definition_decompression', 'wait_for_completion', 'force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_trained_model_request).body),
-      ...getShape(getShape(ml_delete_trained_model_request).path),
-      ...getShape(getShape(ml_delete_trained_model_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_trained_model_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_trained_model_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_trained_model_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_trained_model_response)),
@@ -13194,13 +12618,11 @@ by the \`model_id\`, this API returns an error.`,
     urlParams: ['reassign'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_delete_trained_model_alias_request).body),
-      ...getShape(getShape(ml_delete_trained_model_alias_request).path),
-      ...getShape(getShape(ml_delete_trained_model_alias_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'body'),
+    getLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'path'),
+    getLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_delete_trained_model_alias_response)),
@@ -13226,13 +12648,11 @@ estimates for the fields it references.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_estimate_model_memory_request).body),
-      ...getShape(getShape(ml_estimate_model_memory_request).path),
-      ...getShape(getShape(ml_estimate_model_memory_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_estimate_model_memory_request, 'body'),
+    getLooseObjectFromProperty(ml_estimate_model_memory_request, 'path'),
+    getLooseObjectFromProperty(ml_estimate_model_memory_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_estimate_model_memory_response)),
@@ -13259,13 +12679,11 @@ field and an analytics result field to be present.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_evaluate_data_frame_request).body),
-      ...getShape(getShape(ml_evaluate_data_frame_request).path),
-      ...getShape(getShape(ml_evaluate_data_frame_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_evaluate_data_frame_request, 'body'),
+    getLooseObjectFromProperty(ml_evaluate_data_frame_request, 'path'),
+    getLooseObjectFromProperty(ml_evaluate_data_frame_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_evaluate_data_frame_response)),
@@ -13294,22 +12712,20 @@ If you have object fields or fields that are excluded via source filtering, they
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_explain_data_frame_analytics_request).body),
-      ...getShape(getShape(ml_explain_data_frame_analytics_request).path),
-      ...getShape(getShape(ml_explain_data_frame_analytics_request).query),
-      ...getShape(getShape(ml_explain_data_frame_analytics1_request).body),
-      ...getShape(getShape(ml_explain_data_frame_analytics1_request).path),
-      ...getShape(getShape(ml_explain_data_frame_analytics1_request).query),
-      ...getShape(getShape(ml_explain_data_frame_analytics2_request).body),
-      ...getShape(getShape(ml_explain_data_frame_analytics2_request).path),
-      ...getShape(getShape(ml_explain_data_frame_analytics2_request).query),
-      ...getShape(getShape(ml_explain_data_frame_analytics3_request).body),
-      ...getShape(getShape(ml_explain_data_frame_analytics3_request).path),
-      ...getShape(getShape(ml_explain_data_frame_analytics3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'body'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'path'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'query'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'body'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'path'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'query'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'body'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'path'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'query'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'body'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'path'),
+    getLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_explain_data_frame_analytics_response)),
@@ -13342,13 +12758,11 @@ analyzing further data.`,
     urlParams: ['advance_time', 'calc_interim', 'end', 'skip_time', 'start'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_flush_job_request).body),
-      ...getShape(getShape(ml_flush_job_request).path),
-      ...getShape(getShape(ml_flush_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_flush_job_request, 'body'),
+    getLooseObjectFromProperty(ml_flush_job_request, 'path'),
+    getLooseObjectFromProperty(ml_flush_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_flush_job_response)),
@@ -13375,13 +12789,11 @@ based on historical data.`,
     urlParams: ['duration', 'expires_in', 'max_model_memory'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_forecast_request).body),
-      ...getShape(getShape(ml_forecast_request).path),
-      ...getShape(getShape(ml_forecast_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_forecast_request, 'body'),
+    getLooseObjectFromProperty(ml_forecast_request, 'path'),
+    getLooseObjectFromProperty(ml_forecast_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_forecast_response)),
@@ -13407,22 +12819,20 @@ The API presents a chronological view of the records, grouped by bucket.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_buckets_request).body),
-      ...getShape(getShape(ml_get_buckets_request).path),
-      ...getShape(getShape(ml_get_buckets_request).query),
-      ...getShape(getShape(ml_get_buckets1_request).body),
-      ...getShape(getShape(ml_get_buckets1_request).path),
-      ...getShape(getShape(ml_get_buckets1_request).query),
-      ...getShape(getShape(ml_get_buckets2_request).body),
-      ...getShape(getShape(ml_get_buckets2_request).path),
-      ...getShape(getShape(ml_get_buckets2_request).query),
-      ...getShape(getShape(ml_get_buckets3_request).body),
-      ...getShape(getShape(ml_get_buckets3_request).path),
-      ...getShape(getShape(ml_get_buckets3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_buckets_request, 'body'),
+    getLooseObjectFromProperty(ml_get_buckets_request, 'path'),
+    getLooseObjectFromProperty(ml_get_buckets_request, 'query'),
+    getLooseObjectFromProperty(ml_get_buckets1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_buckets1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_buckets1_request, 'query'),
+    getLooseObjectFromProperty(ml_get_buckets2_request, 'body'),
+    getLooseObjectFromProperty(ml_get_buckets2_request, 'path'),
+    getLooseObjectFromProperty(ml_get_buckets2_request, 'query'),
+    getLooseObjectFromProperty(ml_get_buckets3_request, 'body'),
+    getLooseObjectFromProperty(ml_get_buckets3_request, 'path'),
+    getLooseObjectFromProperty(ml_get_buckets3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_buckets_response)),
@@ -13447,13 +12857,11 @@ const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
     urlParams: ['end', 'from', 'job_id', 'size', 'start'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_calendar_events_request).body),
-      ...getShape(getShape(ml_get_calendar_events_request).path),
-      ...getShape(getShape(ml_get_calendar_events_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_calendar_events_request, 'body'),
+    getLooseObjectFromProperty(ml_get_calendar_events_request, 'path'),
+    getLooseObjectFromProperty(ml_get_calendar_events_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_calendar_events_response)),
@@ -13475,22 +12883,20 @@ const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_calendars_request).body),
-      ...getShape(getShape(ml_get_calendars_request).path),
-      ...getShape(getShape(ml_get_calendars_request).query),
-      ...getShape(getShape(ml_get_calendars1_request).body),
-      ...getShape(getShape(ml_get_calendars1_request).path),
-      ...getShape(getShape(ml_get_calendars1_request).query),
-      ...getShape(getShape(ml_get_calendars2_request).body),
-      ...getShape(getShape(ml_get_calendars2_request).path),
-      ...getShape(getShape(ml_get_calendars2_request).query),
-      ...getShape(getShape(ml_get_calendars3_request).body),
-      ...getShape(getShape(ml_get_calendars3_request).path),
-      ...getShape(getShape(ml_get_calendars3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_calendars_request, 'body'),
+    getLooseObjectFromProperty(ml_get_calendars_request, 'path'),
+    getLooseObjectFromProperty(ml_get_calendars_request, 'query'),
+    getLooseObjectFromProperty(ml_get_calendars1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_calendars1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_calendars1_request, 'query'),
+    getLooseObjectFromProperty(ml_get_calendars2_request, 'body'),
+    getLooseObjectFromProperty(ml_get_calendars2_request, 'path'),
+    getLooseObjectFromProperty(ml_get_calendars2_request, 'query'),
+    getLooseObjectFromProperty(ml_get_calendars3_request, 'body'),
+    getLooseObjectFromProperty(ml_get_calendars3_request, 'path'),
+    getLooseObjectFromProperty(ml_get_calendars3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_calendars_response)),
@@ -13518,22 +12924,20 @@ const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_categories_request).body),
-      ...getShape(getShape(ml_get_categories_request).path),
-      ...getShape(getShape(ml_get_categories_request).query),
-      ...getShape(getShape(ml_get_categories1_request).body),
-      ...getShape(getShape(ml_get_categories1_request).path),
-      ...getShape(getShape(ml_get_categories1_request).query),
-      ...getShape(getShape(ml_get_categories2_request).body),
-      ...getShape(getShape(ml_get_categories2_request).path),
-      ...getShape(getShape(ml_get_categories2_request).query),
-      ...getShape(getShape(ml_get_categories3_request).body),
-      ...getShape(getShape(ml_get_categories3_request).path),
-      ...getShape(getShape(ml_get_categories3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_categories_request, 'body'),
+    getLooseObjectFromProperty(ml_get_categories_request, 'path'),
+    getLooseObjectFromProperty(ml_get_categories_request, 'query'),
+    getLooseObjectFromProperty(ml_get_categories1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_categories1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_categories1_request, 'query'),
+    getLooseObjectFromProperty(ml_get_categories2_request, 'body'),
+    getLooseObjectFromProperty(ml_get_categories2_request, 'path'),
+    getLooseObjectFromProperty(ml_get_categories2_request, 'query'),
+    getLooseObjectFromProperty(ml_get_categories3_request, 'body'),
+    getLooseObjectFromProperty(ml_get_categories3_request, 'path'),
+    getLooseObjectFromProperty(ml_get_categories3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_categories_response)),
@@ -13561,16 +12965,14 @@ wildcard expression.`,
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_data_frame_analytics_request).body),
-      ...getShape(getShape(ml_get_data_frame_analytics_request).path),
-      ...getShape(getShape(ml_get_data_frame_analytics_request).query),
-      ...getShape(getShape(ml_get_data_frame_analytics1_request).body),
-      ...getShape(getShape(ml_get_data_frame_analytics1_request).path),
-      ...getShape(getShape(ml_get_data_frame_analytics1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'body'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'path'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'query'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_data_frame_analytics_response)),
@@ -13593,16 +12995,14 @@ const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_data_frame_analytics_stats_request).body),
-      ...getShape(getShape(ml_get_data_frame_analytics_stats_request).path),
-      ...getShape(getShape(ml_get_data_frame_analytics_stats_request).query),
-      ...getShape(getShape(ml_get_data_frame_analytics_stats1_request).body),
-      ...getShape(getShape(ml_get_data_frame_analytics_stats1_request).path),
-      ...getShape(getShape(ml_get_data_frame_analytics_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'body'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'path'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'query'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_data_frame_analytics_stats_response)),
@@ -13631,16 +13031,14 @@ This API returns a maximum of 10,000 datafeeds.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_datafeed_stats_request).body),
-      ...getShape(getShape(ml_get_datafeed_stats_request).path),
-      ...getShape(getShape(ml_get_datafeed_stats_request).query),
-      ...getShape(getShape(ml_get_datafeed_stats1_request).body),
-      ...getShape(getShape(ml_get_datafeed_stats1_request).path),
-      ...getShape(getShape(ml_get_datafeed_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_datafeed_stats_request, 'body'),
+    getLooseObjectFromProperty(ml_get_datafeed_stats_request, 'path'),
+    getLooseObjectFromProperty(ml_get_datafeed_stats_request, 'query'),
+    getLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_datafeed_stats_response)),
@@ -13674,16 +13072,14 @@ This API returns a maximum of 10,000 datafeeds.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_datafeeds_request).body),
-      ...getShape(getShape(ml_get_datafeeds_request).path),
-      ...getShape(getShape(ml_get_datafeeds_request).query),
-      ...getShape(getShape(ml_get_datafeeds1_request).body),
-      ...getShape(getShape(ml_get_datafeeds1_request).path),
-      ...getShape(getShape(ml_get_datafeeds1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_datafeeds_request, 'body'),
+    getLooseObjectFromProperty(ml_get_datafeeds_request, 'path'),
+    getLooseObjectFromProperty(ml_get_datafeeds_request, 'query'),
+    getLooseObjectFromProperty(ml_get_datafeeds1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_datafeeds1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_datafeeds1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_datafeeds_response)),
@@ -13707,16 +13103,14 @@ You can get a single filter or all filters.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_filters_request).body),
-      ...getShape(getShape(ml_get_filters_request).path),
-      ...getShape(getShape(ml_get_filters_request).query),
-      ...getShape(getShape(ml_get_filters1_request).body),
-      ...getShape(getShape(ml_get_filters1_request).path),
-      ...getShape(getShape(ml_get_filters1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_filters_request, 'body'),
+    getLooseObjectFromProperty(ml_get_filters_request, 'path'),
+    getLooseObjectFromProperty(ml_get_filters_request, 'query'),
+    getLooseObjectFromProperty(ml_get_filters1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_filters1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_filters1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_filters_response)),
@@ -13742,16 +13136,14 @@ the anomalies. Influencer results are available only if an
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_influencers_request).body),
-      ...getShape(getShape(ml_get_influencers_request).path),
-      ...getShape(getShape(ml_get_influencers_request).query),
-      ...getShape(getShape(ml_get_influencers1_request).body),
-      ...getShape(getShape(ml_get_influencers1_request).path),
-      ...getShape(getShape(ml_get_influencers1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_influencers_request, 'body'),
+    getLooseObjectFromProperty(ml_get_influencers_request, 'path'),
+    getLooseObjectFromProperty(ml_get_influencers_request, 'query'),
+    getLooseObjectFromProperty(ml_get_influencers1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_influencers1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_influencers1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_influencers_response)),
@@ -13774,16 +13166,14 @@ const ML_GET_JOB_STATS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_job_stats_request).body),
-      ...getShape(getShape(ml_get_job_stats_request).path),
-      ...getShape(getShape(ml_get_job_stats_request).query),
-      ...getShape(getShape(ml_get_job_stats1_request).body),
-      ...getShape(getShape(ml_get_job_stats1_request).path),
-      ...getShape(getShape(ml_get_job_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_job_stats_request, 'body'),
+    getLooseObjectFromProperty(ml_get_job_stats_request, 'path'),
+    getLooseObjectFromProperty(ml_get_job_stats_request, 'query'),
+    getLooseObjectFromProperty(ml_get_job_stats1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_job_stats1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_job_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_job_stats_response)),
@@ -13818,16 +13208,14 @@ expression. You can get information for all anomaly detection jobs by using
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_jobs_request).body),
-      ...getShape(getShape(ml_get_jobs_request).path),
-      ...getShape(getShape(ml_get_jobs_request).query),
-      ...getShape(getShape(ml_get_jobs1_request).body),
-      ...getShape(getShape(ml_get_jobs1_request).path),
-      ...getShape(getShape(ml_get_jobs1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_jobs_request, 'body'),
+    getLooseObjectFromProperty(ml_get_jobs_request, 'path'),
+    getLooseObjectFromProperty(ml_get_jobs_request, 'query'),
+    getLooseObjectFromProperty(ml_get_jobs1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_jobs1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_jobs1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_jobs_response)),
@@ -13852,16 +13240,14 @@ on each node, both within the JVM heap, and natively, outside of the JVM.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_memory_stats_request).body),
-      ...getShape(getShape(ml_get_memory_stats_request).path),
-      ...getShape(getShape(ml_get_memory_stats_request).query),
-      ...getShape(getShape(ml_get_memory_stats1_request).body),
-      ...getShape(getShape(ml_get_memory_stats1_request).path),
-      ...getShape(getShape(ml_get_memory_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_memory_stats_request, 'body'),
+    getLooseObjectFromProperty(ml_get_memory_stats_request, 'path'),
+    getLooseObjectFromProperty(ml_get_memory_stats_request, 'query'),
+    getLooseObjectFromProperty(ml_get_memory_stats1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_memory_stats1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_memory_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_memory_stats_response)),
@@ -13884,13 +13270,11 @@ const ML_GET_MODEL_SNAPSHOT_UPGRADE_STATS_CONTRACT: InternalConnectorContract = 
     urlParams: ['allow_no_match'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_model_snapshot_upgrade_stats_request).body),
-      ...getShape(getShape(ml_get_model_snapshot_upgrade_stats_request).path),
-      ...getShape(getShape(ml_get_model_snapshot_upgrade_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'body'),
+    getLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'path'),
+    getLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_model_snapshot_upgrade_stats_response)),
@@ -13915,22 +13299,20 @@ const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_model_snapshots_request).body),
-      ...getShape(getShape(ml_get_model_snapshots_request).path),
-      ...getShape(getShape(ml_get_model_snapshots_request).query),
-      ...getShape(getShape(ml_get_model_snapshots1_request).body),
-      ...getShape(getShape(ml_get_model_snapshots1_request).path),
-      ...getShape(getShape(ml_get_model_snapshots1_request).query),
-      ...getShape(getShape(ml_get_model_snapshots2_request).body),
-      ...getShape(getShape(ml_get_model_snapshots2_request).path),
-      ...getShape(getShape(ml_get_model_snapshots2_request).query),
-      ...getShape(getShape(ml_get_model_snapshots3_request).body),
-      ...getShape(getShape(ml_get_model_snapshots3_request).path),
-      ...getShape(getShape(ml_get_model_snapshots3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_model_snapshots_request, 'body'),
+    getLooseObjectFromProperty(ml_get_model_snapshots_request, 'path'),
+    getLooseObjectFromProperty(ml_get_model_snapshots_request, 'query'),
+    getLooseObjectFromProperty(ml_get_model_snapshots1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_model_snapshots1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_model_snapshots1_request, 'query'),
+    getLooseObjectFromProperty(ml_get_model_snapshots2_request, 'body'),
+    getLooseObjectFromProperty(ml_get_model_snapshots2_request, 'path'),
+    getLooseObjectFromProperty(ml_get_model_snapshots2_request, 'query'),
+    getLooseObjectFromProperty(ml_get_model_snapshots3_request, 'body'),
+    getLooseObjectFromProperty(ml_get_model_snapshots3_request, 'path'),
+    getLooseObjectFromProperty(ml_get_model_snapshots3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_model_snapshots_response)),
@@ -13973,16 +13355,14 @@ jobs' largest bucket span.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_overall_buckets_request).body),
-      ...getShape(getShape(ml_get_overall_buckets_request).path),
-      ...getShape(getShape(ml_get_overall_buckets_request).query),
-      ...getShape(getShape(ml_get_overall_buckets1_request).body),
-      ...getShape(getShape(ml_get_overall_buckets1_request).path),
-      ...getShape(getShape(ml_get_overall_buckets1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_overall_buckets_request, 'body'),
+    getLooseObjectFromProperty(ml_get_overall_buckets_request, 'path'),
+    getLooseObjectFromProperty(ml_get_overall_buckets_request, 'query'),
+    getLooseObjectFromProperty(ml_get_overall_buckets1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_overall_buckets1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_overall_buckets1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_overall_buckets_response)),
@@ -14015,16 +13395,14 @@ number of detectors.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_records_request).body),
-      ...getShape(getShape(ml_get_records_request).path),
-      ...getShape(getShape(ml_get_records_request).query),
-      ...getShape(getShape(ml_get_records1_request).body),
-      ...getShape(getShape(ml_get_records1_request).path),
-      ...getShape(getShape(ml_get_records1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_records_request, 'body'),
+    getLooseObjectFromProperty(ml_get_records_request, 'path'),
+    getLooseObjectFromProperty(ml_get_records_request, 'query'),
+    getLooseObjectFromProperty(ml_get_records1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_records1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_records1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_records_response)),
@@ -14047,16 +13425,14 @@ const ML_GET_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
     urlParams: ['defer_definition_decompression', 'wait_for_completion', 'force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_trained_models_request).body),
-      ...getShape(getShape(ml_get_trained_models_request).path),
-      ...getShape(getShape(ml_get_trained_models_request).query),
-      ...getShape(getShape(ml_get_trained_models1_request).body),
-      ...getShape(getShape(ml_get_trained_models1_request).path),
-      ...getShape(getShape(ml_get_trained_models1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_trained_models_request, 'body'),
+    getLooseObjectFromProperty(ml_get_trained_models_request, 'path'),
+    getLooseObjectFromProperty(ml_get_trained_models_request, 'query'),
+    getLooseObjectFromProperty(ml_get_trained_models1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_trained_models1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_trained_models1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_trained_models_response)),
@@ -14081,16 +13457,14 @@ models in a single API request by using a comma-separated list of model IDs or a
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_get_trained_models_stats_request).body),
-      ...getShape(getShape(ml_get_trained_models_stats_request).path),
-      ...getShape(getShape(ml_get_trained_models_stats_request).query),
-      ...getShape(getShape(ml_get_trained_models_stats1_request).body),
-      ...getShape(getShape(ml_get_trained_models_stats1_request).path),
-      ...getShape(getShape(ml_get_trained_models_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_get_trained_models_stats_request, 'body'),
+    getLooseObjectFromProperty(ml_get_trained_models_stats_request, 'path'),
+    getLooseObjectFromProperty(ml_get_trained_models_stats_request, 'query'),
+    getLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'body'),
+    getLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'path'),
+    getLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_get_trained_models_stats_response)),
@@ -14113,13 +13487,11 @@ const ML_INFER_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_infer_trained_model_request).body),
-      ...getShape(getShape(ml_infer_trained_model_request).path),
-      ...getShape(getShape(ml_infer_trained_model_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_infer_trained_model_request, 'body'),
+    getLooseObjectFromProperty(ml_infer_trained_model_request, 'path'),
+    getLooseObjectFromProperty(ml_infer_trained_model_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_infer_trained_model_response)),
@@ -14147,13 +13519,11 @@ cluster configuration.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_info_request).body),
-      ...getShape(getShape(ml_info_request).path),
-      ...getShape(getShape(ml_info_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_info_request, 'body'),
+    getLooseObjectFromProperty(ml_info_request, 'path'),
+    getLooseObjectFromProperty(ml_info_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_info_response)),
@@ -14182,13 +13552,11 @@ new data is received.`,
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_open_job_request).body),
-      ...getShape(getShape(ml_open_job_request).path),
-      ...getShape(getShape(ml_open_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_open_job_request, 'body'),
+    getLooseObjectFromProperty(ml_open_job_request, 'path'),
+    getLooseObjectFromProperty(ml_open_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_open_job_response)),
@@ -14210,13 +13578,11 @@ const ML_POST_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
     urlParams: ['end', 'from', 'job_id', 'size', 'start'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_post_calendar_events_request).body),
-      ...getShape(getShape(ml_post_calendar_events_request).path),
-      ...getShape(getShape(ml_post_calendar_events_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_post_calendar_events_request, 'body'),
+    getLooseObjectFromProperty(ml_post_calendar_events_request, 'path'),
+    getLooseObjectFromProperty(ml_post_calendar_events_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_post_calendar_events_response)),
@@ -14241,13 +13607,11 @@ It is not currently possible to post data to multiple jobs using wildcards or a 
     urlParams: ['reset_end', 'reset_start'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_post_data_request).body),
-      ...getShape(getShape(ml_post_data_request).path),
-      ...getShape(getShape(ml_post_data_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_post_data_request, 'body'),
+    getLooseObjectFromProperty(ml_post_data_request, 'path'),
+    getLooseObjectFromProperty(ml_post_data_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_post_data_response)),
@@ -14270,22 +13634,20 @@ Preview the extracted features used by a data frame analytics config.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_preview_data_frame_analytics_request).body),
-      ...getShape(getShape(ml_preview_data_frame_analytics_request).path),
-      ...getShape(getShape(ml_preview_data_frame_analytics_request).query),
-      ...getShape(getShape(ml_preview_data_frame_analytics1_request).body),
-      ...getShape(getShape(ml_preview_data_frame_analytics1_request).path),
-      ...getShape(getShape(ml_preview_data_frame_analytics1_request).query),
-      ...getShape(getShape(ml_preview_data_frame_analytics2_request).body),
-      ...getShape(getShape(ml_preview_data_frame_analytics2_request).path),
-      ...getShape(getShape(ml_preview_data_frame_analytics2_request).query),
-      ...getShape(getShape(ml_preview_data_frame_analytics3_request).body),
-      ...getShape(getShape(ml_preview_data_frame_analytics3_request).path),
-      ...getShape(getShape(ml_preview_data_frame_analytics3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'body'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'path'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'query'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'body'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'path'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'query'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'body'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'path'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'query'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'body'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'path'),
+    getLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_preview_data_frame_analytics_response)),
@@ -14318,22 +13680,20 @@ You can also use secondary authorization headers to supply the credentials.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_preview_datafeed_request).body),
-      ...getShape(getShape(ml_preview_datafeed_request).path),
-      ...getShape(getShape(ml_preview_datafeed_request).query),
-      ...getShape(getShape(ml_preview_datafeed1_request).body),
-      ...getShape(getShape(ml_preview_datafeed1_request).path),
-      ...getShape(getShape(ml_preview_datafeed1_request).query),
-      ...getShape(getShape(ml_preview_datafeed2_request).body),
-      ...getShape(getShape(ml_preview_datafeed2_request).path),
-      ...getShape(getShape(ml_preview_datafeed2_request).query),
-      ...getShape(getShape(ml_preview_datafeed3_request).body),
-      ...getShape(getShape(ml_preview_datafeed3_request).path),
-      ...getShape(getShape(ml_preview_datafeed3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_preview_datafeed_request, 'body'),
+    getLooseObjectFromProperty(ml_preview_datafeed_request, 'path'),
+    getLooseObjectFromProperty(ml_preview_datafeed_request, 'query'),
+    getLooseObjectFromProperty(ml_preview_datafeed1_request, 'body'),
+    getLooseObjectFromProperty(ml_preview_datafeed1_request, 'path'),
+    getLooseObjectFromProperty(ml_preview_datafeed1_request, 'query'),
+    getLooseObjectFromProperty(ml_preview_datafeed2_request, 'body'),
+    getLooseObjectFromProperty(ml_preview_datafeed2_request, 'path'),
+    getLooseObjectFromProperty(ml_preview_datafeed2_request, 'query'),
+    getLooseObjectFromProperty(ml_preview_datafeed3_request, 'body'),
+    getLooseObjectFromProperty(ml_preview_datafeed3_request, 'path'),
+    getLooseObjectFromProperty(ml_preview_datafeed3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_preview_datafeed_response)),
@@ -14358,13 +13718,11 @@ const ML_PUT_CALENDAR_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_calendar_request).body),
-      ...getShape(getShape(ml_put_calendar_request).path),
-      ...getShape(getShape(ml_put_calendar_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_calendar_request, 'body'),
+    getLooseObjectFromProperty(ml_put_calendar_request, 'path'),
+    getLooseObjectFromProperty(ml_put_calendar_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_calendar_response)),
@@ -14386,13 +13744,11 @@ const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_calendar_job_request).body),
-      ...getShape(getShape(ml_put_calendar_job_request).path),
-      ...getShape(getShape(ml_put_calendar_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_calendar_job_request, 'body'),
+    getLooseObjectFromProperty(ml_put_calendar_job_request, 'path'),
+    getLooseObjectFromProperty(ml_put_calendar_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_calendar_job_response)),
@@ -14421,13 +13777,11 @@ If you supply only a subset of the regression or classification parameters, hype
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_data_frame_analytics_request).body),
-      ...getShape(getShape(ml_put_data_frame_analytics_request).path),
-      ...getShape(getShape(ml_put_data_frame_analytics_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'body'),
+    getLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'path'),
+    getLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_data_frame_analytics_response)),
@@ -14466,13 +13820,11 @@ directly to the \`.ml-config\` index. Do not give users \`write\` privileges on 
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_datafeed_request).body),
-      ...getShape(getShape(ml_put_datafeed_request).path),
-      ...getShape(getShape(ml_put_datafeed_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_datafeed_request, 'body'),
+    getLooseObjectFromProperty(ml_put_datafeed_request, 'path'),
+    getLooseObjectFromProperty(ml_put_datafeed_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_datafeed_response)),
@@ -14496,13 +13848,11 @@ Specifically, filters are referenced in the \`custom_rules\` property of detecto
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_filter_request).body),
-      ...getShape(getShape(ml_put_filter_request).path),
-      ...getShape(getShape(ml_put_filter_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_filter_request, 'body'),
+    getLooseObjectFromProperty(ml_put_filter_request, 'path'),
+    getLooseObjectFromProperty(ml_put_filter_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_filter_response)),
@@ -14534,13 +13884,11 @@ If you include a \`datafeed_config\` but do not provide a query, the datafeed us
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_job_request).body),
-      ...getShape(getShape(ml_put_job_request).path),
-      ...getShape(getShape(ml_put_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_job_request, 'body'),
+    getLooseObjectFromProperty(ml_put_job_request, 'path'),
+    getLooseObjectFromProperty(ml_put_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_job_response)),
@@ -14563,13 +13911,11 @@ Enable you to supply a trained model that is not created by data frame analytics
     urlParams: ['defer_definition_decompression', 'wait_for_completion', 'force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_trained_model_request).body),
-      ...getShape(getShape(ml_put_trained_model_request).path),
-      ...getShape(getShape(ml_put_trained_model_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_trained_model_request, 'body'),
+    getLooseObjectFromProperty(ml_put_trained_model_request, 'path'),
+    getLooseObjectFromProperty(ml_put_trained_model_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_trained_model_response)),
@@ -14607,13 +13953,11 @@ returns a warning.`,
     urlParams: ['reassign'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_trained_model_alias_request).body),
-      ...getShape(getShape(ml_put_trained_model_alias_request).path),
-      ...getShape(getShape(ml_put_trained_model_alias_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_trained_model_alias_request, 'body'),
+    getLooseObjectFromProperty(ml_put_trained_model_alias_request, 'path'),
+    getLooseObjectFromProperty(ml_put_trained_model_alias_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_trained_model_alias_response)),
@@ -14635,13 +13979,11 @@ const ML_PUT_TRAINED_MODEL_DEFINITION_PART_CONTRACT: InternalConnectorContract =
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_trained_model_definition_part_request).body),
-      ...getShape(getShape(ml_put_trained_model_definition_part_request).path),
-      ...getShape(getShape(ml_put_trained_model_definition_part_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'body'),
+    getLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'path'),
+    getLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_trained_model_definition_part_response)),
@@ -14665,13 +14007,11 @@ The vocabulary is stored in the index as described in \`inference_config.*.vocab
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_put_trained_model_vocabulary_request).body),
-      ...getShape(getShape(ml_put_trained_model_vocabulary_request).path),
-      ...getShape(getShape(ml_put_trained_model_vocabulary_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'body'),
+    getLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'path'),
+    getLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_put_trained_model_vocabulary_response)),
@@ -14697,13 +14037,11 @@ comma separated list.`,
     urlParams: ['wait_for_completion', 'delete_user_annotations'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_reset_job_request).body),
-      ...getShape(getShape(ml_reset_job_request).path),
-      ...getShape(getShape(ml_reset_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_reset_job_request, 'body'),
+    getLooseObjectFromProperty(ml_reset_job_request, 'path'),
+    getLooseObjectFromProperty(ml_reset_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_reset_job_response)),
@@ -14732,13 +14070,11 @@ snapshot after Black Friday or a critical system failure.`,
     urlParams: ['delete_intervening_results'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_revert_model_snapshot_request).body),
-      ...getShape(getShape(ml_revert_model_snapshot_request).path),
-      ...getShape(getShape(ml_revert_model_snapshot_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_revert_model_snapshot_request, 'body'),
+    getLooseObjectFromProperty(ml_revert_model_snapshot_request, 'path'),
+    getLooseObjectFromProperty(ml_revert_model_snapshot_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_revert_model_snapshot_response)),
@@ -14772,13 +14108,11 @@ machine learning info API.`,
     urlParams: ['enabled', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_set_upgrade_mode_request).body),
-      ...getShape(getShape(ml_set_upgrade_mode_request).path),
-      ...getShape(getShape(ml_set_upgrade_mode_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_set_upgrade_mode_request, 'body'),
+    getLooseObjectFromProperty(ml_set_upgrade_mode_request, 'path'),
+    getLooseObjectFromProperty(ml_set_upgrade_mode_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_set_upgrade_mode_response)),
@@ -14811,13 +14145,11 @@ the destination index in advance with custom settings and mappings.`,
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_start_data_frame_analytics_request).body),
-      ...getShape(getShape(ml_start_data_frame_analytics_request).path),
-      ...getShape(getShape(ml_start_data_frame_analytics_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'body'),
+    getLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'path'),
+    getLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_start_data_frame_analytics_response)),
@@ -14851,13 +14183,11 @@ authorization headers when you created or updated the datafeed, those credential
     urlParams: ['end', 'start', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_start_datafeed_request).body),
-      ...getShape(getShape(ml_start_datafeed_request).path),
-      ...getShape(getShape(ml_start_datafeed_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_start_datafeed_request, 'body'),
+    getLooseObjectFromProperty(ml_start_datafeed_request, 'path'),
+    getLooseObjectFromProperty(ml_start_datafeed_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_start_datafeed_response)),
@@ -14889,13 +14219,11 @@ It allocates the model to every machine learning node.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_start_trained_model_deployment_request).body),
-      ...getShape(getShape(ml_start_trained_model_deployment_request).path),
-      ...getShape(getShape(ml_start_trained_model_deployment_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'body'),
+    getLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'path'),
+    getLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_start_trained_model_deployment_response)),
@@ -14919,13 +14247,11 @@ throughout its lifecycle.`,
     urlParams: ['allow_no_match', 'force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_stop_data_frame_analytics_request).body),
-      ...getShape(getShape(ml_stop_data_frame_analytics_request).path),
-      ...getShape(getShape(ml_stop_data_frame_analytics_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'body'),
+    getLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'path'),
+    getLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_stop_data_frame_analytics_response)),
@@ -14949,13 +14275,11 @@ multiple times throughout its lifecycle.`,
     urlParams: ['allow_no_match', 'force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_stop_datafeed_request).body),
-      ...getShape(getShape(ml_stop_datafeed_request).path),
-      ...getShape(getShape(ml_stop_datafeed_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_stop_datafeed_request, 'body'),
+    getLooseObjectFromProperty(ml_stop_datafeed_request, 'path'),
+    getLooseObjectFromProperty(ml_stop_datafeed_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_stop_datafeed_response)),
@@ -14977,13 +14301,11 @@ const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
     urlParams: ['allow_no_match', 'force'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_stop_trained_model_deployment_request).body),
-      ...getShape(getShape(ml_stop_trained_model_deployment_request).path),
-      ...getShape(getShape(ml_stop_trained_model_deployment_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'body'),
+    getLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'path'),
+    getLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_stop_trained_model_deployment_response)),
@@ -15005,13 +14327,11 @@ const ML_UPDATE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_update_data_frame_analytics_request).body),
-      ...getShape(getShape(ml_update_data_frame_analytics_request).path),
-      ...getShape(getShape(ml_update_data_frame_analytics_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'body'),
+    getLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'path'),
+    getLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_update_data_frame_analytics_response)),
@@ -15037,13 +14357,11 @@ those credentials are used instead.`,
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_throttled', 'ignore_unavailable'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_update_datafeed_request).body),
-      ...getShape(getShape(ml_update_datafeed_request).path),
-      ...getShape(getShape(ml_update_datafeed_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_update_datafeed_request, 'body'),
+    getLooseObjectFromProperty(ml_update_datafeed_request, 'path'),
+    getLooseObjectFromProperty(ml_update_datafeed_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_update_datafeed_response)),
@@ -15066,13 +14384,11 @@ Updates the description of a filter, adds items, or removes items from the list.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_update_filter_request).body),
-      ...getShape(getShape(ml_update_filter_request).path),
-      ...getShape(getShape(ml_update_filter_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_update_filter_request, 'body'),
+    getLooseObjectFromProperty(ml_update_filter_request, 'path'),
+    getLooseObjectFromProperty(ml_update_filter_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_update_filter_response)),
@@ -15095,13 +14411,11 @@ Updates certain properties of an anomaly detection job.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_update_job_request).body),
-      ...getShape(getShape(ml_update_job_request).path),
-      ...getShape(getShape(ml_update_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_update_job_request, 'body'),
+    getLooseObjectFromProperty(ml_update_job_request, 'path'),
+    getLooseObjectFromProperty(ml_update_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_update_job_response)),
@@ -15124,13 +14438,11 @@ Updates certain properties of a snapshot.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_update_model_snapshot_request).body),
-      ...getShape(getShape(ml_update_model_snapshot_request).path),
-      ...getShape(getShape(ml_update_model_snapshot_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_update_model_snapshot_request, 'body'),
+    getLooseObjectFromProperty(ml_update_model_snapshot_request, 'path'),
+    getLooseObjectFromProperty(ml_update_model_snapshot_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_update_model_snapshot_response)),
@@ -15152,13 +14464,11 @@ const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
     urlParams: ['number_of_allocations'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_update_trained_model_deployment_request).body),
-      ...getShape(getShape(ml_update_trained_model_deployment_request).path),
-      ...getShape(getShape(ml_update_trained_model_deployment_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'body'),
+    getLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'path'),
+    getLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_update_trained_model_deployment_response)),
@@ -15189,13 +14499,11 @@ job.`,
     urlParams: ['wait_for_completion', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ml_upgrade_job_snapshot_request).body),
-      ...getShape(getShape(ml_upgrade_job_snapshot_request).path),
-      ...getShape(getShape(ml_upgrade_job_snapshot_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'body'),
+    getLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'path'),
+    getLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ml_upgrade_job_snapshot_response)),
@@ -15290,22 +14598,20 @@ When sending requests to this endpoint the \`Content-Type\` header should be set
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(msearch_request).body),
-      ...getShape(getShape(msearch_request).path),
-      ...getShape(getShape(msearch_request).query),
-      ...getShape(getShape(msearch1_request).body),
-      ...getShape(getShape(msearch1_request).path),
-      ...getShape(getShape(msearch1_request).query),
-      ...getShape(getShape(msearch2_request).body),
-      ...getShape(getShape(msearch2_request).path),
-      ...getShape(getShape(msearch2_request).query),
-      ...getShape(getShape(msearch3_request).body),
-      ...getShape(getShape(msearch3_request).path),
-      ...getShape(getShape(msearch3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(msearch_request, 'body'),
+    getLooseObjectFromProperty(msearch_request, 'path'),
+    getLooseObjectFromProperty(msearch_request, 'query'),
+    getLooseObjectFromProperty(msearch1_request, 'body'),
+    getLooseObjectFromProperty(msearch1_request, 'path'),
+    getLooseObjectFromProperty(msearch1_request, 'query'),
+    getLooseObjectFromProperty(msearch2_request, 'body'),
+    getLooseObjectFromProperty(msearch2_request, 'path'),
+    getLooseObjectFromProperty(msearch2_request, 'query'),
+    getLooseObjectFromProperty(msearch3_request, 'body'),
+    getLooseObjectFromProperty(msearch3_request, 'path'),
+    getLooseObjectFromProperty(msearch3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(msearch_response)),
@@ -15344,22 +14650,20 @@ For example:
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(msearch_template_request).body),
-      ...getShape(getShape(msearch_template_request).path),
-      ...getShape(getShape(msearch_template_request).query),
-      ...getShape(getShape(msearch_template1_request).body),
-      ...getShape(getShape(msearch_template1_request).path),
-      ...getShape(getShape(msearch_template1_request).query),
-      ...getShape(getShape(msearch_template2_request).body),
-      ...getShape(getShape(msearch_template2_request).path),
-      ...getShape(getShape(msearch_template2_request).query),
-      ...getShape(getShape(msearch_template3_request).body),
-      ...getShape(getShape(msearch_template3_request).path),
-      ...getShape(getShape(msearch_template3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(msearch_template_request, 'body'),
+    getLooseObjectFromProperty(msearch_template_request, 'path'),
+    getLooseObjectFromProperty(msearch_template_request, 'query'),
+    getLooseObjectFromProperty(msearch_template1_request, 'body'),
+    getLooseObjectFromProperty(msearch_template1_request, 'path'),
+    getLooseObjectFromProperty(msearch_template1_request, 'query'),
+    getLooseObjectFromProperty(msearch_template2_request, 'body'),
+    getLooseObjectFromProperty(msearch_template2_request, 'path'),
+    getLooseObjectFromProperty(msearch_template2_request, 'query'),
+    getLooseObjectFromProperty(msearch_template3_request, 'body'),
+    getLooseObjectFromProperty(msearch_template3_request, 'path'),
+    getLooseObjectFromProperty(msearch_template3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(msearch_template_response)),
@@ -15395,22 +14699,20 @@ The mapping used is determined by the specified \`_index\`.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(mtermvectors_request).body),
-      ...getShape(getShape(mtermvectors_request).path),
-      ...getShape(getShape(mtermvectors_request).query),
-      ...getShape(getShape(mtermvectors1_request).body),
-      ...getShape(getShape(mtermvectors1_request).path),
-      ...getShape(getShape(mtermvectors1_request).query),
-      ...getShape(getShape(mtermvectors2_request).body),
-      ...getShape(getShape(mtermvectors2_request).path),
-      ...getShape(getShape(mtermvectors2_request).query),
-      ...getShape(getShape(mtermvectors3_request).body),
-      ...getShape(getShape(mtermvectors3_request).path),
-      ...getShape(getShape(mtermvectors3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(mtermvectors_request, 'body'),
+    getLooseObjectFromProperty(mtermvectors_request, 'path'),
+    getLooseObjectFromProperty(mtermvectors_request, 'query'),
+    getLooseObjectFromProperty(mtermvectors1_request, 'body'),
+    getLooseObjectFromProperty(mtermvectors1_request, 'path'),
+    getLooseObjectFromProperty(mtermvectors1_request, 'query'),
+    getLooseObjectFromProperty(mtermvectors2_request, 'body'),
+    getLooseObjectFromProperty(mtermvectors2_request, 'path'),
+    getLooseObjectFromProperty(mtermvectors2_request, 'query'),
+    getLooseObjectFromProperty(mtermvectors3_request, 'body'),
+    getLooseObjectFromProperty(mtermvectors3_request, 'path'),
+    getLooseObjectFromProperty(mtermvectors3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(mtermvectors_response)),
@@ -15436,13 +14738,11 @@ Clear the archived repositories metering information in the cluster.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(nodes_clear_repositories_metering_archive_request).body),
-      ...getShape(getShape(nodes_clear_repositories_metering_archive_request).path),
-      ...getShape(getShape(nodes_clear_repositories_metering_archive_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'body'),
+    getLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'path'),
+    getLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(nodes_clear_repositories_metering_archive_response)),
@@ -15467,13 +14767,11 @@ Additionally, the information exposed by this API is volatile, meaning that it w
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(nodes_get_repositories_metering_info_request).body),
-      ...getShape(getShape(nodes_get_repositories_metering_info_request).path),
-      ...getShape(getShape(nodes_get_repositories_metering_info_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'body'),
+    getLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'path'),
+    getLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(nodes_get_repositories_metering_info_response)),
@@ -15497,16 +14795,14 @@ The output is plain text with a breakdown of the top hot threads for each node.`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(nodes_hot_threads_request).body),
-      ...getShape(getShape(nodes_hot_threads_request).path),
-      ...getShape(getShape(nodes_hot_threads_request).query),
-      ...getShape(getShape(nodes_hot_threads1_request).body),
-      ...getShape(getShape(nodes_hot_threads1_request).path),
-      ...getShape(getShape(nodes_hot_threads1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(nodes_hot_threads_request, 'body'),
+    getLooseObjectFromProperty(nodes_hot_threads_request, 'path'),
+    getLooseObjectFromProperty(nodes_hot_threads_request, 'query'),
+    getLooseObjectFromProperty(nodes_hot_threads1_request, 'body'),
+    getLooseObjectFromProperty(nodes_hot_threads1_request, 'path'),
+    getLooseObjectFromProperty(nodes_hot_threads1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(nodes_hot_threads_response)),
@@ -15530,22 +14826,20 @@ By default, the API returns all attributes and core settings for cluster nodes.`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(nodes_info_request).body),
-      ...getShape(getShape(nodes_info_request).path),
-      ...getShape(getShape(nodes_info_request).query),
-      ...getShape(getShape(nodes_info1_request).body),
-      ...getShape(getShape(nodes_info1_request).path),
-      ...getShape(getShape(nodes_info1_request).query),
-      ...getShape(getShape(nodes_info2_request).body),
-      ...getShape(getShape(nodes_info2_request).path),
-      ...getShape(getShape(nodes_info2_request).query),
-      ...getShape(getShape(nodes_info3_request).body),
-      ...getShape(getShape(nodes_info3_request).path),
-      ...getShape(getShape(nodes_info3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(nodes_info_request, 'body'),
+    getLooseObjectFromProperty(nodes_info_request, 'path'),
+    getLooseObjectFromProperty(nodes_info_request, 'query'),
+    getLooseObjectFromProperty(nodes_info1_request, 'body'),
+    getLooseObjectFromProperty(nodes_info1_request, 'path'),
+    getLooseObjectFromProperty(nodes_info1_request, 'query'),
+    getLooseObjectFromProperty(nodes_info2_request, 'body'),
+    getLooseObjectFromProperty(nodes_info2_request, 'path'),
+    getLooseObjectFromProperty(nodes_info2_request, 'query'),
+    getLooseObjectFromProperty(nodes_info3_request, 'body'),
+    getLooseObjectFromProperty(nodes_info3_request, 'path'),
+    getLooseObjectFromProperty(nodes_info3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(nodes_info_response)),
@@ -15578,16 +14872,14 @@ Alternatively, you can reload the secure settings on each node by locally access
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(nodes_reload_secure_settings_request).body),
-      ...getShape(getShape(nodes_reload_secure_settings_request).path),
-      ...getShape(getShape(nodes_reload_secure_settings_request).query),
-      ...getShape(getShape(nodes_reload_secure_settings1_request).body),
-      ...getShape(getShape(nodes_reload_secure_settings1_request).path),
-      ...getShape(getShape(nodes_reload_secure_settings1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(nodes_reload_secure_settings_request, 'body'),
+    getLooseObjectFromProperty(nodes_reload_secure_settings_request, 'path'),
+    getLooseObjectFromProperty(nodes_reload_secure_settings_request, 'query'),
+    getLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'body'),
+    getLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'path'),
+    getLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(nodes_reload_secure_settings_response)),
@@ -15619,28 +14911,26 @@ By default, all stats are returned. You can limit the returned information by us
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(nodes_stats_request).body),
-      ...getShape(getShape(nodes_stats_request).path),
-      ...getShape(getShape(nodes_stats_request).query),
-      ...getShape(getShape(nodes_stats1_request).body),
-      ...getShape(getShape(nodes_stats1_request).path),
-      ...getShape(getShape(nodes_stats1_request).query),
-      ...getShape(getShape(nodes_stats2_request).body),
-      ...getShape(getShape(nodes_stats2_request).path),
-      ...getShape(getShape(nodes_stats2_request).query),
-      ...getShape(getShape(nodes_stats3_request).body),
-      ...getShape(getShape(nodes_stats3_request).path),
-      ...getShape(getShape(nodes_stats3_request).query),
-      ...getShape(getShape(nodes_stats4_request).body),
-      ...getShape(getShape(nodes_stats4_request).path),
-      ...getShape(getShape(nodes_stats4_request).query),
-      ...getShape(getShape(nodes_stats5_request).body),
-      ...getShape(getShape(nodes_stats5_request).path),
-      ...getShape(getShape(nodes_stats5_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(nodes_stats_request, 'body'),
+    getLooseObjectFromProperty(nodes_stats_request, 'path'),
+    getLooseObjectFromProperty(nodes_stats_request, 'query'),
+    getLooseObjectFromProperty(nodes_stats1_request, 'body'),
+    getLooseObjectFromProperty(nodes_stats1_request, 'path'),
+    getLooseObjectFromProperty(nodes_stats1_request, 'query'),
+    getLooseObjectFromProperty(nodes_stats2_request, 'body'),
+    getLooseObjectFromProperty(nodes_stats2_request, 'path'),
+    getLooseObjectFromProperty(nodes_stats2_request, 'query'),
+    getLooseObjectFromProperty(nodes_stats3_request, 'body'),
+    getLooseObjectFromProperty(nodes_stats3_request, 'path'),
+    getLooseObjectFromProperty(nodes_stats3_request, 'query'),
+    getLooseObjectFromProperty(nodes_stats4_request, 'body'),
+    getLooseObjectFromProperty(nodes_stats4_request, 'path'),
+    getLooseObjectFromProperty(nodes_stats4_request, 'query'),
+    getLooseObjectFromProperty(nodes_stats5_request, 'body'),
+    getLooseObjectFromProperty(nodes_stats5_request, 'path'),
+    getLooseObjectFromProperty(nodes_stats5_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(nodes_stats_response)),
@@ -15672,22 +14962,20 @@ const NODES_USAGE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(nodes_usage_request).body),
-      ...getShape(getShape(nodes_usage_request).path),
-      ...getShape(getShape(nodes_usage_request).query),
-      ...getShape(getShape(nodes_usage1_request).body),
-      ...getShape(getShape(nodes_usage1_request).path),
-      ...getShape(getShape(nodes_usage1_request).query),
-      ...getShape(getShape(nodes_usage2_request).body),
-      ...getShape(getShape(nodes_usage2_request).path),
-      ...getShape(getShape(nodes_usage2_request).query),
-      ...getShape(getShape(nodes_usage3_request).body),
-      ...getShape(getShape(nodes_usage3_request).path),
-      ...getShape(getShape(nodes_usage3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(nodes_usage_request, 'body'),
+    getLooseObjectFromProperty(nodes_usage_request, 'path'),
+    getLooseObjectFromProperty(nodes_usage_request, 'query'),
+    getLooseObjectFromProperty(nodes_usage1_request, 'body'),
+    getLooseObjectFromProperty(nodes_usage1_request, 'path'),
+    getLooseObjectFromProperty(nodes_usage1_request, 'query'),
+    getLooseObjectFromProperty(nodes_usage2_request, 'body'),
+    getLooseObjectFromProperty(nodes_usage2_request, 'path'),
+    getLooseObjectFromProperty(nodes_usage2_request, 'query'),
+    getLooseObjectFromProperty(nodes_usage3_request, 'body'),
+    getLooseObjectFromProperty(nodes_usage3_request, 'path'),
+    getLooseObjectFromProperty(nodes_usage3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(nodes_usage_response)),
@@ -15756,13 +15044,11 @@ You can check how many point-in-times (that is, search contexts) are open with t
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(open_point_in_time_request).body),
-      ...getShape(getShape(open_point_in_time_request).path),
-      ...getShape(getShape(open_point_in_time_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(open_point_in_time_request, 'body'),
+    getLooseObjectFromProperty(open_point_in_time_request, 'path'),
+    getLooseObjectFromProperty(open_point_in_time_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(open_point_in_time_response)),
@@ -15784,13 +15070,11 @@ Get information about whether the cluster is running.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ping_request).body),
-      ...getShape(getShape(ping_request).path),
-      ...getShape(getShape(ping_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ping_request, 'body'),
+    getLooseObjectFromProperty(ping_request, 'path'),
+    getLooseObjectFromProperty(ping_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ping_response)),
@@ -15909,22 +15193,20 @@ Creates or updates a stored script or search template.`,
     urlParams: ['master_timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(put_script_request).body),
-      ...getShape(getShape(put_script_request).path),
-      ...getShape(getShape(put_script_request).query),
-      ...getShape(getShape(put_script1_request).body),
-      ...getShape(getShape(put_script1_request).path),
-      ...getShape(getShape(put_script1_request).query),
-      ...getShape(getShape(put_script2_request).body),
-      ...getShape(getShape(put_script2_request).path),
-      ...getShape(getShape(put_script2_request).query),
-      ...getShape(getShape(put_script3_request).body),
-      ...getShape(getShape(put_script3_request).path),
-      ...getShape(getShape(put_script3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(put_script_request, 'body'),
+    getLooseObjectFromProperty(put_script_request, 'path'),
+    getLooseObjectFromProperty(put_script_request, 'query'),
+    getLooseObjectFromProperty(put_script1_request, 'body'),
+    getLooseObjectFromProperty(put_script1_request, 'path'),
+    getLooseObjectFromProperty(put_script1_request, 'query'),
+    getLooseObjectFromProperty(put_script2_request, 'body'),
+    getLooseObjectFromProperty(put_script2_request, 'path'),
+    getLooseObjectFromProperty(put_script2_request, 'query'),
+    getLooseObjectFromProperty(put_script3_request, 'body'),
+    getLooseObjectFromProperty(put_script3_request, 'path'),
+    getLooseObjectFromProperty(put_script3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(put_script_response)),
@@ -15951,13 +15233,11 @@ This is a destructive action that is only recoverable by re-adding the same rule
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(query_rules_delete_rule_request).body),
-      ...getShape(getShape(query_rules_delete_rule_request).path),
-      ...getShape(getShape(query_rules_delete_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(query_rules_delete_rule_request, 'body'),
+    getLooseObjectFromProperty(query_rules_delete_rule_request, 'path'),
+    getLooseObjectFromProperty(query_rules_delete_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(query_rules_delete_rule_response)),
@@ -15981,13 +15261,11 @@ This is a destructive action that is not recoverable.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(query_rules_delete_ruleset_request).body),
-      ...getShape(getShape(query_rules_delete_ruleset_request).path),
-      ...getShape(getShape(query_rules_delete_ruleset_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(query_rules_delete_ruleset_request, 'body'),
+    getLooseObjectFromProperty(query_rules_delete_ruleset_request, 'path'),
+    getLooseObjectFromProperty(query_rules_delete_ruleset_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(query_rules_delete_ruleset_response)),
@@ -16010,13 +15288,11 @@ Get details about a query rule within a query ruleset.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(query_rules_get_rule_request).body),
-      ...getShape(getShape(query_rules_get_rule_request).path),
-      ...getShape(getShape(query_rules_get_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(query_rules_get_rule_request, 'body'),
+    getLooseObjectFromProperty(query_rules_get_rule_request, 'path'),
+    getLooseObjectFromProperty(query_rules_get_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(query_rules_get_rule_response)),
@@ -16039,13 +15315,11 @@ Get details about a query ruleset.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(query_rules_get_ruleset_request).body),
-      ...getShape(getShape(query_rules_get_ruleset_request).path),
-      ...getShape(getShape(query_rules_get_ruleset_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(query_rules_get_ruleset_request, 'body'),
+    getLooseObjectFromProperty(query_rules_get_ruleset_request, 'path'),
+    getLooseObjectFromProperty(query_rules_get_ruleset_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(query_rules_get_ruleset_response)),
@@ -16068,13 +15342,11 @@ Get summarized information about the query rulesets.`,
     urlParams: ['from', 'size'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(query_rules_list_rulesets_request).body),
-      ...getShape(getShape(query_rules_list_rulesets_request).path),
-      ...getShape(getShape(query_rules_list_rulesets_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(query_rules_list_rulesets_request, 'body'),
+    getLooseObjectFromProperty(query_rules_list_rulesets_request, 'path'),
+    getLooseObjectFromProperty(query_rules_list_rulesets_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(query_rules_list_rulesets_response)),
@@ -16102,13 +15374,11 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(query_rules_put_rule_request).body),
-      ...getShape(getShape(query_rules_put_rule_request).path),
-      ...getShape(getShape(query_rules_put_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(query_rules_put_rule_request, 'body'),
+    getLooseObjectFromProperty(query_rules_put_rule_request, 'path'),
+    getLooseObjectFromProperty(query_rules_put_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(query_rules_put_rule_response)),
@@ -16137,13 +15407,11 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(query_rules_put_ruleset_request).body),
-      ...getShape(getShape(query_rules_put_ruleset_request).path),
-      ...getShape(getShape(query_rules_put_ruleset_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(query_rules_put_ruleset_request, 'body'),
+    getLooseObjectFromProperty(query_rules_put_ruleset_request, 'path'),
+    getLooseObjectFromProperty(query_rules_put_ruleset_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(query_rules_put_ruleset_response)),
@@ -16166,13 +15434,11 @@ Evaluate match criteria against a query ruleset to identify the rules that would
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(query_rules_test_request).body),
-      ...getShape(getShape(query_rules_test_request).path),
-      ...getShape(getShape(query_rules_test_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(query_rules_test_request, 'body'),
+    getLooseObjectFromProperty(query_rules_test_request, 'path'),
+    getLooseObjectFromProperty(query_rules_test_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(query_rules_test_response)),
@@ -16195,22 +15461,20 @@ Evaluate the quality of ranked search results over a set of typical search queri
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rank_eval_request).body),
-      ...getShape(getShape(rank_eval_request).path),
-      ...getShape(getShape(rank_eval_request).query),
-      ...getShape(getShape(rank_eval1_request).body),
-      ...getShape(getShape(rank_eval1_request).path),
-      ...getShape(getShape(rank_eval1_request).query),
-      ...getShape(getShape(rank_eval2_request).body),
-      ...getShape(getShape(rank_eval2_request).path),
-      ...getShape(getShape(rank_eval2_request).query),
-      ...getShape(getShape(rank_eval3_request).body),
-      ...getShape(getShape(rank_eval3_request).path),
-      ...getShape(getShape(rank_eval3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rank_eval_request, 'body'),
+    getLooseObjectFromProperty(rank_eval_request, 'path'),
+    getLooseObjectFromProperty(rank_eval_request, 'query'),
+    getLooseObjectFromProperty(rank_eval1_request, 'body'),
+    getLooseObjectFromProperty(rank_eval1_request, 'path'),
+    getLooseObjectFromProperty(rank_eval1_request, 'query'),
+    getLooseObjectFromProperty(rank_eval2_request, 'body'),
+    getLooseObjectFromProperty(rank_eval2_request, 'path'),
+    getLooseObjectFromProperty(rank_eval2_request, 'query'),
+    getLooseObjectFromProperty(rank_eval3_request, 'body'),
+    getLooseObjectFromProperty(rank_eval3_request, 'path'),
+    getLooseObjectFromProperty(rank_eval3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rank_eval_response)),
@@ -16291,13 +15555,11 @@ Refer to the linked documentation for examples of how to reindex documents.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(reindex_request).body),
-      ...getShape(getShape(reindex_request).path),
-      ...getShape(getShape(reindex_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(reindex_request, 'body'),
+    getLooseObjectFromProperty(reindex_request, 'path'),
+    getLooseObjectFromProperty(reindex_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(reindex_response)),
@@ -16329,13 +15591,11 @@ This behavior prevents scroll timeouts.`,
     urlParams: ['requests_per_second'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(reindex_rethrottle_request).body),
-      ...getShape(getShape(reindex_rethrottle_request).path),
-      ...getShape(getShape(reindex_rethrottle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(reindex_rethrottle_request, 'body'),
+    getLooseObjectFromProperty(reindex_rethrottle_request, 'path'),
+    getLooseObjectFromProperty(reindex_rethrottle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(reindex_rethrottle_response)),
@@ -16359,22 +15619,20 @@ Render a search template as a search request body.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(render_search_template_request).body),
-      ...getShape(getShape(render_search_template_request).path),
-      ...getShape(getShape(render_search_template_request).query),
-      ...getShape(getShape(render_search_template1_request).body),
-      ...getShape(getShape(render_search_template1_request).path),
-      ...getShape(getShape(render_search_template1_request).query),
-      ...getShape(getShape(render_search_template2_request).body),
-      ...getShape(getShape(render_search_template2_request).path),
-      ...getShape(getShape(render_search_template2_request).query),
-      ...getShape(getShape(render_search_template3_request).body),
-      ...getShape(getShape(render_search_template3_request).path),
-      ...getShape(getShape(render_search_template3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(render_search_template_request, 'body'),
+    getLooseObjectFromProperty(render_search_template_request, 'path'),
+    getLooseObjectFromProperty(render_search_template_request, 'query'),
+    getLooseObjectFromProperty(render_search_template1_request, 'body'),
+    getLooseObjectFromProperty(render_search_template1_request, 'path'),
+    getLooseObjectFromProperty(render_search_template1_request, 'query'),
+    getLooseObjectFromProperty(render_search_template2_request, 'body'),
+    getLooseObjectFromProperty(render_search_template2_request, 'path'),
+    getLooseObjectFromProperty(render_search_template2_request, 'query'),
+    getLooseObjectFromProperty(render_search_template3_request, 'body'),
+    getLooseObjectFromProperty(render_search_template3_request, 'path'),
+    getLooseObjectFromProperty(render_search_template3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(render_search_template_response)),
@@ -16422,13 +15680,11 @@ POST my_rollup_index/_delete_by_query
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rollup_delete_job_request).body),
-      ...getShape(getShape(rollup_delete_job_request).path),
-      ...getShape(getShape(rollup_delete_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rollup_delete_job_request, 'body'),
+    getLooseObjectFromProperty(rollup_delete_job_request, 'path'),
+    getLooseObjectFromProperty(rollup_delete_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rollup_delete_job_response)),
@@ -16455,16 +15711,14 @@ For details about a historical rollup job, the rollup capabilities API may be mo
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rollup_get_jobs_request).body),
-      ...getShape(getShape(rollup_get_jobs_request).path),
-      ...getShape(getShape(rollup_get_jobs_request).query),
-      ...getShape(getShape(rollup_get_jobs1_request).body),
-      ...getShape(getShape(rollup_get_jobs1_request).path),
-      ...getShape(getShape(rollup_get_jobs1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rollup_get_jobs_request, 'body'),
+    getLooseObjectFromProperty(rollup_get_jobs_request, 'path'),
+    getLooseObjectFromProperty(rollup_get_jobs_request, 'query'),
+    getLooseObjectFromProperty(rollup_get_jobs1_request, 'body'),
+    getLooseObjectFromProperty(rollup_get_jobs1_request, 'path'),
+    getLooseObjectFromProperty(rollup_get_jobs1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rollup_get_jobs_response)),
@@ -16495,16 +15749,14 @@ This API enables you to inspect an index and determine:
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rollup_get_rollup_caps_request).body),
-      ...getShape(getShape(rollup_get_rollup_caps_request).path),
-      ...getShape(getShape(rollup_get_rollup_caps_request).query),
-      ...getShape(getShape(rollup_get_rollup_caps1_request).body),
-      ...getShape(getShape(rollup_get_rollup_caps1_request).path),
-      ...getShape(getShape(rollup_get_rollup_caps1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rollup_get_rollup_caps_request, 'body'),
+    getLooseObjectFromProperty(rollup_get_rollup_caps_request, 'path'),
+    getLooseObjectFromProperty(rollup_get_rollup_caps_request, 'query'),
+    getLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'body'),
+    getLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'path'),
+    getLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rollup_get_rollup_caps_response)),
@@ -16532,13 +15784,11 @@ A single rollup index may store the data for multiple rollup jobs and may have a
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rollup_get_rollup_index_caps_request).body),
-      ...getShape(getShape(rollup_get_rollup_index_caps_request).path),
-      ...getShape(getShape(rollup_get_rollup_index_caps_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'body'),
+    getLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'path'),
+    getLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rollup_get_rollup_index_caps_response)),
@@ -16568,13 +15818,11 @@ Jobs are created in a \`STOPPED\` state. You can start them with the start rollu
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rollup_put_job_request).body),
-      ...getShape(getShape(rollup_put_job_request).path),
-      ...getShape(getShape(rollup_put_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rollup_put_job_request, 'body'),
+    getLooseObjectFromProperty(rollup_put_job_request, 'path'),
+    getLooseObjectFromProperty(rollup_put_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rollup_put_job_response)),
@@ -16606,16 +15854,14 @@ For more detailed examples of using the rollup search API, including querying ro
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rollup_rollup_search_request).body),
-      ...getShape(getShape(rollup_rollup_search_request).path),
-      ...getShape(getShape(rollup_rollup_search_request).query),
-      ...getShape(getShape(rollup_rollup_search1_request).body),
-      ...getShape(getShape(rollup_rollup_search1_request).path),
-      ...getShape(getShape(rollup_rollup_search1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rollup_rollup_search_request, 'body'),
+    getLooseObjectFromProperty(rollup_rollup_search_request, 'path'),
+    getLooseObjectFromProperty(rollup_rollup_search_request, 'query'),
+    getLooseObjectFromProperty(rollup_rollup_search1_request, 'body'),
+    getLooseObjectFromProperty(rollup_rollup_search1_request, 'path'),
+    getLooseObjectFromProperty(rollup_rollup_search1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rollup_rollup_search_response)),
@@ -16640,13 +15886,11 @@ If you try to start a job that is already started, nothing happens.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rollup_start_job_request).body),
-      ...getShape(getShape(rollup_start_job_request).path),
-      ...getShape(getShape(rollup_start_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rollup_start_job_request, 'body'),
+    getLooseObjectFromProperty(rollup_start_job_request, 'path'),
+    getLooseObjectFromProperty(rollup_start_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rollup_start_job_response)),
@@ -16679,13 +15923,11 @@ If the specified time elapses without the job moving to STOPPED, a timeout excep
     urlParams: ['timeout', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(rollup_stop_job_request).body),
-      ...getShape(getShape(rollup_stop_job_request).path),
-      ...getShape(getShape(rollup_stop_job_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(rollup_stop_job_request, 'body'),
+    getLooseObjectFromProperty(rollup_stop_job_request, 'path'),
+    getLooseObjectFromProperty(rollup_stop_job_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(rollup_stop_job_response)),
@@ -16715,16 +15957,14 @@ Each context requires a script, but additional parameters depend on the context 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(scripts_painless_execute_request).body),
-      ...getShape(getShape(scripts_painless_execute_request).path),
-      ...getShape(getShape(scripts_painless_execute_request).query),
-      ...getShape(getShape(scripts_painless_execute1_request).body),
-      ...getShape(getShape(scripts_painless_execute1_request).path),
-      ...getShape(getShape(scripts_painless_execute1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(scripts_painless_execute_request, 'body'),
+    getLooseObjectFromProperty(scripts_painless_execute_request, 'path'),
+    getLooseObjectFromProperty(scripts_painless_execute_request, 'query'),
+    getLooseObjectFromProperty(scripts_painless_execute1_request, 'body'),
+    getLooseObjectFromProperty(scripts_painless_execute1_request, 'path'),
+    getLooseObjectFromProperty(scripts_painless_execute1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(scripts_painless_execute_response)),
@@ -16759,22 +15999,20 @@ IMPORTANT: Results from a scrolling search reflect the state of the index at the
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(scroll_request).body),
-      ...getShape(getShape(scroll_request).path),
-      ...getShape(getShape(scroll_request).query),
-      ...getShape(getShape(scroll1_request).body),
-      ...getShape(getShape(scroll1_request).path),
-      ...getShape(getShape(scroll1_request).query),
-      ...getShape(getShape(scroll2_request).body),
-      ...getShape(getShape(scroll2_request).path),
-      ...getShape(getShape(scroll2_request).query),
-      ...getShape(getShape(scroll3_request).body),
-      ...getShape(getShape(scroll3_request).path),
-      ...getShape(getShape(scroll3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(scroll_request, 'body'),
+    getLooseObjectFromProperty(scroll_request, 'path'),
+    getLooseObjectFromProperty(scroll_request, 'query'),
+    getLooseObjectFromProperty(scroll1_request, 'body'),
+    getLooseObjectFromProperty(scroll1_request, 'path'),
+    getLooseObjectFromProperty(scroll1_request, 'query'),
+    getLooseObjectFromProperty(scroll2_request, 'body'),
+    getLooseObjectFromProperty(scroll2_request, 'path'),
+    getLooseObjectFromProperty(scroll2_request, 'query'),
+    getLooseObjectFromProperty(scroll3_request, 'body'),
+    getLooseObjectFromProperty(scroll3_request, 'path'),
+    getLooseObjectFromProperty(scroll3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(scroll_response)),
@@ -16817,22 +16055,20 @@ This situation can occur because the splitting criterion is based on Lucene docu
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_request).body),
-      ...getShape(getShape(search_request).path),
-      ...getShape(getShape(search_request).query),
-      ...getShape(getShape(search1_request).body),
-      ...getShape(getShape(search1_request).path),
-      ...getShape(getShape(search1_request).query),
-      ...getShape(getShape(search2_request).body),
-      ...getShape(getShape(search2_request).path),
-      ...getShape(getShape(search2_request).query),
-      ...getShape(getShape(search3_request).body),
-      ...getShape(getShape(search3_request).path),
-      ...getShape(getShape(search3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_request, 'body'),
+    getLooseObjectFromProperty(search_request, 'path'),
+    getLooseObjectFromProperty(search_request, 'query'),
+    getLooseObjectFromProperty(search1_request, 'body'),
+    getLooseObjectFromProperty(search1_request, 'path'),
+    getLooseObjectFromProperty(search1_request, 'query'),
+    getLooseObjectFromProperty(search2_request, 'body'),
+    getLooseObjectFromProperty(search2_request, 'path'),
+    getLooseObjectFromProperty(search2_request, 'query'),
+    getLooseObjectFromProperty(search3_request, 'body'),
+    getLooseObjectFromProperty(search3_request, 'path'),
+    getLooseObjectFromProperty(search3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_response)),
@@ -16859,13 +16095,11 @@ Remove a search application and its associated alias. Indices attached to the se
     urlParams: ['create'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_delete_request).body),
-      ...getShape(getShape(search_application_delete_request).path),
-      ...getShape(getShape(search_application_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_delete_request, 'body'),
+    getLooseObjectFromProperty(search_application_delete_request, 'path'),
+    getLooseObjectFromProperty(search_application_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_delete_response)),
@@ -16888,13 +16122,11 @@ The associated data stream is also deleted.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_delete_behavioral_analytics_request).body),
-      ...getShape(getShape(search_application_delete_behavioral_analytics_request).path),
-      ...getShape(getShape(search_application_delete_behavioral_analytics_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'body'),
+    getLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'path'),
+    getLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_delete_behavioral_analytics_response)),
@@ -16916,13 +16148,11 @@ const SEARCH_APPLICATION_GET_CONTRACT: InternalConnectorContract = {
     urlParams: ['create'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_get_request).body),
-      ...getShape(getShape(search_application_get_request).path),
-      ...getShape(getShape(search_application_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_get_request, 'body'),
+    getLooseObjectFromProperty(search_application_get_request, 'path'),
+    getLooseObjectFromProperty(search_application_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_get_response)),
@@ -16944,16 +16174,14 @@ const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_get_behavioral_analytics_request).body),
-      ...getShape(getShape(search_application_get_behavioral_analytics_request).path),
-      ...getShape(getShape(search_application_get_behavioral_analytics_request).query),
-      ...getShape(getShape(search_application_get_behavioral_analytics1_request).body),
-      ...getShape(getShape(search_application_get_behavioral_analytics1_request).path),
-      ...getShape(getShape(search_application_get_behavioral_analytics1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'body'),
+    getLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'path'),
+    getLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'query'),
+    getLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'body'),
+    getLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'path'),
+    getLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_get_behavioral_analytics_response)),
@@ -16977,13 +16205,11 @@ Get information about search applications.`,
     urlParams: ['q', 'from', 'size'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_list_request).body),
-      ...getShape(getShape(search_application_list_request).path),
-      ...getShape(getShape(search_application_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_list_request, 'body'),
+    getLooseObjectFromProperty(search_application_list_request, 'path'),
+    getLooseObjectFromProperty(search_application_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_list_response)),
@@ -17005,13 +16231,11 @@ const SEARCH_APPLICATION_POST_BEHAVIORAL_ANALYTICS_EVENT_CONTRACT: InternalConne
     urlParams: ['debug'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_post_behavioral_analytics_event_request).body),
-      ...getShape(getShape(search_application_post_behavioral_analytics_event_request).path),
-      ...getShape(getShape(search_application_post_behavioral_analytics_event_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_post_behavioral_analytics_event_request, 'body'),
+    getLooseObjectFromProperty(search_application_post_behavioral_analytics_event_request, 'path'),
+    getLooseObjectFromProperty(search_application_post_behavioral_analytics_event_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_post_behavioral_analytics_event_response)),
@@ -17033,13 +16257,11 @@ const SEARCH_APPLICATION_PUT_CONTRACT: InternalConnectorContract = {
     urlParams: ['create'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_put_request).body),
-      ...getShape(getShape(search_application_put_request).path),
-      ...getShape(getShape(search_application_put_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_put_request, 'body'),
+    getLooseObjectFromProperty(search_application_put_request, 'path'),
+    getLooseObjectFromProperty(search_application_put_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_put_response)),
@@ -17061,13 +16283,11 @@ const SEARCH_APPLICATION_PUT_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_put_behavioral_analytics_request).body),
-      ...getShape(getShape(search_application_put_behavioral_analytics_request).path),
-      ...getShape(getShape(search_application_put_behavioral_analytics_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'body'),
+    getLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'path'),
+    getLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_put_behavioral_analytics_response)),
@@ -17094,13 +16314,11 @@ You must have \`read\` privileges on the backing alias of the search application
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_render_query_request).body),
-      ...getShape(getShape(search_application_render_query_request).path),
-      ...getShape(getShape(search_application_render_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_render_query_request, 'body'),
+    getLooseObjectFromProperty(search_application_render_query_request, 'path'),
+    getLooseObjectFromProperty(search_application_render_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_render_query_response)),
@@ -17124,16 +16342,14 @@ Unspecified template parameters are assigned their default values if applicable.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_application_search_request).body),
-      ...getShape(getShape(search_application_search_request).path),
-      ...getShape(getShape(search_application_search_request).query),
-      ...getShape(getShape(search_application_search1_request).body),
-      ...getShape(getShape(search_application_search1_request).path),
-      ...getShape(getShape(search_application_search1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_application_search_request, 'body'),
+    getLooseObjectFromProperty(search_application_search_request, 'path'),
+    getLooseObjectFromProperty(search_application_search_request, 'query'),
+    getLooseObjectFromProperty(search_application_search1_request, 'body'),
+    getLooseObjectFromProperty(search_application_search1_request, 'path'),
+    getLooseObjectFromProperty(search_application_search1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_application_search_response)),
@@ -17243,16 +16459,14 @@ Learn how to use the vector tile search API with practical examples in the [Vect
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_mvt_request).body),
-      ...getShape(getShape(search_mvt_request).path),
-      ...getShape(getShape(search_mvt_request).query),
-      ...getShape(getShape(search_mvt1_request).body),
-      ...getShape(getShape(search_mvt1_request).path),
-      ...getShape(getShape(search_mvt1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_mvt_request, 'body'),
+    getLooseObjectFromProperty(search_mvt_request, 'path'),
+    getLooseObjectFromProperty(search_mvt_request, 'query'),
+    getLooseObjectFromProperty(search_mvt1_request, 'body'),
+    getLooseObjectFromProperty(search_mvt1_request, 'path'),
+    getLooseObjectFromProperty(search_mvt1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_mvt_response)),
@@ -17281,22 +16495,20 @@ If the Elasticsearch security features are enabled, you must have the \`view_ind
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_shards_request).body),
-      ...getShape(getShape(search_shards_request).path),
-      ...getShape(getShape(search_shards_request).query),
-      ...getShape(getShape(search_shards1_request).body),
-      ...getShape(getShape(search_shards1_request).path),
-      ...getShape(getShape(search_shards1_request).query),
-      ...getShape(getShape(search_shards2_request).body),
-      ...getShape(getShape(search_shards2_request).path),
-      ...getShape(getShape(search_shards2_request).query),
-      ...getShape(getShape(search_shards3_request).body),
-      ...getShape(getShape(search_shards3_request).path),
-      ...getShape(getShape(search_shards3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_shards_request, 'body'),
+    getLooseObjectFromProperty(search_shards_request, 'path'),
+    getLooseObjectFromProperty(search_shards_request, 'query'),
+    getLooseObjectFromProperty(search_shards1_request, 'body'),
+    getLooseObjectFromProperty(search_shards1_request, 'path'),
+    getLooseObjectFromProperty(search_shards1_request, 'query'),
+    getLooseObjectFromProperty(search_shards2_request, 'body'),
+    getLooseObjectFromProperty(search_shards2_request, 'path'),
+    getLooseObjectFromProperty(search_shards2_request, 'query'),
+    getLooseObjectFromProperty(search_shards3_request, 'body'),
+    getLooseObjectFromProperty(search_shards3_request, 'path'),
+    getLooseObjectFromProperty(search_shards3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_shards_response)),
@@ -17321,22 +16533,20 @@ const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(search_template_request).body),
-      ...getShape(getShape(search_template_request).path),
-      ...getShape(getShape(search_template_request).query),
-      ...getShape(getShape(search_template1_request).body),
-      ...getShape(getShape(search_template1_request).path),
-      ...getShape(getShape(search_template1_request).query),
-      ...getShape(getShape(search_template2_request).body),
-      ...getShape(getShape(search_template2_request).path),
-      ...getShape(getShape(search_template2_request).query),
-      ...getShape(getShape(search_template3_request).body),
-      ...getShape(getShape(search_template3_request).path),
-      ...getShape(getShape(search_template3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(search_template_request, 'body'),
+    getLooseObjectFromProperty(search_template_request, 'path'),
+    getLooseObjectFromProperty(search_template_request, 'query'),
+    getLooseObjectFromProperty(search_template1_request, 'body'),
+    getLooseObjectFromProperty(search_template1_request, 'path'),
+    getLooseObjectFromProperty(search_template1_request, 'query'),
+    getLooseObjectFromProperty(search_template2_request, 'body'),
+    getLooseObjectFromProperty(search_template2_request, 'path'),
+    getLooseObjectFromProperty(search_template2_request, 'query'),
+    getLooseObjectFromProperty(search_template3_request, 'body'),
+    getLooseObjectFromProperty(search_template3_request, 'path'),
+    getLooseObjectFromProperty(search_template3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(search_template_response)),
@@ -17362,16 +16572,14 @@ Get statistics about the shared cache for partially mounted indices.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(searchable_snapshots_cache_stats_request).body),
-      ...getShape(getShape(searchable_snapshots_cache_stats_request).path),
-      ...getShape(getShape(searchable_snapshots_cache_stats_request).query),
-      ...getShape(getShape(searchable_snapshots_cache_stats1_request).body),
-      ...getShape(getShape(searchable_snapshots_cache_stats1_request).path),
-      ...getShape(getShape(searchable_snapshots_cache_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'body'),
+    getLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'path'),
+    getLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'query'),
+    getLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'body'),
+    getLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'path'),
+    getLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(searchable_snapshots_cache_stats_response)),
@@ -17395,16 +16603,14 @@ Clear indices and data streams from the shared cache for partially mounted indic
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(searchable_snapshots_clear_cache_request).body),
-      ...getShape(getShape(searchable_snapshots_clear_cache_request).path),
-      ...getShape(getShape(searchable_snapshots_clear_cache_request).query),
-      ...getShape(getShape(searchable_snapshots_clear_cache1_request).body),
-      ...getShape(getShape(searchable_snapshots_clear_cache1_request).path),
-      ...getShape(getShape(searchable_snapshots_clear_cache1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'body'),
+    getLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'path'),
+    getLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'query'),
+    getLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'body'),
+    getLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'path'),
+    getLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(searchable_snapshots_clear_cache_response)),
@@ -17430,13 +16636,11 @@ Manually mounting ILM-managed snapshots can interfere with ILM processes.`,
     urlParams: ['master_timeout', 'wait_for_completion', 'storage'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(searchable_snapshots_mount_request).body),
-      ...getShape(getShape(searchable_snapshots_mount_request).path),
-      ...getShape(getShape(searchable_snapshots_mount_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(searchable_snapshots_mount_request, 'body'),
+    getLooseObjectFromProperty(searchable_snapshots_mount_request, 'path'),
+    getLooseObjectFromProperty(searchable_snapshots_mount_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(searchable_snapshots_mount_response)),
@@ -17458,16 +16662,14 @@ const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(searchable_snapshots_stats_request).body),
-      ...getShape(getShape(searchable_snapshots_stats_request).path),
-      ...getShape(getShape(searchable_snapshots_stats_request).query),
-      ...getShape(getShape(searchable_snapshots_stats1_request).body),
-      ...getShape(getShape(searchable_snapshots_stats1_request).path),
-      ...getShape(getShape(searchable_snapshots_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(searchable_snapshots_stats_request, 'body'),
+    getLooseObjectFromProperty(searchable_snapshots_stats_request, 'path'),
+    getLooseObjectFromProperty(searchable_snapshots_stats_request, 'query'),
+    getLooseObjectFromProperty(searchable_snapshots_stats1_request, 'body'),
+    getLooseObjectFromProperty(searchable_snapshots_stats1_request, 'path'),
+    getLooseObjectFromProperty(searchable_snapshots_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(searchable_snapshots_stats_response)),
@@ -17503,13 +16705,11 @@ Any updates do not change existing content for either the \`labels\` or \`data\`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_activate_user_profile_request).body),
-      ...getShape(getShape(security_activate_user_profile_request).path),
-      ...getShape(getShape(security_activate_user_profile_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_activate_user_profile_request, 'body'),
+    getLooseObjectFromProperty(security_activate_user_profile_request, 'path'),
+    getLooseObjectFromProperty(security_activate_user_profile_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_activate_user_profile_response)),
@@ -17536,13 +16736,11 @@ If the user cannot be authenticated, this API returns a 401 status code.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_authenticate_request).body),
-      ...getShape(getShape(security_authenticate_request).path),
-      ...getShape(getShape(security_authenticate_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_authenticate_request, 'body'),
+    getLooseObjectFromProperty(security_authenticate_request, 'path'),
+    getLooseObjectFromProperty(security_authenticate_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_authenticate_response)),
@@ -17567,13 +16765,11 @@ The bulk delete roles API cannot delete roles that are defined in roles files.`,
     urlParams: ['refresh', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_bulk_delete_role_request).body),
-      ...getShape(getShape(security_bulk_delete_role_request).path),
-      ...getShape(getShape(security_bulk_delete_role_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_bulk_delete_role_request, 'body'),
+    getLooseObjectFromProperty(security_bulk_delete_role_request, 'path'),
+    getLooseObjectFromProperty(security_bulk_delete_role_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_bulk_delete_role_response)),
@@ -17598,13 +16794,11 @@ The bulk create or update roles API cannot update roles that are defined in role
     urlParams: ['refresh', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_bulk_put_role_request).body),
-      ...getShape(getShape(security_bulk_put_role_request).path),
-      ...getShape(getShape(security_bulk_put_role_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_bulk_put_role_request, 'body'),
+    getLooseObjectFromProperty(security_bulk_put_role_request, 'path'),
+    getLooseObjectFromProperty(security_bulk_put_role_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_bulk_put_role_response)),
@@ -17641,13 +16835,11 @@ A successful request returns a JSON structure that contains the IDs of all updat
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_bulk_update_api_keys_request).body),
-      ...getShape(getShape(security_bulk_update_api_keys_request).path),
-      ...getShape(getShape(security_bulk_update_api_keys_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_bulk_update_api_keys_request, 'body'),
+    getLooseObjectFromProperty(security_bulk_update_api_keys_request, 'path'),
+    getLooseObjectFromProperty(security_bulk_update_api_keys_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_bulk_update_api_keys_response)),
@@ -17671,22 +16863,20 @@ Change the passwords of users in the native realm and built-in users.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_change_password_request).body),
-      ...getShape(getShape(security_change_password_request).path),
-      ...getShape(getShape(security_change_password_request).query),
-      ...getShape(getShape(security_change_password1_request).body),
-      ...getShape(getShape(security_change_password1_request).path),
-      ...getShape(getShape(security_change_password1_request).query),
-      ...getShape(getShape(security_change_password2_request).body),
-      ...getShape(getShape(security_change_password2_request).path),
-      ...getShape(getShape(security_change_password2_request).query),
-      ...getShape(getShape(security_change_password3_request).body),
-      ...getShape(getShape(security_change_password3_request).path),
-      ...getShape(getShape(security_change_password3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_change_password_request, 'body'),
+    getLooseObjectFromProperty(security_change_password_request, 'path'),
+    getLooseObjectFromProperty(security_change_password_request, 'query'),
+    getLooseObjectFromProperty(security_change_password1_request, 'body'),
+    getLooseObjectFromProperty(security_change_password1_request, 'path'),
+    getLooseObjectFromProperty(security_change_password1_request, 'query'),
+    getLooseObjectFromProperty(security_change_password2_request, 'body'),
+    getLooseObjectFromProperty(security_change_password2_request, 'path'),
+    getLooseObjectFromProperty(security_change_password2_request, 'query'),
+    getLooseObjectFromProperty(security_change_password3_request, 'body'),
+    getLooseObjectFromProperty(security_change_password3_request, 'path'),
+    getLooseObjectFromProperty(security_change_password3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_change_password_response)),
@@ -17714,13 +16904,11 @@ The cache is also automatically cleared on state changes of the security index.`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_clear_api_key_cache_request).body),
-      ...getShape(getShape(security_clear_api_key_cache_request).path),
-      ...getShape(getShape(security_clear_api_key_cache_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_clear_api_key_cache_request, 'body'),
+    getLooseObjectFromProperty(security_clear_api_key_cache_request, 'path'),
+    getLooseObjectFromProperty(security_clear_api_key_cache_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_clear_api_key_cache_response)),
@@ -17745,13 +16933,11 @@ The cache is also automatically cleared for applications that have their privile
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_clear_cached_privileges_request).body),
-      ...getShape(getShape(security_clear_cached_privileges_request).path),
-      ...getShape(getShape(security_clear_cached_privileges_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_clear_cached_privileges_request, 'body'),
+    getLooseObjectFromProperty(security_clear_cached_privileges_request, 'path'),
+    getLooseObjectFromProperty(security_clear_cached_privileges_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_clear_cached_privileges_response)),
@@ -17780,13 +16966,11 @@ For more information, refer to the documentation about controlling the user cach
     urlParams: ['usernames'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_clear_cached_realms_request).body),
-      ...getShape(getShape(security_clear_cached_realms_request).path),
-      ...getShape(getShape(security_clear_cached_realms_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_clear_cached_realms_request, 'body'),
+    getLooseObjectFromProperty(security_clear_cached_realms_request, 'path'),
+    getLooseObjectFromProperty(security_clear_cached_realms_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_clear_cached_realms_response)),
@@ -17810,13 +16994,11 @@ Evict roles from the native role cache.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_clear_cached_roles_request).body),
-      ...getShape(getShape(security_clear_cached_roles_request).path),
-      ...getShape(getShape(security_clear_cached_roles_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_clear_cached_roles_request, 'body'),
+    getLooseObjectFromProperty(security_clear_cached_roles_request, 'path'),
+    getLooseObjectFromProperty(security_clear_cached_roles_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_clear_cached_roles_response)),
@@ -17845,13 +17027,11 @@ The cache for tokens backed by the \`service_tokens\` file is cleared automatica
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_clear_cached_service_tokens_request).body),
-      ...getShape(getShape(security_clear_cached_service_tokens_request).path),
-      ...getShape(getShape(security_clear_cached_service_tokens_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'body'),
+    getLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'path'),
+    getLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_clear_cached_service_tokens_response)),
@@ -17895,16 +17075,14 @@ To configure or turn off the API key service, refer to API key service setting d
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_create_api_key_request).body),
-      ...getShape(getShape(security_create_api_key_request).path),
-      ...getShape(getShape(security_create_api_key_request).query),
-      ...getShape(getShape(security_create_api_key1_request).body),
-      ...getShape(getShape(security_create_api_key1_request).path),
-      ...getShape(getShape(security_create_api_key1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_create_api_key_request, 'body'),
+    getLooseObjectFromProperty(security_create_api_key_request, 'path'),
+    getLooseObjectFromProperty(security_create_api_key_request, 'query'),
+    getLooseObjectFromProperty(security_create_api_key1_request, 'body'),
+    getLooseObjectFromProperty(security_create_api_key1_request, 'path'),
+    getLooseObjectFromProperty(security_create_api_key1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_create_api_key_response)),
@@ -17943,13 +17121,11 @@ Attempting to update them with the update REST API key API or the bulk update RE
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_create_cross_cluster_api_key_request).body),
-      ...getShape(getShape(security_create_cross_cluster_api_key_request).path),
-      ...getShape(getShape(security_create_cross_cluster_api_key_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'body'),
+    getLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'path'),
+    getLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_create_cross_cluster_api_key_response)),
@@ -17979,19 +17155,17 @@ You must actively delete them if they are no longer needed.`,
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_create_service_token_request).body),
-      ...getShape(getShape(security_create_service_token_request).path),
-      ...getShape(getShape(security_create_service_token_request).query),
-      ...getShape(getShape(security_create_service_token1_request).body),
-      ...getShape(getShape(security_create_service_token1_request).path),
-      ...getShape(getShape(security_create_service_token1_request).query),
-      ...getShape(getShape(security_create_service_token2_request).body),
-      ...getShape(getShape(security_create_service_token2_request).path),
-      ...getShape(getShape(security_create_service_token2_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_create_service_token_request, 'body'),
+    getLooseObjectFromProperty(security_create_service_token_request, 'path'),
+    getLooseObjectFromProperty(security_create_service_token_request, 'query'),
+    getLooseObjectFromProperty(security_create_service_token1_request, 'body'),
+    getLooseObjectFromProperty(security_create_service_token1_request, 'path'),
+    getLooseObjectFromProperty(security_create_service_token1_request, 'query'),
+    getLooseObjectFromProperty(security_create_service_token2_request, 'body'),
+    getLooseObjectFromProperty(security_create_service_token2_request, 'path'),
+    getLooseObjectFromProperty(security_create_service_token2_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_create_service_token_response)),
@@ -18025,13 +17199,11 @@ The proxy is trusted to have performed the TLS authentication and this API trans
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_delegate_pki_request).body),
-      ...getShape(getShape(security_delegate_pki_request).path),
-      ...getShape(getShape(security_delegate_pki_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_delegate_pki_request, 'body'),
+    getLooseObjectFromProperty(security_delegate_pki_request, 'path'),
+    getLooseObjectFromProperty(security_delegate_pki_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_delegate_pki_response)),
@@ -18058,13 +17230,11 @@ To use this API, you must have one of the following privileges:
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_delete_privileges_request).body),
-      ...getShape(getShape(security_delete_privileges_request).path),
-      ...getShape(getShape(security_delete_privileges_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_delete_privileges_request, 'body'),
+    getLooseObjectFromProperty(security_delete_privileges_request, 'path'),
+    getLooseObjectFromProperty(security_delete_privileges_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_delete_privileges_response)),
@@ -18090,13 +17260,11 @@ The delete roles API cannot remove roles that are defined in roles files.`,
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_delete_role_request).body),
-      ...getShape(getShape(security_delete_role_request).path),
-      ...getShape(getShape(security_delete_role_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_delete_role_request, 'body'),
+    getLooseObjectFromProperty(security_delete_role_request, 'path'),
+    getLooseObjectFromProperty(security_delete_role_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_delete_role_response)),
@@ -18122,13 +17290,11 @@ The delete role mappings API cannot remove role mappings that are defined in rol
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_delete_role_mapping_request).body),
-      ...getShape(getShape(security_delete_role_mapping_request).path),
-      ...getShape(getShape(security_delete_role_mapping_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_delete_role_mapping_request, 'body'),
+    getLooseObjectFromProperty(security_delete_role_mapping_request, 'path'),
+    getLooseObjectFromProperty(security_delete_role_mapping_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_delete_role_mapping_response)),
@@ -18152,13 +17318,11 @@ Delete service account tokens for a service in a specified namespace.`,
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_delete_service_token_request).body),
-      ...getShape(getShape(security_delete_service_token_request).path),
-      ...getShape(getShape(security_delete_service_token_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_delete_service_token_request, 'body'),
+    getLooseObjectFromProperty(security_delete_service_token_request, 'path'),
+    getLooseObjectFromProperty(security_delete_service_token_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_delete_service_token_response)),
@@ -18182,13 +17346,11 @@ Delete users from the native realm.`,
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_delete_user_request).body),
-      ...getShape(getShape(security_delete_user_request).path),
-      ...getShape(getShape(security_delete_user_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_delete_user_request, 'body'),
+    getLooseObjectFromProperty(security_delete_user_request, 'path'),
+    getLooseObjectFromProperty(security_delete_user_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_delete_user_response)),
@@ -18214,16 +17376,14 @@ You can use this API to revoke a user's access to Elasticsearch.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_disable_user_request).body),
-      ...getShape(getShape(security_disable_user_request).path),
-      ...getShape(getShape(security_disable_user_request).query),
-      ...getShape(getShape(security_disable_user1_request).body),
-      ...getShape(getShape(security_disable_user1_request).path),
-      ...getShape(getShape(security_disable_user1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_disable_user_request, 'body'),
+    getLooseObjectFromProperty(security_disable_user_request, 'path'),
+    getLooseObjectFromProperty(security_disable_user_request, 'query'),
+    getLooseObjectFromProperty(security_disable_user1_request, 'body'),
+    getLooseObjectFromProperty(security_disable_user1_request, 'path'),
+    getLooseObjectFromProperty(security_disable_user1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_disable_user_response)),
@@ -18255,16 +17415,14 @@ To re-enable a disabled user profile, use the enable user profile API .`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_disable_user_profile_request).body),
-      ...getShape(getShape(security_disable_user_profile_request).path),
-      ...getShape(getShape(security_disable_user_profile_request).query),
-      ...getShape(getShape(security_disable_user_profile1_request).body),
-      ...getShape(getShape(security_disable_user_profile1_request).path),
-      ...getShape(getShape(security_disable_user_profile1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_disable_user_profile_request, 'body'),
+    getLooseObjectFromProperty(security_disable_user_profile_request, 'path'),
+    getLooseObjectFromProperty(security_disable_user_profile_request, 'query'),
+    getLooseObjectFromProperty(security_disable_user_profile1_request, 'body'),
+    getLooseObjectFromProperty(security_disable_user_profile1_request, 'path'),
+    getLooseObjectFromProperty(security_disable_user_profile1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_disable_user_profile_response)),
@@ -18290,16 +17448,14 @@ By default, when you create users, they are enabled.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_enable_user_request).body),
-      ...getShape(getShape(security_enable_user_request).path),
-      ...getShape(getShape(security_enable_user_request).query),
-      ...getShape(getShape(security_enable_user1_request).body),
-      ...getShape(getShape(security_enable_user1_request).path),
-      ...getShape(getShape(security_enable_user1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_enable_user_request, 'body'),
+    getLooseObjectFromProperty(security_enable_user_request, 'path'),
+    getLooseObjectFromProperty(security_enable_user_request, 'query'),
+    getLooseObjectFromProperty(security_enable_user1_request, 'body'),
+    getLooseObjectFromProperty(security_enable_user1_request, 'path'),
+    getLooseObjectFromProperty(security_enable_user1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_enable_user_response)),
@@ -18331,16 +17487,14 @@ If you later disable the user profile, you can use the enable user profile API t
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_enable_user_profile_request).body),
-      ...getShape(getShape(security_enable_user_profile_request).path),
-      ...getShape(getShape(security_enable_user_profile_request).query),
-      ...getShape(getShape(security_enable_user_profile1_request).body),
-      ...getShape(getShape(security_enable_user_profile1_request).path),
-      ...getShape(getShape(security_enable_user_profile1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_enable_user_profile_request, 'body'),
+    getLooseObjectFromProperty(security_enable_user_profile_request, 'path'),
+    getLooseObjectFromProperty(security_enable_user_profile_request, 'query'),
+    getLooseObjectFromProperty(security_enable_user_profile1_request, 'body'),
+    getLooseObjectFromProperty(security_enable_user_profile1_request, 'path'),
+    getLooseObjectFromProperty(security_enable_user_profile1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_enable_user_profile_response)),
@@ -18368,13 +17522,11 @@ Kibana uses this API internally to configure itself for communications with an E
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_enroll_kibana_request).body),
-      ...getShape(getShape(security_enroll_kibana_request).path),
-      ...getShape(getShape(security_enroll_kibana_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_enroll_kibana_request, 'body'),
+    getLooseObjectFromProperty(security_enroll_kibana_request, 'path'),
+    getLooseObjectFromProperty(security_enroll_kibana_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_enroll_kibana_response)),
@@ -18401,13 +17553,11 @@ The response contains key and certificate material that allows the caller to gen
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_enroll_node_request).body),
-      ...getShape(getShape(security_enroll_node_request).path),
-      ...getShape(getShape(security_enroll_node_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_enroll_node_request, 'body'),
+    getLooseObjectFromProperty(security_enroll_node_request, 'path'),
+    getLooseObjectFromProperty(security_enroll_node_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_enroll_node_response)),
@@ -18442,13 +17592,11 @@ If you have \`read_security\`, \`manage_api_key\` or greater privileges (includi
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_api_key_request).body),
-      ...getShape(getShape(security_get_api_key_request).path),
-      ...getShape(getShape(security_get_api_key_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_api_key_request, 'body'),
+    getLooseObjectFromProperty(security_get_api_key_request, 'path'),
+    getLooseObjectFromProperty(security_get_api_key_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_api_key_response)),
@@ -18472,13 +17620,11 @@ Get the list of cluster privileges and index privileges that are available in th
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_builtin_privileges_request).body),
-      ...getShape(getShape(security_get_builtin_privileges_request).path),
-      ...getShape(getShape(security_get_builtin_privileges_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_builtin_privileges_request, 'body'),
+    getLooseObjectFromProperty(security_get_builtin_privileges_request, 'path'),
+    getLooseObjectFromProperty(security_get_builtin_privileges_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_builtin_privileges_response)),
@@ -18509,19 +17655,17 @@ To use this API, you must have one of the following privileges:
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_privileges_request).body),
-      ...getShape(getShape(security_get_privileges_request).path),
-      ...getShape(getShape(security_get_privileges_request).query),
-      ...getShape(getShape(security_get_privileges1_request).body),
-      ...getShape(getShape(security_get_privileges1_request).path),
-      ...getShape(getShape(security_get_privileges1_request).query),
-      ...getShape(getShape(security_get_privileges2_request).body),
-      ...getShape(getShape(security_get_privileges2_request).path),
-      ...getShape(getShape(security_get_privileges2_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_privileges_request, 'body'),
+    getLooseObjectFromProperty(security_get_privileges_request, 'path'),
+    getLooseObjectFromProperty(security_get_privileges_request, 'query'),
+    getLooseObjectFromProperty(security_get_privileges1_request, 'body'),
+    getLooseObjectFromProperty(security_get_privileges1_request, 'path'),
+    getLooseObjectFromProperty(security_get_privileges1_request, 'query'),
+    getLooseObjectFromProperty(security_get_privileges2_request, 'body'),
+    getLooseObjectFromProperty(security_get_privileges2_request, 'path'),
+    getLooseObjectFromProperty(security_get_privileges2_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_privileges_response)),
@@ -18549,16 +17693,14 @@ The get roles API cannot retrieve roles that are defined in roles files.`,
     urlParams: ['refresh', 'refresh', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_role_request).body),
-      ...getShape(getShape(security_get_role_request).path),
-      ...getShape(getShape(security_get_role_request).query),
-      ...getShape(getShape(security_get_role1_request).body),
-      ...getShape(getShape(security_get_role1_request).path),
-      ...getShape(getShape(security_get_role1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_role_request, 'body'),
+    getLooseObjectFromProperty(security_get_role_request, 'path'),
+    getLooseObjectFromProperty(security_get_role_request, 'query'),
+    getLooseObjectFromProperty(security_get_role1_request, 'body'),
+    getLooseObjectFromProperty(security_get_role1_request, 'path'),
+    getLooseObjectFromProperty(security_get_role1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_role_response)),
@@ -18585,16 +17727,14 @@ The get role mappings API cannot retrieve role mappings that are defined in role
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_role_mapping_request).body),
-      ...getShape(getShape(security_get_role_mapping_request).path),
-      ...getShape(getShape(security_get_role_mapping_request).query),
-      ...getShape(getShape(security_get_role_mapping1_request).body),
-      ...getShape(getShape(security_get_role_mapping1_request).path),
-      ...getShape(getShape(security_get_role_mapping1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_role_mapping_request, 'body'),
+    getLooseObjectFromProperty(security_get_role_mapping_request, 'path'),
+    getLooseObjectFromProperty(security_get_role_mapping_request, 'query'),
+    getLooseObjectFromProperty(security_get_role_mapping1_request, 'body'),
+    getLooseObjectFromProperty(security_get_role_mapping1_request, 'path'),
+    getLooseObjectFromProperty(security_get_role_mapping1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_role_mapping_response)),
@@ -18625,19 +17765,17 @@ NOTE: Currently, only the \`elastic/fleet-server\` service account is available.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_service_accounts_request).body),
-      ...getShape(getShape(security_get_service_accounts_request).path),
-      ...getShape(getShape(security_get_service_accounts_request).query),
-      ...getShape(getShape(security_get_service_accounts1_request).body),
-      ...getShape(getShape(security_get_service_accounts1_request).path),
-      ...getShape(getShape(security_get_service_accounts1_request).query),
-      ...getShape(getShape(security_get_service_accounts2_request).body),
-      ...getShape(getShape(security_get_service_accounts2_request).path),
-      ...getShape(getShape(security_get_service_accounts2_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_service_accounts_request, 'body'),
+    getLooseObjectFromProperty(security_get_service_accounts_request, 'path'),
+    getLooseObjectFromProperty(security_get_service_accounts_request, 'query'),
+    getLooseObjectFromProperty(security_get_service_accounts1_request, 'body'),
+    getLooseObjectFromProperty(security_get_service_accounts1_request, 'path'),
+    getLooseObjectFromProperty(security_get_service_accounts1_request, 'query'),
+    getLooseObjectFromProperty(security_get_service_accounts2_request, 'body'),
+    getLooseObjectFromProperty(security_get_service_accounts2_request, 'path'),
+    getLooseObjectFromProperty(security_get_service_accounts2_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_service_accounts_response)),
@@ -18668,13 +17806,11 @@ Tokens with the same name from different nodes are assumed to be the same token 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_service_credentials_request).body),
-      ...getShape(getShape(security_get_service_credentials_request).path),
-      ...getShape(getShape(security_get_service_credentials_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_service_credentials_request, 'body'),
+    getLooseObjectFromProperty(security_get_service_credentials_request, 'path'),
+    getLooseObjectFromProperty(security_get_service_credentials_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_service_credentials_response)),
@@ -18703,13 +17839,11 @@ This includes:
     urlParams: ['master_timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_settings_request).body),
-      ...getShape(getShape(security_get_settings_request).path),
-      ...getShape(getShape(security_get_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_settings_request, 'body'),
+    getLooseObjectFromProperty(security_get_settings_request, 'path'),
+    getLooseObjectFromProperty(security_get_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_settings_response)),
@@ -18733,13 +17867,11 @@ Gather security usage statistics from all node(s) within the cluster.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_stats_request).body),
-      ...getShape(getShape(security_get_stats_request).path),
-      ...getShape(getShape(security_get_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_stats_request, 'body'),
+    getLooseObjectFromProperty(security_get_stats_request, 'path'),
+    getLooseObjectFromProperty(security_get_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_stats_response)),
@@ -18774,13 +17906,11 @@ If you want to invalidate a token immediately, you can do so by using the invali
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_token_request).body),
-      ...getShape(getShape(security_get_token_request).path),
-      ...getShape(getShape(security_get_token_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_token_request, 'body'),
+    getLooseObjectFromProperty(security_get_token_request, 'path'),
+    getLooseObjectFromProperty(security_get_token_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_token_response)),
@@ -18804,16 +17934,14 @@ Get information about users in the native realm and built-in users.`,
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_user_request).body),
-      ...getShape(getShape(security_get_user_request).path),
-      ...getShape(getShape(security_get_user_request).query),
-      ...getShape(getShape(security_get_user1_request).body),
-      ...getShape(getShape(security_get_user1_request).path),
-      ...getShape(getShape(security_get_user1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_user_request, 'body'),
+    getLooseObjectFromProperty(security_get_user_request, 'path'),
+    getLooseObjectFromProperty(security_get_user_request, 'query'),
+    getLooseObjectFromProperty(security_get_user1_request, 'body'),
+    getLooseObjectFromProperty(security_get_user1_request, 'path'),
+    getLooseObjectFromProperty(security_get_user1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_user_response)),
@@ -18841,13 +17969,11 @@ To check whether a user has a specific list of privileges, use the has privilege
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_user_privileges_request).body),
-      ...getShape(getShape(security_get_user_privileges_request).path),
-      ...getShape(getShape(security_get_user_privileges_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_user_privileges_request, 'body'),
+    getLooseObjectFromProperty(security_get_user_privileges_request, 'path'),
+    getLooseObjectFromProperty(security_get_user_privileges_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_user_privileges_response)),
@@ -18875,13 +18001,11 @@ Elastic reserves the right to change or remove this feature in future releases w
     urlParams: ['data'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_get_user_profile_request).body),
-      ...getShape(getShape(security_get_user_profile_request).path),
-      ...getShape(getShape(security_get_user_profile_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_get_user_profile_request, 'body'),
+    getLooseObjectFromProperty(security_get_user_profile_request, 'path'),
+    getLooseObjectFromProperty(security_get_user_profile_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_get_user_profile_response)),
@@ -18924,13 +18048,11 @@ By default, API keys never expire. You can specify expiration information when y
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_grant_api_key_request).body),
-      ...getShape(getShape(security_grant_api_key_request).path),
-      ...getShape(getShape(security_grant_api_key_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_grant_api_key_request, 'body'),
+    getLooseObjectFromProperty(security_grant_api_key_request, 'path'),
+    getLooseObjectFromProperty(security_grant_api_key_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_grant_api_key_response)),
@@ -18956,22 +18078,20 @@ To check the privileges of other users, you must use the run as feature.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_has_privileges_request).body),
-      ...getShape(getShape(security_has_privileges_request).path),
-      ...getShape(getShape(security_has_privileges_request).query),
-      ...getShape(getShape(security_has_privileges1_request).body),
-      ...getShape(getShape(security_has_privileges1_request).path),
-      ...getShape(getShape(security_has_privileges1_request).query),
-      ...getShape(getShape(security_has_privileges2_request).body),
-      ...getShape(getShape(security_has_privileges2_request).path),
-      ...getShape(getShape(security_has_privileges2_request).query),
-      ...getShape(getShape(security_has_privileges3_request).body),
-      ...getShape(getShape(security_has_privileges3_request).path),
-      ...getShape(getShape(security_has_privileges3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_has_privileges_request, 'body'),
+    getLooseObjectFromProperty(security_has_privileges_request, 'path'),
+    getLooseObjectFromProperty(security_has_privileges_request, 'query'),
+    getLooseObjectFromProperty(security_has_privileges1_request, 'body'),
+    getLooseObjectFromProperty(security_has_privileges1_request, 'path'),
+    getLooseObjectFromProperty(security_has_privileges1_request, 'query'),
+    getLooseObjectFromProperty(security_has_privileges2_request, 'body'),
+    getLooseObjectFromProperty(security_has_privileges2_request, 'path'),
+    getLooseObjectFromProperty(security_has_privileges2_request, 'query'),
+    getLooseObjectFromProperty(security_has_privileges3_request, 'body'),
+    getLooseObjectFromProperty(security_has_privileges3_request, 'path'),
+    getLooseObjectFromProperty(security_has_privileges3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_has_privileges_response)),
@@ -19001,16 +18121,14 @@ Elastic reserves the right to change or remove this feature in future releases w
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_has_privileges_user_profile_request).body),
-      ...getShape(getShape(security_has_privileges_user_profile_request).path),
-      ...getShape(getShape(security_has_privileges_user_profile_request).query),
-      ...getShape(getShape(security_has_privileges_user_profile1_request).body),
-      ...getShape(getShape(security_has_privileges_user_profile1_request).path),
-      ...getShape(getShape(security_has_privileges_user_profile1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_has_privileges_user_profile_request, 'body'),
+    getLooseObjectFromProperty(security_has_privileges_user_profile_request, 'path'),
+    getLooseObjectFromProperty(security_has_privileges_user_profile_request, 'query'),
+    getLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'body'),
+    getLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'path'),
+    getLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_has_privileges_user_profile_response)),
@@ -19055,13 +18173,11 @@ In addition, with the \`manage_own_api_key\` privilege, an invalidation request 
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_invalidate_api_key_request).body),
-      ...getShape(getShape(security_invalidate_api_key_request).path),
-      ...getShape(getShape(security_invalidate_api_key_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_invalidate_api_key_request, 'body'),
+    getLooseObjectFromProperty(security_invalidate_api_key_request, 'path'),
+    getLooseObjectFromProperty(security_invalidate_api_key_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_invalidate_api_key_response)),
@@ -19095,13 +18211,11 @@ If none of these two are specified, then \`realm_name\` and/or \`username\` need
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_invalidate_token_request).body),
-      ...getShape(getShape(security_invalidate_token_request).path),
-      ...getShape(getShape(security_invalidate_token_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_invalidate_token_request, 'body'),
+    getLooseObjectFromProperty(security_invalidate_token_request, 'path'),
+    getLooseObjectFromProperty(security_invalidate_token_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_invalidate_token_response)),
@@ -19128,13 +18242,11 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_oidc_authenticate_request).body),
-      ...getShape(getShape(security_oidc_authenticate_request).path),
-      ...getShape(getShape(security_oidc_authenticate_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_oidc_authenticate_request, 'body'),
+    getLooseObjectFromProperty(security_oidc_authenticate_request, 'path'),
+    getLooseObjectFromProperty(security_oidc_authenticate_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_oidc_authenticate_response)),
@@ -19163,13 +18275,11 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_oidc_logout_request).body),
-      ...getShape(getShape(security_oidc_logout_request).path),
-      ...getShape(getShape(security_oidc_logout_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_oidc_logout_request, 'body'),
+    getLooseObjectFromProperty(security_oidc_logout_request, 'path'),
+    getLooseObjectFromProperty(security_oidc_logout_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_oidc_logout_response)),
@@ -19198,13 +18308,11 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_oidc_prepare_authentication_request).body),
-      ...getShape(getShape(security_oidc_prepare_authentication_request).path),
-      ...getShape(getShape(security_oidc_prepare_authentication_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'body'),
+    getLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'path'),
+    getLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_oidc_prepare_authentication_response)),
@@ -19244,16 +18352,14 @@ Action names can contain any number of printable ASCII characters and must conta
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_put_privileges_request).body),
-      ...getShape(getShape(security_put_privileges_request).path),
-      ...getShape(getShape(security_put_privileges_request).query),
-      ...getShape(getShape(security_put_privileges1_request).body),
-      ...getShape(getShape(security_put_privileges1_request).path),
-      ...getShape(getShape(security_put_privileges1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_put_privileges_request, 'body'),
+    getLooseObjectFromProperty(security_put_privileges_request, 'path'),
+    getLooseObjectFromProperty(security_put_privileges_request, 'query'),
+    getLooseObjectFromProperty(security_put_privileges1_request, 'body'),
+    getLooseObjectFromProperty(security_put_privileges1_request, 'path'),
+    getLooseObjectFromProperty(security_put_privileges1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_put_privileges_response)),
@@ -19280,16 +18386,14 @@ File-based role management is not available in Elastic Serverless.`,
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_put_role_request).body),
-      ...getShape(getShape(security_put_role_request).path),
-      ...getShape(getShape(security_put_role_request).query),
-      ...getShape(getShape(security_put_role1_request).body),
-      ...getShape(getShape(security_put_role1_request).path),
-      ...getShape(getShape(security_put_role1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_put_role_request, 'body'),
+    getLooseObjectFromProperty(security_put_role_request, 'path'),
+    getLooseObjectFromProperty(security_put_role_request, 'query'),
+    getLooseObjectFromProperty(security_put_role1_request, 'body'),
+    getLooseObjectFromProperty(security_put_role1_request, 'path'),
+    getLooseObjectFromProperty(security_put_role1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_put_role_response)),
@@ -19337,16 +18441,14 @@ If the format of the template is set to "json" then the template is expected to 
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_put_role_mapping_request).body),
-      ...getShape(getShape(security_put_role_mapping_request).path),
-      ...getShape(getShape(security_put_role_mapping_request).query),
-      ...getShape(getShape(security_put_role_mapping1_request).body),
-      ...getShape(getShape(security_put_role_mapping1_request).path),
-      ...getShape(getShape(security_put_role_mapping1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_put_role_mapping_request, 'body'),
+    getLooseObjectFromProperty(security_put_role_mapping_request, 'path'),
+    getLooseObjectFromProperty(security_put_role_mapping_request, 'query'),
+    getLooseObjectFromProperty(security_put_role_mapping1_request, 'body'),
+    getLooseObjectFromProperty(security_put_role_mapping1_request, 'path'),
+    getLooseObjectFromProperty(security_put_role_mapping1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_put_role_mapping_response)),
@@ -19373,16 +18475,14 @@ To change a user's password without updating any other fields, use the change pa
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_put_user_request).body),
-      ...getShape(getShape(security_put_user_request).path),
-      ...getShape(getShape(security_put_user_request).query),
-      ...getShape(getShape(security_put_user1_request).body),
-      ...getShape(getShape(security_put_user1_request).path),
-      ...getShape(getShape(security_put_user1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_put_user_request, 'body'),
+    getLooseObjectFromProperty(security_put_user_request, 'path'),
+    getLooseObjectFromProperty(security_put_user_request, 'query'),
+    getLooseObjectFromProperty(security_put_user1_request, 'body'),
+    getLooseObjectFromProperty(security_put_user1_request, 'path'),
+    getLooseObjectFromProperty(security_put_user1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_put_user_response)),
@@ -19413,16 +18513,14 @@ Refer to the linked documentation for examples of how to find API keys:`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_query_api_keys_request).body),
-      ...getShape(getShape(security_query_api_keys_request).path),
-      ...getShape(getShape(security_query_api_keys_request).query),
-      ...getShape(getShape(security_query_api_keys1_request).body),
-      ...getShape(getShape(security_query_api_keys1_request).path),
-      ...getShape(getShape(security_query_api_keys1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_query_api_keys_request, 'body'),
+    getLooseObjectFromProperty(security_query_api_keys_request, 'path'),
+    getLooseObjectFromProperty(security_query_api_keys_request, 'query'),
+    getLooseObjectFromProperty(security_query_api_keys1_request, 'body'),
+    getLooseObjectFromProperty(security_query_api_keys1_request, 'path'),
+    getLooseObjectFromProperty(security_query_api_keys1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_query_api_keys_response)),
@@ -19451,16 +18549,14 @@ Also, the results can be paginated and sorted.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_query_role_request).body),
-      ...getShape(getShape(security_query_role_request).path),
-      ...getShape(getShape(security_query_role_request).query),
-      ...getShape(getShape(security_query_role1_request).body),
-      ...getShape(getShape(security_query_role1_request).path),
-      ...getShape(getShape(security_query_role1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_query_role_request, 'body'),
+    getLooseObjectFromProperty(security_query_role_request, 'path'),
+    getLooseObjectFromProperty(security_query_role_request, 'query'),
+    getLooseObjectFromProperty(security_query_role1_request, 'body'),
+    getLooseObjectFromProperty(security_query_role1_request, 'path'),
+    getLooseObjectFromProperty(security_query_role1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_query_role_response)),
@@ -19489,16 +18585,14 @@ This API is only for native users.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_query_user_request).body),
-      ...getShape(getShape(security_query_user_request).path),
-      ...getShape(getShape(security_query_user_request).query),
-      ...getShape(getShape(security_query_user1_request).body),
-      ...getShape(getShape(security_query_user1_request).path),
-      ...getShape(getShape(security_query_user1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_query_user_request, 'body'),
+    getLooseObjectFromProperty(security_query_user_request, 'path'),
+    getLooseObjectFromProperty(security_query_user_request, 'query'),
+    getLooseObjectFromProperty(security_query_user1_request, 'body'),
+    getLooseObjectFromProperty(security_query_user1_request, 'path'),
+    getLooseObjectFromProperty(security_query_user1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_query_user_response)),
@@ -19536,13 +18630,11 @@ This API endpoint essentially exchanges SAML responses that indicate successful 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_saml_authenticate_request).body),
-      ...getShape(getShape(security_saml_authenticate_request).path),
-      ...getShape(getShape(security_saml_authenticate_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_saml_authenticate_request, 'body'),
+    getLooseObjectFromProperty(security_saml_authenticate_request, 'path'),
+    getLooseObjectFromProperty(security_saml_authenticate_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_saml_authenticate_response)),
@@ -19575,13 +18667,11 @@ The caller of this API must prepare the request accordingly so that this API can
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_saml_complete_logout_request).body),
-      ...getShape(getShape(security_saml_complete_logout_request).path),
-      ...getShape(getShape(security_saml_complete_logout_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_saml_complete_logout_request, 'body'),
+    getLooseObjectFromProperty(security_saml_complete_logout_request, 'path'),
+    getLooseObjectFromProperty(security_saml_complete_logout_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_saml_complete_logout_response)),
@@ -19613,13 +18703,11 @@ Thus the user can be redirected back to their IdP.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_saml_invalidate_request).body),
-      ...getShape(getShape(security_saml_invalidate_request).path),
-      ...getShape(getShape(security_saml_invalidate_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_saml_invalidate_request, 'body'),
+    getLooseObjectFromProperty(security_saml_invalidate_request, 'path'),
+    getLooseObjectFromProperty(security_saml_invalidate_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_saml_invalidate_response)),
@@ -19649,13 +18737,11 @@ If the SAML realm in Elasticsearch is configured accordingly and the SAML IdP su
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_saml_logout_request).body),
-      ...getShape(getShape(security_saml_logout_request).path),
-      ...getShape(getShape(security_saml_logout_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_saml_logout_request, 'body'),
+    getLooseObjectFromProperty(security_saml_logout_request, 'path'),
+    getLooseObjectFromProperty(security_saml_logout_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_saml_logout_response)),
@@ -19690,13 +18776,11 @@ The caller of this API needs to store this identifier as it needs to be used in 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_saml_prepare_authentication_request).body),
-      ...getShape(getShape(security_saml_prepare_authentication_request).path),
-      ...getShape(getShape(security_saml_prepare_authentication_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_saml_prepare_authentication_request, 'body'),
+    getLooseObjectFromProperty(security_saml_prepare_authentication_request, 'path'),
+    getLooseObjectFromProperty(security_saml_prepare_authentication_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_saml_prepare_authentication_response)),
@@ -19723,13 +18807,11 @@ This API generates Service Provider metadata based on the configuration of a SAM
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_saml_service_provider_metadata_request).body),
-      ...getShape(getShape(security_saml_service_provider_metadata_request).path),
-      ...getShape(getShape(security_saml_service_provider_metadata_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'body'),
+    getLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'path'),
+    getLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_saml_service_provider_metadata_response)),
@@ -19757,16 +18839,14 @@ Elastic reserves the right to change or remove this feature in future releases w
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_suggest_user_profiles_request).body),
-      ...getShape(getShape(security_suggest_user_profiles_request).path),
-      ...getShape(getShape(security_suggest_user_profiles_request).query),
-      ...getShape(getShape(security_suggest_user_profiles1_request).body),
-      ...getShape(getShape(security_suggest_user_profiles1_request).path),
-      ...getShape(getShape(security_suggest_user_profiles1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_suggest_user_profiles_request, 'body'),
+    getLooseObjectFromProperty(security_suggest_user_profiles_request, 'path'),
+    getLooseObjectFromProperty(security_suggest_user_profiles_request, 'query'),
+    getLooseObjectFromProperty(security_suggest_user_profiles1_request, 'body'),
+    getLooseObjectFromProperty(security_suggest_user_profiles1_request, 'path'),
+    getLooseObjectFromProperty(security_suggest_user_profiles1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_suggest_user_profiles_response)),
@@ -19808,13 +18888,11 @@ This change can occur if the owner user's permissions have changed since the API
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_update_api_key_request).body),
-      ...getShape(getShape(security_update_api_key_request).path),
-      ...getShape(getShape(security_update_api_key_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_update_api_key_request, 'body'),
+    getLooseObjectFromProperty(security_update_api_key_request, 'path'),
+    getLooseObjectFromProperty(security_update_api_key_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_update_api_key_response)),
@@ -19854,13 +18932,11 @@ To learn more about how to use this API, refer to the [Update cross cluter API k
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_update_cross_cluster_api_key_request).body),
-      ...getShape(getShape(security_update_cross_cluster_api_key_request).path),
-      ...getShape(getShape(security_update_cross_cluster_api_key_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'body'),
+    getLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'path'),
+    getLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_update_cross_cluster_api_key_response)),
@@ -19889,13 +18965,11 @@ This API does not yet support configuring the settings for indices before they a
     urlParams: ['master_timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_update_settings_request).body),
-      ...getShape(getShape(security_update_settings_request).path),
-      ...getShape(getShape(security_update_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_update_settings_request, 'body'),
+    getLooseObjectFromProperty(security_update_settings_request, 'path'),
+    getLooseObjectFromProperty(security_update_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_update_settings_response)),
@@ -19934,16 +19008,14 @@ The \`update_profile_data\` global privilege grants privileges for updating only
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(security_update_user_profile_data_request).body),
-      ...getShape(getShape(security_update_user_profile_data_request).path),
-      ...getShape(getShape(security_update_user_profile_data_request).query),
-      ...getShape(getShape(security_update_user_profile_data1_request).body),
-      ...getShape(getShape(security_update_user_profile_data1_request).path),
-      ...getShape(getShape(security_update_user_profile_data1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(security_update_user_profile_data_request, 'body'),
+    getLooseObjectFromProperty(security_update_user_profile_data_request, 'path'),
+    getLooseObjectFromProperty(security_update_user_profile_data_request, 'query'),
+    getLooseObjectFromProperty(security_update_user_profile_data1_request, 'body'),
+    getLooseObjectFromProperty(security_update_user_profile_data1_request, 'path'),
+    getLooseObjectFromProperty(security_update_user_profile_data1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(security_update_user_profile_data_response)),
@@ -20072,22 +19144,20 @@ These will be used in place of the pipeline definitions that are already in the 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(simulate_ingest_request).body),
-      ...getShape(getShape(simulate_ingest_request).path),
-      ...getShape(getShape(simulate_ingest_request).query),
-      ...getShape(getShape(simulate_ingest1_request).body),
-      ...getShape(getShape(simulate_ingest1_request).path),
-      ...getShape(getShape(simulate_ingest1_request).query),
-      ...getShape(getShape(simulate_ingest2_request).body),
-      ...getShape(getShape(simulate_ingest2_request).path),
-      ...getShape(getShape(simulate_ingest2_request).query),
-      ...getShape(getShape(simulate_ingest3_request).body),
-      ...getShape(getShape(simulate_ingest3_request).path),
-      ...getShape(getShape(simulate_ingest3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(simulate_ingest_request, 'body'),
+    getLooseObjectFromProperty(simulate_ingest_request, 'path'),
+    getLooseObjectFromProperty(simulate_ingest_request, 'query'),
+    getLooseObjectFromProperty(simulate_ingest1_request, 'body'),
+    getLooseObjectFromProperty(simulate_ingest1_request, 'path'),
+    getLooseObjectFromProperty(simulate_ingest1_request, 'query'),
+    getLooseObjectFromProperty(simulate_ingest2_request, 'body'),
+    getLooseObjectFromProperty(simulate_ingest2_request, 'path'),
+    getLooseObjectFromProperty(simulate_ingest2_request, 'query'),
+    getLooseObjectFromProperty(simulate_ingest3_request, 'body'),
+    getLooseObjectFromProperty(simulate_ingest3_request, 'path'),
+    getLooseObjectFromProperty(simulate_ingest3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(simulate_ingest_response)),
@@ -20114,13 +19184,11 @@ This operation prevents any future snapshots from being taken but does not cance
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(slm_delete_lifecycle_request).body),
-      ...getShape(getShape(slm_delete_lifecycle_request).path),
-      ...getShape(getShape(slm_delete_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(slm_delete_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(slm_delete_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(slm_delete_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(slm_delete_lifecycle_response)),
@@ -20144,13 +19212,11 @@ The snapshot policy is normally applied according to its schedule, but you might
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(slm_execute_lifecycle_request).body),
-      ...getShape(getShape(slm_execute_lifecycle_request).path),
-      ...getShape(getShape(slm_execute_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(slm_execute_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(slm_execute_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(slm_execute_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(slm_execute_lifecycle_response)),
@@ -20174,13 +19240,11 @@ The retention policy is normally applied according to its schedule.`,
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(slm_execute_retention_request).body),
-      ...getShape(getShape(slm_execute_retention_request).path),
-      ...getShape(getShape(slm_execute_retention_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(slm_execute_retention_request, 'body'),
+    getLooseObjectFromProperty(slm_execute_retention_request, 'path'),
+    getLooseObjectFromProperty(slm_execute_retention_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(slm_execute_retention_response)),
@@ -20203,16 +19267,14 @@ Get snapshot lifecycle policy definitions and information about the latest snaps
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(slm_get_lifecycle_request).body),
-      ...getShape(getShape(slm_get_lifecycle_request).path),
-      ...getShape(getShape(slm_get_lifecycle_request).query),
-      ...getShape(getShape(slm_get_lifecycle1_request).body),
-      ...getShape(getShape(slm_get_lifecycle1_request).path),
-      ...getShape(getShape(slm_get_lifecycle1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(slm_get_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(slm_get_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(slm_get_lifecycle_request, 'query'),
+    getLooseObjectFromProperty(slm_get_lifecycle1_request, 'body'),
+    getLooseObjectFromProperty(slm_get_lifecycle1_request, 'path'),
+    getLooseObjectFromProperty(slm_get_lifecycle1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(slm_get_lifecycle_response)),
@@ -20236,13 +19298,11 @@ Get global and policy-level statistics about actions taken by snapshot lifecycle
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(slm_get_stats_request).body),
-      ...getShape(getShape(slm_get_stats_request).path),
-      ...getShape(getShape(slm_get_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(slm_get_stats_request, 'body'),
+    getLooseObjectFromProperty(slm_get_stats_request, 'path'),
+    getLooseObjectFromProperty(slm_get_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(slm_get_stats_response)),
@@ -20264,13 +19324,11 @@ const SLM_GET_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(slm_get_status_request).body),
-      ...getShape(getShape(slm_get_status_request).path),
-      ...getShape(getShape(slm_get_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(slm_get_status_request, 'body'),
+    getLooseObjectFromProperty(slm_get_status_request, 'path'),
+    getLooseObjectFromProperty(slm_get_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(slm_get_status_response)),
@@ -20295,13 +19353,11 @@ Only the latest version of a policy is stored.`,
     urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(slm_put_lifecycle_request).body),
-      ...getShape(getShape(slm_put_lifecycle_request).path),
-      ...getShape(getShape(slm_put_lifecycle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(slm_put_lifecycle_request, 'body'),
+    getLooseObjectFromProperty(slm_put_lifecycle_request, 'path'),
+    getLooseObjectFromProperty(slm_put_lifecycle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(slm_put_lifecycle_response)),
@@ -20324,13 +19380,11 @@ Manually starting SLM is necessary only if it has been stopped using the stop SL
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(slm_start_request).body),
-      ...getShape(getShape(slm_start_request).path),
-      ...getShape(getShape(slm_start_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(slm_start_request, 'body'),
+    getLooseObjectFromProperty(slm_start_request, 'path'),
+    getLooseObjectFromProperty(slm_start_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(slm_start_response)),
@@ -20358,13 +19412,11 @@ Use the get snapshot lifecycle management status API to see if SLM is running.`,
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(slm_stop_request).body),
-      ...getShape(getShape(slm_stop_request).path),
-      ...getShape(getShape(slm_stop_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(slm_stop_request, 'body'),
+    getLooseObjectFromProperty(slm_stop_request, 'path'),
+    getLooseObjectFromProperty(slm_stop_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(slm_stop_response)),
@@ -20387,13 +19439,11 @@ Trigger the review of the contents of a snapshot repository and delete any stale
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_cleanup_repository_request).body),
-      ...getShape(getShape(snapshot_cleanup_repository_request).path),
-      ...getShape(getShape(snapshot_cleanup_repository_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_cleanup_repository_request, 'body'),
+    getLooseObjectFromProperty(snapshot_cleanup_repository_request, 'path'),
+    getLooseObjectFromProperty(snapshot_cleanup_repository_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_cleanup_repository_response)),
@@ -20416,13 +19466,11 @@ Clone part of all of a snapshot into another snapshot in the same repository.`,
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_clone_request).body),
-      ...getShape(getShape(snapshot_clone_request).path),
-      ...getShape(getShape(snapshot_clone_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_clone_request, 'body'),
+    getLooseObjectFromProperty(snapshot_clone_request, 'path'),
+    getLooseObjectFromProperty(snapshot_clone_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_clone_response)),
@@ -20462,16 +19510,14 @@ Take a snapshot of a cluster or of data streams and indices.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_create_request).body),
-      ...getShape(getShape(snapshot_create_request).path),
-      ...getShape(getShape(snapshot_create_request).query),
-      ...getShape(getShape(snapshot_create1_request).body),
-      ...getShape(getShape(snapshot_create1_request).path),
-      ...getShape(getShape(snapshot_create1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_create_request, 'body'),
+    getLooseObjectFromProperty(snapshot_create_request, 'path'),
+    getLooseObjectFromProperty(snapshot_create_request, 'query'),
+    getLooseObjectFromProperty(snapshot_create1_request, 'body'),
+    getLooseObjectFromProperty(snapshot_create1_request, 'path'),
+    getLooseObjectFromProperty(snapshot_create1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_create_response)),
@@ -20500,16 +19546,14 @@ If both parameters are specified, only the query parameter is used.`,
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_create_repository_request).body),
-      ...getShape(getShape(snapshot_create_repository_request).path),
-      ...getShape(getShape(snapshot_create_repository_request).query),
-      ...getShape(getShape(snapshot_create_repository1_request).body),
-      ...getShape(getShape(snapshot_create_repository1_request).path),
-      ...getShape(getShape(snapshot_create_repository1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_create_repository_request, 'body'),
+    getLooseObjectFromProperty(snapshot_create_repository_request, 'path'),
+    getLooseObjectFromProperty(snapshot_create_repository_request, 'query'),
+    getLooseObjectFromProperty(snapshot_create_repository1_request, 'body'),
+    getLooseObjectFromProperty(snapshot_create_repository1_request, 'path'),
+    getLooseObjectFromProperty(snapshot_create_repository1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_create_repository_response)),
@@ -20549,13 +19593,11 @@ const SNAPSHOT_DELETE_CONTRACT: InternalConnectorContract = {
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_delete_request).body),
-      ...getShape(getShape(snapshot_delete_request).path),
-      ...getShape(getShape(snapshot_delete_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_delete_request, 'body'),
+    getLooseObjectFromProperty(snapshot_delete_request, 'path'),
+    getLooseObjectFromProperty(snapshot_delete_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_delete_response)),
@@ -20579,13 +19621,11 @@ The snapshots themselves are left untouched and in place.`,
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_delete_repository_request).body),
-      ...getShape(getShape(snapshot_delete_repository_request).path),
-      ...getShape(getShape(snapshot_delete_repository_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_delete_repository_request, 'body'),
+    getLooseObjectFromProperty(snapshot_delete_repository_request, 'path'),
+    getLooseObjectFromProperty(snapshot_delete_repository_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_delete_repository_response)),
@@ -20628,13 +19668,11 @@ Snapshots concurrently created may be seen during an iteration.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_get_request).body),
-      ...getShape(getShape(snapshot_get_request).path),
-      ...getShape(getShape(snapshot_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_get_request, 'body'),
+    getLooseObjectFromProperty(snapshot_get_request, 'path'),
+    getLooseObjectFromProperty(snapshot_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_get_response)),
@@ -20656,16 +19694,14 @@ const SNAPSHOT_GET_REPOSITORY_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_get_repository_request).body),
-      ...getShape(getShape(snapshot_get_repository_request).path),
-      ...getShape(getShape(snapshot_get_repository_request).query),
-      ...getShape(getShape(snapshot_get_repository1_request).body),
-      ...getShape(getShape(snapshot_get_repository1_request).path),
-      ...getShape(getShape(snapshot_get_repository1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_get_repository_request, 'body'),
+    getLooseObjectFromProperty(snapshot_get_repository_request, 'path'),
+    getLooseObjectFromProperty(snapshot_get_repository_request, 'query'),
+    getLooseObjectFromProperty(snapshot_get_repository1_request, 'body'),
+    getLooseObjectFromProperty(snapshot_get_repository1_request, 'path'),
+    getLooseObjectFromProperty(snapshot_get_repository1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_get_repository_response)),
@@ -20804,13 +19840,11 @@ Some operations also verify the behavior on small blobs with sizes other than 8 
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_repository_analyze_request).body),
-      ...getShape(getShape(snapshot_repository_analyze_request).path),
-      ...getShape(getShape(snapshot_repository_analyze_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_repository_analyze_request, 'body'),
+    getLooseObjectFromProperty(snapshot_repository_analyze_request, 'path'),
+    getLooseObjectFromProperty(snapshot_repository_analyze_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_repository_analyze_response)),
@@ -20876,13 +19910,11 @@ The response body format is therefore not considered stable and may be different
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_repository_verify_integrity_request).body),
-      ...getShape(getShape(snapshot_repository_verify_integrity_request).path),
-      ...getShape(getShape(snapshot_repository_verify_integrity_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'body'),
+    getLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'path'),
+    getLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_repository_verify_integrity_response)),
@@ -20921,13 +19953,11 @@ If your snapshot contains data from App Search or Workplace Search, you must res
     urlParams: ['master_timeout', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_restore_request).body),
-      ...getShape(getShape(snapshot_restore_request).path),
-      ...getShape(getShape(snapshot_restore_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_restore_request, 'body'),
+    getLooseObjectFromProperty(snapshot_restore_request, 'path'),
+    getLooseObjectFromProperty(snapshot_restore_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_restore_response)),
@@ -20974,19 +20004,17 @@ These requests can also tax machine resources and, when using cloud storage, inc
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_status_request).body),
-      ...getShape(getShape(snapshot_status_request).path),
-      ...getShape(getShape(snapshot_status_request).query),
-      ...getShape(getShape(snapshot_status1_request).body),
-      ...getShape(getShape(snapshot_status1_request).path),
-      ...getShape(getShape(snapshot_status1_request).query),
-      ...getShape(getShape(snapshot_status2_request).body),
-      ...getShape(getShape(snapshot_status2_request).path),
-      ...getShape(getShape(snapshot_status2_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_status_request, 'body'),
+    getLooseObjectFromProperty(snapshot_status_request, 'path'),
+    getLooseObjectFromProperty(snapshot_status_request, 'query'),
+    getLooseObjectFromProperty(snapshot_status1_request, 'body'),
+    getLooseObjectFromProperty(snapshot_status1_request, 'path'),
+    getLooseObjectFromProperty(snapshot_status1_request, 'query'),
+    getLooseObjectFromProperty(snapshot_status2_request, 'body'),
+    getLooseObjectFromProperty(snapshot_status2_request, 'path'),
+    getLooseObjectFromProperty(snapshot_status2_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_status_response)),
@@ -21011,13 +20039,11 @@ Check for common misconfigurations in a snapshot repository.`,
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(snapshot_verify_repository_request).body),
-      ...getShape(getShape(snapshot_verify_repository_request).path),
-      ...getShape(getShape(snapshot_verify_repository_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(snapshot_verify_repository_request, 'body'),
+    getLooseObjectFromProperty(snapshot_verify_repository_request, 'path'),
+    getLooseObjectFromProperty(snapshot_verify_repository_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(snapshot_verify_repository_response)),
@@ -21039,13 +20065,11 @@ const SQL_CLEAR_CURSOR_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(sql_clear_cursor_request).body),
-      ...getShape(getShape(sql_clear_cursor_request).path),
-      ...getShape(getShape(sql_clear_cursor_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(sql_clear_cursor_request, 'body'),
+    getLooseObjectFromProperty(sql_clear_cursor_request, 'path'),
+    getLooseObjectFromProperty(sql_clear_cursor_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(sql_clear_cursor_response)),
@@ -21074,13 +20098,11 @@ If the Elasticsearch security features are enabled, only the following users can
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(sql_delete_async_request).body),
-      ...getShape(getShape(sql_delete_async_request).path),
-      ...getShape(getShape(sql_delete_async_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(sql_delete_async_request, 'body'),
+    getLooseObjectFromProperty(sql_delete_async_request, 'path'),
+    getLooseObjectFromProperty(sql_delete_async_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(sql_delete_async_response)),
@@ -21105,13 +20127,11 @@ If the Elasticsearch security features are enabled, only the user who first subm
     urlParams: ['delimiter', 'format', 'keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(sql_get_async_request).body),
-      ...getShape(getShape(sql_get_async_request).path),
-      ...getShape(getShape(sql_get_async_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(sql_get_async_request, 'body'),
+    getLooseObjectFromProperty(sql_get_async_request, 'path'),
+    getLooseObjectFromProperty(sql_get_async_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(sql_get_async_response)),
@@ -21134,13 +20154,11 @@ Get the current status of an async SQL search or a stored synchronous SQL search
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(sql_get_async_status_request).body),
-      ...getShape(getShape(sql_get_async_status_request).path),
-      ...getShape(getShape(sql_get_async_status_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(sql_get_async_status_request, 'body'),
+    getLooseObjectFromProperty(sql_get_async_status_request, 'path'),
+    getLooseObjectFromProperty(sql_get_async_status_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(sql_get_async_status_response)),
@@ -21162,16 +20180,14 @@ Run an SQL request.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(sql_query_request).body),
-      ...getShape(getShape(sql_query_request).path),
-      ...getShape(getShape(sql_query_request).query),
-      ...getShape(getShape(sql_query1_request).body),
-      ...getShape(getShape(sql_query1_request).path),
-      ...getShape(getShape(sql_query1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(sql_query_request, 'body'),
+    getLooseObjectFromProperty(sql_query_request, 'path'),
+    getLooseObjectFromProperty(sql_query_request, 'query'),
+    getLooseObjectFromProperty(sql_query1_request, 'body'),
+    getLooseObjectFromProperty(sql_query1_request, 'path'),
+    getLooseObjectFromProperty(sql_query1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(sql_query_response)),
@@ -21196,16 +20212,14 @@ It accepts the same request body parameters as the SQL search API, excluding \`c
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(sql_translate_request).body),
-      ...getShape(getShape(sql_translate_request).path),
-      ...getShape(getShape(sql_translate_request).query),
-      ...getShape(getShape(sql_translate1_request).body),
-      ...getShape(getShape(sql_translate1_request).path),
-      ...getShape(getShape(sql_translate1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(sql_translate_request, 'body'),
+    getLooseObjectFromProperty(sql_translate_request, 'path'),
+    getLooseObjectFromProperty(sql_translate_request, 'query'),
+    getLooseObjectFromProperty(sql_translate1_request, 'body'),
+    getLooseObjectFromProperty(sql_translate1_request, 'path'),
+    getLooseObjectFromProperty(sql_translate1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(sql_translate_response)),
@@ -21244,13 +20258,11 @@ If Elasticsearch is configured to use a keystore or truststore, the API output i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(ssl_certificates_request).body),
-      ...getShape(getShape(ssl_certificates_request).path),
-      ...getShape(getShape(ssl_certificates_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(ssl_certificates_request, 'body'),
+    getLooseObjectFromProperty(ssl_certificates_request, 'path'),
+    getLooseObjectFromProperty(ssl_certificates_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(ssl_certificates_response)),
@@ -21356,13 +20368,11 @@ When the synonyms set is not used in analyzers, you will be able to delete it.`,
     urlParams: ['from', 'size', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(synonyms_delete_synonym_request).body),
-      ...getShape(getShape(synonyms_delete_synonym_request).path),
-      ...getShape(getShape(synonyms_delete_synonym_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(synonyms_delete_synonym_request, 'body'),
+    getLooseObjectFromProperty(synonyms_delete_synonym_request, 'path'),
+    getLooseObjectFromProperty(synonyms_delete_synonym_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(synonyms_delete_synonym_response)),
@@ -21385,13 +20395,11 @@ Delete a synonym rule from a synonym set.`,
     urlParams: ['refresh', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(synonyms_delete_synonym_rule_request).body),
-      ...getShape(getShape(synonyms_delete_synonym_rule_request).path),
-      ...getShape(getShape(synonyms_delete_synonym_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'body'),
+    getLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'path'),
+    getLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(synonyms_delete_synonym_rule_response)),
@@ -21413,13 +20421,11 @@ const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
     urlParams: ['from', 'size', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(synonyms_get_synonym_request).body),
-      ...getShape(getShape(synonyms_get_synonym_request).path),
-      ...getShape(getShape(synonyms_get_synonym_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(synonyms_get_synonym_request, 'body'),
+    getLooseObjectFromProperty(synonyms_get_synonym_request, 'path'),
+    getLooseObjectFromProperty(synonyms_get_synonym_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(synonyms_get_synonym_response)),
@@ -21442,13 +20448,11 @@ Get a synonym rule from a synonym set.`,
     urlParams: ['refresh', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(synonyms_get_synonym_rule_request).body),
-      ...getShape(getShape(synonyms_get_synonym_rule_request).path),
-      ...getShape(getShape(synonyms_get_synonym_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'body'),
+    getLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'path'),
+    getLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(synonyms_get_synonym_rule_response)),
@@ -21471,13 +20475,11 @@ Get a summary of all defined synonym sets.`,
     urlParams: ['from', 'size'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(synonyms_get_synonyms_sets_request).body),
-      ...getShape(getShape(synonyms_get_synonyms_sets_request).path),
-      ...getShape(getShape(synonyms_get_synonyms_sets_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'body'),
+    getLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'path'),
+    getLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(synonyms_get_synonyms_sets_response)),
@@ -21506,13 +20508,11 @@ For practical examples of how to create or update a synonyms set, refer to the E
     urlParams: ['from', 'size', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(synonyms_put_synonym_request).body),
-      ...getShape(getShape(synonyms_put_synonym_request).path),
-      ...getShape(getShape(synonyms_put_synonym_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(synonyms_put_synonym_request, 'body'),
+    getLooseObjectFromProperty(synonyms_put_synonym_request, 'path'),
+    getLooseObjectFromProperty(synonyms_put_synonym_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(synonyms_put_synonym_response)),
@@ -21539,13 +20539,11 @@ When you update a synonym rule, all analyzers using the synonyms set will be rel
     urlParams: ['refresh', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(synonyms_put_synonym_rule_request).body),
-      ...getShape(getShape(synonyms_put_synonym_rule_request).path),
-      ...getShape(getShape(synonyms_put_synonym_rule_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'body'),
+    getLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'path'),
+    getLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(synonyms_put_synonym_rule_response)),
@@ -21577,16 +20575,14 @@ You can also use the node hot threads API to obtain detailed information about t
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(tasks_cancel_request).body),
-      ...getShape(getShape(tasks_cancel_request).path),
-      ...getShape(getShape(tasks_cancel_request).query),
-      ...getShape(getShape(tasks_cancel1_request).body),
-      ...getShape(getShape(tasks_cancel1_request).path),
-      ...getShape(getShape(tasks_cancel1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(tasks_cancel_request, 'body'),
+    getLooseObjectFromProperty(tasks_cancel_request, 'path'),
+    getLooseObjectFromProperty(tasks_cancel_request, 'query'),
+    getLooseObjectFromProperty(tasks_cancel1_request, 'body'),
+    getLooseObjectFromProperty(tasks_cancel1_request, 'path'),
+    getLooseObjectFromProperty(tasks_cancel1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(tasks_cancel_response)),
@@ -21614,13 +20610,11 @@ If the task identifier is not found, a 404 response code indicates that there ar
     urlParams: ['timeout', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(tasks_get_request).body),
-      ...getShape(getShape(tasks_get_request).path),
-      ...getShape(getShape(tasks_get_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(tasks_get_request, 'body'),
+    getLooseObjectFromProperty(tasks_get_request, 'path'),
+    getLooseObjectFromProperty(tasks_get_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(tasks_get_response)),
@@ -21707,13 +20701,11 @@ The \`X-Opaque-Id\` in the children \`headers\` is the child task of the task th
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(tasks_list_request).body),
-      ...getShape(getShape(tasks_list_request).path),
-      ...getShape(getShape(tasks_list_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(tasks_list_request, 'body'),
+    getLooseObjectFromProperty(tasks_list_request, 'path'),
+    getLooseObjectFromProperty(tasks_list_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(tasks_list_response)),
@@ -21740,16 +20732,14 @@ This API is designed for low-latency look-ups used in auto-complete scenarios.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(terms_enum_request).body),
-      ...getShape(getShape(terms_enum_request).path),
-      ...getShape(getShape(terms_enum_request).query),
-      ...getShape(getShape(terms_enum1_request).body),
-      ...getShape(getShape(terms_enum1_request).path),
-      ...getShape(getShape(terms_enum1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(terms_enum_request, 'body'),
+    getLooseObjectFromProperty(terms_enum_request, 'path'),
+    getLooseObjectFromProperty(terms_enum_request, 'query'),
+    getLooseObjectFromProperty(terms_enum1_request, 'body'),
+    getLooseObjectFromProperty(terms_enum1_request, 'path'),
+    getLooseObjectFromProperty(terms_enum1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(terms_enum_response)),
@@ -21813,22 +20803,20 @@ Refer to the linked documentation for detailed examples of how to use this API.`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(termvectors_request).body),
-      ...getShape(getShape(termvectors_request).path),
-      ...getShape(getShape(termvectors_request).query),
-      ...getShape(getShape(termvectors1_request).body),
-      ...getShape(getShape(termvectors1_request).path),
-      ...getShape(getShape(termvectors1_request).query),
-      ...getShape(getShape(termvectors2_request).body),
-      ...getShape(getShape(termvectors2_request).path),
-      ...getShape(getShape(termvectors2_request).query),
-      ...getShape(getShape(termvectors3_request).body),
-      ...getShape(getShape(termvectors3_request).path),
-      ...getShape(getShape(termvectors3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(termvectors_request, 'body'),
+    getLooseObjectFromProperty(termvectors_request, 'path'),
+    getLooseObjectFromProperty(termvectors_request, 'query'),
+    getLooseObjectFromProperty(termvectors1_request, 'body'),
+    getLooseObjectFromProperty(termvectors1_request, 'path'),
+    getLooseObjectFromProperty(termvectors1_request, 'query'),
+    getLooseObjectFromProperty(termvectors2_request, 'body'),
+    getLooseObjectFromProperty(termvectors2_request, 'path'),
+    getLooseObjectFromProperty(termvectors2_request, 'query'),
+    getLooseObjectFromProperty(termvectors3_request, 'body'),
+    getLooseObjectFromProperty(termvectors3_request, 'path'),
+    getLooseObjectFromProperty(termvectors3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(termvectors_response)),
@@ -21884,13 +20872,11 @@ It helps determine why the returned structure was chosen.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(text_structure_find_field_structure_request).body),
-      ...getShape(getShape(text_structure_find_field_structure_request).path),
-      ...getShape(getShape(text_structure_find_field_structure_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(text_structure_find_field_structure_request, 'body'),
+    getLooseObjectFromProperty(text_structure_find_field_structure_request, 'path'),
+    getLooseObjectFromProperty(text_structure_find_field_structure_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(text_structure_find_field_structure_response)),
@@ -21930,16 +20916,14 @@ It helps determine why the returned structure was chosen.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(text_structure_find_message_structure_request).body),
-      ...getShape(getShape(text_structure_find_message_structure_request).path),
-      ...getShape(getShape(text_structure_find_message_structure_request).query),
-      ...getShape(getShape(text_structure_find_message_structure1_request).body),
-      ...getShape(getShape(text_structure_find_message_structure1_request).path),
-      ...getShape(getShape(text_structure_find_message_structure1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(text_structure_find_message_structure_request, 'body'),
+    getLooseObjectFromProperty(text_structure_find_message_structure_request, 'path'),
+    getLooseObjectFromProperty(text_structure_find_message_structure_request, 'query'),
+    getLooseObjectFromProperty(text_structure_find_message_structure1_request, 'body'),
+    getLooseObjectFromProperty(text_structure_find_message_structure1_request, 'path'),
+    getLooseObjectFromProperty(text_structure_find_message_structure1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(text_structure_find_message_structure_response)),
@@ -21994,13 +20978,11 @@ However, you can optionally override some of the decisions about the text struct
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(text_structure_find_structure_request).body),
-      ...getShape(getShape(text_structure_find_structure_request).path),
-      ...getShape(getShape(text_structure_find_structure_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(text_structure_find_structure_request, 'body'),
+    getLooseObjectFromProperty(text_structure_find_structure_request, 'path'),
+    getLooseObjectFromProperty(text_structure_find_structure_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(text_structure_find_structure_response)),
@@ -22024,16 +21006,14 @@ The API indicates whether the lines match the pattern together with the offsets 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(text_structure_test_grok_pattern_request).body),
-      ...getShape(getShape(text_structure_test_grok_pattern_request).path),
-      ...getShape(getShape(text_structure_test_grok_pattern_request).query),
-      ...getShape(getShape(text_structure_test_grok_pattern1_request).body),
-      ...getShape(getShape(text_structure_test_grok_pattern1_request).path),
-      ...getShape(getShape(text_structure_test_grok_pattern1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'body'),
+    getLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'path'),
+    getLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'query'),
+    getLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'body'),
+    getLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'path'),
+    getLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(text_structure_test_grok_pattern_response)),
@@ -22056,13 +21036,11 @@ const TRANSFORM_DELETE_TRANSFORM_CONTRACT: InternalConnectorContract = {
     urlParams: ['defer_validation', 'timeout', 'force', 'delete_dest_index', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_delete_transform_request).body),
-      ...getShape(getShape(transform_delete_transform_request).path),
-      ...getShape(getShape(transform_delete_transform_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_delete_transform_request, 'body'),
+    getLooseObjectFromProperty(transform_delete_transform_request, 'path'),
+    getLooseObjectFromProperty(transform_delete_transform_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_delete_transform_response)),
@@ -22105,16 +21083,14 @@ Get configuration information for transforms.`,
     urlParams: ['defer_validation', 'timeout', 'force', 'delete_dest_index', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_get_transform_request).body),
-      ...getShape(getShape(transform_get_transform_request).path),
-      ...getShape(getShape(transform_get_transform_request).query),
-      ...getShape(getShape(transform_get_transform1_request).body),
-      ...getShape(getShape(transform_get_transform1_request).path),
-      ...getShape(getShape(transform_get_transform1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_get_transform_request, 'body'),
+    getLooseObjectFromProperty(transform_get_transform_request, 'path'),
+    getLooseObjectFromProperty(transform_get_transform_request, 'query'),
+    getLooseObjectFromProperty(transform_get_transform1_request, 'body'),
+    getLooseObjectFromProperty(transform_get_transform1_request, 'path'),
+    getLooseObjectFromProperty(transform_get_transform1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_get_transform_response)),
@@ -22139,13 +21115,11 @@ Get usage information for transforms.`,
     urlParams: ['allow_no_match', 'from', 'size', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_get_transform_stats_request).body),
-      ...getShape(getShape(transform_get_transform_stats_request).path),
-      ...getShape(getShape(transform_get_transform_stats_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_get_transform_stats_request, 'body'),
+    getLooseObjectFromProperty(transform_get_transform_stats_request, 'path'),
+    getLooseObjectFromProperty(transform_get_transform_stats_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_get_transform_stats_response)),
@@ -22172,22 +21146,20 @@ types of the source index and the transform aggregations.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_preview_transform_request).body),
-      ...getShape(getShape(transform_preview_transform_request).path),
-      ...getShape(getShape(transform_preview_transform_request).query),
-      ...getShape(getShape(transform_preview_transform1_request).body),
-      ...getShape(getShape(transform_preview_transform1_request).path),
-      ...getShape(getShape(transform_preview_transform1_request).query),
-      ...getShape(getShape(transform_preview_transform2_request).body),
-      ...getShape(getShape(transform_preview_transform2_request).path),
-      ...getShape(getShape(transform_preview_transform2_request).query),
-      ...getShape(getShape(transform_preview_transform3_request).body),
-      ...getShape(getShape(transform_preview_transform3_request).path),
-      ...getShape(getShape(transform_preview_transform3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_preview_transform_request, 'body'),
+    getLooseObjectFromProperty(transform_preview_transform_request, 'path'),
+    getLooseObjectFromProperty(transform_preview_transform_request, 'query'),
+    getLooseObjectFromProperty(transform_preview_transform1_request, 'body'),
+    getLooseObjectFromProperty(transform_preview_transform1_request, 'path'),
+    getLooseObjectFromProperty(transform_preview_transform1_request, 'query'),
+    getLooseObjectFromProperty(transform_preview_transform2_request, 'body'),
+    getLooseObjectFromProperty(transform_preview_transform2_request, 'path'),
+    getLooseObjectFromProperty(transform_preview_transform2_request, 'query'),
+    getLooseObjectFromProperty(transform_preview_transform3_request, 'body'),
+    getLooseObjectFromProperty(transform_preview_transform3_request, 'path'),
+    getLooseObjectFromProperty(transform_preview_transform3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_preview_transform_response)),
@@ -22233,13 +21205,11 @@ give users any privileges on \`.data-frame-internal*\` indices.`,
     urlParams: ['defer_validation', 'timeout', 'force', 'delete_dest_index', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_put_transform_request).body),
-      ...getShape(getShape(transform_put_transform_request).path),
-      ...getShape(getShape(transform_put_transform_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_put_transform_request, 'body'),
+    getLooseObjectFromProperty(transform_put_transform_request, 'path'),
+    getLooseObjectFromProperty(transform_put_transform_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_put_transform_response)),
@@ -22264,13 +21234,11 @@ If the destination index was created by the transform, it is deleted.`,
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_reset_transform_request).body),
-      ...getShape(getShape(transform_reset_transform_request).path),
-      ...getShape(getShape(transform_reset_transform_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_reset_transform_request, 'body'),
+    getLooseObjectFromProperty(transform_reset_transform_request, 'path'),
+    getLooseObjectFromProperty(transform_reset_transform_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_reset_transform_response)),
@@ -22298,13 +21266,11 @@ is called again in the meantime.`,
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_schedule_now_transform_request).body),
-      ...getShape(getShape(transform_schedule_now_transform_request).path),
-      ...getShape(getShape(transform_schedule_now_transform_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_schedule_now_transform_request, 'body'),
+    getLooseObjectFromProperty(transform_schedule_now_transform_request, 'path'),
+    getLooseObjectFromProperty(transform_schedule_now_transform_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_schedule_now_transform_response)),
@@ -22338,13 +21304,11 @@ transform info API.`,
     urlParams: ['enabled', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_set_upgrade_mode_request).body),
-      ...getShape(getShape(transform_set_upgrade_mode_request).path),
-      ...getShape(getShape(transform_set_upgrade_mode_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_set_upgrade_mode_request, 'body'),
+    getLooseObjectFromProperty(transform_set_upgrade_mode_request, 'path'),
+    getLooseObjectFromProperty(transform_set_upgrade_mode_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_set_upgrade_mode_response)),
@@ -22381,13 +21345,11 @@ destination indices, the transform fails when it attempts unauthorized operation
     urlParams: ['timeout', 'from'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_start_transform_request).body),
-      ...getShape(getShape(transform_start_transform_request).path),
-      ...getShape(getShape(transform_start_transform_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_start_transform_request, 'body'),
+    getLooseObjectFromProperty(transform_start_transform_request, 'path'),
+    getLooseObjectFromProperty(transform_start_transform_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_start_transform_response)),
@@ -22410,13 +21372,11 @@ Stops one or more transforms.`,
     urlParams: ['allow_no_match', 'force', 'timeout', 'wait_for_checkpoint', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_stop_transform_request).body),
-      ...getShape(getShape(transform_stop_transform_request).path),
-      ...getShape(getShape(transform_stop_transform_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_stop_transform_request, 'body'),
+    getLooseObjectFromProperty(transform_stop_transform_request, 'path'),
+    getLooseObjectFromProperty(transform_stop_transform_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_stop_transform_response)),
@@ -22445,13 +21405,11 @@ time of update and runs with those privileges.`,
     urlParams: ['defer_validation', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_update_transform_request).body),
-      ...getShape(getShape(transform_update_transform_request).path),
-      ...getShape(getShape(transform_update_transform_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_update_transform_request, 'body'),
+    getLooseObjectFromProperty(transform_update_transform_request, 'path'),
+    getLooseObjectFromProperty(transform_update_transform_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_update_transform_response)),
@@ -22487,13 +21445,11 @@ You may want to perform a recent cluster backup prior to the upgrade.`,
     urlParams: ['dry_run', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(transform_upgrade_transforms_request).body),
-      ...getShape(getShape(transform_upgrade_transforms_request).path),
-      ...getShape(getShape(transform_upgrade_transforms_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(transform_upgrade_transforms_request, 'body'),
+    getLooseObjectFromProperty(transform_upgrade_transforms_request, 'path'),
+    getLooseObjectFromProperty(transform_upgrade_transforms_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(transform_upgrade_transforms_response)),
@@ -22547,13 +21503,11 @@ For usage examples such as partial updates, upserts, and scripted updates, see t
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_request).body),
-      ...getShape(getShape(update_request).path),
-      ...getShape(getShape(update_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_request, 'body'),
+    getLooseObjectFromProperty(update_request, 'path'),
+    getLooseObjectFromProperty(update_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_response)),
@@ -22699,13 +21653,11 @@ Refer to the linked documentation for examples of how to update documents using 
     ],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_by_query_request).body),
-      ...getShape(getShape(update_by_query_request).path),
-      ...getShape(getShape(update_by_query_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_by_query_request, 'body'),
+    getLooseObjectFromProperty(update_by_query_request, 'path'),
+    getLooseObjectFromProperty(update_by_query_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_by_query_response)),
@@ -22730,13 +21682,11 @@ Rethrottling that speeds up the query takes effect immediately but rethrotting t
     urlParams: ['requests_per_second'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(update_by_query_rethrottle_request).body),
-      ...getShape(getShape(update_by_query_rethrottle_request).path),
-      ...getShape(getShape(update_by_query_rethrottle_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(update_by_query_rethrottle_request, 'body'),
+    getLooseObjectFromProperty(update_by_query_rethrottle_request, 'path'),
+    getLooseObjectFromProperty(update_by_query_rethrottle_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(update_by_query_rethrottle_response)),
@@ -22768,22 +21718,20 @@ To demonstrate how throttling works in practice and how it can be configured for
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_ack_watch_request).body),
-      ...getShape(getShape(watcher_ack_watch_request).path),
-      ...getShape(getShape(watcher_ack_watch_request).query),
-      ...getShape(getShape(watcher_ack_watch1_request).body),
-      ...getShape(getShape(watcher_ack_watch1_request).path),
-      ...getShape(getShape(watcher_ack_watch1_request).query),
-      ...getShape(getShape(watcher_ack_watch2_request).body),
-      ...getShape(getShape(watcher_ack_watch2_request).path),
-      ...getShape(getShape(watcher_ack_watch2_request).query),
-      ...getShape(getShape(watcher_ack_watch3_request).body),
-      ...getShape(getShape(watcher_ack_watch3_request).path),
-      ...getShape(getShape(watcher_ack_watch3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_ack_watch_request, 'body'),
+    getLooseObjectFromProperty(watcher_ack_watch_request, 'path'),
+    getLooseObjectFromProperty(watcher_ack_watch_request, 'query'),
+    getLooseObjectFromProperty(watcher_ack_watch1_request, 'body'),
+    getLooseObjectFromProperty(watcher_ack_watch1_request, 'path'),
+    getLooseObjectFromProperty(watcher_ack_watch1_request, 'query'),
+    getLooseObjectFromProperty(watcher_ack_watch2_request, 'body'),
+    getLooseObjectFromProperty(watcher_ack_watch2_request, 'path'),
+    getLooseObjectFromProperty(watcher_ack_watch2_request, 'query'),
+    getLooseObjectFromProperty(watcher_ack_watch3_request, 'body'),
+    getLooseObjectFromProperty(watcher_ack_watch3_request, 'path'),
+    getLooseObjectFromProperty(watcher_ack_watch3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_ack_watch_response)),
@@ -22809,16 +21757,14 @@ A watch can be either active or inactive.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_activate_watch_request).body),
-      ...getShape(getShape(watcher_activate_watch_request).path),
-      ...getShape(getShape(watcher_activate_watch_request).query),
-      ...getShape(getShape(watcher_activate_watch1_request).body),
-      ...getShape(getShape(watcher_activate_watch1_request).path),
-      ...getShape(getShape(watcher_activate_watch1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_activate_watch_request, 'body'),
+    getLooseObjectFromProperty(watcher_activate_watch_request, 'path'),
+    getLooseObjectFromProperty(watcher_activate_watch_request, 'query'),
+    getLooseObjectFromProperty(watcher_activate_watch1_request, 'body'),
+    getLooseObjectFromProperty(watcher_activate_watch1_request, 'path'),
+    getLooseObjectFromProperty(watcher_activate_watch1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_activate_watch_response)),
@@ -22842,16 +21788,14 @@ A watch can be either active or inactive.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_deactivate_watch_request).body),
-      ...getShape(getShape(watcher_deactivate_watch_request).path),
-      ...getShape(getShape(watcher_deactivate_watch_request).query),
-      ...getShape(getShape(watcher_deactivate_watch1_request).body),
-      ...getShape(getShape(watcher_deactivate_watch1_request).path),
-      ...getShape(getShape(watcher_deactivate_watch1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_deactivate_watch_request, 'body'),
+    getLooseObjectFromProperty(watcher_deactivate_watch_request, 'path'),
+    getLooseObjectFromProperty(watcher_deactivate_watch_request, 'query'),
+    getLooseObjectFromProperty(watcher_deactivate_watch1_request, 'body'),
+    getLooseObjectFromProperty(watcher_deactivate_watch1_request, 'path'),
+    getLooseObjectFromProperty(watcher_deactivate_watch1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_deactivate_watch_response)),
@@ -22881,13 +21825,11 @@ When Elasticsearch security features are enabled, make sure no write privileges 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_delete_watch_request).body),
-      ...getShape(getShape(watcher_delete_watch_request).path),
-      ...getShape(getShape(watcher_delete_watch_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_delete_watch_request, 'body'),
+    getLooseObjectFromProperty(watcher_delete_watch_request, 'path'),
+    getLooseObjectFromProperty(watcher_delete_watch_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_delete_watch_response)),
@@ -22923,22 +21865,20 @@ Refer to the external documentation for examples of watch execution requests, in
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_execute_watch_request).body),
-      ...getShape(getShape(watcher_execute_watch_request).path),
-      ...getShape(getShape(watcher_execute_watch_request).query),
-      ...getShape(getShape(watcher_execute_watch1_request).body),
-      ...getShape(getShape(watcher_execute_watch1_request).path),
-      ...getShape(getShape(watcher_execute_watch1_request).query),
-      ...getShape(getShape(watcher_execute_watch2_request).body),
-      ...getShape(getShape(watcher_execute_watch2_request).path),
-      ...getShape(getShape(watcher_execute_watch2_request).query),
-      ...getShape(getShape(watcher_execute_watch3_request).body),
-      ...getShape(getShape(watcher_execute_watch3_request).path),
-      ...getShape(getShape(watcher_execute_watch3_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_execute_watch_request, 'body'),
+    getLooseObjectFromProperty(watcher_execute_watch_request, 'path'),
+    getLooseObjectFromProperty(watcher_execute_watch_request, 'query'),
+    getLooseObjectFromProperty(watcher_execute_watch1_request, 'body'),
+    getLooseObjectFromProperty(watcher_execute_watch1_request, 'path'),
+    getLooseObjectFromProperty(watcher_execute_watch1_request, 'query'),
+    getLooseObjectFromProperty(watcher_execute_watch2_request, 'body'),
+    getLooseObjectFromProperty(watcher_execute_watch2_request, 'path'),
+    getLooseObjectFromProperty(watcher_execute_watch2_request, 'query'),
+    getLooseObjectFromProperty(watcher_execute_watch3_request, 'body'),
+    getLooseObjectFromProperty(watcher_execute_watch3_request, 'path'),
+    getLooseObjectFromProperty(watcher_execute_watch3_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_execute_watch_response)),
@@ -22965,13 +21905,11 @@ Only a subset of settings are shown, for example \`index.auto_expand_replicas\` 
     urlParams: ['master_timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_get_settings_request).body),
-      ...getShape(getShape(watcher_get_settings_request).path),
-      ...getShape(getShape(watcher_get_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_get_settings_request, 'body'),
+    getLooseObjectFromProperty(watcher_get_settings_request, 'path'),
+    getLooseObjectFromProperty(watcher_get_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_get_settings_response)),
@@ -22993,13 +21931,11 @@ const WATCHER_GET_WATCH_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_get_watch_request).body),
-      ...getShape(getShape(watcher_get_watch_request).path),
-      ...getShape(getShape(watcher_get_watch_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_get_watch_request, 'body'),
+    getLooseObjectFromProperty(watcher_get_watch_request, 'path'),
+    getLooseObjectFromProperty(watcher_get_watch_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_get_watch_response)),
@@ -23032,16 +21968,14 @@ If the user is able to read index \`a\`, but not index \`b\`, the same will appl
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_put_watch_request).body),
-      ...getShape(getShape(watcher_put_watch_request).path),
-      ...getShape(getShape(watcher_put_watch_request).query),
-      ...getShape(getShape(watcher_put_watch1_request).body),
-      ...getShape(getShape(watcher_put_watch1_request).path),
-      ...getShape(getShape(watcher_put_watch1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_put_watch_request, 'body'),
+    getLooseObjectFromProperty(watcher_put_watch_request, 'path'),
+    getLooseObjectFromProperty(watcher_put_watch_request, 'query'),
+    getLooseObjectFromProperty(watcher_put_watch1_request, 'body'),
+    getLooseObjectFromProperty(watcher_put_watch1_request, 'path'),
+    getLooseObjectFromProperty(watcher_put_watch1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_put_watch_response)),
@@ -23067,16 +22001,14 @@ Note that only the \`_id\` and \`metadata.*\` fields are queryable or sortable.`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_query_watches_request).body),
-      ...getShape(getShape(watcher_query_watches_request).path),
-      ...getShape(getShape(watcher_query_watches_request).query),
-      ...getShape(getShape(watcher_query_watches1_request).body),
-      ...getShape(getShape(watcher_query_watches1_request).path),
-      ...getShape(getShape(watcher_query_watches1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_query_watches_request, 'body'),
+    getLooseObjectFromProperty(watcher_query_watches_request, 'path'),
+    getLooseObjectFromProperty(watcher_query_watches_request, 'query'),
+    getLooseObjectFromProperty(watcher_query_watches1_request, 'body'),
+    getLooseObjectFromProperty(watcher_query_watches1_request, 'path'),
+    getLooseObjectFromProperty(watcher_query_watches1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_query_watches_response)),
@@ -23100,13 +22032,11 @@ Start the Watcher service if it is not already running.`,
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_start_request).body),
-      ...getShape(getShape(watcher_start_request).path),
-      ...getShape(getShape(watcher_start_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_start_request, 'body'),
+    getLooseObjectFromProperty(watcher_start_request, 'path'),
+    getLooseObjectFromProperty(watcher_start_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_start_response)),
@@ -23130,16 +22060,14 @@ You retrieve more metrics by using the metric parameter.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_stats_request).body),
-      ...getShape(getShape(watcher_stats_request).path),
-      ...getShape(getShape(watcher_stats_request).query),
-      ...getShape(getShape(watcher_stats1_request).body),
-      ...getShape(getShape(watcher_stats1_request).path),
-      ...getShape(getShape(watcher_stats1_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_stats_request, 'body'),
+    getLooseObjectFromProperty(watcher_stats_request, 'path'),
+    getLooseObjectFromProperty(watcher_stats_request, 'query'),
+    getLooseObjectFromProperty(watcher_stats1_request, 'body'),
+    getLooseObjectFromProperty(watcher_stats1_request, 'path'),
+    getLooseObjectFromProperty(watcher_stats1_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_stats_response)),
@@ -23163,13 +22091,11 @@ Stop the Watcher service if it is running.`,
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_stop_request).body),
-      ...getShape(getShape(watcher_stop_request).path),
-      ...getShape(getShape(watcher_stop_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_stop_request, 'body'),
+    getLooseObjectFromProperty(watcher_stop_request, 'path'),
+    getLooseObjectFromProperty(watcher_stop_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_stop_response)),
@@ -23197,13 +22123,11 @@ Watcher shards must always be in the \`data_content\` tier.`,
     urlParams: ['master_timeout', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(watcher_update_settings_request).body),
-      ...getShape(getShape(watcher_update_settings_request).path),
-      ...getShape(getShape(watcher_update_settings_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(watcher_update_settings_request, 'body'),
+    getLooseObjectFromProperty(watcher_update_settings_request, 'path'),
+    getLooseObjectFromProperty(watcher_update_settings_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(watcher_update_settings_response)),
@@ -23229,13 +22153,11 @@ The information provided by the API includes:
     urlParams: ['categories', 'accept_enterprise', 'human'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(xpack_info_request).body),
-      ...getShape(getShape(xpack_info_request).path),
-      ...getShape(getShape(xpack_info_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(xpack_info_request, 'body'),
+    getLooseObjectFromProperty(xpack_info_request, 'path'),
+    getLooseObjectFromProperty(xpack_info_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(xpack_info_response)),
@@ -23258,13 +22180,11 @@ The API also provides some usage statistics.`,
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z
-    .looseObject({
-      ...getShape(getShape(xpack_usage_request).body),
-      ...getShape(getShape(xpack_usage_request).path),
-      ...getShape(getShape(xpack_usage_request).query),
-    })
-    .partial(),
+  paramsSchema: z.union([
+    getLooseObjectFromProperty(xpack_usage_request, 'body'),
+    getLooseObjectFromProperty(xpack_usage_request, 'path'),
+    getLooseObjectFromProperty(xpack_usage_request, 'query'),
+  ]),
   outputSchema: z.object({
     output: z.looseObject({
       ...getShape(getShape(xpack_usage_response)),
