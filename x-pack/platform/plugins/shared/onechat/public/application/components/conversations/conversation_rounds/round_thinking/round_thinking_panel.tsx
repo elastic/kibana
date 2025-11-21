@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiTitle,
   useEuiTheme,
+  useEuiShadow,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
@@ -57,7 +58,7 @@ export const RoundThinkingPanel = ({
     border-radius: ${euiTheme.border.radius.medium};
     border: 1px solid ${euiTheme.colors.borderStrongPrimary};
     padding: ${euiTheme.size.l};
-    box-shadow: ${euiTheme.shadows.l.down};
+    ${useEuiShadow('l')};
   `;
 
   const toggleFlyout = () => {
@@ -87,7 +88,7 @@ export const RoundThinkingPanel = ({
         </EuiFlexGroup>
 
         {/* Thinking Steps */}
-        <RoundSteps steps={steps} />
+        <RoundSteps steps={steps} isLoading={isLoading} />
 
         {!isLoading && (
           <EuiFlexItem grow={false}>

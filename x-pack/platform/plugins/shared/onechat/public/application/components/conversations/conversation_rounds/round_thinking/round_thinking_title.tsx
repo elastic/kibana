@@ -36,6 +36,9 @@ interface RoundThinkingTitleProps {
   onShow: () => void;
 }
 
+// We use a min-height to stop the title growing in height to match the height of the button when it's shown.
+const MIN_HEIGHT = '40px';
+
 export const RoundThinkingTitle = ({
   isLoading,
   isError,
@@ -60,6 +63,9 @@ export const RoundThinkingTitle = ({
       justifyContent="spaceBetween"
       responsive={false}
       alignItems="center"
+      css={css`
+        min-height: ${MIN_HEIGHT};
+      `}
     >
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
         <EuiFlexItem grow={false}>
