@@ -96,25 +96,6 @@ const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
   ],
 };
 
-const canWriteParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
-  groupType: 'independent',
-  privileges: [
-    {
-      id: 'can_write_params',
-      name: i18n.translate('xpack.synthetics.features.canWriteParams.label', {
-        defaultMessage: 'Write Global Parameters',
-      }),
-      includeIn: 'all',
-      savedObject: {
-        all: [syntheticsParamType],
-        read: [],
-      },
-      ui: ['canWriteParams'],
-      api: [], // Access is controlled via saved object permissions
-    },
-  ],
-};
-
 export const syntheticsFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,
