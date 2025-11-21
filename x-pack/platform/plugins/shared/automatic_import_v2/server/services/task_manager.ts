@@ -20,25 +20,10 @@ const TASK_TYPE = 'autoImport-task';
 export class TaskManagerService {
   private logger: Logger;
   private taskManager: TaskManagerStartContract | null = null;
-  private invokeDeepAgent?: (
-    integrationId: string,
-    dataStreamId: string,
-    fakeRequest?: KibanaRequest
-  ) => Promise<any>;
+  private taskWorkflow?: () => void | Promise<void>;
 
-  constructor(
-    logger: Logger,
-    taskManagerSetup: TaskManagerSetupContract,
-    options?: {
-      invokeDeepAgent?: (
-        integrationId: string,
-        dataStreamId: string,
-        fakeRequest?: KibanaRequest
-      ) => Promise<any>;
-    }
-  ) {
+  constructor(logger: Logger, taskManagerSetup: TaskManagerSetupContract) {
     this.logger = logger.get('taskManagerService');
-    this.invokeDeepAgent = options?.invokeDeepAgent;
 
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
@@ -49,8 +34,8 @@ export class TaskManagerService {
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
         cost: TaskCost.Normal,
         priority: TaskPriority.Normal,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => ({
-          run: async () => this.runTask(taskInstance, fakeRequest),
+        createTaskRunner: ({ taskInstance }) => ({
+          run: async () => this.runTask(taskInstance),
           cancel: async () => this.cancelTask(taskInstance),
         }),
       },
@@ -63,17 +48,13 @@ export class TaskManagerService {
   public initialize(
     taskManager: TaskManagerStartContract,
     options?: {
-      invokeDeepAgent?: (
-        integrationId: string,
-        dataStreamId: string,
-        fakeRequest?: KibanaRequest
-      ) => Promise<any>;
+      taskWorkflow?: () => void | Promise<void>;
     }
   ): void {
     this.taskManager = taskManager;
 
-    if (options?.invokeDeepAgent) {
-      this.invokeDeepAgent = options.invokeDeepAgent;
+    if (options?.taskWorkflow) {
+      this.taskWorkflow = options.taskWorkflow;
     }
 
     this.logger.debug('TaskManagerService initialized');
@@ -135,18 +116,17 @@ export class TaskManagerService {
     }
   }
 
-  private async runTask(taskInstance: ConcreteTaskInstance, fakeRequest?: KibanaRequest) {
+  private async runTask(taskInstance: ConcreteTaskInstance) {
     const { id: taskId, params } = taskInstance;
 
     this.logger.info(`Running task ${taskId}`, params);
 
     try {
-      if (this.invokeDeepAgent) {
-        // Pass fakeRequest to enable user-scoped execution
-        await this.invokeDeepAgent(params.integrationId, params.dataStreamId, fakeRequest);
-        this.logger.debug(`Task ${taskId}: Deep agent invocation completed`);
+      if (this.taskWorkflow) {
+        await this.taskWorkflow();
+        this.logger.debug(`Task ${taskId}: Workflow executed`);
       } else {
-        this.logger.warn(`Task ${taskId}: No invokeDeepAgent function provided, using mock delay`);
+        this.logger.warn(`Task ${taskId}: No workflow provided, using mock delay`);
         await new Promise((resolve) => setTimeout(resolve, 5000));
       }
 

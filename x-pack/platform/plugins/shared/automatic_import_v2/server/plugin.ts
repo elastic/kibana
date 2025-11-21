@@ -11,9 +11,7 @@ import type {
   Plugin,
   Logger,
   ElasticsearchClient,
-  KibanaRequest,
 } from '@kbn/core/server';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
@@ -27,9 +25,6 @@ import type {
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportService } from './services';
 import { TaskManagerService } from './services/task_manager';
-import { AgentService } from './services/agents/agent_service';
-import { AutomaticImportSamplesIndexService } from './services/samples_index/index_service';
-import { TASK_STATUSES } from './services/saved_objects/constants';
 
 export class AutomaticImportV2Plugin
   implements
@@ -133,7 +128,9 @@ export class AutomaticImportV2Plugin
       });
 
     this.taskManagerService.initialize(plugins.taskManager, {
-      invokeDeepAgent: this.createTaskOrchestrationFunctionFactory(core, plugins),
+      taskWorkflow: () => {
+        this.logger.info('Workflow task running successfully');
+      },
     });
 
     this.logger.info('TaskManagerService initialized successfully');
@@ -143,186 +140,6 @@ export class AutomaticImportV2Plugin
       inference: plugins.inference,
       licensing: plugins.licensing,
       security: plugins.security,
-    };
-  }
-
-  /**
-   * Get the connector ID to use for AI workflows for use in the AgentService factory
-   * @param core - Core start contract
-   * @param fakeRequest - User-scoped request
-   * @param connectorId - Optional explicitly provided connector ID
-   * @returns The resolved connector ID
-   */
-  private async getConnectorId(
-    core: CoreStart,
-    fakeRequest: KibanaRequest,
-    connectorId?: string
-  ): Promise<string> {
-    if (connectorId) {
-      this.logger.debug(`Using connector ID: ${connectorId}`);
-      return connectorId;
-    }
-
-    // Else get user's default connector from settings
-    try {
-      const soClient = core.savedObjects.getScopedClient(fakeRequest);
-      const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-
-      const defaultConnectorSetting = await uiSettingsClient.get<string>(
-        GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR
-      );
-
-      if (defaultConnectorSetting && defaultConnectorSetting !== 'NO_DEFAULT_CONNECTOR') {
-        this.logger.debug(
-          `Using user's default connector from UI settings: ${defaultConnectorSetting}`
-        );
-        return defaultConnectorSetting;
-      }
-    } catch (error) {
-      this.logger.warn('Failed to get default connector from UI settings', error);
-    }
-
-    throw new Error('No AI connectors available for automatic import workflow');
-  }
-
-  private createTaskOrchestrationFunctionFactory(
-    core: CoreStart,
-    plugins: AutomaticImportV2PluginStartDependencies
-  ) {
-    return async (integrationId: string, dataStreamId: string, fakeRequest?: KibanaRequest) => {
-      if (!fakeRequest) {
-        throw new Error('User context required for AI workflow execution');
-      }
-
-      if (!this.automaticImportService) {
-        throw new Error('AutomaticImportService not initialized');
-      }
-
-      const userEsClient = core.elasticsearch.client.asScoped(fakeRequest);
-
-      let connectorId: string;
-      try {
-        const task = await plugins.taskManager.get(`ai-task-${integrationId}-${dataStreamId}`);
-        connectorId = await this.getConnectorId(core, fakeRequest, task.params.connectorId);
-      } catch (error) {
-        this.logger.warn(
-          `Failed to retrieve task for connector ID, resolving from settings: ${error}`
-        );
-        connectorId = await this.getConnectorId(core, fakeRequest);
-      }
-
-      const userModel = await plugins.inference.getChatModel({
-        connectorId,
-        request: fakeRequest,
-        chatModelOptions: {},
-      });
-
-      const samplesIndexService = new AutomaticImportSamplesIndexService(
-        this.logger,
-        Promise.resolve(userEsClient.asCurrentUser)
-      );
-
-      const agentService = new AgentService(
-        userEsClient.asCurrentUser,
-        samplesIndexService,
-        userModel
-      );
-
-      try {
-        this.logger.info(
-          `Starting AI workflow for integration ${integrationId}, data stream ${dataStreamId}`
-        );
-        const result = await agentService.invoke_deep_agent(integrationId, dataStreamId);
-
-        this.logger.info(`Updating data stream ${dataStreamId} with agent results`);
-        const dataStream = await this.automaticImportService!.getDataStream(dataStreamId);
-        const currentVersion = dataStream.attributes.metadata?.version || '0.0.0';
-
-        await this.automaticImportService.updateDataStream(
-          {
-            ...dataStream.attributes,
-            job_info: {
-              ...dataStream.attributes.job_info,
-              status: TASK_STATUSES.completed,
-            },
-            result: {
-              ingest_pipeline: JSON.stringify(result),
-              field_mapping: {},
-              connector: connectorId,
-            },
-          },
-          currentVersion
-        );
-
-        // Check if all data streams for this integration are complete
-        this.logger.debug(
-          `Checking completion status for all data streams in integration ${integrationId}`
-        );
-        const allDataStreams = await this.automaticImportService!.getAllDataStreams();
-        const integrationDataStreams = allDataStreams.saved_objects.filter(
-          (ds) => ds.attributes.integration_id === integrationId
-        );
-
-        const allComplete = integrationDataStreams.every(
-          (ds) => ds.attributes.job_info.status === TASK_STATUSES.completed
-        );
-
-        if (allComplete) {
-          this.logger.info(
-            `All data streams complete for integration ${integrationId}, updating integration status`
-          );
-          const integration = await this.automaticImportService!.getIntegration(integrationId);
-          await this.automaticImportService!.updateIntegration(
-            {
-              ...integration.attributes,
-              status: TASK_STATUSES.completed,
-            },
-            integration.attributes.metadata?.version || '1.0.0'
-          );
-        } else {
-          this.logger.debug(
-            `Integration ${integrationId} has ${integrationDataStreams.length} data streams, ` +
-              `${
-                integrationDataStreams.filter(
-                  (ds) => ds.attributes.job_info.status === TASK_STATUSES.completed
-                ).length
-              } completed`
-          );
-        }
-
-        this.logger.info(
-          `AI workflow completed successfully for integration ${integrationId}, data stream ${dataStreamId}`
-        );
-        return { success: true, result };
-      } catch (error) {
-        this.logger.error(
-          `AI workflow failed for integration ${integrationId}, data stream ${dataStreamId}:`,
-          error
-        );
-
-        // Update data stream status to failed
-        try {
-          const dataStream = await this.automaticImportService!.getDataStream(dataStreamId);
-          await this.automaticImportService!.updateDataStream(
-            {
-              ...dataStream.attributes,
-              job_info: {
-                ...dataStream.attributes.job_info,
-                status: TASK_STATUSES.failed,
-              },
-            },
-            dataStream.attributes.metadata?.version || '0.0.0'
-          );
-          this.logger.info(`Updated data stream ${dataStreamId} status to failed`);
-        } catch (updateError) {
-          this.logger.error(
-            `Failed to update data stream ${dataStreamId} status after workflow error:`,
-            updateError
-          );
-        }
-
-        throw error;
-      }
     };
   }
 
