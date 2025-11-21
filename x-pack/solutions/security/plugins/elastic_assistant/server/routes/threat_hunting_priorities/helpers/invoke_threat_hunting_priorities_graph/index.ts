@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
-import { ActionsClientLlm } from '@kbn/langchain/server';
+import { ActionsClientLlm, getDefaultArguments } from '@kbn/langchain/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 
@@ -91,7 +91,9 @@ export const invokeThreatHuntingPrioritiesGraph = async ({
     llmType,
     logger,
     model,
-    temperature: 0, // zero temperature for threat hunting priorities, because we want structured JSON output
+    // Use default temperature for the LLM type to support models that don't allow temperature: 0
+    // Structured JSON output should still work with the default temperature if prompts are well-designed
+    temperature: getDefaultArguments(llmType).temperature,
     timeout: connectorTimeout,
     traceOptions,
     telemetryMetadata: {
