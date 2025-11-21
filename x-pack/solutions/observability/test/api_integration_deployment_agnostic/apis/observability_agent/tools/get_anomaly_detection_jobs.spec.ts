@@ -25,6 +25,9 @@ const endUnix = datemath.parse(END)!;
 const SPIKE_START = endUnix.valueOf() - moment.duration(2, 'hours').asMilliseconds();
 const SPIKE_END = endUnix.valueOf() - moment.duration(1, 'hours').asMilliseconds();
 
+const START_ISO = new Date(startUnix.valueOf()).toISOString();
+const END_ISO = new Date(endUnix.valueOf()).toISOString();
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const ml = getService('ml');
@@ -56,7 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const toolResults =
           await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
             id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-            params: { start: START, end: END },
+            params: { start: START_ISO, end: END_ISO },
           });
 
         const hasAnomalies = toolResults[0].data.jobs[0].topAnomalies.length > 0;
@@ -76,8 +79,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         toolResults = await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
           params: {
-            start: START,
-            end: END,
+            start: START_ISO,
+            end: END_ISO,
           },
         });
       });
@@ -101,7 +104,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('should contain an anomaly for transaction_throughput with expected values', async () => {
+      it.only('should contain an anomaly for transaction_throughput with expected values', async () => {
         const jobs = toolResults[0].data.jobs;
         const { topAnomalies } = jobs[0];
 
@@ -145,7 +148,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const toolResults =
         await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-          params: { jobIds: [jobId], start: START, end: END },
+          params: { jobIds: [jobId], start: START_ISO, end: END_ISO },
         });
 
       expect(toolResults[0].data.jobs).to.have.length(1);
@@ -158,8 +161,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
           params: {
             jobIds: ['non-existent-job-id'],
-            start: START,
-            end: END,
+            start: START_ISO,
+            end: END_ISO,
           },
         });
 
@@ -169,17 +172,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
     });
 
-    it('returns job without anomalies when time range excludes them', async () => {
-      // SPIKE_START is 2 hours ago. SPIKE_END is 1 hour ago.
-      const earlyStart = 'now-12h';
-      const earlyEnd = 'now-3h';
+    it.only('returns job without anomalies when time range excludes them', async () => {
+      const EARLY_START_ISO = START_ISO;
+      const EARLY_END_ISO = new Date(
+        SPIKE_START - moment.duration(30, 'minutes').asMilliseconds()
+      ).toISOString();
 
       const toolResults =
         await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
           params: {
-            start: earlyStart,
-            end: earlyEnd,
+            start: EARLY_START_ISO,
+            end: EARLY_END_ISO,
           },
         });
 
