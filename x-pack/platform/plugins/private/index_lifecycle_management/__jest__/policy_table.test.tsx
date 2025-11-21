@@ -115,10 +115,10 @@ const testSort = (headerName: string) => {
   const sortButton = within(headerCell).getByRole('button');
 
   fireEvent.click(sortButton);
-  expect(getPolicyNames()).toMatchInlineSnapshot();
+  expect(getPolicyNames()).toMatchSnapshot();
 
   fireEvent.click(sortButton);
-  expect(getPolicyNames()).toMatchInlineSnapshot();
+  expect(getPolicyNames()).toMatchSnapshot();
 };
 
 const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
@@ -154,13 +154,13 @@ describe('policy table', () => {
 
   test('changes pages when a pagination link is clicked on', () => {
     const { container } = renderWithI18n(<TestComponent testPolicies={policies} />);
-    expect(getPolicyNames()).toMatchInlineSnapshot();
+    expect(getPolicyNames()).toMatchSnapshot();
 
     const pagingButtons = container.querySelectorAll('.euiPaginationButton');
     const secondPageButton = pagingButtons[1];
     fireEvent.click(secondPageButton);
 
-    expect(getPolicyNames()).toMatchInlineSnapshot();
+    expect(getPolicyNames()).toMatchSnapshot();
   });
 
   test('does not show any hidden policies by default', () => {
@@ -245,7 +245,7 @@ describe('policy table', () => {
     fireEvent.change(searchInput, { target: { value: 'testy0' } });
     fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
 
-    expect(getPolicyNames()).toMatchInlineSnapshot();
+    expect(getPolicyNames()).toMatchSnapshot();
   });
 
   test('sorts when name header is clicked', () => {
