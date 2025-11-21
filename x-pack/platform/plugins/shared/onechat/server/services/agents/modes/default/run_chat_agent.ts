@@ -70,12 +70,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachmentsService: attachments,
   });
 
-  const attachmentTools = processedConversation.attachments.flatMap((att) => att.tools);
-  // TODO: convert to executable tool...
-
   const selectedTools = await selectTools({
-    input: nextInput,
-    conversation,
+    conversation: processedConversation,
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,

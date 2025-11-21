@@ -19,5 +19,5 @@ export interface AttachmentsService {
   /**
    * Convert an attachment-scoped tool to a generic executable tool
    */
-  convertAttachmentTool(tool: AttachmentScopedTool): Promise<ExecutableTool>;
+  convertAttachmentTool(tool: AttachmentScopedTool): ExecutableTool;
 }

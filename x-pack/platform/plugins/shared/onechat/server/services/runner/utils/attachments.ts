@@ -48,7 +48,7 @@ export const createAttachmentsService = ({
   };
 };
 
-type AttachmentToolConverterFn = (tool: AttachmentScopedTool) => Promise<ExecutableTool>;
+type AttachmentToolConverterFn = (tool: AttachmentScopedTool) => ExecutableTool;
 
 export const createToolConverter = ({
   request,
@@ -75,7 +75,7 @@ export const createToolConverter = ({
 
   const cache = new ToolAvailabilityCache();
 
-  return async (tool) => {
+  return (tool) => {
     const definition = definitionMap[tool.type]!;
     const internal = convertTool({ tool, context, definition, cache });
     return toExecutableTool({ tool: internal, request, runner });
