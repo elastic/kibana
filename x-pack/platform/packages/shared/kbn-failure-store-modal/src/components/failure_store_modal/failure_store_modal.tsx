@@ -95,24 +95,18 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         return;
       }
 
-      // The new failure store configuration has to include the enabled state and, if the custom retention type is enabled, the retention period or disabled flag.
-      let newFailureStoreConfig: FailureStoreFormData;
-
-      if (data.failureStore && data.periodType === PERIOD_TYPE.DISABLED_LIFECYCLE) {
-        newFailureStoreConfig = {
-          failureStoreEnabled: data.failureStore,
-          retentionDisabled: true,
-        };
-      } else if (data.failureStore && data.periodType === PERIOD_TYPE.CUSTOM) {
-        newFailureStoreConfig = {
-          failureStoreEnabled: data.failureStore,
-          customRetentionPeriod: `${data.retentionPeriodValue}${data.retentionPeriodUnit}`,
-        };
-      } else {
-        newFailureStoreConfig = {
-          failureStoreEnabled: data.failureStore,
-        };
-      }
+      // The failure store configuration has to include the enabled state and, if the custom retention type is enabled, the retention period or disabled flag.
+      const newFailureStoreConfig: FailureStoreFormData = {
+        failureStoreEnabled: data.failureStore,
+        ...(data.failureStore &&
+          data.periodType === PERIOD_TYPE.DISABLED_LIFECYCLE && {
+            retentionDisabled: true,
+          }),
+        ...(data.failureStore &&
+          data.periodType === PERIOD_TYPE.CUSTOM && {
+            customRetentionPeriod: `${data.retentionPeriodValue}${data.retentionPeriodUnit}`,
+          }),
+      };
 
       await onSaveModal(newFailureStoreConfig);
     } finally {
@@ -281,7 +275,9 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                 euiFieldProps={{
                   options: canShowDisableLifecycle
                     ? failureStorePeriodOptions
-                    : failureStorePeriodOptions.filter((option) => option.id !== 'disabled'),
+                    : failureStorePeriodOptions.filter(
+                        (option) => option.id !== PERIOD_TYPE.DISABLED_LIFECYCLE
+                      ),
                   'data-test-subj': 'selectFailureStorePeriodType',
                   isDisabled: inherit,
                 }}
