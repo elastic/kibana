@@ -29,6 +29,7 @@ export const GenerativeAIForSecurityConnectorFeatureId = 'generativeAIForSecurit
 export const GenerativeAIForObservabilityConnectorFeatureId = 'generativeAIForObservability';
 export const GenerativeAIForSearchPlaygroundConnectorFeatureId = 'generativeAIForSearchPlayground';
 export const EndpointSecurityConnectorFeatureId = 'endpointSecurity';
+export const WorkflowsConnectorFeatureId = 'workflows';
 export const FederatedConnectorFeatureId = 'federated';
 
 const compatibilityEndpointSecurity = i18n.translate(
@@ -77,6 +78,11 @@ const compatibilityCases = i18n.translate(
   {
     defaultMessage: 'Cases',
   }
+);
+
+const compatibilityWorkflows = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.workflows',
+  { defaultMessage: 'Workflows' }
 );
 
 export const AlertingConnectorFeature: ConnectorFeatureConfig = {
@@ -135,6 +141,12 @@ export const EndpointSecurityConnectorFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityEndpointSecurity,
 };
 
+export const WorkflowsConnectorFeature: ConnectorFeatureConfig = {
+  id: WorkflowsConnectorFeatureId,
+  name: compatibilityWorkflows,
+  compatibility: compatibilityWorkflows,
+};
+
 export const FederatedSearchConnectorFeature: ConnectorFeatureConfig = {
   id: FederatedConnectorFeatureId,
   name: 'Federated Search',
@@ -150,6 +162,7 @@ const AllAvailableConnectorFeatures = {
   [GenerativeAIForObservabilityFeature.id]: GenerativeAIForObservabilityFeature,
   [GenerativeAIForSearchPlaygroundFeature.id]: GenerativeAIForSearchPlaygroundFeature,
   [EndpointSecurityConnectorFeature.id]: EndpointSecurityConnectorFeature,
+  [WorkflowsConnectorFeature.id]: WorkflowsConnectorFeature,
   [FederatedSearchConnectorFeature.id]: FederatedSearchConnectorFeature,
 };
 

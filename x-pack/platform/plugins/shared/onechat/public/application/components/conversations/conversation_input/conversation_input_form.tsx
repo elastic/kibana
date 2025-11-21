@@ -54,6 +54,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     border: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBasePlain};
     border-radius: ${euiTheme.border.radius.medium};
+    flex-grow: 0;
     &:focus-within {
       border-bottom-color: ${euiTheme.colors.primary};
     }

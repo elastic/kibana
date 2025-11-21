@@ -7,8 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { type InferenceClient } from '@kbn/inference-common';
-import type { Feature } from '@kbn/streams-schema';
-import { type GeneratedSignificantEventQuery, type Streams } from '@kbn/streams-schema';
+import type { GeneratedSignificantEventQuery, Streams, Feature } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 
 interface Params {
@@ -51,11 +50,6 @@ export async function generateSignificantEventDefinitions(
   return queries.map((query) => ({
     title: query.title,
     kql: query.kql,
-    feature: feature
-      ? {
-          name: feature?.name,
-          filter: feature?.filter,
-        }
-      : undefined,
+    feature: feature ? { name: feature.name, filter: feature?.filter } : undefined,
   }));
 }

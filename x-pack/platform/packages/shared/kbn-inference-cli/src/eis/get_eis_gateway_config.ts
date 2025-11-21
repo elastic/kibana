@@ -16,7 +16,7 @@ export interface EisGatewayConfig {
   ports: [number, number];
   mount: {
     acl: string;
-    metadata: string;
+    endpointMetadata: string;
     tls: {
       cert: string;
       key: string;
@@ -50,6 +50,31 @@ interface AccessControlListConfig {
       };
     };
   };
+}
+
+interface EndpointMetadataConfig {
+  inference_endpoints: Array<{
+    id: string;
+    model_name: string;
+    task_types: {
+      elasticsearch: string;
+      eis: string;
+    };
+    status: string;
+    properties: string[];
+    release_date: string;
+    end_of_life_date?: string;
+    configuration?: {
+      similarity?: string;
+      dimensions?: number;
+      element_type?: string;
+      chunking_settings?: {
+        strategy: string;
+        max_chunk_size: number;
+        sentence_overlap: number;
+      };
+    };
+  }>;
 }
 
 export async function getEisGatewayConfig({
@@ -124,12 +149,12 @@ export async function getEisGatewayConfig({
   log.debug(`Wrote ACL file to ${aclFilePath}`);
 
   // This file is meant for LOCAL DEVELOPMENT ONLY!
-  // Based on https://github.com/elastic/eis-gateway/blob/main/endpoint-metadata/endpoint-metadata.yaml
-  const endpointMetadataContents: any = {
+  // We have different versions of this in serverless-gitops via Helm values.
+  const endpointMetadataContents: EndpointMetadataConfig = {
     inference_endpoints: [
       {
-        id: '.rainbow-sprinkles-elastic',
-        model_name: 'rainbow-sprinkles',
+        id: `.${EIS_CHAT_MODEL_NAME}-elastic`,
+        model_name: EIS_CHAT_MODEL_NAME,
         task_types: {
           elasticsearch: 'chat_completion',
           eis: 'chat',
@@ -182,7 +207,7 @@ export async function getEisGatewayConfig({
   };
 
   const endpointMetadataFilePath = await writeTempfile(
-    'endpoint_metadata.yaml',
+    'endpoint-metadata.yaml',
     dump(endpointMetadataContents)
   );
 
@@ -201,7 +226,7 @@ export async function getEisGatewayConfig({
     },
     mount: {
       acl: aclFilePath,
-      metadata: endpointMetadataFilePath,
+      endpointMetadata: endpointMetadataFilePath,
       tls,
       ca,
     },
