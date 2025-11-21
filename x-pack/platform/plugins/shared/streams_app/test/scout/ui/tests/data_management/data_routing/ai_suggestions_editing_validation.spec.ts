@@ -21,138 +21,132 @@ import {
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
-test.describe(
-  'Stream data routing - AI suggestions editing validation',
-  { tag: ['@ess', '@svlOblt'] },
-  () => {
-    let llmSetup: LlmProxySetup;
+test.describe('Stream data routing - AI suggestions editing validation', { tag: ['@ess'] }, () => {
+  let llmSetup: LlmProxySetup;
 
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
-      await apiServices.streams.enable();
-      await logsSynthtraceEsClient.clean();
-      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
+  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
+    await apiServices.streams.enable();
+    await logsSynthtraceEsClient.clean();
+    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
 
-      llmSetup = await setupLlmProxyAndConnector(log, apiServices);
-    });
+    llmSetup = await setupLlmProxyAndConnector(log, apiServices);
+  });
 
-    test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
-      await setupAiSuggestionsTest(
-        page,
-        llmSetup,
-        [MOCK_SUGGESTION_INFO],
-        browserAuth,
-        pageObjects,
-        DATE_RANGE
-      );
-    });
-
-    test.afterEach(async ({ apiServices }) => {
-      try {
-        await apiServices.streams.clearStreamChildren('logs');
-      } catch {
-        // Ignore errors if stream doesn't exist
-      }
-    });
-
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await cleanupLlmProxyAndConnector(llmSetup, apiServices);
-      await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
-    });
-
-    test('should show error when editing suggestion with empty name', async ({ page }) => {
-      const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
-      await clickSuggestionEditButton(page, streamName);
-
-      const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
-      await expect(nameInput).toBeVisible();
-
-      await nameInput.clear();
-
-      await expect(page.getByText('Stream name is required', { exact: false })).toBeVisible();
-    });
-
-    test('should show error when editing suggestion with name containing dots', async ({
+  test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
+    await setupAiSuggestionsTest(
       page,
-    }) => {
-      const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
-      await clickSuggestionEditButton(page, streamName);
-
-      const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
-      await expect(nameInput).toBeVisible();
-
-      await nameInput.fill('test.name');
-
-      await expect(
-        page.getByText('Stream name cannot contain the "." character', { exact: false })
-      ).toBeVisible();
-    });
-
-    test('should show error when editing suggestion with name exceeding max length', async ({
-      page,
-    }) => {
-      const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
-      await clickSuggestionEditButton(page, streamName);
-
-      const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
-      await expect(nameInput).toBeVisible();
-
-      const longName = 'a'.repeat(200);
-      await nameInput.fill(longName);
-
-      await expect(
-        page.getByText('Stream name cannot be longer than 200 characters', { exact: false })
-      ).toBeVisible();
-    });
-
-    test('should show error when editing suggestion with duplicate name', async ({
-      page,
-      apiServices,
+      llmSetup,
+      [MOCK_SUGGESTION_INFO],
       browserAuth,
       pageObjects,
-    }) => {
-      await apiServices.streams.forkStream('logs', 'logs.existing', {
-        field: 'service.name',
-        eq: 'existing-service',
-      });
+      DATE_RANGE
+    );
+  });
 
-      await page.reload();
-      await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoPartitioningTab('logs');
-      await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
+  test.afterEach(async ({ apiServices }) => {
+    try {
+      await apiServices.streams.clearStreamChildren('logs');
+    } catch {
+      // Ignore errors if stream doesn't exist
+    }
+  });
 
-      await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
-      setupPartitionLogsInterceptor(llmSetup.llmProxy, [MOCK_SUGGESTION_INFO]);
-      await generateSuggestions(page, llmSetup.llmProxy);
+  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await cleanupLlmProxyAndConnector(llmSetup, apiServices);
+    await logsSynthtraceEsClient.clean();
+    await apiServices.streams.disable();
+  });
 
-      const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
-      await clickSuggestionEditButton(page, streamName);
+  test('should show error when editing suggestion with empty name', async ({ page }) => {
+    const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
+    await clickSuggestionEditButton(page, streamName);
 
-      const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
-      await expect(nameInput).toBeVisible();
+    const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
+    await expect(nameInput).toBeVisible();
 
-      await nameInput.fill('existing');
+    await nameInput.clear();
 
-      await expect(
-        page.getByText('A stream with this name already exists', { exact: false })
-      ).toBeVisible();
+    await expect(page.getByText('Stream name is required', { exact: false })).toBeVisible();
+  });
 
-      const acceptButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateAndAcceptButton');
-      await expect(acceptButton).toBeDisabled();
+  test('should show error when editing suggestion with name containing dots', async ({ page }) => {
+    const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
+    await clickSuggestionEditButton(page, streamName);
+
+    const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
+    await expect(nameInput).toBeVisible();
+
+    await nameInput.fill('test.name');
+
+    await expect(
+      page.getByText('Stream name cannot contain the "." character', { exact: false })
+    ).toBeVisible();
+  });
+
+  test('should show error when editing suggestion with name exceeding max length', async ({
+    page,
+  }) => {
+    const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
+    await clickSuggestionEditButton(page, streamName);
+
+    const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
+    await expect(nameInput).toBeVisible();
+
+    const longName = 'a'.repeat(200);
+    await nameInput.fill(longName);
+
+    await expect(
+      page.getByText('Stream name cannot be longer than 200 characters', { exact: false })
+    ).toBeVisible();
+  });
+
+  test('should show error when editing suggestion with duplicate name', async ({
+    page,
+    apiServices,
+    browserAuth,
+    pageObjects,
+  }) => {
+    await apiServices.streams.forkStream('logs', 'logs.existing', {
+      field: 'service.name',
+      eq: 'existing-service',
     });
 
-    test('should allow editing suggestion with valid condition', async ({ page }) => {
-      const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
-      await clickSuggestionEditButton(page, streamName);
+    await page.reload();
+    await browserAuth.loginAsAdmin();
+    await pageObjects.streams.gotoPartitioningTab('logs');
+    await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
 
-      const conditionEditor = page.getByTestId('streamsAppConditionEditor');
-      await expect(conditionEditor).toBeVisible();
+    await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
+    setupPartitionLogsInterceptor(llmSetup.llmProxy, [MOCK_SUGGESTION_INFO]);
+    await generateSuggestions(page, llmSetup.llmProxy);
 
-      const errorText = page.getByText('Condition is required', { exact: false });
-      await expect(errorText).toBeHidden();
+    const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
+    await clickSuggestionEditButton(page, streamName);
 
-      const acceptButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateAndAcceptButton');
-      await expect(acceptButton).toBeEnabled();
-    });
-  }
-);
+    const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
+    await expect(nameInput).toBeVisible();
+
+    await nameInput.fill('existing');
+
+    await expect(
+      page.getByText('A stream with this name already exists', { exact: false })
+    ).toBeVisible();
+
+    const acceptButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateAndAcceptButton');
+    await expect(acceptButton).toBeDisabled();
+  });
+
+  test('should allow editing suggestion with valid condition', async ({ page }) => {
+    const streamName = getStreamName(MOCK_SUGGESTION_INFO.name);
+    await clickSuggestionEditButton(page, streamName);
+
+    const conditionEditor = page.getByTestId('streamsAppConditionEditor');
+    await expect(conditionEditor).toBeVisible();
+
+    const errorText = page.getByText('Condition is required', { exact: false });
+    await expect(errorText).toBeHidden();
+
+    const acceptButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateAndAcceptButton');
+    await expect(acceptButton).toBeEnabled();
+  });
+});

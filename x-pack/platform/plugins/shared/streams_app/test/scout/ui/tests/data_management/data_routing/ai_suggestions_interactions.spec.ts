@@ -21,172 +21,163 @@ import {
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
-test.describe(
-  'Stream data routing - AI suggestions interactions',
-  { tag: ['@ess', '@svlOblt'] },
-  () => {
-    let llmSetup: LlmProxySetup;
+test.describe('Stream data routing - AI suggestions interactions', { tag: ['@ess'] }, () => {
+  let llmSetup: LlmProxySetup;
 
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
-      await apiServices.streams.enable();
-      await logsSynthtraceEsClient.clean();
-      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
+  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
+    await apiServices.streams.enable();
+    await logsSynthtraceEsClient.clean();
+    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
 
-      llmSetup = await setupLlmProxyAndConnector(log, apiServices);
-    });
+    llmSetup = await setupLlmProxyAndConnector(log, apiServices);
+  });
 
-    test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
-      await setupAiSuggestionsTest(
-        page,
-        llmSetup,
-        MOCK_SUGGESTIONS_MULTIPLE,
-        browserAuth,
-        pageObjects,
-        DATE_RANGE
-      );
-    });
-
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await cleanupLlmProxyAndConnector(llmSetup, apiServices);
-      await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
-    });
-
-    test('should preview suggestion', async ({ page }) => {
-      const streamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
-      await clickSuggestionPreviewButton(page, streamName);
-
-      await expect(page.getByTestId('streamsAppRoutingPreviewPanelWithResults')).toBeVisible();
-    });
-
-    test('should edit suggestion', async ({ page }) => {
-      const streamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
-      await clickSuggestionEditButton(page, streamName);
-
-      const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
-      await expect(nameInput).toBeVisible();
-      await expect(nameInput).toHaveValue(MOCK_SUGGESTIONS_MULTIPLE[0].name);
-    });
-
-    test('should reject suggestion', async ({ page }) => {
-      const streamName0 = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
-      const streamName1 = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[1].name);
-      await clickSuggestionRejectButton(page, streamName0);
-
-      await expect(page.getByText(streamName0)).toBeHidden();
-      await expect(page.getByText(streamName1)).toBeVisible();
-    });
-
-    test('should regenerate suggestions', async ({ page }) => {
-      llmSetup.llmProxy.clear();
-
-      setupPartitionLogsInterceptor(
-        llmSetup.llmProxy,
-        MOCK_SUGGESTIONS_MULTIPLE,
-        'partition_logs regenerate'
-      );
-
-      const regenerateButton = page
-        .getByTestId('streamsAppGenerateSuggestionButton')
-        .filter({ hasText: 'Regenerate' });
-      await expect(regenerateButton).toBeVisible();
-      await regenerateButton.click();
-
-      await llmSetup.llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-      await expect(
-        page.getByTestId('streamsAppReviewPartitioningSuggestionsCallout')
-      ).toBeVisible();
-    });
-
-    test('should update suggestion name when editing and accepting', async ({ page }) => {
-      const originalStreamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
-      await clickSuggestionEditButton(page, originalStreamName);
-
-      const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
-      await expect(nameInput).toBeVisible();
-
-      await nameInput.fill('debug');
-
-      const acceptButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateAndAcceptButton');
-      await expect(acceptButton).toBeEnabled();
-      await acceptButton.click();
-
-      const modal = page.getByTestId('streamsAppCreateStreamConfirmationModal');
-      await expect(modal).toBeVisible();
-
-      const nameField = modal.getByTestId('streamsAppCreateStreamConfirmationModalStreamName');
-      const updatedStreamName = getStreamName('debug');
-      await expect(nameField).toHaveValue(updatedStreamName);
-
-      await modal.getByTestId('streamsAppCreateStreamConfirmationModalCancelButton').click();
-      await expect(modal).toBeHidden();
-
-      await expect(page.getByTestId(`suggestionName-${updatedStreamName}`)).toBeVisible();
-      await expect(page.getByTestId(`suggestionName-${originalStreamName}`)).toBeHidden();
-    });
-
-    test('should update suggestion condition when editing and accepting', async ({
+  test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
+    await setupAiSuggestionsTest(
       page,
+      llmSetup,
+      MOCK_SUGGESTIONS_MULTIPLE,
+      browserAuth,
       pageObjects,
-    }) => {
-      const streamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
-      await clickSuggestionEditButton(page, streamName);
+      DATE_RANGE
+    );
+  });
 
-      await pageObjects.streams.fillConditionEditor({
-        field: 'service.name',
-        value: 'updated-service',
-        operator: 'equals',
-      });
+  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await cleanupLlmProxyAndConnector(llmSetup, apiServices);
+    await logsSynthtraceEsClient.clean();
+    await apiServices.streams.disable();
+  });
 
-      const acceptButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateAndAcceptButton');
-      await expect(acceptButton).toBeEnabled();
-      await acceptButton.click();
+  test('should preview suggestion', async ({ page }) => {
+    const streamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
+    await clickSuggestionPreviewButton(page, streamName);
 
-      const modal = page.getByTestId('streamsAppCreateStreamConfirmationModal');
-      await expect(modal).toBeVisible();
+    await expect(page.getByTestId('streamsAppRoutingPreviewPanelWithResults')).toBeVisible();
+  });
 
-      const conditionField = modal.getByTestId('streamsAppConditionDisplayField');
-      await expect(conditionField).toContainText('service.name');
-      const conditionValue = modal.getByTestId('streamsAppConditionDisplayValue');
-      await expect(conditionValue).toContainText('updated-service');
+  test('should edit suggestion', async ({ page }) => {
+    const streamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
+    await clickSuggestionEditButton(page, streamName);
 
-      await modal.getByTestId('streamsAppCreateStreamConfirmationModalCancelButton').click();
-      await expect(modal).toBeHidden();
+    const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
+    await expect(nameInput).toBeVisible();
+    await expect(nameInput).toHaveValue(MOCK_SUGGESTIONS_MULTIPLE[0].name);
+  });
 
-      const conditionPanel = page.getByTestId(`suggestionConditionPanel-${streamName}`);
-      await expect(conditionPanel.getByTestId('streamsAppConditionDisplayField')).toContainText(
-        'service.name'
-      );
+  test('should reject suggestion', async ({ page }) => {
+    const streamName0 = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
+    const streamName1 = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[1].name);
+    await clickSuggestionRejectButton(page, streamName0);
+
+    await expect(page.getByText(streamName0)).toBeHidden();
+    await expect(page.getByText(streamName1)).toBeVisible();
+  });
+
+  test('should regenerate suggestions', async ({ page }) => {
+    llmSetup.llmProxy.clear();
+
+    setupPartitionLogsInterceptor(
+      llmSetup.llmProxy,
+      MOCK_SUGGESTIONS_MULTIPLE,
+      'partition_logs regenerate'
+    );
+
+    const regenerateButton = page
+      .getByTestId('streamsAppGenerateSuggestionButton')
+      .filter({ hasText: 'Regenerate' });
+    await expect(regenerateButton).toBeVisible();
+    await regenerateButton.click();
+
+    await llmSetup.llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+    await expect(page.getByTestId('streamsAppReviewPartitioningSuggestionsCallout')).toBeVisible();
+  });
+
+  test('should update suggestion name when editing and accepting', async ({ page }) => {
+    const originalStreamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
+    await clickSuggestionEditButton(page, originalStreamName);
+
+    const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
+    await expect(nameInput).toBeVisible();
+
+    await nameInput.fill('debug');
+
+    const acceptButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateAndAcceptButton');
+    await expect(acceptButton).toBeEnabled();
+    await acceptButton.click();
+
+    const modal = page.getByTestId('streamsAppCreateStreamConfirmationModal');
+    await expect(modal).toBeVisible();
+
+    const nameField = modal.getByTestId('streamsAppCreateStreamConfirmationModalStreamName');
+    const updatedStreamName = getStreamName('debug');
+    await expect(nameField).toHaveValue(updatedStreamName);
+
+    await modal.getByTestId('streamsAppCreateStreamConfirmationModalCancelButton').click();
+    await expect(modal).toBeHidden();
+
+    await expect(page.getByTestId(`suggestionName-${updatedStreamName}`)).toBeVisible();
+    await expect(page.getByTestId(`suggestionName-${originalStreamName}`)).toBeHidden();
+  });
+
+  test('should update suggestion condition when editing and accepting', async ({
+    page,
+    pageObjects,
+  }) => {
+    const streamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
+    await clickSuggestionEditButton(page, streamName);
+
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      value: 'updated-service',
+      operator: 'equals',
     });
 
-    test('should cancel editing and revert to original suggestion', async ({
-      page,
-      pageObjects,
-    }) => {
-      const streamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
-      await clickSuggestionEditButton(page, streamName);
+    const acceptButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateAndAcceptButton');
+    await expect(acceptButton).toBeEnabled();
+    await acceptButton.click();
 
-      const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
-      await expect(nameInput).toBeVisible();
+    const modal = page.getByTestId('streamsAppCreateStreamConfirmationModal');
+    await expect(modal).toBeVisible();
 
-      await nameInput.fill('modified');
-      await pageObjects.streams.fillConditionEditor({
-        field: 'service.name',
-        value: 'modified-service',
-        operator: 'equals',
-      });
+    const conditionField = modal.getByTestId('streamsAppConditionDisplayField');
+    await expect(conditionField).toContainText('service.name');
+    const conditionValue = modal.getByTestId('streamsAppConditionDisplayValue');
+    await expect(conditionValue).toContainText('updated-service');
 
-      const cancelButton = page.getByRole('button', { name: 'Cancel' });
-      await cancelButton.click();
+    await modal.getByTestId('streamsAppCreateStreamConfirmationModalCancelButton').click();
+    await expect(modal).toBeHidden();
 
-      await expect(nameInput).toBeHidden();
+    const conditionPanel = page.getByTestId(`suggestionConditionPanel-${streamName}`);
+    await expect(conditionPanel.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'service.name'
+    );
+  });
 
-      await expect(page.getByTestId(`suggestionName-${streamName}`)).toBeVisible();
-      const conditionPanel = page.getByTestId(`suggestionConditionPanel-${streamName}`);
-      await expect(conditionPanel.getByTestId('streamsAppConditionDisplayField')).toContainText(
-        'severity_text'
-      );
+  test('should cancel editing and revert to original suggestion', async ({ page, pageObjects }) => {
+    const streamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
+    await clickSuggestionEditButton(page, streamName);
+
+    const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
+    await expect(nameInput).toBeVisible();
+
+    await nameInput.fill('modified');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      value: 'modified-service',
+      operator: 'equals',
     });
-  }
-);
+
+    const cancelButton = page.getByRole('button', { name: 'Cancel' });
+    await cancelButton.click();
+
+    await expect(nameInput).toBeHidden();
+
+    await expect(page.getByTestId(`suggestionName-${streamName}`)).toBeVisible();
+    const conditionPanel = page.getByTestId(`suggestionConditionPanel-${streamName}`);
+    await expect(conditionPanel.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'severity_text'
+    );
+  });
+});

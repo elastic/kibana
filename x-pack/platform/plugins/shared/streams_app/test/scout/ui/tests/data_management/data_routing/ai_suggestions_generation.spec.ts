@@ -21,65 +21,61 @@ import {
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
-test.describe(
-  'Stream data routing - AI suggestions generation',
-  { tag: ['@ess', '@svlOblt'] },
-  () => {
-    let llmSetup: LlmProxySetup;
+test.describe('Stream data routing - AI suggestions generation', { tag: ['@ess'] }, () => {
+  let llmSetup: LlmProxySetup;
 
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
-      await apiServices.streams.enable();
-      await logsSynthtraceEsClient.clean();
-      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
+  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
+    await apiServices.streams.enable();
+    await logsSynthtraceEsClient.clean();
+    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
 
-      llmSetup = await setupLlmProxyAndConnector(log, apiServices);
-    });
+    llmSetup = await setupLlmProxyAndConnector(log, apiServices);
+  });
 
-    test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoPartitioningTab('logs');
-      await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
+  test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.streams.gotoPartitioningTab('logs');
+    await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
 
-      await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
-    });
+    await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
+  });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await cleanupLlmProxyAndConnector(llmSetup, apiServices);
-      await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
-    });
+  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await cleanupLlmProxyAndConnector(llmSetup, apiServices);
+    await logsSynthtraceEsClient.clean();
+    await apiServices.streams.disable();
+  });
 
-    test('should successfully generate and display suggestions', async ({ page }) => {
-      setupPartitionLogsInterceptor(llmSetup.llmProxy, MOCK_SUGGESTIONS_MULTIPLE);
-      await generateSuggestions(page, llmSetup.llmProxy);
+  test('should successfully generate and display suggestions', async ({ page }) => {
+    setupPartitionLogsInterceptor(llmSetup.llmProxy, MOCK_SUGGESTIONS_MULTIPLE);
+    await generateSuggestions(page, llmSetup.llmProxy);
 
-      for (const suggestion of MOCK_SUGGESTIONS_MULTIPLE) {
-        const streamName = getStreamName(suggestion.name);
-        await expect(page.getByTestId(`suggestionName-${streamName}`)).toBeVisible();
-      }
-    });
+    for (const suggestion of MOCK_SUGGESTIONS_MULTIPLE) {
+      const streamName = getStreamName(suggestion.name);
+      await expect(page.getByTestId(`suggestionName-${streamName}`)).toBeVisible();
+    }
+  });
 
-    test('should handle empty suggestions response', async ({ page }) => {
-      setupPartitionLogsInterceptor(llmSetup.llmProxy, [], 'partition_logs with empty partitions');
-      await generateSuggestions(page, llmSetup.llmProxy);
+  test('should handle empty suggestions response', async ({ page }) => {
+    setupPartitionLogsInterceptor(llmSetup.llmProxy, [], 'partition_logs with empty partitions');
+    await generateSuggestions(page, llmSetup.llmProxy);
 
-      const noSuggestionsCallout = page.getByTestId('streamsAppNoSuggestionsCallout');
-      await expect(noSuggestionsCallout).toBeVisible();
-    });
+    const noSuggestionsCallout = page.getByTestId('streamsAppNoSuggestionsCallout');
+    await expect(noSuggestionsCallout).toBeVisible();
+  });
 
-    test('should show error toast when API returns 500 error', async ({ page, pageObjects }) => {
-      const simulatorPromise = llmSetup.llmProxy
-        .intercept('partition_logs error', partitionLogsWhenCondition)
-        .waitForIntercept();
+  test('should show error toast when API returns 500 error', async ({ page, pageObjects }) => {
+    const simulatorPromise = llmSetup.llmProxy
+      .intercept('partition_logs error', partitionLogsWhenCondition)
+      .waitForIntercept();
 
-      const button = page.getByTestId('streamsAppGenerateSuggestionButton');
-      await expect(button).toBeEnabled();
-      await button.click();
+    const button = page.getByTestId('streamsAppGenerateSuggestionButton');
+    await expect(button).toBeEnabled();
+    await button.click();
 
-      const simulator = await simulatorPromise;
-      await simulator.error({ message: 'Internal server error' });
+    const simulator = await simulatorPromise;
+    await simulator.error({ message: 'Internal server error' });
 
-      await expectErrorToast(pageObjects);
-    });
-  }
-);
+    await expectErrorToast(pageObjects);
+  });
+});
