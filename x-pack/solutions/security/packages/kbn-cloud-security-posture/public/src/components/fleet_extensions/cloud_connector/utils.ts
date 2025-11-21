@@ -101,12 +101,6 @@ export function hasValidNewConnectionCredentials(
   }
 }
 
-const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
-  if (!cloudHost) return undefined;
-  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
-  return match;
-};
-
 export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
   if (!url) return undefined;
   const match = url.match(/\/deployments\/([^/?#]+)/);
@@ -181,11 +175,6 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
   const accountType = getAccountTypeFromInput(input, provider);
-
-  const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-
-  if (!hostProvider || (provider === AWS_PROVIDER && hostProvider !== provider)) return undefined;
-
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
   const templateUrlFieldName = getTemplateFieldNameByProvider(provider);
