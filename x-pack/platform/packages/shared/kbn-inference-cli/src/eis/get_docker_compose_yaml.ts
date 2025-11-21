@@ -31,7 +31,9 @@ export function getDockerComposeYaml({
           - "8051:8051"
         volumes:
           - "${config.eisGateway.mount.acl}:/app/acl/acl.yaml:ro"
-          - "${config.eisGateway.mount.endpointMetadata}:/endpoint-metadata/endpoint-metadata.yaml:ro"
+          - "${
+            config.eisGateway.mount.endpointMetadata
+          }:/endpoint-metadata/endpoint-metadata.yaml:ro"
           - "${config.eisGateway.mount.tls.cert}:/certs/tls/tls.crt:ro"
           - "${config.eisGateway.mount.tls.key}:/certs/tls/tls.key:ro"
           - "${config.eisGateway.mount.ca.cert}:/certs/ca/ca.crt:ro"
