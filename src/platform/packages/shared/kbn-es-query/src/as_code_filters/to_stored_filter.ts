@@ -268,7 +268,7 @@ function convertFromFilterGroup(
         ...baseStored.meta,
         key: field,
         field, // Add field property for round-trip compatibility
-        type: 'phrases',
+        type: FILTERS.PHRASES,
         params: values,
         negate: isNegated, // Preserve negation from operator
       },
@@ -347,7 +347,7 @@ function convertFromDSLFilter(
       query: dsl.query,
       meta: {
         ...baseStored.meta,
-        type: 'phrase',
+        type: FILTERS.PHRASE,
         params: { query: typeof value === 'object' ? value.query || value : value },
         ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
       },
@@ -365,7 +365,7 @@ function convertFromDSLFilter(
         query: dsl.query,
         meta: {
           ...baseStored.meta,
-          type: 'phrase',
+          type: FILTERS.PHRASE,
           params: { query: config.query },
           ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
         },
@@ -382,7 +382,7 @@ function convertFromDSLFilter(
       query: dsl.query,
       meta: {
         ...baseStored.meta,
-        type: 'phrase',
+        type: FILTERS.PHRASE,
         params: { query: value },
         ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
       },
@@ -395,11 +395,11 @@ function convertFromDSLFilter(
     const rangeParams = dsl.query.range[field];
 
     // Detect RANGE_FROM_VALUE (single-bound range) vs regular RANGE (multi-bound)
-    let type = 'range';
+    let type = FILTERS.RANGE;
     if (rangeParams && typeof rangeParams === 'object') {
       const boundCount = ['gte', 'lte', 'gt', 'lt'].filter((k) => k in rangeParams).length;
       if (boundCount === 1) {
-        type = 'range_from_value';
+        type = FILTERS.RANGE_FROM_VALUE;
       }
     }
 
@@ -422,7 +422,7 @@ function convertFromDSLFilter(
       query: dsl.query,
       meta: {
         ...baseStored.meta,
-        type: 'exists',
+        type: FILTERS.EXISTS,
         ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
         ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
       },
@@ -436,7 +436,7 @@ function convertFromDSLFilter(
       query: dsl.query,
       meta: {
         ...baseStored.meta,
-        type: 'match_all',
+        type: FILTERS.MATCH_ALL,
         params: dsl.query.match_all,
         ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
       },
@@ -450,7 +450,7 @@ function convertFromDSLFilter(
       query: dsl.query,
       meta: {
         ...baseStored.meta,
-        type: 'query_string',
+        type: FILTERS.QUERY_STRING,
         params: dsl.query.query_string,
         ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
       },
@@ -480,7 +480,7 @@ function convertFromDSLFilter(
         query: dsl.query,
         meta: {
           ...baseStored.meta,
-          type: 'spatial_filter',
+          type: FILTERS.SPATIAL_FILTER,
           ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
           ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
         },
@@ -494,7 +494,7 @@ function convertFromDSLFilter(
     query: dsl.query,
     meta: {
       ...baseStored.meta,
-      type: 'custom',
+      type: FILTERS.CUSTOM,
       ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
       ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
     },
