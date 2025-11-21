@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
 
-      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.switchToVisualization('line', undefined, 1);
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
