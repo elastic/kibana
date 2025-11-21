@@ -548,7 +548,6 @@ describe('fromStoredFilter', () => {
         expect(result.label).toBe('intersects shape');
         expect(result.disabled).toBe(false);
         expect(result.negate).toBe(false);
-        expect(result.pinned).toBe(false); // appState = not pinned
       }
     });
 
@@ -564,7 +563,7 @@ describe('fromStoredFilter', () => {
   });
 
   describe('Base properties extraction', () => {
-    it('should extract pinned, disabled, and label properties', () => {
+    it('should extract disabled and label properties', () => {
       const storedFilter = {
         $state: { store: 'globalState' },
         meta: {
@@ -579,7 +578,6 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
-      expect(result.pinned).toBe(true);
       expect(result.disabled).toBe(true);
       expect(result.label).toBe('Status Filter');
       // For condition filters, negate is encoded in the operator, not as a separate property

@@ -19,7 +19,6 @@ import type {
 } from '@kbn/es-query-server';
 import type { Logger } from '@kbn/logging';
 import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
-import { FilterStateStore } from '../..';
 import { FilterConversionError } from './errors';
 import type { StoredFilter } from './types';
 import { FILTERS } from '../filters';
@@ -68,14 +67,8 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
 
     // Build base stored filter structure
     // Only include properties that are explicitly set in AsCodeFilter (minimize round-trip differences)
+    // Note: $state.store (pinned) is not included as it's UI state only
     const storedFilter: StoredFilter = {
-      ...(filter.pinned !== undefined
-        ? {
-            $state: {
-              store: filter.pinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
-            },
-          }
-        : {}),
       meta: {
         ...(filter.label !== undefined ? { alias: filter.label } : {}),
         ...(filter.disabled !== undefined ? { disabled: filter.disabled } : {}),
@@ -192,7 +185,6 @@ function convertFromSimpleCondition(
   // RANGE
   if (condition.operator === ASCODE_FILTER_OPERATOR.RANGE) {
     // Determine format - use existing meta.params.format if available, otherwise default for @timestamp
-    // TODO is setting the format necessary?
     const existingFormat =
       typeof baseStored.meta.params === 'object' &&
       baseStored.meta.params !== null &&
@@ -200,7 +192,7 @@ function convertFromSimpleCondition(
         ? (baseStored.meta.params as { format?: string }).format
         : undefined;
     const format =
-      existingFormat ||
+      existingFormat ??
       (condition.field === '@timestamp' ? 'strict_date_optional_time' : undefined);
 
     // Build range query, including format if present

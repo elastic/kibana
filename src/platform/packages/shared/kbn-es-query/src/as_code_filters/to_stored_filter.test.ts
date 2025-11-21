@@ -45,21 +45,6 @@ describe('toStoredFilter', () => {
       });
     });
 
-    it('should handle pinned filters', () => {
-      const simplified: AsCodeFilter = {
-        pinned: true,
-        condition: {
-          field: 'status',
-          operator: 'is',
-          value: 'active',
-        },
-      };
-
-      const result = toStoredFilter(simplified) as StoredFilter;
-
-      expect(result.$state).toEqual({ store: 'globalState' });
-    });
-
     it('should convert group filters to bool queries', () => {
       const simplified: AsCodeFilter = {
         group: {
@@ -146,8 +131,10 @@ describe('toStoredFilter', () => {
 
       // negate: false is not preserved in round-trip for condition filters
       // because negation is encoded in the operator (is_one_of vs is_not_one_of)
+      // $state.store (pinned) is also not preserved as it's UI state only
       const { negate, ...metaWithoutNegate } = originalFilter.meta;
-      const expectedFilter = { ...originalFilter, meta: metaWithoutNegate };
+      const { $state, ...filterWithoutState } = originalFilter;
+      const expectedFilter = { ...filterWithoutState, meta: metaWithoutNegate };
 
       expect(roundTripFilter).toEqual(expectedFilter);
     });
@@ -168,7 +155,6 @@ describe('toStoredFilter', () => {
       expect(roundTripFilter.meta.alias).toBe(originalFilter.meta.alias);
       expect(roundTripFilter.meta.disabled).toBe(originalFilter.meta.disabled);
       expect(roundTripFilter.meta.negate).toBe(originalFilter.meta.negate);
-      expect(roundTripFilter.$state).toEqual(originalFilter.$state);
 
       // Verify filterType is preserved (now supported!)
       expect(roundTripFilter.meta.type).toBe(originalFilter.meta.type);
@@ -301,15 +287,12 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(scriptedFilter) as AsCodeFilter;
 
       expect('dsl' in asCodeFilter).toBe(true);
-      expect(asCodeFilter.pinned).toBe(true); // GLOBAL_STATE = pinned
       expect(asCodeFilter.filterType).toBe('phrase');
 
-      // Round-trip
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
       expect(roundTrip.query?.script).toBeDefined();
       expect(roundTrip.meta.type).toBe('phrase');
-      expect(roundTrip.$state?.store).toBe(FilterStateStore.GLOBAL_STATE);
     });
   });
 
@@ -353,7 +336,6 @@ describe('toStoredFilter', () => {
       expect(asCodeFilter.filterType).toBe('range');
       expect(asCodeFilter.key).toBe('@timestamp');
 
-      // Convert back to StoredFilter
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
       // Verify format is present
@@ -472,7 +454,6 @@ describe('toStoredFilter', () => {
       if ('condition' in asCodeFilter) {
         expect(asCodeFilter.condition.operator).toBe('range');
       }
-      expect(asCodeFilter.pinned).toBe(true);
 
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
       expect(roundTrip.query?.range?.['@timestamp'].gte).toBe('now-15m');
@@ -1033,7 +1014,6 @@ describe('toStoredFilter', () => {
       const roundTripped = toStoredFilter(asCodeFilter!) as StoredFilter;
 
       // Verify top-level structure
-      expect(roundTripped.$state).toEqual({ store: FilterStateStore.APP_STATE });
       expect(roundTripped.meta.type).toBe('combined');
       expect(roundTripped.meta.relation).toBe('AND');
       expect(Array.isArray(roundTripped.meta.params)).toBe(true);

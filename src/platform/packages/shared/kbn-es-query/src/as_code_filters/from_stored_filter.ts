@@ -449,12 +449,9 @@ function convertToDSLFilter(
  * Extract base properties from stored filter
  */
 function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter> {
-  const $state = storedFilter.$state;
   const meta = storedFilter.meta;
 
   return {
-    pinned:
-      $state?.store === 'globalState' ? true : $state?.store === 'appState' ? false : undefined,
     disabled: meta?.disabled === true ? true : meta?.disabled === false ? false : undefined,
     controlledBy: meta?.controlledBy || undefined,
     dataViewId: meta?.index || undefined,
