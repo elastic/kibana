@@ -41,7 +41,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
   return canCancel ? (
     <EuiButtonIcon
       aria-label={labels.cancel}
-      data-test-subj="onechatAppConversationInputCancelButton"
+      data-test-subj="agentBuilderConversationInputCancelButton"
       iconType="stopFilled"
       size="m"
       color="text"
@@ -56,7 +56,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
   ) : (
     <EuiButtonIcon
       aria-label={labels.submit}
-      data-test-subj="onechatAppConversationInputSubmitButton"
+      data-test-subj="agentBuilderConversationInputSubmitButton"
       iconType="sortUp"
       display="fill"
       size="m"

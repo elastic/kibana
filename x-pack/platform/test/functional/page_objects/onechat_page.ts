@@ -48,7 +48,7 @@ export class OneChatPageObject extends FtrService {
    * Send the current message
    */
   async sendMessage() {
-    const sendButton = await this.testSubjects.find('onechatAppConversationInputFormSubmitButton');
+    const sendButton = await this.testSubjects.find('agentBuilderConversationInputSubmitButton');
     await sendButton.click();
   }
 
