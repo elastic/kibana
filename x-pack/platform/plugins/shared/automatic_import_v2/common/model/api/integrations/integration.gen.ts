@@ -62,7 +62,8 @@ export const CreateAutoImportIntegrationRequestBody = z
           })
           .strict()
       )
-      .min(1),
+      .min(1)
+      .optional(),
   })
   .strict();
 export type CreateAutoImportIntegrationRequestBodyInput = z.input<

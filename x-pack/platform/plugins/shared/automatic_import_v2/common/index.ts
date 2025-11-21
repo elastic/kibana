@@ -6,14 +6,17 @@
  */
 
 export type {
-  CreateAutoImportIntegrationRequestBody,
   CreateAutoImportIntegrationResponse,
   DeleteAutoImportIntegrationRequestParams,
-  GetAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationResponse,
   GetAutoImportIntegrationsResponse,
   UpdateAutoImportIntegrationRequestBody,
   UpdateAutoImportIntegrationRequestParams,
+} from './model/api/integrations/integration.gen';
+
+export {
+  CreateAutoImportIntegrationRequestBody,
+  GetAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 
 export type { DataStreamSamples } from './model/index_samples.gen';

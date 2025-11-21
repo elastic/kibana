@@ -23,7 +23,6 @@ paths:
               required:
                 - title
                 - description
-                - dataStreams
               properties:
                 title:
                   description: The title of the integration

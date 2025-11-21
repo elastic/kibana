@@ -6,12 +6,15 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import type {
-  CreateAutoImportIntegrationRequestBody,
   CreateAutoImportIntegrationResponse,
   GetAutoImportIntegrationsResponse,
   GetAutoImportIntegrationResponse,
+} from '../../common';
+import {
+  CreateAutoImportIntegrationRequestBody,
   GetAutoImportIntegrationRequestParams,
 } from '../../common';
 import { buildAutomaticImportV2Response } from './utils';
@@ -79,14 +82,17 @@ const getIntegrationByIdRoute = (
     .addVersion(
       {
         version: '1',
-        validate: false,
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(GetAutoImportIntegrationRequestParams),
+          },
+        },
       },
       async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
-          const { integration_id: integrationId } =
-            request.params as GetAutoImportIntegrationRequestParams;
+          const { integration_id: integrationId } = request.params;
           const integration = await automaticImportService.getIntegrationById(integrationId);
           const body: GetAutoImportIntegrationResponse = { integration };
           return response.ok({ body });
@@ -106,7 +112,7 @@ const addIntegrationRoute = (
   logger: Logger
 ) =>
   router.versioned
-    .post({
+    .put({
       access: 'internal',
       path: '/api/automatic_import_v2/integrations',
       security: {
@@ -118,14 +124,18 @@ const addIntegrationRoute = (
     .addVersion(
       {
         version: '1',
-        validate: false,
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(CreateAutoImportIntegrationRequestBody),
+          },
+        },
       },
       async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
-          const integrationRequestBody = request.body as CreateAutoImportIntegrationRequestBody;
-          const integrationId = createIntegrationId(integrationRequestBody.title);
+          const integrationRequestBody = request.body;
+          const integrationId = createId(integrationRequestBody.title);
           const integrationData = {
             integration_id: integrationId,
             dataStreams: integrationRequestBody.dataStreams,
@@ -134,6 +144,7 @@ const addIntegrationRoute = (
             description: integrationRequestBody.description,
           };
           await automaticImportService.insertIntegration(request, integrationData);
+          // TODO: Create data streams
           const body: CreateAutoImportIntegrationResponse = { integration_id: integrationId };
           return response.ok({ body });
         } catch (err) {
@@ -147,6 +158,6 @@ const addIntegrationRoute = (
       }
     );
 
-function createIntegrationId(title: string): string {
+function createId(title: string): string {
   return title.toLowerCase().replace(/ /g, '-');
 }
