@@ -303,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.createLayer('data', undefined, 'bar');
-      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar');
+      expect(await PageObjects.lens.getLayerType()).to.eql('Bar');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',

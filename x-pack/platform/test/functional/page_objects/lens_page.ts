@@ -1100,10 +1100,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Returns the layer vis type from chart switch label
      */
-    async getLayerType(index = 0) {
-      return (await find.allByCssSelector(`[data-test-subj^="lnsChartSwitchPopover"]`))[
-        index
-      ].getVisibleText();
+    async getLayerType() {
+      const switchPopovers = await find.allByCssSelector(
+        `[data-test-subj^="lnsChartSwitchPopover"]`
+      );
+      expect(switchPopovers.length).to.be(1);
+      return await switchPopovers[0].getVisibleText();
     },
 
     /**
