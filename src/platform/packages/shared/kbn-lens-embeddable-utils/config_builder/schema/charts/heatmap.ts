@@ -14,7 +14,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { colorByValueSchema } from '../color';
 import { esqlColumnSchema } from '../metric_ops';
-import { sharedPanelInfoSchema, layerSettingsSchema } from '../shared';
+import { sharedPanelInfoSchema, layerSettingsSchema, dslOnlyPanelInfoSchema } from '../shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchema,
@@ -94,6 +94,7 @@ const heatmapStateMetricOptionsSchema = {
 export const heatmapStateSchemaNoESQL = schema.object({
   ...heatmapSharedStateSchema,
   ...heatmapAxesStateSchema,
+  ...dslOnlyPanelInfoSchema,
   ...datasetSchema,
   metric: mergeAllMetricsWithChartDimensionSchema(
     schema.object({
