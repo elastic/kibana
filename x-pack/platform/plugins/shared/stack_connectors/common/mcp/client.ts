@@ -5,15 +5,10 @@ class McpClient {
   private client: Client;
   private transport: StreamableHTTPClientTransport;
 
-  constructor(url: string, bearerToken?: string, customHeaders?: Record<string, string>) {
-    // prepare headers and bearer token
+  constructor(url: string, customHeaders?: Record<string, string>) {
     const headers: Record<string, string> = {
       ...(customHeaders ?? {}),
     };
-
-    if (bearerToken) {
-      headers['Authorization'] = `Bearer ${bearerToken}`;
-    }
 
     this.transport = new StreamableHTTPClientTransport(
       new URL(url),
