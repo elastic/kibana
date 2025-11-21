@@ -10,7 +10,6 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -22,12 +21,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check that no sampling info is shown in the dataView picker
       expect(await testSubjects.exists('lnsChangeIndexPatternSamplingInfo')).to.be(false);
 
-      await lens.openLayerContextMenu();
-
-      // should be 3 actions available
-      expect(
-        (await find.allByCssSelector('[data-test-subj=lnsLayerActionsMenu] button')).length
-      ).to.eql(3);
+      // settings button should be available
+      await testSubjects.existOrFail('lnsLayerSettings');
+      // clear button should be available
+      await testSubjects.existOrFail('lnsLayerRemove--0');
+      // clone button should be available
+      await testSubjects.existOrFail('lnsLayerClone--0');
     });
 
     it('should open layer settings for a data layer and set a sampling rate', async () => {
