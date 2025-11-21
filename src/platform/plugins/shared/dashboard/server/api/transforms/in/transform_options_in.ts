@@ -10,12 +10,13 @@
 import type { DashboardState } from '../../types';
 import { DASHBOARD_API_OPTION_KEYS, DASHBOARD_SO_OPTION_KEYS } from '../constants';
 
-export function transformOptionsOut(optionsJSON: string): Required<DashboardState>['options'] {
-  const options = JSON.parse(optionsJSON);
-  const knownOptions: { [key: string]: unknown } = {};
-  Object.keys(options).forEach((soKey, index) => {
-    const apiKey = DASHBOARD_API_OPTION_KEYS[index];
-    if (DASHBOARD_SO_OPTION_KEYS.includes(soKey)) knownOptions[apiKey] = options[soKey];
+export function transformOptionsIn(options: DashboardState['options']): string {
+  const apiOptions = options ?? {};
+  const savedObjectOptions: { [key: string]: unknown } = {};
+
+  DASHBOARD_API_OPTION_KEYS.forEach((apiKey, index) => {
+    const soKey = DASHBOARD_SO_OPTION_KEYS[index];
+    if (apiOptions[apiKey]) savedObjectOptions[soKey] = apiOptions[apiKey];
   });
-  return knownOptions;
+  return JSON.stringify(savedObjectOptions);
 }

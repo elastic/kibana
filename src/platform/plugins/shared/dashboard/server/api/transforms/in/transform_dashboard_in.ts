@@ -15,6 +15,7 @@ import { transformPanelsIn } from './transform_panels_in';
 import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
+import { transformOptionsIn } from './transform_options_in';
 
 export const transformDashboardIn = (
   dashboardState: DashboardState
@@ -68,7 +69,7 @@ export const transformDashboardIn = (
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
       }),
-      optionsJSON: JSON.stringify(options ?? {}),
+      optionsJSON: transformOptionsIn(options),
       ...(panels && {
         panelsJSON,
       }),
