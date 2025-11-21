@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import type { FindRulesRequestQueryInput } from './find_rules_route.gen';
 import { validateFindRulesRequestQuery } from './request_schema_validation';
+
+const GAP_FILTERS_COUPLING_ERROR =
+  'Query fields "gap_fill_statuses", "gaps_range_start" and "gaps_range_end" has to be specified together';
 
 describe('Find rules request schema, additional validation', () => {
   describe('validateFindRulesRequestQuery', () => {
     describe('gap filters coupling', () => {
       test('Valid when gap_fill_statuses with both gaps_range_start and gaps_range_end', () => {
         const schema: FindRulesRequestQueryInput = {
-          gap_fill_statuses: ['unfilled'],
+          gap_fill_statuses: [gapFillStatus.UNFILLED],
           gaps_range_start: '2024-01-01T00:00:00.000Z',
           gaps_range_end: '2024-01-02T00:00:00.000Z',
         };
@@ -23,34 +26,28 @@ describe('Find rules request schema, additional validation', () => {
 
       test('Error when gap_fill_statuses present without gaps_range_start and gaps_range_end', () => {
         const schema: FindRulesRequestQueryInput = {
-          gap_fill_statuses: ['in_progress'],
+          gap_fill_statuses: [gapFillStatus.IN_PROGRESS],
         };
         const errors = validateFindRulesRequestQuery(schema);
-        expect(errors).toEqual([
-          'when "gap_fill_statuses" is present, "gaps_range_start" and "gaps_range_end" must also be present',
-        ]);
+        expect(errors).toEqual([GAP_FILTERS_COUPLING_ERROR]);
       });
 
       test('Error when gap_fill_statuses present with only gaps_range_start', () => {
         const schema: FindRulesRequestQueryInput = {
-          gap_fill_statuses: ['filled'],
+          gap_fill_statuses: [gapFillStatus.FILLED],
           gaps_range_start: '2024-01-01T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
-        expect(errors).toEqual([
-          'when "gap_fill_statuses" is present, "gaps_range_start" and "gaps_range_end" must also be present',
-        ]);
+        expect(errors).toEqual([GAP_FILTERS_COUPLING_ERROR]);
       });
 
       test('Error when gap_fill_statuses present with only gaps_range_end', () => {
         const schema: FindRulesRequestQueryInput = {
-          gap_fill_statuses: ['filled'],
+          gap_fill_statuses: [gapFillStatus.FILLED],
           gaps_range_end: '2024-01-02T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
-        expect(errors).toEqual([
-          'when "gap_fill_statuses" is present, "gaps_range_start" and "gaps_range_end" must also be present',
-        ]);
+        expect(errors).toEqual([GAP_FILTERS_COUPLING_ERROR]);
       });
 
       test('Error when gaps_range_start and gaps_range_end present without gap_fill_statuses', () => {
@@ -59,9 +56,7 @@ describe('Find rules request schema, additional validation', () => {
           gaps_range_end: '2024-01-02T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
-        expect(errors).toEqual([
-          'when "gap_fill_statuses" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
-        ]);
+        expect(errors).toEqual([GAP_FILTERS_COUPLING_ERROR]);
       });
 
       test('Error when only gaps_range_start present without gap_fill_statuses', () => {
@@ -69,9 +64,7 @@ describe('Find rules request schema, additional validation', () => {
           gaps_range_start: '2024-01-01T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
-        expect(errors).toEqual([
-          'when "gap_fill_statuses" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
-        ]);
+        expect(errors).toEqual([GAP_FILTERS_COUPLING_ERROR]);
       });
 
       test('Error when only gaps_range_end present without gap_fill_statuses', () => {
@@ -79,9 +72,7 @@ describe('Find rules request schema, additional validation', () => {
           gaps_range_end: '2024-01-02T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
-        expect(errors).toEqual([
-          'when "gap_fill_statuses" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
-        ]);
+        expect(errors).toEqual([GAP_FILTERS_COUPLING_ERROR]);
       });
 
       test('No error when none of gap filters are provided', () => {
