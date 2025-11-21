@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SpanDocument } from '@kbn/apm-types';
+import type { UnifiedSpanDocument } from '@kbn/apm-types';
 import { existsQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { SPAN_ID, TRACE_ID, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
+import { SPAN_ID, TRACE_ID, PROCESSOR_EVENT, PARENT_ID } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getUnifiedTraceSpan({
@@ -18,13 +18,15 @@ export async function getUnifiedTraceSpan({
   apmEventClient,
   start,
   end,
+  fields = ['*'],
 }: {
-  spanId: string;
+  spanId?: string;
   traceId: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}): Promise<SpanDocument | undefined> {
+  fields?: string[];
+}): Promise<UnifiedSpanDocument | undefined> {
   const params = {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
@@ -32,14 +34,15 @@ export async function getUnifiedTraceSpan({
     track_total_hits: false,
     size: 1,
     terminate_after: 1,
-    fields: ['*'],
+    fields,
     query: {
       bool: {
         filter: [
-          ...termQuery(SPAN_ID, spanId),
+          ...(spanId ? termQuery(SPAN_ID, spanId) : []),
           ...termQuery(TRACE_ID, traceId),
           ...rangeQuery(start, end),
         ],
+        ...(spanId ? {} : { must_not: existsQuery(PARENT_ID) }),
         should: [
           ...termsQuery(PROCESSOR_EVENT, ProcessorEvent.span, ProcessorEvent.transaction),
           { bool: { must_not: existsQuery(PROCESSOR_EVENT) } },
@@ -71,5 +74,5 @@ export async function getUnifiedTraceSpan({
     ...event,
     _id,
     _index,
-  } as SpanDocument;
+  } as UnifiedSpanDocument;
 }

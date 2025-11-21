@@ -7,7 +7,7 @@
 
 import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { type ErrorsByTraceId, type SpanDocument, type TraceRootSpan } from '@kbn/apm-types';
+import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
@@ -38,7 +38,14 @@ import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { normalizeErrors } from './normalize_errors';
 import { getUnifiedTraceSpan } from './get_unified_trace_span';
-import { getUnifiedTraceRootSpanByTraceId } from './get_unified_trace_root_span_by_trace_id';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import {
+  TRANSACTION_DURATION,
+  SPAN_DURATION,
+  DURATION,
+  SPAN_ID,
+} from '../../../common/es_fields/apm';
+import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -304,8 +311,37 @@ const rootItemByTraceIdRoute = createApmServerRoute({
     } = resources;
 
     const apmEventClient = await getApmEventClient(resources);
+    const optionalFields = asMutableArray([
+      TRANSACTION_DURATION,
+      SPAN_DURATION,
+      DURATION,
+      SPAN_ID,
+    ] as const);
 
-    return getUnifiedTraceRootSpanByTraceId({ traceId, apmEventClient, start, end });
+    const span = await getUnifiedTraceSpan({
+      traceId,
+      apmEventClient,
+      start,
+      end,
+      fields: optionalFields,
+    });
+
+    if (!span) {
+      return {} as TraceRootSpan;
+    }
+
+    const apmDuration = span.transaction?.duration?.us ?? span.span?.duration?.us;
+    const otelDuration = span.duration;
+
+    const duration = apmDuration ?? parseOtelDuration(otelDuration);
+
+    if (duration === undefined || duration === 0) {
+      return {} as TraceRootSpan;
+    }
+
+    return {
+      duration,
+    };
   },
 });
 
@@ -488,7 +524,7 @@ const unifiedTraceSpanRoute = createApmServerRoute({
     query: rangeRt,
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<SpanDocument | undefined> => {
+  handler: async (resources): Promise<UnifiedSpanDocument | undefined> => {
     const {
       params: {
         path: { traceId, spanId },

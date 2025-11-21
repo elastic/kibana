@@ -8,7 +8,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import type { SpanDocument } from '@kbn/apm-types';
+import type { UnifiedSpanDocument } from '@kbn/apm-types';
 import { useFetchSpan } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
@@ -16,7 +16,7 @@ jest.mock('../../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
-const mockFetchSpan = jest.fn<Promise<SpanDocument | undefined>, any>();
+const mockFetchSpan = jest.fn<Promise<UnifiedSpanDocument | undefined>, any>();
 const mockAddDanger = jest.fn();
 const mockGetAbsoluteTime = jest.fn(() => ({
   from: '2023-01-01T00:00:00.000Z',
@@ -25,7 +25,7 @@ const mockGetAbsoluteTime = jest.fn(() => ({
 
 const mockGetById: jest.Mock<
   | {
-      fetchSpan: jest.Mock<Promise<SpanDocument | undefined>>;
+      fetchSpan: jest.Mock<Promise<UnifiedSpanDocument | undefined>>;
     }
   | undefined
 > = jest.fn(() => ({
@@ -123,7 +123,7 @@ describe('useFetchSpan', () => {
   });
 
   it('should update span when data is fetched successfully', async () => {
-    const mockSpan: SpanDocument = {
+    const mockSpan: UnifiedSpanDocument = {
       _id: 'test-id',
       _index: 'traces-apm-*',
       span: {
@@ -133,7 +133,7 @@ describe('useFetchSpan', () => {
       },
       trace: { id: traceId },
       service: { name: 'test-service' },
-    } as SpanDocument;
+    } as UnifiedSpanDocument;
 
     mockFetchSpan.mockResolvedValue(mockSpan);
 
@@ -198,16 +198,16 @@ describe('useFetchSpan', () => {
   });
 
   it('should refetch when spanId changes', async () => {
-    const mockSpan1: SpanDocument = {
+    const mockSpan1: UnifiedSpanDocument = {
       _id: 'span-1',
       _index: 'traces-apm-*',
       span: { id: 'span-1', name: 'span-1' },
-    } as SpanDocument;
-    const mockSpan2: SpanDocument = {
+    } as UnifiedSpanDocument;
+    const mockSpan2: UnifiedSpanDocument = {
       _id: 'span-2',
       _index: 'traces-apm-*',
       span: { id: 'span-2', name: 'span-2' },
-    } as SpanDocument;
+    } as UnifiedSpanDocument;
 
     mockFetchSpan.mockResolvedValueOnce(mockSpan1).mockResolvedValueOnce(mockSpan2);
 
@@ -247,11 +247,11 @@ describe('useFetchSpan', () => {
   });
 
   it('should refetch when traceId changes', async () => {
-    const mockSpan: SpanDocument = {
+    const mockSpan: UnifiedSpanDocument = {
       _id: 'test-id',
       _index: 'traces-apm-*',
       span: { id: spanId, name: 'test-span' },
-    } as SpanDocument;
+    } as UnifiedSpanDocument;
 
     mockFetchSpan.mockResolvedValue(mockSpan);
 
@@ -289,11 +289,11 @@ describe('useFetchSpan', () => {
   });
 
   it('should pass AbortSignal to fetchSpan', async () => {
-    const mockSpan: SpanDocument = {
+    const mockSpan: UnifiedSpanDocument = {
       _id: 'test-id',
       _index: 'traces-apm-*',
       span: { id: spanId, name: 'test-span' },
-    } as SpanDocument;
+    } as UnifiedSpanDocument;
 
     mockFetchSpan.mockImplementation(({ signal }: { signal: AbortSignal }) => {
       expect(signal).toBeInstanceOf(AbortSignal);

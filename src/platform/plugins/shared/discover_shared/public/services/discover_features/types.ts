@@ -11,7 +11,12 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
-import type { SpanLinks, ErrorsByTraceId, TraceRootSpan, SpanDocument } from '@kbn/apm-types';
+import type {
+  SpanLinks,
+  ErrorsByTraceId,
+  TraceRootSpan,
+  UnifiedSpanDocument,
+} from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { HistogramItem } from '@kbn/apm-types-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -158,7 +163,7 @@ export interface ObservabilityTracesFetchSpanFeature {
       end: string;
     },
     signal: AbortSignal
-  ) => Promise<SpanDocument | undefined>;
+  ) => Promise<UnifiedSpanDocument | undefined>;
 }
 
 export interface ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature {
