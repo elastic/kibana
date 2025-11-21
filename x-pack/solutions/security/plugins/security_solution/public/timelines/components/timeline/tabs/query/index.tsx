@@ -15,6 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
@@ -40,7 +41,6 @@ import type { KueryFilterQueryKind } from '../../../../../../common/types/timeli
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
@@ -78,17 +78,16 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   status,
   sort,
   timerangeKind,
-  pinnedEventIds,
   eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView: experimentalDataView, status: sourcererStatus } = useDataView(
-    SourcererScopeName.timeline
+    PageScope.timeline
   );
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
 
   const {
     browserFields: oldBrowserFields,
@@ -98,7 +97,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns: oldSelectedPatterns,
     sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
   const loadingSourcerer = useMemo(
     () => (newDataViewPickerEnabled ? sourcererStatus !== 'ready' : oldLoadingSourcerer),
@@ -296,7 +295,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timelineId,
     refetch,
     events,
-    pinnedEventIds,
     eventIdToNoteIds,
     onToggleShowNotes,
   });
@@ -398,7 +396,6 @@ const makeMapStateToProps = () => {
       activeTab,
       columns,
       dataProviders,
-      pinnedEventIds,
       eventIdToNoteIds,
       filters,
       itemsPerPage,
@@ -433,7 +430,6 @@ const makeMapStateToProps = () => {
       end: input.timerange.to,
       filters: timelineFilter,
       timelineId,
-      pinnedEventIds,
       eventIdToNoteIds,
       itemsPerPage,
       itemsPerPageOptions,
@@ -470,7 +466,6 @@ const QueryTabContent = connector(
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.columns, nextProps.columns) &&
-      deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       deepEqual(prevProps.sort, nextProps.sort)

@@ -9,8 +9,12 @@
 
 import { useMemo, useRef, useEffect } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import { useValueFilters } from './use_value_filters';
+import type {
+  MetricField,
+  Dimension,
+  DimensionFilters,
+} from '@kbn/metrics-experience-plugin/common/types';
+import { useDimensionFilters } from './use_dimension_filters';
 import { useMetricFieldsSearchQuery } from './use_metric_fields_search_query';
 
 export const useFilteredMetricFields = ({
@@ -22,17 +26,17 @@ export const useFilteredMetricFields = ({
   onFilterComplete,
 }: {
   allFields: MetricField[];
-  dimensions: string[];
+  dimensions: Dimension[];
   searchTerm: string;
   valueFilters: string[];
   timeRange: TimeRange | undefined;
   onFilterComplete?: () => void;
 }) => {
-  const { kuery, filters } = useValueFilters(valueFilters);
+  const { filters } = useDimensionFilters(valueFilters);
 
   // Client-side filtering by dimensions and search term
   const dimensionsSet = useMemo(
-    () => (dimensions.length > 0 ? new Set(dimensions) : null),
+    () => (dimensions.length > 0 ? new Set(dimensions.map((d) => d.name)) : null),
     [dimensions]
   );
   const searchTermLower = useMemo(() => searchTerm?.toLowerCase(), [searchTerm]);
@@ -55,7 +59,7 @@ export const useFilteredMetricFields = ({
   }, [allFields, searchTermLower, dimensionsSet]);
 
   const { fiedNamesSearch, indicesSearch } = useMemo(() => {
-    if (!kuery) {
+    if (!filters || Object.keys(filters).length === 0) {
       return { fiedNamesSearch: new Set<string>(), indicesSearch: new Set<string>() };
     }
 
@@ -67,7 +71,7 @@ export const useFilteredMetricFields = ({
       },
       { fiedNamesSearch: new Set<string>(), indicesSearch: new Set<string>() }
     );
-  }, [filteredFields, kuery]);
+  }, [filteredFields, filters]);
 
   const shouldSearch = fiedNamesSearch.size > 0;
 
@@ -75,13 +79,13 @@ export const useFilteredMetricFields = ({
     fields: Array.from(fiedNamesSearch),
     index: Array.from(indicesSearch).join(','),
     timeRange,
-    kuery,
+    filters,
     enabled: shouldSearch,
   });
 
   const lastValueRef = useRef<{
     fields: MetricField[];
-    filters: Array<{ field: string; value: string }>;
+    filters?: DimensionFilters;
   }>({ fields: filteredFields, filters });
 
   const shouldUpdate = useMemo(

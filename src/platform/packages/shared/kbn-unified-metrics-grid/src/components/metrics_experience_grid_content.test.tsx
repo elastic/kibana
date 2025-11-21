@@ -112,7 +112,7 @@ describe('MetricsExperienceGridContent', () => {
 
     useFilteredMetricFieldsMock.mockReturnValue({
       fields: allFields,
-      filters: [],
+      filters: {},
       isLoading: false,
     });
 
@@ -139,7 +139,7 @@ describe('MetricsExperienceGridContent', () => {
   it('renders the no data state when filtered/paginated fields returns no fields', () => {
     useFilteredMetricFieldsMock.mockReturnValue({
       fields: [],
-      filters: [],
+      filters: {},
       isLoading: false,
     });
 
@@ -182,7 +182,7 @@ describe('MetricsExperienceGridContent', () => {
 
     useFilteredMetricFieldsMock.mockReturnValue({
       fields: cpuFields,
-      filters: [],
+      filters: {},
       isLoading: false,
     });
 
@@ -205,7 +205,7 @@ describe('MetricsExperienceGridContent', () => {
   it('displays loading state when filtering is in progress', () => {
     useFilteredMetricFieldsMock.mockReturnValue({
       fields: allFields,
-      filters: [],
+      filters: {},
       isLoading: true,
     });
 

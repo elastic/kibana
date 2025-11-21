@@ -11,9 +11,9 @@ import { AlertFilteringMetric } from './alert_filtering_metric';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getExcludeAlertsFilters } from './utils';
 import { getAlertFilteringMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
+import { PageScope } from '../../../data_view_manager/constants';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
@@ -88,7 +88,7 @@ describe('AlertFilteringMetric', () => {
           to: defaultProps.to,
         },
         id: 'AlertFilteringMetricQuery-area-embeddable',
-        scopeId: SourcererScopeName.detections,
+        scopeId: PageScope.alerts,
         withActions: [
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

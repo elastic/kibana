@@ -18,9 +18,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    },
     // add references to other TypeScript projects the plugin depends on
     "@kbn/actions-plugin",
     "@kbn/aiops-change-point-detection",
@@ -147,5 +144,8 @@
     "@kbn/data-service-server",
     "@kbn/es-query-server",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/file-upload-plugin",
+    "@kbn/file-upload",
+    "@kbn/file-upload-common",
   ]
 }

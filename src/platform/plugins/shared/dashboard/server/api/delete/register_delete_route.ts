@@ -11,7 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from '../constants';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
+import { deleteDashboard } from './delete';
 
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
   const deleteRoute = router.delete({
@@ -37,8 +37,7 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       try {
-        const { core } = await ctx.resolve(['core']);
-        await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, req.params.id);
+        await deleteDashboard(ctx, req.params.id);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
