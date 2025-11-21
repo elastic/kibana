@@ -34,8 +34,15 @@ test.describe('Stream data retention - display values', { tag: ['@ess', '@svlObl
     await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
   });
 
-  test.afterEach(async ({ apiServices, pageObjects }) => {
-    await pageObjects.toasts.closeAll();
+  test.afterEach(async ({ apiServices, page }) => {
+    // Only close toasts if they exist
+    const toasts = page.locator('.euiToast');
+    if ((await toasts.count()) > 0) {
+      await page
+        .locator('.euiToast__closeButton')
+        .click({ timeout: 1000 })
+        .catch(() => {});
+    }
     await apiServices.streams.clearStreamChildren('logs');
   });
 

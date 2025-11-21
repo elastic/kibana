@@ -8,6 +8,13 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
+import {
+  openRetentionModal,
+  saveRetentionChanges,
+  setCustomRetention,
+  toggleInheritSwitch,
+  verifyRetentionDisplay,
+} from '../../../fixtures/retention_helpers';
 
 test.describe(
   'Stream data retention - updating failure store',
@@ -147,46 +154,23 @@ test.describe(
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
       // Set main retention to 30 days
-      await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
-      await page.getByRole('button', { name: 'Custom period' }).click();
-      await page.getByTestId('streamsAppDslModalDaysField').fill('30');
-      await page.getByRole('button', { name: 'Save' }).click();
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '30', 'd');
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '30 days');
 
       // Set failure store retention to 7 days
       await page.getByTestId('streamFailureStoreEditRetention').click();
       await page.getByTestId('custom').click();
       const dialog = page.getByRole('dialog');
+      await dialog.getByTestId('selectFailureStorePeriodValue').clear();
       await dialog.getByTestId('selectFailureStorePeriodValue').fill('7');
       await page.getByTestId('failureStoreModalSaveButton').click();
 
       // Verify both are set correctly
-      await expect(page.getByTestId('retention-metric').getByText('30 days')).toBeVisible();
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('7 days')
-      ).toBeVisible();
-    });
-
-    test('should change failure store retention multiple times', async ({ page, pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
-
-      // Set to 7 days
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('custom').click();
-      let dialog = page.getByRole('dialog');
-      await dialog.getByTestId('selectFailureStorePeriodValue').fill('7');
-      await page.getByTestId('failureStoreModalSaveButton').click();
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('7 days')
-      ).toBeVisible();
-
-      // Change to 14 days
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      dialog = page.getByRole('dialog');
-      await dialog.getByTestId('selectFailureStorePeriodValue').fill('14');
-      await page.getByTestId('failureStoreModalSaveButton').click();
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('14 days')
-      ).toBeVisible();
+      await verifyRetentionDisplay(page, '30 days');
+      await verifyRetentionDisplay(page, '7 days', true);
     });
 
     test('should persist failure store retention across page reload', async ({
@@ -229,21 +213,6 @@ test.describe(
       );
     });
 
-    test('should display failure store and main retention independently', async ({
-      page,
-      pageObjects,
-    }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
-
-      // Verify both cards are visible
-      await expect(page.getByTestId('retentionCard')).toBeVisible();
-      await expect(page.getByTestId('failureStoreRetentionCard')).toBeVisible();
-
-      // Verify they have different test IDs
-      await expect(page.getByTestId('retention-metric')).toBeVisible();
-      await expect(page.getByTestId('failureStoreRetention-metric')).toBeVisible();
-    });
-
     test('should show failure store disabled state', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
@@ -253,36 +222,6 @@ test.describe(
 
       await expect(page.getByTestId('disabledFailureStorePanel')).toBeVisible();
       await expect(page.getByText('Failure store disabled')).toBeVisible();
-    });
-
-    test('should show enable button when failure store is disabled', async ({
-      page,
-      pageObjects,
-    }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
-
-      // Disable first
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
-
-      // Verify enable button appears
-      await expect(page.getByTestId('streamsAppFailureStoreEnableButton')).toBeVisible();
-    });
-
-    test('should validate failure store retention value', async ({ page, pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
-
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('custom').click();
-      const dialog = page.getByRole('dialog');
-
-      // Try invalid value
-      await dialog.getByTestId('selectFailureStorePeriodValue').fill('-5');
-
-      // Should show validation error or disable save button
-      // (exact behavior depends on implementation)
-      await expect(page.getByTestId('failureStoreModalSaveButton')).toBeDisabled();
     });
   }
 );

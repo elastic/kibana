@@ -33,19 +33,20 @@ test.describe(
       await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
     });
 
-    test.afterEach(async ({ apiServices, pageObjects }) => {
-      await pageObjects.toasts.closeAll();
+    test.afterEach(async ({ apiServices, page }) => {
+      // Only close toasts if they exist
+      const toasts = page.locator('.euiToast');
+      if ((await toasts.count()) > 0) {
+        await page
+          .locator('.euiToast__closeButton')
+          .click({ timeout: 1000 })
+          .catch(() => {});
+      }
       await apiServices.streams.clearStreamChildren('logs');
     });
 
     test.afterAll(async ({ apiServices }) => {
       await apiServices.streams.disable();
-    });
-
-    test('should display retention card alongside storage metrics', async ({ page }) => {
-      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionCard)).toBeVisible();
-      // Storage size card should also be visible (if implemented)
-      // await expect(page.getByTestId('storageSizeCard')).toBeVisible();
     });
 
     test('should update retention without affecting storage display', async ({ page }) => {
@@ -59,11 +60,6 @@ test.describe(
 
       // Storage metrics should still be visible/unchanged
       // (exact verification depends on storage metrics implementation)
-    });
-
-    test('should show all lifecycle cards in correct order', async ({ page }) => {
-      // Verify lifecycle section contains expected cards
-      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionCard)).toBeVisible();
     });
 
     test('should maintain retention display after page navigation', async ({

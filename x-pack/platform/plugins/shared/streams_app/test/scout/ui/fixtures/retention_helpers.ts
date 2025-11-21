@@ -146,8 +146,10 @@ export async function setCustomRetention(
   // Click custom retention button
   await page.getByRole('button', { name: 'Custom period' }).click();
 
-  // Fill in the value
-  await page.getByTestId(RETENTION_TEST_IDS.dslField).fill(value);
+  // Clear and fill in the value (clear is needed because the field has a default value of 90)
+  const field = page.getByTestId(RETENTION_TEST_IDS.dslField);
+  await field.clear();
+  await field.fill(value);
 
   // Select the unit if not days (days is default)
   if (unit !== 'd') {

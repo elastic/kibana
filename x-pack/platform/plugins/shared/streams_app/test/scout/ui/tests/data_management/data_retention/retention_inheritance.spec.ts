@@ -27,8 +27,15 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
     await apiServices.streams.clearStreamChildren('logs');
   });
 
-  test.afterEach(async ({ apiServices, pageObjects }) => {
-    await pageObjects.toasts.closeAll();
+  test.afterEach(async ({ apiServices, page }) => {
+    // Only close toasts if they exist
+    const toasts = page.locator('.euiToast');
+    if ((await toasts.count()) > 0) {
+      await page
+        .locator('.euiToast__closeButton')
+        .click({ timeout: 1000 })
+        .catch(() => {});
+    }
     await apiServices.streams.clearStreamChildren('logs');
   });
 
