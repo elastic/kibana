@@ -32,6 +32,7 @@ export function formatZodError(
     return { message, formattedError: error };
   }
 
+  // eslint-disable-next-line complexity
   const formattedIssues = error.issues.map((issue) => {
     let formattedMessage: string;
 
@@ -54,9 +55,9 @@ export function formatZodError(
           formattedMessage = genericUnionMessage;
         }
         // Handle discriminated union errors for type field
-        else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
+        else if (issue.code === 'invalid_union' && issue.path.includes('triggers')) {
           formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
-        } else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
+        } else if (issue.code === 'invalid_union' && issue.path.includes('type')) {
           formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
         }
         // Handle literal type errors for type field (avoid listing all 1000+ options)
@@ -98,14 +99,13 @@ export function formatZodError(
     else {
       // Try generic union error message first
       const genericUnionMessage = getGenericUnionErrorMessage(issue);
-      if (genericUnionMessage) {
-        formattedMessage = genericUnionMessage;
-      }
       // Handle discriminated union errors for type field
-      else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
+      if (issue.code === 'invalid_union' && issue.path.includes('triggers')) {
         formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
-      } else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
+      } else if (issue.code === 'invalid_union' && issue.path.includes('type')) {
         formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+      } else if (genericUnionMessage) {
+        formattedMessage = genericUnionMessage;
       }
       // Handle literal type errors for type field (avoid listing all 1000+ options)
       else if (issue.code === 'invalid_literal' && issue.path?.includes('type')) {
@@ -194,7 +194,7 @@ const schemaCache = new Map<string, any>();
  */
 function generateUnionErrorMessage(
   schema: z.ZodType,
-  path: (string | number)[],
+  path: PropertyKey[],
   fieldName: string,
   yamlDocument?: any
 ): string | null {
@@ -240,11 +240,11 @@ function generateUnionErrorMessage(
         // Unwrap optional, nullable, default wrappers to find the underlying union
         while (unionSchema && !(unionSchema instanceof z.ZodUnion)) {
           if (unionSchema instanceof z.ZodOptional) {
-            unionSchema = unionSchema._def.innerType;
+            unionSchema = unionSchema.unwrap() as z.ZodType;
           } else if (unionSchema instanceof z.ZodNullable) {
-            unionSchema = unionSchema._def.innerType;
+            unionSchema = unionSchema.unwrap() as z.ZodType;
           } else if (unionSchema instanceof z.ZodDefault) {
-            unionSchema = unionSchema._def.innerType;
+            unionSchema = unionSchema.unwrap() as z.ZodType;
           } else {
             break;
           }
@@ -277,7 +277,7 @@ function generateUnionErrorMessage(
  * Generates a better error message for non-union field types (like objects)
  */
 function getBetterFieldErrorMessage(
-  path: (string | number)[],
+  path: PropertyKey[],
   fieldName: string,
   yamlDocument?: any
 ): string | null {
@@ -333,7 +333,7 @@ function analyzeUnionSchema(
     let description = 'unknown option';
 
     if (option instanceof z.ZodObject) {
-      const shape = option._def.shape();
+      const shape = option.def.shape;
 
       // Look for discriminator fields (like 'type')
       const discriminator = findDiscriminatorInShape(shape);
@@ -360,8 +360,8 @@ function analyzeUnionSchema(
         }
       }
     } else if (option instanceof z.ZodLiteral) {
-      name = `literal_${String(option._def.value).replace(/[^a-zA-Z0-9]/g, '_')}`;
-      description = `literal value: ${JSON.stringify(option._def.value)}`;
+      name = `literal_${String(option.value).replace(/[^a-zA-Z0-9]/g, '_')}`;
+      description = `literal value: ${JSON.stringify(option.value)}`;
     } else if (option instanceof z.ZodString) {
       name = 'string';
       description = 'string value';
@@ -392,7 +392,8 @@ function findDiscriminatorInShape(
 ): { key: string; value: any } | null {
   for (const [key, schema] of Object.entries(shape)) {
     if (schema instanceof z.ZodLiteral) {
-      return { key, value: schema._def.value };
+      // TODO: fix multiple values case
+      return { key, value: schema.value };
     }
   }
   return null;
@@ -551,7 +552,7 @@ function getObjectStructureDescription(objectSchema: z.ZodType): string | null {
  * This works for any connector type and field, not just Cases connectors
  */
 function getConnectorUnionSchemaFromPath(
-  path: (string | number)[],
+  path: PropertyKey[],
   yamlDocument?: any
 ): z.ZodUnion<any> | null {
   try {

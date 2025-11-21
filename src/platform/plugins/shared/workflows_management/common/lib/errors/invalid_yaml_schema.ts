@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ZodIssue } from '@kbn/zod/v4';
+import type { $ZodIssue } from '@kbn/zod/v4/core';
 
 export interface MockZodIssue {
   code: 'invalid_literal' | 'unknown';
@@ -23,7 +23,7 @@ export interface MockZodError {
 
 export interface FormattedZodError {
   message: string;
-  issues: ZodIssue[] | MockZodIssue[];
+  issues: $ZodIssue[] | MockZodIssue[];
 }
 
 export class InvalidYamlSchemaError extends Error {
