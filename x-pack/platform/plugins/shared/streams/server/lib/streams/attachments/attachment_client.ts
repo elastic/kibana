@@ -9,12 +9,12 @@ import { isNotFoundError } from '@kbn/es-errors';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { groupBy } from 'lodash';
 import { AttachmentNotFoundError } from '../errors/attachment_not_found_error';
 import { AttachmentLinkNotFoundError } from '../errors/attachment_link_not_found_error';
 import type { AttachmentStorageSettings } from './storage_settings';
 import { ATTACHMENT_ID, ATTACHMENT_TYPE, ATTACHMENT_UUID, STREAM_NAMES } from './storage_settings';
 import {
-  ATTACHMENT_TYPES,
   type Attachment,
   type AttachmentBulkOperation,
   type AttachmentDocument,
@@ -148,26 +148,15 @@ export class AttachmentClient {
    * @returns A promise that resolves with an array of full attachment details
    */
   private async fetchAttachments(attachmentLinks: AttachmentLink[]): Promise<Attachment[]> {
-    // Group attachment IDs by type
-    const attachmentIdsByType: Record<AttachmentType, string[]> = {
-      dashboard: [],
-      rule: [],
-    };
-
-    attachmentLinks.forEach((link) => {
-      attachmentIdsByType[link.type].push(link.id);
-    });
+    // Group attachment IDs by type using lodash groupBy
+    const attachmentIdsByType = groupBy(attachmentLinks, 'type');
 
     // Fetch attachments for each type and flatten results
     const attachments: Attachment[] = (
       await Promise.all(
-        ATTACHMENT_TYPES.map(async (type) => {
-          const ids = attachmentIdsByType[type];
-          if (ids.length === 0) {
-            return [];
-          }
-
-          return this.getAttachmentEntitiesMap[type](ids);
+        Object.entries(attachmentIdsByType).map(async ([type, links]) => {
+          const ids = links.map((link) => link.id);
+          return this.getAttachmentEntitiesMap[type as AttachmentType](ids);
         })
       )
     ).flat();
