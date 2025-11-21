@@ -61,7 +61,7 @@ export const upsertStreamQueryRequestSchema = z.object({
   feature: z
     .object({
       name: NonEmptyString,
-      filter: conditionSchema,
+      filter: conditionSchema.optional(),
     })
     .optional(),
   kql: z.object({
