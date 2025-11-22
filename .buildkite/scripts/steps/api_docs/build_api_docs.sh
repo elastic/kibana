@@ -26,6 +26,13 @@ echo "$CHANGED_PLUGINS" | jq -r '.[]' | while read -r PLUGIN_ID; do
   fi
 done
 
+# Restore TypeScript build cache
+echo "--- Restore TypeScript build cache"
+node scripts/type_check --restore-only
+
+echo "--- Build API Docs"
+node --max-old-space-size=24000 scripts/build_api_docs
+
 if [[ "${PUBLISH_API_DOCS_CHANGES:-}" == "true" ]]; then
   echo "--- Store API Docs changes in Buildkite"
   git add -N ./*.docnav.json
