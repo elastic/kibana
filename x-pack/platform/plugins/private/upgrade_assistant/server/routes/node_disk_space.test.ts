@@ -49,6 +49,12 @@ describe('Disk space API', () => {
                 total_in_bytes: 100,
                 available_in_bytes: 20,
               },
+              data: [
+                {
+                  available_in_bytes: 20,
+                  low_watermark_free_space_in_bytes: 100,
+                },
+              ],
             },
           },
         },
@@ -77,8 +83,7 @@ describe('Disk space API', () => {
         {
           nodeName: 'node_name',
           nodeId: '1YOaoS9lTNOiTxR1uzSgRA',
-          available: '20%',
-          lowDiskWatermarkSetting: '75%',
+          available: '20b',
         },
       ]);
     });
@@ -103,8 +108,7 @@ describe('Disk space API', () => {
         {
           nodeName: 'node_name',
           nodeId: '1YOaoS9lTNOiTxR1uzSgRA',
-          available: '20%',
-          lowDiskWatermarkSetting: '75%',
+          available: '20b',
         },
       ]);
     });
@@ -129,8 +133,7 @@ describe('Disk space API', () => {
         {
           nodeName: 'node_name',
           nodeId: '1YOaoS9lTNOiTxR1uzSgRA',
-          available: '20%',
-          lowDiskWatermarkSetting: '79%',
+          available: '20b',
         },
       ]);
     });
@@ -157,8 +160,7 @@ describe('Disk space API', () => {
         {
           nodeName: 'node_name',
           nodeId: '1YOaoS9lTNOiTxR1uzSgRA',
-          available: '20%',
-          lowDiskWatermarkSetting: '80b',
+          available: '20b',
         },
       ]);
     });
@@ -192,6 +194,29 @@ describe('Disk space API', () => {
         },
         transient: {},
         persistent: {},
+      });
+
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.nodes.stats as jest.Mock
+      ).mockResolvedValue({
+        nodes: {
+          '1YOaoS9lTNOiTxR1uzSgRA': {
+            name: 'node_name',
+            fs: {
+              total: {
+                // Keeping these numbers (inaccurately) small so it's easier to reason the math when scanning through :)
+                total_in_bytes: 100,
+                available_in_bytes: 120,
+              },
+              data: [
+                {
+                  available_in_bytes: 120,
+                  low_watermark_free_space_in_bytes: 100,
+                },
+              ],
+            },
+          },
+        },
       });
 
       const resp = await routeDependencies.router.getHandler({
