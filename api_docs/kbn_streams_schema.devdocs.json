@@ -3296,7 +3296,7 @@
           },
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { filter: ",
+          ", { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3304,7 +3304,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; }, { filter: ",
+          "; }, { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3312,7 +3312,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; }>>; kql: ",
+          "; }>>; kql: ",
           "ZodObject",
           "<{ query: ",
           "ZodString",
@@ -3320,7 +3320,7 @@
           "ZodTypeAny",
           ", { query: string; }, { query: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; kql: { query: string; }; feature?: { filter: ",
+          ", { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3328,7 +3328,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }, { title: string; kql: { query: string; }; feature?: { filter: ",
+          "; } | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3336,7 +3336,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }>"
+          "; } | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
         "deprecated": false,
