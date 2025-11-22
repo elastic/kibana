@@ -151,8 +151,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('lens XY chart with multiple layers', async () => {
       await lens.createLayer();
+      await lens.ensureLayerTabIsActive(1);
 
-      await lens.switchToVisualization('area');
+      await lens.switchToVisualization('area', undefined, 1);
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
