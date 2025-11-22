@@ -179,9 +179,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const href = await testSubjects.getAttribute('gettingStartedSearchLabs-btn', 'href');
             expect(href).to.contain('search-labs');
           });
-          it('renders Python Notebooks callout and navigates correctly', async () => {
-            const href = await testSubjects.getAttribute('gettingStartedOpenNotebooks-btn', 'href');
-            expect(href).to.contain('search-labs/tutorials/examples');
+          it('renders Elastic Training callout and navigates correctly', async () => {
+            const href = await testSubjects.getAttribute(
+              'gettingStartedElasticTraining-btn',
+              'href'
+            );
+            expect(href).to.contain('training');
           });
           it('renders Elasticsearch Documentation callout and navigates correctly', async () => {
             const href = await testSubjects.getAttribute(
