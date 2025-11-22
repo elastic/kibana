@@ -1,0 +1,35 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "jsx": "react",
+    "esModuleInterop": true,
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "@testing-library/react",
+      "../../../../../../../typings/emotion.d.ts"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/content-list-provider",
+    "@kbn/content-management-favorites-public",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/content-management-tags",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/content-management-user-profiles"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

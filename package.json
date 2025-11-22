@@ -269,6 +269,7 @@
     "@kbn/content-list-provider": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider",
     "@kbn/content-list-provider-client": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client",
     "@kbn/content-list-provider-server": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-server",
+    "@kbn/content-list-table": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-table",
     "@kbn/content-management-access-control-public": "link:src/platform/packages/shared/content-management/access_control/access_control_public",
     "@kbn/content-management-access-control-server": "link:src/platform/packages/shared/content-management/access_control/access_control_server",
     "@kbn/content-management-content-editor": "link:src/platform/packages/shared/content-management/content_editor",

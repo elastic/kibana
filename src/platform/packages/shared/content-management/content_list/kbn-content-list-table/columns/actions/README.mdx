@@ -1,0 +1,230 @@
+# Actions
+
+Actions are buttons that appear in the Actions column, allowing users to perform operations on individual items.
+
+The Actions column uses [EuiBasicTable's native Row Actions functionality](https://eui.elastic.co/docs/components/tables/basic/#row-actions) which provides:
+- Automatic action visibility management (primary actions visible, rest in popover when hovering)
+- Row hover transparency effects
+- Automatic disabling when rows are selected
+
+## Usage
+
+Actions are declarative components passed as children to `Column.Actions`:
+
+```tsx
+const { Column, Action } = ContentListTable;
+
+<ContentListTable>
+  <Column.Name />
+  <Column.Actions>
+    <Action.Edit />
+    <Action.Delete />
+  </Column.Actions>
+</ContentListTable>
+```
+
+## Built-in Actions
+
+Built-in actions automatically use handlers from the provider's `itemConfig.actions`:
+
+### ViewDetails
+
+```tsx
+// Handler: itemConfig.actions.onViewDetails
+<Action.ViewDetails
+  tooltip="View details"      // Optional: custom tooltip
+  aria-label="View details"   // Optional: accessibility label
+/>
+```
+
+### Edit
+
+```tsx
+// Handler: itemConfig.actions.onEdit
+<Action.Edit
+  tooltip="Edit"              // Optional: custom tooltip
+  aria-label="Edit {title}"   // Optional: accessibility label
+/>
+```
+
+### Delete
+
+```tsx
+// Handler: itemConfig.actions.onDelete
+<Action.Delete
+  tooltip="Delete"
+  aria-label="Delete {title}"
+/>
+```
+
+### Duplicate
+
+```tsx
+// Handler: itemConfig.actions.onDuplicate
+<Action.Duplicate
+  tooltip="Duplicate"
+  aria-label="Duplicate {title}"
+/>
+```
+
+### Export
+
+```tsx
+// Handler: itemConfig.actions.onExport
+<Action.Export
+  tooltip="Export"
+  aria-label="Export {title}"
+/>
+```
+
+## Custom Actions
+
+For actions not covered by built-ins, use `Action` directly (the base `Action` component is for custom actions):
+
+```tsx
+<Action
+  id="share"                             // Required: unique identifier
+  label="Share"                          // Required: display label
+  iconType="share"                       // Required: EUI icon type
+  handler={(item) => handleShare(item)}  // Required: click handler
+  tooltip="Share with team"              // Optional
+  color="primary"                        // Optional: 'primary' | 'success' | 'warning' | 'danger' | 'text'
+  aria-label="Share {title}"             // Optional
+  isEnabled={(item) => !item.isManaged}  // Optional: conditionally disable
+/>
+```
+
+## Action Order and Primary Actions
+
+Actions render in the order they appear in JSX. Only `Edit` and `ViewDetails` are marked as primary and remain visible at all times. When more than two actions are defined, additional actions appear in a popover (ellipsis menu):
+
+```tsx
+<Column.Actions>
+  <Action.Edit />            {/* Primary - always visible */}
+  <Action.ViewDetails />     {/* Primary - always visible */}
+  <Action id="share" ... />  {/* In popover menu */}
+  <Action.Delete />          {/* In popover menu */}
+</Column.Actions>
+```
+
+Note: Custom actions (via `Action`) are never marked as primary.
+
+## Default Behavior
+
+If no children are provided to `Column.Actions`, all actions from the provider are shown:
+
+```tsx
+// Shows all actions defined in itemConfig.actions
+<Column.Actions />
+```
+
+To show specific actions only:
+
+```tsx
+// Shows only Edit and Delete (even if more are defined in provider)
+<Column.Actions>
+  <Action.Edit />
+  <Action.Delete />
+</Column.Actions>
+```
+
+## Provider Configuration
+
+Actions handlers are defined in the provider. Each action supports either a handler function (shorthand) or an object with `handler` and optional `isEnabled`:
+
+```tsx
+<ContentListProvider
+  item={{
+    actions: {
+      // Shorthand: just the handler function
+      onDelete: (item) => confirmDelete(item),
+      onDuplicate: (item) => duplicateItem(item),
+      onExport: (item) => exportItem(item),
+      onViewDetails: (item) => openDetails(item),
+
+      // Full config: handler with isEnabled for conditional disabling
+      onEdit: {
+        handler: (item) => navigateToEdit(item.id),
+        isEnabled: (item) => !item.isManaged,  // Disabled for managed items
+      },
+    }
+  }}
+>
+  <ContentListTable>
+    <Column.Actions>
+      <Action.Edit />        {/* Uses onEdit - disabled when isManaged */}
+      <Action.ViewDetails /> {/* Uses onViewDetails */}
+      <Action.Delete />      {/* Uses onDelete */}
+    </Column.Actions>
+  </ContentListTable>
+</ContentListProvider>
+```
+
+## Conditional Action Disabling
+
+Actions can be conditionally disabled per-item using the `isEnabled` callback. When `isEnabled` returns `false`, the action is rendered as disabled (grayed out, not clickable) but still visible.
+
+```tsx
+// Disable editing for managed items
+onEdit: {
+  handler: (item) => navigateToEdit(item.id),
+  isEnabled: (item) => !item.isManaged,
+}
+
+// Disable delete for items with references
+onDelete: {
+  handler: (item) => confirmDelete(item),
+  isEnabled: (item) => item.references?.length === 0,
+}
+```
+
+For custom actions, use the `isEnabled` prop directly on the `Action` component:
+
+```tsx
+<Action
+  id="archive"
+  label="Archive"
+  iconType="folderClosed"
+  handler={(item) => archiveItem(item)}
+  isEnabled={(item) => item.status !== 'archived'}
+/>
+```
+
+Custom actions defined in the provider's `custom` array also support `isEnabled`:
+
+```tsx
+custom: [
+  {
+    id: 'archive',
+    label: 'Archive',
+    iconType: 'folderClosed',
+    handler: (item) => archiveItem(item),
+    isEnabled: (item) => item.status !== 'archived',
+  },
+]
+```
+
+## Architecture
+
+Actions use the same declarative pattern as columns:
+
+1. **Marker components** (`Action.Edit`, `Action`, etc.) don't render.
+2. **Parser** (`parse_actions.ts`) extracts action descriptors from children.
+3. **Column builder** creates an `EuiTableActionsColumnType` with `DefaultItemAction` array.
+
+```tsx
+// Action descriptors parsed from children
+type ActionDescriptor =
+  | KnownActionDescriptor   // { id: 'viewDetails' | 'edit' | 'delete' | 'duplicate' | 'export', ... }
+  | CustomActionDescriptor  // { id: string, label, iconType, handler, ... }
+```
+
+## Read-Only Mode
+
+When `isReadOnly={true}` is set on the provider, the Actions column is hidden entirely.
+
+## Related
+
+- [EUI Row Actions Documentation](https://eui.elastic.co/docs/components/tables/basic/#row-actions)
+- [Parent README](../README.mdx) - Column architecture
+- [Package README](../../README.md) - Full package documentation
