@@ -19,6 +19,7 @@ import {
   type ControlTriggerSource,
 } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
+import type { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import { untilPluginStartServicesReady } from '../../kibana_services';
 import { ESQLControlsFlyout } from './control_flyout';
 
@@ -36,7 +37,8 @@ interface Context {
   closeFlyout?: () => void;
   ariaLabelledBy: string;
   currentApp?: string;
-  triggerSource: ControlTriggerSource;
+  triggerSource?: ControlTriggerSource;
+  telemetryService: ESQLEditorTelemetryService;
 }
 
 export async function loadESQLControlFlyout({
@@ -54,6 +56,7 @@ export async function loadESQLControlFlyout({
   ariaLabelledBy,
   currentApp,
   triggerSource,
+  telemetryService,
 }: Context) {
   const timeRange = timefilter.getTime();
   const deps = await untilPluginStartServicesReady();
@@ -79,6 +82,7 @@ export async function loadESQLControlFlyout({
           timeRange={timeRange}
           currentApp={currentApp}
           telemetryTriggerSource={triggerSource}
+          telemetryService={telemetryService}
         />
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
