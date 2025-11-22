@@ -85,7 +85,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('get and list', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240922
+    describe.skip('get and list', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
       });

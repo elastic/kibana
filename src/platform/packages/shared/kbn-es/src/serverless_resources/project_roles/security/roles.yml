@@ -50,8 +50,8 @@ viewer:
         - feature_siemV4.endpoint_list_read
         - feature_siemV4.endpoint_exceptions_read
         - feature_securitySolutionCasesV2.read
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAssistant.minimal_all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_actions.read
