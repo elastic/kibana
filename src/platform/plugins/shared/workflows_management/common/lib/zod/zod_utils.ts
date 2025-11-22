@@ -70,7 +70,14 @@ export function getSchemaAtPath(
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
             : { schema: null, scopedToPath: null };
         }
-        current = validBranch as ZodType;
+        // We found a valid branch, now we need to traverse into it with the current segment
+        const branchResult = getSchemaAtPath(validBranch as ZodType, segment);
+        if (!branchResult.schema) {
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
+        }
+        current = branchResult.schema;
       } else if (current instanceof z.ZodArray) {
         if (!/^\d+$/.test(segment)) {
           return partial

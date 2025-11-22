@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EsGenericResponseSchema } from '@kbn/workflows/common/elasticsearch_generic_response_schema';
 import { z } from '@kbn/zod/v4';
 import {
   expectZodSchemaEqual,
@@ -133,6 +134,23 @@ describe('getSchemaAtPath', () => {
     const result = getSchemaAtPath(schema, 'a.b');
     expectZodSchemaEqual(result.schema as z.ZodType, z.any());
     expect(result.scopedToPath).toBe('a.b');
+  });
+});
+
+describe('getSchemaAtPath: real life examples', () => {
+  it('should return the correct type for the real life example', () => {
+    const path = 'steps.search_park_data.output.hits.total.value';
+    const schema = z.object({
+      steps: z.object({
+        search_park_data: z.object({
+          output: EsGenericResponseSchema,
+        }),
+      }),
+    });
+    const atPathResult = getSchemaAtPath(schema, path);
+    expect(atPathResult.schema).toBeDefined();
+    expect(atPathResult.scopedToPath).toBe(path);
+    expectZodSchemaEqual(atPathResult.schema as z.ZodType, z.number());
   });
 });
 
