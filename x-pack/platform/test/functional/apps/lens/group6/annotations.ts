@@ -28,6 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(
         await (await testSubjects.find(`lnsLayerAddButton-annotations`)).getAttribute('disabled')
       ).to.be('true');
+
+      // click add layer button again to close the popup
+      await testSubjects.click('lnsLayerAddButton');
     });
 
     it('should add manual annotation layer with static date and allow edition', async () => {
@@ -76,6 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add query annotation layer and allow edition', async () => {
       await lens.removeLayer(1);
+      await lens.assertLayerCount(1);
       await lens.createLayer('annotations');
 
       await lens.assertLayerCount(2);
