@@ -6,11 +6,21 @@
  */
 
 export const gapAutoFillSchedulerLimits = {
+  /**
+   * Maximum number of backfills gap fill scheduler can schedule
+   * default value is 1000, which is big enough for most use cases
+   */
   maxBackfills: {
     min: 1,
     max: 5000,
     defaultValue: 1000,
   },
+  /**
+   * How many times to retry to automatically fill a gap
+   * if the gap is not filled after the retries, the gap will be skipped
+   * default value is 3, which is a should work if error was caused by a temporary issue
+   * if the error is caused by a permanent issue, the gap will be skipped
+   */
   numRetries: {
     min: 1,
     max: 10,
