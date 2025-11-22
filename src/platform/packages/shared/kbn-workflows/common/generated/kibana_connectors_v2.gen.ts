@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-11-21T23:40:14.001Z
+ * Generated at: 2025-11-22T01:09:36.721Z
  * Source: /oas_docs/output/kibana.yaml (undefined APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
@@ -1065,7 +1065,7 @@ import {
   upsert_entity_response,
 } from './schemas/kibana_openapi_zod.gen';
 import type { InternalConnectorContract } from '../../types/latest';
-import { getLooseObjectFromProperty, getShape } from '../utils';
+import { getLooseObjectFromProperty } from '../utils';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 
@@ -1094,12 +1094,7 @@ You do not need any Kibana feature privileges to run this API.`,
     getLooseObjectFromProperty(get_actions_connector_types_request, 'path'),
     getLooseObjectFromProperty(get_actions_connector_types_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_actions_connector_types_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_actions_connector_types_response,
 };
 const DELETE_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_actions_connector_id',
@@ -1125,12 +1120,7 @@ WARNING: When you delete a connector, it cannot be recovered.`,
     getLooseObjectFromProperty(delete_actions_connector_id_request, 'path'),
     getLooseObjectFromProperty(delete_actions_connector_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_actions_connector_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_actions_connector_id_response,
 };
 const GET_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_actions_connector_id',
@@ -1154,12 +1144,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_actions_connector_id_request, 'path'),
     getLooseObjectFromProperty(get_actions_connector_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_actions_connector_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_actions_connector_id_response,
 };
 const POST_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_actions_connector_id',
@@ -1183,12 +1168,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_actions_connector_id_request, 'path'),
     getLooseObjectFromProperty(post_actions_connector_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_actions_connector_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_actions_connector_id_response,
 };
 const PUT_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_actions_connector_id',
@@ -1212,12 +1192,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(put_actions_connector_id_request, 'path'),
     getLooseObjectFromProperty(put_actions_connector_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_actions_connector_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_actions_connector_id_response,
 };
 const POST_ACTIONS_CONNECTOR_ID_EXECUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_actions_connector_id_execute',
@@ -1243,12 +1218,7 @@ You can use this API to test an action that involves interaction with Kibana ser
     getLooseObjectFromProperty(post_actions_connector_id_execute_request, 'path'),
     getLooseObjectFromProperty(post_actions_connector_id_execute_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_actions_connector_id_execute_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_actions_connector_id_execute_response,
 };
 const GET_ACTIONS_CONNECTORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_actions_connectors',
@@ -1272,12 +1242,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_actions_connectors_request, 'path'),
     getLooseObjectFromProperty(get_actions_connectors_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_actions_connectors_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_actions_connectors_response,
 };
 const POST_AGENT_BUILDER_A2A_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_a2a_agentid',
@@ -1303,12 +1268,7 @@ WARNING: This endpoint is designed for A2A protocol clients and should not be us
     getLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'path'),
     getLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_agent_builder_a2a_agentid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_agent_builder_a2a_agentid_response,
 };
 const GET_AGENT_BUILDER_A2A_AGENTID_JSON_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_a2a_agentid_json',
@@ -1334,12 +1294,7 @@ Get agent discovery metadata in JSON format. Use this endpoint to provide agent 
     getLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'path'),
     getLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_agent_builder_a2a_agentid_json_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_agent_builder_a2a_agentid_json_response,
 };
 const GET_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_agents',
@@ -1365,12 +1320,7 @@ List all available agents. Use this endpoint to retrieve complete agent informat
     getLooseObjectFromProperty(get_agent_builder_agents_request, 'path'),
     getLooseObjectFromProperty(get_agent_builder_agents_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_agent_builder_agents_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_agent_builder_agents_response,
 };
 const POST_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_agents',
@@ -1396,12 +1346,7 @@ Create a new agent. Use this endpoint to define the agent's behavior, appearance
     getLooseObjectFromProperty(post_agent_builder_agents_request, 'path'),
     getLooseObjectFromProperty(post_agent_builder_agents_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_agent_builder_agents_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_agent_builder_agents_response,
 };
 const DELETE_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_agent_builder_agents_id',
@@ -1427,12 +1372,7 @@ Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authoriz
     getLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'path'),
     getLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_agent_builder_agents_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_agent_builder_agents_id_response,
 };
 const GET_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_agents_id',
@@ -1458,12 +1398,7 @@ Get a specific agent by ID. Use this endpoint to retrieve the complete agent def
     getLooseObjectFromProperty(get_agent_builder_agents_id_request, 'path'),
     getLooseObjectFromProperty(get_agent_builder_agents_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_agent_builder_agents_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_agent_builder_agents_id_response,
 };
 const PUT_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_agent_builder_agents_id',
@@ -1489,12 +1424,7 @@ Update an existing agent configuration. Use this endpoint to modify any aspect o
     getLooseObjectFromProperty(put_agent_builder_agents_id_request, 'path'),
     getLooseObjectFromProperty(put_agent_builder_agents_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_agent_builder_agents_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_agent_builder_agents_id_response,
 };
 const GET_AGENT_BUILDER_CONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_conversations',
@@ -1520,12 +1450,7 @@ List all conversations for a user. Use the optional agent ID to filter conversat
     getLooseObjectFromProperty(get_agent_builder_conversations_request, 'path'),
     getLooseObjectFromProperty(get_agent_builder_conversations_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_agent_builder_conversations_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_agent_builder_conversations_response,
 };
 const DELETE_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_agent_builder_conversations_conversation_id',
@@ -1551,12 +1476,7 @@ Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required au
     getLooseObjectFromProperty(delete_agent_builder_conversations_conversation_id_request, 'path'),
     getLooseObjectFromProperty(delete_agent_builder_conversations_conversation_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_agent_builder_conversations_conversation_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_agent_builder_conversations_conversation_id_response,
 };
 const GET_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_conversations_conversation_id',
@@ -1582,12 +1502,7 @@ Get a specific conversation by ID. Use this endpoint to retrieve the complete co
     getLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'path'),
     getLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_agent_builder_conversations_conversation_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_agent_builder_conversations_conversation_id_response,
 };
 const POST_AGENT_BUILDER_CONVERSE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_converse',
@@ -1613,12 +1528,7 @@ Send a message to an agent and receive a complete response. This synchronous end
     getLooseObjectFromProperty(post_agent_builder_converse_request, 'path'),
     getLooseObjectFromProperty(post_agent_builder_converse_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_agent_builder_converse_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_agent_builder_converse_response,
 };
 const POST_AGENT_BUILDER_CONVERSE_ASYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_converse_async',
@@ -1820,12 +1730,7 @@ A typical conversation round emits events in this sequence:
     getLooseObjectFromProperty(post_agent_builder_converse_async_request, 'path'),
     getLooseObjectFromProperty(post_agent_builder_converse_async_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_agent_builder_converse_async_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_agent_builder_converse_async_response,
 };
 const POST_AGENT_BUILDER_MCP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_mcp',
@@ -1851,12 +1756,7 @@ WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS C
     getLooseObjectFromProperty(post_agent_builder_mcp_request, 'path'),
     getLooseObjectFromProperty(post_agent_builder_mcp_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_agent_builder_mcp_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_agent_builder_mcp_response,
 };
 const GET_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_tools',
@@ -1882,12 +1782,7 @@ List all available tools. Use this endpoint to retrieve complete tool definition
     getLooseObjectFromProperty(get_agent_builder_tools_request, 'path'),
     getLooseObjectFromProperty(get_agent_builder_tools_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_agent_builder_tools_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_agent_builder_tools_response,
 };
 const POST_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_tools',
@@ -1913,12 +1808,7 @@ Create a new tool. Use this endpoint to define a custom tool with specific funct
     getLooseObjectFromProperty(post_agent_builder_tools_request, 'path'),
     getLooseObjectFromProperty(post_agent_builder_tools_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_agent_builder_tools_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_agent_builder_tools_response,
 };
 const POST_AGENT_BUILDER_TOOLS_EXECUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_tools_execute',
@@ -1944,12 +1834,7 @@ Execute a tool with parameters. Use this endpoint to run a tool directly with sp
     getLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'path'),
     getLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_agent_builder_tools_execute_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_agent_builder_tools_execute_response,
 };
 const DELETE_AGENT_BUILDER_TOOLS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_agent_builder_tools_id',
@@ -1975,12 +1860,7 @@ Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorizat
     getLooseObjectFromProperty(delete_agent_builder_tools_id_request, 'path'),
     getLooseObjectFromProperty(delete_agent_builder_tools_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_agent_builder_tools_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_agent_builder_tools_id_response,
 };
 const GET_AGENT_BUILDER_TOOLS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_tools_id',
@@ -2006,12 +1886,7 @@ Get a specific tool by ID. Use this endpoint to retrieve the complete tool defin
     getLooseObjectFromProperty(get_agent_builder_tools_id_request, 'path'),
     getLooseObjectFromProperty(get_agent_builder_tools_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_agent_builder_tools_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_agent_builder_tools_id_response,
 };
 const PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_agent_builder_tools_toolid',
@@ -2037,12 +1912,7 @@ Update an existing tool. Use this endpoint to modify any aspect of the tool's co
     getLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'path'),
     getLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_agent_builder_tools_toolid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_agent_builder_tools_toolid_response,
 };
 const GETALERTINGHEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAlertingHealth',
@@ -2069,12 +1939,7 @@ You must have \`read\` privileges for the **Management > Stack Rules** feature o
     getLooseObjectFromProperty(get_alerting_health_request, 'path'),
     getLooseObjectFromProperty(get_alerting_health_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_alerting_health_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_alerting_health_response,
 };
 const GETRULETYPES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getRuleTypes',
@@ -2101,12 +1966,7 @@ If you have \`read\` privileges for one or more Kibana features, the API respons
     getLooseObjectFromProperty(get_rule_types_request, 'path'),
     getLooseObjectFromProperty(get_rule_types_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_rule_types_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_rule_types_response,
 };
 const DELETE_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_alerting_rule_id',
@@ -2130,12 +1990,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_alerting_rule_id_request, 'path'),
     getLooseObjectFromProperty(delete_alerting_rule_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_alerting_rule_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_alerting_rule_id_response,
 };
 const GET_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_alerting_rule_id',
@@ -2159,12 +2014,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_alerting_rule_id_request, 'path'),
     getLooseObjectFromProperty(get_alerting_rule_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_alerting_rule_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_alerting_rule_id_response,
 };
 const POST_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id',
@@ -2188,12 +2038,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_alerting_rule_id_request, 'path'),
     getLooseObjectFromProperty(post_alerting_rule_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_alerting_rule_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_alerting_rule_id_response,
 };
 const PUT_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_alerting_rule_id',
@@ -2217,12 +2062,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(put_alerting_rule_id_request, 'path'),
     getLooseObjectFromProperty(put_alerting_rule_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_alerting_rule_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_alerting_rule_id_response,
 };
 const POST_ALERTING_RULE_ID_DISABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_disable',
@@ -2246,12 +2086,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'path'),
     getLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_alerting_rule_id_disable_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_alerting_rule_id_disable_response,
 };
 const POST_ALERTING_RULE_ID_ENABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_enable',
@@ -2275,12 +2110,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'path'),
     getLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_alerting_rule_id_enable_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_alerting_rule_id_enable_response,
 };
 const POST_ALERTING_RULE_ID_MUTE_ALL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_mute_all',
@@ -2304,12 +2134,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'path'),
     getLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_alerting_rule_id_mute_all_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_alerting_rule_id_mute_all_response,
 };
 const POST_ALERTING_RULE_ID_UNMUTE_ALL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_unmute_all',
@@ -2333,12 +2158,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'path'),
     getLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_alerting_rule_id_unmute_all_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_alerting_rule_id_unmute_all_response,
 };
 const POST_ALERTING_RULE_ID_UPDATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_update_api_key',
@@ -2362,12 +2182,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'path'),
     getLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_alerting_rule_id_update_api_key_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_alerting_rule_id_update_api_key_response,
 };
 const POST_ALERTING_RULE_ID_SNOOZE_SCHEDULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_snooze_schedule',
@@ -2393,12 +2208,7 @@ When you snooze a rule, the rule checks continue to run but alerts will not gene
     getLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'path'),
     getLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_alerting_rule_id_snooze_schedule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_alerting_rule_id_snooze_schedule_response,
 };
 const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_MUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_rule_id_alert_alert_id_mute',
@@ -2422,12 +2232,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'path'),
     getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_mute_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_alerting_rule_rule_id_alert_alert_id_mute_response,
 };
 const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_UNMUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_rule_id_alert_alert_id_unmute',
@@ -2451,12 +2256,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'path'),
     getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_alerting_rule_rule_id_alert_alert_id_unmute_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_alerting_rule_rule_id_alert_alert_id_unmute_response,
 };
 const DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_alerting_rule_ruleid_snooze_schedule_scheduleid',
@@ -2489,12 +2289,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'query'
     ),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_alerting_rule_ruleid_snooze_schedule_scheduleid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_alerting_rule_ruleid_snooze_schedule_scheduleid_response,
 };
 const GET_ALERTING_RULES_FIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_alerting_rules_find',
@@ -2530,12 +2325,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_alerting_rules_find_request, 'path'),
     getLooseObjectFromProperty(get_alerting_rules_find_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_alerting_rules_find_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_alerting_rules_find_response,
 };
 const CREATEAGENTKEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createAgentKey',
@@ -2564,12 +2354,7 @@ After it is created, you can copy the API key (Base64 encoded) and use it to to 
     getLooseObjectFromProperty(create_agent_key_request, 'path'),
     getLooseObjectFromProperty(create_agent_key_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_agent_key_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_agent_key_response,
 };
 const SAVEAPMSERVERSCHEMA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.saveApmServerSchema',
@@ -2593,12 +2378,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(save_apm_server_schema_request, 'path'),
     getLooseObjectFromProperty(save_apm_server_schema_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(save_apm_server_schema_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: save_apm_server_schema_response,
 };
 const CREATEANNOTATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createAnnotation',
@@ -2624,12 +2404,7 @@ Create a new annotation for a specific service.`,
     getLooseObjectFromProperty(create_annotation_request, 'path'),
     getLooseObjectFromProperty(create_annotation_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_annotation_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_annotation_response,
 };
 const GETANNOTATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAnnotation',
@@ -2655,12 +2430,7 @@ Search for annotations related to a specific service.`,
     getLooseObjectFromProperty(get_annotation_request, 'path'),
     getLooseObjectFromProperty(get_annotation_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_annotation_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_annotation_response,
 };
 const DELETEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteAgentConfiguration',
@@ -2684,12 +2454,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_agent_configuration_request, 'path'),
     getLooseObjectFromProperty(delete_agent_configuration_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_agent_configuration_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_agent_configuration_response,
 };
 const GETAGENTCONFIGURATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAgentConfigurations',
@@ -2713,12 +2478,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_agent_configurations_request, 'path'),
     getLooseObjectFromProperty(get_agent_configurations_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_agent_configurations_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_agent_configurations_response,
 };
 const CREATEUPDATEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createUpdateAgentConfiguration',
@@ -2742,12 +2502,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(create_update_agent_configuration_request, 'path'),
     getLooseObjectFromProperty(create_update_agent_configuration_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_update_agent_configuration_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_update_agent_configuration_response,
 };
 const GETAGENTNAMEFORSERVICE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAgentNameForService',
@@ -2773,12 +2528,7 @@ Retrieve \`agentName\` for a service.`,
     getLooseObjectFromProperty(get_agent_name_for_service_request, 'path'),
     getLooseObjectFromProperty(get_agent_name_for_service_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_agent_name_for_service_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_agent_name_for_service_response,
 };
 const GETENVIRONMENTSFORSERVICE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getEnvironmentsForService',
@@ -2802,12 +2552,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_environments_for_service_request, 'path'),
     getLooseObjectFromProperty(get_environments_for_service_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_environments_for_service_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_environments_for_service_response,
 };
 const SEARCHSINGLECONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.searchSingleConfiguration',
@@ -2834,12 +2579,7 @@ This endpoint enables you to search for a single agent configuration and update 
     getLooseObjectFromProperty(search_single_configuration_request, 'path'),
     getLooseObjectFromProperty(search_single_configuration_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_single_configuration_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_single_configuration_response,
 };
 const GETSINGLEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSingleAgentConfiguration',
@@ -2863,12 +2603,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_single_agent_configuration_request, 'path'),
     getLooseObjectFromProperty(get_single_agent_configuration_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_single_agent_configuration_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_single_agent_configuration_response,
 };
 const GETSOURCEMAPS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSourceMaps',
@@ -2895,12 +2630,7 @@ Get an array of Fleet artifacts, including source map uploads. You must have \`r
     getLooseObjectFromProperty(get_source_maps_request, 'path'),
     getLooseObjectFromProperty(get_source_maps_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_source_maps_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_source_maps_response,
 };
 const UPLOADSOURCEMAP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.uploadSourceMap',
@@ -2928,12 +2658,7 @@ The maximum payload size is \`1mb\`. If you attempt to upload a source map that 
     getLooseObjectFromProperty(upload_source_map_request, 'path'),
     getLooseObjectFromProperty(upload_source_map_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(upload_source_map_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: upload_source_map_response,
 };
 const DELETESOURCEMAP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSourceMap',
@@ -2960,12 +2685,7 @@ Delete a previously uploaded source map. You must have \`all\` Kibana privileges
     getLooseObjectFromProperty(delete_source_map_request, 'path'),
     getLooseObjectFromProperty(delete_source_map_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_source_map_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_source_map_response,
 };
 const DELETEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAssetCriticalityRecord',
@@ -2991,12 +2711,7 @@ Delete the asset criticality record for a specific entity.`,
     getLooseObjectFromProperty(delete_asset_criticality_record_request, 'path'),
     getLooseObjectFromProperty(delete_asset_criticality_record_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_asset_criticality_record_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_asset_criticality_record_response,
 };
 const GETASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAssetCriticalityRecord',
@@ -3022,12 +2737,7 @@ Get the asset criticality record for a specific entity.`,
     getLooseObjectFromProperty(get_asset_criticality_record_request, 'path'),
     getLooseObjectFromProperty(get_asset_criticality_record_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_asset_criticality_record_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_asset_criticality_record_response,
 };
 const CREATEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAssetCriticalityRecord',
@@ -3056,12 +2766,7 @@ If a record already exists for the specified entity, that record is overwritten 
     getLooseObjectFromProperty(create_asset_criticality_record_request, 'path'),
     getLooseObjectFromProperty(create_asset_criticality_record_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_asset_criticality_record_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_asset_criticality_record_response,
 };
 const BULKUPSERTASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.BulkUpsertAssetCriticalityRecords',
@@ -3090,12 +2795,7 @@ If asset criticality records already exist for the specified entities, those rec
     getLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'path'),
     getLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(bulk_upsert_asset_criticality_records_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: bulk_upsert_asset_criticality_records_response,
 };
 const FINDASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAssetCriticalityRecords',
@@ -3121,12 +2821,7 @@ List asset criticality records, paging, sorting and filtering as needed.`,
     getLooseObjectFromProperty(find_asset_criticality_records_request, 'path'),
     getLooseObjectFromProperty(find_asset_criticality_records_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_asset_criticality_records_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_asset_criticality_records_response,
 };
 const POSTATTACKDISCOVERYBULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryBulk',
@@ -3152,12 +2847,7 @@ Performs bulk updates on multiple Attack discoveries, including workflow status 
     getLooseObjectFromProperty(post_attack_discovery_bulk_request, 'path'),
     getLooseObjectFromProperty(post_attack_discovery_bulk_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_attack_discovery_bulk_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_attack_discovery_bulk_response,
 };
 const ATTACKDISCOVERYFIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.AttackDiscoveryFind',
@@ -3199,12 +2889,7 @@ Find Attack discoveries that match the search criteria. Supports free text searc
     getLooseObjectFromProperty(attack_discovery_find_request, 'path'),
     getLooseObjectFromProperty(attack_discovery_find_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(attack_discovery_find_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: attack_discovery_find_response,
 };
 const POSTATTACKDISCOVERYGENERATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryGenerate',
@@ -3230,12 +2915,7 @@ Initiates the generation of attack discoveries by analyzing security alerts usin
     getLooseObjectFromProperty(post_attack_discovery_generate_request, 'path'),
     getLooseObjectFromProperty(post_attack_discovery_generate_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_attack_discovery_generate_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_attack_discovery_generate_response,
 };
 const GETATTACKDISCOVERYGENERATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoveryGenerations',
@@ -3261,12 +2941,7 @@ Get the latest attack discovery generations metadata (that are not dismissed) fo
     getLooseObjectFromProperty(get_attack_discovery_generations_request, 'path'),
     getLooseObjectFromProperty(get_attack_discovery_generations_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_attack_discovery_generations_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_attack_discovery_generations_response,
 };
 const GETATTACKDISCOVERYGENERATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoveryGeneration',
@@ -3292,12 +2967,7 @@ Returns a specific Attack discovery generation, including all generated Attack d
     getLooseObjectFromProperty(get_attack_discovery_generation_request, 'path'),
     getLooseObjectFromProperty(get_attack_discovery_generation_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_attack_discovery_generation_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_attack_discovery_generation_response,
 };
 const POSTATTACKDISCOVERYGENERATIONSDISMISS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryGenerationsDismiss',
@@ -3323,12 +2993,7 @@ Dismisses an attack discovery generation for the current user, indicating that i
     getLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'path'),
     getLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_attack_discovery_generations_dismiss_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_attack_discovery_generations_dismiss_response,
 };
 const CREATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAttackDiscoverySchedules',
@@ -3354,12 +3019,7 @@ Creates a new Attack discovery schedule that analyzes security alerts at specifi
     getLooseObjectFromProperty(create_attack_discovery_schedules_request, 'path'),
     getLooseObjectFromProperty(create_attack_discovery_schedules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_attack_discovery_schedules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_attack_discovery_schedules_response,
 };
 const FINDATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAttackDiscoverySchedules',
@@ -3385,12 +3045,7 @@ Finds Attack discovery schedules that match the search criteria. Supports pagina
     getLooseObjectFromProperty(find_attack_discovery_schedules_request, 'path'),
     getLooseObjectFromProperty(find_attack_discovery_schedules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_attack_discovery_schedules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_attack_discovery_schedules_response,
 };
 const DELETEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAttackDiscoverySchedules',
@@ -3416,12 +3071,7 @@ Permanently deletes an Attack discovery schedule and all associated configuratio
     getLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'path'),
     getLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_attack_discovery_schedules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_attack_discovery_schedules_response,
 };
 const GETATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoverySchedules',
@@ -3447,12 +3097,7 @@ Retrieves a specific Attack discovery schedule by its unique identifier. Returns
     getLooseObjectFromProperty(get_attack_discovery_schedules_request, 'path'),
     getLooseObjectFromProperty(get_attack_discovery_schedules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_attack_discovery_schedules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_attack_discovery_schedules_response,
 };
 const UPDATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateAttackDiscoverySchedules',
@@ -3478,12 +3123,7 @@ Updates an existing Attack discovery schedule with new configuration. All schedu
     getLooseObjectFromProperty(update_attack_discovery_schedules_request, 'path'),
     getLooseObjectFromProperty(update_attack_discovery_schedules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_attack_discovery_schedules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_attack_discovery_schedules_response,
 };
 const DISABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DisableAttackDiscoverySchedules',
@@ -3509,12 +3149,7 @@ Disables an Attack discovery schedule, preventing it from running according to i
     getLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'path'),
     getLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(disable_attack_discovery_schedules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: disable_attack_discovery_schedules_response,
 };
 const ENABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EnableAttackDiscoverySchedules',
@@ -3540,12 +3175,7 @@ Enables a previously disabled Attack discovery schedule, allowing it to run acco
     getLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'path'),
     getLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(enable_attack_discovery_schedules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: enable_attack_discovery_schedules_response,
 };
 const DELETECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseDefaultSpace',
@@ -3572,12 +3202,7 @@ You must have \`read\` or \`all\` privileges and the \`delete\` sub-feature priv
     getLooseObjectFromProperty(delete_case_default_space_request, 'path'),
     getLooseObjectFromProperty(delete_case_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_case_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_case_default_space_response,
 };
 const UPDATECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateCaseDefaultSpace',
@@ -3604,12 +3229,7 @@ You must have \`all\` privileges for the **Cases** feature in the  **Management*
     getLooseObjectFromProperty(update_case_default_space_request, 'path'),
     getLooseObjectFromProperty(update_case_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_case_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_case_default_space_response,
 };
 const CREATECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createCaseDefaultSpace',
@@ -3636,12 +3256,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     getLooseObjectFromProperty(create_case_default_space_request, 'path'),
     getLooseObjectFromProperty(create_case_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_case_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_case_default_space_response,
 };
 const FINDCASESDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCasesDefaultSpace',
@@ -3668,12 +3283,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     getLooseObjectFromProperty(find_cases_default_space_request, 'path'),
     getLooseObjectFromProperty(find_cases_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_cases_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_cases_default_space_response,
 };
 const GETCASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseDefaultSpace',
@@ -3700,12 +3310,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     getLooseObjectFromProperty(get_case_default_space_request, 'path'),
     getLooseObjectFromProperty(get_case_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_case_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_case_default_space_response,
 };
 const GETCASEALERTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseAlertsDefaultSpace',
@@ -3732,12 +3337,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     getLooseObjectFromProperty(get_case_alerts_default_space_request, 'path'),
     getLooseObjectFromProperty(get_case_alerts_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_case_alerts_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_case_alerts_default_space_response,
 };
 const DELETECASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseCommentsDefaultSpace',
@@ -3764,12 +3364,7 @@ Deletes all comments and alerts from a case. You must have \`all\` privileges fo
     getLooseObjectFromProperty(delete_case_comments_default_space_request, 'path'),
     getLooseObjectFromProperty(delete_case_comments_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_case_comments_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_case_comments_default_space_response,
 };
 const UPDATECASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateCaseCommentDefaultSpace',
@@ -3796,12 +3391,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     getLooseObjectFromProperty(update_case_comment_default_space_request, 'path'),
     getLooseObjectFromProperty(update_case_comment_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_case_comment_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_case_comment_default_space_response,
 };
 const ADDCASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.addCaseCommentDefaultSpace',
@@ -3828,12 +3418,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     getLooseObjectFromProperty(add_case_comment_default_space_request, 'path'),
     getLooseObjectFromProperty(add_case_comment_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(add_case_comment_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: add_case_comment_default_space_response,
 };
 const FINDCASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseCommentsDefaultSpace',
@@ -3860,12 +3445,7 @@ Retrieves a paginated list of comments for a case. You must have \`read\` privil
     getLooseObjectFromProperty(find_case_comments_default_space_request, 'path'),
     getLooseObjectFromProperty(find_case_comments_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_case_comments_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_case_comments_default_space_response,
 };
 const DELETECASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseCommentDefaultSpace',
@@ -3892,12 +3472,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     getLooseObjectFromProperty(delete_case_comment_default_space_request, 'path'),
     getLooseObjectFromProperty(delete_case_comment_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_case_comment_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_case_comment_default_space_response,
 };
 const GETCASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseCommentDefaultSpace',
@@ -3924,12 +3499,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     getLooseObjectFromProperty(get_case_comment_default_space_request, 'path'),
     getLooseObjectFromProperty(get_case_comment_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_case_comment_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_case_comment_default_space_response,
 };
 const PUSHCASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.pushCaseDefaultSpace',
@@ -3956,12 +3526,7 @@ You must have \`all\` privileges for the **Actions and Connectors** feature in t
     getLooseObjectFromProperty(push_case_default_space_request, 'path'),
     getLooseObjectFromProperty(push_case_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(push_case_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: push_case_default_space_response,
 };
 const ADDCASEFILEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.addCaseFileDefaultSpace',
@@ -3990,12 +3555,7 @@ Attach a file to a case. You must have \`all\` privileges for the **Cases** feat
     getLooseObjectFromProperty(add_case_file_default_space_request, 'path'),
     getLooseObjectFromProperty(add_case_file_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(add_case_file_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: add_case_file_default_space_response,
 };
 const FINDCASEACTIVITYDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseActivityDefaultSpace',
@@ -4022,12 +3582,7 @@ Retrives a paginated list of user activity for a case. You must have \`read\` pr
     getLooseObjectFromProperty(find_case_activity_default_space_request, 'path'),
     getLooseObjectFromProperty(find_case_activity_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_case_activity_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_case_activity_default_space_response,
 };
 const GETCASESBYALERTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCasesByAlertDefaultSpace',
@@ -4054,12 +3609,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     getLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'path'),
     getLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_cases_by_alert_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_cases_by_alert_default_space_response,
 };
 const GETCASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseConfigurationDefaultSpace',
@@ -4086,12 +3636,7 @@ Get setting details such as the closure type, custom fields, templatse, and the 
     getLooseObjectFromProperty(get_case_configuration_default_space_request, 'path'),
     getLooseObjectFromProperty(get_case_configuration_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_case_configuration_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_case_configuration_default_space_response,
 };
 const SETCASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.setCaseConfigurationDefaultSpace',
@@ -4118,12 +3663,7 @@ Case settings include external connection details, custom fields, and templates.
     getLooseObjectFromProperty(set_case_configuration_default_space_request, 'path'),
     getLooseObjectFromProperty(set_case_configuration_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(set_case_configuration_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: set_case_configuration_default_space_response,
 };
 const UPDATECASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateCaseConfigurationDefaultSpace',
@@ -4150,12 +3690,7 @@ Updates setting details such as the closure type, custom fields, templates, and 
     getLooseObjectFromProperty(update_case_configuration_default_space_request, 'path'),
     getLooseObjectFromProperty(update_case_configuration_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_case_configuration_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_case_configuration_default_space_response,
 };
 const FINDCASECONNECTORSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseConnectorsDefaultSpace',
@@ -4182,12 +3717,7 @@ Get information about connectors that are supported for use in cases. You must h
     getLooseObjectFromProperty(find_case_connectors_default_space_request, 'path'),
     getLooseObjectFromProperty(find_case_connectors_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_case_connectors_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_case_connectors_default_space_response,
 };
 const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseReportersDefaultSpace',
@@ -4208,12 +3738,7 @@ const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_case_reporters_default_space_request, 'path'),
     getLooseObjectFromProperty(get_case_reporters_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_case_reporters_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_case_reporters_default_space_response,
 };
 const GETCASETAGSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseTagsDefaultSpace',
@@ -4240,12 +3765,7 @@ Aggregates and returns a list of case tags. You must have read privileges for th
     getLooseObjectFromProperty(get_case_tags_default_space_request, 'path'),
     getLooseObjectFromProperty(get_case_tags_default_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_case_tags_default_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_case_tags_default_space_response,
 };
 const GETALLDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAllDataViewsDefault',
@@ -4269,12 +3789,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_all_data_views_default_request, 'path'),
     getLooseObjectFromProperty(get_all_data_views_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_all_data_views_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_all_data_views_default_response,
 };
 const CREATEDATAVIEWDEFAULTW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createDataViewDefaultw',
@@ -4298,12 +3813,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(create_data_view_defaultw_request, 'path'),
     getLooseObjectFromProperty(create_data_view_defaultw_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_data_view_defaultw_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_data_view_defaultw_response,
 };
 const DELETEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteDataViewDefault',
@@ -4330,12 +3840,7 @@ WARNING: When you delete a data view, it cannot be recovered.
     getLooseObjectFromProperty(delete_data_view_default_request, 'path'),
     getLooseObjectFromProperty(delete_data_view_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_data_view_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_data_view_default_response,
 };
 const GETDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDataViewDefault',
@@ -4359,12 +3864,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_data_view_default_request, 'path'),
     getLooseObjectFromProperty(get_data_view_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_data_view_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_data_view_default_response,
 };
 const UPDATEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateDataViewDefault',
@@ -4388,12 +3888,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(update_data_view_default_request, 'path'),
     getLooseObjectFromProperty(update_data_view_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_data_view_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_data_view_default_response,
 };
 const UPDATEFIELDSMETADATADEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateFieldsMetadataDefault',
@@ -4420,12 +3915,7 @@ Update fields presentation metadata such as count, customLabel, customDescriptio
     getLooseObjectFromProperty(update_fields_metadata_default_request, 'path'),
     getLooseObjectFromProperty(update_fields_metadata_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_fields_metadata_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_fields_metadata_default_response,
 };
 const CREATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createRuntimeFieldDefault',
@@ -4449,12 +3939,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(create_runtime_field_default_request, 'path'),
     getLooseObjectFromProperty(create_runtime_field_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_runtime_field_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_runtime_field_default_response,
 };
 const CREATEUPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createUpdateRuntimeFieldDefault',
@@ -4478,12 +3963,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(create_update_runtime_field_default_request, 'path'),
     getLooseObjectFromProperty(create_update_runtime_field_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_update_runtime_field_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_update_runtime_field_default_response,
 };
 const DELETERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteRuntimeFieldDefault',
@@ -4507,12 +3987,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_runtime_field_default_request, 'path'),
     getLooseObjectFromProperty(delete_runtime_field_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_runtime_field_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_runtime_field_default_response,
 };
 const GETRUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getRuntimeFieldDefault',
@@ -4536,12 +4011,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_runtime_field_default_request, 'path'),
     getLooseObjectFromProperty(get_runtime_field_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_runtime_field_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_runtime_field_default_response,
 };
 const UPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateRuntimeFieldDefault',
@@ -4565,12 +4035,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(update_runtime_field_default_request, 'path'),
     getLooseObjectFromProperty(update_runtime_field_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_runtime_field_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_runtime_field_default_response,
 };
 const GETDEFAULTDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDefaultDataViewDefault',
@@ -4594,12 +4059,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_default_data_view_default_request, 'path'),
     getLooseObjectFromProperty(get_default_data_view_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_default_data_view_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_default_data_view_default_response,
 };
 const SETDEFAULTDATAILVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.setDefaultDatailViewDefault',
@@ -4623,12 +4083,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(set_default_datail_view_default_request, 'path'),
     getLooseObjectFromProperty(set_default_datail_view_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(set_default_datail_view_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: set_default_datail_view_default_response,
 };
 const SWAPDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.swapDataViewsDefault',
@@ -4655,12 +4110,7 @@ Changes saved object references from one data view identifier to another. WARNIN
     getLooseObjectFromProperty(swap_data_views_default_request, 'path'),
     getLooseObjectFromProperty(swap_data_views_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(swap_data_views_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: swap_data_views_default_response,
 };
 const PREVIEWSWAPDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.previewSwapDataViewsDefault',
@@ -4687,12 +4137,7 @@ Preview the impact of swapping saved object references from one data view identi
     getLooseObjectFromProperty(preview_swap_data_views_default_request, 'path'),
     getLooseObjectFromProperty(preview_swap_data_views_default_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(preview_swap_data_views_default_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: preview_swap_data_views_default_response,
 };
 const DELETEALERTSINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAlertsIndex',
@@ -4716,12 +4161,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_alerts_index_request, 'path'),
     getLooseObjectFromProperty(delete_alerts_index_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_alerts_index_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_alerts_index_response,
 };
 const READALERTSINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadAlertsIndex',
@@ -4745,12 +4185,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(read_alerts_index_request, 'path'),
     getLooseObjectFromProperty(read_alerts_index_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_alerts_index_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_alerts_index_response,
 };
 const CREATEALERTSINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAlertsIndex',
@@ -4774,12 +4209,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(create_alerts_index_request, 'path'),
     getLooseObjectFromProperty(create_alerts_index_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_alerts_index_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_alerts_index_response,
 };
 const READPRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadPrivileges',
@@ -4809,12 +4239,7 @@ detection engine rules.
     getLooseObjectFromProperty(read_privileges_request, 'path'),
     getLooseObjectFromProperty(read_privileges_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_privileges_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_privileges_response,
 };
 const DELETERULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteRule',
@@ -4848,12 +4273,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     getLooseObjectFromProperty(delete_rule_request, 'path'),
     getLooseObjectFromProperty(delete_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_rule_response,
 };
 const READRULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadRule',
@@ -4887,12 +4307,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     getLooseObjectFromProperty(read_rule_request, 'path'),
     getLooseObjectFromProperty(read_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_rule_response,
 };
 const PATCHRULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchRule',
@@ -4925,12 +4340,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     getLooseObjectFromProperty(patch_rule_request, 'path'),
     getLooseObjectFromProperty(patch_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(patch_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: patch_rule_response,
 };
 const CREATERULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateRule',
@@ -5010,12 +4420,7 @@ For detailed information on Kibana actions and alerting, and additional API call
     getLooseObjectFromProperty(create_rule_request, 'path'),
     getLooseObjectFromProperty(create_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_rule_response,
 };
 const UPDATERULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateRule',
@@ -5048,12 +4453,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     getLooseObjectFromProperty(update_rule_request, 'path'),
     getLooseObjectFromProperty(update_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_rule_response,
 };
 const PERFORMRULESBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformRulesBulkAction',
@@ -5087,12 +4487,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     getLooseObjectFromProperty(perform_rules_bulk_action_request, 'path'),
     getLooseObjectFromProperty(perform_rules_bulk_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(perform_rules_bulk_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: perform_rules_bulk_action_response,
 };
 const EXPORTRULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportRules',
@@ -5127,12 +4522,7 @@ Export detection rules to an \`.ndjson\` file. The following configuration items
     getLooseObjectFromProperty(export_rules_request, 'path'),
     getLooseObjectFromProperty(export_rules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(export_rules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: export_rules_response,
 };
 const FINDRULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindRules',
@@ -5167,12 +4557,7 @@ Retrieve a paginated list of detection rules. By default, the first page is retu
     getLooseObjectFromProperty(find_rules_request, 'path'),
     getLooseObjectFromProperty(find_rules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_rules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_rules_response,
 };
 const IMPORTRULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportRules',
@@ -5214,12 +4599,7 @@ Import detection rules from an \`.ndjson\` file, including actions and exception
     getLooseObjectFromProperty(import_rules_request, 'path'),
     getLooseObjectFromProperty(import_rules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(import_rules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: import_rules_response,
 };
 const CREATERULEEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateRuleExceptionListItems',
@@ -5245,12 +4625,7 @@ Create exception items that apply to a single detection rule.`,
     getLooseObjectFromProperty(create_rule_exception_list_items_request, 'path'),
     getLooseObjectFromProperty(create_rule_exception_list_items_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_rule_exception_list_items_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_rule_exception_list_items_response,
 };
 const INSTALLPREBUILTRULESANDTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrebuiltRulesAndTimelines',
@@ -5287,12 +4662,7 @@ providing you with the most current and effective threat detection capabilities.
     getLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'path'),
     getLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(install_prebuilt_rules_and_timelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: install_prebuilt_rules_and_timelines_response,
 };
 const READPREBUILTRULESANDTIMELINESSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadPrebuiltRulesAndTimelinesStatus',
@@ -5321,12 +4691,7 @@ This endpoint provides detailed information about the number of custom rules, in
     getLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'path'),
     getLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_prebuilt_rules_and_timelines_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_prebuilt_rules_and_timelines_status_response,
 };
 const RULEPREVIEW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.RulePreview',
@@ -5350,12 +4715,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(rule_preview_request, 'path'),
     getLooseObjectFromProperty(rule_preview_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rule_preview_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: rule_preview_response,
 };
 const SETALERTASSIGNEES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertAssignees',
@@ -5384,12 +4744,7 @@ Assign users to detection alerts, and unassign them from alerts.
     getLooseObjectFromProperty(set_alert_assignees_request, 'path'),
     getLooseObjectFromProperty(set_alert_assignees_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(set_alert_assignees_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: set_alert_assignees_response,
 };
 const FINALIZEALERTSMIGRATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FinalizeAlertsMigration',
@@ -5418,12 +4773,7 @@ finalize it.
     getLooseObjectFromProperty(finalize_alerts_migration_request, 'path'),
     getLooseObjectFromProperty(finalize_alerts_migration_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(finalize_alerts_migration_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: finalize_alerts_migration_response,
 };
 const ALERTSMIGRATIONCLEANUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.AlertsMigrationCleanup',
@@ -5456,12 +4806,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
     getLooseObjectFromProperty(alerts_migration_cleanup_request, 'path'),
     getLooseObjectFromProperty(alerts_migration_cleanup_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(alerts_migration_cleanup_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: alerts_migration_cleanup_response,
 };
 const CREATEALERTSMIGRATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAlertsMigration',
@@ -5489,12 +4834,7 @@ Migrations are initiated per index. While the process is neither destructive nor
     getLooseObjectFromProperty(create_alerts_migration_request, 'path'),
     getLooseObjectFromProperty(create_alerts_migration_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_alerts_migration_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_alerts_migration_response,
 };
 const READALERTSMIGRATIONSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadAlertsMigrationStatus',
@@ -5520,12 +4860,7 @@ Retrieve indices that contain detection alerts of a particular age, along with m
     getLooseObjectFromProperty(read_alerts_migration_status_request, 'path'),
     getLooseObjectFromProperty(read_alerts_migration_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_alerts_migration_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_alerts_migration_status_response,
 };
 const SEARCHALERTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SearchAlerts',
@@ -5551,12 +4886,7 @@ Find and/or aggregate detection alerts that match the given query.`,
     getLooseObjectFromProperty(search_alerts_request, 'path'),
     getLooseObjectFromProperty(search_alerts_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_alerts_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_alerts_response,
 };
 const SETALERTSSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertsStatus',
@@ -5582,12 +4912,7 @@ Set the status of one or more detection alerts.`,
     getLooseObjectFromProperty(set_alerts_status_request, 'path'),
     getLooseObjectFromProperty(set_alerts_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(set_alerts_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: set_alerts_status_response,
 };
 const SETALERTTAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertTags',
@@ -5616,12 +4941,7 @@ And tags to detection alerts, and remove them from alerts.
     getLooseObjectFromProperty(set_alert_tags_request, 'path'),
     getLooseObjectFromProperty(set_alert_tags_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(set_alert_tags_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: set_alert_tags_response,
 };
 const READTAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadTags',
@@ -5647,12 +4967,7 @@ List all unique tags from all detection rules.`,
     getLooseObjectFromProperty(read_tags_request, 'path'),
     getLooseObjectFromProperty(read_tags_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_tags_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_tags_response,
 };
 const ROTATEENCRYPTIONKEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.rotateEncryptionKey',
@@ -5677,12 +4992,7 @@ This functionality is in technical preview and may be changed or removed in a fu
     getLooseObjectFromProperty(rotate_encryption_key_request, 'path'),
     getLooseObjectFromProperty(rotate_encryption_key_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rotate_encryption_key_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: rotate_encryption_key_response,
 };
 const CREATEENDPOINTLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateEndpointList',
@@ -5708,12 +5018,7 @@ Create the exception list for Elastic Endpoint rule exceptions. When you create 
     getLooseObjectFromProperty(create_endpoint_list_request, 'path'),
     getLooseObjectFromProperty(create_endpoint_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_endpoint_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_endpoint_list_response,
 };
 const DELETEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEndpointListItem',
@@ -5739,12 +5044,7 @@ Delete an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
     getLooseObjectFromProperty(delete_endpoint_list_item_request, 'path'),
     getLooseObjectFromProperty(delete_endpoint_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_endpoint_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_endpoint_list_item_response,
 };
 const READENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadEndpointListItem',
@@ -5770,12 +5070,7 @@ Get the details of an Elastic Endpoint exception list item, specified by the \`i
     getLooseObjectFromProperty(read_endpoint_list_item_request, 'path'),
     getLooseObjectFromProperty(read_endpoint_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_endpoint_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_endpoint_list_item_response,
 };
 const CREATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateEndpointListItem',
@@ -5801,12 +5096,7 @@ Create an Elastic Endpoint exception list item, and associate it with the Elasti
     getLooseObjectFromProperty(create_endpoint_list_item_request, 'path'),
     getLooseObjectFromProperty(create_endpoint_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_endpoint_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_endpoint_list_item_response,
 };
 const UPDATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateEndpointListItem',
@@ -5832,12 +5122,7 @@ Update an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
     getLooseObjectFromProperty(update_endpoint_list_item_request, 'path'),
     getLooseObjectFromProperty(update_endpoint_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_endpoint_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_endpoint_list_item_response,
 };
 const FINDENDPOINTLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindEndpointListItems',
@@ -5863,12 +5148,7 @@ Get a list of all Elastic Endpoint exception list items.`,
     getLooseObjectFromProperty(find_endpoint_list_items_request, 'path'),
     getLooseObjectFromProperty(find_endpoint_list_items_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_endpoint_list_items_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_endpoint_list_items_response,
 };
 const ENDPOINTGETACTIONSLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsList',
@@ -5905,12 +5185,7 @@ Get a list of all response actions.`,
     getLooseObjectFromProperty(endpoint_get_actions_list_request, 'path'),
     getLooseObjectFromProperty(endpoint_get_actions_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_get_actions_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_get_actions_list_response,
 };
 const ENDPOINTGETACTIONSSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsStatus',
@@ -5936,12 +5211,7 @@ Get the status of response actions for the specified agent IDs.`,
     getLooseObjectFromProperty(endpoint_get_actions_status_request, 'path'),
     getLooseObjectFromProperty(endpoint_get_actions_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_get_actions_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_get_actions_status_response,
 };
 const ENDPOINTGETACTIONSDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsDetails',
@@ -5967,12 +5237,7 @@ Get the details of a response action using the action ID.`,
     getLooseObjectFromProperty(endpoint_get_actions_details_request, 'path'),
     getLooseObjectFromProperty(endpoint_get_actions_details_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_get_actions_details_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_get_actions_details_response,
 };
 const ENDPOINTFILEINFO_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointFileInfo',
@@ -5999,12 +5264,7 @@ Get information for the specified response action file download.
     getLooseObjectFromProperty(endpoint_file_info_request, 'path'),
     getLooseObjectFromProperty(endpoint_file_info_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_file_info_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_file_info_response,
 };
 const ENDPOINTFILEDOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointFileDownload',
@@ -6031,12 +5291,7 @@ Download a file associated with a response action.
     getLooseObjectFromProperty(endpoint_file_download_request, 'path'),
     getLooseObjectFromProperty(endpoint_file_download_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_file_download_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_file_download_response,
 };
 const CANCELACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CancelAction',
@@ -6062,12 +5317,7 @@ Cancel a running or pending response action (Applies only to some agent types).`
     getLooseObjectFromProperty(cancel_action_request, 'path'),
     getLooseObjectFromProperty(cancel_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cancel_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cancel_action_response,
 };
 const ENDPOINTEXECUTEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointExecuteAction',
@@ -6093,12 +5343,7 @@ Run a shell command on an endpoint.`,
     getLooseObjectFromProperty(endpoint_execute_action_request, 'path'),
     getLooseObjectFromProperty(endpoint_execute_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_execute_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_execute_action_response,
 };
 const ENDPOINTGETFILEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetFileAction',
@@ -6124,12 +5369,7 @@ Get a file from an endpoint.`,
     getLooseObjectFromProperty(endpoint_get_file_action_request, 'path'),
     getLooseObjectFromProperty(endpoint_get_file_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_get_file_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_get_file_action_response,
 };
 const ENDPOINTISOLATEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointIsolateAction',
@@ -6155,12 +5395,7 @@ Isolate an endpoint from the network. The endpoint remains isolated until it's r
     getLooseObjectFromProperty(endpoint_isolate_action_request, 'path'),
     getLooseObjectFromProperty(endpoint_isolate_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_isolate_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_isolate_action_response,
 };
 const ENDPOINTKILLPROCESSACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointKillProcessAction',
@@ -6186,12 +5421,7 @@ Terminate a running process on an endpoint.`,
     getLooseObjectFromProperty(endpoint_kill_process_action_request, 'path'),
     getLooseObjectFromProperty(endpoint_kill_process_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_kill_process_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_kill_process_action_response,
 };
 const ENDPOINTGETPROCESSESACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetProcessesAction',
@@ -6217,12 +5447,7 @@ Get a list of all processes running on an endpoint.`,
     getLooseObjectFromProperty(endpoint_get_processes_action_request, 'path'),
     getLooseObjectFromProperty(endpoint_get_processes_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_get_processes_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_get_processes_action_response,
 };
 const RUNSCRIPTACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.RunScriptAction',
@@ -6248,12 +5473,7 @@ Run a script on a host. Currently supported only for some agent types.`,
     getLooseObjectFromProperty(run_script_action_request, 'path'),
     getLooseObjectFromProperty(run_script_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(run_script_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: run_script_action_response,
 };
 const ENDPOINTSCANACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointScanAction',
@@ -6279,12 +5499,7 @@ Scan a specific file or directory on an endpoint for malware.`,
     getLooseObjectFromProperty(endpoint_scan_action_request, 'path'),
     getLooseObjectFromProperty(endpoint_scan_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_scan_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_scan_action_response,
 };
 const ENDPOINTGETACTIONSSTATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsState',
@@ -6310,12 +5525,7 @@ Get a response actions state, which reports whether encryption is enabled.`,
     getLooseObjectFromProperty(endpoint_get_actions_state_request, 'path'),
     getLooseObjectFromProperty(endpoint_get_actions_state_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_get_actions_state_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_get_actions_state_response,
 };
 const ENDPOINTSUSPENDPROCESSACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointSuspendProcessAction',
@@ -6341,12 +5551,7 @@ Suspend a running process on an endpoint.`,
     getLooseObjectFromProperty(endpoint_suspend_process_action_request, 'path'),
     getLooseObjectFromProperty(endpoint_suspend_process_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_suspend_process_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_suspend_process_action_response,
 };
 const ENDPOINTUNISOLATEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointUnisolateAction',
@@ -6372,12 +5577,7 @@ Release an isolated endpoint, allowing it to rejoin a network.`,
     getLooseObjectFromProperty(endpoint_unisolate_action_request, 'path'),
     getLooseObjectFromProperty(endpoint_unisolate_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_unisolate_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_unisolate_action_response,
 };
 const ENDPOINTUPLOADACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointUploadAction',
@@ -6403,12 +5603,7 @@ Upload a file to an endpoint.`,
     getLooseObjectFromProperty(endpoint_upload_action_request, 'path'),
     getLooseObjectFromProperty(endpoint_upload_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(endpoint_upload_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: endpoint_upload_action_response,
 };
 const GETENDPOINTMETADATALIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEndpointMetadataList',
@@ -6432,12 +5627,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_endpoint_metadata_list_request, 'path'),
     getLooseObjectFromProperty(get_endpoint_metadata_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_endpoint_metadata_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_endpoint_metadata_list_response,
 };
 const GETENDPOINTMETADATA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEndpointMetadata',
@@ -6461,12 +5651,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_endpoint_metadata_request, 'path'),
     getLooseObjectFromProperty(get_endpoint_metadata_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_endpoint_metadata_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_endpoint_metadata_response,
 };
 const GETPOLICYRESPONSE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetPolicyResponse',
@@ -6490,12 +5675,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_policy_response_request, 'path'),
     getLooseObjectFromProperty(get_policy_response_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_policy_response_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_policy_response_response,
 };
 const GETPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetProtectionUpdatesNote',
@@ -6519,12 +5699,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_protection_updates_note_request, 'path'),
     getLooseObjectFromProperty(get_protection_updates_note_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_protection_updates_note_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_protection_updates_note_response,
 };
 const CREATEUPDATEPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateUpdateProtectionUpdatesNote',
@@ -6548,12 +5723,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(create_update_protection_updates_note_request, 'path'),
     getLooseObjectFromProperty(create_update_protection_updates_note_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_update_protection_updates_note_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_update_protection_updates_note_response,
 };
 const DELETEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteMonitoringEngine',
@@ -6577,12 +5747,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_monitoring_engine_request, 'path'),
     getLooseObjectFromProperty(delete_monitoring_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_monitoring_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_monitoring_engine_response,
 };
 const DISABLEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DisableMonitoringEngine',
@@ -6606,12 +5771,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(disable_monitoring_engine_request, 'path'),
     getLooseObjectFromProperty(disable_monitoring_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(disable_monitoring_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: disable_monitoring_engine_response,
 };
 const INITMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitMonitoringEngine',
@@ -6635,12 +5795,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(init_monitoring_engine_request, 'path'),
     getLooseObjectFromProperty(init_monitoring_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(init_monitoring_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: init_monitoring_engine_response,
 };
 const SCHEDULEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ScheduleMonitoringEngine',
@@ -6664,12 +5819,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(schedule_monitoring_engine_request, 'path'),
     getLooseObjectFromProperty(schedule_monitoring_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(schedule_monitoring_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: schedule_monitoring_engine_response,
 };
 const PRIVMONHEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivMonHealth',
@@ -6693,12 +5843,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(priv_mon_health_request, 'path'),
     getLooseObjectFromProperty(priv_mon_health_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(priv_mon_health_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: priv_mon_health_response,
 };
 const PRIVMONPRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivMonPrivileges',
@@ -6724,12 +5869,7 @@ Check if the current user has all required permissions for Privilege Monitoring`
     getLooseObjectFromProperty(priv_mon_privileges_request, 'path'),
     getLooseObjectFromProperty(priv_mon_privileges_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(priv_mon_privileges_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: priv_mon_privileges_response,
 };
 const CREATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreatePrivMonUser',
@@ -6753,12 +5893,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(create_priv_mon_user_request, 'path'),
     getLooseObjectFromProperty(create_priv_mon_user_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_priv_mon_user_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_priv_mon_user_response,
 };
 const PRIVMONBULKUPLOADUSERSCSV_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivmonBulkUploadUsersCSV',
@@ -6782,12 +5917,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'path'),
     getLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(privmon_bulk_upload_users_c_s_v_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: privmon_bulk_upload_users_c_s_v_response,
 };
 const DELETEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeletePrivMonUser',
@@ -6811,12 +5941,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_priv_mon_user_request, 'path'),
     getLooseObjectFromProperty(delete_priv_mon_user_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_priv_mon_user_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_priv_mon_user_response,
 };
 const UPDATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdatePrivMonUser',
@@ -6840,12 +5965,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(update_priv_mon_user_request, 'path'),
     getLooseObjectFromProperty(update_priv_mon_user_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_priv_mon_user_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_priv_mon_user_response,
 };
 const LISTPRIVMONUSERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListPrivMonUsers',
@@ -6869,12 +5989,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(list_priv_mon_users_request, 'path'),
     getLooseObjectFromProperty(list_priv_mon_users_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(list_priv_mon_users_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: list_priv_mon_users_response,
 };
 const INSTALLPRIVILEGEDACCESSDETECTIONPACKAGE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrivilegedAccessDetectionPackage',
@@ -6898,12 +6013,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(install_privileged_access_detection_package_request, 'path'),
     getLooseObjectFromProperty(install_privileged_access_detection_package_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(install_privileged_access_detection_package_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: install_privileged_access_detection_package_response,
 };
 const GETPRIVILEGEDACCESSDETECTIONPACKAGESTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetPrivilegedAccessDetectionPackageStatus',
@@ -6927,12 +6037,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'path'),
     getLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_privileged_access_detection_package_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_privileged_access_detection_package_status_response,
 };
 const INITENTITYSTORE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitEntityStore',
@@ -6956,12 +6061,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(init_entity_store_request, 'path'),
     getLooseObjectFromProperty(init_entity_store_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(init_entity_store_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: init_entity_store_response,
 };
 const DELETEENTITYENGINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEntityEngines',
@@ -6985,12 +6085,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_entity_engines_request, 'path'),
     getLooseObjectFromProperty(delete_entity_engines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_entity_engines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_entity_engines_response,
 };
 const LISTENTITYENGINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListEntityEngines',
@@ -7014,12 +6109,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(list_entity_engines_request, 'path'),
     getLooseObjectFromProperty(list_entity_engines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(list_entity_engines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: list_entity_engines_response,
 };
 const DELETEENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEntityEngine',
@@ -7043,12 +6133,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_entity_engine_request, 'path'),
     getLooseObjectFromProperty(delete_entity_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_entity_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_entity_engine_response,
 };
 const GETENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEntityEngine',
@@ -7072,12 +6157,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_entity_engine_request, 'path'),
     getLooseObjectFromProperty(get_entity_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_entity_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_entity_engine_response,
 };
 const INITENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitEntityEngine',
@@ -7101,12 +6181,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(init_entity_engine_request, 'path'),
     getLooseObjectFromProperty(init_entity_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(init_entity_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: init_entity_engine_response,
 };
 const STARTENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.StartEntityEngine',
@@ -7130,12 +6205,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(start_entity_engine_request, 'path'),
     getLooseObjectFromProperty(start_entity_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(start_entity_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: start_entity_engine_response,
 };
 const STOPENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.StopEntityEngine',
@@ -7159,12 +6229,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(stop_entity_engine_request, 'path'),
     getLooseObjectFromProperty(stop_entity_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(stop_entity_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: stop_entity_engine_response,
 };
 const APPLYENTITYENGINEDATAVIEWINDICES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ApplyEntityEngineDataviewIndices',
@@ -7188,12 +6253,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'path'),
     getLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(apply_entity_engine_dataview_indices_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: apply_entity_engine_dataview_indices_response,
 };
 const DELETESINGLEENTITY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteSingleEntity',
@@ -7221,12 +6281,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
     getLooseObjectFromProperty(delete_single_entity_request, 'path'),
     getLooseObjectFromProperty(delete_single_entity_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_single_entity_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_single_entity_response,
 };
 const UPSERTENTITY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpsertEntity',
@@ -7256,12 +6311,7 @@ If the specified entity already exists, it is updated with the provided values. 
     getLooseObjectFromProperty(upsert_entity_request, 'path'),
     getLooseObjectFromProperty(upsert_entity_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(upsert_entity_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: upsert_entity_response,
 };
 const UPSERTENTITIESBULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpsertEntitiesBulk',
@@ -7290,12 +6340,7 @@ The creation is asynchronous. The time for a document to be present in the  fina
     getLooseObjectFromProperty(upsert_entities_bulk_request, 'path'),
     getLooseObjectFromProperty(upsert_entities_bulk_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(upsert_entities_bulk_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: upsert_entities_bulk_response,
 };
 const LISTENTITIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListEntities',
@@ -7321,12 +6366,7 @@ List entities records, paging, sorting and filtering as needed.`,
     getLooseObjectFromProperty(list_entities_request, 'path'),
     getLooseObjectFromProperty(list_entities_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(list_entities_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: list_entities_response,
 };
 const GETENTITYSTORESTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEntityStoreStatus',
@@ -7350,12 +6390,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_entity_store_status_request, 'path'),
     getLooseObjectFromProperty(get_entity_store_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_entity_store_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_entity_store_status_response,
 };
 const DELETEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteExceptionList',
@@ -7381,12 +6416,7 @@ Delete an exception list using the \`id\` or \`list_id\` field.`,
     getLooseObjectFromProperty(delete_exception_list_request, 'path'),
     getLooseObjectFromProperty(delete_exception_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_exception_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_exception_list_response,
 };
 const READEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionList',
@@ -7412,12 +6442,7 @@ Get the details of an exception list using the \`id\` or \`list_id\` field.`,
     getLooseObjectFromProperty(read_exception_list_request, 'path'),
     getLooseObjectFromProperty(read_exception_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_exception_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_exception_list_response,
 };
 const CREATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateExceptionList',
@@ -7446,12 +6471,7 @@ An exception list groups exception items and can be associated with detection ru
     getLooseObjectFromProperty(create_exception_list_request, 'path'),
     getLooseObjectFromProperty(create_exception_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_exception_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_exception_list_response,
 };
 const UPDATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateExceptionList',
@@ -7477,12 +6497,7 @@ Update an exception list using the \`id\` or \`list_id\` field.`,
     getLooseObjectFromProperty(update_exception_list_request, 'path'),
     getLooseObjectFromProperty(update_exception_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_exception_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_exception_list_response,
 };
 const DUPLICATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DuplicateExceptionList',
@@ -7508,12 +6523,7 @@ Duplicate an existing exception list.`,
     getLooseObjectFromProperty(duplicate_exception_list_request, 'path'),
     getLooseObjectFromProperty(duplicate_exception_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(duplicate_exception_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: duplicate_exception_list_response,
 };
 const EXPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportExceptionList',
@@ -7539,12 +6549,7 @@ Export an exception list and its associated items to an NDJSON file.`,
     getLooseObjectFromProperty(export_exception_list_request, 'path'),
     getLooseObjectFromProperty(export_exception_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(export_exception_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: export_exception_list_response,
 };
 const FINDEXCEPTIONLISTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindExceptionLists',
@@ -7570,12 +6575,7 @@ Get a list of all exception list containers.`,
     getLooseObjectFromProperty(find_exception_lists_request, 'path'),
     getLooseObjectFromProperty(find_exception_lists_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_exception_lists_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_exception_lists_response,
 };
 const IMPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportExceptionList',
@@ -7601,12 +6601,7 @@ Import an exception list and its associated items from an NDJSON file.`,
     getLooseObjectFromProperty(import_exception_list_request, 'path'),
     getLooseObjectFromProperty(import_exception_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(import_exception_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: import_exception_list_response,
 };
 const DELETEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteExceptionListItem',
@@ -7632,12 +6627,7 @@ Delete an exception list item using the \`id\` or \`item_id\` field.`,
     getLooseObjectFromProperty(delete_exception_list_item_request, 'path'),
     getLooseObjectFromProperty(delete_exception_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_exception_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_exception_list_item_response,
 };
 const READEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionListItem',
@@ -7663,12 +6653,7 @@ Get the details of an exception list item using the \`id\` or \`item_id\` field.
     getLooseObjectFromProperty(read_exception_list_item_request, 'path'),
     getLooseObjectFromProperty(read_exception_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_exception_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_exception_list_item_response,
 };
 const CREATEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateExceptionListItem',
@@ -7697,12 +6682,7 @@ Create an exception item and associate it with the specified exception list.
     getLooseObjectFromProperty(create_exception_list_item_request, 'path'),
     getLooseObjectFromProperty(create_exception_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_exception_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_exception_list_item_response,
 };
 const UPDATEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateExceptionListItem',
@@ -7728,12 +6708,7 @@ Update an exception list item using the \`id\` or \`item_id\` field.`,
     getLooseObjectFromProperty(update_exception_list_item_request, 'path'),
     getLooseObjectFromProperty(update_exception_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_exception_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_exception_list_item_response,
 };
 const FINDEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindExceptionListItems',
@@ -7768,12 +6743,7 @@ Get a list of all exception list items in the specified list.`,
     getLooseObjectFromProperty(find_exception_list_items_request, 'path'),
     getLooseObjectFromProperty(find_exception_list_items_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_exception_list_items_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_exception_list_items_response,
 };
 const READEXCEPTIONLISTSUMMARY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionListSummary',
@@ -7799,12 +6769,7 @@ Get a summary of the specified exception list.`,
     getLooseObjectFromProperty(read_exception_list_summary_request, 'path'),
     getLooseObjectFromProperty(read_exception_list_summary_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_exception_list_summary_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_exception_list_summary_response,
 };
 const CREATESHAREDEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateSharedExceptionList',
@@ -7833,12 +6798,7 @@ An exception list groups exception items and can be associated with detection ru
     getLooseObjectFromProperty(create_shared_exception_list_request, 'path'),
     getLooseObjectFromProperty(create_shared_exception_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_shared_exception_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_shared_exception_list_response,
 };
 const GET_FEATURES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_features',
@@ -7859,12 +6819,7 @@ const GET_FEATURES_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_features_request, 'path'),
     getLooseObjectFromProperty(get_features_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_features_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_features_response,
 };
 const GET_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_download_sources',
@@ -7890,12 +6845,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agent_download_sources_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agent_download_sources_response,
 };
 const POST_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_download_sources',
@@ -7921,12 +6871,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agent_download_sources_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agent_download_sources_response,
 };
 const DELETE_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agent_download_sources_sourceid',
@@ -7952,12 +6897,7 @@ Delete an agent binary download source by ID.<br/><br/>[Required authorization] 
     getLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_agent_download_sources_sourceid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_agent_download_sources_sourceid_response,
 };
 const GET_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_download_sources_sourceid',
@@ -7983,12 +6923,7 @@ Get an agent binary download source by ID.<br/><br/>[Required authorization] Rou
     getLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agent_download_sources_sourceid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agent_download_sources_sourceid_response,
 };
 const PUT_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_agent_download_sources_sourceid',
@@ -8014,12 +6949,7 @@ Update an agent binary download source by ID.<br/><br/>[Required authorization] 
     getLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'path'),
     getLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_agent_download_sources_sourceid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_agent_download_sources_sourceid_response,
 };
 const GET_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies',
@@ -8056,12 +6986,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agent_policies_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agent_policies_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agent_policies_response,
 };
 const POST_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies',
@@ -8087,12 +7012,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agent_policies_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agent_policies_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agent_policies_response,
 };
 const POST_FLEET_AGENT_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_bulk_get',
@@ -8118,12 +7038,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_bulk_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agent_policies_bulk_get_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid',
@@ -8149,12 +7064,7 @@ Get an agent policy by ID.<br/><br/>[Required authorization] Route required priv
     getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agent_policies_agentpolicyid_response,
 };
 const PUT_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_agent_policies_agentpolicyid',
@@ -8180,12 +7090,7 @@ Update an agent policy by ID.<br/><br/>[Required authorization] Route required p
     getLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'path'),
     getLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_agent_policies_agentpolicyid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_agent_policies_agentpolicyid_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_AUTO_UPGRADE_AGENTS_STATUS_CONTRACT: InternalConnectorContract =
   {
@@ -8221,14 +7126,7 @@ Get auto upgrade agent status<br/><br/>[Required authorization] Route required p
         'query'
       ),
     ]),
-    outputSchema: z.object({
-      output: z.looseObject({
-        ...getShape(
-          getShape(get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_response)
-        ),
-      }),
-      error: z.any().optional(),
-    }),
+    outputSchema: get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_response,
   };
 const POST_FLEET_AGENT_POLICIES_AGENTPOLICYID_COPY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_agentpolicyid_copy',
@@ -8254,12 +7152,7 @@ Copy an agent policy by ID.<br/><br/>[Required authorization] Route required pri
     getLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_agentpolicyid_copy_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agent_policies_agentpolicyid_copy_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_DOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid_download',
@@ -8285,12 +7178,7 @@ Download an agent policy by ID.<br/><br/>[Required authorization] Route required
     getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_download_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agent_policies_agentpolicyid_download_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_FULL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid_full',
@@ -8316,12 +7204,7 @@ Get a full agent policy by ID.<br/><br/>[Required authorization] Route required 
     getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_full_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agent_policies_agentpolicyid_full_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid_outputs',
@@ -8347,12 +7230,7 @@ Get a list of outputs associated with agent policy by policy id.<br/><br/>[Requi
     getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agent_policies_agentpolicyid_outputs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agent_policies_agentpolicyid_outputs_response,
 };
 const POST_FLEET_AGENT_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_delete',
@@ -8378,12 +7256,7 @@ Delete an agent policy by ID.<br/><br/>[Required authorization] Route required p
     getLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agent_policies_delete_response,
 };
 const POST_FLEET_AGENT_POLICIES_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_outputs',
@@ -8409,12 +7282,7 @@ Get a list of outputs associated with agent policies.<br/><br/>[Required authori
     getLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agent_policies_outputs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agent_policies_outputs_response,
 };
 const GET_FLEET_AGENT_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_status',
@@ -8438,12 +7306,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agent_status_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agent_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agent_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agent_status_response,
 };
 const GET_FLEET_AGENT_STATUS_DATA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_status_data',
@@ -8469,12 +7332,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agent_status_data_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agent_status_data_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agent_status_data_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agent_status_data_response,
 };
 const POST_FLEET_AGENTLESS_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agentless_policies',
@@ -8500,12 +7358,7 @@ Create an agentless policy`,
     getLooseObjectFromProperty(post_fleet_agentless_policies_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agentless_policies_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agentless_policies_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agentless_policies_response,
 };
 const DELETE_FLEET_AGENTLESS_POLICIES_POLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agentless_policies_policyid',
@@ -8531,12 +7384,7 @@ Delete an agentless policy`,
     getLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_agentless_policies_policyid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_agentless_policies_policyid_response,
 };
 const GET_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents',
@@ -8577,12 +7425,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agents_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agents_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agents_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agents_response,
 };
 const POST_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents',
@@ -8608,12 +7451,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_response,
 };
 const DELETE_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agents_agentid',
@@ -8639,12 +7477,7 @@ Delete an agent by ID.<br/><br/>[Required authorization] Route required privileg
     getLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_agents_agentid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_agents_agentid_response,
 };
 const GET_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_agentid',
@@ -8670,12 +7503,7 @@ Get an agent by ID.<br/><br/>[Required authorization] Route required privileges:
     getLooseObjectFromProperty(get_fleet_agents_agentid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agents_agentid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agents_agentid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agents_agentid_response,
 };
 const PUT_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_agents_agentid',
@@ -8701,12 +7529,7 @@ Update an agent by ID.<br/><br/>[Required authorization] Route required privileg
     getLooseObjectFromProperty(put_fleet_agents_agentid_request, 'path'),
     getLooseObjectFromProperty(put_fleet_agents_agentid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_agents_agentid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_agents_agentid_response,
 };
 const POST_FLEET_AGENTS_AGENTID_ACTIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_actions',
@@ -8732,12 +7555,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_actions_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_agentid_actions_response,
 };
 const POST_FLEET_AGENTS_AGENTID_MIGRATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_migrate',
@@ -8763,12 +7581,7 @@ Migrate a single agent to another cluster.<br/><br/>[Required authorization] Rou
     getLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_migrate_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_agentid_migrate_response,
 };
 const POST_FLEET_AGENTS_AGENTID_REASSIGN_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_reassign',
@@ -8794,12 +7607,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_reassign_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_agentid_reassign_response,
 };
 const POST_FLEET_AGENTS_AGENTID_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_request_diagnostics',
@@ -8825,12 +7633,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_request_diagnostics_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_agentid_request_diagnostics_response,
 };
 const POST_FLEET_AGENTS_AGENTID_UNENROLL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_unenroll',
@@ -8856,12 +7659,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_unenroll_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_agentid_unenroll_response,
 };
 const POST_FLEET_AGENTS_AGENTID_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_upgrade',
@@ -8887,12 +7685,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_agentid_upgrade_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_agentid_upgrade_response,
 };
 const GET_FLEET_AGENTS_AGENTID_UPLOADS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_agentid_uploads',
@@ -8918,12 +7711,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agents_agentid_uploads_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agents_agentid_uploads_response,
 };
 const GET_FLEET_AGENTS_ACTION_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_action_status',
@@ -8949,12 +7737,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agents_action_status_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agents_action_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agents_action_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agents_action_status_response,
 };
 const POST_FLEET_AGENTS_ACTIONS_ACTIONID_CANCEL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_actions_actionid_cancel',
@@ -8980,12 +7763,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_actions_actionid_cancel_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_actions_actionid_cancel_response,
 };
 const GET_FLEET_AGENTS_AVAILABLE_VERSIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_available_versions',
@@ -9011,12 +7789,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agents_available_versions_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agents_available_versions_response,
 };
 const POST_FLEET_AGENTS_BULK_MIGRATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_migrate',
@@ -9042,12 +7815,7 @@ Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route 
     getLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_migrate_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_bulk_migrate_response,
 };
 const POST_FLEET_AGENTS_BULK_REASSIGN_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_reassign',
@@ -9073,12 +7841,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_reassign_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_bulk_reassign_response,
 };
 const POST_FLEET_AGENTS_BULK_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_request_diagnostics',
@@ -9104,12 +7867,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_request_diagnostics_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_bulk_request_diagnostics_response,
 };
 const POST_FLEET_AGENTS_BULK_UNENROLL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_unenroll',
@@ -9135,12 +7893,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_unenroll_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_bulk_unenroll_response,
 };
 const POST_FLEET_AGENTS_BULK_UPDATE_AGENT_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_update_agent_tags',
@@ -9166,12 +7919,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_update_agent_tags_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_bulk_update_agent_tags_response,
 };
 const POST_FLEET_AGENTS_BULK_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_upgrade',
@@ -9197,12 +7945,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_bulk_upgrade_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_bulk_upgrade_response,
 };
 const DELETE_FLEET_AGENTS_FILES_FILEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agents_files_fileid',
@@ -9228,12 +7971,7 @@ Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route requ
     getLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_agents_files_fileid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_agents_files_fileid_response,
 };
 const GET_FLEET_AGENTS_FILES_FILEID_FILENAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_files_fileid_filename',
@@ -9259,12 +7997,7 @@ Get a file uploaded by an agent.<br/><br/>[Required authorization] Route require
     getLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agents_files_fileid_filename_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agents_files_fileid_filename_response,
 };
 const GET_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_setup',
@@ -9290,12 +8023,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agents_setup_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agents_setup_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agents_setup_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agents_setup_response,
 };
 const POST_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_setup',
@@ -9321,12 +8049,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_agents_setup_request, 'path'),
     getLooseObjectFromProperty(post_fleet_agents_setup_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_agents_setup_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_agents_setup_response,
 };
 const GET_FLEET_AGENTS_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_tags',
@@ -9352,12 +8075,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_agents_tags_request, 'path'),
     getLooseObjectFromProperty(get_fleet_agents_tags_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_agents_tags_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_agents_tags_response,
 };
 const GET_FLEET_CHECK_PERMISSIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_check_permissions',
@@ -9381,12 +8099,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_check_permissions_request, 'path'),
     getLooseObjectFromProperty(get_fleet_check_permissions_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_check_permissions_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_check_permissions_response,
 };
 const GET_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_cloud_connectors',
@@ -9412,12 +8125,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'path'),
     getLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_cloud_connectors_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_cloud_connectors_response,
 };
 const POST_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_cloud_connectors',
@@ -9443,12 +8151,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'path'),
     getLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_cloud_connectors_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_cloud_connectors_response,
 };
 const DELETE_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_cloud_connectors_cloudconnectorid',
@@ -9474,12 +8177,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_cloud_connectors_cloudconnectorid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_cloud_connectors_cloudconnectorid_response,
 };
 const GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_cloud_connectors_cloudconnectorid',
@@ -9505,12 +8203,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_cloud_connectors_cloudconnectorid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_cloud_connectors_cloudconnectorid_response,
 };
 const PUT_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_cloud_connectors_cloudconnectorid',
@@ -9536,12 +8229,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
     getLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_cloud_connectors_cloudconnectorid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_cloud_connectors_cloudconnectorid_response,
 };
 const GET_FLEET_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_data_streams',
@@ -9567,12 +8255,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_data_streams_request, 'path'),
     getLooseObjectFromProperty(get_fleet_data_streams_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_data_streams_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_data_streams_response,
 };
 const GET_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_enrollment_api_keys',
@@ -9598,12 +8281,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'path'),
     getLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_enrollment_api_keys_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_enrollment_api_keys_response,
 };
 const POST_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_enrollment_api_keys',
@@ -9629,12 +8307,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'path'),
     getLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_enrollment_api_keys_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_enrollment_api_keys_response,
 };
 const DELETE_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_enrollment_api_keys_keyid',
@@ -9660,12 +8333,7 @@ Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required
     getLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_enrollment_api_keys_keyid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_enrollment_api_keys_keyid_response,
 };
 const GET_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_enrollment_api_keys_keyid',
@@ -9691,12 +8359,7 @@ Get an enrollment API key by ID.<br/><br/>[Required authorization] Route require
     getLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_enrollment_api_keys_keyid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_enrollment_api_keys_keyid_response,
 };
 const POST_FLEET_EPM_BULK_ASSETS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_bulk_assets',
@@ -9722,12 +8385,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'path'),
     getLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_bulk_assets_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_bulk_assets_response,
 };
 const GET_FLEET_EPM_CATEGORIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_categories',
@@ -9753,12 +8411,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_categories_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_categories_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_categories_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_categories_response,
 };
 const POST_FLEET_EPM_CUSTOM_INTEGRATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_custom_integrations',
@@ -9784,12 +8437,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'path'),
     getLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_custom_integrations_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_custom_integrations_response,
 };
 const PUT_FLEET_EPM_CUSTOM_INTEGRATIONS_PKGNAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_epm_custom_integrations_pkgname',
@@ -9815,12 +8463,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'path'),
     getLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_epm_custom_integrations_pkgname_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_epm_custom_integrations_pkgname_response,
 };
 const GET_FLEET_EPM_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_data_streams',
@@ -9846,12 +8489,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_data_streams_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_data_streams_response,
 };
 const GET_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages',
@@ -9877,12 +8515,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_packages_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_packages_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_packages_response,
 };
 const POST_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages',
@@ -9908,12 +8541,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_epm_packages_request, 'path'),
     getLooseObjectFromProperty(post_fleet_epm_packages_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_packages_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk',
@@ -9939,12 +8567,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'path'),
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_bulk_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_packages_bulk_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_ROLLBACK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk_rollback',
@@ -9970,12 +8593,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'path'),
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_bulk_rollback_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_packages_bulk_rollback_response,
 };
 const GET_FLEET_EPM_PACKAGES_BULK_ROLLBACK_TASKID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_bulk_rollback_taskid',
@@ -10001,12 +8619,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_bulk_rollback_taskid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_packages_bulk_rollback_taskid_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_UNINSTALL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk_uninstall',
@@ -10032,12 +8645,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'path'),
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_bulk_uninstall_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_packages_bulk_uninstall_response,
 };
 const GET_FLEET_EPM_PACKAGES_BULK_UNINSTALL_TASKID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_bulk_uninstall_taskid',
@@ -10063,12 +8671,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_bulk_uninstall_taskid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_packages_bulk_uninstall_taskid_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk_upgrade',
@@ -10094,12 +8697,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'path'),
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_bulk_upgrade_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_packages_bulk_upgrade_response,
 };
 const GET_FLEET_EPM_PACKAGES_BULK_UPGRADE_TASKID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_bulk_upgrade_taskid',
@@ -10125,12 +8723,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_bulk_upgrade_taskid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_packages_bulk_upgrade_taskid_response,
 };
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_epm_packages_pkgname_pkgversion',
@@ -10156,12 +8749,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_epm_packages_pkgname_pkgversion_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_pkgname_pkgversion',
@@ -10185,12 +8773,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion',
@@ -10216,12 +8799,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
     getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const PUT_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_epm_packages_pkgname_pkgversion',
@@ -10247,12 +8825,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
     getLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_epm_packages_pkgname_pkgversion_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_FILEPATH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_pkgname_pkgversion_filepath',
@@ -10278,12 +8851,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_pkgversion_filepath_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_packages_pkgname_pkgversion_filepath_response,
 };
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_DATASTREAM_ASSETS_CONTRACT: InternalConnectorContract =
   {
@@ -10319,14 +8887,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
         'query'
       ),
     ]),
-    outputSchema: z.object({
-      output: z.looseObject({
-        ...getShape(
-          getShape(delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_response)
-        ),
-      }),
-      error: z.any().optional(),
-    }),
+    outputSchema: delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_response,
   };
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: InternalConnectorContract =
   {
@@ -10362,12 +8923,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
         'query'
       ),
     ]),
-    outputSchema: z.object({
-      output: z.looseObject({
-        ...getShape(getShape(delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_response)),
-      }),
-      error: z.any().optional(),
-    }),
+    outputSchema: delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_response,
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: InternalConnectorContract =
   {
@@ -10403,12 +8959,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
         'query'
       ),
     ]),
-    outputSchema: z.object({
-      output: z.looseObject({
-        ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_response)),
-      }),
-      error: z.any().optional(),
-    }),
+    outputSchema: post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_response,
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_RULE_ASSETS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion_rule_assets',
@@ -10443,12 +8994,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'query'
     ),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_pkgversion_rule_assets_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_packages_pkgname_pkgversion_rule_assets_response,
 };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_TRANSFORMS_AUTHORIZE_CONTRACT: InternalConnectorContract =
   {
@@ -10482,14 +9028,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
         'query'
       ),
     ]),
-    outputSchema: z.object({
-      output: z.looseObject({
-        ...getShape(
-          getShape(post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_response)
-        ),
-      }),
-      error: z.any().optional(),
-    }),
+    outputSchema: post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_response,
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_ROLLBACK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_rollback',
@@ -10515,12 +9054,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'path'),
     getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_epm_packages_pkgname_rollback_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_epm_packages_pkgname_rollback_response,
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_STATS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_pkgname_stats',
@@ -10546,12 +9080,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_pkgname_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_packages_pkgname_stats_response,
 };
 const GET_FLEET_EPM_PACKAGES_INSTALLED_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_installed',
@@ -10584,12 +9113,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_installed_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_packages_installed_response,
 };
 const GET_FLEET_EPM_PACKAGES_LIMITED_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_limited',
@@ -10615,12 +9139,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_packages_limited_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_packages_limited_response,
 };
 const GET_FLEET_EPM_TEMPLATES_PKGNAME_PKGVERSION_INPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_templates_pkgname_pkgversion_inputs',
@@ -10646,12 +9165,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_templates_pkgname_pkgversion_inputs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_templates_pkgname_pkgversion_inputs_response,
 };
 const GET_FLEET_EPM_VERIFICATION_KEY_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_verification_key_id',
@@ -10677,12 +9191,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'path'),
     getLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_epm_verification_key_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_epm_verification_key_id_response,
 };
 const GET_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_fleet_server_hosts',
@@ -10708,12 +9217,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'path'),
     getLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_fleet_server_hosts_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_fleet_server_hosts_response,
 };
 const POST_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_fleet_server_hosts',
@@ -10739,12 +9243,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'path'),
     getLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_fleet_server_hosts_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_fleet_server_hosts_response,
 };
 const DELETE_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_fleet_server_hosts_itemid',
@@ -10770,12 +9269,7 @@ Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route requir
     getLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_fleet_server_hosts_itemid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_fleet_server_hosts_itemid_response,
 };
 const GET_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_fleet_server_hosts_itemid',
@@ -10801,12 +9295,7 @@ Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required 
     getLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_fleet_server_hosts_itemid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_fleet_server_hosts_itemid_response,
 };
 const PUT_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_fleet_server_hosts_itemid',
@@ -10832,12 +9321,7 @@ Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route requir
     getLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'path'),
     getLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_fleet_server_hosts_itemid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_fleet_server_hosts_itemid_response,
 };
 const POST_FLEET_HEALTH_CHECK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_health_check',
@@ -10863,12 +9347,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_health_check_request, 'path'),
     getLooseObjectFromProperty(post_fleet_health_check_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_health_check_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_health_check_response,
 };
 const GET_FLEET_KUBERNETES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_kubernetes',
@@ -10894,12 +9373,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_kubernetes_request, 'path'),
     getLooseObjectFromProperty(get_fleet_kubernetes_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_kubernetes_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_kubernetes_response,
 };
 const GET_FLEET_KUBERNETES_DOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_kubernetes_download',
@@ -10925,12 +9399,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'path'),
     getLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_kubernetes_download_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_kubernetes_download_response,
 };
 const POST_FLEET_LOGSTASH_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_logstash_api_keys',
@@ -10956,12 +9425,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'path'),
     getLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_logstash_api_keys_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_logstash_api_keys_response,
 };
 const POST_FLEET_MESSAGE_SIGNING_SERVICE_ROTATE_KEY_PAIR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_message_signing_service_rotate_key_pair',
@@ -10987,12 +9451,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_message_signing_service_rotate_key_pair_request, 'path'),
     getLooseObjectFromProperty(post_fleet_message_signing_service_rotate_key_pair_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_message_signing_service_rotate_key_pair_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_message_signing_service_rotate_key_pair_response,
 };
 const GET_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_outputs',
@@ -11018,12 +9477,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_outputs_request, 'path'),
     getLooseObjectFromProperty(get_fleet_outputs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_outputs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_outputs_response,
 };
 const POST_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_outputs',
@@ -11049,12 +9503,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_outputs_request, 'path'),
     getLooseObjectFromProperty(post_fleet_outputs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_outputs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_outputs_response,
 };
 const DELETE_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_outputs_outputid',
@@ -11080,12 +9529,7 @@ Delete output by ID.<br/><br/>[Required authorization] Route required privileges
     getLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_outputs_outputid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_outputs_outputid_response,
 };
 const GET_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_outputs_outputid',
@@ -11111,12 +9555,7 @@ Get output by ID.<br/><br/>[Required authorization] Route required privileges: f
     getLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_outputs_outputid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_outputs_outputid_response,
 };
 const PUT_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_outputs_outputid',
@@ -11142,12 +9581,7 @@ Update output by ID.<br/><br/>[Required authorization] Route required privileges
     getLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'path'),
     getLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_outputs_outputid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_outputs_outputid_response,
 };
 const GET_FLEET_OUTPUTS_OUTPUTID_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_outputs_outputid_health',
@@ -11173,12 +9607,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'path'),
     getLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_outputs_outputid_health_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_outputs_outputid_health_response,
 };
 const GET_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_package_policies',
@@ -11211,12 +9640,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_package_policies_request, 'path'),
     getLooseObjectFromProperty(get_fleet_package_policies_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_package_policies_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_package_policies_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies',
@@ -11240,12 +9664,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_package_policies_request, 'path'),
     getLooseObjectFromProperty(post_fleet_package_policies_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_package_policies_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_package_policies_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_bulk_get',
@@ -11269,12 +9688,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'path'),
     getLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_package_policies_bulk_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_package_policies_bulk_get_response,
 };
 const DELETE_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_package_policies_packagepolicyid',
@@ -11300,12 +9714,7 @@ Delete a package policy by ID.<br/><br/>[Required authorization] Route required 
     getLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_package_policies_packagepolicyid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_package_policies_packagepolicyid_response,
 };
 const GET_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_package_policies_packagepolicyid',
@@ -11331,12 +9740,7 @@ Get a package policy by ID.`,
     getLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_package_policies_packagepolicyid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_package_policies_packagepolicyid_response,
 };
 const PUT_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_package_policies_packagepolicyid',
@@ -11362,12 +9766,7 @@ Update a package policy by ID.`,
     getLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'path'),
     getLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_package_policies_packagepolicyid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_package_policies_packagepolicyid_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_delete',
@@ -11393,12 +9792,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'path'),
     getLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_package_policies_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_package_policies_delete_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_upgrade',
@@ -11424,12 +9818,7 @@ Upgrade a package policy to a newer package version.<br/><br/>[Required authoriz
     getLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'path'),
     getLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_package_policies_upgrade_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_package_policies_upgrade_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_UPGRADE_DRYRUN_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_upgrade_dryrun',
@@ -11455,12 +9844,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'path'),
     getLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_package_policies_upgrade_dryrun_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_package_policies_upgrade_dryrun_response,
 };
 const GET_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_proxies',
@@ -11486,12 +9870,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_proxies_request, 'path'),
     getLooseObjectFromProperty(get_fleet_proxies_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_proxies_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_proxies_response,
 };
 const POST_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_proxies',
@@ -11517,12 +9896,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_proxies_request, 'path'),
     getLooseObjectFromProperty(post_fleet_proxies_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_proxies_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_proxies_response,
 };
 const DELETE_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_proxies_itemid',
@@ -11548,12 +9922,7 @@ Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges
     getLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'path'),
     getLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_fleet_proxies_itemid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_fleet_proxies_itemid_response,
 };
 const GET_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_proxies_itemid',
@@ -11579,12 +9948,7 @@ Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: 
     getLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_proxies_itemid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_proxies_itemid_response,
 };
 const PUT_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_proxies_itemid',
@@ -11610,12 +9974,7 @@ Update a proxy by ID.<br/><br/>[Required authorization] Route required privilege
     getLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'path'),
     getLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_proxies_itemid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_proxies_itemid_response,
 };
 const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_OUTPUTID_REMOTE_STATUS_CONTRACT: InternalConnectorContract =
   {
@@ -11651,12 +10010,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
         'query'
       ),
     ]),
-    outputSchema: z.object({
-      output: z.looseObject({
-        ...getShape(getShape(get_fleet_remote_synced_integrations_outputid_remote_status_response)),
-      }),
-      error: z.any().optional(),
-    }),
+    outputSchema: get_fleet_remote_synced_integrations_outputid_remote_status_response,
   };
 const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_remote_synced_integrations_status',
@@ -11682,12 +10036,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'path'),
     getLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_remote_synced_integrations_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_remote_synced_integrations_status_response,
 };
 const POST_FLEET_SERVICE_TOKENS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_service_tokens',
@@ -11713,12 +10062,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_service_tokens_request, 'path'),
     getLooseObjectFromProperty(post_fleet_service_tokens_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_service_tokens_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_service_tokens_response,
 };
 const GET_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_settings',
@@ -11744,12 +10088,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_settings_request, 'path'),
     getLooseObjectFromProperty(get_fleet_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_settings_response,
 };
 const PUT_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_settings',
@@ -11775,12 +10114,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(put_fleet_settings_request, 'path'),
     getLooseObjectFromProperty(put_fleet_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_settings_response,
 };
 const POST_FLEET_SETUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_setup',
@@ -11806,12 +10140,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_fleet_setup_request, 'path'),
     getLooseObjectFromProperty(post_fleet_setup_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_fleet_setup_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_fleet_setup_response,
 };
 const GET_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_space_settings',
@@ -11835,12 +10164,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_fleet_space_settings_request, 'path'),
     getLooseObjectFromProperty(get_fleet_space_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_space_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_space_settings_response,
 };
 const PUT_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_space_settings',
@@ -11866,12 +10190,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(put_fleet_space_settings_request, 'path'),
     getLooseObjectFromProperty(put_fleet_space_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_fleet_space_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_fleet_space_settings_response,
 };
 const GET_FLEET_UNINSTALL_TOKENS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_uninstall_tokens',
@@ -11897,12 +10216,7 @@ List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Re
     getLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'path'),
     getLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_uninstall_tokens_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_uninstall_tokens_response,
 };
 const GET_FLEET_UNINSTALL_TOKENS_UNINSTALLTOKENID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_uninstall_tokens_uninstalltokenid',
@@ -11928,12 +10242,7 @@ Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] R
     getLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'path'),
     getLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_fleet_uninstall_tokens_uninstalltokenid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_fleet_uninstall_tokens_uninstalltokenid_response,
 };
 const DELETELIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteList',
@@ -11962,12 +10271,7 @@ Delete a value list using the list ID.
     getLooseObjectFromProperty(delete_list_request, 'path'),
     getLooseObjectFromProperty(delete_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_list_response,
 };
 const READLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadList',
@@ -11993,12 +10297,7 @@ Get the details of a value list using the list ID.`,
     getLooseObjectFromProperty(read_list_request, 'path'),
     getLooseObjectFromProperty(read_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_list_response,
 };
 const PATCHLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchList',
@@ -12024,12 +10323,7 @@ Update specific fields of an existing list using the list \`id\`.`,
     getLooseObjectFromProperty(patch_list_request, 'path'),
     getLooseObjectFromProperty(patch_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(patch_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: patch_list_response,
 };
 const CREATELIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateList',
@@ -12055,12 +10349,7 @@ Create a new value list.`,
     getLooseObjectFromProperty(create_list_request, 'path'),
     getLooseObjectFromProperty(create_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_list_response,
 };
 const UPDATELIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateList',
@@ -12089,12 +10378,7 @@ Update a value list using the list \`id\`. The original list is replaced, and al
     getLooseObjectFromProperty(update_list_request, 'path'),
     getLooseObjectFromProperty(update_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_list_response,
 };
 const FINDLISTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindLists',
@@ -12120,12 +10404,7 @@ Get a paginated subset of value lists. By default, the first page is returned, w
     getLooseObjectFromProperty(find_lists_request, 'path'),
     getLooseObjectFromProperty(find_lists_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_lists_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_lists_response,
 };
 const DELETELISTINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteListIndex',
@@ -12151,12 +10430,7 @@ Delete the \`.lists\` and \`.items\` data streams.`,
     getLooseObjectFromProperty(delete_list_index_request, 'path'),
     getLooseObjectFromProperty(delete_list_index_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_list_index_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_list_index_response,
 };
 const READLISTINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListIndex',
@@ -12182,12 +10456,7 @@ Verify that \`.lists\` and \`.items\` data streams exist.`,
     getLooseObjectFromProperty(read_list_index_request, 'path'),
     getLooseObjectFromProperty(read_list_index_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_list_index_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_list_index_response,
 };
 const CREATELISTINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateListIndex',
@@ -12213,12 +10482,7 @@ Create \`.lists\` and \`.items\` data streams in the relevant space.`,
     getLooseObjectFromProperty(create_list_index_request, 'path'),
     getLooseObjectFromProperty(create_list_index_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_list_index_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_list_index_response,
 };
 const DELETELISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteListItem',
@@ -12244,12 +10508,7 @@ Delete a value list item using its \`id\`, or its \`list_id\` and \`value\` fiel
     getLooseObjectFromProperty(delete_list_item_request, 'path'),
     getLooseObjectFromProperty(delete_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_list_item_response,
 };
 const READLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListItem',
@@ -12275,12 +10534,7 @@ Get the details of a value list item.`,
     getLooseObjectFromProperty(read_list_item_request, 'path'),
     getLooseObjectFromProperty(read_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_list_item_response,
 };
 const PATCHLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchListItem',
@@ -12306,12 +10560,7 @@ Update specific fields of an existing value list item using the item \`id\`.`,
     getLooseObjectFromProperty(patch_list_item_request, 'path'),
     getLooseObjectFromProperty(patch_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(patch_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: patch_list_item_response,
 };
 const CREATELISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateListItem',
@@ -12342,12 +10591,7 @@ All value list items in the same list must be the same type. For example, each l
     getLooseObjectFromProperty(create_list_item_request, 'path'),
     getLooseObjectFromProperty(create_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_list_item_response,
 };
 const UPDATELISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateListItem',
@@ -12376,12 +10620,7 @@ Update a value list item using the list item ID. The original list item is repla
     getLooseObjectFromProperty(update_list_item_request, 'path'),
     getLooseObjectFromProperty(update_list_item_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_list_item_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_list_item_response,
 };
 const EXPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportListItems',
@@ -12407,12 +10646,7 @@ Export list item values from the specified value list.`,
     getLooseObjectFromProperty(export_list_items_request, 'path'),
     getLooseObjectFromProperty(export_list_items_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(export_list_items_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: export_list_items_response,
 };
 const FINDLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindListItems',
@@ -12438,12 +10672,7 @@ Get all value list items in the specified list.`,
     getLooseObjectFromProperty(find_list_items_request, 'path'),
     getLooseObjectFromProperty(find_list_items_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_list_items_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_list_items_response,
 };
 const IMPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportListItems',
@@ -12472,12 +10701,7 @@ You can import items to a new or existing list.
     getLooseObjectFromProperty(import_list_items_request, 'path'),
     getLooseObjectFromProperty(import_list_items_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(import_list_items_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: import_list_items_response,
 };
 const READLISTPRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListPrivileges',
@@ -12501,12 +10725,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(read_list_privileges_request, 'path'),
     getLooseObjectFromProperty(read_list_privileges_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_list_privileges_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_list_privileges_response,
 };
 const DELETE_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_logstash_pipeline',
@@ -12528,12 +10747,7 @@ If your Elasticsearch cluster is protected with basic authentication, you must h
     getLooseObjectFromProperty(delete_logstash_pipeline_request, 'path'),
     getLooseObjectFromProperty(delete_logstash_pipeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_logstash_pipeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_logstash_pipeline_response,
 };
 const GET_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_logstash_pipeline',
@@ -12555,12 +10769,7 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
     getLooseObjectFromProperty(get_logstash_pipeline_request, 'path'),
     getLooseObjectFromProperty(get_logstash_pipeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_logstash_pipeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_logstash_pipeline_response,
 };
 const PUT_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_logstash_pipeline',
@@ -12582,12 +10791,7 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
     getLooseObjectFromProperty(put_logstash_pipeline_request, 'path'),
     getLooseObjectFromProperty(put_logstash_pipeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_logstash_pipeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_logstash_pipeline_response,
 };
 const GET_LOGSTASH_PIPELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_logstash_pipelines',
@@ -12614,12 +10818,7 @@ The \`username\` property appears in the response when security is enabled and d
     getLooseObjectFromProperty(get_logstash_pipelines_request, 'path'),
     getLooseObjectFromProperty(get_logstash_pipelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_logstash_pipelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_logstash_pipelines_response,
 };
 const POST_MAINTENANCE_WINDOW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_maintenance_window',
@@ -12645,12 +10844,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_maintenance_window_request, 'path'),
     getLooseObjectFromProperty(post_maintenance_window_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_maintenance_window_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_maintenance_window_response,
 };
 const GET_MAINTENANCE_WINDOW_FIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_maintenance_window_find',
@@ -12676,12 +10870,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_maintenance_window_find_request, 'path'),
     getLooseObjectFromProperty(get_maintenance_window_find_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_maintenance_window_find_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_maintenance_window_find_response,
 };
 const DELETE_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_maintenance_window_id',
@@ -12707,12 +10896,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(delete_maintenance_window_id_request, 'path'),
     getLooseObjectFromProperty(delete_maintenance_window_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_maintenance_window_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_maintenance_window_id_response,
 };
 const GET_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_maintenance_window_id',
@@ -12738,12 +10922,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_maintenance_window_id_request, 'path'),
     getLooseObjectFromProperty(get_maintenance_window_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_maintenance_window_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_maintenance_window_id_response,
 };
 const PATCH_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.patch_maintenance_window_id',
@@ -12769,12 +10948,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(patch_maintenance_window_id_request, 'path'),
     getLooseObjectFromProperty(patch_maintenance_window_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(patch_maintenance_window_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: patch_maintenance_window_id_response,
 };
 const POST_MAINTENANCE_WINDOW_ID_ARCHIVE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_maintenance_window_id_archive',
@@ -12800,12 +10974,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'path'),
     getLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_maintenance_window_id_archive_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_maintenance_window_id_archive_response,
 };
 const POST_MAINTENANCE_WINDOW_ID_UNARCHIVE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_maintenance_window_id_unarchive',
@@ -12831,12 +11000,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'path'),
     getLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_maintenance_window_id_unarchive_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_maintenance_window_id_unarchive_response,
 };
 const MLSYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.mlSync',
@@ -12863,12 +11027,7 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models i
     getLooseObjectFromProperty(ml_sync_request, 'path'),
     getLooseObjectFromProperty(ml_sync_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_sync_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_sync_response,
 };
 const DELETENOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteNote',
@@ -12894,12 +11053,7 @@ Delete a note from a Timeline using the note ID.`,
     getLooseObjectFromProperty(delete_note_request, 'path'),
     getLooseObjectFromProperty(delete_note_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_note_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_note_response,
 };
 const GETNOTES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetNotes',
@@ -12936,12 +11090,7 @@ Get all notes for a given document.`,
     getLooseObjectFromProperty(get_notes_request, 'path'),
     getLooseObjectFromProperty(get_notes_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_notes_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_notes_response,
 };
 const PERSISTNOTEROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistNoteRoute',
@@ -12967,12 +11116,7 @@ Add a note to a Timeline or update an existing note.`,
     getLooseObjectFromProperty(persist_note_route_request, 'path'),
     getLooseObjectFromProperty(persist_note_route_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(persist_note_route_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: persist_note_route_response,
 };
 const OBSERVABILITY_AI_ASSISTANT_CHAT_COMPLETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.observability_ai_assistant_chat_complete',
@@ -13005,12 +11149,7 @@ This functionality is in technical preview and may be changed or removed in a fu
     getLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'path'),
     getLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(observability_ai_assistant_chat_complete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: observability_ai_assistant_chat_complete_response,
 };
 const OSQUERYFINDLIVEQUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindLiveQueries',
@@ -13036,12 +11175,7 @@ Get a list of all live queries.`,
     getLooseObjectFromProperty(osquery_find_live_queries_request, 'path'),
     getLooseObjectFromProperty(osquery_find_live_queries_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_find_live_queries_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_find_live_queries_response,
 };
 const OSQUERYCREATELIVEQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreateLiveQuery',
@@ -13067,12 +11201,7 @@ Create and run a live query.`,
     getLooseObjectFromProperty(osquery_create_live_query_request, 'path'),
     getLooseObjectFromProperty(osquery_create_live_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_create_live_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_create_live_query_response,
 };
 const OSQUERYGETLIVEQUERYDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetLiveQueryDetails',
@@ -13098,12 +11227,7 @@ Get the details of a live query using the query ID.`,
     getLooseObjectFromProperty(osquery_get_live_query_details_request, 'path'),
     getLooseObjectFromProperty(osquery_get_live_query_details_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_get_live_query_details_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_get_live_query_details_response,
 };
 const OSQUERYGETLIVEQUERYRESULTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetLiveQueryResults',
@@ -13129,12 +11253,7 @@ Get the results of a live query using the query action ID.`,
     getLooseObjectFromProperty(osquery_get_live_query_results_request, 'path'),
     getLooseObjectFromProperty(osquery_get_live_query_results_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_get_live_query_results_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_get_live_query_results_response,
 };
 const OSQUERYFINDPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindPacks',
@@ -13160,12 +11279,7 @@ Get a list of all query packs.`,
     getLooseObjectFromProperty(osquery_find_packs_request, 'path'),
     getLooseObjectFromProperty(osquery_find_packs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_find_packs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_find_packs_response,
 };
 const OSQUERYCREATEPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreatePacks',
@@ -13191,12 +11305,7 @@ Create a query pack.`,
     getLooseObjectFromProperty(osquery_create_packs_request, 'path'),
     getLooseObjectFromProperty(osquery_create_packs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_create_packs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_create_packs_response,
 };
 const OSQUERYDELETEPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryDeletePacks',
@@ -13222,12 +11331,7 @@ Delete a query pack using the pack ID.`,
     getLooseObjectFromProperty(osquery_delete_packs_request, 'path'),
     getLooseObjectFromProperty(osquery_delete_packs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_delete_packs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_delete_packs_response,
 };
 const OSQUERYGETPACKSDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetPacksDetails',
@@ -13253,12 +11357,7 @@ Get the details of a query pack using the pack ID.`,
     getLooseObjectFromProperty(osquery_get_packs_details_request, 'path'),
     getLooseObjectFromProperty(osquery_get_packs_details_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_get_packs_details_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_get_packs_details_response,
 };
 const OSQUERYUPDATEPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryUpdatePacks',
@@ -13287,12 +11386,7 @@ Update a query pack using the pack ID.
     getLooseObjectFromProperty(osquery_update_packs_request, 'path'),
     getLooseObjectFromProperty(osquery_update_packs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_update_packs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_update_packs_response,
 };
 const OSQUERYFINDSAVEDQUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindSavedQueries',
@@ -13318,12 +11412,7 @@ Get a list of all saved queries.`,
     getLooseObjectFromProperty(osquery_find_saved_queries_request, 'path'),
     getLooseObjectFromProperty(osquery_find_saved_queries_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_find_saved_queries_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_find_saved_queries_response,
 };
 const OSQUERYCREATESAVEDQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreateSavedQuery',
@@ -13349,12 +11438,7 @@ Create and run a saved query.`,
     getLooseObjectFromProperty(osquery_create_saved_query_request, 'path'),
     getLooseObjectFromProperty(osquery_create_saved_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_create_saved_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_create_saved_query_response,
 };
 const OSQUERYDELETESAVEDQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryDeleteSavedQuery',
@@ -13380,12 +11464,7 @@ Delete a saved query using the query ID.`,
     getLooseObjectFromProperty(osquery_delete_saved_query_request, 'path'),
     getLooseObjectFromProperty(osquery_delete_saved_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_delete_saved_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_delete_saved_query_response,
 };
 const OSQUERYGETSAVEDQUERYDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetSavedQueryDetails',
@@ -13411,12 +11490,7 @@ Get the details of a saved query using the query ID.`,
     getLooseObjectFromProperty(osquery_get_saved_query_details_request, 'path'),
     getLooseObjectFromProperty(osquery_get_saved_query_details_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_get_saved_query_details_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_get_saved_query_details_response,
 };
 const OSQUERYUPDATESAVEDQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryUpdateSavedQuery',
@@ -13445,12 +11519,7 @@ Update a saved query using the query ID.
     getLooseObjectFromProperty(osquery_update_saved_query_request, 'path'),
     getLooseObjectFromProperty(osquery_update_saved_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(osquery_update_saved_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: osquery_update_saved_query_response,
 };
 const PERSISTPINNEDEVENTROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistPinnedEventRoute',
@@ -13476,12 +11545,7 @@ Pin/unpin an event to/from an existing Timeline.`,
     getLooseObjectFromProperty(persist_pinned_event_route_request, 'path'),
     getLooseObjectFromProperty(persist_pinned_event_route_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(persist_pinned_event_route_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: persist_pinned_event_route_response,
 };
 const CLEANUPRISKENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CleanUpRiskEngine',
@@ -13507,12 +11571,7 @@ Cleaning up the the Risk Engine by removing the indices, mapping and transforms`
     getLooseObjectFromProperty(clean_up_risk_engine_request, 'path'),
     getLooseObjectFromProperty(clean_up_risk_engine_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(clean_up_risk_engine_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: clean_up_risk_engine_response,
 };
 const CONFIGURERISKENGINESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ConfigureRiskEngineSavedObject',
@@ -13538,12 +11597,7 @@ Configuring the Risk Engine Saved Object`,
     getLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'path'),
     getLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(configure_risk_engine_saved_object_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: configure_risk_engine_saved_object_response,
 };
 const SCHEDULERISKENGINENOW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ScheduleRiskEngineNow',
@@ -13569,12 +11623,7 @@ Schedule the risk scoring engine to run as soon as possible. You can use this to
     getLooseObjectFromProperty(schedule_risk_engine_now_request, 'path'),
     getLooseObjectFromProperty(schedule_risk_engine_now_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(schedule_risk_engine_now_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: schedule_risk_engine_now_response,
 };
 const BULKCREATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkCreateSavedObjects',
@@ -13598,12 +11647,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(bulk_create_saved_objects_request, 'path'),
     getLooseObjectFromProperty(bulk_create_saved_objects_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(bulk_create_saved_objects_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: bulk_create_saved_objects_response,
 };
 const BULKDELETESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteSavedObjects',
@@ -13630,12 +11674,7 @@ WARNING: When you delete a saved object, it cannot be recovered.
     getLooseObjectFromProperty(bulk_delete_saved_objects_request, 'path'),
     getLooseObjectFromProperty(bulk_delete_saved_objects_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(bulk_delete_saved_objects_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: bulk_delete_saved_objects_response,
 };
 const BULKGETSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkGetSavedObjects',
@@ -13659,12 +11698,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(bulk_get_saved_objects_request, 'path'),
     getLooseObjectFromProperty(bulk_get_saved_objects_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(bulk_get_saved_objects_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: bulk_get_saved_objects_response,
 };
 const BULKRESOLVESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkResolveSavedObjects',
@@ -13691,12 +11725,7 @@ Retrieve multiple Kibana saved objects by identifier using any legacy URL aliase
     getLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'path'),
     getLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(bulk_resolve_saved_objects_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: bulk_resolve_saved_objects_response,
 };
 const BULKUPDATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkUpdateSavedObjects',
@@ -13722,12 +11751,7 @@ Update the attributes for multiple Kibana saved objects.`,
     getLooseObjectFromProperty(bulk_update_saved_objects_request, 'path'),
     getLooseObjectFromProperty(bulk_update_saved_objects_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(bulk_update_saved_objects_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: bulk_update_saved_objects_response,
 };
 const POST_SAVED_OBJECTS_EXPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_saved_objects_export',
@@ -13757,12 +11781,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
     getLooseObjectFromProperty(post_saved_objects_export_request, 'path'),
     getLooseObjectFromProperty(post_saved_objects_export_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_saved_objects_export_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_saved_objects_export_response,
 };
 const FINDSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findSavedObjects',
@@ -13803,12 +11822,7 @@ Retrieve a paginated set of Kibana saved objects.`,
     getLooseObjectFromProperty(find_saved_objects_request, 'path'),
     getLooseObjectFromProperty(find_saved_objects_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_saved_objects_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_saved_objects_response,
 };
 const POST_SAVED_OBJECTS_IMPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_saved_objects_import',
@@ -13836,12 +11850,7 @@ Exported saved objects are not backwards compatible and cannot be imported into 
     getLooseObjectFromProperty(post_saved_objects_import_request, 'path'),
     getLooseObjectFromProperty(post_saved_objects_import_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_saved_objects_import_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_saved_objects_import_response,
 };
 const RESOLVEIMPORTERRORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolveImportErrors',
@@ -13872,12 +11881,7 @@ To resolve errors from the Import objects API, you can:
     getLooseObjectFromProperty(resolve_import_errors_request, 'path'),
     getLooseObjectFromProperty(resolve_import_errors_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(resolve_import_errors_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: resolve_import_errors_response,
 };
 const CREATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSavedObject',
@@ -13903,12 +11907,7 @@ Create a Kibana saved object with a randomly generated identifier.`,
     getLooseObjectFromProperty(create_saved_object_request, 'path'),
     getLooseObjectFromProperty(create_saved_object_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_saved_object_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_saved_object_response,
 };
 const GETSAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSavedObject',
@@ -13934,12 +11933,7 @@ Retrieve a single Kibana saved object by identifier.`,
     getLooseObjectFromProperty(get_saved_object_request, 'path'),
     getLooseObjectFromProperty(get_saved_object_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_saved_object_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_saved_object_response,
 };
 const CREATESAVEDOBJECTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSavedObjectId',
@@ -13965,12 +11959,7 @@ Create a Kibana saved object and specify its identifier instead of using a rando
     getLooseObjectFromProperty(create_saved_object_id_request, 'path'),
     getLooseObjectFromProperty(create_saved_object_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_saved_object_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_saved_object_id_response,
 };
 const UPDATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateSavedObject',
@@ -13996,12 +11985,7 @@ Update the attributes for Kibana saved objects.`,
     getLooseObjectFromProperty(update_saved_object_request, 'path'),
     getLooseObjectFromProperty(update_saved_object_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_saved_object_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_saved_object_response,
 };
 const RESOLVESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolveSavedObject',
@@ -14028,12 +12012,7 @@ Retrieve a single Kibana saved object by identifier using any legacy URL alias i
     getLooseObjectFromProperty(resolve_saved_object_request, 'path'),
     getLooseObjectFromProperty(resolve_saved_object_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(resolve_saved_object_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: resolve_saved_object_response,
 };
 const PERFORMANONYMIZATIONFIELDSBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformAnonymizationFieldsBulkAction',
@@ -14059,12 +12038,7 @@ Apply a bulk action to multiple anonymization fields. The bulk action is applied
     getLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'path'),
     getLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(perform_anonymization_fields_bulk_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: perform_anonymization_fields_bulk_action_response,
 };
 const FINDANONYMIZATIONFIELDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAnonymizationFields',
@@ -14090,12 +12064,7 @@ Get a list of all anonymization fields.`,
     getLooseObjectFromProperty(find_anonymization_fields_request, 'path'),
     getLooseObjectFromProperty(find_anonymization_fields_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_anonymization_fields_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_anonymization_fields_response,
 };
 const CHATCOMPLETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ChatComplete',
@@ -14121,12 +12090,7 @@ Create a model response for the given chat conversation.`,
     getLooseObjectFromProperty(chat_complete_request, 'path'),
     getLooseObjectFromProperty(chat_complete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(chat_complete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: chat_complete_response,
 };
 const DELETEALLCONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAllConversations',
@@ -14152,12 +12116,7 @@ This endpoint allows users to permanently delete all conversations.`,
     getLooseObjectFromProperty(delete_all_conversations_request, 'path'),
     getLooseObjectFromProperty(delete_all_conversations_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_all_conversations_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_all_conversations_response,
 };
 const CREATECONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateConversation',
@@ -14183,12 +12142,7 @@ Create a new Security AI Assistant conversation. This endpoint allows the user t
     getLooseObjectFromProperty(create_conversation_request, 'path'),
     getLooseObjectFromProperty(create_conversation_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_conversation_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_conversation_response,
 };
 const FINDCONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindConversations',
@@ -14214,12 +12168,7 @@ Get a list of all conversations for the current user. This endpoint allows users
     getLooseObjectFromProperty(find_conversations_request, 'path'),
     getLooseObjectFromProperty(find_conversations_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_conversations_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_conversations_response,
 };
 const DELETECONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteConversation',
@@ -14245,12 +12194,7 @@ Delete an existing conversation using the conversation ID. This endpoint allows 
     getLooseObjectFromProperty(delete_conversation_request, 'path'),
     getLooseObjectFromProperty(delete_conversation_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_conversation_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_conversation_response,
 };
 const READCONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadConversation',
@@ -14276,12 +12220,7 @@ Get the details of an existing conversation using the conversation ID. This allo
     getLooseObjectFromProperty(read_conversation_request, 'path'),
     getLooseObjectFromProperty(read_conversation_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_conversation_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_conversation_response,
 };
 const UPDATECONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateConversation',
@@ -14307,12 +12246,7 @@ Update an existing conversation using the conversation ID. This endpoint allows 
     getLooseObjectFromProperty(update_conversation_request, 'path'),
     getLooseObjectFromProperty(update_conversation_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_conversation_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_conversation_response,
 };
 const GETKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetKnowledgeBase',
@@ -14338,12 +12272,7 @@ Read a single KB`,
     getLooseObjectFromProperty(get_knowledge_base_request, 'path'),
     getLooseObjectFromProperty(get_knowledge_base_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_knowledge_base_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_knowledge_base_response,
 };
 const POSTKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostKnowledgeBase',
@@ -14367,12 +12296,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(post_knowledge_base_request, 'path'),
     getLooseObjectFromProperty(post_knowledge_base_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_knowledge_base_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_knowledge_base_response,
 };
 const READKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadKnowledgeBase',
@@ -14398,12 +12322,7 @@ Read a knowledge base with a specific resource identifier.`,
     getLooseObjectFromProperty(read_knowledge_base_request, 'path'),
     getLooseObjectFromProperty(read_knowledge_base_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_knowledge_base_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_knowledge_base_response,
 };
 const CREATEKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateKnowledgeBase',
@@ -14429,12 +12348,7 @@ Create a knowledge base with a specific resource identifier.`,
     getLooseObjectFromProperty(create_knowledge_base_request, 'path'),
     getLooseObjectFromProperty(create_knowledge_base_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_knowledge_base_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_knowledge_base_response,
 };
 const CREATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateKnowledgeBaseEntry',
@@ -14460,12 +12374,7 @@ Create a Knowledge Base Entry`,
     getLooseObjectFromProperty(create_knowledge_base_entry_request, 'path'),
     getLooseObjectFromProperty(create_knowledge_base_entry_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_knowledge_base_entry_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_knowledge_base_entry_response,
 };
 const PERFORMKNOWLEDGEBASEENTRYBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformKnowledgeBaseEntryBulkAction',
@@ -14491,12 +12400,7 @@ The bulk action is applied to all Knowledge Base Entries that match the filter o
     getLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'path'),
     getLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(perform_knowledge_base_entry_bulk_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: perform_knowledge_base_entry_bulk_action_response,
 };
 const FINDKNOWLEDGEBASEENTRIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindKnowledgeBaseEntries',
@@ -14522,12 +12426,7 @@ Finds Knowledge Base Entries that match the given query.`,
     getLooseObjectFromProperty(find_knowledge_base_entries_request, 'path'),
     getLooseObjectFromProperty(find_knowledge_base_entries_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_knowledge_base_entries_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_knowledge_base_entries_response,
 };
 const DELETEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteKnowledgeBaseEntry',
@@ -14553,12 +12452,7 @@ Delete a Knowledge Base Entry by its unique \`id\`.`,
     getLooseObjectFromProperty(delete_knowledge_base_entry_request, 'path'),
     getLooseObjectFromProperty(delete_knowledge_base_entry_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_knowledge_base_entry_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_knowledge_base_entry_response,
 };
 const READKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadKnowledgeBaseEntry',
@@ -14584,12 +12478,7 @@ Retrieve a Knowledge Base Entry by its unique \`id\`.`,
     getLooseObjectFromProperty(read_knowledge_base_entry_request, 'path'),
     getLooseObjectFromProperty(read_knowledge_base_entry_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(read_knowledge_base_entry_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: read_knowledge_base_entry_response,
 };
 const UPDATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateKnowledgeBaseEntry',
@@ -14615,12 +12504,7 @@ Update an existing Knowledge Base Entry by its unique \`id\`.`,
     getLooseObjectFromProperty(update_knowledge_base_entry_request, 'path'),
     getLooseObjectFromProperty(update_knowledge_base_entry_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_knowledge_base_entry_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_knowledge_base_entry_response,
 };
 const PERFORMPROMPTSBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformPromptsBulkAction',
@@ -14646,12 +12530,7 @@ Apply a bulk action to multiple prompts. The bulk action is applied to all promp
     getLooseObjectFromProperty(perform_prompts_bulk_action_request, 'path'),
     getLooseObjectFromProperty(perform_prompts_bulk_action_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(perform_prompts_bulk_action_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: perform_prompts_bulk_action_response,
 };
 const FINDPROMPTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindPrompts',
@@ -14677,12 +12556,7 @@ Get a list of all prompts based on optional filters, sorting, and pagination.`,
     getLooseObjectFromProperty(find_prompts_request, 'path'),
     getLooseObjectFromProperty(find_prompts_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_prompts_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_prompts_response,
 };
 const GET_SECURITY_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_security_role',
@@ -14702,12 +12576,7 @@ const GET_SECURITY_ROLE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_security_role_request, 'path'),
     getLooseObjectFromProperty(get_security_role_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_security_role_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_security_role_response,
 };
 const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_role_query',
@@ -14727,12 +12596,7 @@ const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(post_security_role_query_request, 'path'),
     getLooseObjectFromProperty(post_security_role_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_security_role_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_security_role_query_response,
 };
 const DELETE_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_security_role_name',
@@ -14752,12 +12616,7 @@ const DELETE_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(delete_security_role_name_request, 'path'),
     getLooseObjectFromProperty(delete_security_role_name_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_security_role_name_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_security_role_name_response,
 };
 const GET_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_security_role_name',
@@ -14777,12 +12636,7 @@ const GET_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_security_role_name_request, 'path'),
     getLooseObjectFromProperty(get_security_role_name_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_security_role_name_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_security_role_name_response,
 };
 const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_security_role_name',
@@ -14802,12 +12656,7 @@ const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(put_security_role_name_request, 'path'),
     getLooseObjectFromProperty(put_security_role_name_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_security_role_name_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_security_role_name_response,
 };
 const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_roles',
@@ -14827,12 +12676,7 @@ const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(post_security_roles_request, 'path'),
     getLooseObjectFromProperty(post_security_roles_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_security_roles_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_security_roles_response,
 };
 const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_session_invalidate',
@@ -14853,12 +12697,7 @@ const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(post_security_session_invalidate_request, 'path'),
     getLooseObjectFromProperty(post_security_session_invalidate_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_security_session_invalidate_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_security_session_invalidate_response,
 };
 const POST_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_url',
@@ -14880,12 +12719,7 @@ Short URLs are created by specifying the locator ID and locator parameters. When
     getLooseObjectFromProperty(post_url_request, 'path'),
     getLooseObjectFromProperty(post_url_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_url_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_url_response,
 };
 const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolve_url',
@@ -14906,12 +12740,7 @@ const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(resolve_url_request, 'path'),
     getLooseObjectFromProperty(resolve_url_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(resolve_url_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: resolve_url_response,
 };
 const DELETE_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_url',
@@ -14932,12 +12761,7 @@ const DELETE_URL_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(delete_url_request, 'path'),
     getLooseObjectFromProperty(delete_url_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_url_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_url_response,
 };
 const GET_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_url',
@@ -14958,12 +12782,7 @@ const GET_URL_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_url_request, 'path'),
     getLooseObjectFromProperty(get_url_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_url_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_url_response,
 };
 const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_copy_saved_objects',
@@ -14983,12 +12802,7 @@ const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'path'),
     getLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_spaces_copy_saved_objects_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_spaces_copy_saved_objects_response,
 };
 const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_disable_legacy_url_aliases',
@@ -15008,12 +12822,7 @@ const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract
     getLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'path'),
     getLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_spaces_disable_legacy_url_aliases_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_spaces_disable_legacy_url_aliases_response,
 };
 const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_get_shareable_references',
@@ -15033,12 +12842,7 @@ const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract =
     getLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'path'),
     getLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_spaces_get_shareable_references_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_spaces_get_shareable_references_response,
 };
 const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_resolve_copy_saved_objects_errors',
@@ -15058,12 +12862,7 @@ const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorC
     getLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'path'),
     getLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_spaces_resolve_copy_saved_objects_errors_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_spaces_resolve_copy_saved_objects_errors_response,
 };
 const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_update_objects_spaces',
@@ -15083,12 +12882,7 @@ const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'path'),
     getLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_spaces_update_objects_spaces_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_spaces_update_objects_spaces_response,
 };
 const GET_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_spaces_space',
@@ -15108,12 +12902,7 @@ const GET_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_spaces_space_request, 'path'),
     getLooseObjectFromProperty(get_spaces_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_spaces_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_spaces_space_response,
 };
 const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_space',
@@ -15133,12 +12922,7 @@ const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(post_spaces_space_request, 'path'),
     getLooseObjectFromProperty(post_spaces_space_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_spaces_space_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_spaces_space_response,
 };
 const DELETE_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_spaces_space_id',
@@ -15158,12 +12942,7 @@ const DELETE_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(delete_spaces_space_id_request, 'path'),
     getLooseObjectFromProperty(delete_spaces_space_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_spaces_space_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_spaces_space_id_response,
 };
 const GET_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_spaces_space_id',
@@ -15183,12 +12962,7 @@ const GET_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_spaces_space_id_request, 'path'),
     getLooseObjectFromProperty(get_spaces_space_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_spaces_space_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_spaces_space_id_response,
 };
 const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_spaces_space_id',
@@ -15208,12 +12982,7 @@ const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(put_spaces_space_id_request, 'path'),
     getLooseObjectFromProperty(put_spaces_space_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_spaces_space_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_spaces_space_id_response,
 };
 const GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_status',
@@ -15233,12 +13002,7 @@ const GET_STATUS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_status_request, 'path'),
     getLooseObjectFromProperty(get_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_status_response,
 };
 const GET_STREAMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams',
@@ -15264,12 +13028,7 @@ Fetches list of all streams<br/><br/>[Required authorization] Route required pri
     getLooseObjectFromProperty(get_streams_request, 'path'),
     getLooseObjectFromProperty(get_streams_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_streams_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_streams_response,
 };
 const POST_STREAMS_DISABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_disable',
@@ -15295,12 +13054,7 @@ Disables wired streams and deletes all existing stream definitions. The data of 
     getLooseObjectFromProperty(post_streams_disable_request, 'path'),
     getLooseObjectFromProperty(post_streams_disable_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_disable_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_disable_response,
 };
 const POST_STREAMS_ENABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_enable',
@@ -15326,12 +13080,7 @@ Enables wired streams<br/><br/>[Required authorization] Route required privilege
     getLooseObjectFromProperty(post_streams_enable_request, 'path'),
     getLooseObjectFromProperty(post_streams_enable_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_enable_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_enable_response,
 };
 const POST_STREAMS_RESYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_resync',
@@ -15357,12 +13106,7 @@ Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><b
     getLooseObjectFromProperty(post_streams_resync_request, 'path'),
     getLooseObjectFromProperty(post_streams_resync_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_resync_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_resync_response,
 };
 const DELETE_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name',
@@ -15388,12 +13132,7 @@ Deletes a stream definition and the underlying data stream<br/><br/>[Required au
     getLooseObjectFromProperty(delete_streams_name_request, 'path'),
     getLooseObjectFromProperty(delete_streams_name_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_streams_name_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_streams_name_response,
 };
 const GET_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name',
@@ -15419,12 +13158,7 @@ Fetches a stream definition and associated dashboards<br/><br/>[Required authori
     getLooseObjectFromProperty(get_streams_name_request, 'path'),
     getLooseObjectFromProperty(get_streams_name_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_streams_name_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_streams_name_response,
 };
 const PUT_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name',
@@ -15450,12 +13184,7 @@ Creates or updates a stream definition. Classic streams can not be created throu
     getLooseObjectFromProperty(put_streams_name_request, 'path'),
     getLooseObjectFromProperty(put_streams_name_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_streams_name_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_streams_name_response,
 };
 const POST_STREAMS_NAME_FORK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_fork',
@@ -15481,12 +13210,7 @@ Forks a wired stream and creates a child stream<br/><br/>[Required authorization
     getLooseObjectFromProperty(post_streams_name_fork_request, 'path'),
     getLooseObjectFromProperty(post_streams_name_fork_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_name_fork_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_name_fork_response,
 };
 const GET_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_group',
@@ -15512,12 +13236,7 @@ Fetches the group settings of a group stream definition<br/><br/>[Required autho
     getLooseObjectFromProperty(get_streams_name_group_request, 'path'),
     getLooseObjectFromProperty(get_streams_name_group_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_streams_name_group_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_streams_name_group_response,
 };
 const PUT_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_group',
@@ -15543,12 +13262,7 @@ Upserts the group settings of a group stream definition<br/><br/>[Required autho
     getLooseObjectFromProperty(put_streams_name_group_request, 'path'),
     getLooseObjectFromProperty(put_streams_name_group_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_streams_name_group_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_streams_name_group_response,
 };
 const GET_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_ingest',
@@ -15574,12 +13288,7 @@ Fetches the ingest settings of an ingest stream definition<br/><br/>[Required au
     getLooseObjectFromProperty(get_streams_name_ingest_request, 'path'),
     getLooseObjectFromProperty(get_streams_name_ingest_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_streams_name_ingest_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_streams_name_ingest_response,
 };
 const PUT_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_ingest',
@@ -15605,12 +13314,7 @@ Upserts the ingest settings of an ingest stream definition<br/><br/>[Required au
     getLooseObjectFromProperty(put_streams_name_ingest_request, 'path'),
     getLooseObjectFromProperty(put_streams_name_ingest_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_streams_name_ingest_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_streams_name_ingest_response,
 };
 const POST_STREAMS_NAME_CONTENT_EXPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_content_export',
@@ -15636,12 +13340,7 @@ Exports the content associated to a stream.<br/><br/>[Required authorization] Ro
     getLooseObjectFromProperty(post_streams_name_content_export_request, 'path'),
     getLooseObjectFromProperty(post_streams_name_content_export_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_name_content_export_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_name_content_export_response,
 };
 const POST_STREAMS_NAME_CONTENT_IMPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_content_import',
@@ -15667,12 +13366,7 @@ Links content objects to a stream.<br/><br/>[Required authorization] Route requi
     getLooseObjectFromProperty(post_streams_name_content_import_request, 'path'),
     getLooseObjectFromProperty(post_streams_name_content_import_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_name_content_import_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_name_content_import_response,
 };
 const GET_STREAMS_NAME_DASHBOARDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_dashboards',
@@ -15698,12 +13392,7 @@ Fetches all dashboards linked to a stream that are visible to the current user i
     getLooseObjectFromProperty(get_streams_name_dashboards_request, 'path'),
     getLooseObjectFromProperty(get_streams_name_dashboards_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_streams_name_dashboards_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_streams_name_dashboards_response,
 };
 const POST_STREAMS_NAME_DASHBOARDS_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_dashboards_bulk',
@@ -15729,12 +13418,7 @@ Bulk update dashboards linked to a stream. Can link new dashboards and delete ex
     getLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'path'),
     getLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_name_dashboards_bulk_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_name_dashboards_bulk_response,
 };
 const DELETE_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name_dashboards_dashboardid',
@@ -15760,12 +13444,7 @@ Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the st
     getLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'path'),
     getLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_streams_name_dashboards_dashboardid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_streams_name_dashboards_dashboardid_response,
 };
 const PUT_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_dashboards_dashboardid',
@@ -15791,12 +13470,7 @@ Links a dashboard to a stream. Noop if the dashboard is already linked to the st
     getLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'path'),
     getLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_streams_name_dashboards_dashboardid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_streams_name_dashboards_dashboardid_response,
 };
 const GET_STREAMS_NAME_QUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_queries',
@@ -15822,12 +13496,7 @@ Fetches all queries linked to a stream that are visible to the current user in t
     getLooseObjectFromProperty(get_streams_name_queries_request, 'path'),
     getLooseObjectFromProperty(get_streams_name_queries_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_streams_name_queries_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_streams_name_queries_response,
 };
 const POST_STREAMS_NAME_QUERIES_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_queries_bulk',
@@ -15853,12 +13522,7 @@ Bulk update queries of a stream. Can add new queries and delete existing ones.<b
     getLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'path'),
     getLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_name_queries_bulk_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_name_queries_bulk_response,
 };
 const DELETE_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name_queries_queryid',
@@ -15884,12 +13548,7 @@ Remove a query from a stream. Noop if the query is not found on the stream.<br/>
     getLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'path'),
     getLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_streams_name_queries_queryid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_streams_name_queries_queryid_response,
 };
 const PUT_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_queries_queryid',
@@ -15915,12 +13574,7 @@ Adds a query to a stream. Noop if the query is already present on the stream.<br
     getLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'path'),
     getLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_streams_name_queries_queryid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_streams_name_queries_queryid_response,
 };
 const GET_STREAMS_NAME_RULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_rules',
@@ -15946,12 +13600,7 @@ Fetches all rules linked to a stream that are visible to the current user in the
     getLooseObjectFromProperty(get_streams_name_rules_request, 'path'),
     getLooseObjectFromProperty(get_streams_name_rules_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_streams_name_rules_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_streams_name_rules_response,
 };
 const DELETE_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name_rules_ruleid',
@@ -15977,12 +13626,7 @@ Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/>
     getLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'path'),
     getLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_streams_name_rules_ruleid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_streams_name_rules_ruleid_response,
 };
 const PUT_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_rules_ruleid',
@@ -16008,12 +13652,7 @@ Links a rule to a stream. Noop if the rule is already linked to the stream.<br/>
     getLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'path'),
     getLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_streams_name_rules_ruleid_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_streams_name_rules_ruleid_response,
 };
 const GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_significant_events',
@@ -16039,12 +13678,7 @@ Read the significant events<br/><br/>[Required authorization] Route required pri
     getLooseObjectFromProperty(get_streams_name_significant_events_request, 'path'),
     getLooseObjectFromProperty(get_streams_name_significant_events_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_streams_name_significant_events_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_streams_name_significant_events_response,
 };
 const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_GENERATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_significant_events_generate',
@@ -16070,12 +13704,7 @@ Generate significant events queries based on the stream data<br/><br/>[Required 
     getLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'path'),
     getLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_name_significant_events_generate_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_name_significant_events_generate_response,
 };
 const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_PREVIEW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_significant_events_preview',
@@ -16101,12 +13730,7 @@ Preview significant event results based on a given query<br/><br/>[Required auth
     getLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'path'),
     getLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_streams_name_significant_events_preview_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_streams_name_significant_events_preview_response,
 };
 const POST_SYNTHETICS_MONITOR_TEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_synthetics_monitor_test',
@@ -16133,12 +13757,7 @@ Trigger an immediate test execution for the specified monitor. The response incl
     getLooseObjectFromProperty(post_synthetics_monitor_test_request, 'path'),
     getLooseObjectFromProperty(post_synthetics_monitor_test_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_synthetics_monitor_test_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_synthetics_monitor_test_response,
 };
 const GET_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_synthetic_monitors',
@@ -16180,12 +13799,7 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
     getLooseObjectFromProperty(get_synthetic_monitors_request, 'path'),
     getLooseObjectFromProperty(get_synthetic_monitors_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_synthetic_monitors_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_synthetic_monitors_response,
 };
 const POST_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_synthetic_monitors',
@@ -16213,12 +13827,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     getLooseObjectFromProperty(post_synthetic_monitors_request, 'path'),
     getLooseObjectFromProperty(post_synthetic_monitors_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_synthetic_monitors_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_synthetic_monitors_response,
 };
 const DELETE_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_synthetic_monitors',
@@ -16245,12 +13854,7 @@ Delete multiple monitors by sending a list of config IDs.
     getLooseObjectFromProperty(delete_synthetic_monitors_request, 'path'),
     getLooseObjectFromProperty(delete_synthetic_monitors_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_synthetic_monitors_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_synthetic_monitors_response,
 };
 const DELETE_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_synthetic_monitor',
@@ -16278,12 +13882,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     getLooseObjectFromProperty(delete_synthetic_monitor_request, 'path'),
     getLooseObjectFromProperty(delete_synthetic_monitor_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_synthetic_monitor_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_synthetic_monitor_response,
 };
 const GET_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_synthetic_monitor',
@@ -16307,12 +13906,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(get_synthetic_monitor_request, 'path'),
     getLooseObjectFromProperty(get_synthetic_monitor_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_synthetic_monitor_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_synthetic_monitor_response,
 };
 const PUT_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_synthetic_monitor',
@@ -16341,12 +13935,7 @@ You can also partially update a monitor. This will only update the fields that a
     getLooseObjectFromProperty(put_synthetic_monitor_request, 'path'),
     getLooseObjectFromProperty(put_synthetic_monitor_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_synthetic_monitor_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_synthetic_monitor_response,
 };
 const GET_PARAMETERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_parameters',
@@ -16373,12 +13962,7 @@ Get a list of all parameters. You must have \`read\` privileges for the Syntheti
     getLooseObjectFromProperty(get_parameters_request, 'path'),
     getLooseObjectFromProperty(get_parameters_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_parameters_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_parameters_response,
 };
 const POST_PARAMETERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_parameters',
@@ -16406,12 +13990,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     getLooseObjectFromProperty(post_parameters_request, 'path'),
     getLooseObjectFromProperty(post_parameters_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_parameters_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_parameters_response,
 };
 const DELETE_PARAMETERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_parameters',
@@ -16439,12 +14018,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     getLooseObjectFromProperty(delete_parameters_request, 'path'),
     getLooseObjectFromProperty(delete_parameters_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_parameters_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_parameters_response,
 };
 const DELETE_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_parameter',
@@ -16472,12 +14046,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     getLooseObjectFromProperty(delete_parameter_request, 'path'),
     getLooseObjectFromProperty(delete_parameter_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_parameter_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_parameter_response,
 };
 const GET_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_parameter',
@@ -16505,12 +14074,7 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
     getLooseObjectFromProperty(get_parameter_request, 'path'),
     getLooseObjectFromProperty(get_parameter_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_parameter_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_parameter_response,
 };
 const PUT_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_parameter',
@@ -16538,12 +14102,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     getLooseObjectFromProperty(put_parameter_request, 'path'),
     getLooseObjectFromProperty(put_parameter_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_parameter_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_parameter_response,
 };
 const GET_PRIVATE_LOCATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_private_locations',
@@ -16571,12 +14130,7 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
     getLooseObjectFromProperty(get_private_locations_request, 'path'),
     getLooseObjectFromProperty(get_private_locations_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_private_locations_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_private_locations_response,
 };
 const POST_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_private_location',
@@ -16602,12 +14156,7 @@ You must have \`all\` privileges for the Synthetics and Uptime feature in the Ob
     getLooseObjectFromProperty(post_private_location_request, 'path'),
     getLooseObjectFromProperty(post_private_location_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(post_private_location_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: post_private_location_response,
 };
 const DELETE_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_private_location',
@@ -16636,12 +14185,7 @@ A location cannot be deleted if it has associated monitors in use. You must dele
     getLooseObjectFromProperty(delete_private_location_request, 'path'),
     getLooseObjectFromProperty(delete_private_location_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_private_location_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_private_location_response,
 };
 const GET_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_private_location',
@@ -16668,12 +14212,7 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
     getLooseObjectFromProperty(get_private_location_request, 'path'),
     getLooseObjectFromProperty(get_private_location_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_private_location_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_private_location_response,
 };
 const PUT_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_private_location',
@@ -16702,12 +14241,7 @@ When a private location's label is updated, all monitors using this location wil
     getLooseObjectFromProperty(put_private_location_request, 'path'),
     getLooseObjectFromProperty(put_private_location_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_private_location_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_private_location_response,
 };
 const TASK_MANAGER_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.task_manager_health',
@@ -16728,12 +14262,7 @@ const TASK_MANAGER_HEALTH_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(task_manager_health_request, 'path'),
     getLooseObjectFromProperty(task_manager_health_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(task_manager_health_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: task_manager_health_response,
 };
 const DELETETIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteTimelines',
@@ -16759,12 +14288,7 @@ Delete one or more Timelines or Timeline templates.`,
     getLooseObjectFromProperty(delete_timelines_request, 'path'),
     getLooseObjectFromProperty(delete_timelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_timelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_timelines_response,
 };
 const GETTIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetTimeline',
@@ -16790,12 +14314,7 @@ Get the details of an existing saved Timeline or Timeline template.`,
     getLooseObjectFromProperty(get_timeline_request, 'path'),
     getLooseObjectFromProperty(get_timeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_timeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_timeline_response,
 };
 const PATCHTIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchTimeline',
@@ -16821,12 +14340,7 @@ Update an existing Timeline. You can update the title, description, date range, 
     getLooseObjectFromProperty(patch_timeline_request, 'path'),
     getLooseObjectFromProperty(patch_timeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(patch_timeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: patch_timeline_response,
 };
 const CREATETIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateTimelines',
@@ -16852,12 +14366,7 @@ Create a new Timeline or Timeline template.`,
     getLooseObjectFromProperty(create_timelines_request, 'path'),
     getLooseObjectFromProperty(create_timelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_timelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_timelines_response,
 };
 const COPYTIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CopyTimeline',
@@ -16884,12 +14393,7 @@ Copies and returns a timeline or timeline template.
     getLooseObjectFromProperty(copy_timeline_request, 'path'),
     getLooseObjectFromProperty(copy_timeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(copy_timeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: copy_timeline_response,
 };
 const GETDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetDraftTimelines',
@@ -16915,12 +14419,7 @@ Get the details of the draft Timeline  or Timeline template for the current user
     getLooseObjectFromProperty(get_draft_timelines_request, 'path'),
     getLooseObjectFromProperty(get_draft_timelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_draft_timelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_draft_timelines_response,
 };
 const CLEANDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CleanDraftTimelines',
@@ -16949,12 +14448,7 @@ Create a clean draft Timeline or Timeline template for the current user.
     getLooseObjectFromProperty(clean_draft_timelines_request, 'path'),
     getLooseObjectFromProperty(clean_draft_timelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(clean_draft_timelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: clean_draft_timelines_response,
 };
 const EXPORTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportTimelines',
@@ -16980,12 +14474,7 @@ Export Timelines as an NDJSON file.`,
     getLooseObjectFromProperty(export_timelines_request, 'path'),
     getLooseObjectFromProperty(export_timelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(export_timelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: export_timelines_response,
 };
 const PERSISTFAVORITEROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistFavoriteRoute',
@@ -17011,12 +14500,7 @@ Favorite a Timeline or Timeline template for the current user.`,
     getLooseObjectFromProperty(persist_favorite_route_request, 'path'),
     getLooseObjectFromProperty(persist_favorite_route_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(persist_favorite_route_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: persist_favorite_route_response,
 };
 const IMPORTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportTimelines',
@@ -17042,12 +14526,7 @@ Import Timelines.`,
     getLooseObjectFromProperty(import_timelines_request, 'path'),
     getLooseObjectFromProperty(import_timelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(import_timelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: import_timelines_response,
 };
 const INSTALLPREPACKEDTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrepackedTimelines',
@@ -17073,12 +14552,7 @@ Install or update prepackaged Timelines.`,
     getLooseObjectFromProperty(install_prepacked_timelines_request, 'path'),
     getLooseObjectFromProperty(install_prepacked_timelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(install_prepacked_timelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: install_prepacked_timelines_response,
 };
 const RESOLVETIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ResolveTimeline',
@@ -17102,12 +14576,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     getLooseObjectFromProperty(resolve_timeline_request, 'path'),
     getLooseObjectFromProperty(resolve_timeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(resolve_timeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: resolve_timeline_response,
 };
 const GETTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetTimelines',
@@ -17142,12 +14611,7 @@ Get a list of all saved Timelines or Timeline templates.`,
     getLooseObjectFromProperty(get_timelines_request, 'path'),
     getLooseObjectFromProperty(get_timelines_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_timelines_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_timelines_response,
 };
 const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_upgrade_status',
@@ -17167,12 +14631,7 @@ const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_upgrade_status_request, 'path'),
     getLooseObjectFromProperty(get_upgrade_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_upgrade_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_upgrade_status_response,
 };
 const GET_UPTIME_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_uptime_settings',
@@ -17199,12 +14658,7 @@ You must have \`read\` privileges for the uptime feature in the Observability se
     getLooseObjectFromProperty(get_uptime_settings_request, 'path'),
     getLooseObjectFromProperty(get_uptime_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_uptime_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_uptime_settings_response,
 };
 const PUT_UPTIME_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_uptime_settings',
@@ -17231,12 +14685,7 @@ Update uptime setting attributes like \`heartbeatIndices\`, \`certExpirationThre
     getLooseObjectFromProperty(put_uptime_settings_request, 'path'),
     getLooseObjectFromProperty(put_uptime_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_uptime_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: put_uptime_settings_response,
 };
 const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findSlosOp',
@@ -17266,12 +14715,7 @@ const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(find_slos_op_request, 'path'),
     getLooseObjectFromProperty(find_slos_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(find_slos_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: find_slos_op_response,
 };
 const CREATESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSloOp',
@@ -17292,12 +14736,7 @@ const CREATESLOOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(create_slo_op_request, 'path'),
     getLooseObjectFromProperty(create_slo_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_slo_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: create_slo_op_response,
 };
 const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteOp',
@@ -17318,12 +14757,7 @@ const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(bulk_delete_op_request, 'path'),
     getLooseObjectFromProperty(bulk_delete_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(bulk_delete_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: bulk_delete_op_response,
 };
 const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteStatusOp',
@@ -17344,12 +14778,7 @@ const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(bulk_delete_status_op_request, 'path'),
     getLooseObjectFromProperty(bulk_delete_status_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(bulk_delete_status_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: bulk_delete_status_op_response,
 };
 const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteRollupDataOp',
@@ -17370,12 +14799,7 @@ const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(delete_rollup_data_op_request, 'path'),
     getLooseObjectFromProperty(delete_rollup_data_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_rollup_data_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_rollup_data_op_response,
 };
 const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSloInstancesOp',
@@ -17396,12 +14820,7 @@ const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(delete_slo_instances_op_request, 'path'),
     getLooseObjectFromProperty(delete_slo_instances_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_slo_instances_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_slo_instances_op_response,
 };
 const DELETESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSloOp',
@@ -17422,12 +14841,7 @@ const DELETESLOOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(delete_slo_op_request, 'path'),
     getLooseObjectFromProperty(delete_slo_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_slo_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_slo_op_response,
 };
 const GETSLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSloOp',
@@ -17448,12 +14862,7 @@ const GETSLOOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_slo_op_request, 'path'),
     getLooseObjectFromProperty(get_slo_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_slo_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_slo_op_response,
 };
 const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateSloOp',
@@ -17474,12 +14883,7 @@ const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(update_slo_op_request, 'path'),
     getLooseObjectFromProperty(update_slo_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_slo_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_slo_op_response,
 };
 const RESETSLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resetSloOp',
@@ -17500,12 +14904,7 @@ const RESETSLOOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(reset_slo_op_request, 'path'),
     getLooseObjectFromProperty(reset_slo_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(reset_slo_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: reset_slo_op_response,
 };
 const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.disableSloOp',
@@ -17526,12 +14925,7 @@ const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(disable_slo_op_request, 'path'),
     getLooseObjectFromProperty(disable_slo_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(disable_slo_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: disable_slo_op_response,
 };
 const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.enableSloOp',
@@ -17552,12 +14946,7 @@ const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(enable_slo_op_request, 'path'),
     getLooseObjectFromProperty(enable_slo_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(enable_slo_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: enable_slo_op_response,
 };
 const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDefinitionsOp',
@@ -17578,12 +14967,7 @@ const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(get_definitions_op_request, 'path'),
     getLooseObjectFromProperty(get_definitions_op_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_definitions_op_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_definitions_op_response,
 };
 
 // export contracts

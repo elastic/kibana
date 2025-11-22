@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
- * Generated at: 2025-11-21T23:10:44.492Z
+ * Generated at: 2025-11-21T23:59:35.484Z
  * Source: elasticsearch-specification repository (582 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -1639,7 +1639,7 @@ import {
   xpack_usage_response,
 } from './schemas/es_openapi_zod.gen';
 import type { InternalConnectorContract } from '../../types/latest';
-import { getLooseObjectFromProperty, getShape } from '../utils';
+import { getLooseObjectFromProperty } from '../utils';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 
@@ -1667,12 +1667,7 @@ If the Elasticsearch security features are enabled, the deletion of a specific a
     getLooseObjectFromProperty(async_search_delete_request, 'path'),
     getLooseObjectFromProperty(async_search_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(async_search_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: async_search_delete_response,
 };
 const ASYNC_SEARCH_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.async_search.get',
@@ -1696,12 +1691,7 @@ If the Elasticsearch security features are enabled, access to the results of a s
     getLooseObjectFromProperty(async_search_get_request, 'path'),
     getLooseObjectFromProperty(async_search_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(async_search_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: async_search_get_response,
 };
 const ASYNC_SEARCH_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.async_search.status',
@@ -1728,12 +1718,7 @@ If the Elasticsearch security features are enabled, the access to the status of 
     getLooseObjectFromProperty(async_search_status_request, 'path'),
     getLooseObjectFromProperty(async_search_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(async_search_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: async_search_status_response,
 };
 const ASYNC_SEARCH_SUBMIT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.async_search.submit',
@@ -1764,13 +1749,7 @@ The maximum allowed size for a stored async search response can be set by changi
     getLooseObjectFromProperty(async_search_submit1_request, 'path'),
     getLooseObjectFromProperty(async_search_submit1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(async_search_submit_response)),
-      ...getShape(getShape(async_search_submit1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([async_search_submit_response, async_search_submit1_response]),
 };
 const AUTOSCALING_DELETE_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.delete_autoscaling_policy',
@@ -1789,10 +1768,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const AUTOSCALING_GET_AUTOSCALING_CAPACITY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.get_autoscaling_capacity',
@@ -1822,10 +1798,7 @@ Do not use this information to make autoscaling decisions.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const AUTOSCALING_GET_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.get_autoscaling_policy',
@@ -1844,10 +1817,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const AUTOSCALING_PUT_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.put_autoscaling_policy',
@@ -1866,10 +1836,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const BULK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.bulk',
@@ -2011,15 +1978,7 @@ Refer to the linked documentation for step-by-step instructions using the index 
     getLooseObjectFromProperty(bulk3_request, 'path'),
     getLooseObjectFromProperty(bulk3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(bulk_response)),
-      ...getShape(getShape(bulk1_response)),
-      ...getShape(getShape(bulk2_response)),
-      ...getShape(getShape(bulk3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([bulk_response, bulk1_response, bulk2_response, bulk3_response]),
 };
 const CAPABILITIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.capabilities',
@@ -2036,10 +1995,7 @@ const CAPABILITIES_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const CAT_ALIASES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.aliases',
@@ -2068,13 +2024,7 @@ IMPORTANT: CAT APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_aliases1_request, 'path'),
     getLooseObjectFromProperty(cat_aliases1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_aliases_response)),
-      ...getShape(getShape(cat_aliases1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_aliases_response, cat_aliases1_response]),
 };
 const CAT_ALLOCATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.allocation',
@@ -2102,13 +2052,7 @@ IMPORTANT: CAT APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_allocation1_request, 'path'),
     getLooseObjectFromProperty(cat_allocation1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_allocation_response)),
-      ...getShape(getShape(cat_allocation1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_allocation_response, cat_allocation1_response]),
 };
 const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.circuit_breaker',
@@ -2124,10 +2068,7 @@ const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const CAT_COMPONENT_TEMPLATES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.component_templates',
@@ -2157,13 +2098,7 @@ They are not intended for use by applications. For application consumption, use 
     getLooseObjectFromProperty(cat_component_templates1_request, 'path'),
     getLooseObjectFromProperty(cat_component_templates1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_component_templates_response)),
-      ...getShape(getShape(cat_component_templates1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_component_templates_response, cat_component_templates1_response]),
 };
 const CAT_COUNT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.count',
@@ -2192,13 +2127,7 @@ They are not intended for use by applications. For application consumption, use 
     getLooseObjectFromProperty(cat_count1_request, 'path'),
     getLooseObjectFromProperty(cat_count1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_count_response)),
-      ...getShape(getShape(cat_count1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_count_response, cat_count1_response]),
 };
 const CAT_FIELDDATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.fielddata',
@@ -2227,13 +2156,7 @@ They are not intended for use by applications. For application consumption, use 
     getLooseObjectFromProperty(cat_fielddata1_request, 'path'),
     getLooseObjectFromProperty(cat_fielddata1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_fielddata_response)),
-      ...getShape(getShape(cat_fielddata1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_fielddata_response, cat_fielddata1_response]),
 };
 const CAT_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.health',
@@ -2263,12 +2186,7 @@ You also can use the API to track the recovery of a large cluster over a longer 
     getLooseObjectFromProperty(cat_health_request, 'path'),
     getLooseObjectFromProperty(cat_health_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_health_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cat_health_response,
 };
 const CAT_HELP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.help',
@@ -2290,12 +2208,7 @@ Get help for the CAT APIs.`,
     getLooseObjectFromProperty(cat_help_request, 'path'),
     getLooseObjectFromProperty(cat_help_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_help_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cat_help_response,
 };
 const CAT_INDICES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.indices',
@@ -2334,13 +2247,7 @@ They are not intended for use by applications. For application consumption, use 
     getLooseObjectFromProperty(cat_indices1_request, 'path'),
     getLooseObjectFromProperty(cat_indices1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_indices_response)),
-      ...getShape(getShape(cat_indices1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_indices_response, cat_indices1_response]),
 };
 const CAT_MASTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.master',
@@ -2364,12 +2271,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_master_request, 'path'),
     getLooseObjectFromProperty(cat_master_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_master_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cat_master_response,
 };
 const CAT_ML_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.ml_data_frame_analytics',
@@ -2399,13 +2301,10 @@ application consumption, use the get data frame analytics jobs statistics API.`,
     getLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'path'),
     getLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_ml_data_frame_analytics_response)),
-      ...getShape(getShape(cat_ml_data_frame_analytics1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    cat_ml_data_frame_analytics_response,
+    cat_ml_data_frame_analytics1_response,
+  ]),
 };
 const CAT_ML_DATAFEEDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.ml_datafeeds',
@@ -2438,13 +2337,7 @@ application consumption, use the get datafeed statistics API.`,
     getLooseObjectFromProperty(cat_ml_datafeeds1_request, 'path'),
     getLooseObjectFromProperty(cat_ml_datafeeds1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_ml_datafeeds_response)),
-      ...getShape(getShape(cat_ml_datafeeds1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_ml_datafeeds_response, cat_ml_datafeeds1_response]),
 };
 const CAT_ML_JOBS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.ml_jobs',
@@ -2477,13 +2370,7 @@ application consumption, use the get anomaly detection job statistics API.`,
     getLooseObjectFromProperty(cat_ml_jobs1_request, 'path'),
     getLooseObjectFromProperty(cat_ml_jobs1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_ml_jobs_response)),
-      ...getShape(getShape(cat_ml_jobs1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_ml_jobs_response, cat_ml_jobs1_response]),
 };
 const CAT_ML_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.ml_trained_models',
@@ -2513,13 +2400,7 @@ application consumption, use the get trained models statistics API.`,
     getLooseObjectFromProperty(cat_ml_trained_models1_request, 'path'),
     getLooseObjectFromProperty(cat_ml_trained_models1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_ml_trained_models_response)),
-      ...getShape(getShape(cat_ml_trained_models1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_ml_trained_models_response, cat_ml_trained_models1_response]),
 };
 const CAT_NODEATTRS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.nodeattrs',
@@ -2543,12 +2424,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_nodeattrs_request, 'path'),
     getLooseObjectFromProperty(cat_nodeattrs_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_nodeattrs_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cat_nodeattrs_response,
 };
 const CAT_NODES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.nodes',
@@ -2571,12 +2447,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_nodes_request, 'path'),
     getLooseObjectFromProperty(cat_nodes_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_nodes_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cat_nodes_response,
 };
 const CAT_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.pending_tasks',
@@ -2600,12 +2471,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_pending_tasks_request, 'path'),
     getLooseObjectFromProperty(cat_pending_tasks_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_pending_tasks_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cat_pending_tasks_response,
 };
 const CAT_PLUGINS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.plugins',
@@ -2629,12 +2495,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_plugins_request, 'path'),
     getLooseObjectFromProperty(cat_plugins_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_plugins_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cat_plugins_response,
 };
 const CAT_RECOVERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.recovery',
@@ -2663,13 +2524,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_recovery1_request, 'path'),
     getLooseObjectFromProperty(cat_recovery1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_recovery_response)),
-      ...getShape(getShape(cat_recovery1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_recovery_response, cat_recovery1_response]),
 };
 const CAT_REPOSITORIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.repositories',
@@ -2693,12 +2548,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_repositories_request, 'path'),
     getLooseObjectFromProperty(cat_repositories_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_repositories_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cat_repositories_response,
 };
 const CAT_SEGMENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.segments',
@@ -2726,13 +2576,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_segments1_request, 'path'),
     getLooseObjectFromProperty(cat_segments1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_segments_response)),
-      ...getShape(getShape(cat_segments1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_segments_response, cat_segments1_response]),
 };
 const CAT_SHARDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.shards',
@@ -2759,13 +2603,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_shards1_request, 'path'),
     getLooseObjectFromProperty(cat_shards1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_shards_response)),
-      ...getShape(getShape(cat_shards1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_shards_response, cat_shards1_response]),
 };
 const CAT_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.snapshots',
@@ -2793,13 +2631,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_snapshots1_request, 'path'),
     getLooseObjectFromProperty(cat_snapshots1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_snapshots_response)),
-      ...getShape(getShape(cat_snapshots1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_snapshots_response, cat_snapshots1_response]),
 };
 const CAT_TASKS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.tasks',
@@ -2831,12 +2663,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_tasks_request, 'path'),
     getLooseObjectFromProperty(cat_tasks_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_tasks_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cat_tasks_response,
 };
 const CAT_TEMPLATES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.templates',
@@ -2864,13 +2691,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_templates1_request, 'path'),
     getLooseObjectFromProperty(cat_templates1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_templates_response)),
-      ...getShape(getShape(cat_templates1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_templates_response, cat_templates1_response]),
 };
 const CAT_THREAD_POOL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.thread_pool',
@@ -2898,13 +2719,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     getLooseObjectFromProperty(cat_thread_pool1_request, 'path'),
     getLooseObjectFromProperty(cat_thread_pool1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_thread_pool_response)),
-      ...getShape(getShape(cat_thread_pool1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_thread_pool_response, cat_thread_pool1_response]),
 };
 const CAT_TRANSFORMS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.transforms',
@@ -2934,13 +2749,7 @@ application consumption, use the get transform statistics API.`,
     getLooseObjectFromProperty(cat_transforms1_request, 'path'),
     getLooseObjectFromProperty(cat_transforms1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cat_transforms_response)),
-      ...getShape(getShape(cat_transforms1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cat_transforms_response, cat_transforms1_response]),
 };
 const CCR_DELETE_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.delete_auto_follow_pattern',
@@ -2963,12 +2772,7 @@ Delete a collection of cross-cluster replication auto-follow patterns.`,
     getLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'path'),
     getLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_delete_auto_follow_pattern_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_delete_auto_follow_pattern_response,
 };
 const CCR_FOLLOW_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.follow',
@@ -2990,12 +2794,7 @@ When the API returns, the follower index exists and cross-cluster replication st
     getLooseObjectFromProperty(ccr_follow_request, 'path'),
     getLooseObjectFromProperty(ccr_follow_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_follow_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_follow_response,
 };
 const CCR_FOLLOW_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.follow_info',
@@ -3019,12 +2818,7 @@ For example, the results include follower index names, leader index names, repli
     getLooseObjectFromProperty(ccr_follow_info_request, 'path'),
     getLooseObjectFromProperty(ccr_follow_info_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_follow_info_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_follow_info_response,
 };
 const CCR_FOLLOW_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.follow_stats',
@@ -3048,12 +2842,7 @@ The API returns shard-level stats about the "following tasks" associated with ea
     getLooseObjectFromProperty(ccr_follow_stats_request, 'path'),
     getLooseObjectFromProperty(ccr_follow_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_follow_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_follow_stats_response,
 };
 const CCR_FORGET_FOLLOWER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.forget_follower',
@@ -3085,12 +2874,7 @@ The only purpose of this API is to handle the case of failure to remove the foll
     getLooseObjectFromProperty(ccr_forget_follower_request, 'path'),
     getLooseObjectFromProperty(ccr_forget_follower_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_forget_follower_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_forget_follower_response,
 };
 const CCR_GET_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.get_auto_follow_pattern',
@@ -3116,13 +2900,10 @@ Get cross-cluster replication auto-follow patterns.`,
     getLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'path'),
     getLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_get_auto_follow_pattern_response)),
-      ...getShape(getShape(ccr_get_auto_follow_pattern1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ccr_get_auto_follow_pattern_response,
+    ccr_get_auto_follow_pattern1_response,
+  ]),
 };
 const CCR_PAUSE_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.pause_auto_follow_pattern',
@@ -3151,12 +2932,7 @@ Remote indices that were created while the pattern was paused will also be follo
     getLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'path'),
     getLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_pause_auto_follow_pattern_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_pause_auto_follow_pattern_response,
 };
 const CCR_PAUSE_FOLLOW_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.pause_follow',
@@ -3182,12 +2958,7 @@ You can pause and resume a follower index to change the configuration of the fol
     getLooseObjectFromProperty(ccr_pause_follow_request, 'path'),
     getLooseObjectFromProperty(ccr_pause_follow_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_pause_follow_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_pause_follow_response,
 };
 const CCR_PUT_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.put_auto_follow_pattern',
@@ -3214,12 +2985,7 @@ NOTE: Follower indices that were configured automatically before updating an aut
     getLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'path'),
     getLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_put_auto_follow_pattern_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_put_auto_follow_pattern_response,
 };
 const CCR_RESUME_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.resume_auto_follow_pattern',
@@ -3244,12 +3010,7 @@ Remote indices created while the pattern was paused will also be followed unless
     getLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'path'),
     getLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_resume_auto_follow_pattern_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_resume_auto_follow_pattern_response,
 };
 const CCR_RESUME_FOLLOW_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.resume_follow',
@@ -3274,12 +3035,7 @@ When this API returns, the follower index will resume fetching operations from t
     getLooseObjectFromProperty(ccr_resume_follow_request, 'path'),
     getLooseObjectFromProperty(ccr_resume_follow_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_resume_follow_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_resume_follow_response,
 };
 const CCR_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.stats',
@@ -3301,12 +3057,7 @@ This API returns stats about auto-following and the same shard-level stats as th
     getLooseObjectFromProperty(ccr_stats_request, 'path'),
     getLooseObjectFromProperty(ccr_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_stats_response,
 };
 const CCR_UNFOLLOW_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.unfollow',
@@ -3334,12 +3085,7 @@ The follower index must be paused and closed before you call the unfollow API.
     getLooseObjectFromProperty(ccr_unfollow_request, 'path'),
     getLooseObjectFromProperty(ccr_unfollow_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ccr_unfollow_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ccr_unfollow_response,
 };
 const CLEAR_SCROLL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.clear_scroll',
@@ -3364,13 +3110,7 @@ Clear the search context and results for a scrolling search.`,
     getLooseObjectFromProperty(clear_scroll1_request, 'path'),
     getLooseObjectFromProperty(clear_scroll1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(clear_scroll_response)),
-      ...getShape(getShape(clear_scroll1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([clear_scroll_response, clear_scroll1_response]),
 };
 const CLOSE_POINT_IN_TIME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.close_point_in_time',
@@ -3395,12 +3135,7 @@ However, keeping points in time has a cost; close them as soon as they are no lo
     getLooseObjectFromProperty(close_point_in_time_request, 'path'),
     getLooseObjectFromProperty(close_point_in_time_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(close_point_in_time_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: close_point_in_time_response,
 };
 const CLUSTER_ALLOCATION_EXPLAIN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.allocation_explain',
@@ -3430,13 +3165,10 @@ Refer to the linked documentation for examples of how to troubleshoot allocation
     getLooseObjectFromProperty(cluster_allocation_explain1_request, 'path'),
     getLooseObjectFromProperty(cluster_allocation_explain1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_allocation_explain_response)),
-      ...getShape(getShape(cluster_allocation_explain1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    cluster_allocation_explain_response,
+    cluster_allocation_explain1_response,
+  ]),
 };
 const CLUSTER_DELETE_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.delete_component_template',
@@ -3458,12 +3190,7 @@ Component templates are building blocks for constructing index templates that sp
     getLooseObjectFromProperty(cluster_delete_component_template_request, 'path'),
     getLooseObjectFromProperty(cluster_delete_component_template_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_delete_component_template_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_delete_component_template_response,
 };
 const CLUSTER_DELETE_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.delete_voting_config_exclusions',
@@ -3492,12 +3219,7 @@ Remove master-eligible nodes from the voting configuration exclusion list.`,
     getLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'path'),
     getLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_delete_voting_config_exclusions_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_delete_voting_config_exclusions_response,
 };
 const CLUSTER_EXISTS_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.exists_component_template',
@@ -3519,12 +3241,7 @@ Returns information about whether a particular component template exists.`,
     getLooseObjectFromProperty(cluster_exists_component_template_request, 'path'),
     getLooseObjectFromProperty(cluster_exists_component_template_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_exists_component_template_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_exists_component_template_response,
 };
 const CLUSTER_GET_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.get_component_template',
@@ -3549,13 +3266,10 @@ Get information about component templates.`,
     getLooseObjectFromProperty(cluster_get_component_template1_request, 'path'),
     getLooseObjectFromProperty(cluster_get_component_template1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_get_component_template_response)),
-      ...getShape(getShape(cluster_get_component_template1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    cluster_get_component_template_response,
+    cluster_get_component_template1_response,
+  ]),
 };
 const CLUSTER_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.get_settings',
@@ -3586,12 +3300,7 @@ By default, it returns only settings that have been explicitly defined.`,
     getLooseObjectFromProperty(cluster_get_settings_request, 'path'),
     getLooseObjectFromProperty(cluster_get_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_get_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_get_settings_response,
 };
 const CLUSTER_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.health',
@@ -3625,13 +3334,7 @@ The cluster status is controlled by the worst index status.`,
     getLooseObjectFromProperty(cluster_health1_request, 'path'),
     getLooseObjectFromProperty(cluster_health1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_health_response)),
-      ...getShape(getShape(cluster_health1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cluster_health_response, cluster_health1_response]),
 };
 const CLUSTER_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.info',
@@ -3653,12 +3356,7 @@ Returns basic information about the cluster.`,
     getLooseObjectFromProperty(cluster_info_request, 'path'),
     getLooseObjectFromProperty(cluster_info_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_info_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_info_response,
 };
 const CLUSTER_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.pending_tasks',
@@ -3684,12 +3382,7 @@ However, if a user-initiated task such as a create index command causes a cluste
     getLooseObjectFromProperty(cluster_pending_tasks_request, 'path'),
     getLooseObjectFromProperty(cluster_pending_tasks_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_pending_tasks_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_pending_tasks_response,
 };
 const CLUSTER_POST_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.post_voting_config_exclusions',
@@ -3734,12 +3427,7 @@ They are not required when removing master-ineligible nodes or when removing few
     getLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'path'),
     getLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_post_voting_config_exclusions_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_post_voting_config_exclusions_response,
 };
 const CLUSTER_PUT_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.put_component_template',
@@ -3782,13 +3470,10 @@ To be applied, a component template must be included in an index template's \`co
     getLooseObjectFromProperty(cluster_put_component_template1_request, 'path'),
     getLooseObjectFromProperty(cluster_put_component_template1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_put_component_template_response)),
-      ...getShape(getShape(cluster_put_component_template1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    cluster_put_component_template_response,
+    cluster_put_component_template1_response,
+  ]),
 };
 const CLUSTER_PUT_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.put_settings',
@@ -3835,12 +3520,7 @@ If a cluster becomes unstable, transient settings can clear unexpectedly, result
     getLooseObjectFromProperty(cluster_put_settings_request, 'path'),
     getLooseObjectFromProperty(cluster_put_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_put_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_put_settings_response,
 };
 const CLUSTER_REMOTE_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.remote_info',
@@ -3870,12 +3550,7 @@ The API returns connection and endpoint information keyed by the configured remo
     getLooseObjectFromProperty(cluster_remote_info_request, 'path'),
     getLooseObjectFromProperty(cluster_remote_info_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_remote_info_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_remote_info_response,
 };
 const CLUSTER_REROUTE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.reroute',
@@ -3909,12 +3584,7 @@ Once the problem has been corrected, allocation can be manually retried by calli
     getLooseObjectFromProperty(cluster_reroute_request, 'path'),
     getLooseObjectFromProperty(cluster_reroute_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_reroute_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: cluster_reroute_response,
 };
 const CLUSTER_STATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.state',
@@ -3959,14 +3629,7 @@ Instead, obtain the information you require using other more stable cluster APIs
     getLooseObjectFromProperty(cluster_state2_request, 'path'),
     getLooseObjectFromProperty(cluster_state2_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_state_response)),
-      ...getShape(getShape(cluster_state1_response)),
-      ...getShape(getShape(cluster_state2_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cluster_state_response, cluster_state1_response, cluster_state2_response]),
 };
 const CLUSTER_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.stats',
@@ -3991,13 +3654,7 @@ Get basic index metrics (shard numbers, store size, memory usage) and informatio
     getLooseObjectFromProperty(cluster_stats1_request, 'path'),
     getLooseObjectFromProperty(cluster_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(cluster_stats_response)),
-      ...getShape(getShape(cluster_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([cluster_stats_response, cluster_stats1_response]),
 };
 const CONNECTOR_CHECK_IN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.check_in',
@@ -4020,12 +3677,7 @@ Update the \`last_seen\` field in the connector and set it to the current timest
     getLooseObjectFromProperty(connector_check_in_request, 'path'),
     getLooseObjectFromProperty(connector_check_in_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_check_in_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_check_in_response,
 };
 const CONNECTOR_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.delete',
@@ -4051,12 +3703,7 @@ These need to be removed manually.`,
     getLooseObjectFromProperty(connector_delete_request, 'path'),
     getLooseObjectFromProperty(connector_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_delete_response,
 };
 const CONNECTOR_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.get',
@@ -4079,12 +3726,7 @@ Get the details about a connector.`,
     getLooseObjectFromProperty(connector_get_request, 'path'),
     getLooseObjectFromProperty(connector_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_get_response,
 };
 const CONNECTOR_LAST_SYNC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.last_sync',
@@ -4104,10 +3746,7 @@ This action is used for analytics and monitoring.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_LIST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.list',
@@ -4138,12 +3777,7 @@ Get information about all connectors.`,
     getLooseObjectFromProperty(connector_list_request, 'path'),
     getLooseObjectFromProperty(connector_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_list_response,
 };
 const CONNECTOR_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.post',
@@ -4176,12 +3810,7 @@ Self-managed connectors (Connector clients) are self-managed on your infrastruct
     getLooseObjectFromProperty(connector_post_request, 'path'),
     getLooseObjectFromProperty(connector_post_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_post_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_post_response,
 };
 const CONNECTOR_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.put',
@@ -4216,13 +3845,7 @@ const CONNECTOR_PUT_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(connector_put1_request, 'path'),
     getLooseObjectFromProperty(connector_put1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_put_response)),
-      ...getShape(getShape(connector_put1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([connector_put_response, connector_put1_response]),
 };
 const CONNECTOR_SECRET_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_delete',
@@ -4238,10 +3861,7 @@ const CONNECTOR_SECRET_DELETE_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_SECRET_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_get',
@@ -4257,10 +3877,7 @@ const CONNECTOR_SECRET_GET_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_SECRET_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_post',
@@ -4276,10 +3893,7 @@ const CONNECTOR_SECRET_POST_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_SECRET_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_put',
@@ -4295,10 +3909,7 @@ const CONNECTOR_SECRET_PUT_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_SYNC_JOB_CANCEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_cancel',
@@ -4322,12 +3933,7 @@ The connector service is then responsible for setting the status of connector sy
     getLooseObjectFromProperty(connector_sync_job_cancel_request, 'path'),
     getLooseObjectFromProperty(connector_sync_job_cancel_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_sync_job_cancel_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_sync_job_cancel_response,
 };
 const CONNECTOR_SYNC_JOB_CHECK_IN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_check_in',
@@ -4352,12 +3958,7 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     getLooseObjectFromProperty(connector_sync_job_check_in_request, 'path'),
     getLooseObjectFromProperty(connector_sync_job_check_in_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_sync_job_check_in_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_sync_job_check_in_response,
 };
 const CONNECTOR_SYNC_JOB_CLAIM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_claim',
@@ -4386,12 +3987,7 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     getLooseObjectFromProperty(connector_sync_job_claim_request, 'path'),
     getLooseObjectFromProperty(connector_sync_job_claim_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_sync_job_claim_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_sync_job_claim_response,
 };
 const CONNECTOR_SYNC_JOB_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_delete',
@@ -4415,12 +4011,7 @@ This is a destructive action that is not recoverable.`,
     getLooseObjectFromProperty(connector_sync_job_delete_request, 'path'),
     getLooseObjectFromProperty(connector_sync_job_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_sync_job_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_sync_job_delete_response,
 };
 const CONNECTOR_SYNC_JOB_ERROR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_error',
@@ -4445,12 +4036,7 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     getLooseObjectFromProperty(connector_sync_job_error_request, 'path'),
     getLooseObjectFromProperty(connector_sync_job_error_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_sync_job_error_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_sync_job_error_response,
 };
 const CONNECTOR_SYNC_JOB_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_get',
@@ -4471,12 +4057,7 @@ const CONNECTOR_SYNC_JOB_GET_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(connector_sync_job_get_request, 'path'),
     getLooseObjectFromProperty(connector_sync_job_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_sync_job_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_sync_job_get_response,
 };
 const CONNECTOR_SYNC_JOB_LIST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_list',
@@ -4499,12 +4080,7 @@ Get information about all stored connector sync jobs listed by their creation da
     getLooseObjectFromProperty(connector_sync_job_list_request, 'path'),
     getLooseObjectFromProperty(connector_sync_job_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_sync_job_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_sync_job_list_response,
 };
 const CONNECTOR_SYNC_JOB_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_post',
@@ -4527,12 +4103,7 @@ Create a connector sync job document in the internal index and initialize its co
     getLooseObjectFromProperty(connector_sync_job_post_request, 'path'),
     getLooseObjectFromProperty(connector_sync_job_post_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_sync_job_post_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_sync_job_post_response,
 };
 const CONNECTOR_SYNC_JOB_UPDATE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_update_stats',
@@ -4559,12 +4130,7 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     getLooseObjectFromProperty(connector_sync_job_update_stats_request, 'path'),
     getLooseObjectFromProperty(connector_sync_job_update_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_sync_job_update_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_sync_job_update_stats_response,
 };
 const CONNECTOR_UPDATE_ACTIVE_FILTERING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_active_filtering',
@@ -4587,12 +4153,7 @@ Activates the valid draft filtering for a connector.`,
     getLooseObjectFromProperty(connector_update_active_filtering_request, 'path'),
     getLooseObjectFromProperty(connector_update_active_filtering_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_active_filtering_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_active_filtering_response,
 };
 const CONNECTOR_UPDATE_API_KEY_ID_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_api_key_id',
@@ -4618,12 +4179,7 @@ Self-managed connectors (connector clients) do not use this field.`,
     getLooseObjectFromProperty(connector_update_api_key_id_request, 'path'),
     getLooseObjectFromProperty(connector_update_api_key_id_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_api_key_id_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_api_key_id_response,
 };
 const CONNECTOR_UPDATE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_configuration',
@@ -4646,12 +4202,7 @@ Update the configuration field in the connector document.`,
     getLooseObjectFromProperty(connector_update_configuration_request, 'path'),
     getLooseObjectFromProperty(connector_update_configuration_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_configuration_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_configuration_response,
 };
 const CONNECTOR_UPDATE_ERROR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_error',
@@ -4676,12 +4227,7 @@ Otherwise, if the error is reset to null, the connector status is updated to con
     getLooseObjectFromProperty(connector_update_error_request, 'path'),
     getLooseObjectFromProperty(connector_update_error_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_error_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_error_response,
 };
 const CONNECTOR_UPDATE_FEATURES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_features',
@@ -4715,12 +4261,7 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     getLooseObjectFromProperty(connector_update_features_request, 'path'),
     getLooseObjectFromProperty(connector_update_features_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_features_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_features_response,
 };
 const CONNECTOR_UPDATE_FILTERING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_filtering',
@@ -4745,12 +4286,7 @@ The filtering property is used to configure sync rules (both basic and advanced)
     getLooseObjectFromProperty(connector_update_filtering_request, 'path'),
     getLooseObjectFromProperty(connector_update_filtering_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_filtering_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_filtering_response,
 };
 const CONNECTOR_UPDATE_FILTERING_VALIDATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_filtering_validation',
@@ -4773,12 +4309,7 @@ Update the draft filtering validation info for a connector.`,
     getLooseObjectFromProperty(connector_update_filtering_validation_request, 'path'),
     getLooseObjectFromProperty(connector_update_filtering_validation_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_filtering_validation_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_filtering_validation_response,
 };
 const CONNECTOR_UPDATE_INDEX_NAME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_index_name',
@@ -4801,12 +4332,7 @@ Update the \`index_name\` field of a connector, specifying the index where the d
     getLooseObjectFromProperty(connector_update_index_name_request, 'path'),
     getLooseObjectFromProperty(connector_update_index_name_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_index_name_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_index_name_response,
 };
 const CONNECTOR_UPDATE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_name',
@@ -4827,12 +4353,7 @@ const CONNECTOR_UPDATE_NAME_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(connector_update_name_request, 'path'),
     getLooseObjectFromProperty(connector_update_name_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_name_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_name_response,
 };
 const CONNECTOR_UPDATE_NATIVE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_native',
@@ -4853,12 +4374,7 @@ const CONNECTOR_UPDATE_NATIVE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(connector_update_native_request, 'path'),
     getLooseObjectFromProperty(connector_update_native_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_native_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_native_response,
 };
 const CONNECTOR_UPDATE_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_pipeline',
@@ -4881,12 +4397,7 @@ When you create a new connector, the configuration of an ingest pipeline is popu
     getLooseObjectFromProperty(connector_update_pipeline_request, 'path'),
     getLooseObjectFromProperty(connector_update_pipeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_pipeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_pipeline_response,
 };
 const CONNECTOR_UPDATE_SCHEDULING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_scheduling',
@@ -4907,12 +4418,7 @@ const CONNECTOR_UPDATE_SCHEDULING_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(connector_update_scheduling_request, 'path'),
     getLooseObjectFromProperty(connector_update_scheduling_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_scheduling_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_scheduling_response,
 };
 const CONNECTOR_UPDATE_SERVICE_TYPE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_service_type',
@@ -4933,12 +4439,7 @@ const CONNECTOR_UPDATE_SERVICE_TYPE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(connector_update_service_type_request, 'path'),
     getLooseObjectFromProperty(connector_update_service_type_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_service_type_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_service_type_response,
 };
 const CONNECTOR_UPDATE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_status',
@@ -4959,12 +4460,7 @@ const CONNECTOR_UPDATE_STATUS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(connector_update_status_request, 'path'),
     getLooseObjectFromProperty(connector_update_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(connector_update_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: connector_update_status_response,
 };
 const COUNT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.count',
@@ -5003,15 +4499,7 @@ This means that replicas increase the scalability of the count.`,
     getLooseObjectFromProperty(count3_request, 'path'),
     getLooseObjectFromProperty(count3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(count_response)),
-      ...getShape(getShape(count1_response)),
-      ...getShape(getShape(count2_response)),
-      ...getShape(getShape(count3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([count_response, count1_response, count2_response, count3_response]),
 };
 const CREATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.create',
@@ -5105,13 +4593,7 @@ The \`_shards\` section of the API response reveals the number of shard copies o
     getLooseObjectFromProperty(create1_request, 'path'),
     getLooseObjectFromProperty(create1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(create_response)),
-      ...getShape(getShape(create1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([create_response, create1_response]),
 };
 const DANGLING_INDICES_DELETE_DANGLING_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.dangling_indices.delete_dangling_index',
@@ -5141,12 +4623,7 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
     getLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'path'),
     getLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(dangling_indices_delete_dangling_index_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: dangling_indices_delete_dangling_index_response,
 };
 const DANGLING_INDICES_IMPORT_DANGLING_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.dangling_indices.import_dangling_index',
@@ -5177,12 +4654,7 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
     getLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'path'),
     getLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(dangling_indices_import_dangling_index_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: dangling_indices_import_dangling_index_response,
 };
 const DANGLING_INDICES_LIST_DANGLING_INDICES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.dangling_indices.list_dangling_indices',
@@ -5208,12 +4680,7 @@ Use this API to list dangling indices, which you can then import or delete.`,
     getLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'path'),
     getLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(dangling_indices_list_dangling_indices_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: dangling_indices_list_dangling_indices_response,
 };
 const DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.delete',
@@ -5301,12 +4768,7 @@ It then gets redirected into the primary shard within that ID group and replicat
     getLooseObjectFromProperty(delete_request, 'path'),
     getLooseObjectFromProperty(delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_response,
 };
 const DELETE_BY_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.delete_by_query',
@@ -5436,12 +4898,7 @@ The get task status API will continue to list the delete by query task until thi
     getLooseObjectFromProperty(delete_by_query_request, 'path'),
     getLooseObjectFromProperty(delete_by_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_by_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_by_query_response,
 };
 const DELETE_BY_QUERY_RETHROTTLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.delete_by_query_rethrottle',
@@ -5465,12 +4922,7 @@ Rethrottling that speeds up the query takes effect immediately but rethrotting t
     getLooseObjectFromProperty(delete_by_query_rethrottle_request, 'path'),
     getLooseObjectFromProperty(delete_by_query_rethrottle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_by_query_rethrottle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_by_query_rethrottle_response,
 };
 const DELETE_SCRIPT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.delete_script',
@@ -5492,12 +4944,7 @@ Deletes a stored script or search template.`,
     getLooseObjectFromProperty(delete_script_request, 'path'),
     getLooseObjectFromProperty(delete_script_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(delete_script_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: delete_script_response,
 };
 const ENRICH_DELETE_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.delete_policy',
@@ -5519,12 +4966,7 @@ Deletes an existing enrich policy and its enrich index.`,
     getLooseObjectFromProperty(enrich_delete_policy_request, 'path'),
     getLooseObjectFromProperty(enrich_delete_policy_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(enrich_delete_policy_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: enrich_delete_policy_response,
 };
 const ENRICH_EXECUTE_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.execute_policy',
@@ -5546,12 +4988,7 @@ Create the enrich index for an existing enrich policy.`,
     getLooseObjectFromProperty(enrich_execute_policy_request, 'path'),
     getLooseObjectFromProperty(enrich_execute_policy_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(enrich_execute_policy_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: enrich_execute_policy_response,
 };
 const ENRICH_GET_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.get_policy',
@@ -5576,13 +5013,7 @@ Returns information about an enrich policy.`,
     getLooseObjectFromProperty(enrich_get_policy1_request, 'path'),
     getLooseObjectFromProperty(enrich_get_policy1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(enrich_get_policy_response)),
-      ...getShape(getShape(enrich_get_policy1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([enrich_get_policy_response, enrich_get_policy1_response]),
 };
 const ENRICH_PUT_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.put_policy',
@@ -5604,12 +5035,7 @@ Creates an enrich policy.`,
     getLooseObjectFromProperty(enrich_put_policy_request, 'path'),
     getLooseObjectFromProperty(enrich_put_policy_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(enrich_put_policy_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: enrich_put_policy_response,
 };
 const ENRICH_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.stats',
@@ -5631,12 +5057,7 @@ Returns enrich coordinator statistics and information about enrich policies that
     getLooseObjectFromProperty(enrich_stats_request, 'path'),
     getLooseObjectFromProperty(enrich_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(enrich_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: enrich_stats_response,
 };
 const EQL_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.eql.delete',
@@ -5658,12 +5079,7 @@ The API also deletes results for the search.`,
     getLooseObjectFromProperty(eql_delete_request, 'path'),
     getLooseObjectFromProperty(eql_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(eql_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: eql_delete_response,
 };
 const EQL_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.eql.get',
@@ -5684,12 +5100,7 @@ Get the current status and available results for an async EQL search or a stored
     getLooseObjectFromProperty(eql_get_request, 'path'),
     getLooseObjectFromProperty(eql_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(eql_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: eql_get_response,
 };
 const EQL_GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.eql.get_status',
@@ -5711,12 +5122,7 @@ Get the current status for an async EQL search or a stored synchronous EQL searc
     getLooseObjectFromProperty(eql_get_status_request, 'path'),
     getLooseObjectFromProperty(eql_get_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(eql_get_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: eql_get_status_response,
 };
 const EQL_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.eql.search',
@@ -5741,13 +5147,7 @@ EQL assumes each document in a data stream or index corresponds to an event.`,
     getLooseObjectFromProperty(eql_search1_request, 'path'),
     getLooseObjectFromProperty(eql_search1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(eql_search_response)),
-      ...getShape(getShape(eql_search1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([eql_search_response, eql_search1_response]),
 };
 const ESQL_ASYNC_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.async_query',
@@ -5771,12 +5171,7 @@ The API accepts the same parameters and request body as the synchronous query AP
     getLooseObjectFromProperty(esql_async_query_request, 'path'),
     getLooseObjectFromProperty(esql_async_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(esql_async_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: esql_async_query_response,
 };
 const ESQL_ASYNC_QUERY_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.async_query_delete',
@@ -5804,12 +5199,7 @@ If the Elasticsearch security features are enabled, only the following users can
     getLooseObjectFromProperty(esql_async_query_delete_request, 'path'),
     getLooseObjectFromProperty(esql_async_query_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(esql_async_query_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: esql_async_query_delete_response,
 };
 const ESQL_ASYNC_QUERY_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.async_query_get',
@@ -5832,12 +5222,7 @@ If the Elasticsearch security features are enabled, only the user who first subm
     getLooseObjectFromProperty(esql_async_query_get_request, 'path'),
     getLooseObjectFromProperty(esql_async_query_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(esql_async_query_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: esql_async_query_get_response,
 };
 const ESQL_ASYNC_QUERY_STOP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.async_query_stop',
@@ -5861,12 +5246,7 @@ If the Elasticsearch security features are enabled, only the user who first subm
     getLooseObjectFromProperty(esql_async_query_stop_request, 'path'),
     getLooseObjectFromProperty(esql_async_query_stop_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(esql_async_query_stop_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: esql_async_query_stop_response,
 };
 const ESQL_GET_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.get_query',
@@ -5888,12 +5268,7 @@ Returns an object extended information about a running ES|QL query.`,
     getLooseObjectFromProperty(esql_get_query_request, 'path'),
     getLooseObjectFromProperty(esql_get_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(esql_get_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: esql_get_query_response,
 };
 const ESQL_LIST_QUERIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.list_queries',
@@ -5915,12 +5290,7 @@ Returns an object containing IDs and other information about the running ES|QL q
     getLooseObjectFromProperty(esql_list_queries_request, 'path'),
     getLooseObjectFromProperty(esql_list_queries_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(esql_list_queries_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: esql_list_queries_response,
 };
 const ESQL_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.query',
@@ -5941,12 +5311,7 @@ Get search results for an ES|QL (Elasticsearch query language) query.`,
     getLooseObjectFromProperty(esql_query_request, 'path'),
     getLooseObjectFromProperty(esql_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(esql_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: esql_query_response,
 };
 const EXISTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.exists',
@@ -6014,12 +5379,7 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
     getLooseObjectFromProperty(exists_request, 'path'),
     getLooseObjectFromProperty(exists_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(exists_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: exists_response,
 };
 const EXISTS_SOURCE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.exists_source',
@@ -6067,12 +5427,7 @@ A document's source is not available if it is disabled in the mapping.`,
     getLooseObjectFromProperty(exists_source_request, 'path'),
     getLooseObjectFromProperty(exists_source_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(exists_source_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: exists_source_response,
 };
 const EXPLAIN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.explain',
@@ -6097,13 +5452,7 @@ It computes a score explanation for a query and a specific document.`,
     getLooseObjectFromProperty(explain1_request, 'path'),
     getLooseObjectFromProperty(explain1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(explain_response)),
-      ...getShape(getShape(explain1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([explain_response, explain1_response]),
 };
 const FEATURES_GET_FEATURES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.features.get_features',
@@ -6133,12 +5482,7 @@ In order for a feature state to be listed in this API and recognized as a valid 
     getLooseObjectFromProperty(features_get_features_request, 'path'),
     getLooseObjectFromProperty(features_get_features_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(features_get_features_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: features_get_features_response,
 };
 const FEATURES_RESET_FEATURES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.features.reset_features',
@@ -6175,12 +5519,7 @@ IMPORTANT: The features installed on the node you submit this request to are the
     getLooseObjectFromProperty(features_reset_features_request, 'path'),
     getLooseObjectFromProperty(features_reset_features_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(features_reset_features_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: features_reset_features_response,
 };
 const FIELD_CAPS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.field_caps',
@@ -6215,15 +5554,12 @@ For example, a runtime field with a type of keyword is returned the same as any 
     getLooseObjectFromProperty(field_caps3_request, 'path'),
     getLooseObjectFromProperty(field_caps3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(field_caps_response)),
-      ...getShape(getShape(field_caps1_response)),
-      ...getShape(getShape(field_caps2_response)),
-      ...getShape(getShape(field_caps3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    field_caps_response,
+    field_caps1_response,
+    field_caps2_response,
+    field_caps3_response,
+  ]),
 };
 const FLEET_DELETE_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.delete_secret',
@@ -6239,10 +5575,7 @@ const FLEET_DELETE_SECRET_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const FLEET_GET_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.get_secret',
@@ -6258,10 +5591,7 @@ const FLEET_GET_SECRET_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const FLEET_GLOBAL_CHECKPOINTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.global_checkpoints',
@@ -6284,12 +5614,7 @@ This API is designed for internal use by the Fleet server project.`,
     getLooseObjectFromProperty(fleet_global_checkpoints_request, 'path'),
     getLooseObjectFromProperty(fleet_global_checkpoints_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(fleet_global_checkpoints_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: fleet_global_checkpoints_response,
 };
 const FLEET_MSEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.msearch',
@@ -6322,15 +5647,12 @@ However, similar to the Fleet search API, it supports the \`wait_for_checkpoints
     getLooseObjectFromProperty(fleet_msearch3_request, 'path'),
     getLooseObjectFromProperty(fleet_msearch3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(fleet_msearch_response)),
-      ...getShape(getShape(fleet_msearch1_response)),
-      ...getShape(getShape(fleet_msearch2_response)),
-      ...getShape(getShape(fleet_msearch3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    fleet_msearch_response,
+    fleet_msearch1_response,
+    fleet_msearch2_response,
+    fleet_msearch3_response,
+  ]),
 };
 const FLEET_POST_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.post_secret',
@@ -6346,10 +5668,7 @@ const FLEET_POST_SECRET_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const FLEET_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.search',
@@ -6375,13 +5694,7 @@ after the provided checkpoint has been processed and is visible for searches ins
     getLooseObjectFromProperty(fleet_search1_request, 'path'),
     getLooseObjectFromProperty(fleet_search1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(fleet_search_response)),
-      ...getShape(getShape(fleet_search1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([fleet_search_response, fleet_search1_response]),
 };
 const GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get',
@@ -6488,12 +5801,7 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
     getLooseObjectFromProperty(get_request, 'path'),
     getLooseObjectFromProperty(get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_response,
 };
 const GET_SCRIPT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get_script',
@@ -6514,12 +5822,7 @@ Retrieves a stored script or search template.`,
     getLooseObjectFromProperty(get_script_request, 'path'),
     getLooseObjectFromProperty(get_script_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_script_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_script_response,
 };
 const GET_SCRIPT_CONTEXT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get_script_context',
@@ -6542,12 +5845,7 @@ Get a list of supported script contexts and their methods.`,
     getLooseObjectFromProperty(get_script_context_request, 'path'),
     getLooseObjectFromProperty(get_script_context_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_script_context_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_script_context_response,
 };
 const GET_SCRIPT_LANGUAGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get_script_languages',
@@ -6570,12 +5868,7 @@ Get a list of available script types, languages, and contexts.`,
     getLooseObjectFromProperty(get_script_languages_request, 'path'),
     getLooseObjectFromProperty(get_script_languages_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_script_languages_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_script_languages_response,
 };
 const GET_SOURCE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get_source',
@@ -6627,12 +5920,7 @@ GET my-index-000001/_source/1/?_source_includes=*.id&_source_excludes=entities
     getLooseObjectFromProperty(get_source_request, 'path'),
     getLooseObjectFromProperty(get_source_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(get_source_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: get_source_response,
 };
 const GRAPH_EXPLORE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.graph.explore',
@@ -6660,13 +5948,7 @@ You can exclude vertices that have already been returned.`,
     getLooseObjectFromProperty(graph_explore1_request, 'path'),
     getLooseObjectFromProperty(graph_explore1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(graph_explore_response)),
-      ...getShape(getShape(graph_explore1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([graph_explore_response, graph_explore1_response]),
 };
 const HEALTH_REPORT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.health_report',
@@ -6707,13 +5989,7 @@ When setting up automated polling of the API for health status, set verbose to f
     getLooseObjectFromProperty(health_report1_request, 'path'),
     getLooseObjectFromProperty(health_report1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(health_report_response)),
-      ...getShape(getShape(health_report1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([health_report_response, health_report1_response]),
 };
 const ILM_DELETE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.delete_lifecycle',
@@ -6735,12 +6011,7 @@ You cannot delete policies that are currently in use. If the policy is being use
     getLooseObjectFromProperty(ilm_delete_lifecycle_request, 'path'),
     getLooseObjectFromProperty(ilm_delete_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_delete_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_delete_lifecycle_response,
 };
 const ILM_EXPLAIN_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.explain_lifecycle',
@@ -6765,12 +6036,7 @@ The response indicates when the index entered each lifecycle state, provides the
     getLooseObjectFromProperty(ilm_explain_lifecycle_request, 'path'),
     getLooseObjectFromProperty(ilm_explain_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_explain_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_explain_lifecycle_response,
 };
 const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.get_lifecycle',
@@ -6794,13 +6060,7 @@ const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ilm_get_lifecycle1_request, 'path'),
     getLooseObjectFromProperty(ilm_get_lifecycle1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_get_lifecycle_response)),
-      ...getShape(getShape(ilm_get_lifecycle1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ilm_get_lifecycle_response, ilm_get_lifecycle1_response]),
 };
 const ILM_GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.get_status',
@@ -6823,12 +6083,7 @@ Get the current index lifecycle management status.`,
     getLooseObjectFromProperty(ilm_get_status_request, 'path'),
     getLooseObjectFromProperty(ilm_get_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_get_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_get_status_response,
 };
 const ILM_MIGRATE_TO_DATA_TIERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.migrate_to_data_tiers',
@@ -6862,12 +6117,7 @@ Use the stop ILM and get ILM status APIs to wait until the reported operation mo
     getLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'path'),
     getLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_migrate_to_data_tiers_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_migrate_to_data_tiers_response,
 };
 const ILM_MOVE_TO_STEP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.move_to_step',
@@ -6901,12 +6151,7 @@ An index cannot move to a step that is not part of its policy.`,
     getLooseObjectFromProperty(ilm_move_to_step_request, 'path'),
     getLooseObjectFromProperty(ilm_move_to_step_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_move_to_step_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_move_to_step_response,
 };
 const ILM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.put_lifecycle',
@@ -6930,12 +6175,7 @@ NOTE: Only the latest version of the policy is stored, you cannot revert to prev
     getLooseObjectFromProperty(ilm_put_lifecycle_request, 'path'),
     getLooseObjectFromProperty(ilm_put_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_put_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_put_lifecycle_response,
 };
 const ILM_REMOVE_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.remove_policy',
@@ -6958,12 +6198,7 @@ It also stops managing the indices.`,
     getLooseObjectFromProperty(ilm_remove_policy_request, 'path'),
     getLooseObjectFromProperty(ilm_remove_policy_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_remove_policy_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_remove_policy_response,
 };
 const ILM_RETRY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.retry',
@@ -6986,12 +6221,7 @@ Use the explain lifecycle state API to determine whether an index is in the ERRO
     getLooseObjectFromProperty(ilm_retry_request, 'path'),
     getLooseObjectFromProperty(ilm_retry_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_retry_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_retry_response,
 };
 const ILM_START_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.start',
@@ -7014,12 +6244,7 @@ Restarting ILM is necessary only when it has been stopped using the stop ILM API
     getLooseObjectFromProperty(ilm_start_request, 'path'),
     getLooseObjectFromProperty(ilm_start_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_start_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_start_response,
 };
 const ILM_STOP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.stop',
@@ -7044,12 +6269,7 @@ Use the get ILM status API to check whether ILM is running.`,
     getLooseObjectFromProperty(ilm_stop_request, 'path'),
     getLooseObjectFromProperty(ilm_stop_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ilm_stop_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ilm_stop_response,
 };
 const INDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.index',
@@ -7223,14 +6443,7 @@ Even the simple case of updating the Elasticsearch index using data from a datab
     getLooseObjectFromProperty(index2_request, 'path'),
     getLooseObjectFromProperty(index2_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(index_response)),
-      ...getShape(getShape(index1_response)),
-      ...getShape(getShape(index2_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([index_response, index1_response, index2_response]),
 };
 const INDICES_ADD_BLOCK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.add_block',
@@ -7265,12 +6478,7 @@ Index blocks limit the operations allowed on an index by blocking specific opera
     getLooseObjectFromProperty(indices_add_block_request, 'path'),
     getLooseObjectFromProperty(indices_add_block_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_add_block_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_add_block_response,
 };
 const INDICES_ANALYZE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.analyze',
@@ -7306,15 +6514,12 @@ The \`_analyze\` endpoint without a specified index will always use \`10000\` as
     getLooseObjectFromProperty(indices_analyze3_request, 'path'),
     getLooseObjectFromProperty(indices_analyze3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_analyze_response)),
-      ...getShape(getShape(indices_analyze1_response)),
-      ...getShape(getShape(indices_analyze2_response)),
-      ...getShape(getShape(indices_analyze3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_analyze_response,
+    indices_analyze1_response,
+    indices_analyze2_response,
+    indices_analyze3_response,
+  ]),
 };
 const INDICES_CANCEL_MIGRATE_REINDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.cancel_migrate_reindex',
@@ -7337,12 +6542,7 @@ Cancel a migration reindex attempt for a data stream or index.`,
     getLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'path'),
     getLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_cancel_migrate_reindex_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_cancel_migrate_reindex_response,
 };
 const INDICES_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.clear_cache',
@@ -7372,13 +6572,7 @@ To clear the cache only of specific fields, use the \`fields\` parameter.`,
     getLooseObjectFromProperty(indices_clear_cache1_request, 'path'),
     getLooseObjectFromProperty(indices_clear_cache1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_clear_cache_response)),
-      ...getShape(getShape(indices_clear_cache1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_clear_cache_response, indices_clear_cache1_response]),
 };
 const INDICES_CLONE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.clone',
@@ -7446,13 +6640,7 @@ Because the clone operation creates a new index to clone the shards to, the wait
     getLooseObjectFromProperty(indices_clone1_request, 'path'),
     getLooseObjectFromProperty(indices_clone1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_clone_response)),
-      ...getShape(getShape(indices_clone1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_clone_response, indices_clone1_response]),
 };
 const INDICES_CLOSE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.close',
@@ -7497,12 +6685,7 @@ Closing indices can be turned off with the cluster settings API by setting \`clu
     getLooseObjectFromProperty(indices_close_request, 'path'),
     getLooseObjectFromProperty(indices_close_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_close_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_close_response,
 };
 const INDICES_CREATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.create',
@@ -7565,12 +6748,7 @@ Note that changing this setting will also affect the \`wait_for_active_shards\` 
     getLooseObjectFromProperty(indices_create_request, 'path'),
     getLooseObjectFromProperty(indices_create_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_create_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_create_response,
 };
 const INDICES_CREATE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.create_data_stream',
@@ -7593,12 +6771,7 @@ You must have a matching index template with data stream enabled.`,
     getLooseObjectFromProperty(indices_create_data_stream_request, 'path'),
     getLooseObjectFromProperty(indices_create_data_stream_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_create_data_stream_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_create_data_stream_response,
 };
 const INDICES_CREATE_FROM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.create_from',
@@ -7624,13 +6797,7 @@ Copy the mappings and settings from the source index to a destination index whil
     getLooseObjectFromProperty(indices_create_from1_request, 'path'),
     getLooseObjectFromProperty(indices_create_from1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_create_from_response)),
-      ...getShape(getShape(indices_create_from1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_create_from_response, indices_create_from1_response]),
 };
 const INDICES_DATA_STREAMS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.data_streams_stats',
@@ -7656,13 +6823,10 @@ Get statistics for one or more data streams.`,
     getLooseObjectFromProperty(indices_data_streams_stats1_request, 'path'),
     getLooseObjectFromProperty(indices_data_streams_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_data_streams_stats_response)),
-      ...getShape(getShape(indices_data_streams_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_data_streams_stats_response,
+    indices_data_streams_stats1_response,
+  ]),
 };
 const INDICES_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete',
@@ -7712,12 +6876,7 @@ You can then use the delete index API to delete the previous write index.`,
     getLooseObjectFromProperty(indices_delete_request, 'path'),
     getLooseObjectFromProperty(indices_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_delete_response,
 };
 const INDICES_DELETE_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_alias',
@@ -7742,13 +6901,7 @@ Removes a data stream or index from an alias.`,
     getLooseObjectFromProperty(indices_delete_alias1_request, 'path'),
     getLooseObjectFromProperty(indices_delete_alias1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_delete_alias_response)),
-      ...getShape(getShape(indices_delete_alias1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_delete_alias_response, indices_delete_alias1_response]),
 };
 const INDICES_DELETE_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_data_lifecycle',
@@ -7780,12 +6933,7 @@ Removes the data stream lifecycle from a data stream, rendering it not managed b
     getLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'path'),
     getLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_delete_data_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_delete_data_lifecycle_response,
 };
 const INDICES_DELETE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_data_stream',
@@ -7807,12 +6955,7 @@ Deletes one or more data streams and their backing indices.`,
     getLooseObjectFromProperty(indices_delete_data_stream_request, 'path'),
     getLooseObjectFromProperty(indices_delete_data_stream_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_delete_data_stream_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_delete_data_stream_response,
 };
 const INDICES_DELETE_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_data_stream_options',
@@ -7843,12 +6986,7 @@ Removes the data stream options from a data stream.`,
     getLooseObjectFromProperty(indices_delete_data_stream_options_request, 'path'),
     getLooseObjectFromProperty(indices_delete_data_stream_options_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_delete_data_stream_options_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_delete_data_stream_options_response,
 };
 const INDICES_DELETE_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_index_template',
@@ -7872,12 +7010,7 @@ existing templates.`,
     getLooseObjectFromProperty(indices_delete_index_template_request, 'path'),
     getLooseObjectFromProperty(indices_delete_index_template_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_delete_index_template_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_delete_index_template_response,
 };
 const INDICES_DELETE_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_sample_configuration',
@@ -7894,10 +7027,7 @@ Delete the sampling configuration for the specified index.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_DELETE_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_template',
@@ -7919,12 +7049,7 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     getLooseObjectFromProperty(indices_delete_template_request, 'path'),
     getLooseObjectFromProperty(indices_delete_template_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_delete_template_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_delete_template_response,
 };
 const INDICES_DISK_USAGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.disk_usage',
@@ -7960,12 +7085,7 @@ For usage examples see the External documentation or refer to [Analyze the index
     getLooseObjectFromProperty(indices_disk_usage_request, 'path'),
     getLooseObjectFromProperty(indices_disk_usage_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_disk_usage_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_disk_usage_response,
 };
 const INDICES_DOWNSAMPLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.downsample',
@@ -7998,12 +7118,7 @@ The source index must be read-only (\`index.blocks.write: true\`).`,
     getLooseObjectFromProperty(indices_downsample_request, 'path'),
     getLooseObjectFromProperty(indices_downsample_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_downsample_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_downsample_response,
 };
 const INDICES_EXISTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.exists',
@@ -8048,12 +7163,7 @@ Check if one or more indices, index aliases, or data streams exist.`,
     getLooseObjectFromProperty(indices_exists_request, 'path'),
     getLooseObjectFromProperty(indices_exists_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_exists_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_exists_response,
 };
 const INDICES_EXISTS_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.exists_alias',
@@ -8079,13 +7189,7 @@ Check if one or more data stream or index aliases exist.`,
     getLooseObjectFromProperty(indices_exists_alias1_request, 'path'),
     getLooseObjectFromProperty(indices_exists_alias1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_exists_alias_response)),
-      ...getShape(getShape(indices_exists_alias1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_exists_alias_response, indices_exists_alias1_response]),
 };
 const INDICES_EXISTS_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.exists_index_template',
@@ -8108,12 +7212,7 @@ Check whether index templates exist.`,
     getLooseObjectFromProperty(indices_exists_index_template_request, 'path'),
     getLooseObjectFromProperty(indices_exists_index_template_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_exists_index_template_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_exists_index_template_response,
 };
 const INDICES_EXISTS_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.exists_template',
@@ -8138,12 +7237,7 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     getLooseObjectFromProperty(indices_exists_template_request, 'path'),
     getLooseObjectFromProperty(indices_exists_template_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_exists_template_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_exists_template_response,
 };
 const INDICES_EXPLAIN_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.explain_data_lifecycle',
@@ -8165,12 +7259,7 @@ Get information about an index or data stream's current data stream lifecycle st
     getLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'path'),
     getLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_explain_data_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_explain_data_lifecycle_response,
 };
 const INDICES_FIELD_USAGE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.field_usage_stats',
@@ -8197,12 +7286,7 @@ A given request will increment each count by a maximum value of 1, even if the r
     getLooseObjectFromProperty(indices_field_usage_stats_request, 'path'),
     getLooseObjectFromProperty(indices_field_usage_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_field_usage_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_field_usage_stats_response,
 };
 const INDICES_FLUSH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.flush',
@@ -8242,15 +7326,12 @@ If you call the flush API after indexing some documents then a successful respon
     getLooseObjectFromProperty(indices_flush3_request, 'path'),
     getLooseObjectFromProperty(indices_flush3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_flush_response)),
-      ...getShape(getShape(indices_flush1_response)),
-      ...getShape(getShape(indices_flush2_response)),
-      ...getShape(getShape(indices_flush3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_flush_response,
+    indices_flush1_response,
+    indices_flush2_response,
+    indices_flush3_response,
+  ]),
 };
 const INDICES_FORCEMERGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.forcemerge',
@@ -8326,13 +7407,7 @@ POST /.ds-my-data-stream-2099.03.07-000001/_forcemerge?max_num_segments=1
     getLooseObjectFromProperty(indices_forcemerge1_request, 'path'),
     getLooseObjectFromProperty(indices_forcemerge1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_forcemerge_response)),
-      ...getShape(getShape(indices_forcemerge1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_forcemerge_response, indices_forcemerge1_response]),
 };
 const INDICES_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get',
@@ -8378,12 +7453,7 @@ stream’s backing indices.`,
     getLooseObjectFromProperty(indices_get_request, 'path'),
     getLooseObjectFromProperty(indices_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_get_response,
 };
 const INDICES_GET_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_alias',
@@ -8414,15 +7484,12 @@ Retrieves information for one or more data stream or index aliases.`,
     getLooseObjectFromProperty(indices_get_alias3_request, 'path'),
     getLooseObjectFromProperty(indices_get_alias3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_alias_response)),
-      ...getShape(getShape(indices_get_alias1_response)),
-      ...getShape(getShape(indices_get_alias2_response)),
-      ...getShape(getShape(indices_get_alias3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_get_alias_response,
+    indices_get_alias1_response,
+    indices_get_alias2_response,
+    indices_get_alias3_response,
+  ]),
 };
 const INDICES_GET_ALL_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_all_sample_configuration',
@@ -8439,10 +7506,7 @@ Get the sampling configurations for all indices.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_GET_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_lifecycle',
@@ -8475,12 +7539,7 @@ Get the data stream lifecycle configuration of one or more data streams.`,
     getLooseObjectFromProperty(indices_get_data_lifecycle_request, 'path'),
     getLooseObjectFromProperty(indices_get_data_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_data_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_get_data_lifecycle_response,
 };
 const INDICES_GET_DATA_LIFECYCLE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_lifecycle_stats',
@@ -8502,12 +7561,7 @@ Get statistics about the data streams that are managed by a data stream lifecycl
     getLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'path'),
     getLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_data_lifecycle_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_get_data_lifecycle_stats_response,
 };
 const INDICES_GET_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_stream',
@@ -8533,13 +7587,7 @@ Get information about one or more data streams.`,
     getLooseObjectFromProperty(indices_get_data_stream1_request, 'path'),
     getLooseObjectFromProperty(indices_get_data_stream1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_data_stream_response)),
-      ...getShape(getShape(indices_get_data_stream1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_get_data_stream_response, indices_get_data_stream1_response]),
 };
 const INDICES_GET_DATA_STREAM_MAPPINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_stream_mappings',
@@ -8562,12 +7610,7 @@ Get mapping information for one or more data streams.`,
     getLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'path'),
     getLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_data_stream_mappings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_get_data_stream_mappings_response,
 };
 const INDICES_GET_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_stream_options',
@@ -8599,12 +7642,7 @@ Get the data stream options configuration of one or more data streams.`,
     getLooseObjectFromProperty(indices_get_data_stream_options_request, 'path'),
     getLooseObjectFromProperty(indices_get_data_stream_options_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_data_stream_options_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_get_data_stream_options_response,
 };
 const INDICES_GET_DATA_STREAM_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_stream_settings',
@@ -8627,12 +7665,7 @@ Get setting information for one or more data streams.`,
     getLooseObjectFromProperty(indices_get_data_stream_settings_request, 'path'),
     getLooseObjectFromProperty(indices_get_data_stream_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_data_stream_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_get_data_stream_settings_response,
 };
 const INDICES_GET_FIELD_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_field_mapping',
@@ -8660,13 +7693,7 @@ This API is useful if you don't need a complete mapping or if an index mapping c
     getLooseObjectFromProperty(indices_get_field_mapping1_request, 'path'),
     getLooseObjectFromProperty(indices_get_field_mapping1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_field_mapping_response)),
-      ...getShape(getShape(indices_get_field_mapping1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_get_field_mapping_response, indices_get_field_mapping1_response]),
 };
 const INDICES_GET_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_index_template',
@@ -8691,13 +7718,10 @@ Get information about one or more index templates.`,
     getLooseObjectFromProperty(indices_get_index_template1_request, 'path'),
     getLooseObjectFromProperty(indices_get_index_template1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_index_template_response)),
-      ...getShape(getShape(indices_get_index_template1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_get_index_template_response,
+    indices_get_index_template1_response,
+  ]),
 };
 const INDICES_GET_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_mapping',
@@ -8722,13 +7746,7 @@ For data streams, the API retrieves mappings for the stream’s backing indices.
     getLooseObjectFromProperty(indices_get_mapping1_request, 'path'),
     getLooseObjectFromProperty(indices_get_mapping1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_mapping_response)),
-      ...getShape(getShape(indices_get_mapping1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_get_mapping_response, indices_get_mapping1_response]),
 };
 const INDICES_GET_MIGRATE_REINDEX_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_migrate_reindex_status',
@@ -8750,12 +7768,7 @@ Get the status of a migration reindex attempt for a data stream or index.`,
     getLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'path'),
     getLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_migrate_reindex_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_get_migrate_reindex_status_response,
 };
 const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_sample',
@@ -8771,10 +7784,7 @@ const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_GET_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_sample_configuration',
@@ -8791,10 +7801,7 @@ Get the sampling configuration for the specified index.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_GET_SAMPLE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_sample_stats',
@@ -8810,10 +7817,7 @@ const INDICES_GET_SAMPLE_STATS_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_settings',
@@ -8845,15 +7849,12 @@ For data streams, it returns setting information for the stream's backing indice
     getLooseObjectFromProperty(indices_get_settings3_request, 'path'),
     getLooseObjectFromProperty(indices_get_settings3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_settings_response)),
-      ...getShape(getShape(indices_get_settings1_response)),
-      ...getShape(getShape(indices_get_settings2_response)),
-      ...getShape(getShape(indices_get_settings3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_get_settings_response,
+    indices_get_settings1_response,
+    indices_get_settings2_response,
+    indices_get_settings3_response,
+  ]),
 };
 const INDICES_GET_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_template',
@@ -8880,13 +7881,7 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     getLooseObjectFromProperty(indices_get_template1_request, 'path'),
     getLooseObjectFromProperty(indices_get_template1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_get_template_response)),
-      ...getShape(getShape(indices_get_template1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_get_template_response, indices_get_template1_response]),
 };
 const INDICES_MIGRATE_REINDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.migrate_reindex',
@@ -8911,12 +7906,7 @@ The persistent task ID is returned immediately and the reindexing work is comple
     getLooseObjectFromProperty(indices_migrate_reindex_request, 'path'),
     getLooseObjectFromProperty(indices_migrate_reindex_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_migrate_reindex_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_migrate_reindex_response,
 };
 const INDICES_MIGRATE_TO_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.migrate_to_data_stream',
@@ -8947,12 +7937,7 @@ The write index for the alias becomes the write index for the stream.`,
     getLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'path'),
     getLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_migrate_to_data_stream_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_migrate_to_data_stream_response,
 };
 const INDICES_MODIFY_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.modify_data_stream',
@@ -8974,12 +7959,7 @@ Performs one or more data stream modification actions in a single atomic operati
     getLooseObjectFromProperty(indices_modify_data_stream_request, 'path'),
     getLooseObjectFromProperty(indices_modify_data_stream_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_modify_data_stream_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_modify_data_stream_response,
 };
 const INDICES_OPEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.open',
@@ -9029,12 +8009,7 @@ Because opening or closing an index allocates its shards, the \`wait_for_active_
     getLooseObjectFromProperty(indices_open_request, 'path'),
     getLooseObjectFromProperty(indices_open_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_open_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_open_response,
 };
 const INDICES_PROMOTE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.promote_data_stream',
@@ -9065,12 +8040,7 @@ This will affect the lifecycle management of the data stream and interfere with 
     getLooseObjectFromProperty(indices_promote_data_stream_request, 'path'),
     getLooseObjectFromProperty(indices_promote_data_stream_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_promote_data_stream_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_promote_data_stream_response,
 };
 const INDICES_PUT_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_alias',
@@ -9101,15 +8071,12 @@ Adds a data stream or index to an alias.`,
     getLooseObjectFromProperty(indices_put_alias3_request, 'path'),
     getLooseObjectFromProperty(indices_put_alias3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_put_alias_response)),
-      ...getShape(getShape(indices_put_alias1_response)),
-      ...getShape(getShape(indices_put_alias2_response)),
-      ...getShape(getShape(indices_put_alias3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_put_alias_response,
+    indices_put_alias1_response,
+    indices_put_alias2_response,
+    indices_put_alias3_response,
+  ]),
 };
 const INDICES_PUT_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_data_lifecycle',
@@ -9141,12 +8108,7 @@ Update the data stream lifecycle of the specified data streams.`,
     getLooseObjectFromProperty(indices_put_data_lifecycle_request, 'path'),
     getLooseObjectFromProperty(indices_put_data_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_put_data_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_put_data_lifecycle_response,
 };
 const INDICES_PUT_DATA_STREAM_MAPPINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_data_stream_mappings',
@@ -9171,12 +8133,7 @@ that are created during rollover after this API is called. No indices are change
     getLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'path'),
     getLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_put_data_stream_mappings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_put_data_stream_mappings_response,
 };
 const INDICES_PUT_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_data_stream_options',
@@ -9207,12 +8164,7 @@ Update the data stream options of the specified data streams.`,
     getLooseObjectFromProperty(indices_put_data_stream_options_request, 'path'),
     getLooseObjectFromProperty(indices_put_data_stream_options_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_put_data_stream_options_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_put_data_stream_options_response,
 };
 const INDICES_PUT_DATA_STREAM_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_data_stream_settings',
@@ -9238,12 +8190,7 @@ backing indices. Otherwise, it will be applied when the data stream is next roll
     getLooseObjectFromProperty(indices_put_data_stream_settings_request, 'path'),
     getLooseObjectFromProperty(indices_put_data_stream_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_put_data_stream_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_put_data_stream_settings_response,
 };
 const INDICES_PUT_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_index_template',
@@ -9294,13 +8241,10 @@ If an entry already exists with the same key, then it is overwritten by the new 
     getLooseObjectFromProperty(indices_put_index_template1_request, 'path'),
     getLooseObjectFromProperty(indices_put_index_template1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_put_index_template_response)),
-      ...getShape(getShape(indices_put_index_template1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_put_index_template_response,
+    indices_put_index_template1_response,
+  ]),
 };
 const INDICES_PUT_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_mapping',
@@ -9336,13 +8280,7 @@ Learn how to use the update mapping API with practical examples in the [Update m
     getLooseObjectFromProperty(indices_put_mapping1_request, 'path'),
     getLooseObjectFromProperty(indices_put_mapping1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_put_mapping_response)),
-      ...getShape(getShape(indices_put_mapping1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_put_mapping_response, indices_put_mapping1_response]),
 };
 const INDICES_PUT_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_sample_configuration',
@@ -9359,10 +8297,7 @@ Create or update the sampling configuration for the specified index.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_PUT_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_settings',
@@ -9440,13 +8375,7 @@ Refer to [updating analyzers on existing indices](https://www.elastic.co/docs/ma
     getLooseObjectFromProperty(indices_put_settings1_request, 'path'),
     getLooseObjectFromProperty(indices_put_settings1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_put_settings_response)),
-      ...getShape(getShape(indices_put_settings1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_put_settings_response, indices_put_settings1_response]),
 };
 const INDICES_PUT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_template',
@@ -9490,13 +8419,7 @@ NOTE: Multiple matching templates with the same order value will result in a non
     getLooseObjectFromProperty(indices_put_template1_request, 'path'),
     getLooseObjectFromProperty(indices_put_template1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_put_template_response)),
-      ...getShape(getShape(indices_put_template1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_put_template_response, indices_put_template1_response]),
 };
 const INDICES_RECOVERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.recovery',
@@ -9542,13 +8465,7 @@ This means that if a shard copy completes a recovery and then Elasticsearch relo
     getLooseObjectFromProperty(indices_recovery1_request, 'path'),
     getLooseObjectFromProperty(indices_recovery1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_recovery_response)),
-      ...getShape(getShape(indices_recovery1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_recovery_response, indices_recovery1_response]),
 };
 const INDICES_REFRESH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.refresh',
@@ -9593,15 +8510,12 @@ This option ensures the indexing operation waits for a periodic refresh before r
     getLooseObjectFromProperty(indices_refresh3_request, 'path'),
     getLooseObjectFromProperty(indices_refresh3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_refresh_response)),
-      ...getShape(getShape(indices_refresh1_response)),
-      ...getShape(getShape(indices_refresh2_response)),
-      ...getShape(getShape(indices_refresh3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_refresh_response,
+    indices_refresh1_response,
+    indices_refresh2_response,
+    indices_refresh3_response,
+  ]),
 };
 const INDICES_RELOAD_SEARCH_ANALYZERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.reload_search_analyzers',
@@ -9638,13 +8552,10 @@ This ensures the synonym file is updated everywhere in the cluster in case shard
     getLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'path'),
     getLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_reload_search_analyzers_response)),
-      ...getShape(getShape(indices_reload_search_analyzers1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_reload_search_analyzers_response,
+    indices_reload_search_analyzers1_response,
+  ]),
 };
 const INDICES_REMOVE_BLOCK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.remove_block',
@@ -9679,12 +8590,7 @@ Index blocks limit the operations allowed on an index by blocking specific opera
     getLooseObjectFromProperty(indices_remove_block_request, 'path'),
     getLooseObjectFromProperty(indices_remove_block_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_remove_block_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_remove_block_response,
 };
 const INDICES_RESOLVE_CLUSTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.resolve_cluster',
@@ -9753,13 +8659,7 @@ If a connection was (re-)established, this will also cause the \`remote/info\` e
     getLooseObjectFromProperty(indices_resolve_cluster1_request, 'path'),
     getLooseObjectFromProperty(indices_resolve_cluster1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_resolve_cluster_response)),
-      ...getShape(getShape(indices_resolve_cluster1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_resolve_cluster_response, indices_resolve_cluster1_response]),
 };
 const INDICES_RESOLVE_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.resolve_index',
@@ -9782,12 +8682,7 @@ Multiple patterns and remote clusters are supported.`,
     getLooseObjectFromProperty(indices_resolve_index_request, 'path'),
     getLooseObjectFromProperty(indices_resolve_index_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_resolve_index_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_resolve_index_response,
 };
 const INDICES_ROLLOVER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.rollover',
@@ -9848,13 +8743,7 @@ If you roll over the alias on May 7, 2099, the new index's name is \`my-index-20
     getLooseObjectFromProperty(indices_rollover1_request, 'path'),
     getLooseObjectFromProperty(indices_rollover1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_rollover_response)),
-      ...getShape(getShape(indices_rollover1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_rollover_response, indices_rollover1_response]),
 };
 const INDICES_SEGMENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.segments',
@@ -9880,13 +8769,7 @@ For data streams, the API returns information about the stream's backing indices
     getLooseObjectFromProperty(indices_segments1_request, 'path'),
     getLooseObjectFromProperty(indices_segments1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_segments_response)),
-      ...getShape(getShape(indices_segments1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_segments_response, indices_segments1_response]),
 };
 const INDICES_SHARD_STORES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.shard_stores',
@@ -9921,13 +8804,7 @@ By default, the API returns store information only for primary shards that are u
     getLooseObjectFromProperty(indices_shard_stores1_request, 'path'),
     getLooseObjectFromProperty(indices_shard_stores1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_shard_stores_response)),
-      ...getShape(getShape(indices_shard_stores1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_shard_stores_response, indices_shard_stores1_response]),
 };
 const INDICES_SHRINK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.shrink',
@@ -9982,13 +8859,7 @@ IMPORTANT: Indices can only be shrunk if they satisfy the following requirements
     getLooseObjectFromProperty(indices_shrink1_request, 'path'),
     getLooseObjectFromProperty(indices_shrink1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_shrink_response)),
-      ...getShape(getShape(indices_shrink1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_shrink_response, indices_shrink1_response]),
 };
 const INDICES_SIMULATE_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.simulate_index_template',
@@ -10010,12 +8881,7 @@ Get the index configuration that would be applied to the specified index from an
     getLooseObjectFromProperty(indices_simulate_index_template_request, 'path'),
     getLooseObjectFromProperty(indices_simulate_index_template_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_simulate_index_template_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_simulate_index_template_response,
 };
 const INDICES_SIMULATE_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.simulate_template',
@@ -10040,13 +8906,7 @@ Get the index configuration that would be applied by a particular index template
     getLooseObjectFromProperty(indices_simulate_template1_request, 'path'),
     getLooseObjectFromProperty(indices_simulate_template1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_simulate_template_response)),
-      ...getShape(getShape(indices_simulate_template1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_simulate_template_response, indices_simulate_template1_response]),
 };
 const INDICES_SPLIT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.split',
@@ -10102,13 +8962,7 @@ IMPORTANT: Indices can only be split if they satisfy the following requirements:
     getLooseObjectFromProperty(indices_split1_request, 'path'),
     getLooseObjectFromProperty(indices_split1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_split_response)),
-      ...getShape(getShape(indices_split1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([indices_split_response, indices_split1_response]),
 };
 const INDICES_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.stats',
@@ -10148,15 +9002,12 @@ Although the shard is no longer part of the node, that node retains any node-lev
     getLooseObjectFromProperty(indices_stats3_request, 'path'),
     getLooseObjectFromProperty(indices_stats3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_stats_response)),
-      ...getShape(getShape(indices_stats1_response)),
-      ...getShape(getShape(indices_stats2_response)),
-      ...getShape(getShape(indices_stats3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_stats_response,
+    indices_stats1_response,
+    indices_stats2_response,
+    indices_stats3_response,
+  ]),
 };
 const INDICES_UPDATE_ALIASES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.update_aliases',
@@ -10178,12 +9029,7 @@ Adds a data stream or index to an alias.`,
     getLooseObjectFromProperty(indices_update_aliases_request, 'path'),
     getLooseObjectFromProperty(indices_update_aliases_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_update_aliases_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: indices_update_aliases_response,
 };
 const INDICES_VALIDATE_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.validate_query',
@@ -10214,15 +9060,12 @@ Validates a query without running it.`,
     getLooseObjectFromProperty(indices_validate_query3_request, 'path'),
     getLooseObjectFromProperty(indices_validate_query3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(indices_validate_query_response)),
-      ...getShape(getShape(indices_validate_query1_response)),
-      ...getShape(getShape(indices_validate_query2_response)),
-      ...getShape(getShape(indices_validate_query3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    indices_validate_query_response,
+    indices_validate_query1_response,
+    indices_validate_query2_response,
+    indices_validate_query3_response,
+  ]),
 };
 const INFERENCE_CHAT_COMPLETION_UNIFIED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.chat_completion_unified',
@@ -10252,12 +9095,7 @@ If you use the \`openai\`, \`hugging_face\` or the \`elastic\` service, use the 
     getLooseObjectFromProperty(inference_chat_completion_unified_request, 'path'),
     getLooseObjectFromProperty(inference_chat_completion_unified_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_chat_completion_unified_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_chat_completion_unified_response,
 };
 const INFERENCE_COMPLETION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.completion',
@@ -10285,12 +9123,7 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
     getLooseObjectFromProperty(inference_completion_request, 'path'),
     getLooseObjectFromProperty(inference_completion_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_completion_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_completion_response,
 };
 const INFERENCE_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.delete',
@@ -10316,13 +9149,7 @@ This API requires the manage_inference cluster privilege (the built-in \`inferen
     getLooseObjectFromProperty(inference_delete1_request, 'path'),
     getLooseObjectFromProperty(inference_delete1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_delete_response)),
-      ...getShape(getShape(inference_delete1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([inference_delete_response, inference_delete1_response]),
 };
 const INFERENCE_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.get',
@@ -10351,14 +9178,7 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
     getLooseObjectFromProperty(inference_get2_request, 'path'),
     getLooseObjectFromProperty(inference_get2_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_get_response)),
-      ...getShape(getShape(inference_get1_response)),
-      ...getShape(getShape(inference_get2_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([inference_get_response, inference_get1_response, inference_get2_response]),
 };
 const INFERENCE_INFERENCE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.inference',
@@ -10391,13 +9211,7 @@ For details about using this API with a service, such as Amazon Bedrock, Anthrop
     getLooseObjectFromProperty(inference_inference1_request, 'path'),
     getLooseObjectFromProperty(inference_inference1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_inference_response)),
-      ...getShape(getShape(inference_inference1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([inference_inference_response, inference_inference1_response]),
 };
 const INFERENCE_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put',
@@ -10447,13 +9261,7 @@ The following integrations are available through the inference API. You can find
     getLooseObjectFromProperty(inference_put1_request, 'path'),
     getLooseObjectFromProperty(inference_put1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_response)),
-      ...getShape(getShape(inference_put1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([inference_put_response, inference_put1_response]),
 };
 const INFERENCE_PUT_AI21_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_ai21',
@@ -10476,12 +9284,7 @@ Create an inference endpoint to perform an inference task with the \`ai21\` serv
     getLooseObjectFromProperty(inference_put_ai21_request, 'path'),
     getLooseObjectFromProperty(inference_put_ai21_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_ai21_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_ai21_response,
 };
 const INFERENCE_PUT_ALIBABACLOUD_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_alibabacloud',
@@ -10504,12 +9307,7 @@ Create an inference endpoint to perform an inference task with the \`alibabaclou
     getLooseObjectFromProperty(inference_put_alibabacloud_request, 'path'),
     getLooseObjectFromProperty(inference_put_alibabacloud_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_alibabacloud_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_alibabacloud_response,
 };
 const INFERENCE_PUT_AMAZONBEDROCK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_amazonbedrock',
@@ -10535,12 +9333,7 @@ Create an inference endpoint to perform an inference task with the \`amazonbedro
     getLooseObjectFromProperty(inference_put_amazonbedrock_request, 'path'),
     getLooseObjectFromProperty(inference_put_amazonbedrock_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_amazonbedrock_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_amazonbedrock_response,
 };
 const INFERENCE_PUT_AMAZONSAGEMAKER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_amazonsagemaker',
@@ -10563,12 +9356,7 @@ Create an inference endpoint to perform an inference task with the \`amazon_sage
     getLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'path'),
     getLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_amazonsagemaker_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_amazonsagemaker_response,
 };
 const INFERENCE_PUT_ANTHROPIC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_anthropic',
@@ -10591,12 +9379,7 @@ Create an inference endpoint to perform an inference task with the \`anthropic\`
     getLooseObjectFromProperty(inference_put_anthropic_request, 'path'),
     getLooseObjectFromProperty(inference_put_anthropic_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_anthropic_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_anthropic_response,
 };
 const INFERENCE_PUT_AZUREAISTUDIO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_azureaistudio',
@@ -10619,12 +9402,7 @@ Create an inference endpoint to perform an inference task with the \`azureaistud
     getLooseObjectFromProperty(inference_put_azureaistudio_request, 'path'),
     getLooseObjectFromProperty(inference_put_azureaistudio_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_azureaistudio_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_azureaistudio_response,
 };
 const INFERENCE_PUT_AZUREOPENAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_azureopenai',
@@ -10654,12 +9432,7 @@ The list of embeddings models that you can choose from in your deployment can be
     getLooseObjectFromProperty(inference_put_azureopenai_request, 'path'),
     getLooseObjectFromProperty(inference_put_azureopenai_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_azureopenai_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_azureopenai_response,
 };
 const INFERENCE_PUT_COHERE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_cohere',
@@ -10682,12 +9455,7 @@ Create an inference endpoint to perform an inference task with the \`cohere\` se
     getLooseObjectFromProperty(inference_put_cohere_request, 'path'),
     getLooseObjectFromProperty(inference_put_cohere_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_cohere_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_cohere_response,
 };
 const INFERENCE_PUT_CONTEXTUALAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_contextualai',
@@ -10712,12 +9480,7 @@ To review the available \`rerank\` models, refer to <https://docs.contextual.ai/
     getLooseObjectFromProperty(inference_put_contextualai_request, 'path'),
     getLooseObjectFromProperty(inference_put_contextualai_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_contextualai_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_contextualai_response,
 };
 const INFERENCE_PUT_CUSTOM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_custom',
@@ -10779,12 +9542,7 @@ Pre-defined templates:
     getLooseObjectFromProperty(inference_put_custom_request, 'path'),
     getLooseObjectFromProperty(inference_put_custom_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_custom_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_custom_response,
 };
 const INFERENCE_PUT_DEEPSEEK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_deepseek',
@@ -10807,12 +9565,7 @@ Create an inference endpoint to perform an inference task with the \`deepseek\` 
     getLooseObjectFromProperty(inference_put_deepseek_request, 'path'),
     getLooseObjectFromProperty(inference_put_deepseek_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_deepseek_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_deepseek_response,
 };
 const INFERENCE_PUT_ELASTICSEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_elasticsearch',
@@ -10848,12 +9601,7 @@ Avoid creating multiple endpoints for the same model unless required, as each en
     getLooseObjectFromProperty(inference_put_elasticsearch_request, 'path'),
     getLooseObjectFromProperty(inference_put_elasticsearch_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_elasticsearch_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_elasticsearch_response,
 };
 const INFERENCE_PUT_ELSER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_elser',
@@ -10890,12 +9638,7 @@ Avoid creating multiple endpoints for the same model unless required, as each en
     getLooseObjectFromProperty(inference_put_elser_request, 'path'),
     getLooseObjectFromProperty(inference_put_elser_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_elser_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_elser_response,
 };
 const INFERENCE_PUT_GOOGLEAISTUDIO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_googleaistudio',
@@ -10918,12 +9661,7 @@ Create an inference endpoint to perform an inference task with the \`googleaistu
     getLooseObjectFromProperty(inference_put_googleaistudio_request, 'path'),
     getLooseObjectFromProperty(inference_put_googleaistudio_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_googleaistudio_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_googleaistudio_response,
 };
 const INFERENCE_PUT_GOOGLEVERTEXAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_googlevertexai',
@@ -10946,12 +9684,7 @@ Create an inference endpoint to perform an inference task with the \`googleverte
     getLooseObjectFromProperty(inference_put_googlevertexai_request, 'path'),
     getLooseObjectFromProperty(inference_put_googlevertexai_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_googlevertexai_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_googlevertexai_response,
 };
 const INFERENCE_PUT_HUGGING_FACE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_hugging_face',
@@ -11009,12 +9742,7 @@ Tested models for \`rerank\` task:
     getLooseObjectFromProperty(inference_put_hugging_face_request, 'path'),
     getLooseObjectFromProperty(inference_put_hugging_face_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_hugging_face_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_hugging_face_response,
 };
 const INFERENCE_PUT_JINAAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_jinaai',
@@ -11040,12 +9768,7 @@ To review the available \`text_embedding\` models, refer to the <https://jina.ai
     getLooseObjectFromProperty(inference_put_jinaai_request, 'path'),
     getLooseObjectFromProperty(inference_put_jinaai_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_jinaai_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_jinaai_response,
 };
 const INFERENCE_PUT_LLAMA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_llama',
@@ -11068,12 +9791,7 @@ Create an inference endpoint to perform an inference task with the \`llama\` ser
     getLooseObjectFromProperty(inference_put_llama_request, 'path'),
     getLooseObjectFromProperty(inference_put_llama_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_llama_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_llama_response,
 };
 const INFERENCE_PUT_MISTRAL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_mistral',
@@ -11096,12 +9814,7 @@ Create an inference endpoint to perform an inference task with the \`mistral\` s
     getLooseObjectFromProperty(inference_put_mistral_request, 'path'),
     getLooseObjectFromProperty(inference_put_mistral_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_mistral_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_mistral_response,
 };
 const INFERENCE_PUT_OPENAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_openai',
@@ -11124,12 +9837,7 @@ Create an inference endpoint to perform an inference task with the \`openai\` se
     getLooseObjectFromProperty(inference_put_openai_request, 'path'),
     getLooseObjectFromProperty(inference_put_openai_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_openai_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_openai_response,
 };
 const INFERENCE_PUT_VOYAGEAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_voyageai',
@@ -11154,12 +9862,7 @@ Avoid creating multiple endpoints for the same model unless required, as each en
     getLooseObjectFromProperty(inference_put_voyageai_request, 'path'),
     getLooseObjectFromProperty(inference_put_voyageai_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_voyageai_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_voyageai_response,
 };
 const INFERENCE_PUT_WATSONX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_watsonx',
@@ -11184,12 +9887,7 @@ You can provision one through the IBM catalog, the Cloud Databases CLI plug-in, 
     getLooseObjectFromProperty(inference_put_watsonx_request, 'path'),
     getLooseObjectFromProperty(inference_put_watsonx_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_put_watsonx_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_put_watsonx_response,
 };
 const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.rerank',
@@ -11210,12 +9908,7 @@ const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(inference_rerank_request, 'path'),
     getLooseObjectFromProperty(inference_rerank_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_rerank_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_rerank_response,
 };
 const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.sparse_embedding',
@@ -11236,12 +9929,7 @@ const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(inference_sparse_embedding_request, 'path'),
     getLooseObjectFromProperty(inference_sparse_embedding_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_sparse_embedding_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_sparse_embedding_response,
 };
 const INFERENCE_STREAM_COMPLETION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.stream_completion',
@@ -11269,12 +9957,7 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
     getLooseObjectFromProperty(inference_stream_completion_request, 'path'),
     getLooseObjectFromProperty(inference_stream_completion_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_stream_completion_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_stream_completion_response,
 };
 const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.text_embedding',
@@ -11295,12 +9978,7 @@ const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(inference_text_embedding_request, 'path'),
     getLooseObjectFromProperty(inference_text_embedding_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_text_embedding_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: inference_text_embedding_response,
 };
 const INFERENCE_UPDATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.update',
@@ -11333,13 +10011,7 @@ However, if you do not plan to use the inference APIs to use these models or if 
     getLooseObjectFromProperty(inference_update1_request, 'path'),
     getLooseObjectFromProperty(inference_update1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(inference_update_response)),
-      ...getShape(getShape(inference_update1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([inference_update_response, inference_update1_response]),
 };
 const INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.info',
@@ -11361,12 +10033,7 @@ Get basic build, version, and cluster information.
     getLooseObjectFromProperty(info_request, 'path'),
     getLooseObjectFromProperty(info_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(info_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: info_response,
 };
 const INGEST_DELETE_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.delete_geoip_database',
@@ -11389,12 +10056,7 @@ Delete one or more IP geolocation database configurations.`,
     getLooseObjectFromProperty(ingest_delete_geoip_database_request, 'path'),
     getLooseObjectFromProperty(ingest_delete_geoip_database_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_delete_geoip_database_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ingest_delete_geoip_database_response,
 };
 const INGEST_DELETE_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.delete_ip_location_database',
@@ -11415,12 +10077,7 @@ const INGEST_DELETE_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'path'),
     getLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_delete_ip_location_database_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ingest_delete_ip_location_database_response,
 };
 const INGEST_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.delete_pipeline',
@@ -11442,12 +10099,7 @@ Delete one or more ingest pipelines.`,
     getLooseObjectFromProperty(ingest_delete_pipeline_request, 'path'),
     getLooseObjectFromProperty(ingest_delete_pipeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_delete_pipeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ingest_delete_pipeline_response,
 };
 const INGEST_GEO_IP_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.geo_ip_stats',
@@ -11468,12 +10120,7 @@ Get download statistics for GeoIP2 databases that are used with the GeoIP proces
     getLooseObjectFromProperty(ingest_geo_ip_stats_request, 'path'),
     getLooseObjectFromProperty(ingest_geo_ip_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_geo_ip_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ingest_geo_ip_stats_response,
 };
 const INGEST_GET_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.get_geoip_database',
@@ -11499,13 +10146,7 @@ Get information about one or more IP geolocation database configurations.`,
     getLooseObjectFromProperty(ingest_get_geoip_database1_request, 'path'),
     getLooseObjectFromProperty(ingest_get_geoip_database1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_get_geoip_database_response)),
-      ...getShape(getShape(ingest_get_geoip_database1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ingest_get_geoip_database_response, ingest_get_geoip_database1_response]),
 };
 const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.get_ip_location_database',
@@ -11529,13 +10170,10 @@ const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'path'),
     getLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_get_ip_location_database_response)),
-      ...getShape(getShape(ingest_get_ip_location_database1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ingest_get_ip_location_database_response,
+    ingest_get_ip_location_database1_response,
+  ]),
 };
 const INGEST_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.get_pipeline',
@@ -11562,13 +10200,7 @@ This API returns a local reference of the pipeline.`,
     getLooseObjectFromProperty(ingest_get_pipeline1_request, 'path'),
     getLooseObjectFromProperty(ingest_get_pipeline1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_get_pipeline_response)),
-      ...getShape(getShape(ingest_get_pipeline1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ingest_get_pipeline_response, ingest_get_pipeline1_response]),
 };
 const INGEST_PROCESSOR_GROK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.processor_grok',
@@ -11591,12 +10223,7 @@ A grok pattern is like a regular expression that supports aliased expressions th
     getLooseObjectFromProperty(ingest_processor_grok_request, 'path'),
     getLooseObjectFromProperty(ingest_processor_grok_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_processor_grok_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ingest_processor_grok_response,
 };
 const INGEST_PUT_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.put_geoip_database',
@@ -11619,12 +10246,7 @@ Refer to the create or update IP geolocation database configuration API.`,
     getLooseObjectFromProperty(ingest_put_geoip_database_request, 'path'),
     getLooseObjectFromProperty(ingest_put_geoip_database_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_put_geoip_database_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ingest_put_geoip_database_response,
 };
 const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.put_ip_location_database',
@@ -11645,12 +10267,7 @@ const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ingest_put_ip_location_database_request, 'path'),
     getLooseObjectFromProperty(ingest_put_ip_location_database_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_put_ip_location_database_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ingest_put_ip_location_database_response,
 };
 const INGEST_PUT_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.put_pipeline',
@@ -11671,12 +10288,7 @@ Changes made using this API take effect immediately.`,
     getLooseObjectFromProperty(ingest_put_pipeline_request, 'path'),
     getLooseObjectFromProperty(ingest_put_pipeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_put_pipeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ingest_put_pipeline_response,
 };
 const INGEST_SIMULATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.simulate',
@@ -11709,15 +10321,12 @@ You can either specify an existing pipeline to use with the provided documents o
     getLooseObjectFromProperty(ingest_simulate3_request, 'path'),
     getLooseObjectFromProperty(ingest_simulate3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ingest_simulate_response)),
-      ...getShape(getShape(ingest_simulate1_response)),
-      ...getShape(getShape(ingest_simulate2_response)),
-      ...getShape(getShape(ingest_simulate3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ingest_simulate_response,
+    ingest_simulate1_response,
+    ingest_simulate2_response,
+    ingest_simulate3_response,
+  ]),
 };
 const KNN_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.knn_search',
@@ -11733,10 +10342,7 @@ const KNN_SEARCH_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const LICENSE_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.delete',
@@ -11761,12 +10367,7 @@ If the operator privileges feature is enabled, only operator users can use this 
     getLooseObjectFromProperty(license_delete_request, 'path'),
     getLooseObjectFromProperty(license_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(license_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: license_delete_response,
 };
 const LICENSE_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.get',
@@ -11793,12 +10394,7 @@ Get information about your Elastic license including its type, its status, when 
     getLooseObjectFromProperty(license_get_request, 'path'),
     getLooseObjectFromProperty(license_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(license_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: license_get_response,
 };
 const LICENSE_GET_BASIC_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.get_basic_status',
@@ -11819,12 +10415,7 @@ const LICENSE_GET_BASIC_STATUS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(license_get_basic_status_request, 'path'),
     getLooseObjectFromProperty(license_get_basic_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(license_get_basic_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: license_get_basic_status_response,
 };
 const LICENSE_GET_TRIAL_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.get_trial_status',
@@ -11845,12 +10436,7 @@ const LICENSE_GET_TRIAL_STATUS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(license_get_trial_status_request, 'path'),
     getLooseObjectFromProperty(license_get_trial_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(license_get_trial_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: license_get_trial_status_response,
 };
 const LICENSE_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.post',
@@ -11882,13 +10468,7 @@ If the operator privileges feature is enabled, only operator users can use this 
     getLooseObjectFromProperty(license_post1_request, 'path'),
     getLooseObjectFromProperty(license_post1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(license_post_response)),
-      ...getShape(getShape(license_post1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([license_post_response, license_post1_response]),
 };
 const LICENSE_POST_START_BASIC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.post_start_basic',
@@ -11918,12 +10498,7 @@ To check the status of your basic license, use the get basic license API.`,
     getLooseObjectFromProperty(license_post_start_basic_request, 'path'),
     getLooseObjectFromProperty(license_post_start_basic_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(license_post_start_basic_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: license_post_start_basic_response,
 };
 const LICENSE_POST_START_TRIAL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.post_start_trial',
@@ -11950,12 +10525,7 @@ To check the status of your trial, use the get trial status API.`,
     getLooseObjectFromProperty(license_post_start_trial_request, 'path'),
     getLooseObjectFromProperty(license_post_start_trial_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(license_post_start_trial_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: license_post_start_trial_response,
 };
 const LOGSTASH_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.logstash.delete_pipeline',
@@ -11978,12 +10548,7 @@ If the request succeeds, you receive an empty response with an appropriate statu
     getLooseObjectFromProperty(logstash_delete_pipeline_request, 'path'),
     getLooseObjectFromProperty(logstash_delete_pipeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(logstash_delete_pipeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: logstash_delete_pipeline_response,
 };
 const LOGSTASH_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.logstash.get_pipeline',
@@ -12008,13 +10573,7 @@ Get pipelines that are used for Logstash Central Management.`,
     getLooseObjectFromProperty(logstash_get_pipeline1_request, 'path'),
     getLooseObjectFromProperty(logstash_get_pipeline1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(logstash_get_pipeline_response)),
-      ...getShape(getShape(logstash_get_pipeline1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([logstash_get_pipeline_response, logstash_get_pipeline1_response]),
 };
 const LOGSTASH_PUT_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.logstash.put_pipeline',
@@ -12038,12 +10597,7 @@ If the specified pipeline exists, it is replaced.`,
     getLooseObjectFromProperty(logstash_put_pipeline_request, 'path'),
     getLooseObjectFromProperty(logstash_put_pipeline_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(logstash_put_pipeline_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: logstash_put_pipeline_response,
 };
 const MGET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.mget',
@@ -12088,15 +10642,7 @@ You can include the \`stored_fields\` query parameter in the request URI to spec
     getLooseObjectFromProperty(mget3_request, 'path'),
     getLooseObjectFromProperty(mget3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(mget_response)),
-      ...getShape(getShape(mget1_response)),
-      ...getShape(getShape(mget2_response)),
-      ...getShape(getShape(mget3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([mget_response, mget1_response, mget2_response, mget3_response]),
 };
 const MIGRATION_DEPRECATIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.migration.deprecations',
@@ -12124,13 +10670,7 @@ You are strongly recommended to use the Upgrade Assistant.`,
     getLooseObjectFromProperty(migration_deprecations1_request, 'path'),
     getLooseObjectFromProperty(migration_deprecations1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(migration_deprecations_response)),
-      ...getShape(getShape(migration_deprecations1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([migration_deprecations_response, migration_deprecations1_response]),
 };
 const MIGRATION_GET_FEATURE_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.migration.get_feature_upgrade_status',
@@ -12156,12 +10696,7 @@ You are strongly recommended to use the Upgrade Assistant.`,
     getLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'path'),
     getLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(migration_get_feature_upgrade_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: migration_get_feature_upgrade_status_response,
 };
 const MIGRATION_POST_FEATURE_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.migration.post_feature_upgrade',
@@ -12188,12 +10723,7 @@ TIP: The API is designed for indirect use by the Upgrade Assistant. We strongly 
     getLooseObjectFromProperty(migration_post_feature_upgrade_request, 'path'),
     getLooseObjectFromProperty(migration_post_feature_upgrade_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(migration_post_feature_upgrade_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: migration_post_feature_upgrade_response,
 };
 const ML_CLEAR_TRAINED_MODEL_DEPLOYMENT_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.clear_trained_model_deployment_cache',
@@ -12219,12 +10749,7 @@ Calling this API clears the caches without restarting the deployment.`,
     getLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'path'),
     getLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_clear_trained_model_deployment_cache_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_clear_trained_model_deployment_cache_response,
 };
 const ML_CLOSE_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.close_job',
@@ -12250,12 +10775,7 @@ When a datafeed that has a specified end date stops, it automatically closes its
     getLooseObjectFromProperty(ml_close_job_request, 'path'),
     getLooseObjectFromProperty(ml_close_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_close_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_close_job_response,
 };
 const ML_DELETE_CALENDAR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_calendar',
@@ -12278,12 +10798,7 @@ Remove all scheduled events from a calendar, then delete it.`,
     getLooseObjectFromProperty(ml_delete_calendar_request, 'path'),
     getLooseObjectFromProperty(ml_delete_calendar_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_calendar_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_calendar_response,
 };
 const ML_DELETE_CALENDAR_EVENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_calendar_event',
@@ -12304,12 +10819,7 @@ const ML_DELETE_CALENDAR_EVENT_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_delete_calendar_event_request, 'path'),
     getLooseObjectFromProperty(ml_delete_calendar_event_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_calendar_event_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_calendar_event_response,
 };
 const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_calendar_job',
@@ -12330,12 +10840,7 @@ const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_delete_calendar_job_request, 'path'),
     getLooseObjectFromProperty(ml_delete_calendar_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_calendar_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_calendar_job_response,
 };
 const ML_DELETE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_data_frame_analytics',
@@ -12356,12 +10861,7 @@ const ML_DELETE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'path'),
     getLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_data_frame_analytics_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_data_frame_analytics_response,
 };
 const ML_DELETE_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_datafeed',
@@ -12388,12 +10888,7 @@ const ML_DELETE_DATAFEED_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_delete_datafeed_request, 'path'),
     getLooseObjectFromProperty(ml_delete_datafeed_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_datafeed_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_datafeed_response,
 };
 const ML_DELETE_EXPIRED_DATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_expired_data',
@@ -12426,13 +10921,7 @@ jobs by using \`_all\`, by specifying \`*\` as the \`<job_id>\`, or by omitting 
     getLooseObjectFromProperty(ml_delete_expired_data1_request, 'path'),
     getLooseObjectFromProperty(ml_delete_expired_data1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_expired_data_response)),
-      ...getShape(getShape(ml_delete_expired_data1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_delete_expired_data_response, ml_delete_expired_data1_response]),
 };
 const ML_DELETE_FILTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_filter',
@@ -12456,12 +10945,7 @@ filter. You must update or delete the job before you can delete the filter.`,
     getLooseObjectFromProperty(ml_delete_filter_request, 'path'),
     getLooseObjectFromProperty(ml_delete_filter_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_filter_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_filter_response,
 };
 const ML_DELETE_FORECAST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_forecast',
@@ -12493,13 +10977,7 @@ forecasts before they expire.`,
     getLooseObjectFromProperty(ml_delete_forecast1_request, 'path'),
     getLooseObjectFromProperty(ml_delete_forecast1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_forecast_response)),
-      ...getShape(getShape(ml_delete_forecast1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_delete_forecast_response, ml_delete_forecast1_response]),
 };
 const ML_DELETE_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_job',
@@ -12535,12 +11013,7 @@ delete job request.`,
     getLooseObjectFromProperty(ml_delete_job_request, 'path'),
     getLooseObjectFromProperty(ml_delete_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_job_response,
 };
 const ML_DELETE_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_model_snapshot',
@@ -12565,12 +11038,7 @@ the \`model_snapshot_id\` in the results from the get jobs API.`,
     getLooseObjectFromProperty(ml_delete_model_snapshot_request, 'path'),
     getLooseObjectFromProperty(ml_delete_model_snapshot_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_model_snapshot_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_model_snapshot_response,
 };
 const ML_DELETE_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_trained_model',
@@ -12593,12 +11061,7 @@ The request deletes a trained inference model that is not referenced by an inges
     getLooseObjectFromProperty(ml_delete_trained_model_request, 'path'),
     getLooseObjectFromProperty(ml_delete_trained_model_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_trained_model_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_trained_model_response,
 };
 const ML_DELETE_TRAINED_MODEL_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_trained_model_alias',
@@ -12623,12 +11086,7 @@ by the \`model_id\`, this API returns an error.`,
     getLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'path'),
     getLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_delete_trained_model_alias_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_delete_trained_model_alias_response,
 };
 const ML_ESTIMATE_MODEL_MEMORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.estimate_model_memory',
@@ -12653,12 +11111,7 @@ estimates for the fields it references.`,
     getLooseObjectFromProperty(ml_estimate_model_memory_request, 'path'),
     getLooseObjectFromProperty(ml_estimate_model_memory_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_estimate_model_memory_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_estimate_model_memory_response,
 };
 const ML_EVALUATE_DATA_FRAME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.evaluate_data_frame',
@@ -12684,12 +11137,7 @@ field and an analytics result field to be present.`,
     getLooseObjectFromProperty(ml_evaluate_data_frame_request, 'path'),
     getLooseObjectFromProperty(ml_evaluate_data_frame_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_evaluate_data_frame_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_evaluate_data_frame_response,
 };
 const ML_EXPLAIN_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.explain_data_frame_analytics',
@@ -12726,15 +11174,12 @@ If you have object fields or fields that are excluded via source filtering, they
     getLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'path'),
     getLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_explain_data_frame_analytics_response)),
-      ...getShape(getShape(ml_explain_data_frame_analytics1_response)),
-      ...getShape(getShape(ml_explain_data_frame_analytics2_response)),
-      ...getShape(getShape(ml_explain_data_frame_analytics3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_explain_data_frame_analytics_response,
+    ml_explain_data_frame_analytics1_response,
+    ml_explain_data_frame_analytics2_response,
+    ml_explain_data_frame_analytics3_response,
+  ]),
 };
 const ML_FLUSH_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.flush_job',
@@ -12763,12 +11208,7 @@ analyzing further data.`,
     getLooseObjectFromProperty(ml_flush_job_request, 'path'),
     getLooseObjectFromProperty(ml_flush_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_flush_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_flush_job_response,
 };
 const ML_FORECAST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.forecast',
@@ -12794,12 +11234,7 @@ based on historical data.`,
     getLooseObjectFromProperty(ml_forecast_request, 'path'),
     getLooseObjectFromProperty(ml_forecast_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_forecast_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_forecast_response,
 };
 const ML_GET_BUCKETS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_buckets',
@@ -12833,15 +11268,12 @@ The API presents a chronological view of the records, grouped by bucket.`,
     getLooseObjectFromProperty(ml_get_buckets3_request, 'path'),
     getLooseObjectFromProperty(ml_get_buckets3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_buckets_response)),
-      ...getShape(getShape(ml_get_buckets1_response)),
-      ...getShape(getShape(ml_get_buckets2_response)),
-      ...getShape(getShape(ml_get_buckets3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_get_buckets_response,
+    ml_get_buckets1_response,
+    ml_get_buckets2_response,
+    ml_get_buckets3_response,
+  ]),
 };
 const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_calendar_events',
@@ -12862,12 +11294,7 @@ const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_get_calendar_events_request, 'path'),
     getLooseObjectFromProperty(ml_get_calendar_events_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_calendar_events_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_get_calendar_events_response,
 };
 const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_calendars',
@@ -12897,15 +11324,12 @@ const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_get_calendars3_request, 'path'),
     getLooseObjectFromProperty(ml_get_calendars3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_calendars_response)),
-      ...getShape(getShape(ml_get_calendars1_response)),
-      ...getShape(getShape(ml_get_calendars2_response)),
-      ...getShape(getShape(ml_get_calendars3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_get_calendars_response,
+    ml_get_calendars1_response,
+    ml_get_calendars2_response,
+    ml_get_calendars3_response,
+  ]),
 };
 const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_categories',
@@ -12938,15 +11362,12 @@ const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_get_categories3_request, 'path'),
     getLooseObjectFromProperty(ml_get_categories3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_categories_response)),
-      ...getShape(getShape(ml_get_categories1_response)),
-      ...getShape(getShape(ml_get_categories2_response)),
-      ...getShape(getShape(ml_get_categories3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_get_categories_response,
+    ml_get_categories1_response,
+    ml_get_categories2_response,
+    ml_get_categories3_response,
+  ]),
 };
 const ML_GET_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_data_frame_analytics',
@@ -12973,13 +11394,10 @@ wildcard expression.`,
     getLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'path'),
     getLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_data_frame_analytics_response)),
-      ...getShape(getShape(ml_get_data_frame_analytics1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_get_data_frame_analytics_response,
+    ml_get_data_frame_analytics1_response,
+  ]),
 };
 const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_data_frame_analytics_stats',
@@ -13003,13 +11421,10 @@ const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'path'),
     getLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_data_frame_analytics_stats_response)),
-      ...getShape(getShape(ml_get_data_frame_analytics_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_get_data_frame_analytics_stats_response,
+    ml_get_data_frame_analytics_stats1_response,
+  ]),
 };
 const ML_GET_DATAFEED_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_datafeed_stats',
@@ -13039,13 +11454,7 @@ This API returns a maximum of 10,000 datafeeds.`,
     getLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'path'),
     getLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_datafeed_stats_response)),
-      ...getShape(getShape(ml_get_datafeed_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_datafeed_stats_response, ml_get_datafeed_stats1_response]),
 };
 const ML_GET_DATAFEEDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_datafeeds',
@@ -13080,13 +11489,7 @@ This API returns a maximum of 10,000 datafeeds.`,
     getLooseObjectFromProperty(ml_get_datafeeds1_request, 'path'),
     getLooseObjectFromProperty(ml_get_datafeeds1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_datafeeds_response)),
-      ...getShape(getShape(ml_get_datafeeds1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_datafeeds_response, ml_get_datafeeds1_response]),
 };
 const ML_GET_FILTERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_filters',
@@ -13111,13 +11514,7 @@ You can get a single filter or all filters.`,
     getLooseObjectFromProperty(ml_get_filters1_request, 'path'),
     getLooseObjectFromProperty(ml_get_filters1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_filters_response)),
-      ...getShape(getShape(ml_get_filters1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_filters_response, ml_get_filters1_response]),
 };
 const ML_GET_INFLUENCERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_influencers',
@@ -13144,13 +11541,7 @@ the anomalies. Influencer results are available only if an
     getLooseObjectFromProperty(ml_get_influencers1_request, 'path'),
     getLooseObjectFromProperty(ml_get_influencers1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_influencers_response)),
-      ...getShape(getShape(ml_get_influencers1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_influencers_response, ml_get_influencers1_response]),
 };
 const ML_GET_JOB_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_job_stats',
@@ -13174,13 +11565,7 @@ const ML_GET_JOB_STATS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_get_job_stats1_request, 'path'),
     getLooseObjectFromProperty(ml_get_job_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_job_stats_response)),
-      ...getShape(getShape(ml_get_job_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_job_stats_response, ml_get_job_stats1_response]),
 };
 const ML_GET_JOBS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_jobs',
@@ -13216,13 +11601,7 @@ expression. You can get information for all anomaly detection jobs by using
     getLooseObjectFromProperty(ml_get_jobs1_request, 'path'),
     getLooseObjectFromProperty(ml_get_jobs1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_jobs_response)),
-      ...getShape(getShape(ml_get_jobs1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_jobs_response, ml_get_jobs1_response]),
 };
 const ML_GET_MEMORY_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_memory_stats',
@@ -13248,13 +11627,7 @@ on each node, both within the JVM heap, and natively, outside of the JVM.`,
     getLooseObjectFromProperty(ml_get_memory_stats1_request, 'path'),
     getLooseObjectFromProperty(ml_get_memory_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_memory_stats_response)),
-      ...getShape(getShape(ml_get_memory_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_memory_stats_response, ml_get_memory_stats1_response]),
 };
 const ML_GET_MODEL_SNAPSHOT_UPGRADE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_model_snapshot_upgrade_stats',
@@ -13275,12 +11648,7 @@ const ML_GET_MODEL_SNAPSHOT_UPGRADE_STATS_CONTRACT: InternalConnectorContract = 
     getLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'path'),
     getLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_model_snapshot_upgrade_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_get_model_snapshot_upgrade_stats_response,
 };
 const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_model_snapshots',
@@ -13313,15 +11681,12 @@ const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_get_model_snapshots3_request, 'path'),
     getLooseObjectFromProperty(ml_get_model_snapshots3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_model_snapshots_response)),
-      ...getShape(getShape(ml_get_model_snapshots1_response)),
-      ...getShape(getShape(ml_get_model_snapshots2_response)),
-      ...getShape(getShape(ml_get_model_snapshots3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_get_model_snapshots_response,
+    ml_get_model_snapshots1_response,
+    ml_get_model_snapshots2_response,
+    ml_get_model_snapshots3_response,
+  ]),
 };
 const ML_GET_OVERALL_BUCKETS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_overall_buckets',
@@ -13363,13 +11728,7 @@ jobs' largest bucket span.`,
     getLooseObjectFromProperty(ml_get_overall_buckets1_request, 'path'),
     getLooseObjectFromProperty(ml_get_overall_buckets1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_overall_buckets_response)),
-      ...getShape(getShape(ml_get_overall_buckets1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_overall_buckets_response, ml_get_overall_buckets1_response]),
 };
 const ML_GET_RECORDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_records',
@@ -13403,13 +11762,7 @@ number of detectors.`,
     getLooseObjectFromProperty(ml_get_records1_request, 'path'),
     getLooseObjectFromProperty(ml_get_records1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_records_response)),
-      ...getShape(getShape(ml_get_records1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_records_response, ml_get_records1_response]),
 };
 const ML_GET_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_trained_models',
@@ -13433,13 +11786,7 @@ const ML_GET_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_get_trained_models1_request, 'path'),
     getLooseObjectFromProperty(ml_get_trained_models1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_trained_models_response)),
-      ...getShape(getShape(ml_get_trained_models1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([ml_get_trained_models_response, ml_get_trained_models1_response]),
 };
 const ML_GET_TRAINED_MODELS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_trained_models_stats',
@@ -13465,13 +11812,10 @@ models in a single API request by using a comma-separated list of model IDs or a
     getLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'path'),
     getLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_get_trained_models_stats_response)),
-      ...getShape(getShape(ml_get_trained_models_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_get_trained_models_stats_response,
+    ml_get_trained_models_stats1_response,
+  ]),
 };
 const ML_INFER_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.infer_trained_model',
@@ -13492,12 +11836,7 @@ const ML_INFER_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_infer_trained_model_request, 'path'),
     getLooseObjectFromProperty(ml_infer_trained_model_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_infer_trained_model_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_infer_trained_model_response,
 };
 const ML_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.info',
@@ -13524,12 +11863,7 @@ cluster configuration.`,
     getLooseObjectFromProperty(ml_info_request, 'path'),
     getLooseObjectFromProperty(ml_info_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_info_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_info_response,
 };
 const ML_OPEN_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.open_job',
@@ -13557,12 +11891,7 @@ new data is received.`,
     getLooseObjectFromProperty(ml_open_job_request, 'path'),
     getLooseObjectFromProperty(ml_open_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_open_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_open_job_response,
 };
 const ML_POST_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.post_calendar_events',
@@ -13583,12 +11912,7 @@ const ML_POST_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_post_calendar_events_request, 'path'),
     getLooseObjectFromProperty(ml_post_calendar_events_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_post_calendar_events_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_post_calendar_events_response,
 };
 const ML_POST_DATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.post_data',
@@ -13612,12 +11936,7 @@ It is not currently possible to post data to multiple jobs using wildcards or a 
     getLooseObjectFromProperty(ml_post_data_request, 'path'),
     getLooseObjectFromProperty(ml_post_data_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_post_data_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_post_data_response,
 };
 const ML_PREVIEW_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.preview_data_frame_analytics',
@@ -13648,15 +11967,12 @@ Preview the extracted features used by a data frame analytics config.`,
     getLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'path'),
     getLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_preview_data_frame_analytics_response)),
-      ...getShape(getShape(ml_preview_data_frame_analytics1_response)),
-      ...getShape(getShape(ml_preview_data_frame_analytics2_response)),
-      ...getShape(getShape(ml_preview_data_frame_analytics3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_preview_data_frame_analytics_response,
+    ml_preview_data_frame_analytics1_response,
+    ml_preview_data_frame_analytics2_response,
+    ml_preview_data_frame_analytics3_response,
+  ]),
 };
 const ML_PREVIEW_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.preview_datafeed',
@@ -13694,15 +12010,12 @@ You can also use secondary authorization headers to supply the credentials.`,
     getLooseObjectFromProperty(ml_preview_datafeed3_request, 'path'),
     getLooseObjectFromProperty(ml_preview_datafeed3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_preview_datafeed_response)),
-      ...getShape(getShape(ml_preview_datafeed1_response)),
-      ...getShape(getShape(ml_preview_datafeed2_response)),
-      ...getShape(getShape(ml_preview_datafeed3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    ml_preview_datafeed_response,
+    ml_preview_datafeed1_response,
+    ml_preview_datafeed2_response,
+    ml_preview_datafeed3_response,
+  ]),
 };
 const ML_PUT_CALENDAR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_calendar',
@@ -13723,12 +12036,7 @@ const ML_PUT_CALENDAR_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_put_calendar_request, 'path'),
     getLooseObjectFromProperty(ml_put_calendar_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_calendar_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_calendar_response,
 };
 const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_calendar_job',
@@ -13749,12 +12057,7 @@ const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_put_calendar_job_request, 'path'),
     getLooseObjectFromProperty(ml_put_calendar_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_calendar_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_calendar_job_response,
 };
 const ML_PUT_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_data_frame_analytics',
@@ -13782,12 +12085,7 @@ If you supply only a subset of the regression or classification parameters, hype
     getLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'path'),
     getLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_data_frame_analytics_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_data_frame_analytics_response,
 };
 const ML_PUT_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_datafeed',
@@ -13825,12 +12123,7 @@ directly to the \`.ml-config\` index. Do not give users \`write\` privileges on 
     getLooseObjectFromProperty(ml_put_datafeed_request, 'path'),
     getLooseObjectFromProperty(ml_put_datafeed_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_datafeed_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_datafeed_response,
 };
 const ML_PUT_FILTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_filter',
@@ -13853,12 +12146,7 @@ Specifically, filters are referenced in the \`custom_rules\` property of detecto
     getLooseObjectFromProperty(ml_put_filter_request, 'path'),
     getLooseObjectFromProperty(ml_put_filter_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_filter_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_filter_response,
 };
 const ML_PUT_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_job',
@@ -13889,12 +12177,7 @@ If you include a \`datafeed_config\` but do not provide a query, the datafeed us
     getLooseObjectFromProperty(ml_put_job_request, 'path'),
     getLooseObjectFromProperty(ml_put_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_job_response,
 };
 const ML_PUT_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_trained_model',
@@ -13916,12 +12199,7 @@ Enable you to supply a trained model that is not created by data frame analytics
     getLooseObjectFromProperty(ml_put_trained_model_request, 'path'),
     getLooseObjectFromProperty(ml_put_trained_model_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_trained_model_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_trained_model_response,
 };
 const ML_PUT_TRAINED_MODEL_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_trained_model_alias',
@@ -13958,12 +12236,7 @@ returns a warning.`,
     getLooseObjectFromProperty(ml_put_trained_model_alias_request, 'path'),
     getLooseObjectFromProperty(ml_put_trained_model_alias_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_trained_model_alias_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_trained_model_alias_response,
 };
 const ML_PUT_TRAINED_MODEL_DEFINITION_PART_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_trained_model_definition_part',
@@ -13984,12 +12257,7 @@ const ML_PUT_TRAINED_MODEL_DEFINITION_PART_CONTRACT: InternalConnectorContract =
     getLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'path'),
     getLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_trained_model_definition_part_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_trained_model_definition_part_response,
 };
 const ML_PUT_TRAINED_MODEL_VOCABULARY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_trained_model_vocabulary',
@@ -14012,12 +12280,7 @@ The vocabulary is stored in the index as described in \`inference_config.*.vocab
     getLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'path'),
     getLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_put_trained_model_vocabulary_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_put_trained_model_vocabulary_response,
 };
 const ML_RESET_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.reset_job',
@@ -14042,12 +12305,7 @@ comma separated list.`,
     getLooseObjectFromProperty(ml_reset_job_request, 'path'),
     getLooseObjectFromProperty(ml_reset_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_reset_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_reset_job_response,
 };
 const ML_REVERT_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.revert_model_snapshot',
@@ -14075,12 +12333,7 @@ snapshot after Black Friday or a critical system failure.`,
     getLooseObjectFromProperty(ml_revert_model_snapshot_request, 'path'),
     getLooseObjectFromProperty(ml_revert_model_snapshot_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_revert_model_snapshot_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_revert_model_snapshot_response,
 };
 const ML_SET_UPGRADE_MODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.set_upgrade_mode',
@@ -14113,12 +12366,7 @@ machine learning info API.`,
     getLooseObjectFromProperty(ml_set_upgrade_mode_request, 'path'),
     getLooseObjectFromProperty(ml_set_upgrade_mode_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_set_upgrade_mode_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_set_upgrade_mode_response,
 };
 const ML_START_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.start_data_frame_analytics',
@@ -14150,12 +12398,7 @@ the destination index in advance with custom settings and mappings.`,
     getLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'path'),
     getLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_start_data_frame_analytics_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_start_data_frame_analytics_response,
 };
 const ML_START_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.start_datafeed',
@@ -14188,12 +12431,7 @@ authorization headers when you created or updated the datafeed, those credential
     getLooseObjectFromProperty(ml_start_datafeed_request, 'path'),
     getLooseObjectFromProperty(ml_start_datafeed_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_start_datafeed_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_start_datafeed_response,
 };
 const ML_START_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.start_trained_model_deployment',
@@ -14224,12 +12462,7 @@ It allocates the model to every machine learning node.`,
     getLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'path'),
     getLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_start_trained_model_deployment_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_start_trained_model_deployment_response,
 };
 const ML_STOP_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.stop_data_frame_analytics',
@@ -14252,12 +12485,7 @@ throughout its lifecycle.`,
     getLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'path'),
     getLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_stop_data_frame_analytics_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_stop_data_frame_analytics_response,
 };
 const ML_STOP_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.stop_datafeed',
@@ -14280,12 +12508,7 @@ multiple times throughout its lifecycle.`,
     getLooseObjectFromProperty(ml_stop_datafeed_request, 'path'),
     getLooseObjectFromProperty(ml_stop_datafeed_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_stop_datafeed_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_stop_datafeed_response,
 };
 const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.stop_trained_model_deployment',
@@ -14306,12 +12529,7 @@ const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'path'),
     getLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_stop_trained_model_deployment_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_stop_trained_model_deployment_response,
 };
 const ML_UPDATE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_data_frame_analytics',
@@ -14332,12 +12550,7 @@ const ML_UPDATE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'path'),
     getLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_update_data_frame_analytics_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_update_data_frame_analytics_response,
 };
 const ML_UPDATE_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_datafeed',
@@ -14362,12 +12575,7 @@ those credentials are used instead.`,
     getLooseObjectFromProperty(ml_update_datafeed_request, 'path'),
     getLooseObjectFromProperty(ml_update_datafeed_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_update_datafeed_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_update_datafeed_response,
 };
 const ML_UPDATE_FILTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_filter',
@@ -14389,12 +12597,7 @@ Updates the description of a filter, adds items, or removes items from the list.
     getLooseObjectFromProperty(ml_update_filter_request, 'path'),
     getLooseObjectFromProperty(ml_update_filter_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_update_filter_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_update_filter_response,
 };
 const ML_UPDATE_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_job',
@@ -14416,12 +12619,7 @@ Updates certain properties of an anomaly detection job.`,
     getLooseObjectFromProperty(ml_update_job_request, 'path'),
     getLooseObjectFromProperty(ml_update_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_update_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_update_job_response,
 };
 const ML_UPDATE_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_model_snapshot',
@@ -14443,12 +12641,7 @@ Updates certain properties of a snapshot.`,
     getLooseObjectFromProperty(ml_update_model_snapshot_request, 'path'),
     getLooseObjectFromProperty(ml_update_model_snapshot_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_update_model_snapshot_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_update_model_snapshot_response,
 };
 const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_trained_model_deployment',
@@ -14469,12 +12662,7 @@ const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'path'),
     getLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_update_trained_model_deployment_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_update_trained_model_deployment_response,
 };
 const ML_UPGRADE_JOB_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.upgrade_job_snapshot',
@@ -14504,12 +12692,7 @@ job.`,
     getLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'path'),
     getLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ml_upgrade_job_snapshot_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ml_upgrade_job_snapshot_response,
 };
 const ML_VALIDATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.validate',
@@ -14525,10 +12708,7 @@ const ML_VALIDATE_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const ML_VALIDATE_DETECTOR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.validate_detector',
@@ -14544,10 +12724,7 @@ const ML_VALIDATE_DETECTOR_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const MONITORING_BULK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.monitoring.bulk',
@@ -14564,10 +12741,7 @@ This API is used by the monitoring features to send monitoring data.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const MSEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.msearch',
@@ -14612,15 +12786,12 @@ When sending requests to this endpoint the \`Content-Type\` header should be set
     getLooseObjectFromProperty(msearch3_request, 'path'),
     getLooseObjectFromProperty(msearch3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(msearch_response)),
-      ...getShape(getShape(msearch1_response)),
-      ...getShape(getShape(msearch2_response)),
-      ...getShape(getShape(msearch3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    msearch_response,
+    msearch1_response,
+    msearch2_response,
+    msearch3_response,
+  ]),
 };
 const MSEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.msearch_template',
@@ -14664,15 +12835,12 @@ For example:
     getLooseObjectFromProperty(msearch_template3_request, 'path'),
     getLooseObjectFromProperty(msearch_template3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(msearch_template_response)),
-      ...getShape(getShape(msearch_template1_response)),
-      ...getShape(getShape(msearch_template2_response)),
-      ...getShape(getShape(msearch_template3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    msearch_template_response,
+    msearch_template1_response,
+    msearch_template2_response,
+    msearch_template3_response,
+  ]),
 };
 const MTERMVECTORS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.mtermvectors',
@@ -14713,15 +12881,12 @@ The mapping used is determined by the specified \`_index\`.`,
     getLooseObjectFromProperty(mtermvectors3_request, 'path'),
     getLooseObjectFromProperty(mtermvectors3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(mtermvectors_response)),
-      ...getShape(getShape(mtermvectors1_response)),
-      ...getShape(getShape(mtermvectors2_response)),
-      ...getShape(getShape(mtermvectors3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    mtermvectors_response,
+    mtermvectors1_response,
+    mtermvectors2_response,
+    mtermvectors3_response,
+  ]),
 };
 const NODES_CLEAR_REPOSITORIES_METERING_ARCHIVE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.clear_repositories_metering_archive',
@@ -14743,12 +12908,7 @@ Clear the archived repositories metering information in the cluster.`,
     getLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'path'),
     getLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(nodes_clear_repositories_metering_archive_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: nodes_clear_repositories_metering_archive_response,
 };
 const NODES_GET_REPOSITORIES_METERING_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.get_repositories_metering_info',
@@ -14772,12 +12932,7 @@ Additionally, the information exposed by this API is volatile, meaning that it w
     getLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'path'),
     getLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(nodes_get_repositories_metering_info_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: nodes_get_repositories_metering_info_response,
 };
 const NODES_HOT_THREADS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.hot_threads',
@@ -14803,13 +12958,7 @@ The output is plain text with a breakdown of the top hot threads for each node.`
     getLooseObjectFromProperty(nodes_hot_threads1_request, 'path'),
     getLooseObjectFromProperty(nodes_hot_threads1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(nodes_hot_threads_response)),
-      ...getShape(getShape(nodes_hot_threads1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([nodes_hot_threads_response, nodes_hot_threads1_response]),
 };
 const NODES_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.info',
@@ -14840,15 +12989,12 @@ By default, the API returns all attributes and core settings for cluster nodes.`
     getLooseObjectFromProperty(nodes_info3_request, 'path'),
     getLooseObjectFromProperty(nodes_info3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(nodes_info_response)),
-      ...getShape(getShape(nodes_info1_response)),
-      ...getShape(getShape(nodes_info2_response)),
-      ...getShape(getShape(nodes_info3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    nodes_info_response,
+    nodes_info1_response,
+    nodes_info2_response,
+    nodes_info3_response,
+  ]),
 };
 const NODES_RELOAD_SECURE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.reload_secure_settings',
@@ -14880,13 +13026,10 @@ Alternatively, you can reload the secure settings on each node by locally access
     getLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'path'),
     getLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(nodes_reload_secure_settings_response)),
-      ...getShape(getShape(nodes_reload_secure_settings1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    nodes_reload_secure_settings_response,
+    nodes_reload_secure_settings1_response,
+  ]),
 };
 const NODES_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.stats',
@@ -14931,17 +13074,14 @@ By default, all stats are returned. You can limit the returned information by us
     getLooseObjectFromProperty(nodes_stats5_request, 'path'),
     getLooseObjectFromProperty(nodes_stats5_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(nodes_stats_response)),
-      ...getShape(getShape(nodes_stats1_response)),
-      ...getShape(getShape(nodes_stats2_response)),
-      ...getShape(getShape(nodes_stats3_response)),
-      ...getShape(getShape(nodes_stats4_response)),
-      ...getShape(getShape(nodes_stats5_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    nodes_stats_response,
+    nodes_stats1_response,
+    nodes_stats2_response,
+    nodes_stats3_response,
+    nodes_stats4_response,
+    nodes_stats5_response,
+  ]),
 };
 const NODES_USAGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.usage',
@@ -14976,15 +13116,12 @@ const NODES_USAGE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(nodes_usage3_request, 'path'),
     getLooseObjectFromProperty(nodes_usage3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(nodes_usage_response)),
-      ...getShape(getShape(nodes_usage1_response)),
-      ...getShape(getShape(nodes_usage2_response)),
-      ...getShape(getShape(nodes_usage3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    nodes_usage_response,
+    nodes_usage1_response,
+    nodes_usage2_response,
+    nodes_usage3_response,
+  ]),
 };
 const OPEN_POINT_IN_TIME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.open_point_in_time',
@@ -15049,12 +13186,7 @@ You can check how many point-in-times (that is, search contexts) are open with t
     getLooseObjectFromProperty(open_point_in_time_request, 'path'),
     getLooseObjectFromProperty(open_point_in_time_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(open_point_in_time_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: open_point_in_time_response,
 };
 const PING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ping',
@@ -15075,12 +13207,7 @@ Get information about whether the cluster is running.`,
     getLooseObjectFromProperty(ping_request, 'path'),
     getLooseObjectFromProperty(ping_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ping_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ping_response,
 };
 const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.flamegraph',
@@ -15096,10 +13223,7 @@ const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.stacktraces',
@@ -15115,10 +13239,7 @@ const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const PROFILING_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.status',
@@ -15134,10 +13255,7 @@ const PROFILING_STATUS_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.topn_functions',
@@ -15153,10 +13271,7 @@ const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const PROJECT_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.project.tags',
@@ -15174,10 +13289,7 @@ Get the tags that are defined for the project.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const PUT_SCRIPT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.put_script',
@@ -15207,15 +13319,12 @@ Creates or updates a stored script or search template.`,
     getLooseObjectFromProperty(put_script3_request, 'path'),
     getLooseObjectFromProperty(put_script3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(put_script_response)),
-      ...getShape(getShape(put_script1_response)),
-      ...getShape(getShape(put_script2_response)),
-      ...getShape(getShape(put_script3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    put_script_response,
+    put_script1_response,
+    put_script2_response,
+    put_script3_response,
+  ]),
 };
 const QUERY_RULES_DELETE_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.delete_rule',
@@ -15238,12 +13347,7 @@ This is a destructive action that is only recoverable by re-adding the same rule
     getLooseObjectFromProperty(query_rules_delete_rule_request, 'path'),
     getLooseObjectFromProperty(query_rules_delete_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(query_rules_delete_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: query_rules_delete_rule_response,
 };
 const QUERY_RULES_DELETE_RULESET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.delete_ruleset',
@@ -15266,12 +13370,7 @@ This is a destructive action that is not recoverable.`,
     getLooseObjectFromProperty(query_rules_delete_ruleset_request, 'path'),
     getLooseObjectFromProperty(query_rules_delete_ruleset_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(query_rules_delete_ruleset_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: query_rules_delete_ruleset_response,
 };
 const QUERY_RULES_GET_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.get_rule',
@@ -15293,12 +13392,7 @@ Get details about a query rule within a query ruleset.`,
     getLooseObjectFromProperty(query_rules_get_rule_request, 'path'),
     getLooseObjectFromProperty(query_rules_get_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(query_rules_get_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: query_rules_get_rule_response,
 };
 const QUERY_RULES_GET_RULESET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.get_ruleset',
@@ -15320,12 +13414,7 @@ Get details about a query ruleset.`,
     getLooseObjectFromProperty(query_rules_get_ruleset_request, 'path'),
     getLooseObjectFromProperty(query_rules_get_ruleset_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(query_rules_get_ruleset_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: query_rules_get_ruleset_response,
 };
 const QUERY_RULES_LIST_RULESETS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.list_rulesets',
@@ -15347,12 +13436,7 @@ Get summarized information about the query rulesets.`,
     getLooseObjectFromProperty(query_rules_list_rulesets_request, 'path'),
     getLooseObjectFromProperty(query_rules_list_rulesets_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(query_rules_list_rulesets_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: query_rules_list_rulesets_response,
 };
 const QUERY_RULES_PUT_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.put_rule',
@@ -15379,12 +13463,7 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
     getLooseObjectFromProperty(query_rules_put_rule_request, 'path'),
     getLooseObjectFromProperty(query_rules_put_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(query_rules_put_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: query_rules_put_rule_response,
 };
 const QUERY_RULES_PUT_RULESET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.put_ruleset',
@@ -15412,12 +13491,7 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
     getLooseObjectFromProperty(query_rules_put_ruleset_request, 'path'),
     getLooseObjectFromProperty(query_rules_put_ruleset_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(query_rules_put_ruleset_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: query_rules_put_ruleset_response,
 };
 const QUERY_RULES_TEST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.test',
@@ -15439,12 +13513,7 @@ Evaluate match criteria against a query ruleset to identify the rules that would
     getLooseObjectFromProperty(query_rules_test_request, 'path'),
     getLooseObjectFromProperty(query_rules_test_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(query_rules_test_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: query_rules_test_response,
 };
 const RANK_EVAL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rank_eval',
@@ -15475,15 +13544,12 @@ Evaluate the quality of ranked search results over a set of typical search queri
     getLooseObjectFromProperty(rank_eval3_request, 'path'),
     getLooseObjectFromProperty(rank_eval3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rank_eval_response)),
-      ...getShape(getShape(rank_eval1_response)),
-      ...getShape(getShape(rank_eval2_response)),
-      ...getShape(getShape(rank_eval3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    rank_eval_response,
+    rank_eval1_response,
+    rank_eval2_response,
+    rank_eval3_response,
+  ]),
 };
 const REINDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.reindex',
@@ -15560,12 +13626,7 @@ Refer to the linked documentation for examples of how to reindex documents.`,
     getLooseObjectFromProperty(reindex_request, 'path'),
     getLooseObjectFromProperty(reindex_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(reindex_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: reindex_response,
 };
 const REINDEX_RETHROTTLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.reindex_rethrottle',
@@ -15596,12 +13657,7 @@ This behavior prevents scroll timeouts.`,
     getLooseObjectFromProperty(reindex_rethrottle_request, 'path'),
     getLooseObjectFromProperty(reindex_rethrottle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(reindex_rethrottle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: reindex_rethrottle_response,
 };
 const RENDER_SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.render_search_template',
@@ -15633,15 +13689,12 @@ Render a search template as a search request body.`,
     getLooseObjectFromProperty(render_search_template3_request, 'path'),
     getLooseObjectFromProperty(render_search_template3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(render_search_template_response)),
-      ...getShape(getShape(render_search_template1_response)),
-      ...getShape(getShape(render_search_template2_response)),
-      ...getShape(getShape(render_search_template3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    render_search_template_response,
+    render_search_template1_response,
+    render_search_template2_response,
+    render_search_template3_response,
+  ]),
 };
 const ROLLUP_DELETE_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.delete_job',
@@ -15685,12 +13738,7 @@ POST my_rollup_index/_delete_by_query
     getLooseObjectFromProperty(rollup_delete_job_request, 'path'),
     getLooseObjectFromProperty(rollup_delete_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rollup_delete_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: rollup_delete_job_response,
 };
 const ROLLUP_GET_JOBS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.get_jobs',
@@ -15719,13 +13767,7 @@ For details about a historical rollup job, the rollup capabilities API may be mo
     getLooseObjectFromProperty(rollup_get_jobs1_request, 'path'),
     getLooseObjectFromProperty(rollup_get_jobs1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rollup_get_jobs_response)),
-      ...getShape(getShape(rollup_get_jobs1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([rollup_get_jobs_response, rollup_get_jobs1_response]),
 };
 const ROLLUP_GET_ROLLUP_CAPS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.get_rollup_caps',
@@ -15757,13 +13799,7 @@ This API enables you to inspect an index and determine:
     getLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'path'),
     getLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rollup_get_rollup_caps_response)),
-      ...getShape(getShape(rollup_get_rollup_caps1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([rollup_get_rollup_caps_response, rollup_get_rollup_caps1_response]),
 };
 const ROLLUP_GET_ROLLUP_INDEX_CAPS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.get_rollup_index_caps',
@@ -15789,12 +13825,7 @@ A single rollup index may store the data for multiple rollup jobs and may have a
     getLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'path'),
     getLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rollup_get_rollup_index_caps_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: rollup_get_rollup_index_caps_response,
 };
 const ROLLUP_PUT_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.put_job',
@@ -15823,12 +13854,7 @@ Jobs are created in a \`STOPPED\` state. You can start them with the start rollu
     getLooseObjectFromProperty(rollup_put_job_request, 'path'),
     getLooseObjectFromProperty(rollup_put_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rollup_put_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: rollup_put_job_response,
 };
 const ROLLUP_ROLLUP_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.rollup_search',
@@ -15862,13 +13888,7 @@ For more detailed examples of using the rollup search API, including querying ro
     getLooseObjectFromProperty(rollup_rollup_search1_request, 'path'),
     getLooseObjectFromProperty(rollup_rollup_search1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rollup_rollup_search_response)),
-      ...getShape(getShape(rollup_rollup_search1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([rollup_rollup_search_response, rollup_rollup_search1_response]),
 };
 const ROLLUP_START_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.start_job',
@@ -15891,12 +13911,7 @@ If you try to start a job that is already started, nothing happens.`,
     getLooseObjectFromProperty(rollup_start_job_request, 'path'),
     getLooseObjectFromProperty(rollup_start_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rollup_start_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: rollup_start_job_response,
 };
 const ROLLUP_STOP_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.stop_job',
@@ -15928,12 +13943,7 @@ If the specified time elapses without the job moving to STOPPED, a timeout excep
     getLooseObjectFromProperty(rollup_stop_job_request, 'path'),
     getLooseObjectFromProperty(rollup_stop_job_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(rollup_stop_job_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: rollup_stop_job_response,
 };
 const SCRIPTS_PAINLESS_EXECUTE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.scripts_painless_execute',
@@ -15965,13 +13975,7 @@ Each context requires a script, but additional parameters depend on the context 
     getLooseObjectFromProperty(scripts_painless_execute1_request, 'path'),
     getLooseObjectFromProperty(scripts_painless_execute1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(scripts_painless_execute_response)),
-      ...getShape(getShape(scripts_painless_execute1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([scripts_painless_execute_response, scripts_painless_execute1_response]),
 };
 const SCROLL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.scroll',
@@ -16013,15 +14017,7 @@ IMPORTANT: Results from a scrolling search reflect the state of the index at the
     getLooseObjectFromProperty(scroll3_request, 'path'),
     getLooseObjectFromProperty(scroll3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(scroll_response)),
-      ...getShape(getShape(scroll1_response)),
-      ...getShape(getShape(scroll2_response)),
-      ...getShape(getShape(scroll3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([scroll_response, scroll1_response, scroll2_response, scroll3_response]),
 };
 const SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search',
@@ -16069,15 +14065,7 @@ This situation can occur because the splitting criterion is based on Lucene docu
     getLooseObjectFromProperty(search3_request, 'path'),
     getLooseObjectFromProperty(search3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_response)),
-      ...getShape(getShape(search1_response)),
-      ...getShape(getShape(search2_response)),
-      ...getShape(getShape(search3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([search_response, search1_response, search2_response, search3_response]),
 };
 const SEARCH_APPLICATION_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.delete',
@@ -16100,12 +14088,7 @@ Remove a search application and its associated alias. Indices attached to the se
     getLooseObjectFromProperty(search_application_delete_request, 'path'),
     getLooseObjectFromProperty(search_application_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_application_delete_response,
 };
 const SEARCH_APPLICATION_DELETE_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.delete_behavioral_analytics',
@@ -16127,12 +14110,7 @@ The associated data stream is also deleted.`,
     getLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'path'),
     getLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_delete_behavioral_analytics_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_application_delete_behavioral_analytics_response,
 };
 const SEARCH_APPLICATION_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.get',
@@ -16153,12 +14131,7 @@ const SEARCH_APPLICATION_GET_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(search_application_get_request, 'path'),
     getLooseObjectFromProperty(search_application_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_application_get_response,
 };
 const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.get_behavioral_analytics',
@@ -16182,13 +14155,10 @@ const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
     getLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'path'),
     getLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_get_behavioral_analytics_response)),
-      ...getShape(getShape(search_application_get_behavioral_analytics1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    search_application_get_behavioral_analytics_response,
+    search_application_get_behavioral_analytics1_response,
+  ]),
 };
 const SEARCH_APPLICATION_LIST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.list',
@@ -16210,12 +14180,7 @@ Get information about search applications.`,
     getLooseObjectFromProperty(search_application_list_request, 'path'),
     getLooseObjectFromProperty(search_application_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_application_list_response,
 };
 const SEARCH_APPLICATION_POST_BEHAVIORAL_ANALYTICS_EVENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.post_behavioral_analytics_event',
@@ -16236,12 +14201,7 @@ const SEARCH_APPLICATION_POST_BEHAVIORAL_ANALYTICS_EVENT_CONTRACT: InternalConne
     getLooseObjectFromProperty(search_application_post_behavioral_analytics_event_request, 'path'),
     getLooseObjectFromProperty(search_application_post_behavioral_analytics_event_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_post_behavioral_analytics_event_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_application_post_behavioral_analytics_event_response,
 };
 const SEARCH_APPLICATION_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.put',
@@ -16262,12 +14222,7 @@ const SEARCH_APPLICATION_PUT_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(search_application_put_request, 'path'),
     getLooseObjectFromProperty(search_application_put_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_put_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_application_put_response,
 };
 const SEARCH_APPLICATION_PUT_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.put_behavioral_analytics',
@@ -16288,12 +14243,7 @@ const SEARCH_APPLICATION_PUT_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
     getLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'path'),
     getLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_put_behavioral_analytics_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_application_put_behavioral_analytics_response,
 };
 const SEARCH_APPLICATION_RENDER_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.render_query',
@@ -16319,12 +14269,7 @@ You must have \`read\` privileges on the backing alias of the search application
     getLooseObjectFromProperty(search_application_render_query_request, 'path'),
     getLooseObjectFromProperty(search_application_render_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_render_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: search_application_render_query_response,
 };
 const SEARCH_APPLICATION_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.search',
@@ -16350,13 +14295,7 @@ Unspecified template parameters are assigned their default values if applicable.
     getLooseObjectFromProperty(search_application_search1_request, 'path'),
     getLooseObjectFromProperty(search_application_search1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_application_search_response)),
-      ...getShape(getShape(search_application_search1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([search_application_search_response, search_application_search1_response]),
 };
 const SEARCH_MVT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_mvt',
@@ -16467,13 +14406,7 @@ Learn how to use the vector tile search API with practical examples in the [Vect
     getLooseObjectFromProperty(search_mvt1_request, 'path'),
     getLooseObjectFromProperty(search_mvt1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_mvt_response)),
-      ...getShape(getShape(search_mvt1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([search_mvt_response, search_mvt1_response]),
 };
 const SEARCH_SHARDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_shards',
@@ -16509,15 +14442,12 @@ If the Elasticsearch security features are enabled, you must have the \`view_ind
     getLooseObjectFromProperty(search_shards3_request, 'path'),
     getLooseObjectFromProperty(search_shards3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_shards_response)),
-      ...getShape(getShape(search_shards1_response)),
-      ...getShape(getShape(search_shards2_response)),
-      ...getShape(getShape(search_shards3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    search_shards_response,
+    search_shards1_response,
+    search_shards2_response,
+    search_shards3_response,
+  ]),
 };
 const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_template',
@@ -16547,15 +14477,12 @@ const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(search_template3_request, 'path'),
     getLooseObjectFromProperty(search_template3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(search_template_response)),
-      ...getShape(getShape(search_template1_response)),
-      ...getShape(getShape(search_template2_response)),
-      ...getShape(getShape(search_template3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    search_template_response,
+    search_template1_response,
+    search_template2_response,
+    search_template3_response,
+  ]),
 };
 const SEARCHABLE_SNAPSHOTS_CACHE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.cache_stats',
@@ -16580,13 +14507,10 @@ Get statistics about the shared cache for partially mounted indices.`,
     getLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'path'),
     getLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(searchable_snapshots_cache_stats_response)),
-      ...getShape(getShape(searchable_snapshots_cache_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    searchable_snapshots_cache_stats_response,
+    searchable_snapshots_cache_stats1_response,
+  ]),
 };
 const SEARCHABLE_SNAPSHOTS_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.clear_cache',
@@ -16611,13 +14535,10 @@ Clear indices and data streams from the shared cache for partially mounted indic
     getLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'path'),
     getLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(searchable_snapshots_clear_cache_response)),
-      ...getShape(getShape(searchable_snapshots_clear_cache1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    searchable_snapshots_clear_cache_response,
+    searchable_snapshots_clear_cache1_response,
+  ]),
 };
 const SEARCHABLE_SNAPSHOTS_MOUNT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.mount',
@@ -16641,12 +14562,7 @@ Manually mounting ILM-managed snapshots can interfere with ILM processes.`,
     getLooseObjectFromProperty(searchable_snapshots_mount_request, 'path'),
     getLooseObjectFromProperty(searchable_snapshots_mount_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(searchable_snapshots_mount_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: searchable_snapshots_mount_response,
 };
 const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.stats',
@@ -16670,13 +14586,10 @@ const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(searchable_snapshots_stats1_request, 'path'),
     getLooseObjectFromProperty(searchable_snapshots_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(searchable_snapshots_stats_response)),
-      ...getShape(getShape(searchable_snapshots_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    searchable_snapshots_stats_response,
+    searchable_snapshots_stats1_response,
+  ]),
 };
 const SECURITY_ACTIVATE_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.activate_user_profile',
@@ -16710,12 +14623,7 @@ Any updates do not change existing content for either the \`labels\` or \`data\`
     getLooseObjectFromProperty(security_activate_user_profile_request, 'path'),
     getLooseObjectFromProperty(security_activate_user_profile_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_activate_user_profile_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_activate_user_profile_response,
 };
 const SECURITY_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.authenticate',
@@ -16741,12 +14649,7 @@ If the user cannot be authenticated, this API returns a 401 status code.`,
     getLooseObjectFromProperty(security_authenticate_request, 'path'),
     getLooseObjectFromProperty(security_authenticate_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_authenticate_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_authenticate_response,
 };
 const SECURITY_BULK_DELETE_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.bulk_delete_role',
@@ -16770,12 +14673,7 @@ The bulk delete roles API cannot delete roles that are defined in roles files.`,
     getLooseObjectFromProperty(security_bulk_delete_role_request, 'path'),
     getLooseObjectFromProperty(security_bulk_delete_role_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_bulk_delete_role_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_bulk_delete_role_response,
 };
 const SECURITY_BULK_PUT_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.bulk_put_role',
@@ -16799,12 +14697,7 @@ The bulk create or update roles API cannot update roles that are defined in role
     getLooseObjectFromProperty(security_bulk_put_role_request, 'path'),
     getLooseObjectFromProperty(security_bulk_put_role_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_bulk_put_role_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_bulk_put_role_response,
 };
 const SECURITY_BULK_UPDATE_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.bulk_update_api_keys',
@@ -16840,12 +14733,7 @@ A successful request returns a JSON structure that contains the IDs of all updat
     getLooseObjectFromProperty(security_bulk_update_api_keys_request, 'path'),
     getLooseObjectFromProperty(security_bulk_update_api_keys_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_bulk_update_api_keys_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_bulk_update_api_keys_response,
 };
 const SECURITY_CHANGE_PASSWORD_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.change_password',
@@ -16877,15 +14765,12 @@ Change the passwords of users in the native realm and built-in users.`,
     getLooseObjectFromProperty(security_change_password3_request, 'path'),
     getLooseObjectFromProperty(security_change_password3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_change_password_response)),
-      ...getShape(getShape(security_change_password1_response)),
-      ...getShape(getShape(security_change_password2_response)),
-      ...getShape(getShape(security_change_password3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_change_password_response,
+    security_change_password1_response,
+    security_change_password2_response,
+    security_change_password3_response,
+  ]),
 };
 const SECURITY_CLEAR_API_KEY_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_api_key_cache',
@@ -16909,12 +14794,7 @@ The cache is also automatically cleared on state changes of the security index.`
     getLooseObjectFromProperty(security_clear_api_key_cache_request, 'path'),
     getLooseObjectFromProperty(security_clear_api_key_cache_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_clear_api_key_cache_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_clear_api_key_cache_response,
 };
 const SECURITY_CLEAR_CACHED_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_cached_privileges',
@@ -16938,12 +14818,7 @@ The cache is also automatically cleared for applications that have their privile
     getLooseObjectFromProperty(security_clear_cached_privileges_request, 'path'),
     getLooseObjectFromProperty(security_clear_cached_privileges_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_clear_cached_privileges_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_clear_cached_privileges_response,
 };
 const SECURITY_CLEAR_CACHED_REALMS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_cached_realms',
@@ -16971,12 +14846,7 @@ For more information, refer to the documentation about controlling the user cach
     getLooseObjectFromProperty(security_clear_cached_realms_request, 'path'),
     getLooseObjectFromProperty(security_clear_cached_realms_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_clear_cached_realms_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_clear_cached_realms_response,
 };
 const SECURITY_CLEAR_CACHED_ROLES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_cached_roles',
@@ -16999,12 +14869,7 @@ Evict roles from the native role cache.`,
     getLooseObjectFromProperty(security_clear_cached_roles_request, 'path'),
     getLooseObjectFromProperty(security_clear_cached_roles_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_clear_cached_roles_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_clear_cached_roles_response,
 };
 const SECURITY_CLEAR_CACHED_SERVICE_TOKENS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_cached_service_tokens',
@@ -17032,12 +14897,7 @@ The cache for tokens backed by the \`service_tokens\` file is cleared automatica
     getLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'path'),
     getLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_clear_cached_service_tokens_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_clear_cached_service_tokens_response,
 };
 const SECURITY_CREATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.create_api_key',
@@ -17083,13 +14943,7 @@ To configure or turn off the API key service, refer to API key service setting d
     getLooseObjectFromProperty(security_create_api_key1_request, 'path'),
     getLooseObjectFromProperty(security_create_api_key1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_create_api_key_response)),
-      ...getShape(getShape(security_create_api_key1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_create_api_key_response, security_create_api_key1_response]),
 };
 const SECURITY_CREATE_CROSS_CLUSTER_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.create_cross_cluster_api_key',
@@ -17126,12 +14980,7 @@ Attempting to update them with the update REST API key API or the bulk update RE
     getLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'path'),
     getLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_create_cross_cluster_api_key_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_create_cross_cluster_api_key_response,
 };
 const SECURITY_CREATE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.create_service_token',
@@ -17166,14 +15015,11 @@ You must actively delete them if they are no longer needed.`,
     getLooseObjectFromProperty(security_create_service_token2_request, 'path'),
     getLooseObjectFromProperty(security_create_service_token2_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_create_service_token_response)),
-      ...getShape(getShape(security_create_service_token1_response)),
-      ...getShape(getShape(security_create_service_token2_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_create_service_token_response,
+    security_create_service_token1_response,
+    security_create_service_token2_response,
+  ]),
 };
 const SECURITY_DELEGATE_PKI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delegate_pki',
@@ -17204,12 +15050,7 @@ The proxy is trusted to have performed the TLS authentication and this API trans
     getLooseObjectFromProperty(security_delegate_pki_request, 'path'),
     getLooseObjectFromProperty(security_delegate_pki_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_delegate_pki_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_delegate_pki_response,
 };
 const SECURITY_DELETE_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_privileges',
@@ -17235,12 +15076,7 @@ To use this API, you must have one of the following privileges:
     getLooseObjectFromProperty(security_delete_privileges_request, 'path'),
     getLooseObjectFromProperty(security_delete_privileges_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_delete_privileges_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_delete_privileges_response,
 };
 const SECURITY_DELETE_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_role',
@@ -17265,12 +15101,7 @@ The delete roles API cannot remove roles that are defined in roles files.`,
     getLooseObjectFromProperty(security_delete_role_request, 'path'),
     getLooseObjectFromProperty(security_delete_role_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_delete_role_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_delete_role_response,
 };
 const SECURITY_DELETE_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_role_mapping',
@@ -17295,12 +15126,7 @@ The delete role mappings API cannot remove role mappings that are defined in rol
     getLooseObjectFromProperty(security_delete_role_mapping_request, 'path'),
     getLooseObjectFromProperty(security_delete_role_mapping_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_delete_role_mapping_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_delete_role_mapping_response,
 };
 const SECURITY_DELETE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_service_token',
@@ -17323,12 +15149,7 @@ Delete service account tokens for a service in a specified namespace.`,
     getLooseObjectFromProperty(security_delete_service_token_request, 'path'),
     getLooseObjectFromProperty(security_delete_service_token_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_delete_service_token_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_delete_service_token_response,
 };
 const SECURITY_DELETE_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_user',
@@ -17351,12 +15172,7 @@ Delete users from the native realm.`,
     getLooseObjectFromProperty(security_delete_user_request, 'path'),
     getLooseObjectFromProperty(security_delete_user_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_delete_user_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_delete_user_response,
 };
 const SECURITY_DISABLE_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.disable_user',
@@ -17384,13 +15200,7 @@ You can use this API to revoke a user's access to Elasticsearch.`,
     getLooseObjectFromProperty(security_disable_user1_request, 'path'),
     getLooseObjectFromProperty(security_disable_user1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_disable_user_response)),
-      ...getShape(getShape(security_disable_user1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_disable_user_response, security_disable_user1_response]),
 };
 const SECURITY_DISABLE_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.disable_user_profile',
@@ -17423,13 +15233,10 @@ To re-enable a disabled user profile, use the enable user profile API .`,
     getLooseObjectFromProperty(security_disable_user_profile1_request, 'path'),
     getLooseObjectFromProperty(security_disable_user_profile1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_disable_user_profile_response)),
-      ...getShape(getShape(security_disable_user_profile1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_disable_user_profile_response,
+    security_disable_user_profile1_response,
+  ]),
 };
 const SECURITY_ENABLE_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.enable_user',
@@ -17456,13 +15263,7 @@ By default, when you create users, they are enabled.`,
     getLooseObjectFromProperty(security_enable_user1_request, 'path'),
     getLooseObjectFromProperty(security_enable_user1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_enable_user_response)),
-      ...getShape(getShape(security_enable_user1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_enable_user_response, security_enable_user1_response]),
 };
 const SECURITY_ENABLE_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.enable_user_profile',
@@ -17495,13 +15296,10 @@ If you later disable the user profile, you can use the enable user profile API t
     getLooseObjectFromProperty(security_enable_user_profile1_request, 'path'),
     getLooseObjectFromProperty(security_enable_user_profile1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_enable_user_profile_response)),
-      ...getShape(getShape(security_enable_user_profile1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_enable_user_profile_response,
+    security_enable_user_profile1_response,
+  ]),
 };
 const SECURITY_ENROLL_KIBANA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.enroll_kibana',
@@ -17527,12 +15325,7 @@ Kibana uses this API internally to configure itself for communications with an E
     getLooseObjectFromProperty(security_enroll_kibana_request, 'path'),
     getLooseObjectFromProperty(security_enroll_kibana_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_enroll_kibana_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_enroll_kibana_response,
 };
 const SECURITY_ENROLL_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.enroll_node',
@@ -17558,12 +15351,7 @@ The response contains key and certificate material that allows the caller to gen
     getLooseObjectFromProperty(security_enroll_node_request, 'path'),
     getLooseObjectFromProperty(security_enroll_node_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_enroll_node_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_enroll_node_response,
 };
 const SECURITY_GET_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_api_key',
@@ -17597,12 +15385,7 @@ If you have \`read_security\`, \`manage_api_key\` or greater privileges (includi
     getLooseObjectFromProperty(security_get_api_key_request, 'path'),
     getLooseObjectFromProperty(security_get_api_key_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_api_key_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_get_api_key_response,
 };
 const SECURITY_GET_BUILTIN_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_builtin_privileges',
@@ -17625,12 +15408,7 @@ Get the list of cluster privileges and index privileges that are available in th
     getLooseObjectFromProperty(security_get_builtin_privileges_request, 'path'),
     getLooseObjectFromProperty(security_get_builtin_privileges_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_builtin_privileges_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_get_builtin_privileges_response,
 };
 const SECURITY_GET_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_privileges',
@@ -17666,14 +15444,11 @@ To use this API, you must have one of the following privileges:
     getLooseObjectFromProperty(security_get_privileges2_request, 'path'),
     getLooseObjectFromProperty(security_get_privileges2_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_privileges_response)),
-      ...getShape(getShape(security_get_privileges1_response)),
-      ...getShape(getShape(security_get_privileges2_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_get_privileges_response,
+    security_get_privileges1_response,
+    security_get_privileges2_response,
+  ]),
 };
 const SECURITY_GET_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_role',
@@ -17701,13 +15476,7 @@ The get roles API cannot retrieve roles that are defined in roles files.`,
     getLooseObjectFromProperty(security_get_role1_request, 'path'),
     getLooseObjectFromProperty(security_get_role1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_role_response)),
-      ...getShape(getShape(security_get_role1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_get_role_response, security_get_role1_response]),
 };
 const SECURITY_GET_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_role_mapping',
@@ -17735,13 +15504,7 @@ The get role mappings API cannot retrieve role mappings that are defined in role
     getLooseObjectFromProperty(security_get_role_mapping1_request, 'path'),
     getLooseObjectFromProperty(security_get_role_mapping1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_role_mapping_response)),
-      ...getShape(getShape(security_get_role_mapping1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_get_role_mapping_response, security_get_role_mapping1_response]),
 };
 const SECURITY_GET_SERVICE_ACCOUNTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_service_accounts',
@@ -17776,14 +15539,11 @@ NOTE: Currently, only the \`elastic/fleet-server\` service account is available.
     getLooseObjectFromProperty(security_get_service_accounts2_request, 'path'),
     getLooseObjectFromProperty(security_get_service_accounts2_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_service_accounts_response)),
-      ...getShape(getShape(security_get_service_accounts1_response)),
-      ...getShape(getShape(security_get_service_accounts2_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_get_service_accounts_response,
+    security_get_service_accounts1_response,
+    security_get_service_accounts2_response,
+  ]),
 };
 const SECURITY_GET_SERVICE_CREDENTIALS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_service_credentials',
@@ -17811,12 +15571,7 @@ Tokens with the same name from different nodes are assumed to be the same token 
     getLooseObjectFromProperty(security_get_service_credentials_request, 'path'),
     getLooseObjectFromProperty(security_get_service_credentials_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_service_credentials_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_get_service_credentials_response,
 };
 const SECURITY_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_settings',
@@ -17844,12 +15599,7 @@ This includes:
     getLooseObjectFromProperty(security_get_settings_request, 'path'),
     getLooseObjectFromProperty(security_get_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_get_settings_response,
 };
 const SECURITY_GET_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_stats',
@@ -17872,12 +15622,7 @@ Gather security usage statistics from all node(s) within the cluster.`,
     getLooseObjectFromProperty(security_get_stats_request, 'path'),
     getLooseObjectFromProperty(security_get_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_get_stats_response,
 };
 const SECURITY_GET_TOKEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_token',
@@ -17911,12 +15656,7 @@ If you want to invalidate a token immediately, you can do so by using the invali
     getLooseObjectFromProperty(security_get_token_request, 'path'),
     getLooseObjectFromProperty(security_get_token_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_token_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_get_token_response,
 };
 const SECURITY_GET_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_user',
@@ -17942,13 +15682,7 @@ Get information about users in the native realm and built-in users.`,
     getLooseObjectFromProperty(security_get_user1_request, 'path'),
     getLooseObjectFromProperty(security_get_user1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_user_response)),
-      ...getShape(getShape(security_get_user1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_get_user_response, security_get_user1_response]),
 };
 const SECURITY_GET_USER_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_user_privileges',
@@ -17974,12 +15708,7 @@ To check whether a user has a specific list of privileges, use the has privilege
     getLooseObjectFromProperty(security_get_user_privileges_request, 'path'),
     getLooseObjectFromProperty(security_get_user_privileges_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_user_privileges_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_get_user_privileges_response,
 };
 const SECURITY_GET_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_user_profile',
@@ -18006,12 +15735,7 @@ Elastic reserves the right to change or remove this feature in future releases w
     getLooseObjectFromProperty(security_get_user_profile_request, 'path'),
     getLooseObjectFromProperty(security_get_user_profile_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_get_user_profile_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_get_user_profile_response,
 };
 const SECURITY_GRANT_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.grant_api_key',
@@ -18053,12 +15777,7 @@ By default, API keys never expire. You can specify expiration information when y
     getLooseObjectFromProperty(security_grant_api_key_request, 'path'),
     getLooseObjectFromProperty(security_grant_api_key_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_grant_api_key_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_grant_api_key_response,
 };
 const SECURITY_HAS_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.has_privileges',
@@ -18092,15 +15811,12 @@ To check the privileges of other users, you must use the run as feature.`,
     getLooseObjectFromProperty(security_has_privileges3_request, 'path'),
     getLooseObjectFromProperty(security_has_privileges3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_has_privileges_response)),
-      ...getShape(getShape(security_has_privileges1_response)),
-      ...getShape(getShape(security_has_privileges2_response)),
-      ...getShape(getShape(security_has_privileges3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_has_privileges_response,
+    security_has_privileges1_response,
+    security_has_privileges2_response,
+    security_has_privileges3_response,
+  ]),
 };
 const SECURITY_HAS_PRIVILEGES_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.has_privileges_user_profile',
@@ -18129,13 +15845,10 @@ Elastic reserves the right to change or remove this feature in future releases w
     getLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'path'),
     getLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_has_privileges_user_profile_response)),
-      ...getShape(getShape(security_has_privileges_user_profile1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_has_privileges_user_profile_response,
+    security_has_privileges_user_profile1_response,
+  ]),
 };
 const SECURITY_INVALIDATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.invalidate_api_key',
@@ -18178,12 +15891,7 @@ In addition, with the \`manage_own_api_key\` privilege, an invalidation request 
     getLooseObjectFromProperty(security_invalidate_api_key_request, 'path'),
     getLooseObjectFromProperty(security_invalidate_api_key_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_invalidate_api_key_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_invalidate_api_key_response,
 };
 const SECURITY_INVALIDATE_TOKEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.invalidate_token',
@@ -18216,12 +15924,7 @@ If none of these two are specified, then \`realm_name\` and/or \`username\` need
     getLooseObjectFromProperty(security_invalidate_token_request, 'path'),
     getLooseObjectFromProperty(security_invalidate_token_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_invalidate_token_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_invalidate_token_response,
 };
 const SECURITY_OIDC_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.oidc_authenticate',
@@ -18247,12 +15950,7 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
     getLooseObjectFromProperty(security_oidc_authenticate_request, 'path'),
     getLooseObjectFromProperty(security_oidc_authenticate_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_oidc_authenticate_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_oidc_authenticate_response,
 };
 const SECURITY_OIDC_LOGOUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.oidc_logout',
@@ -18280,12 +15978,7 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
     getLooseObjectFromProperty(security_oidc_logout_request, 'path'),
     getLooseObjectFromProperty(security_oidc_logout_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_oidc_logout_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_oidc_logout_response,
 };
 const SECURITY_OIDC_PREPARE_AUTHENTICATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.oidc_prepare_authentication',
@@ -18313,12 +16006,7 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
     getLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'path'),
     getLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_oidc_prepare_authentication_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_oidc_prepare_authentication_response,
 };
 const SECURITY_PUT_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.put_privileges',
@@ -18360,13 +16048,7 @@ Action names can contain any number of printable ASCII characters and must conta
     getLooseObjectFromProperty(security_put_privileges1_request, 'path'),
     getLooseObjectFromProperty(security_put_privileges1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_put_privileges_response)),
-      ...getShape(getShape(security_put_privileges1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_put_privileges_response, security_put_privileges1_response]),
 };
 const SECURITY_PUT_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.put_role',
@@ -18394,13 +16076,7 @@ File-based role management is not available in Elastic Serverless.`,
     getLooseObjectFromProperty(security_put_role1_request, 'path'),
     getLooseObjectFromProperty(security_put_role1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_put_role_response)),
-      ...getShape(getShape(security_put_role1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_put_role_response, security_put_role1_response]),
 };
 const SECURITY_PUT_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.put_role_mapping',
@@ -18449,13 +16125,7 @@ If the format of the template is set to "json" then the template is expected to 
     getLooseObjectFromProperty(security_put_role_mapping1_request, 'path'),
     getLooseObjectFromProperty(security_put_role_mapping1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_put_role_mapping_response)),
-      ...getShape(getShape(security_put_role_mapping1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_put_role_mapping_response, security_put_role_mapping1_response]),
 };
 const SECURITY_PUT_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.put_user',
@@ -18483,13 +16153,7 @@ To change a user's password without updating any other fields, use the change pa
     getLooseObjectFromProperty(security_put_user1_request, 'path'),
     getLooseObjectFromProperty(security_put_user1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_put_user_response)),
-      ...getShape(getShape(security_put_user1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_put_user_response, security_put_user1_response]),
 };
 const SECURITY_QUERY_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.query_api_keys',
@@ -18521,13 +16185,7 @@ Refer to the linked documentation for examples of how to find API keys:`,
     getLooseObjectFromProperty(security_query_api_keys1_request, 'path'),
     getLooseObjectFromProperty(security_query_api_keys1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_query_api_keys_response)),
-      ...getShape(getShape(security_query_api_keys1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_query_api_keys_response, security_query_api_keys1_response]),
 };
 const SECURITY_QUERY_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.query_role',
@@ -18557,13 +16215,7 @@ Also, the results can be paginated and sorted.`,
     getLooseObjectFromProperty(security_query_role1_request, 'path'),
     getLooseObjectFromProperty(security_query_role1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_query_role_response)),
-      ...getShape(getShape(security_query_role1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_query_role_response, security_query_role1_response]),
 };
 const SECURITY_QUERY_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.query_user',
@@ -18593,13 +16245,7 @@ This API is only for native users.`,
     getLooseObjectFromProperty(security_query_user1_request, 'path'),
     getLooseObjectFromProperty(security_query_user1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_query_user_response)),
-      ...getShape(getShape(security_query_user1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([security_query_user_response, security_query_user1_response]),
 };
 const SECURITY_SAML_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_authenticate',
@@ -18635,12 +16281,7 @@ This API endpoint essentially exchanges SAML responses that indicate successful 
     getLooseObjectFromProperty(security_saml_authenticate_request, 'path'),
     getLooseObjectFromProperty(security_saml_authenticate_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_saml_authenticate_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_saml_authenticate_response,
 };
 const SECURITY_SAML_COMPLETE_LOGOUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_complete_logout',
@@ -18672,12 +16313,7 @@ The caller of this API must prepare the request accordingly so that this API can
     getLooseObjectFromProperty(security_saml_complete_logout_request, 'path'),
     getLooseObjectFromProperty(security_saml_complete_logout_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_saml_complete_logout_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_saml_complete_logout_response,
 };
 const SECURITY_SAML_INVALIDATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_invalidate',
@@ -18708,12 +16344,7 @@ Thus the user can be redirected back to their IdP.`,
     getLooseObjectFromProperty(security_saml_invalidate_request, 'path'),
     getLooseObjectFromProperty(security_saml_invalidate_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_saml_invalidate_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_saml_invalidate_response,
 };
 const SECURITY_SAML_LOGOUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_logout',
@@ -18742,12 +16373,7 @@ If the SAML realm in Elasticsearch is configured accordingly and the SAML IdP su
     getLooseObjectFromProperty(security_saml_logout_request, 'path'),
     getLooseObjectFromProperty(security_saml_logout_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_saml_logout_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_saml_logout_response,
 };
 const SECURITY_SAML_PREPARE_AUTHENTICATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_prepare_authentication',
@@ -18781,12 +16407,7 @@ The caller of this API needs to store this identifier as it needs to be used in 
     getLooseObjectFromProperty(security_saml_prepare_authentication_request, 'path'),
     getLooseObjectFromProperty(security_saml_prepare_authentication_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_saml_prepare_authentication_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_saml_prepare_authentication_response,
 };
 const SECURITY_SAML_SERVICE_PROVIDER_METADATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_service_provider_metadata',
@@ -18812,12 +16433,7 @@ This API generates Service Provider metadata based on the configuration of a SAM
     getLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'path'),
     getLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_saml_service_provider_metadata_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_saml_service_provider_metadata_response,
 };
 const SECURITY_SUGGEST_USER_PROFILES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.suggest_user_profiles',
@@ -18847,13 +16463,10 @@ Elastic reserves the right to change or remove this feature in future releases w
     getLooseObjectFromProperty(security_suggest_user_profiles1_request, 'path'),
     getLooseObjectFromProperty(security_suggest_user_profiles1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_suggest_user_profiles_response)),
-      ...getShape(getShape(security_suggest_user_profiles1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_suggest_user_profiles_response,
+    security_suggest_user_profiles1_response,
+  ]),
 };
 const SECURITY_UPDATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_api_key',
@@ -18893,12 +16506,7 @@ This change can occur if the owner user's permissions have changed since the API
     getLooseObjectFromProperty(security_update_api_key_request, 'path'),
     getLooseObjectFromProperty(security_update_api_key_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_update_api_key_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_update_api_key_response,
 };
 const SECURITY_UPDATE_CROSS_CLUSTER_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_cross_cluster_api_key',
@@ -18937,12 +16545,7 @@ To learn more about how to use this API, refer to the [Update cross cluter API k
     getLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'path'),
     getLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_update_cross_cluster_api_key_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_update_cross_cluster_api_key_response,
 };
 const SECURITY_UPDATE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_settings',
@@ -18970,12 +16573,7 @@ This API does not yet support configuring the settings for indices before they a
     getLooseObjectFromProperty(security_update_settings_request, 'path'),
     getLooseObjectFromProperty(security_update_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_update_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: security_update_settings_response,
 };
 const SECURITY_UPDATE_USER_PROFILE_DATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_user_profile_data',
@@ -19016,13 +16614,10 @@ The \`update_profile_data\` global privilege grants privileges for updating only
     getLooseObjectFromProperty(security_update_user_profile_data1_request, 'path'),
     getLooseObjectFromProperty(security_update_user_profile_data1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(security_update_user_profile_data_response)),
-      ...getShape(getShape(security_update_user_profile_data1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    security_update_user_profile_data_response,
+    security_update_user_profile_data1_response,
+  ]),
 };
 const SHUTDOWN_DELETE_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.shutdown.delete_node',
@@ -19047,10 +16642,7 @@ If the operator privileges feature is enabled, you must be an operator to use th
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const SHUTDOWN_GET_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.shutdown.get_node',
@@ -19074,10 +16666,7 @@ If the operator privileges feature is enabled, you must be an operator to use th
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const SHUTDOWN_PUT_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.shutdown.put_node',
@@ -19109,10 +16698,7 @@ Monitor the node shutdown status to determine when it is safe to stop Elasticsea
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const SIMULATE_INGEST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.simulate.ingest',
@@ -19158,15 +16744,12 @@ These will be used in place of the pipeline definitions that are already in the 
     getLooseObjectFromProperty(simulate_ingest3_request, 'path'),
     getLooseObjectFromProperty(simulate_ingest3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(simulate_ingest_response)),
-      ...getShape(getShape(simulate_ingest1_response)),
-      ...getShape(getShape(simulate_ingest2_response)),
-      ...getShape(getShape(simulate_ingest3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    simulate_ingest_response,
+    simulate_ingest1_response,
+    simulate_ingest2_response,
+    simulate_ingest3_response,
+  ]),
 };
 const SLM_DELETE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.delete_lifecycle',
@@ -19189,12 +16772,7 @@ This operation prevents any future snapshots from being taken but does not cance
     getLooseObjectFromProperty(slm_delete_lifecycle_request, 'path'),
     getLooseObjectFromProperty(slm_delete_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(slm_delete_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: slm_delete_lifecycle_response,
 };
 const SLM_EXECUTE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.execute_lifecycle',
@@ -19217,12 +16795,7 @@ The snapshot policy is normally applied according to its schedule, but you might
     getLooseObjectFromProperty(slm_execute_lifecycle_request, 'path'),
     getLooseObjectFromProperty(slm_execute_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(slm_execute_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: slm_execute_lifecycle_response,
 };
 const SLM_EXECUTE_RETENTION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.execute_retention',
@@ -19245,12 +16818,7 @@ The retention policy is normally applied according to its schedule.`,
     getLooseObjectFromProperty(slm_execute_retention_request, 'path'),
     getLooseObjectFromProperty(slm_execute_retention_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(slm_execute_retention_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: slm_execute_retention_response,
 };
 const SLM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.get_lifecycle',
@@ -19275,13 +16843,7 @@ Get snapshot lifecycle policy definitions and information about the latest snaps
     getLooseObjectFromProperty(slm_get_lifecycle1_request, 'path'),
     getLooseObjectFromProperty(slm_get_lifecycle1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(slm_get_lifecycle_response)),
-      ...getShape(getShape(slm_get_lifecycle1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([slm_get_lifecycle_response, slm_get_lifecycle1_response]),
 };
 const SLM_GET_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.get_stats',
@@ -19303,12 +16865,7 @@ Get global and policy-level statistics about actions taken by snapshot lifecycle
     getLooseObjectFromProperty(slm_get_stats_request, 'path'),
     getLooseObjectFromProperty(slm_get_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(slm_get_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: slm_get_stats_response,
 };
 const SLM_GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.get_status',
@@ -19329,12 +16886,7 @@ const SLM_GET_STATUS_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(slm_get_status_request, 'path'),
     getLooseObjectFromProperty(slm_get_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(slm_get_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: slm_get_status_response,
 };
 const SLM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.put_lifecycle',
@@ -19358,12 +16910,7 @@ Only the latest version of a policy is stored.`,
     getLooseObjectFromProperty(slm_put_lifecycle_request, 'path'),
     getLooseObjectFromProperty(slm_put_lifecycle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(slm_put_lifecycle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: slm_put_lifecycle_response,
 };
 const SLM_START_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.start',
@@ -19385,12 +16932,7 @@ Manually starting SLM is necessary only if it has been stopped using the stop SL
     getLooseObjectFromProperty(slm_start_request, 'path'),
     getLooseObjectFromProperty(slm_start_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(slm_start_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: slm_start_response,
 };
 const SLM_STOP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.stop',
@@ -19417,12 +16959,7 @@ Use the get snapshot lifecycle management status API to see if SLM is running.`,
     getLooseObjectFromProperty(slm_stop_request, 'path'),
     getLooseObjectFromProperty(slm_stop_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(slm_stop_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: slm_stop_response,
 };
 const SNAPSHOT_CLEANUP_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.cleanup_repository',
@@ -19444,12 +16981,7 @@ Trigger the review of the contents of a snapshot repository and delete any stale
     getLooseObjectFromProperty(snapshot_cleanup_repository_request, 'path'),
     getLooseObjectFromProperty(snapshot_cleanup_repository_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_cleanup_repository_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: snapshot_cleanup_repository_response,
 };
 const SNAPSHOT_CLONE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.clone',
@@ -19471,12 +17003,7 @@ Clone part of all of a snapshot into another snapshot in the same repository.`,
     getLooseObjectFromProperty(snapshot_clone_request, 'path'),
     getLooseObjectFromProperty(snapshot_clone_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_clone_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: snapshot_clone_response,
 };
 const SNAPSHOT_CREATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.create',
@@ -19518,13 +17045,7 @@ Take a snapshot of a cluster or of data streams and indices.`,
     getLooseObjectFromProperty(snapshot_create1_request, 'path'),
     getLooseObjectFromProperty(snapshot_create1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_create_response)),
-      ...getShape(getShape(snapshot_create1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([snapshot_create_response, snapshot_create1_response]),
 };
 const SNAPSHOT_CREATE_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.create_repository',
@@ -19554,13 +17075,10 @@ If both parameters are specified, only the query parameter is used.`,
     getLooseObjectFromProperty(snapshot_create_repository1_request, 'path'),
     getLooseObjectFromProperty(snapshot_create_repository1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_create_repository_response)),
-      ...getShape(getShape(snapshot_create_repository1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    snapshot_create_repository_response,
+    snapshot_create_repository1_response,
+  ]),
 };
 const SNAPSHOT_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.delete',
@@ -19598,12 +17116,7 @@ const SNAPSHOT_DELETE_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(snapshot_delete_request, 'path'),
     getLooseObjectFromProperty(snapshot_delete_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_delete_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: snapshot_delete_response,
 };
 const SNAPSHOT_DELETE_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.delete_repository',
@@ -19626,12 +17139,7 @@ The snapshots themselves are left untouched and in place.`,
     getLooseObjectFromProperty(snapshot_delete_repository_request, 'path'),
     getLooseObjectFromProperty(snapshot_delete_repository_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_delete_repository_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: snapshot_delete_repository_response,
 };
 const SNAPSHOT_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.get',
@@ -19673,12 +17181,7 @@ Snapshots concurrently created may be seen during an iteration.`,
     getLooseObjectFromProperty(snapshot_get_request, 'path'),
     getLooseObjectFromProperty(snapshot_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: snapshot_get_response,
 };
 const SNAPSHOT_GET_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.get_repository',
@@ -19702,13 +17205,7 @@ const SNAPSHOT_GET_REPOSITORY_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(snapshot_get_repository1_request, 'path'),
     getLooseObjectFromProperty(snapshot_get_repository1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_get_repository_response)),
-      ...getShape(getShape(snapshot_get_repository1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([snapshot_get_repository_response, snapshot_get_repository1_response]),
 };
 const SNAPSHOT_REPOSITORY_ANALYZE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.repository_analyze',
@@ -19845,12 +17342,7 @@ Some operations also verify the behavior on small blobs with sizes other than 8 
     getLooseObjectFromProperty(snapshot_repository_analyze_request, 'path'),
     getLooseObjectFromProperty(snapshot_repository_analyze_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_repository_analyze_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: snapshot_repository_analyze_response,
 };
 const SNAPSHOT_REPOSITORY_VERIFY_INTEGRITY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.repository_verify_integrity',
@@ -19915,12 +17407,7 @@ The response body format is therefore not considered stable and may be different
     getLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'path'),
     getLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_repository_verify_integrity_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: snapshot_repository_verify_integrity_response,
 };
 const SNAPSHOT_RESTORE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.restore',
@@ -19958,12 +17445,7 @@ If your snapshot contains data from App Search or Workplace Search, you must res
     getLooseObjectFromProperty(snapshot_restore_request, 'path'),
     getLooseObjectFromProperty(snapshot_restore_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_restore_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: snapshot_restore_response,
 };
 const SNAPSHOT_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.status',
@@ -20015,14 +17497,11 @@ These requests can also tax machine resources and, when using cloud storage, inc
     getLooseObjectFromProperty(snapshot_status2_request, 'path'),
     getLooseObjectFromProperty(snapshot_status2_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_status_response)),
-      ...getShape(getShape(snapshot_status1_response)),
-      ...getShape(getShape(snapshot_status2_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    snapshot_status_response,
+    snapshot_status1_response,
+    snapshot_status2_response,
+  ]),
 };
 const SNAPSHOT_VERIFY_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.verify_repository',
@@ -20044,12 +17523,7 @@ Check for common misconfigurations in a snapshot repository.`,
     getLooseObjectFromProperty(snapshot_verify_repository_request, 'path'),
     getLooseObjectFromProperty(snapshot_verify_repository_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(snapshot_verify_repository_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: snapshot_verify_repository_response,
 };
 const SQL_CLEAR_CURSOR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.clear_cursor',
@@ -20070,12 +17544,7 @@ const SQL_CLEAR_CURSOR_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(sql_clear_cursor_request, 'path'),
     getLooseObjectFromProperty(sql_clear_cursor_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(sql_clear_cursor_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: sql_clear_cursor_response,
 };
 const SQL_DELETE_ASYNC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.delete_async',
@@ -20103,12 +17572,7 @@ If the Elasticsearch security features are enabled, only the following users can
     getLooseObjectFromProperty(sql_delete_async_request, 'path'),
     getLooseObjectFromProperty(sql_delete_async_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(sql_delete_async_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: sql_delete_async_response,
 };
 const SQL_GET_ASYNC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.get_async',
@@ -20132,12 +17596,7 @@ If the Elasticsearch security features are enabled, only the user who first subm
     getLooseObjectFromProperty(sql_get_async_request, 'path'),
     getLooseObjectFromProperty(sql_get_async_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(sql_get_async_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: sql_get_async_response,
 };
 const SQL_GET_ASYNC_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.get_async_status',
@@ -20159,12 +17618,7 @@ Get the current status of an async SQL search or a stored synchronous SQL search
     getLooseObjectFromProperty(sql_get_async_status_request, 'path'),
     getLooseObjectFromProperty(sql_get_async_status_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(sql_get_async_status_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: sql_get_async_status_response,
 };
 const SQL_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.query',
@@ -20188,13 +17642,7 @@ Run an SQL request.`,
     getLooseObjectFromProperty(sql_query1_request, 'path'),
     getLooseObjectFromProperty(sql_query1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(sql_query_response)),
-      ...getShape(getShape(sql_query1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([sql_query_response, sql_query1_response]),
 };
 const SQL_TRANSLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.translate',
@@ -20220,13 +17668,7 @@ It accepts the same request body parameters as the SQL search API, excluding \`c
     getLooseObjectFromProperty(sql_translate1_request, 'path'),
     getLooseObjectFromProperty(sql_translate1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(sql_translate_response)),
-      ...getShape(getShape(sql_translate1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([sql_translate_response, sql_translate1_response]),
 };
 const SSL_CERTIFICATES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ssl.certificates',
@@ -20263,12 +17705,7 @@ If Elasticsearch is configured to use a keystore or truststore, the API output i
     getLooseObjectFromProperty(ssl_certificates_request, 'path'),
     getLooseObjectFromProperty(ssl_certificates_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(ssl_certificates_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: ssl_certificates_response,
 };
 const STREAMS_LOGS_DISABLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.streams.logs_disable',
@@ -20286,10 +17723,7 @@ Turn off the logs stream feature for this cluster.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const STREAMS_LOGS_ENABLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.streams.logs_enable',
@@ -20311,10 +17745,7 @@ If those indices or data streams exist, a \`409 - Conflict\` response and error 
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const STREAMS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.streams.status',
@@ -20332,10 +17763,7 @@ Get the current status for all types of streams.`,
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const SYNONYMS_DELETE_SYNONYM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.delete_synonym',
@@ -20373,12 +17801,7 @@ When the synonyms set is not used in analyzers, you will be able to delete it.`,
     getLooseObjectFromProperty(synonyms_delete_synonym_request, 'path'),
     getLooseObjectFromProperty(synonyms_delete_synonym_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(synonyms_delete_synonym_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: synonyms_delete_synonym_response,
 };
 const SYNONYMS_DELETE_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.delete_synonym_rule',
@@ -20400,12 +17823,7 @@ Delete a synonym rule from a synonym set.`,
     getLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'path'),
     getLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(synonyms_delete_synonym_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: synonyms_delete_synonym_rule_response,
 };
 const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.get_synonym',
@@ -20426,12 +17844,7 @@ const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(synonyms_get_synonym_request, 'path'),
     getLooseObjectFromProperty(synonyms_get_synonym_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(synonyms_get_synonym_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: synonyms_get_synonym_response,
 };
 const SYNONYMS_GET_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.get_synonym_rule',
@@ -20453,12 +17866,7 @@ Get a synonym rule from a synonym set.`,
     getLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'path'),
     getLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(synonyms_get_synonym_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: synonyms_get_synonym_rule_response,
 };
 const SYNONYMS_GET_SYNONYMS_SETS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.get_synonyms_sets',
@@ -20480,12 +17888,7 @@ Get a summary of all defined synonym sets.`,
     getLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'path'),
     getLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(synonyms_get_synonyms_sets_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: synonyms_get_synonyms_sets_response,
 };
 const SYNONYMS_PUT_SYNONYM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.put_synonym',
@@ -20513,12 +17916,7 @@ For practical examples of how to create or update a synonyms set, refer to the E
     getLooseObjectFromProperty(synonyms_put_synonym_request, 'path'),
     getLooseObjectFromProperty(synonyms_put_synonym_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(synonyms_put_synonym_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: synonyms_put_synonym_response,
 };
 const SYNONYMS_PUT_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.put_synonym_rule',
@@ -20544,12 +17942,7 @@ When you update a synonym rule, all analyzers using the synonyms set will be rel
     getLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'path'),
     getLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(synonyms_put_synonym_rule_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: synonyms_put_synonym_rule_response,
 };
 const TASKS_CANCEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.tasks.cancel',
@@ -20583,13 +17976,7 @@ You can also use the node hot threads API to obtain detailed information about t
     getLooseObjectFromProperty(tasks_cancel1_request, 'path'),
     getLooseObjectFromProperty(tasks_cancel1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(tasks_cancel_response)),
-      ...getShape(getShape(tasks_cancel1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([tasks_cancel_response, tasks_cancel1_response]),
 };
 const TASKS_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.tasks.get',
@@ -20615,12 +18002,7 @@ If the task identifier is not found, a 404 response code indicates that there ar
     getLooseObjectFromProperty(tasks_get_request, 'path'),
     getLooseObjectFromProperty(tasks_get_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(tasks_get_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: tasks_get_response,
 };
 const TASKS_LIST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.tasks.list',
@@ -20706,12 +18088,7 @@ The \`X-Opaque-Id\` in the children \`headers\` is the child task of the task th
     getLooseObjectFromProperty(tasks_list_request, 'path'),
     getLooseObjectFromProperty(tasks_list_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(tasks_list_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: tasks_list_response,
 };
 const TERMS_ENUM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.terms_enum',
@@ -20740,13 +18117,7 @@ This API is designed for low-latency look-ups used in auto-complete scenarios.
     getLooseObjectFromProperty(terms_enum1_request, 'path'),
     getLooseObjectFromProperty(terms_enum1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(terms_enum_response)),
-      ...getShape(getShape(terms_enum1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([terms_enum_response, terms_enum1_response]),
 };
 const TERMVECTORS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.termvectors',
@@ -20817,15 +18188,12 @@ Refer to the linked documentation for detailed examples of how to use this API.`
     getLooseObjectFromProperty(termvectors3_request, 'path'),
     getLooseObjectFromProperty(termvectors3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(termvectors_response)),
-      ...getShape(getShape(termvectors1_response)),
-      ...getShape(getShape(termvectors2_response)),
-      ...getShape(getShape(termvectors3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    termvectors_response,
+    termvectors1_response,
+    termvectors2_response,
+    termvectors3_response,
+  ]),
 };
 const TEXT_STRUCTURE_FIND_FIELD_STRUCTURE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.find_field_structure',
@@ -20877,12 +18245,7 @@ It helps determine why the returned structure was chosen.`,
     getLooseObjectFromProperty(text_structure_find_field_structure_request, 'path'),
     getLooseObjectFromProperty(text_structure_find_field_structure_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(text_structure_find_field_structure_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: text_structure_find_field_structure_response,
 };
 const TEXT_STRUCTURE_FIND_MESSAGE_STRUCTURE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.find_message_structure',
@@ -20924,13 +18287,10 @@ It helps determine why the returned structure was chosen.`,
     getLooseObjectFromProperty(text_structure_find_message_structure1_request, 'path'),
     getLooseObjectFromProperty(text_structure_find_message_structure1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(text_structure_find_message_structure_response)),
-      ...getShape(getShape(text_structure_find_message_structure1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    text_structure_find_message_structure_response,
+    text_structure_find_message_structure1_response,
+  ]),
 };
 const TEXT_STRUCTURE_FIND_STRUCTURE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.find_structure',
@@ -20983,12 +18343,7 @@ However, you can optionally override some of the decisions about the text struct
     getLooseObjectFromProperty(text_structure_find_structure_request, 'path'),
     getLooseObjectFromProperty(text_structure_find_structure_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(text_structure_find_structure_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: text_structure_find_structure_response,
 };
 const TEXT_STRUCTURE_TEST_GROK_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.test_grok_pattern',
@@ -21014,13 +18369,10 @@ The API indicates whether the lines match the pattern together with the offsets 
     getLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'path'),
     getLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(text_structure_test_grok_pattern_response)),
-      ...getShape(getShape(text_structure_test_grok_pattern1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    text_structure_test_grok_pattern_response,
+    text_structure_test_grok_pattern1_response,
+  ]),
 };
 const TRANSFORM_DELETE_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.delete_transform',
@@ -21041,12 +18393,7 @@ const TRANSFORM_DELETE_TRANSFORM_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(transform_delete_transform_request, 'path'),
     getLooseObjectFromProperty(transform_delete_transform_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_delete_transform_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_delete_transform_response,
 };
 const TRANSFORM_GET_NODE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.get_node_stats',
@@ -21063,10 +18410,7 @@ const TRANSFORM_GET_NODE_STATS_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.optional(z.looseObject({})),
-  outputSchema: z.object({
-    output: z.looseObject({}),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.optional(z.looseObject({})),
 };
 const TRANSFORM_GET_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.get_transform',
@@ -21091,13 +18435,7 @@ Get configuration information for transforms.`,
     getLooseObjectFromProperty(transform_get_transform1_request, 'path'),
     getLooseObjectFromProperty(transform_get_transform1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_get_transform_response)),
-      ...getShape(getShape(transform_get_transform1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([transform_get_transform_response, transform_get_transform1_response]),
 };
 const TRANSFORM_GET_TRANSFORM_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.get_transform_stats',
@@ -21120,12 +18458,7 @@ Get usage information for transforms.`,
     getLooseObjectFromProperty(transform_get_transform_stats_request, 'path'),
     getLooseObjectFromProperty(transform_get_transform_stats_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_get_transform_stats_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_get_transform_stats_response,
 };
 const TRANSFORM_PREVIEW_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.preview_transform',
@@ -21160,15 +18493,12 @@ types of the source index and the transform aggregations.`,
     getLooseObjectFromProperty(transform_preview_transform3_request, 'path'),
     getLooseObjectFromProperty(transform_preview_transform3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_preview_transform_response)),
-      ...getShape(getShape(transform_preview_transform1_response)),
-      ...getShape(getShape(transform_preview_transform2_response)),
-      ...getShape(getShape(transform_preview_transform3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    transform_preview_transform_response,
+    transform_preview_transform1_response,
+    transform_preview_transform2_response,
+    transform_preview_transform3_response,
+  ]),
 };
 const TRANSFORM_PUT_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.put_transform',
@@ -21210,12 +18540,7 @@ give users any privileges on \`.data-frame-internal*\` indices.`,
     getLooseObjectFromProperty(transform_put_transform_request, 'path'),
     getLooseObjectFromProperty(transform_put_transform_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_put_transform_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_put_transform_response,
 };
 const TRANSFORM_RESET_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.reset_transform',
@@ -21239,12 +18564,7 @@ If the destination index was created by the transform, it is deleted.`,
     getLooseObjectFromProperty(transform_reset_transform_request, 'path'),
     getLooseObjectFromProperty(transform_reset_transform_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_reset_transform_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_reset_transform_response,
 };
 const TRANSFORM_SCHEDULE_NOW_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.schedule_now_transform',
@@ -21271,12 +18591,7 @@ is called again in the meantime.`,
     getLooseObjectFromProperty(transform_schedule_now_transform_request, 'path'),
     getLooseObjectFromProperty(transform_schedule_now_transform_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_schedule_now_transform_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_schedule_now_transform_response,
 };
 const TRANSFORM_SET_UPGRADE_MODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.set_upgrade_mode',
@@ -21309,12 +18624,7 @@ transform info API.`,
     getLooseObjectFromProperty(transform_set_upgrade_mode_request, 'path'),
     getLooseObjectFromProperty(transform_set_upgrade_mode_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_set_upgrade_mode_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_set_upgrade_mode_response,
 };
 const TRANSFORM_START_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.start_transform',
@@ -21350,12 +18660,7 @@ destination indices, the transform fails when it attempts unauthorized operation
     getLooseObjectFromProperty(transform_start_transform_request, 'path'),
     getLooseObjectFromProperty(transform_start_transform_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_start_transform_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_start_transform_response,
 };
 const TRANSFORM_STOP_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.stop_transform',
@@ -21377,12 +18682,7 @@ Stops one or more transforms.`,
     getLooseObjectFromProperty(transform_stop_transform_request, 'path'),
     getLooseObjectFromProperty(transform_stop_transform_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_stop_transform_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_stop_transform_response,
 };
 const TRANSFORM_UPDATE_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.update_transform',
@@ -21410,12 +18710,7 @@ time of update and runs with those privileges.`,
     getLooseObjectFromProperty(transform_update_transform_request, 'path'),
     getLooseObjectFromProperty(transform_update_transform_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_update_transform_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_update_transform_response,
 };
 const TRANSFORM_UPGRADE_TRANSFORMS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.upgrade_transforms',
@@ -21450,12 +18745,7 @@ You may want to perform a recent cluster backup prior to the upgrade.`,
     getLooseObjectFromProperty(transform_upgrade_transforms_request, 'path'),
     getLooseObjectFromProperty(transform_upgrade_transforms_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(transform_upgrade_transforms_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: transform_upgrade_transforms_response,
 };
 const UPDATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.update',
@@ -21508,12 +18798,7 @@ For usage examples such as partial updates, upserts, and scripted updates, see t
     getLooseObjectFromProperty(update_request, 'path'),
     getLooseObjectFromProperty(update_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_response,
 };
 const UPDATE_BY_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.update_by_query',
@@ -21658,12 +18943,7 @@ Refer to the linked documentation for examples of how to update documents using 
     getLooseObjectFromProperty(update_by_query_request, 'path'),
     getLooseObjectFromProperty(update_by_query_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_by_query_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_by_query_response,
 };
 const UPDATE_BY_QUERY_RETHROTTLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.update_by_query_rethrottle',
@@ -21687,12 +18967,7 @@ Rethrottling that speeds up the query takes effect immediately but rethrotting t
     getLooseObjectFromProperty(update_by_query_rethrottle_request, 'path'),
     getLooseObjectFromProperty(update_by_query_rethrottle_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(update_by_query_rethrottle_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: update_by_query_rethrottle_response,
 };
 const WATCHER_ACK_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.ack_watch',
@@ -21732,15 +19007,12 @@ To demonstrate how throttling works in practice and how it can be configured for
     getLooseObjectFromProperty(watcher_ack_watch3_request, 'path'),
     getLooseObjectFromProperty(watcher_ack_watch3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_ack_watch_response)),
-      ...getShape(getShape(watcher_ack_watch1_response)),
-      ...getShape(getShape(watcher_ack_watch2_response)),
-      ...getShape(getShape(watcher_ack_watch3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    watcher_ack_watch_response,
+    watcher_ack_watch1_response,
+    watcher_ack_watch2_response,
+    watcher_ack_watch3_response,
+  ]),
 };
 const WATCHER_ACTIVATE_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.activate_watch',
@@ -21765,13 +19037,7 @@ A watch can be either active or inactive.`,
     getLooseObjectFromProperty(watcher_activate_watch1_request, 'path'),
     getLooseObjectFromProperty(watcher_activate_watch1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_activate_watch_response)),
-      ...getShape(getShape(watcher_activate_watch1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([watcher_activate_watch_response, watcher_activate_watch1_response]),
 };
 const WATCHER_DEACTIVATE_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.deactivate_watch',
@@ -21796,13 +19062,7 @@ A watch can be either active or inactive.`,
     getLooseObjectFromProperty(watcher_deactivate_watch1_request, 'path'),
     getLooseObjectFromProperty(watcher_deactivate_watch1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_deactivate_watch_response)),
-      ...getShape(getShape(watcher_deactivate_watch1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([watcher_deactivate_watch_response, watcher_deactivate_watch1_response]),
 };
 const WATCHER_DELETE_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.delete_watch',
@@ -21830,12 +19090,7 @@ When Elasticsearch security features are enabled, make sure no write privileges 
     getLooseObjectFromProperty(watcher_delete_watch_request, 'path'),
     getLooseObjectFromProperty(watcher_delete_watch_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_delete_watch_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: watcher_delete_watch_response,
 };
 const WATCHER_EXECUTE_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.execute_watch',
@@ -21879,15 +19134,12 @@ Refer to the external documentation for examples of watch execution requests, in
     getLooseObjectFromProperty(watcher_execute_watch3_request, 'path'),
     getLooseObjectFromProperty(watcher_execute_watch3_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_execute_watch_response)),
-      ...getShape(getShape(watcher_execute_watch1_response)),
-      ...getShape(getShape(watcher_execute_watch2_response)),
-      ...getShape(getShape(watcher_execute_watch3_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([
+    watcher_execute_watch_response,
+    watcher_execute_watch1_response,
+    watcher_execute_watch2_response,
+    watcher_execute_watch3_response,
+  ]),
 };
 const WATCHER_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.get_settings',
@@ -21910,12 +19162,7 @@ Only a subset of settings are shown, for example \`index.auto_expand_replicas\` 
     getLooseObjectFromProperty(watcher_get_settings_request, 'path'),
     getLooseObjectFromProperty(watcher_get_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_get_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: watcher_get_settings_response,
 };
 const WATCHER_GET_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.get_watch',
@@ -21936,12 +19183,7 @@ const WATCHER_GET_WATCH_CONTRACT: InternalConnectorContract = {
     getLooseObjectFromProperty(watcher_get_watch_request, 'path'),
     getLooseObjectFromProperty(watcher_get_watch_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_get_watch_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: watcher_get_watch_response,
 };
 const WATCHER_PUT_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.put_watch',
@@ -21976,13 +19218,7 @@ If the user is able to read index \`a\`, but not index \`b\`, the same will appl
     getLooseObjectFromProperty(watcher_put_watch1_request, 'path'),
     getLooseObjectFromProperty(watcher_put_watch1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_put_watch_response)),
-      ...getShape(getShape(watcher_put_watch1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([watcher_put_watch_response, watcher_put_watch1_response]),
 };
 const WATCHER_QUERY_WATCHES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.query_watches',
@@ -22009,13 +19245,7 @@ Note that only the \`_id\` and \`metadata.*\` fields are queryable or sortable.`
     getLooseObjectFromProperty(watcher_query_watches1_request, 'path'),
     getLooseObjectFromProperty(watcher_query_watches1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_query_watches_response)),
-      ...getShape(getShape(watcher_query_watches1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([watcher_query_watches_response, watcher_query_watches1_response]),
 };
 const WATCHER_START_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.start',
@@ -22037,12 +19267,7 @@ Start the Watcher service if it is not already running.`,
     getLooseObjectFromProperty(watcher_start_request, 'path'),
     getLooseObjectFromProperty(watcher_start_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_start_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: watcher_start_response,
 };
 const WATCHER_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.stats',
@@ -22068,13 +19293,7 @@ You retrieve more metrics by using the metric parameter.`,
     getLooseObjectFromProperty(watcher_stats1_request, 'path'),
     getLooseObjectFromProperty(watcher_stats1_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_stats_response)),
-      ...getShape(getShape(watcher_stats1_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: z.union([watcher_stats_response, watcher_stats1_response]),
 };
 const WATCHER_STOP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.stop',
@@ -22096,12 +19315,7 @@ Stop the Watcher service if it is running.`,
     getLooseObjectFromProperty(watcher_stop_request, 'path'),
     getLooseObjectFromProperty(watcher_stop_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_stop_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: watcher_stop_response,
 };
 const WATCHER_UPDATE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.update_settings',
@@ -22128,12 +19342,7 @@ Watcher shards must always be in the \`data_content\` tier.`,
     getLooseObjectFromProperty(watcher_update_settings_request, 'path'),
     getLooseObjectFromProperty(watcher_update_settings_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(watcher_update_settings_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: watcher_update_settings_response,
 };
 const XPACK_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.xpack.info',
@@ -22158,12 +19367,7 @@ The information provided by the API includes:
     getLooseObjectFromProperty(xpack_info_request, 'path'),
     getLooseObjectFromProperty(xpack_info_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(xpack_info_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: xpack_info_response,
 };
 const XPACK_USAGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.xpack.usage',
@@ -22185,12 +19389,7 @@ The API also provides some usage statistics.`,
     getLooseObjectFromProperty(xpack_usage_request, 'path'),
     getLooseObjectFromProperty(xpack_usage_request, 'query'),
   ]),
-  outputSchema: z.object({
-    output: z.looseObject({
-      ...getShape(getShape(xpack_usage_response)),
-    }),
-    error: z.any().optional(),
-  }),
+  outputSchema: xpack_usage_response,
 };
 
 // export contracts

@@ -77,14 +77,20 @@ function generateParamsSchemaStringObject(operationIds: string[]): string {
 }
 
 export function generateOutputSchemaString(operationIds: string[]): string {
-  return `z.object({
-      output: z.looseObject({
-        ${operationIds
-          .map((operationId) => `...(getShape(getShape(${getResponseSchemaName(operationId)})))`)
-          .join(', ')}
-      }),
-      error: z.any().optional(),
-    })`;
+  // TODO: add error schema
+  return generateSuccessSchemaString(operationIds);
+}
+
+function generateSuccessSchemaString(operationIds: string[]): string {
+  if (operationIds.length === 0) {
+    return 'z.optional(z.looseObject({}))';
+  }
+  if (operationIds.length === 1) {
+    return `${getResponseSchemaName(operationIds[0])}`;
+  }
+  return `z.union([${operationIds
+    .map((operationId) => `${getResponseSchemaName(operationId)}`)
+    .join(', ')}])`;
 }
 
 export function getRequestSchemaName(operationId: string): string {

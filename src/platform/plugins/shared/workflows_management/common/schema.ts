@@ -814,21 +814,25 @@ export const getOutputSchemaForStepType = (stepType: string) => {
   const allConnectors = getAllConnectors();
   const connector = allConnectors.find((c) => c.type === stepType);
   if (connector) {
+    if (!connector.outputSchema) {
+      // throw new Error(`Output schema not found for step type ${stepType}`);
+      return z.unknown();
+    }
     return connector.outputSchema;
   }
 
   // Handle internal actions with pattern matching
   // TODO: add output schema support for elasticsearch.request and kibana.request connectors
   if (stepType.startsWith('elasticsearch.')) {
-    return z.any();
+    return z.unknown();
   }
 
   if (stepType.startsWith('kibana.')) {
-    return z.any();
+    return z.unknown();
   }
 
   // Fallback to any if not found
-  return z.any();
+  return z.unknown();
 };
 
 /**
