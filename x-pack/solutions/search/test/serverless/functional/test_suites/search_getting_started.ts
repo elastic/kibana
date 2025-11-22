@@ -28,6 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('as viewer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsViewer();
+        await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       });
 
       describe('Getting Started page', function () {
@@ -249,7 +250,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.svlCommonNavigation.search.clickOnOption(0);
             await pageObjects.svlCommonNavigation.search.hideSearch();
 
-            expect(await browser.getCurrentUrl()).contain('/app/search-getting-started');
+            expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/getting_started');
           });
 
           it('Getting Started nav item shows correct breadcrumbs', async () => {
