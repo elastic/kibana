@@ -235,6 +235,7 @@ export class BackfillClient {
               ruleName: item.attributes.rule.name,
               bulkCreateError: new Error(error.message),
             };
+            this.logger.warn(`Error to schedule backfill for ruleId ${ruleId} - ${error.message}`);
             auditLogger?.log(
               adHocRunAuditEvent({
                 action: AdHocRunAuditAction.CREATE,
