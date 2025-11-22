@@ -143,8 +143,8 @@ export function registerGapAutoFillSchedulerTask({
               logEvent = initResult.logEvent;
             } catch (e) {
               const errMsg = e instanceof Error ? e.message : String(e);
-              logger.warn(loggerMesage(`initialization failed: ${errMsg}`));
-              return { state: {} };
+              logger.error(loggerMesage(`initialization failed: ${errMsg}`));
+              return { state: {}, shouldDeleteTask: true };
             }
 
             try {

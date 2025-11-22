@@ -602,13 +602,13 @@ describe('Gap Auto Fill Scheduler Task', () => {
     });
 
     describe('Errors', () => {
-      it('should handle errors during initialization', async () => {
+      it('should handle errors during initialization and delete the task', async () => {
         mockSavedObjectsRepository.get.mockRejectedValue(new Error('Config not found'));
 
         const result = await taskRunner.run();
 
-        expect(result).toEqual({ state: {} });
-        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('initialization failed'));
+        expect(result).toEqual({ state: {}, shouldDeleteTask: true });
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('initialization failed'));
         expect(typeof logEventMock).toBe('function');
       });
 
@@ -948,7 +948,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         );
       });
 
-      it('should handle missing request or rules client factory', async () => {
+      it('should handle missing request or rules client factory and delete the task', async () => {
         registerGapAutoFillSchedulerTask({
           taskManager,
           logger,
@@ -969,8 +969,8 @@ describe('Gap Auto Fill Scheduler Task', () => {
 
         const result = await taskRunnerWithoutRequest.run();
 
-        expect(result).toEqual({ state: {} });
-        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('initialization failed'));
+        expect(result).toEqual({ state: {}, shouldDeleteTask: true });
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('initialization failed'));
       });
     });
   });
