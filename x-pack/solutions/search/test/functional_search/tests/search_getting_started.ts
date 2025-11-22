@@ -34,6 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'search-getting-started-ftr'
         ));
         await searchSpace.navigateTo(spaceCreated.id);
+        await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       });
 
       after(async () => {
