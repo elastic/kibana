@@ -846,6 +846,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.duplicateLayer();
 
       // now make the first layer bar percentage to lead it in an broken rendering state
+      await lens.ensureLayerTabIsActive(0);
       await lens.switchToVisualizationSubtype('Percentage');
 
       // now check that both the main visualization and the current visualization suggestion are in error state
