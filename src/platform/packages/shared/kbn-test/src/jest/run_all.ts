@@ -50,6 +50,7 @@ interface FailedTest {
 //   JEST_ALL_CHECKPOINT_PATH       Path to checkpoint file for tracking completed configs (optional, enables resume functionality)
 //   JEST_ALL_FAILED_CONFIGS_PATH   Path to save list of failed configs (optional)
 //   JEST_MAX_PARALLEL              Default max parallel processes if --maxParallel not specified (optional, defaults to 3)
+//   JEST_CHECKPOINT_TEST_FAIL_AFTER  TEST MODE: Simulate agent failure after N successful configs (optional, for testing checkpoint/resume)
 export async function runJestAll() {
   const argv = getopts(process.argv.slice(2), {
     string: ['configs', 'maxParallel'],
@@ -306,6 +307,21 @@ async function runConfigs(
           // Log how many configs are left to complete
           const remaining = configs.length - results.length;
           log.info(`Configs left: ${remaining}`);
+
+          // TEST MODE: Simulate agent failure after N successful configs
+          if (
+            process.env.JEST_CHECKPOINT_TEST_FAIL_AFTER &&
+            code === 0 &&
+            completedConfigs &&
+            completedConfigs.size >= parseInt(process.env.JEST_CHECKPOINT_TEST_FAIL_AFTER, 10)
+          ) {
+            log.warning(
+              `⚠️  TEST MODE: Simulating agent failure after ${completedConfigs.size} completed configs`
+            );
+            log.warning(`⚠️  Checkpoint saved. Retry this job to test resume functionality.`);
+            // Exit with non-zero to trigger retry, but don't mark this config as failed
+            process.exit(99);
+          }
 
           // Save checkpoint when a config succeeds
           if (code === 0 && checkpointPath && completedConfigs) {
