@@ -15,9 +15,10 @@ import { CreateIndexModal } from './create_index_modal';
 export interface CreateIndexButtonProps {
   loadIndices: () => void;
   share?: SharePluginStart;
+  dataTestSubj?: string;
 }
 
-export const CreateIndexButton = ({ loadIndices, share }: CreateIndexButtonProps) => {
+export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIndexButtonProps) => {
   const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
   const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
   const actionProp = createIndexUrl
@@ -30,7 +31,7 @@ export const CreateIndexButton = ({ loadIndices, share }: CreateIndexButtonProps
         fill
         iconType="plusInCircleFilled"
         key="createIndexButton"
-        data-test-subj="createIndexButton"
+        data-test-subj={dataTestSubj || 'createIndexButton'}
         data-telemetry-id="idxMgmt-indexList-createIndexButton"
         {...actionProp}
       >

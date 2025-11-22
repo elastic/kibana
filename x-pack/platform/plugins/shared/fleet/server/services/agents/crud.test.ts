@@ -45,6 +45,9 @@ jest.mock('./versions', () => {
   };
 });
 jest.mock('../spaces/helpers');
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const isSpaceAwarenessEnabledMock = _isSpaceAwarenessEnabled as jest.Mock;
@@ -484,6 +487,62 @@ describe('Agents CRUD test', () => {
         expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
           toElasticsearchQuery(_joinFilters(['status:*'])!)
         );
+      });
+    });
+
+    describe('retry functionality', () => {
+      beforeEach(() => {
+        searchMock.mockReset();
+      });
+
+      it('should retry on transient es errors', async () => {
+        const errorWithShardException = new Error('no_shard_available_action_exception: null');
+
+        searchMock
+          .mockRejectedValueOnce(errorWithShardException)
+          .mockResolvedValueOnce(getEsResponse(['1', '2'], 2, 'online'));
+
+        const result = await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: false,
+        });
+
+        expect(searchMock).toHaveBeenCalledTimes(2);
+
+        expect(result).toEqual({
+          agents: [
+            {
+              access_api_key: undefined,
+              id: '1',
+              packages: [],
+              policy_revision: undefined,
+              status: 'online',
+            },
+            {
+              access_api_key: undefined,
+              id: '2',
+              packages: [],
+              policy_revision: undefined,
+              status: 'online',
+            },
+          ],
+          page: 1,
+          perPage: 20,
+          total: 2,
+        });
+      });
+
+      it('should not retry on non-transient errors', async () => {
+        const nonTransientError = new Error('Oh no!');
+
+        searchMock.mockRejectedValueOnce(nonTransientError);
+
+        await expect(
+          getAgentsByKuery(esClientMock, soClientMock, {
+            showInactive: false,
+          })
+        ).rejects.toThrow('Oh no!');
+
+        expect(searchMock).toHaveBeenCalledTimes(1);
       });
     });
   });

@@ -57,7 +57,7 @@ export class MonacoEditorService extends FtrService {
           const editor = window.MonacoEnvironment?.monaco.editor as typeof monaco.editor;
           const textModels = editor.getModels();
 
-          if (editorIndex) {
+          if (editorIndex !== undefined && textModels[editorIndex]) {
             textModels[editorIndex].setValue(codeEditorValue);
           } else {
             // when specific model instance is unknown, update all models returned

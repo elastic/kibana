@@ -6,7 +6,7 @@
  */
 
 import { test as base } from '@kbn/scout';
-import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
+import type { ApiServicesFixture } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
 import { ObltApiServicesFixture, ObltTestFixtures, ObltWorkerFixtures } from './types';
@@ -30,7 +30,7 @@ export const test = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
   },
   apiServices: [
     async (
-      { apiServices, kbnClient }: { apiServices: ApiServicesFixture; kbnClient: KbnClient },
+      { apiServices }: { apiServices: ApiServicesFixture },
       use: (extendedApiServices: ObltApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as ObltApiServicesFixture;
