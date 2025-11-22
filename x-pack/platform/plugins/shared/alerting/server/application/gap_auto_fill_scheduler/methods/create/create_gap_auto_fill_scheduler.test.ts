@@ -191,6 +191,8 @@ describe('createGapFillAutoScheduler()', () => {
     const params = getParams();
     const result = await rulesClient.createGapAutoFillScheduler(params);
 
+    expect(ruleTypeRegistry.get).toHaveBeenCalledWith('test-rule-type1');
+    expect(ruleTypeRegistry.get).toHaveBeenCalledWith('test-rule-type2');
     expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
@@ -217,6 +219,19 @@ describe('createGapFillAutoScheduler()', () => {
         savedObject: await unsecuredSavedObjectsClient.create.mock.results[0].value,
       })
     );
+  });
+
+  test('throws an error if a rule type is not registered', async () => {
+    ruleTypeRegistry.get.mockImplementationOnce(() => {
+      throw new Error('Invalid type');
+    });
+
+    await expect(rulesClient.createGapAutoFillScheduler(getParams())).rejects.toThrow(
+      'Invalid type'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
   });
 
   test('deletes saved object and throws if scheduling task fails', async () => {
