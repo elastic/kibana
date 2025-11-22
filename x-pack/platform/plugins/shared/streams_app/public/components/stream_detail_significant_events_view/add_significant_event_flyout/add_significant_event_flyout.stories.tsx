@@ -28,6 +28,7 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
     lifecycle: { inherit: {} },
     processing: { steps: [] },
     settings: {},
+    failure_store: { inherit: {} },
   },
 };
 
@@ -39,6 +40,7 @@ export const Default: StoryFn<{}> = () => {
       onSave={async (queries) => {}}
       features={[
         {
+          type: 'system',
           name: 'Test feature',
           filter: {
             field: 'host.name',
@@ -59,6 +61,7 @@ export const Edit: StoryFn<{}> = () => {
       onSave={async (queries) => {}}
       features={[
         {
+          type: 'system',
           name: 'Test feature',
           filter: {
             field: 'host.name',

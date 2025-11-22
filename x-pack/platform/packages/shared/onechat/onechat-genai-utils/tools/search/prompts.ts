@@ -16,9 +16,11 @@ import {
 export const getSearchPrompt = ({
   nlQuery,
   searchTarget,
+  customInstructions,
 }: {
   nlQuery: string;
   searchTarget: SearchTarget;
+  customInstructions?: string;
 }): BaseMessageLike[] => {
   const systemPrompt = `You are an expert search dispatcher. Your sole task is to analyze a user's request and call the single most appropriate tool to answer it.
 You **must** call **one** of the available tools. Do not answer the user directly or ask clarifying questions.
@@ -42,7 +44,13 @@ You **must** call **one** of the available tools. Do not answer the user directl
 
 ## Additional instructions
 
-- The search will be performed against the \`${searchTarget.name}\` ${searchTarget.type}, so you should use that value for the \`index\` parameters of the tool you will call.`;
+- The search will be performed against the \`${searchTarget.name}\` ${
+    searchTarget.type
+  }, so you should use that value for the \`index\` parameters of the tool you will call.${
+    customInstructions ? `\n- User provided additional instructions: ${customInstructions}` : ''
+  }
+
+`;
 
   const userPrompt = `Execute the following user query: "${nlQuery}"`;
 
