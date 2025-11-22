@@ -180,7 +180,7 @@
       "kibana.alert.rule.rule_type_id": "apm.error_rate",
       "message": "hello world 1",
       "kibana.alert.rule.consumer": "apm",
-      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_status": "in-progress",
       "kibana.alert.time_range": {
         "gte": "2020-12-16T15:16:18.570Z"
       },
@@ -202,7 +202,7 @@
       "kibana.alert.rule.rule_type_id": "apm.error_rate",
       "message": "hello world 1",
       "kibana.alert.rule.consumer": "apm",
-      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_status": "in-progress",
       "kibana.alert.time_range": {
         "gte": "2020-12-16T15:16:18.570Z"
       },
@@ -223,7 +223,7 @@
       "kibana.alert.rule.rule_type_id": "apm.error_rate",
       "message": "hello world 1",
       "kibana.alert.rule.consumer": "apm",
-      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_status": "in-progress",
       "kibana.alert.time_range": {
         "gte": "2020-12-16T15:16:18.570Z"
       },
@@ -245,7 +245,7 @@
       "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "message": "hello world security",
       "kibana.alert.rule.consumer": "siem",
-      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_status": "in-progress",
       "kibana.alert.workflow_tags": ["siem-tag-1"],
       "kibana.space_ids": ["space1", "space2"]
     }
