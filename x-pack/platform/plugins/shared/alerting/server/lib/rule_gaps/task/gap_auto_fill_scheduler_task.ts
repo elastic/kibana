@@ -114,7 +114,7 @@ export function registerGapAutoFillSchedulerTask({
       createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
         return {
           async run() {
-            const loggerMesage = (message: string) =>
+            const loggerMessage = (message: string) =>
               `[gap-fill-auto-scheduler-task][${taskInstance.id}] ${message}`;
             const startTime = new Date();
             // Step 1: Initialization
@@ -143,7 +143,7 @@ export function registerGapAutoFillSchedulerTask({
               logEvent = initResult.logEvent;
             } catch (e) {
               const errMsg = e instanceof Error ? e.message : String(e);
-              logger.error(loggerMesage(`initialization failed: ${errMsg}`));
+              logger.error(loggerMessage(`initialization failed: ${errMsg}`));
               return { state: {}, shouldDeleteTask: true };
             }
 
@@ -167,7 +167,7 @@ export function registerGapAutoFillSchedulerTask({
               } catch (cleanupError) {
                 const errMsg =
                   cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
-                logger.warn(loggerMesage(`cleanup of stuck in-progress gaps failed: ${errMsg}`));
+                logger.warn(loggerMessage(`cleanup of stuck in-progress gaps failed: ${errMsg}`));
                 // Continue with normal flow even if cleanup fails
               }
 
@@ -175,7 +175,7 @@ export function registerGapAutoFillSchedulerTask({
               const capacityCheckInitial = await checkBackfillCapacity({
                 rulesClient,
                 maxBackfills: config.maxBackfills,
-                logMessage: (message) => logger.warn(loggerMesage(message)),
+                logMessage: (message) => logger.warn(loggerMessage(message)),
                 initiatorId: taskInstance.id,
               });
               if (!capacityCheckInitial.canSchedule) {
@@ -276,7 +276,7 @@ export function registerGapAutoFillSchedulerTask({
                 while (true) {
                   if (gapFetchIterationCount >= GAP_FETCH_MAX_ITERATIONS) {
                     logger.warn(
-                      loggerMesage(
+                      loggerMessage(
                         `Circuit breaker triggered: reached maximum number of gap fetch iterations`
                       )
                     );
@@ -325,7 +325,7 @@ export function registerGapAutoFillSchedulerTask({
                   const filteredGaps = await filterGapsWithOverlappingBackfills(
                     gapsPage,
                     rulesClientContext,
-                    (message) => logger.warn(loggerMesage(message))
+                    (message) => logger.warn(loggerMessage(message))
                   );
 
                   if (!filteredGaps.length) {
@@ -393,7 +393,7 @@ export function registerGapAutoFillSchedulerTask({
                 message: `Error during execution: ${error && error.message}`,
               });
 
-              logger.error(loggerMesage(`error: ${error && error.message}`));
+              logger.error(loggerMessage(`error: ${error && error.message}`));
               return { state: {} };
             }
           },
