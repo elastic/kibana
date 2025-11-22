@@ -119,7 +119,7 @@ export function validateVariable(
     };
   }
 
-  if (zodTypeName !== 'array' && type === 'foreach') {
+  if (!zodTypeName.endsWith('[]') && type === 'foreach') {
     return {
       ...variableItem,
       message: `Foreach parameter should be an array or a JSON string. ${parsedPath.propertyPath} is ${zodTypeName}`,

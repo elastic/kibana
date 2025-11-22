@@ -135,6 +135,24 @@ describe('getSchemaAtPath', () => {
     expectZodSchemaEqual(result.schema as z.ZodType, z.any());
     expect(result.scopedToPath).toBe('a.b');
   });
+
+  it('should resolve lazy zod schemas', () => {
+    const schema = z.lazy(() => z.object({ a: z.string() }));
+    const result = getSchemaAtPath(schema, 'a');
+    expect(result.schema).toBeDefined();
+    expect(result.scopedToPath).toBe('a');
+    expectZodSchemaEqual(result.schema as z.ZodType, z.string());
+  });
+
+  it('should resolve nested lazy zod schemas', () => {
+    const schema = z.lazy(() =>
+      z.object({ a: z.lazy(() => z.object({ b: z.lazy(() => z.string()) })) })
+    );
+    const result = getSchemaAtPath(schema, 'a.b');
+    expect(result.schema).toBeDefined();
+    expect(result.scopedToPath).toBe('a.b');
+    expectZodSchemaEqual(result.schema as z.ZodType, z.string());
+  });
 });
 
 describe('getSchemaAtPath: real life examples', () => {

@@ -17,6 +17,17 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JSONSchema.J
       unrepresentable: 'any',
       reused: 'ref',
       override: (ctx) => {
+        // TODO: remove fields, which has default or optional from 'required' array because we validating user input not the result of safeParse. e.g. 'version' shouldn't be required
+        // we'd love to use 'io:input' but it results in memory leak
+        if (ctx.jsonSchema.required && ctx.jsonSchema.required.length > 0) {
+          const newRequired = ctx.jsonSchema.required.filter((field) => {
+            const fieldSchema = ctx.jsonSchema.properties?.[field] as
+              | JSONSchema.JSONSchema
+              | undefined;
+            return fieldSchema && !('default' in fieldSchema) && !('optional' in fieldSchema);
+          });
+          ctx.jsonSchema.required = newRequired.length > 0 ? newRequired : undefined;
+        }
         // TODO: remove useless anyOf from schema or at the zod level
         // if (ctx.jsonSchema.anyOf) {
         //   ctx.jsonSchema.anyOf = ctx.jsonSchema.anyOf.filter((schema) => !isEmptyObject(schema));

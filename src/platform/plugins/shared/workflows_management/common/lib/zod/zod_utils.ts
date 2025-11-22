@@ -52,6 +52,9 @@ export function getSchemaAtPath(
       if (current instanceof z.ZodDefault) {
         current = current.unwrap() as ZodType;
       }
+      if (current instanceof z.ZodLazy) {
+        current = current.unwrap() as ZodType;
+      }
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         if (!(segment in shape)) {
@@ -250,7 +253,11 @@ function getZodTypeNameRecursively(schema: z.ZodType, depth: number = 0) {
   if (depth > 10) {
     return 'unknown';
   }
-  if (schema instanceof z.ZodOptional || schema instanceof z.ZodDefault) {
+  if (
+    schema instanceof z.ZodOptional ||
+    schema instanceof z.ZodDefault ||
+    schema instanceof z.ZodLazy
+  ) {
     return getZodTypeNameRecursively(schema.unwrap() as ZodType, depth + 1);
   }
   const def = schema.def;
