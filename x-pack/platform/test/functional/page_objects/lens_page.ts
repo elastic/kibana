@@ -1701,6 +1701,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    async ensureLayerTabWithNameIsActive(name: string) {
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      for (let i = 0; i < tabs.length; i++) {
+        const tabText = await tabs[i].getVisibleText();
+        if (tabText === name) {
+          await tabs[i].click(); // Click to make it active
+          // Wait for the layer panel to render
+          await retry.waitFor('layer panel to be visible', async () => {
+            return await testSubjects.exists(`lns-layerPanel-${i}`);
+          });
+          return;
+        }
+      }
+      throw new Error(`Layer tab with name "${name}" not found`);
+    },
+
     async assertLayerCount(expectedCount: number) {
       // Inside the tab content there should be one panel
       const layerPanels = await find.allByCssSelector('[data-test-subj^="lns-layerPanel-"]');

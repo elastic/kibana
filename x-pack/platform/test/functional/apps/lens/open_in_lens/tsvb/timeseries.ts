@@ -91,10 +91,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
+
       await retry.try(async () => {
-        await lens.ensureLayerTabIsActive(1);
+        await lens.ensureLayerTabWithNameIsActive('Reference line');
 
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
+        expect(layers).to.have.length(1);
 
         const referenceLineDimensions = await testSubjects.findAllDescendant(
           'lns-dimensionTrigger',
@@ -105,10 +107,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        // switch to data tab
-        await lens.ensureLayerTabIsActive(0);
+        await lens.ensureLayerTabWithNameIsActive('Data layer');
 
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
+        expect(layers).to.have.length(1);
+
         const dimensions = await testSubjects.findAllDescendant('lns-dimensionTrigger', layers[0]);
         expect(dimensions).to.have.length(2);
         expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
