@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, KibanaRequest } from '@kbn/core/server';
+import type { Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -15,21 +15,26 @@ import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 
-const TASK_TYPE = 'autoImport-task';
+const TASK_TYPE = 'autoImport-dataStream-task';
+
+export interface DataStreamTaskParams {
+  integrationId: string;
+  dataStreamId: string;
+}
 
 export class TaskManagerService {
   private logger: Logger;
   private taskManager: TaskManagerStartContract | null = null;
-  private taskWorkflow?: () => void | Promise<void>;
+  private taskWorkflow?: (params: DataStreamTaskParams) => void | Promise<void>;
 
-  constructor(logger: Logger, taskManagerSetup: TaskManagerSetupContract) {
+  constructor(logger: LoggerFactory, taskManagerSetup: TaskManagerSetupContract) {
     this.logger = logger.get('taskManagerService');
 
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
       [TASK_TYPE]: {
-        title: 'Automatic Import AI Workflow',
-        description: 'Executes long-running AI agent workflows for automatic import',
+        title: 'Data Stream generation workflow',
+        description: 'Executes long-running AI agent workflows for data stream generation',
         timeout: TASK_TIMEOUT_DURATION,
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
         cost: TaskCost.Normal,
@@ -48,7 +53,7 @@ export class TaskManagerService {
   public initialize(
     taskManager: TaskManagerStartContract,
     options?: {
-      taskWorkflow?: () => void | Promise<void>;
+      taskWorkflow?: (params: DataStreamTaskParams) => void | Promise<void>;
     }
   ): void {
     this.taskManager = taskManager;
@@ -60,39 +65,23 @@ export class TaskManagerService {
     this.logger.debug('TaskManagerService initialized');
   }
 
-  public async scheduleAIWorkflowTask(
-    params: {
-      integrationId: string;
-      dataStreamId: string;
-      [key: string]: any;
-    },
-    request?: KibanaRequest
-  ): Promise<{ taskId: string }> {
+  public async scheduleAIWorkflowTask(params: DataStreamTaskParams): Promise<{ taskId: string }> {
     if (!this.taskManager) {
       throw new Error('TaskManager not initialized');
     }
 
-    // Generate a task ID that is always under 50 characters
-    // TODO: Should we increase the length of id to more characters?
-    // Pattern: ai-task-{integrationId}-{dataStreamId}
-    const taskId = `ai-task-${params.integrationId}-${params.dataStreamId}`;
+    // Generate an unique task ID
+    const taskId = `data-stream-task-${params.integrationId}-${params.dataStreamId}`;
 
-    const taskInstance = await this.taskManager.schedule(
-      {
-        id: taskId,
-        taskType: TASK_TYPE,
-        params,
-        state: { task_status: TASK_STATUSES.pending },
-        scope: ['automaticImport'],
-      },
-      request ? { request } : undefined
-    );
+    const taskInstance = await this.taskManager.schedule({
+      id: taskId,
+      taskType: TASK_TYPE,
+      params,
+      state: { task_status: TASK_STATUSES.pending },
+      scope: ['automaticImport'],
+    });
 
-    if (request) {
-      this.logger.info(`Task scheduled with user context: ${taskInstance.id}`);
-    } else {
-      this.logger.info(`Task scheduled without user context: ${taskInstance.id}`);
-    }
+    this.logger.info(`Task scheduled: ${taskInstance.id}`);
 
     return { taskId: taskInstance.id };
   }
@@ -123,10 +112,17 @@ export class TaskManagerService {
 
     try {
       if (this.taskWorkflow) {
-        await this.taskWorkflow();
-        this.logger.debug(`Task ${taskId}: Workflow executed`);
+        const { integrationId, dataStreamId } = params;
+        if (!integrationId || !dataStreamId) {
+          throw new Error('Task params must include integrationId and dataStreamId');
+        }
+
+        await this.taskWorkflow({ integrationId, dataStreamId });
+        this.logger.debug(`Task ${taskId}: Workflow executed successfully`);
       } else {
-        this.logger.warn(`Task ${taskId}: No workflow provided, using mock delay`);
+        this.logger.warn(
+          `Task ${taskId}: No workflow provided, task will complete without processing`
+        );
       }
 
       this.logger.info(`Task ${taskId} completed successfully`);

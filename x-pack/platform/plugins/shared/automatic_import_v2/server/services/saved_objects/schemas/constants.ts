@@ -6,6 +6,6 @@
  */
 
 // Schema Validation Lengths
-export const MAX_ID_LENGTH = 50;
+export const MAX_ID_LENGTH = 150;
 export const MAX_VERSION_LENGTH = 20;
 export const MIN_VERSION_LENGTH = 5;

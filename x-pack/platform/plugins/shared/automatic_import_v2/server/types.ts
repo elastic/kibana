@@ -29,7 +29,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { AutomaticImportService, TaskManagerService } from './services';
+import type { AutomaticImportService } from './services';
 
 export const PLUGIN_ID = 'automaticImportV2' as const;
 
@@ -72,7 +72,6 @@ export interface AutomaticImportV2PluginApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   getSpaceId: () => string;
   automaticImportService: AutomaticImportService;
-  taskManagerService: TaskManagerService;
 }
 
 /**

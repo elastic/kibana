@@ -8,11 +8,10 @@
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { TASK_STATUSES } from '../constants';
-import { MAX_VERSION_LENGTH, MIN_VERSION_LENGTH } from './constants';
+import { MAX_ID_LENGTH, MAX_VERSION_LENGTH, MIN_VERSION_LENGTH } from './constants';
 
 export const integrationSchemaV1 = schema.object({
-  integration_id: schema.string(),
-  data_stream_count: schema.maybe(schema.number()),
+  integration_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
   created_by: schema.string({ minLength: 1 }),
   status: schema.oneOf(
     Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]

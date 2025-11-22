@@ -14,7 +14,7 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 import { AutomaticImportService } from '../services/automatic_import_service';
 import type { AutomaticImportSavedObjectService } from '../services/saved_objects/saved_objects_service';
-import { TaskManagerService } from '../services/task_manager/task_manager_service';
+import type { TaskManagerService } from '../services/task_manager/task_manager_service';
 import { TASK_STATUSES, INPUT_TYPES } from '../services/saved_objects/constants';
 import { createMockSecurity } from './__mocks__/security';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -56,14 +56,15 @@ describe('TaskManagerService Integration Tests', () => {
         resolveEsClient = resolve;
       });
 
+      expect(taskManagerSetupSpy).toHaveBeenCalled();
+      taskManagerSetup = taskManagerSetupSpy.mock.results[0].value;
+
       automaticImportService = new AutomaticImportService(
         kbnRoot.logger,
         esClientPromise,
-        coreSetup.savedObjects
+        coreSetup.savedObjects,
+        taskManagerSetup
       );
-
-      expect(taskManagerSetupSpy).toHaveBeenCalled();
-      taskManagerSetup = taskManagerSetupSpy.mock.results[0].value;
 
       // Start Kibana to boot taskManager
       coreStart = await kbnRoot.start();
@@ -76,19 +77,27 @@ describe('TaskManagerService Integration Tests', () => {
 
       mockSecurity = createMockSecurity();
 
-      await automaticImportService.initialize(mockSecurity, coreStart.savedObjects);
+      expect(taskManagerStartSpy).toHaveBeenCalled();
+      taskManagerStart = taskManagerStartSpy.mock.results[0].value;
+
+      await automaticImportService.initialize(
+        mockSecurity,
+        coreStart.savedObjects,
+        taskManagerStart
+      );
       savedObjectService = (automaticImportService as any).savedObjectService;
 
-      // Initialize TaskManagerService
-      taskManagerService = new TaskManagerService(kbnRoot.logger.get(), taskManagerSetup);
-      taskManagerService.initialize(taskManagerStart, {
-        taskWorkflow: async () => {
-          kbnRoot.logger.get().info('Test workflow started');
-          // Add delay to allow concurrent execution to be observed
-          await new Promise((resolve) => setTimeout(resolve, 5000)); // 5 seconds
-          kbnRoot.logger.get().info('Test workflow completed');
-        },
-      });
+      // Get the TaskManagerService instance that was already created by AutomaticImportService
+      taskManagerService = (automaticImportService as any).taskManagerService;
+
+      // Override the workflow for testing with a delay to observe concurrent execution
+      (taskManagerService as any).taskWorkflow = async (params: Record<string, any>) => {
+        const { integrationId, dataStreamId } = params;
+        kbnRoot.logger.get().info(`Test workflow started for ${integrationId}/${dataStreamId}`);
+        // Add delay to allow concurrent execution to be observed
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // 5 seconds
+        kbnRoot.logger.get().info(`Test workflow completed for ${integrationId}/${dataStreamId}`);
+      };
     } catch (error) {
       if (kbnRoot) {
         await kbnRoot.shutdown().catch(() => {});
@@ -150,7 +159,6 @@ describe('TaskManagerService Integration Tests', () => {
 
       const integrationData = {
         integration_id: 'test-int-123',
-        data_stream_count: 1,
         created_by: mockUser.username,
         status: TASK_STATUSES.pending,
         metadata: {
@@ -280,7 +288,6 @@ describe('TaskManagerService Integration Tests', () => {
           // Create integration
           const integrationData = {
             integration_id: integrationId,
-            data_stream_count: 1,
             created_by: mockUser.username,
             status: TASK_STATUSES.pending,
             metadata: {

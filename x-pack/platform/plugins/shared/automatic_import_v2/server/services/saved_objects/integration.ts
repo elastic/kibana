@@ -17,7 +17,6 @@ export const integrationSavedObjectType: SavedObjectsType = {
     dynamic: false,
     properties: {
       integration_id: { type: 'keyword' },
-      data_stream_count: { type: 'integer' },
       created_by: { type: 'keyword' },
       status: { type: 'keyword' },
       metadata: {

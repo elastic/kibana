@@ -106,11 +106,7 @@ export class AutomaticImportSavedObjectService {
       throw new Error('No user authenticated');
     }
 
-    const {
-      integration_id: integrationId,
-      data_stream_count: dataStreamCount = 0,
-      metadata = {},
-    } = data;
+    const { integration_id: integrationId, metadata = {} } = data;
 
     if (!integrationId) {
       throw new Error('Integration ID is required');
@@ -121,7 +117,6 @@ export class AutomaticImportSavedObjectService {
 
       const initialIntegrationData: IntegrationAttributes = {
         integration_id: integrationId,
-        data_stream_count: dataStreamCount,
         created_by: authenticatedUser.username,
         status: TASK_STATUSES.pending,
         metadata: {
@@ -165,12 +160,7 @@ export class AutomaticImportSavedObjectService {
     versionUpdate?: 'major' | 'minor' | 'patch',
     options?: SavedObjectsUpdateOptions<IntegrationAttributes>
   ): Promise<SavedObjectsUpdateResponse<IntegrationAttributes>> {
-    const {
-      integration_id: integrationId,
-      data_stream_count: dataStreamCount = 0,
-      status,
-      metadata = {},
-    } = data;
+    const { integration_id: integrationId, status, metadata = {} } = data;
 
     if (!integrationId) {
       throw new Error('Integration ID is required');
@@ -196,7 +186,6 @@ export class AutomaticImportSavedObjectService {
 
       const integrationData: IntegrationAttributes = {
         integration_id: integrationId,
-        data_stream_count: dataStreamCount,
         created_by: existingIntegration.attributes.created_by,
         status: status || existingIntegration.attributes.status,
         metadata: {
@@ -471,31 +460,15 @@ export class AutomaticImportSavedObjectService {
         }
       );
 
-      // After successful data stream creation, update data stream count in the integration
-      // or create a new integration if it doesn't exist
+      // After successful data stream creation, create a new integration if it doesn't exist
       try {
-        if (existingIntegration) {
-          this.logger.debug(
-            `Data stream created successfully, incrementing integration ${integrationId} count`
-          );
-
-          const updatedIntegrationData: IntegrationAttributes = {
-            ...existingIntegration.attributes,
-            data_stream_count: existingIntegration.attributes.data_stream_count! + 1,
-          };
-
-          await this.updateIntegration(
-            updatedIntegrationData,
-            existingIntegration.attributes.metadata?.version || '0.0.0'
-          );
-        } else {
+        if (!existingIntegration) {
           this.logger.debug(
             `Data stream created successfully, creating new integration ${integrationId}`
           );
 
           const defaultIntegrationData: IntegrationAttributes = {
             integration_id: integrationId,
-            data_stream_count: 1,
             created_by: authenticatedUser.username,
             status: TASK_STATUSES.pending,
             metadata: {
@@ -509,7 +482,7 @@ export class AutomaticImportSavedObjectService {
         }
       } catch (integrationError) {
         this.logger.error(
-          `Failed to update/create integration ${integrationId} after creating data stream ${dataStreamId}: ${integrationError}`
+          `Failed to create integration ${integrationId} after creating data stream ${dataStreamId}: ${integrationError}`
         );
       }
 
@@ -674,40 +647,12 @@ export class AutomaticImportSavedObjectService {
     dataStreamId: string,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
-    let parentIntegrationId: string | undefined;
     try {
-      const dataStream = await this.getDataStream(dataStreamId);
-      parentIntegrationId = dataStream.attributes.integration_id;
-
       this.logger.debug(`Deleting data stream with id:${dataStreamId}`);
       await this.savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, dataStreamId, options);
     } catch (error) {
       this.logger.error(`Failed to delete data stream ${dataStreamId}: ${error}`);
       throw error;
-    }
-
-    // update the integration count since we are deleting a data stream
-    try {
-      const parentIntegration = await this.getIntegration(parentIntegrationId);
-      if (!parentIntegration) {
-        throw new Error(
-          `Integration associated with this data stream ${parentIntegrationId} not found`
-        );
-      }
-
-      const updatedIntegrationData: IntegrationAttributes = {
-        ...parentIntegration.attributes,
-        data_stream_count: parentIntegration.attributes.data_stream_count! - 1,
-      };
-
-      await this.updateIntegration(
-        updatedIntegrationData,
-        parentIntegration.attributes.metadata?.version || '0.0.0'
-      );
-    } catch (integrationError) {
-      this.logger.error(
-        `Failed to update integration ${parentIntegrationId} after deleting data stream ${dataStreamId}: ${integrationError}`
-      );
     }
   }
 }

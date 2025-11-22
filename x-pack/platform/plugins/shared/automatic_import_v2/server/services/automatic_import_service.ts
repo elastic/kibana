@@ -20,6 +20,10 @@ import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { DataStreamSamples } from '../../common';
 import type { IntegrationAttributes, DataStreamAttributes } from './saved_objects/schemas/types';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
@@ -27,6 +31,8 @@ import { getAuthenticatedUser } from './lib/get_user';
 import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 import { integrationSavedObjectType } from './saved_objects/integration';
 import { dataStreamSavedObjectType } from './saved_objects/data_stream';
+import type { DataStreamTaskParams } from './task_manager/task_manager_service';
+import { TaskManagerService } from './task_manager/task_manager_service';
 
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
@@ -35,11 +41,14 @@ export class AutomaticImportService {
   private savedObjectService: AutomaticImportSavedObjectService | null = null;
   private logger: LoggerFactory;
   private savedObjectsServiceSetup: SavedObjectsServiceSetup;
+  private taskManagerSetup: TaskManagerSetupContract;
+  private taskManagerService: TaskManagerService | null = null;
 
   constructor(
     logger: LoggerFactory,
     esClientPromise: Promise<ElasticsearchClient>,
-    savedObjectsServiceSetup: SavedObjectsServiceSetup
+    savedObjectsServiceSetup: SavedObjectsServiceSetup,
+    taskManagerSetup: TaskManagerSetupContract
   ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = logger;
@@ -48,12 +57,20 @@ export class AutomaticImportService {
 
     this.savedObjectsServiceSetup.registerType(integrationSavedObjectType);
     this.savedObjectsServiceSetup.registerType(dataStreamSavedObjectType);
+
+    this.taskManagerSetup = taskManagerSetup;
   }
+
+  private processDataStreamWorkflow = async (params: DataStreamTaskParams): Promise<void> => {
+    // TODO: Implement the actual AI agent workflow here that uses AgentService
+    // Will use params.integrationId and params.dataStreamId
+  };
 
   // Run initialize in the start phase of plugin
   public async initialize(
     security: SecurityServiceStart,
-    savedObjectsServiceStart: SavedObjectsServiceStart
+    savedObjectsServiceStart: SavedObjectsServiceStart,
+    taskManagerStart: TaskManagerStartContract
   ): Promise<void> {
     this.security = security;
     const savedObjectsClient = savedObjectsServiceStart.createInternalRepository();
@@ -62,6 +79,10 @@ export class AutomaticImportService {
       savedObjectsClient,
       this.security
     );
+    this.taskManagerService = new TaskManagerService(this.logger, this.taskManagerSetup);
+    this.taskManagerService.initialize(taskManagerStart, {
+      taskWorkflow: this.processDataStreamWorkflow,
+    });
   }
 
   public async addSamplesToDataStream(dataStream: DataStreamSamples, request: KibanaRequest) {
