@@ -7,8 +7,9 @@
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
 import { gapAutoFillSchedulerLimits } from '../../../../../constants';
+import { parseDuration } from '../../../../../parse_duration';
 
-const { maxBackfills, numRetries } = gapAutoFillSchedulerLimits;
+const { maxBackfills, numRetries, minScheduleIntervalInMs } = gapAutoFillSchedulerLimits;
 
 export const gapAutoFillSchedulerBodySchema = schema.object(
   {
@@ -30,10 +31,19 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
     ),
   },
   {
-    validate({ gap_fill_range: gapFillRange }) {
+    validate({ gap_fill_range: gapFillRange, schedule }) {
       const parsed = dateMath.parse(gapFillRange);
       if (!parsed || !parsed.isValid()) {
         return 'gap_fill_range is invalid';
+      }
+
+      try {
+        const intervalMs = parseDuration(schedule.interval);
+        if (intervalMs < minScheduleIntervalInMs) {
+          return 'schedule.interval must be at least 1 minute';
+        }
+      } catch (error) {
+        return `schedule.interval is invalid: ${(error as Error).message}`;
       }
     },
   }
