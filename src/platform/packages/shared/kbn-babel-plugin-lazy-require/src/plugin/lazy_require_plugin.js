@@ -96,15 +96,14 @@ module.exports = function lazyRequirePlugin({ types: t }) {
     visitor: {
       Program(programPath, state) {
         const filename = state.filename || state.file.opts.filename || '';
+        const isTestFile = TEST_DIR_PATTERN.test(filename) || TEST_FILE_PATTERN.test(filename);
 
         transformJestMockFactories(programPath, t);
 
         // Skip transformation for mock files - they need immediate access to all imports
-        if (isMockRelated(filename)) {
+        if (isMockRelated(filename) || isTestFile) {
           return;
         }
-
-        const isTestFile = TEST_DIR_PATTERN.test(filename) || TEST_FILE_PATTERN.test(filename);
 
         // State tracking
         /** @type {Map<string, ModuleInfo>} - Maps module path to cache info */
