@@ -14,16 +14,8 @@ if [ -z "$CHANGED_PLUGINS" ] || [ "$CHANGED_PLUGINS" == "[]" ]; then
 fi
 
 # Parse the JSON array and build docs for each changed plugin/package
-echo "Changed plugins/packages: $CHANGED_PLUGINS"
-
-# Check if we should build all or individual plugins
 PLUGIN_COUNT=$(echo "$CHANGED_PLUGINS" | jq 'length')
-
-if [ "$PLUGIN_COUNT" -eq 0 ]; then
-  echo "No plugins to build"
-  exit 0
-fi
-
+echo "Changed plugins/packages: $CHANGED_PLUGINS"
 echo "--- Build API Docs for $PLUGIN_COUNT plugin(s)/package(s)"
 
 # Extract plugin IDs from JSON array and build docs for each
