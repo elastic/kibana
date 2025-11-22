@@ -68,7 +68,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // get tool by ID
   router.versioned
     .get({
-      path: `${publicApiPath}/tools/{id}`,
+      path: `${publicApiPath}/tools/{toolId}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -90,7 +90,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string({
+              toolId: schema.string({
                 meta: { description: 'The unique identifier of the tool to retrieve.' },
               }),
             }),
@@ -101,10 +101,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { id } = request.params;
+        const { toolId } = request.params;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
-        const tool = await registry.get(id);
+        const tool = await registry.get(toolId);
         return response.ok<GetToolResponse>({
           body: await toDescriptorWithSchema(tool),
         });
@@ -259,7 +259,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // delete tool
   router.versioned
     .delete({
-      path: `${publicApiPath}/tools/{id}`,
+      path: `${publicApiPath}/tools/{toolId}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -280,7 +280,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string({
+              toolId: schema.string({
                 meta: { description: 'The unique identifier of the tool to delete.' },
               }),
             }),
@@ -291,10 +291,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { id } = request.params;
+        const { toolId } = request.params;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
-        const success = await registry.delete(id);
+        const success = await registry.delete(toolId);
         return response.ok<DeleteToolResponse>({
           body: { success },
         });

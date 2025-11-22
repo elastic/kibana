@@ -13,12 +13,14 @@ import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { getSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
+import { getTourQueue } from '@kbn/tour-queue';
 
 /**
  * This tour combines the spaces solution view tour and new navigation tour into a single
  * multi-step tour.
  */
 export class SolutionNavigationTourManager {
+  private tourQueue = getTourQueue();
   constructor(
     private deps: {
       navigationTourManager: NavigationTourManager;
@@ -30,21 +32,44 @@ export class SolutionNavigationTourManager {
   ) {}
 
   async startTour(): Promise<void> {
-    // first start the spaces tour (if applicable)
-    const spacesTour = await this.deps.spacesSolutionViewTourManager.startTour();
-    if (spacesTour.result === 'started') {
-      await this.deps.spacesSolutionViewTourManager.waitForTourEnd();
+    // Register and get tour object
+    const tour = this.tourQueue.register('solutionNavigationTour');
+    // This will only work as long as solutionNavigationTour is the first tour in the queue
+    // Will be removed as part of tour cleanup https://github.com/elastic/kibana/issues/239313
+    if (!tour.isActive()) {
+      tour.unregister();
+      return;
     }
 
-    // when completes, maybe start the navigation tour (if applicable)
-    if (getSideNavVersion(this.deps.featureFlags) !== 'v2') return;
-    const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
-    if (hasCompletedTour) return;
+    try {
+      // first start the spaces tour (if applicable)
+      if (this.deps.spacesSolutionViewTourManager) {
+        const spacesTour = await this.deps.spacesSolutionViewTourManager.startTour();
+        if (spacesTour.result === 'started') {
+          await this.deps.spacesSolutionViewTourManager.waitForTourEnd();
+        }
+      }
 
-    this.deps.navigationTourManager.startTour();
-    await this.deps.navigationTourManager.waitForTourEnd();
+      if (getSideNavVersion(this.deps.featureFlags) !== 'v2') return;
 
-    await preserveTourCompletion(this.deps.userProfile);
+      // when completes, maybe start the navigation tour (if applicable)
+      const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
+      if (hasCompletedTour) {
+        tour.complete();
+        return;
+      }
+      this.deps.navigationTourManager.startTour();
+      const navigationTourResult = await this.deps.navigationTourManager.waitForTourEnd();
+
+      // If skipped, notify queue to skip all remaining tours for the current page load only
+      if (navigationTourResult === 'skipped') {
+        tour.skip();
+      }
+      await preserveTourCompletion(this.deps.userProfile);
+      tour.complete();
+    } finally {
+      tour.unregister();
+    }
   }
 }
 
