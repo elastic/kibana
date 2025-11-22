@@ -75,14 +75,17 @@ export function getNodesWithLowDiskSpace(
         });
       }
 
-      // Having multiple data paths on a single node is deprecated in ES and considered rare
-      // If multiple data paths are above the low watermark, pick the one with the lowest available space
-      fsWithLowDiskSpace.sort((a, b) => {
-        const aBytes = ByteSizeValue.parse(a.available).getValueInBytes();
-        const bBytes = ByteSizeValue.parse(b.available).getValueInBytes();
-        return aBytes - bBytes;
-      });
-      nodesWithLowDiskSpace.push(fsWithLowDiskSpace[0]);
+      if (fsWithLowDiskSpace.length > 0) {
+        // Having multiple data paths on a single node is deprecated in ES and considered rare
+        // If multiple data paths are above the low watermark, pick the one with the lowest available space
+        fsWithLowDiskSpace.sort((a, b) => {
+          const aBytes = ByteSizeValue.parse(a.available).getValueInBytes();
+          const bBytes = ByteSizeValue.parse(b.available).getValueInBytes();
+          return aBytes - bBytes;
+        });
+
+        nodesWithLowDiskSpace.push(fsWithLowDiskSpace[0]);
+      }
     });
   });
 
