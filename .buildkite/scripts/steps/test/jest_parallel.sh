@@ -89,12 +89,15 @@ if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
   
   set +e
   
-  # Download checkpoint(s) - Buildkite will create numbered copies if multiple exist
-  # e.g., checkpoint.json, checkpoint (1).json, checkpoint (2).json, etc.
-  echo "Checkpoint: Running: buildkite-agent artifact download $CHECKPOINT_FILE $CHECKPOINT_TEMP_DIR/ --include-retried-jobs"
-  buildkite-agent artifact download "$CHECKPOINT_FILE" "$CHECKPOINT_TEMP_DIR/" --include-retried-jobs
+  # Download all checkpoint progress files (each upload has unique .progress_N.json suffix)
+  # e.g., jest_checkpoint_integration_0.progress_1.json, .progress_2.json, etc.
+  CHECKPOINT_PATTERN="${CHECKPOINT_FILE%.json}.progress_*.json"
+  echo "Checkpoint: Searching for pattern: $CHECKPOINT_PATTERN"
+  
+  buildkite-agent artifact download "$CHECKPOINT_PATTERN" "$CHECKPOINT_TEMP_DIR/" --include-retried-jobs
   download_code=$?
   echo "Checkpoint: Download exit code: $download_code"
+  
   set -e
   
   if [ $download_code -eq 0 ]; then
@@ -109,8 +112,8 @@ if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
     MAX_CONFIGS=0
     BEST_CHECKPOINT=""
     
-    # Check all downloaded checkpoint files (including numbered copies)
-    for checkpoint_file in "$CHECKPOINT_TEMP_DIR"/"$CHECKPOINT_FILE" "$CHECKPOINT_TEMP_DIR"/target/*checkpoint*.json*; do
+    # Check all downloaded checkpoint progress files
+    for checkpoint_file in "$CHECKPOINT_TEMP_DIR"/target/*.progress_*.json; do
       if [ -f "$checkpoint_file" ]; then
         echo "Checkpoint: Examining $checkpoint_file"
         config_count=$(jq -r '.completedConfigs | length' "$checkpoint_file" 2>/dev/null || echo "0")

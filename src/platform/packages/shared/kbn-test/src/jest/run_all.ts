@@ -338,12 +338,28 @@ async function runConfigs(
 
               // Upload checkpoint to Buildkite immediately (so it survives agent crashes)
               if (process.env.BUILDKITE) {
+                // Create unique filename with progress count to avoid "multiple artifacts" error
+                // e.g., jest_checkpoint_integration_0.progress_3.json
+                const checkpointWithProgress = checkpointPath.replace(
+                  '.json',
+                  `.progress_${completedConfigs.size}.json`
+                );
+
+                // Copy checkpoint with progress suffix for upload
+                try {
+                  await fs.copyFile(checkpointPath, checkpointWithProgress);
+                } catch (copyErr) {
+                  log.warning(
+                    `Checkpoint: Unable to create progress copy: ${(copyErr as Error).message}`
+                  );
+                }
+
                 log.info(`Checkpoint: Attempting upload to Buildkite...`);
                 try {
                   await new Promise<void>((resolve) => {
                     const uploadProc = spawn(
                       'buildkite-agent',
-                      ['artifact', 'upload', checkpointPath],
+                      ['artifact', 'upload', checkpointWithProgress],
                       {
                         stdio: 'pipe',
                       }
@@ -362,6 +378,10 @@ async function runConfigs(
                         log.info(
                           `Checkpoint: Uploaded to Buildkite (${completedConfigs.size} configs)`
                         );
+                        // Clean up the progress file after successful upload
+                        fs.unlink(checkpointWithProgress).catch(() => {
+                          // Ignore cleanup errors
+                        });
                       } else {
                         log.warning(
                           `Checkpoint: Upload failed with code ${uploadCode}: ${uploadOutput}`
