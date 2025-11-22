@@ -9,8 +9,8 @@ import { formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import type { InfrastructureFeature } from '@kbn/streams-schema';
 import {
-  InfrastructureFeature,
   isFeatureWithFilter,
   type Feature,
   type Streams,
