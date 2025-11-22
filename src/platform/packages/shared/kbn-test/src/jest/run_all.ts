@@ -108,16 +108,24 @@ export async function runJestAll() {
   let resumedConfigCount = 0;
 
   if (checkpointPath) {
+    log.info(`Checkpoint: Looking for checkpoint at: ${checkpointPath}`);
     try {
       const checkpointData = await fs.readFile(checkpointPath, 'utf8');
+      log.info(`Checkpoint: Successfully read checkpoint file (${checkpointData.length} bytes)`);
       const checkpoint = JSON.parse(checkpointData);
 
       if (checkpoint.completedConfigs && Array.isArray(checkpoint.completedConfigs)) {
         checkpoint.completedConfigs.forEach((c: string) => completedConfigs.add(c));
+        log.info(`Checkpoint: Found ${completedConfigs.size} completed configs in checkpoint`);
+        log.info(`Checkpoint: Completed configs: ${Array.from(completedConfigs).join(', ')}`);
 
         const beforeFilter = configs.length;
         configs = configs.filter((c) => !completedConfigs.has(c));
         resumedConfigCount = beforeFilter - configs.length;
+
+        log.info(
+          `Checkpoint: Before filter: ${beforeFilter} configs, After filter: ${configs.length} configs, Resumed: ${resumedConfigCount}`
+        );
 
         if (resumedConfigCount > 0) {
           log.info(
@@ -127,12 +135,18 @@ export async function runJestAll() {
             `Checkpoint: Filtered ${resumedConfigCount} configs (${configs.length} remaining)`
           );
         }
+      } else {
+        log.warning(`Checkpoint: File format invalid or missing completedConfigs array`);
       }
     } catch (err) {
-      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-        log.warning(`Unable to read checkpoint file: ${(err as Error).message}`);
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+        log.info(`Checkpoint: File not found at ${checkpointPath}`);
+      } else {
+        log.warning(`Checkpoint: Unable to read checkpoint file: ${(err as Error).message}`);
       }
     }
+  } else {
+    log.info('Checkpoint: JEST_ALL_CHECKPOINT_PATH not set, checkpoint/resume disabled');
   }
 
   // Write config discovery summary after checkpoint loading (only if configs were explicitly passed)
