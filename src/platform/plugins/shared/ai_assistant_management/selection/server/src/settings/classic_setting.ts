@@ -17,12 +17,12 @@ import {
   OBSERVABILITY_IN_OTHER_APPS,
   SECURITY_IN_OTHER_APPS,
   HIDE_ALL_ASSISTANTS,
-  TITLE,
+  AI_ASSISTANT_VISIBILITY_TITLE,
 } from './translations';
 
 // Define the classicSetting with proper typing
 export const classicSetting: Omit<UiSettingsParams<AIAssistantType>, 'value'> = {
-  name: TITLE,
+  name: AI_ASSISTANT_VISIBILITY_TITLE,
   description: i18n.translate(
     'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
     {

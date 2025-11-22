@@ -41,6 +41,7 @@ describe('GenAiSettingsApp', () => {
       isPermissionsBased: false,
       showAiBreadcrumb: true,
       showAiAssistantsVisibilitySetting: true,
+      showChatExperienceSetting: true,
     });
   });
 
@@ -76,6 +77,7 @@ describe('GenAiSettingsApp', () => {
         isPermissionsBased: false,
         showAiBreadcrumb: false,
         showAiAssistantsVisibilitySetting: true,
+        showChatExperienceSetting: true,
       });
 
       renderComponent();
@@ -113,6 +115,7 @@ describe('GenAiSettingsApp', () => {
         isPermissionsBased: false,
         showAiBreadcrumb: true,
         showAiAssistantsVisibilitySetting: true,
+        showChatExperienceSetting: true,
       });
 
       renderComponent();
@@ -124,6 +127,7 @@ describe('GenAiSettingsApp', () => {
         isPermissionsBased: false,
         showAiBreadcrumb: true,
         showAiAssistantsVisibilitySetting: true,
+        showChatExperienceSetting: true,
       });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
@@ -147,6 +151,7 @@ describe('GenAiSettingsApp', () => {
         isPermissionsBased: true,
         showAiBreadcrumb: true,
         showAiAssistantsVisibilitySetting: true,
+        showChatExperienceSetting: true,
       });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
@@ -167,6 +172,7 @@ describe('GenAiSettingsApp', () => {
         isPermissionsBased: true,
         showAiBreadcrumb: true,
         showAiAssistantsVisibilitySetting: true,
+        showChatExperienceSetting: true,
       });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,

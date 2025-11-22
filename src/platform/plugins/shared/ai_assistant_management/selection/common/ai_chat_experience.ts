@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType';
-export const PREFERRED_CHAT_EXPERIENCE_SETTING_KEY = 'aiAssistant:preferredChatExperience';
+export enum AIChatExperience {
+  Classic = 'classic',
+  Agents = 'agents',
+}

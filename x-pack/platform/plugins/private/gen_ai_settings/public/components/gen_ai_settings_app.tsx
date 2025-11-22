@@ -34,6 +34,7 @@ import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
+import { ChatExperience } from './chat_experience/chat_experience';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -47,6 +48,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     isPermissionsBased,
     showAiBreadcrumb,
     showAiAssistantsVisibilitySetting,
+    showChatExperienceSetting,
   } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
@@ -321,6 +323,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   />
                 </EuiFormRow>
               </EuiDescribedFormGroup>
+            )}
+            {showChatExperienceSetting && (
+              <EuiFlexItem>
+                <ChatExperience />
+              </EuiFlexItem>
             )}
             {showAiAssistantsVisibilitySetting && (
               <EuiFlexItem>

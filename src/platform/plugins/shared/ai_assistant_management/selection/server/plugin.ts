@@ -15,9 +15,14 @@ import type {
   AIAssistantManagementSelectionPluginServerSetup,
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import {
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+} from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
+import { chatExperienceSetting } from './src/settings/chat_experience_setting';
+import { AIChatExperience } from '../common/ai_chat_experience';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -56,6 +61,12 @@ export class AIAssistantManagementSelectionPlugin
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
           ...classicSetting,
           value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
+        },
+      });
+      core.uiSettings.register({
+        [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
+          ...chatExperienceSetting,
+          value: this.config.preferredChatExperience ?? AIChatExperience.Classic,
         },
       });
     }

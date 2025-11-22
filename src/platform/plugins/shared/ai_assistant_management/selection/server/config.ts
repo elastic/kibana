@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { AIAssistantType } from '../common/ai_assistant_type';
+import { AIChatExperience } from '../common/ai_chat_experience';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -22,6 +23,10 @@ const configSchema = schema.object({
       schema.literal(AIAssistantType.Security),
     ],
     { defaultValue: AIAssistantType.Default }
+  ),
+  preferredChatExperience: schema.oneOf(
+    [schema.literal(AIChatExperience.Classic), schema.literal(AIChatExperience.Agents)],
+    { defaultValue: AIChatExperience.Classic }
   ),
 });
 
