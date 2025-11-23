@@ -33,6 +33,7 @@ export {
   isEntityNode,
   getNodeDocumentMode,
   hasNodeDocumentsData,
+  hasNodeEntityField,
   getSingleDocumentData,
 } from './utils';
 export { Callout, type CalloutProps } from './callout/callout';
