@@ -19,7 +19,7 @@ import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { authz } from '../../../common/api/util/authz';
-import { processLookups } from '../util/lookups';
+import { processLookups } from '../../../common/api/util/lookups';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
 

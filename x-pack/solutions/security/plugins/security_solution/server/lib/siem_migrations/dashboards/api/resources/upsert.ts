@@ -20,7 +20,7 @@ import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
-import { processLookups } from '../../../rules/api/util/lookups';
+import { processLookups } from '../../../common/api/util/lookups';
 import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsResourceUpsertRoute = (

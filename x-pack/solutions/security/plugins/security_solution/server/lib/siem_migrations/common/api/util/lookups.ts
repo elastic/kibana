@@ -8,7 +8,7 @@
 import Papa from 'papaparse';
 import type { SiemMigrationResourceData } from '../../../../../../common/siem_migrations/model/common.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
-import type { SiemMigrationsDataLookupsClient } from '../../../common/data/siem_migrations_data_lookups_client';
+import type { SiemMigrationsDataLookupsClient } from '../../data/siem_migrations_data_lookups_client';
 
 interface LookupWithData extends SiemMigrationResourceData {
   data: object[] | null;
