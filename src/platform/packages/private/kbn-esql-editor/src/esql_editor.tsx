@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { isEqual, memoize } from 'lodash';
+import { isEqual, memoize, debounce } from 'lodash';
 import { Global, css } from '@emotion/react';
 import { getESQLQueryColumns, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
@@ -207,11 +207,14 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
-  const onQueryUpdate = useCallback(
-    (value: string) => {
-      onTextLangQueryChange({ esql: value } as AggregateQuery);
-      setIsVisorOpen(false);
-    },
+  // Debounce onChange to reduce parent re-renders during typing.
+  // Without debounce, every keystroke triggers SearchBar.setState() causing
+  // re-render of SearchBar and all its children
+  const onQueryUpdate = useMemo(
+    () =>
+      debounce((value: string) => {
+        onTextLangQueryChange({ esql: value } as AggregateQuery);
+      }, 100),
     [onTextLangQueryChange]
   );
 
