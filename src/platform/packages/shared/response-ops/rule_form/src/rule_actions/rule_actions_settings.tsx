@@ -12,7 +12,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow, EuiSuperSelect } f
 import { i18n } from '@kbn/i18n';
 import type { AlertsFilter, AlertsFilterTimeframe, RuleActionFrequency } from '@kbn/alerting-types';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
-import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { useRuleFormState } from '../hooks';
 import type { RuleAction, RuleTypeWithDescription } from '../common';
 import {
@@ -20,10 +19,8 @@ import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
   getSelectedActionGroup,
-  hasAlertsFields,
   parseDuration,
 } from '../utils';
-import { DEFAULT_VALID_CONSUMERS } from '../constants';
 
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
@@ -136,11 +133,9 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   const {
     plugins: { settings },
     formData: {
-      consumer,
       schedule: { interval },
     },
     actionsErrors = {},
-    validConsumers = DEFAULT_VALID_CONSUMERS,
     selectedRuleType,
     selectedRuleTypeModel,
   } = useRuleFormState();
@@ -158,7 +153,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
 
   const actionError = actionsErrors[action.uuid!] || {};
 
-  const showSelectActionGroup = actionGroups && selectedActionGroup && !action.frequency?.summary;
+  const showSelectActionGroup = false;
 
   const intervalNumber = getDurationNumberInItsUnit(interval ?? 1);
 
@@ -186,13 +181,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
 
   const ruleTypeId = selectedRuleType.id;
 
-  const showActionAlertsFilter =
-    hasAlertsFields({
-      ruleType: selectedRuleType,
-      consumer,
-      validConsumers,
-    }) || isSiemRuleType(ruleTypeId);
-
+  const showActionAlertsFilter = false;
   return (
     <EuiFlexGroup direction="column" data-test-subj="ruleActionsSettings">
       <EuiFlexItem>

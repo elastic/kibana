@@ -122,7 +122,6 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
             editAction(paramsProperty, '', index);
           }
         }}
-        append={wrapField ? undefined : VariableButton}
       />
     </Wrapper>
   );

@@ -218,7 +218,6 @@ export type ScopedQueryAlerts = Record<string, string[]>;
 
 export interface SummarizedAlerts {
   new: SummarizedAlertsChunk;
-  ongoing: SummarizedAlertsChunk;
   recovered: SummarizedAlertsChunk;
 }
 export interface CombinedSummarizedAlerts extends SummarizedAlerts {

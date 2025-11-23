@@ -24,11 +24,13 @@ export function getRuleType(): RuleTypeModel<ESQLRuleParams> {
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.esql.ui.alertType.defaultActionMessage',
       {
-        defaultMessage: `ES|QL rule '{{rule.name}}' is active:
+        defaultMessage: `
+        ES|QL alert is {{status}}:
 
-- Conditions Met: Over '{{rule.params.timeWindowSize}}''{{rule.params.timeWindowUnit}}'
-- Timestamp: '{{context.date}}'
-- Link: '{{context.link}}'`,
+        - Rule ID: {{rule.id}}
+        - Parent ID: {{rule.parentId}}
+        - Timestamp: {{date}}
+        - Attributes: {{attrs}}`,
       }
     ),
     requiresAppContext: false,

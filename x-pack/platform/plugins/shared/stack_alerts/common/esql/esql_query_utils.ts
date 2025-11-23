@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { findLastIndex, isNil } from 'lodash';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLCommandOption } from '@kbn/esql-ast';
@@ -84,7 +85,7 @@ export const getEsqlQueryHits = async (
       .sort();
 
     if (mappedAlertId.length > 0) {
-      const alertId = mappedAlertId.join(',');
+      const alertId = uuidv4();
       const hit = {
         _id: ESQL_DOCUMENT_ID,
         _index: '',
@@ -97,7 +98,7 @@ export const getEsqlQueryHits = async (
       }
 
       if (isPreview) {
-        rows.push(Object.assign({ [ALERT_ID_COLUMN]: alertId }, document));
+        rows.push(document);
       }
 
       if (r !== 0 && r % chunkSize === 0) {
@@ -126,7 +127,7 @@ export const transformToEsqlTable = (datatable: ESQLSearchResponse): EsqlTable =
 const getColumnsForPreview = (
   columns: EsqlResultColumn[]
 ): Array<{ id: string; actions: boolean }> => {
-  const cols = [{ id: ALERT_ID_COLUMN, actions: false }];
+  const cols = [];
   for (const c of columns) {
     cols.push({ id: c.name, actions: false });
   }

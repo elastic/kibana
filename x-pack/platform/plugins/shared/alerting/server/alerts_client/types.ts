@@ -78,10 +78,10 @@ export interface IAlertsClient<
   processAlerts(): void;
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
-    type: 'new' | 'active' | 'trackedActiveAlerts'
+    type: 'new' | 'active' | 'trackedActiveAlerts' | 'activeOnlyForActions'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds>> | {};
   getProcessedAlerts(
-    type: 'recovered' | 'trackedRecoveredAlerts'
+    type: 'recovered' | 'trackedRecoveredAlerts' | 'recoveredOnlyForActions'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
   persistAlerts(): Promise<void>;
   updatePersistedAlertsWithMaintenanceWindowIds(): Promise<{
@@ -156,7 +156,8 @@ export interface PublicAlertsClient<
   ): ReportedAlertData<AlertData>;
   writeAlerts(
     activeAlerts: Array<ReportedAlert<AlertData, State, Context, ActionGroupIds>>,
-    recoveredAlerts: Array<ReportedAlert<AlertData, State, Context, ActionGroupIds>>
+    recoveredAlerts: Array<ReportedAlert<AlertData, State, Context, ActionGroupIds>>,
+    newAlerts: Set<string>
   ): Promise<void>;
   getTrackedAlerts(): Record<string, Alert & AlertData>;
   isTrackedAlert(id: string): boolean;

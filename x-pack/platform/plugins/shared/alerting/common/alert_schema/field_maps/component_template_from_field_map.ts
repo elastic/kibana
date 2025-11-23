@@ -40,6 +40,7 @@ export const getComponentTemplateFromFieldMap = ({
                 Math.ceil(Object.keys(fieldMap).length / 1000) * 1000 + 500,
             }
           : {}),
+        'index.mode': 'lookup',
       },
 
       mappings: {

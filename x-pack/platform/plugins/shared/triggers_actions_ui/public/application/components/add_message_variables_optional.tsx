@@ -8,7 +8,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 
 interface Props {
   isOptionalField?: boolean;
@@ -43,15 +42,6 @@ export const AddMessageVariablesOptional: React.FunctionComponent<Props> = ({
           </EuiText>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <AddMessageVariables
-          messageVariables={messageVariables}
-          onSelectEventHandler={onSelectEventHandler}
-          paramsProperty={paramsProperty}
-          buttonTitle={buttonTitle}
-          showButtonTitle={showButtonTitle}
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
