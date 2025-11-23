@@ -47,8 +47,8 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      reassignSteps: (steps: StreamlangDSL['steps']) => {
-        service.send({ type: 'step.reassignSteps', steps });
+      resetSteps: (steps: StreamlangDSL['steps']) => {
+        service.send({ type: 'step.resetSteps', steps });
       },
       addProcessor: (
         step?: StreamlangProcessorDefinition,

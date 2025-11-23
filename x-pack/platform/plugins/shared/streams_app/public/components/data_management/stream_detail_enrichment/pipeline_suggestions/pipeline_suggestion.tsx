@@ -151,59 +151,6 @@ const ActionBlock = ({ step }: { step: StreamlangProcessorDefinition }) => {
                 </EuiText>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {/* <EuiFlexItem grow={false}>
-          <EuiBadgeGroup>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.matchRateBadge',
-                {
-                  defaultMessage: '{percentage}% Matched',
-                  values: {
-                    percentage: (processorMetrics.parsed_rate * 100).toFixed(),
-                  },
-                }
-              )}
-            </EuiBadge>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.fieldCountBadge',
-                {
-                  defaultMessage: '{count} Fields',
-                  values: {
-                    count: processorMetrics.detected_fields.length,
-                  },
-                }
-              )}
-            </EuiBadge>
-          </EuiBadgeGroup>
-        </EuiFlexItem> */}
-            {/* <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                {processorMetrics && (
-                  <EuiFlexItem>
-                    <ProcessorMetricBadges {...processorMetrics} />
-                  </EuiFlexItem>
-                )}
-                {isUnsaved && (
-                  <EuiFlexItem>
-                    <EuiBadge>
-                      {i18n.translate(
-                        'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.unsavedBadge',
-                        { defaultMessage: 'Unsaved' }
-                      )}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem>
-                  <StepContextMenu
-                    stepRef={stepRef}
-                    stepUnderEdit={stepUnderEdit}
-                    isFirstStepInLevel={isFirstStepInLevel}
-                    isLastStepInLevel={isLastStepInLevel}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem> */}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>

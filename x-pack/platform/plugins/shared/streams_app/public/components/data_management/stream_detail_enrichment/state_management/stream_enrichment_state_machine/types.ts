@@ -86,6 +86,6 @@ export type StreamEnrichmentEvent =
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
-  | { type: 'step.reassignSteps'; steps: StreamlangDSL['steps'] }
+  | { type: 'step.resetSteps'; steps: StreamlangDSL['steps'] }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
   | { type: 'url.sync' };

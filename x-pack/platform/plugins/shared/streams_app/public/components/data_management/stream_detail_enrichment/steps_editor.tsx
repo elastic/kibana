@@ -28,7 +28,7 @@ import { SuggestPipelineLoadingPrompt } from './pipeline_suggestions/suggest_pip
 import { SuggestPipelinePanel } from './pipeline_suggestions/suggest_pipeline_panel';
 
 export const StepsEditor = React.memo(() => {
-  const { reassignSteps } = useStreamEnrichmentEvents();
+  const { resetSteps: reassignSteps } = useStreamEnrichmentEvents();
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 

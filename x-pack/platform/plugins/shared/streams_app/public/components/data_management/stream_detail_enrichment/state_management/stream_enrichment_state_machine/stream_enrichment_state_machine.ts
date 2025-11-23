@@ -224,7 +224,7 @@ export const streamEnrichmentMachine = setup({
         stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
       };
     }),
-    reassignSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
+    resetSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
       // Clean-up existing step refs
       assignArgs.context.stepRefs.forEach(stopChild);
 
@@ -240,7 +240,7 @@ export const streamEnrichmentMachine = setup({
         stepRefs,
       };
     }),
-    refreshSteps: assign(({ context }) => ({
+    reassignSteps: assign(({ context }) => ({
       stepRefs: [...context.stepRefs],
     })),
     /* Data sources actions */
@@ -561,10 +561,10 @@ export const streamEnrichmentMachine = setup({
                       target: 'creating',
                       actions: [{ type: 'addCondition', params: ({ event }) => event }],
                     },
-                    'step.reassignSteps': {
+                    'step.resetSteps': {
                       guard: 'hasManagePrivileges',
                       actions: [
-                        { type: 'reassignSteps', params: ({ event }) => event },
+                        { type: 'resetSteps', params: ({ event }) => event },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -576,7 +576,7 @@ export const streamEnrichmentMachine = setup({
                   on: {
                     'step.change': {
                       actions: [
-                        { type: 'refreshSteps' },
+                        { type: 'reassignSteps' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -590,7 +590,7 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'refreshSteps' }],
+                      actions: [{ type: 'reassignSteps' }],
                     },
                   },
                 },
@@ -614,7 +614,7 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'refreshSteps' }],
+                      actions: [{ type: 'reassignSteps' }],
                     },
                   },
                 },
