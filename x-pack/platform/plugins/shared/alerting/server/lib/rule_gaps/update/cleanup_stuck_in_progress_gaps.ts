@@ -104,11 +104,12 @@ export const cleanupStuckInProgressGaps = async ({
     );
 
     // Build a set of gaps that require reset
-    const withoutBackfillsSet = new Set(
-      gapsWithoutBackfills
-        .filter((gap) => gap.internalFields !== undefined)
-        .map((gap) => gap.internalFields?._id)
-    );
+    const withoutBackfillsSet = gapsWithoutBackfills.reduce((acc, gap) => {
+      if (gap.internalFields?._id) {
+        acc.add(gap.internalFields._id);
+      }
+      return acc;
+    }, new Set<string>());
 
     // Group all checked gaps by rule (we'll update all, resetting only those in withoutSet)
     const gapsByRuleId = groupBy(gapsToCheck, 'ruleId');
@@ -117,7 +118,7 @@ export const cleanupStuckInProgressGaps = async ({
     const alertingEventLogger = new AlertingEventLogger(eventLogger);
     for (const [ruleId, gaps] of Object.entries(gapsByRuleId)) {
       for (const gap of gaps) {
-        if (withoutBackfillsSet.has(gap.internalFields?._id)) {
+        if (gap.internalFields?._id && withoutBackfillsSet.has(gap.internalFields._id)) {
           gap.resetInProgressIntervals();
         }
         gap.setUpdatedAt(now.toISOString());
