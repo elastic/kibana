@@ -10,10 +10,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
-import { calculateDataQuality } from '../../../util/calculate_data_quality';
-import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -26,6 +23,7 @@ import {
 } from '../../stream_badges';
 import { GroupStreamControls } from './group_stream_controls';
 import { FeedbackButton } from '../../feedback_button';
+import { useDatasetQuality } from '../../../hooks/use_dataset_quality';
 
 export type ManagementTabs = Record<
   string,
@@ -65,33 +63,12 @@ export function Wrapper({
     })
   );
 
-  const { getStreamDocCounts } = useStreamDocCountsFetch({
-    groupTotalCountByTimestamp: false,
+  const { quality, isQualityLoading } = useDatasetQuality({
+    streamName: streamId,
     canReadFailureStore: Streams.ingest.all.GetResponse.is(definition)
       ? definition.privileges.read_failure_store
       : true,
   });
-  const docCountsFetch = getStreamDocCounts(streamId);
-
-  const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
-  const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
-  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
-
-  const docCount = countResult?.value ? Number(countResult.value?.values?.[0]?.[0]) : 0;
-  const degradedDocCount = degradedDocsResult?.value
-    ? Number(degradedDocsResult.value?.values?.[0]?.[0])
-    : 0;
-  const failedDocCount = failedDocsResult?.value
-    ? Number(failedDocsResult.value?.values?.[0]?.[0])
-    : 0;
-
-  const quality = calculateDataQuality({
-    totalDocs: docCount,
-    degradedDocs: degradedDocCount,
-    failedDocs: failedDocCount,
-  });
-  const isQualityLoading =
-    countResult?.loading || failedDocsResult?.loading || degradedDocsResult.loading;
 
   const { euiTheme } = useEuiTheme();
   return (

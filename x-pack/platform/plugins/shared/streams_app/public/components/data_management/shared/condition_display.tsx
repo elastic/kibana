@@ -33,12 +33,15 @@ import { ConditionEditor } from './condition_editor';
 export const ConditionPanel = ({
   condition,
   keywordWrapper,
+  className,
 }: {
   condition: Condition;
   keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
+  className?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
-  return (
+
+  const panel = (
     <EuiPanel
       color="subdued"
       paddingSize="s"
@@ -54,6 +57,12 @@ export const ConditionPanel = ({
       />
     </EuiPanel>
   );
+
+  if (!className) {
+    return panel;
+  }
+
+  return <div className={className ? ` ${className}` : ''}>{panel}</div>;
 };
 
 export const EditableConditionPanel = ({
