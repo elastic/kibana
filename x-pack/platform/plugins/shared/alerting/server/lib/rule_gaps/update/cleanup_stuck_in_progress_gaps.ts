@@ -47,7 +47,7 @@ export const cleanupStuckInProgressGaps = async ({
     const cutoffTime = new Date(now.getTime() - STUCK_GAP_THRESHOLD_HOURS * 60 * 60 * 1000);
     const cutoffTimeISO = cutoffTime.toISOString();
 
-    logger.info(
+    logger.debug(
       `Starting cleanup of stuck in-progress gaps updated before ${cutoffTimeISO} (max ${MAX_GAPS_TO_PROCESS} gaps)`
     );
 
@@ -64,7 +64,7 @@ export const cleanupStuckInProgressGaps = async ({
     }
 
     const ruleIdsToProcess = allRuleIds.slice(0, MAX_RULES_TO_PROCESS);
-    logger.info(
+    logger.debug(
       `Processing ${ruleIdsToProcess.length} rules (out of ${allRuleIds.length} total) for stuck gap cleanup`
     );
 
@@ -95,7 +95,7 @@ export const cleanupStuckInProgressGaps = async ({
       return;
     }
 
-    logger.info(`Found ${gapsToCheck.length} gaps to check for stuck in-progress intervals`);
+    logger.debug(`Found ${gapsToCheck.length} gaps to check for stuck in-progress intervals`);
 
     const gapsWithoutBackfills = await filterGapsWithOverlappingBackfills(
       gapsToCheck,

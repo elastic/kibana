@@ -275,7 +275,7 @@ export function registerGapAutoFillSchedulerTask({
 
                 while (true) {
                   if (gapFetchIterationCount >= GAP_FETCH_MAX_ITERATIONS) {
-                    logger.warn(
+                    logger.debug(
                       loggerMessage(
                         `Circuit breaker triggered: reached maximum number of gap fetch iterations`
                       )
