@@ -95,6 +95,12 @@ interface YamlValidationResultConnectorIdError extends YamlValidationResultBase 
   owner: 'connector-id-validation';
 }
 
+interface YamlValidationResultJsonSchemaDefault extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'json-schema-default-validation';
+}
+
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
   return [
     'step-name-validation',
@@ -102,6 +108,7 @@ export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidat
     'liquid-template-validation',
     'yaml',
     'connector-id-validation',
+    'json-schema-default-validation',
   ].includes(owner);
 }
 
@@ -112,4 +119,5 @@ export type YamlValidationResult =
   | YamlValidationResultMonacoYaml
   | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
-  | YamlValidationResultConnectorIdValid;
+  | YamlValidationResultConnectorIdValid
+  | YamlValidationResultJsonSchemaDefault;

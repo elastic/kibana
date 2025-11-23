@@ -20,6 +20,70 @@ import {
 import { z } from '@kbn/zod';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 
+// Resolve $ref references within the inputs schema
+function resolveRefInInputs(
+  ref: string,
+  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
+): JSONSchema7 | null {
+  if (!ref.startsWith('#/')) {
+    return null;
+  }
+
+  const path = ref.slice(2).split('/'); // Remove '#/' and split
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let current: any = inputsSchema;
+
+  for (const segment of path) {
+    if (current && typeof current === 'object') {
+      current = current[segment];
+    } else {
+      return null;
+    }
+  }
+
+  return current as JSONSchema7 | null;
+}
+
+// Recursively convert JSON Schema to Zod, resolving $ref along the way
+function convertJsonSchemaToZodWithRefs(
+  jsonSchema: JSONSchema7,
+  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
+): z.ZodType {
+  // Resolve $ref if present
+  let schemaToConvert = jsonSchema;
+  if (jsonSchema.$ref) {
+    const resolved = resolveRefInInputs(jsonSchema.$ref, inputsSchema);
+    if (resolved) {
+      schemaToConvert = resolved;
+    }
+  }
+
+  // If it's an object with properties, recursively handle nested properties
+  if (schemaToConvert.type === 'object' && schemaToConvert.properties) {
+    const shape: Record<string, z.ZodType> = {};
+    for (const [key, propSchema] of Object.entries(schemaToConvert.properties)) {
+      const prop = propSchema as JSONSchema7;
+      let zodProp = convertJsonSchemaToZodWithRefs(prop, inputsSchema);
+
+      // Check if required
+      const isRequired = schemaToConvert.required?.includes(key) ?? false;
+
+      // Apply default if present
+      if (prop.default !== undefined) {
+        zodProp = zodProp.default(prop.default);
+      } else if (!isRequired) {
+        zodProp = zodProp.optional();
+      }
+
+      shape[key] = zodProp;
+    }
+    return z.object(shape);
+  }
+
+  // For non-object types, use the standard converter
+  return convertJsonSchemaToZod(schemaToConvert);
+}
+
 const makeWorkflowInputsValidator = (inputs: WorkflowYaml['inputs']) => {
   // Normalize inputs to the new JSON Schema format (handles backward compatibility)
   // This handles both array (legacy) and object (new) formats
@@ -34,17 +98,20 @@ const makeWorkflowInputsValidator = (inputs: WorkflowYaml['inputs']) => {
   for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
     const jsonSchema = propertySchema as JSONSchema7;
 
-    // Convert JSON Schema to Zod schema
-    let zodSchema: z.ZodType = convertJsonSchemaToZod(jsonSchema);
+    // Convert JSON Schema to Zod schema, resolving $ref if needed
+    let zodSchema: z.ZodType = convertJsonSchemaToZodWithRefs(jsonSchema, normalizedInputs);
 
-    // Apply default value if present
-    if (jsonSchema.default !== undefined) {
-      zodSchema = zodSchema.default(jsonSchema.default);
+    // Apply default value if present (after $ref resolution)
+    const resolvedSchema = jsonSchema.$ref
+      ? resolveRefInInputs(jsonSchema.$ref, normalizedInputs) || jsonSchema
+      : jsonSchema;
+    if (resolvedSchema.default !== undefined) {
+      zodSchema = zodSchema.default(resolvedSchema.default);
     }
 
     // Check if this property is required
     const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
-    if (!isRequired) {
+    if (!isRequired && resolvedSchema.default === undefined) {
       zodSchema = zodSchema.optional();
     }
 
@@ -173,15 +240,34 @@ export const WorkflowExecuteManualForm = ({
     [setValue, definition?.inputs, inputsValidator, setErrors]
   );
 
+  // Validate inputs on initial load and when definition changes
   useEffect(() => {
-    // Set defaults if value is empty or only contains empty object
+    if (definition?.inputs && value) {
+      try {
+        const res = inputsValidator.safeParse(JSON.parse(value));
+        if (!res.success) {
+          setErrors(
+            res.error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`).join(', ')
+          );
+        } else {
+          setErrors(null);
+        }
+      } catch (e: Error | unknown) {
+        // Ignore JSON parse errors
+      }
+    }
+  }, [definition?.inputs, inputsValidator, value, setErrors]);
+
+  // Set defaults if value is empty or only contains empty object
+  useEffect(() => {
     if (definition) {
       const isEmpty = !value || value.trim() === '' || value.trim() === '{}';
       if (isEmpty) {
         handleChange(getDefaultWorkflowInput(definition));
       }
     }
-  }, [definition, value, handleChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [definition]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
