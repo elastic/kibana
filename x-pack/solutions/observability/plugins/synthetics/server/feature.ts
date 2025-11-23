@@ -90,8 +90,10 @@ const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
         all: [],
         read: [syntheticsParamType],
       },
-      ui: ['canReadParams'],
-      api: [], // Access is controlled via saved object permissions
+      ui: ['can_read_param_values'],
+      /* Field level access is enforced for the VALUE of the param.
+       * The api is still accessible for SO operations to users without this privilege */
+      api: [],
     },
   ],
 };
