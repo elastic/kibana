@@ -263,7 +263,6 @@ export const registerClustersRoute = ({
         return response.ok({ body: { success: true } });
       } catch (error) {
         logger.error('Failed to update cluster services', { error });
-        console.log(JSON.stringify(error, null, 2));
 
         if (axios.isAxiosError(error)) {
           const status = error.response?.status;

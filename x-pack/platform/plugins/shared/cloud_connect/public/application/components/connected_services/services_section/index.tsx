@@ -112,24 +112,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
             defaultMessage: 'Service disabled with warnings',
           }),
           text: response.warning,
-          ...(response.warningError && {
-            toastLifeTimeMs: 10000,
-            text: (
-              <>
-                <p>{response.warning}</p>
-                <details>
-                  <summary>
-                    {i18n.translate('xpack.cloudConnect.services.disable.warningDetails', {
-                      defaultMessage: 'View details',
-                    })}
-                  </summary>
-                  <pre style={{ marginTop: '8px', fontSize: '12px' }}>
-                    {response.warningError}
-                  </pre>
-                </details>
-              </>
-            ),
-          }),
         });
       } else {
         notifications.toasts.addSuccess({

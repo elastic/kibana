@@ -69,6 +69,8 @@ export class CloudConnectedPlugin
     // Register encryption for the API key saved object
     plugins.encryptedSavedObjects.registerType(CloudConnectApiKeyEncryptionParams);
 
+    console.log(plugins.encryptedSavedObjects);
+
     // Register HTTP routes
     const router = core.http.createRouter();
     registerRoutes({

@@ -27,13 +27,40 @@ export interface AuthenticateRouteOptions {
   router: IRouter;
   logger: Logger;
   getStartServices: StartServicesAccessor<CloudConnectedStartDeps, unknown>;
+  hasEncryptedSOEnabled: boolean;
 }
 
 export const registerAuthenticateRoute = ({
   router,
   logger,
   getStartServices,
+  hasEncryptedSOEnabled,
 }: AuthenticateRouteOptions) => {
+  // GET /internal/cloud_connect/config
+  router.get(
+    {
+      path: '/internal/cloud_connect/config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route returns public configuration information.',
+        },
+      },
+      validate: false,
+      options: {
+        access: 'internal',
+      },
+    },
+    async (context, request, response) => {
+      return response.ok({
+        body: {
+          hasEncryptedSOEnabled,
+        },
+      });
+    }
+  );
+
+  // POST /internal/cloud_connect/authenticate
   router.post(
     {
       path: '/internal/cloud_connect/authenticate',

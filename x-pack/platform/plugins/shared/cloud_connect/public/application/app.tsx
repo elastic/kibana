@@ -7,21 +7,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useCloudConnectedAppContext } from './app_context';
+import {
+  useCloudConnectedAppContext,
+  CloudConnectedAppContextProvider,
+} from './app_context';
 import { useBreadcrumbs } from './hooks/use_breadcrumbs';
+import { useCloudConnectConfig } from './hooks/use_cloud_connect_config';
 import { OnboardingPage } from './components/onboarding';
 import { ConnectedServicesPage } from './components/connected_services';
 import type { ClusterDetails } from '../types';
 
 export const CloudConnectedAppMain: React.FC = () => {
-  const { http, notifications } = useCloudConnectedAppContext();
+  const appContext = useCloudConnectedAppContext();
+  const { http, notifications } = appContext;
+  const { hasEncryptedSOEnabled, isLoading: isConfigLoading } = useCloudConnectConfig();
   const [clusterDetails, setClusterDetails] = useState<ClusterDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isClusterLoading, setIsClusterLoading] = useState(true);
 
   useBreadcrumbs();
 
   const fetchClusterDetails = async () => {
-    setIsLoading(true);
+    setIsClusterLoading(true);
     try {
       const data = await http.get<ClusterDetails>('/internal/cloud_connect/cluster_details');
       setClusterDetails(data);
@@ -35,7 +41,7 @@ export const CloudConnectedAppMain: React.FC = () => {
       // On any error, show onboarding (clusterDetails remains null)
       setClusterDetails(null);
     } finally {
-      setIsLoading(false);
+      setIsClusterLoading(false);
     }
   };
 
@@ -43,6 +49,8 @@ export const CloudConnectedAppMain: React.FC = () => {
     fetchClusterDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const isLoading = isConfigLoading || isClusterLoading;
 
   if (isLoading) {
     return (
@@ -57,6 +65,12 @@ export const CloudConnectedAppMain: React.FC = () => {
       </EuiPage>
     );
   }
+
+  // Extend the context with the fetched config value
+  const extendedContext = {
+    ...appContext,
+    hasEncryptedSOEnabled,
+  };
 
   const handleRefetch = async () => {
     try {
@@ -75,14 +89,16 @@ export const CloudConnectedAppMain: React.FC = () => {
   };
 
   return (
-    <EuiPage>
-      <EuiPageBody panelled={true}>
-        {clusterDetails ? (
-          <ConnectedServicesPage clusterDetails={clusterDetails} onRefetch={handleRefetch} />
-        ) : (
-          <OnboardingPage onConnect={fetchClusterDetails} />
-        )}
-      </EuiPageBody>
-    </EuiPage>
+    <CloudConnectedAppContextProvider value={extendedContext}>
+      <EuiPage>
+        <EuiPageBody panelled={true}>
+          {clusterDetails ? (
+            <ConnectedServicesPage clusterDetails={clusterDetails} onRefetch={handleRefetch} />
+          ) : (
+            <OnboardingPage onConnect={fetchClusterDetails} />
+          )}
+        </EuiPageBody>
+      </EuiPage>
+    </CloudConnectedAppContextProvider>
   );
 };
