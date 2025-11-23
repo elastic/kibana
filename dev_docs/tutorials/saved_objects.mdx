@@ -355,6 +355,78 @@ export const foo: SavedObjectsType = {
 
 [2] Set this to `true` to build your own HTTP API and have complete control over the route handler.
 
+## Removing a Saved Object type
+
+When you need to remove a Saved Object type from your plugin, there are important steps to follow to ensure the type name cannot be accidentally reused in the future.
+
+### Why do we track removed types?
+
+Once a Saved Object type has been registered and used in production, its name becomes "reserved" for that purpose. If we allowed the same name to be reused for a different type later:
+
+- **Migration conflicts**: Old documents with the removed type name could interfere with new documents using the same name
+- **Upgrade failures**: Users upgrading from older versions could experience migration failures if type names are reused
+
+To prevent these issues, Kibana maintains a list of all removed type names in `packages/kbn-check-saved-objects-cli/removed_types.json`. This ensures type names are never reused.
+
+### How to remove a Saved Object type
+
+#### Step 1: Remove the type registration
+
+First, remove the type registration from your plugin. Also remove the type definition file and any references to it.
+
+#### Step 2: Run the automated check
+
+Kibana includes an automated check that detects when types are removed. Run it locally to update the `removed_types.json` file:
+
+```bash
+# Get your current commit ID
+git log -n 1
+
+# Get the merge-base commit with main
+git merge-base -a <currentCommitSha> main
+
+# Run the check with the baseline
+node scripts/check_saved_objects --baseline <mergeBase> --fix
+```
+
+Replace `<currentCommitSha>` with your actual commit SHA from the first command, and `<mergeBase>` with the merge-base commit SHA from the second command.
+
+This command will:
+1. Compare the current registered types against the baseline (merge-base with main)
+2. Detect any types that were removed
+3. Automatically add the removed type name(s) to `removed_types.json`
+4. Exit with an error message indicating which types were added
+
+The error message will look like:
+
+```
+❌ The following SO types are no longer registered: 'my-removed-type'. 
+Updated 'removed_types.json' to prevent the same names from being reused in the future.
+```
+
+#### Step 3: Commit the changes
+
+Include both your code changes and the updated `removed_types.json` file in your commit.
+
+### Manual update (alternative)
+
+If you prefer to update `removed_types.json` manually, you can:
+
+1. Open `packages/kbn-check-saved-objects-cli/removed_types.json`
+2. Add your removed type name to the array in alphabetical order
+3. Save the file
+
+### Important considerations
+
+<DocCallOut color="warning" title="Type names cannot be reused">
+  Once a type name is added to `removed_types.json`, it cannot be used again for a new Saved Object type. Choose type names carefully when creating new types.
+</DocCallOut>
+
+Before removing a type, ensure:
+- **No references exist**: Check that no other Saved Object types reference the type you're removing
+- **Data migration is complete**: If users have documents of this type, ensure they've been migrated to a new type or are no longer needed
+- **Coordinate with stakeholders**: Confirm with your team and any dependent teams that the removal is expected
+
 ## Troubleshooting
 
 ### CI is failing for my PR
@@ -406,3 +478,15 @@ These errors are pretty obvious. Model versions must be defined as consecutive n
 * The current serverless release. If a high-severity issue occurs, Serverless might be rolled back to a previous version. This could in turn impact CI pipelines for PRs that would otherwise be fine. In other words, _"from the current serverless standpoint, your PR is not releasable at the moment"_ . This should only happen exceptionally. Please take a look at the `#kibana-mission-control` channel to see if something is going on.
   * **Scenario 2.1**: Kibana has been rolled back. Please wait until the situation goes back to normal, i.e. an emergency release is performed after the rollback, and Kibana gets to a normal release state.
   * **Scenario 2.2**: Kibana has NOT been rolled back. Reach out to `#kibana-core` and we will help you figure out what's going on.
+
+```
+❌ The following SO types are no longer registered: '<soType>'. Please run with --fix to update 'removed_types.json'.
+```
+**Problem:** You removed a Saved Object type but didn't update the `removed_types.json` file to track the removal.
+**Solution:** Run `node scripts/check_saved_objects --baseline <mergeBase> --fix` locally to automatically update the `removed_types.json` file, then commit the changes. See the <DocLink id="kibDevTutorialSavedObject" section="removing-a-saved-object-type" text="Removing a Saved Object type"/> section for detailed instructions on how to determine the correct merge-base commit.
+
+```
+❌ Cannot re-register previously removed type(s): <soType>. Please use a different name.
+```
+**Problem:** You're trying to create a new Saved Object type using a name that was previously used and removed. Type names cannot be reused to prevent migration conflicts.
+**Solution:** Choose a different name for your Saved Object type. Once a type name is added to `packages/kbn-check-saved-objects-cli/removed_types.json`, it's permanently reserved and cannot be reused.

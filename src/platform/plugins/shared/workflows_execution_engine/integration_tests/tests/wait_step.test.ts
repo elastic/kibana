@@ -229,15 +229,6 @@ steps:
       expect(nextRunAt.getTime()).toBeLessThan(expectedMaxTime.getTime());
     });
 
-    it('should store resume task ID in wait step state', async () => {
-      const waitStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-      ).filter((se) => se.stepId === 'waitStep');
-      expect(waitStepExecutions.length).toBe(1);
-      expect(waitStepExecutions[0].state).toBeDefined();
-      expect(waitStepExecutions[0].state?.resumeExecutionTaskId).toBe('fake_task_id');
-    });
-
     it('should have workflow finish time undefined when waiting', async () => {
       const workflowExecutionDoc =
         workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(

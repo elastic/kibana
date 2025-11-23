@@ -8,7 +8,6 @@ import React, { useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
 import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
-import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../../common/constants';
 import { EmptyState } from '../../../components/empty_state';
 import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -126,7 +125,6 @@ export const LatestFindingsContainer = () => {
               ...currentGroupFilters,
               ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
             ]}
-            height={DEFAULT_GROUPING_TABLE_HEIGHT}
             showDistributionBar={selectedGroupOptions.includes('none')}
           />
         );
