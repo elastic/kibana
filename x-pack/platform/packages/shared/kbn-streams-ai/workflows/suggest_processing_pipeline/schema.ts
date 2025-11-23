@@ -26,6 +26,7 @@ import {
   dissectProcessorSchema,
   dateProcessorSchema,
   removeProcessorSchema,
+  renameProcessorSchema,
   convertProcessorSchema,
 } from '@kbn/streamlang';
 
@@ -39,6 +40,7 @@ export const pipelineDefinitionSchema = z
           dissectProcessorSchema,
           dateProcessorSchema,
           removeProcessorSchema,
+          renameProcessorSchema,
           convertProcessorSchema,
         ])
       )

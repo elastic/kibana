@@ -13,6 +13,7 @@ import type { simulateProcessing } from '@kbn/streams-plugin/server/routes/inter
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { isOtelStream } from '@kbn/streams-schema';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { SuggestIngestPipelinePrompt } from './prompt';
 import { getPipelineDefinitionJsonSchema, pipelineDefinitionSchema } from './schema';
 
@@ -25,6 +26,7 @@ export async function suggestProcessingPipeline({
   simulatePipeline,
   documents,
   fieldsMetadataClient,
+  esClient,
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
@@ -34,23 +36,25 @@ export async function suggestProcessingPipeline({
   simulatePipeline(pipeline: StreamlangDSL): ReturnType<typeof simulateProcessing>;
   documents: FlattenRecord[];
   fieldsMetadataClient: IFieldsMetadataClient;
+  esClient: ElasticsearchClient;
 }): Promise<StreamlangDSL | null> {
   // No need to involve reasoning if there are no sample documents
   if (documents.length === 0) {
     return null;
   }
 
-  const isOtel = isOtelStream(definition);
-  console.log(`Stream ${definition.name} isOtelStream: ${isOtel}`);
-
-  console.log('parsingProcessor', parsingProcessor);
-
   // Collect metrics for the initial pipeline
+  const isOtel = isOtelStream(definition);
+  const mappedFields = await getMappedFields(esClient, definition.name);
   const simulationResult = await simulatePipeline({
     steps: parsingProcessor ? [parsingProcessor] : [],
   });
-  const simulationMetrics = await getSimulationMetrics(simulationResult, fieldsMetadataClient);
-  console.log('simulationMetrics', simulationMetrics);
+  const simulationMetrics = await getSimulationMetrics(
+    simulationResult,
+    fieldsMetadataClient,
+    isOtel,
+    mappedFields
+  );
 
   // Invoke the reasoning agent to suggest the ingest pipeline
   const response = await executeAsReasoningAgent({
@@ -82,11 +86,12 @@ export async function suggestProcessingPipeline({
 
         // 2. Simulate the pipeline and collect metrics
         const simulateResult = await simulatePipeline(pipeline.data as StreamlangDSL);
-        const metrics = await getSimulationMetrics(simulateResult, fieldsMetadataClient);
-        console.log('--------------------------------');
-        console.log('validatedPipeline', pipeline.data);
-        // console.log('simulateResult', simulateResult);
-        console.log('metrics', metrics);
+        const metrics = await getSimulationMetrics(
+          simulateResult,
+          fieldsMetadataClient,
+          isOtel,
+          mappedFields
+        );
 
         return {
           response: {
@@ -121,8 +126,6 @@ export async function suggestProcessingPipeline({
     },
     abortSignal: signal,
   });
-  console.log('response', response);
-  console.log('response.toolCalls', response.toolCalls);
 
   const commitPipeline = pipelineDefinitionSchema.safeParse(
     response.toolCalls[0].function.arguments.pipeline
@@ -134,108 +137,71 @@ export async function suggestProcessingPipeline({
   return commitPipeline.data as StreamlangDSL;
 }
 
-// {
-//   total: 4810,
-//   sampled: 1000,
-//   fields: [
-//     '@timestamp:date - 889 distinct values',
-//     'attributes.filepath:(unnmapped) - 1 distinct values (`Apache.log`)',
-//     'attributes.process.name:(unnmapped) - 2 distinct values (`apache2`, `httpd`)',
-//     'attributes.user.name:(unnmapped) - 3 distinct values (`admin`, `user`, `guest`)',
-//     'body.text:text - 1000 distinct values (`[Tue Oct 28 12:16:02 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties`, `[Tue Oct 28 11:30:11 2025] [error] mod_jk child workerEnv in error state 6`, 998 more values)',
-//     'host.name:keyword - 3 distinct values (`server2`, `server1`, `server3`)',
-//     'message:text - 1000 distinct values (`[Tue Oct 28 12:16:02 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties`, `[Tue Oct 28 11:30:11 2025] [error] mod_jk child workerEnv in error state 6`, 998 more values)',
-//     'resource.attributes.host.name:keyword - 3 distinct values (`server2`, `server1`, `server3`)',
-//     'resource.attributes.process.pid:(unnmapped) - 960 distinct values (`8446`, `9743`, `266`, `3441`, `4052`, `3674`, `8201`, `1874`, `9095`, `3046`, 950 more values)',
-//     'stream.name:keyword - 1 distinct values (`logs.apache`)'
-//   ]
-// }
+async function getMappedFields(esClient: ElasticsearchClient, index: string) {
+  // get mapped fields for specified index
+  const fieldCaps = await esClient.fieldCaps({
+    index,
+    fields: '*',
+  });
+
+  const mappedFields: Record<string, string> = {};
+  for (const [fieldName, typeInfo] of Object.entries(fieldCaps.fields)) {
+    for (const [typeName, fieldDetails] of Object.entries(typeInfo)) {
+      if (!fieldDetails.metadata_field) {
+        mappedFields[fieldName] = typeName;
+        break;
+      }
+    }
+  }
+
+  // Sort alphabetically by field name
+  return Object.keys(mappedFields)
+    .sort()
+    .reduce<Record<string, string>>((sorted, key) => {
+      sorted[key] = mappedFields[key];
+      return sorted;
+    }, {});
+}
+
 async function getSimulationMetrics(
   simulationResult: Awaited<ReturnType<typeof simulateProcessing>>,
-  fieldsMetadataClient: IFieldsMetadataClient
+  fieldsMetadataClient: IFieldsMetadataClient,
+  isOtel: boolean,
+  mappedFields: Record<string, string>
 ) {
-  // Metrics:
-  // - Success/Parsed rate
-  // - Timestamp coverage
-  // - Message coverage
-  // - Type correctness
-  // - ECS/non-ECS fields
-
-  // Handle failure case
   if (simulationResult.definition_error || simulationResult.documents.length === 0) {
     return {
-      total: 0,
       sampled: 0,
       fields: [],
-      success_rate: 0,
-      timestamp_coverage: 0,
-      message_coverage: 0,
+      parse_rate: 0,
     };
   }
 
   const documents = simulationResult.documents;
-  const total = documents.length;
   const sampled = documents.length;
 
   // Calculate success/parsed rate
-  const successRate = simulationResult.documents_metrics.parsed_rate * 100;
+  const parseRate = simulationResult.documents_metrics.parsed_rate * 100;
 
-  // Calculate timestamp coverage
-  const documentsWithTimestamp = documents.filter(
-    (doc) => doc.value && '@timestamp' in doc.value && doc.value['@timestamp'] != null
-  ).length;
-  const timestampCoverage = total > 0 ? (documentsWithTimestamp / total) * 100 : 0;
-
-  // Calculate message coverage
-  const documentsWithMessage = documents.filter(
-    (doc) =>
-      doc.value &&
-      (('message' in doc.value && doc.value.message != null) ||
-        ('log.message' in doc.value && doc.value['log.message'] != null))
-  ).length;
-  const messageCoverage = total > 0 ? (documentsWithMessage / total) * 100 : 0;
-
-  // Collect all unique fields from all documents
-  const fieldMap = new Map<
-    string,
-    { values: Set<string | number | boolean | null>; types: Set<string> }
-  >();
+  // Collect all unique fields and sample values from documents
+  const fieldMap = new Map<string, Set<string | number | boolean | null>>();
 
   for (const doc of documents) {
     if (doc.value) {
       for (const [fieldName, fieldValue] of Object.entries(doc.value)) {
         if (!fieldMap.has(fieldName)) {
-          fieldMap.set(fieldName, { values: new Set(), types: new Set() });
+          fieldMap.set(fieldName, new Set());
         }
-        const fieldInfo = fieldMap.get(fieldName)!;
+        const values = fieldMap.get(fieldName)!;
 
         // Store sample values (limit to avoid memory issues)
-        if (fieldInfo.values.size < 100) {
+        if (values.size < 100) {
           if (fieldValue != null) {
             const stringValue = String(fieldValue);
             // Truncate long values
-            fieldInfo.values.add(
+            values.add(
               stringValue.length > 100 ? stringValue.substring(0, 100) + '...' : stringValue
             );
-          }
-        }
-
-        // Infer type from value
-        if (fieldValue != null) {
-          if (typeof fieldValue === 'number') {
-            // Check if it's a date (timestamp)
-            if (
-              fieldName === '@timestamp' ||
-              (typeof fieldValue === 'number' && fieldValue > 1000000000000)
-            ) {
-              fieldInfo.types.add('date');
-            } else {
-              fieldInfo.types.add('number');
-            }
-          } else if (typeof fieldValue === 'boolean') {
-            fieldInfo.types.add('boolean');
-          } else {
-            fieldInfo.types.add('text');
           }
         }
       }
@@ -246,37 +212,24 @@ async function getSimulationMetrics(
   const fieldNames = Array.from(fieldMap.keys());
   const fieldMetadataMap = await fieldsMetadataClient.find({
     fieldNames,
-    source: ['ecs', 'otel', 'metadata'],
+    source: isOtel ? 'otel' : 'ecs',
   });
-  // console.log('fieldMetadataMap', fieldMetadataMap.toPlain());
 
   const fieldsMetadata = fieldMetadataMap.getFields();
 
   // Build fields array with metrics
-  const fields = Array.from(fieldMap.entries()).map(([fieldName, fieldInfo]) => {
+  const fields = Array.from(fieldMap.entries()).map(([fieldName, values]) => {
     const metadata = fieldsMetadata[fieldName];
-    const isEcs = metadata?.source === 'ecs';
-    const isMetadata = metadata?.source === 'metadata';
-    // Determine type display
-    let typeDisplay = 'unknown';
-    if (metadata?.type) {
-      typeDisplay = metadata.type;
-    } else if (fieldInfo.types.size > 0) {
-      const types = Array.from(fieldInfo.types);
-      typeDisplay = types.length === 1 ? types[0] : types.join('|');
-    }
+
+    // Get actual type from mappedFields
+    const actualType = mappedFields[fieldName] || 'unmapped';
 
     // Build type display with ECS/metadata indicator
-    let typeIndicator = typeDisplay;
-    if (isMetadata) {
-      typeIndicator = `${typeDisplay}(metadata)`;
-    } else if (!isEcs && fieldInfo.types.size > 0) {
-      typeIndicator = `${typeDisplay}(unmapped)`;
-    }
+    const typeIndicator = metadata ? `${metadata.source}: ${metadata.type}` : actualType;
 
     // Get distinct values count and samples
-    const distinctValues = fieldInfo.values.size;
-    const sampleValues = Array.from(fieldInfo.values).slice(0, 10);
+    const distinctValues = values.size;
+    const sampleValues = Array.from(values).slice(0, 10);
     const remainingCount = distinctValues > 10 ? distinctValues - 10 : 0;
 
     let valuesDescription = '';
@@ -294,15 +247,12 @@ async function getSimulationMetrics(
         .join(', ')}, ${remainingCount} more values)`;
     }
 
-    return `${fieldName}:${typeIndicator} - ${valuesDescription}`;
+    return `${fieldName} (${typeIndicator}) - ${valuesDescription}`;
   });
 
   return {
-    total,
     sampled,
     fields,
-    success_rate: parseFloat(successRate.toFixed(2)),
-    timestamp_coverage: parseFloat(timestampCoverage.toFixed(2)),
-    message_coverage: parseFloat(messageCoverage.toFixed(2)),
+    parse_rate: parseFloat(parseRate.toFixed(2)),
   };
 }

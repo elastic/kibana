@@ -98,6 +98,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
       maxSteps: undefined, // Allow full reasoning for pipeline generation
       signal: abortController.signal,
       documents: params.body.documents,
+      esClient: scopedClusterClient.asCurrentUser,
       fieldsMetadataClient,
       simulatePipeline: (pipeline: StreamlangDSL) =>
         simulateProcessing({
