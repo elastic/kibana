@@ -92,6 +92,26 @@ export const getNodeDocumentMode = (
 };
 
 /**
+ * Checks if a node has an entity field in its documentsData.
+ * Only relevant for single-entity mode - returns false for all other modes.
+ * For single-entity nodes, checks if at least one document contains an 'entity' field.
+ */
+export const hasNodeEntityField = (node: NodeViewModel): boolean => {
+  const docMode = getNodeDocumentMode(node);
+
+  if (docMode !== 'single-entity') {
+    return false;
+  }
+
+  return (
+    'documentsData' in node &&
+    Array.isArray(node.documentsData) &&
+    node.documentsData.length > 0 &&
+    node.documentsData.some((doc) => 'entity' in doc)
+  );
+};
+
+/**
  * Returns the single document data for a node if it is in single-* mode.
  * If the node is not in one of these modes, or if it has no documentsData, it returns undefined.
  */

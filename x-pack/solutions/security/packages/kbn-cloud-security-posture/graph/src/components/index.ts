@@ -33,5 +33,6 @@ export {
   isEntityNode,
   getNodeDocumentMode,
   hasNodeDocumentsData,
+  hasNodeEntityField,
   getSingleDocumentData,
 } from './utils';

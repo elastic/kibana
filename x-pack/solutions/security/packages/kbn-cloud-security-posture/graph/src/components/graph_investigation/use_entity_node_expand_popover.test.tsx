@@ -47,7 +47,8 @@ jest.mock('./use_node_expand_graph_popover', () => ({
 
 const createMockNode = (
   docMode: 'single-entity' | 'grouped-entities' | 'na',
-  sourceNamespaceField?: string
+  sourceNamespaceField?: string,
+  hasEntityField: boolean = true
 ): NodeProps => {
   const baseNode = {
     id: 'test-node-id',
@@ -71,38 +72,52 @@ const createMockNode = (
   } as NodeProps;
 
   if (docMode === 'single-entity' || docMode === 'na') {
+    const docData: Record<string, unknown> = {
+      id: 'entity-123',
+      type: 'entity' as const,
+      sourceNamespaceField,
+    };
+
+    // Only add entity field if hasEntityField is true
+    if (hasEntityField) {
+      docData.entity = {
+        name: 'Test Entity',
+        type: 'User',
+      };
+    }
+
     return {
       ...baseNode,
       data: {
         ...baseNode.data,
-        documentsData: [
-          {
-            id: 'entity-123',
-            type: 'entity' as const,
-            sourceNamespaceField,
-          },
-        ],
+        documentsData: [docData],
       },
     } as NodeProps;
   }
 
   if (docMode === 'grouped-entities') {
+    const createDocData = (id: string): Record<string, unknown> => {
+      const docData: Record<string, unknown> = {
+        id,
+        type: 'entity' as const,
+        sourceNamespaceField,
+      };
+
+      if (hasEntityField) {
+        docData.entity = {
+          name: 'Test Entity',
+          type: 'User',
+        };
+      }
+
+      return docData;
+    };
+
     return {
       ...baseNode,
       data: {
         ...baseNode.data,
-        documentsData: [
-          {
-            id: 'entity-123',
-            type: 'entity' as const,
-            sourceNamespaceField,
-          },
-          {
-            id: 'entity-456',
-            type: 'entity' as const,
-            sourceNamespaceField,
-          },
-        ],
+        documentsData: [createDocData('entity-123'), createDocData('entity-456')],
         count: 2,
       },
     } as NodeProps;
@@ -161,9 +176,7 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should disable entity details item when onShowEntityDetailsClick is not provided', () => {
       const node = createMockNode('single-entity', 'user');
-      renderHook(() =>
-        useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters, undefined)
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -205,9 +218,7 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should disable entity details item when onShowEntityDetailsClick is not provided in grouped-entities mode', () => {
       const node = createMockNode('grouped-entities', 'user');
-      renderHook(() =>
-        useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters, undefined)
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -277,9 +288,7 @@ describe('useEntityNodeExpandPopover', () => {
   describe('shouldDisableEntityDetailsListItem', () => {
     it('should disable entity details when onShowEntityDetailsClick is undefined', () => {
       const node = createMockNode('single-entity', 'user');
-      renderHook(() =>
-        useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters, undefined)
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -294,7 +303,7 @@ describe('useEntityNodeExpandPopover', () => {
       });
     });
 
-    it('should enable entity details when onShowEntityDetailsClick is provided and docMode is single-entity', () => {
+    it('should enable entity details when onShowEntityDetailsClick is provided and docMode is single-entity with entity data', () => {
       const node = createMockNode('single-entity', 'user');
       renderHook(() =>
         useEntityNodeExpandPopover(
@@ -358,6 +367,54 @@ describe('useEntityNodeExpandPopover', () => {
 
       // no-data mode returns 'na' from getNodeDocumentMode, which is treated as single-entity
       expect(items).toHaveLength(5); // 4 items + 1 separator
+    });
+
+    it('should disable entity details when documentsData does not contain entity field', () => {
+      const node = createMockNode('single-entity', 'user', false);
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          mockSetSearchFilters,
+          dataViewId,
+          searchFilters,
+          mockOnShowEntityDetailsClick
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const entityDetailsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
+      );
+
+      expect(entityDetailsItem).toMatchObject({
+        disabled: true,
+        showToolTip: true,
+      });
+    });
+
+    it('should not disable entity details in grouped-entities mode even when documentsData does not contain entity field', () => {
+      const node = createMockNode('grouped-entities', 'user', false);
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          mockSetSearchFilters,
+          dataViewId,
+          searchFilters,
+          mockOnShowEntityDetailsClick
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      expect(items).toHaveLength(1);
+      expect(items[0]).toMatchObject({
+        type: 'item',
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        disabled: false, // Entity field check only applies to single-entity mode
+      });
     });
   });
 
