@@ -501,7 +501,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         expect(logEventMock).toHaveBeenCalledWith(
           expect.objectContaining({
             status: 'success',
-            message: expect.stringContaining('completed'),
+            message: expect.stringContaining('All rules successfully scheduled'),
           })
         );
         expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalled();
@@ -866,7 +866,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           expect(logEventMock).toHaveBeenCalledWith(
             expect.objectContaining({
               status: 'success',
-              message: expect.stringContaining('completed'),
+              message: expect.stringContaining('All rules successfully scheduled'),
             })
           );
         });

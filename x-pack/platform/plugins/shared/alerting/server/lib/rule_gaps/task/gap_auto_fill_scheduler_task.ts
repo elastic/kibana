@@ -35,6 +35,7 @@ import {
   filterGapsWithOverlappingBackfills,
   initRun,
   checkBackfillCapacity,
+  getGapAutoFillRunOutcome,
 } from './utils';
 import { cleanupStuckInProgressGaps } from '../update/cleanup_stuck_in_progress_gaps';
 
@@ -328,7 +329,9 @@ export function registerGapAutoFillSchedulerTask({
                     (message) => logger.warn(loggerMessage(message))
                   );
 
+                  // there are no gaps to process in this page
                   if (!filteredGaps.length) {
+                    // if the page is not full, we've reached the end for this batch
                     if (gapsPage.length < gapsPerPage) {
                       break;
                     }
@@ -363,26 +366,17 @@ export function registerGapAutoFillSchedulerTask({
               }
 
               // Step 5: Finalize and log results
-              const consolidated = Array.from(aggregatedByRule.values());
-              if (consolidated.length === 0) {
-                await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SKIPPED,
-                  results: [],
-                  message: "Skipped execution: can't schedule gap fills for any enabled rule",
-                });
-                return { state: {} };
-              }
-              const overallStatus = consolidated.every(
-                (r) => r.status === GapFillSchedulePerRuleStatus.ERROR
-              )
-                ? GAP_AUTO_FILL_STATUS.ERROR
-                : GAP_AUTO_FILL_STATUS.SUCCESS;
+              const consolidated = resultsFromMap(aggregatedByRule);
+              const { status: outcomeStatus, message: outcomeMessage } =
+                getGapAutoFillRunOutcome(consolidated);
+              const summary = consolidated.length
+                ? ` | ${formatConsolidatedSummary(consolidated)}`
+                : '';
 
-              // Build summary message with counts and error details
               await logEvent({
-                status: overallStatus,
+                status: outcomeStatus,
                 results: consolidated,
-                message: `completed | ${formatConsolidatedSummary(consolidated)}`,
+                message: `${outcomeMessage}${summary}`,
               });
 
               return { state: {} };
