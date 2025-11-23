@@ -599,7 +599,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             base: [],
             spaces: ['*'],
             feature: {
-              uptime: ['all', 'can_read_params'],
+              uptime: ['all', 'can_read_param_values'],
             },
           },
         ],
@@ -660,7 +660,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             base: [],
             spaces: ['*'],
             feature: {
-              uptime: ['minimal_all', 'can_read_params'],
+              uptime: ['minimal_all', 'can_read_param_values'],
             },
           },
         ],
@@ -721,7 +721,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             base: [],
             spaces: ['*'],
             feature: {
-              uptime: ['read', 'can_read_params'],
+              uptime: ['read', 'can_read_param_values'],
             },
           },
         ],

@@ -81,9 +81,9 @@ const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent',
   privileges: [
     {
-      id: 'can_read_params',
+      id: 'can_read_param_values',
       name: i18n.translate('xpack.synthetics.features.canReadParams.label', {
-        defaultMessage: 'Read Global Parameters',
+        defaultMessage: 'Can Read Global Parameter values',
       }),
       includeIn: 'none', // This ensures it is not granted by default
       savedObject: {
@@ -196,7 +196,7 @@ export const syntheticsFeature = {
         defaultMessage: 'Global Parameters',
       }),
       description: i18n.translate('xpack.synthetics.features.app.params.description', {
-        defaultMessage: 'This feature allows you to grant read-only access to Global Parameters.',
+        defaultMessage: 'This feature allows you to read global parameters values',
       }),
       privilegeGroups: [canReadParamsPrivilege],
     },

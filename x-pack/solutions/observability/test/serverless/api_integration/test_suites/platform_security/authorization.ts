@@ -8408,7 +8408,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:synthetics-privates-locations/share_to_space",
                 "ui:uptime/canManagePrivateLocations",
               ],
-              "can_read_params": Array [
+              "can_read_param_values": Array [
                 "login:",
                 "saved_object:synthetics-param/bulk_get",
                 "saved_object:synthetics-param/get",
