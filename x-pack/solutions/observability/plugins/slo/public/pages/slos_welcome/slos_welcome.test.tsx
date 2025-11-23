@@ -88,9 +88,9 @@ describe('SLOs Welcome Page', () => {
 
       render(<SlosWelcomePage />);
 
-      expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
-      expect(screen.queryByTestId('slosPageWelcomePromptSignupForCloudButton')).toBeTruthy();
-      expect(screen.queryByTestId('slosPageWelcomePromptSignupForLicenseButton')).toBeTruthy();
+      expect(screen.queryByTestId('sloWelcomePage')).toBeTruthy();
+      expect(screen.queryByTestId('sloWelcomePageSignupForCloudButton')).toBeTruthy();
+      expect(screen.queryByTestId('sloWelcomePageSignupForLicenseButton')).toBeTruthy();
     });
   });
 
@@ -122,7 +122,7 @@ describe('SLOs Welcome Page', () => {
 
         render(<SlosWelcomePage />);
 
-        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+        expect(screen.queryByTestId('sloWelcomePage')).toBeTruthy();
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
 
@@ -139,7 +139,7 @@ describe('SLOs Welcome Page', () => {
         });
 
         render(<SlosWelcomePage />);
-        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+        expect(screen.queryByTestId('sloWelcomePage')).toBeTruthy();
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
         expect(createNewSloButton).toBeDisabled();
@@ -155,7 +155,7 @@ describe('SLOs Welcome Page', () => {
         });
 
         render(<SlosWelcomePage />);
-        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+        expect(screen.queryByTestId('sloWelcomePage')).toBeTruthy();
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
         expect(createNewSloButton).toBeTruthy();
