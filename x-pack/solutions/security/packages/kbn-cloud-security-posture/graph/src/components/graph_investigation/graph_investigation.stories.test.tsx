@@ -232,7 +232,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).not.toBeInTheDocument();
     });
 
-    it('shows the option `Show entity details` as enabled when entity node has documentsData', async () => {
+    it('shows the option `Show entity details` as enabled when entity node has documentsData with entity data', async () => {
       const { container, getByTestId } = renderStory();
 
       await expandNode(container, 'projects/your-project-id/roles/customRole');
@@ -252,7 +252,7 @@ describe('GraphInvestigation Component', () => {
 
       // can't use userEvent.hover since we get the following error:
       // 'Unable to perform pointer interaction as the element has pointer-events: none:'
-      await fireEvent.mouseOver(showDetailsItem);
+      fireEvent.mouseOver(showDetailsItem);
 
       // Wait for tooltip and execute validation
       await waitAndExecute(() => {
