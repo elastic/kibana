@@ -484,17 +484,18 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // Verify first entity node - Service actor
         await expandedFlyoutGraph.assertNodeEntityTag(
           'api-service@your-project-id.iam.gserviceaccount.com',
-          'service'
+          'Service'
         );
         await expandedFlyoutGraph.assertNodeEntityDetails(
           'api-service@your-project-id.iam.gserviceaccount.com',
-          'GCP Service Account'
+          'ApiServiceAccount'
         );
 
         // Verify second entity node - Host target
-        await expandedFlyoutGraph.assertNodeEntityTag('host-instance-1', 'host');
+        // get Node by md5 hash of host-instance-1 and host-instance-2
+        await expandedFlyoutGraph.assertNodeEntityTag('599353ee39e688c8a37d9d2818d77898', 'Host');
         await expandedFlyoutGraph.assertNodeEntityDetails(
-          'host-instance-1',
+          '599353ee39e688c8a37d9d2818d77898',
           'GCP Compute Instance'
         );
       });
