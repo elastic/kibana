@@ -1944,6 +1944,8 @@
       "@kbn/securitysolution-autocomplete/*": ["x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/*"],
       "@kbn/securitysolution-data-table": ["x-pack/solutions/security/packages/data-table"],
       "@kbn/securitysolution-data-table/*": ["x-pack/solutions/security/packages/data-table/*"],
+      "@kbn/securitysolution-deep-agent": ["x-pack/solutions/security/packages/deep-agent"],
+      "@kbn/securitysolution-deep-agent/*": ["x-pack/solutions/security/packages/deep-agent/*"],
       "@kbn/securitysolution-ecs": ["src/platform/packages/shared/kbn-securitysolution-ecs"],
       "@kbn/securitysolution-ecs/*": ["src/platform/packages/shared/kbn-securitysolution-ecs/*"],
       "@kbn/securitysolution-endpoint-exceptions-common": ["x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common"],
@@ -2515,7 +2517,7 @@
     "esModuleInterop": true,
     // Resolve modules in the same way as Node.js. Aka make `require` works the
     // same in TypeScript as it does in Node.js.
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.
