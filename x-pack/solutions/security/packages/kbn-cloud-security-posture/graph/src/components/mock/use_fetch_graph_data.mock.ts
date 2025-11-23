@@ -46,6 +46,10 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
               {
                 id: '1',
                 type: DOCUMENT_TYPE_ENTITY,
+                entity: {
+                  name: 'Custom Role',
+                  type: 'role',
+                },
               },
             ],
           },
