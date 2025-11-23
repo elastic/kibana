@@ -299,7 +299,7 @@ export default function (providerContext: FtrProviderContext) {
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts_ecs_and_legacy_mappings'
         );
         await esArchiver.load(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit_ecs_and_legacy'
+          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
 
         await spacesService.create({
@@ -321,7 +321,7 @@ export default function (providerContext: FtrProviderContext) {
         // Try to unload logs archive - might have been replaced by nested test suites
         try {
           await esArchiver.unload(
-            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit_ecs_and_legacy'
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
           );
         } catch (e) {
           // Ignore if already unloaded or replaced by another archive
@@ -1254,7 +1254,7 @@ export default function (providerContext: FtrProviderContext) {
             'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
           );
           await esArchiver.load(
-            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit_ecs_and_legacy'
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
           );
         });
 
@@ -1267,7 +1267,7 @@ export default function (providerContext: FtrProviderContext) {
             conflicts: 'proceed',
           });
           await esArchiver.unload(
-            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit_ecs_and_legacy'
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
           );
         });
 
@@ -1351,7 +1351,7 @@ export default function (providerContext: FtrProviderContext) {
 
         // Load the new ECS schema archives (ONLY new fields, no legacy actor.entity.id/target.entity.id)
         await esArchiver.load(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit_ecs'
+          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit_ecs_only'
         );
         await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts_ecs'
@@ -1401,7 +1401,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         await esArchiver.unload(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit_ecs'
+          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit_ecs_only'
         );
 
         if (dataView) {
