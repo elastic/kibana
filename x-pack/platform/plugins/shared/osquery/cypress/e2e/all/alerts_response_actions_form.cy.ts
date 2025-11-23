@@ -175,6 +175,7 @@ describe(
           cy.getBySel('comboBoxSearchInput').click();
           cy.contains('Search for a pack to run');
           cy.contains('Pack is a required field');
+          cy.contains('something fake');
           cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
           cy.contains(packName);
         })
