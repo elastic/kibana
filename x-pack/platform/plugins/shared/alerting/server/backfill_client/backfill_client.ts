@@ -255,7 +255,7 @@ export class BackfillClient {
     const isBulkCreateError = (
       result: SavedObject<AdHocRunSO> | BulkCreateError
     ): result is BulkCreateError => {
-      return (result as BulkCreateError).bulkCreateError !== undefined;
+      return 'bulkCreateError' in result && result.bulkCreateError !== undefined;
     };
 
     const transformedResponse: ScheduleBackfillResults = orderedResults.map(

@@ -48,7 +48,7 @@ export const processGapsBatch = async (
     if (!gapsByRuleId.has(ruleId)) {
       gapsByRuleId.set(ruleId, []);
     }
-    gapsByRuleId.get(ruleId)!.push(gap);
+    gapsByRuleId.get(ruleId)?.push(gap);
   }
 
   const schedulingPayloads: Array<{
