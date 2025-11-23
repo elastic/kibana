@@ -207,7 +207,10 @@ export class EntityStoreCrudClient {
       size: 1,
     });
 
-    if (searchResp.hits.total === 0 || (typeof searchResp.hits.total === 'object' && searchResp.hits.total.value === 0)) {
+    if (
+      searchResp.hits.total === 0 ||
+      (typeof searchResp.hits.total === 'object' && searchResp.hits.total.value === 0)
+    ) {
       throw new Error(`Entity with id '${entityId}' not found`);
     }
 
