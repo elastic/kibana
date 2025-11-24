@@ -35,7 +35,12 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<Streams.all.GetResponse> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<Streams.all.GetResponse> => {
     const { assetClient, attachmentClient, streamsClient, scopedClusterClient } =
       await getScopedClients({
         request,

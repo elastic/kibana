@@ -357,6 +357,7 @@ export class StreamsClient {
                 fields: {},
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
           },
         },
@@ -610,6 +611,7 @@ export class StreamsClient {
         processing: { steps: [] },
         settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     };
 
@@ -695,6 +697,7 @@ export class StreamsClient {
         processing: { steps: [] },
         settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     }));
   }
