@@ -57,7 +57,7 @@ export const getPosition = (command: ESQLAstAllCommands, innerText: string): Car
     // in the BY clause
 
     const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
-    if (isAssignment(lastOptionArg)) {
+    if (isAssignment(lastOptionArg) && !/,\s*$/.test(innerText)) {
       return 'grouping_expression_after_assignment';
     }
 
