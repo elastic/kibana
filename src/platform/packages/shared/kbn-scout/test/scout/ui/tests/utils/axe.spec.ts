@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { runA11yScan } from './axe';
-import { isValidUTCDate, formatTime, getPlaywrightGrepTag } from './runner_utils';
+import { test, expect } from '../../../../../src/playwright';
 
-describe('runA11yScan', () => {
+test.describe('runA11yScan', () => {
   test('returns violations array (empty for basic accessible markup)', async ({ page }) => {
     await page.setContent(`
       <main>
@@ -23,14 +22,11 @@ describe('runA11yScan', () => {
       </main>
     `);
 
-    const { violations } = await runA11yScan(page, {
-      // Example: filter only serious+ if desired
-      impactLevels: ['serious', 'critical'],
-    });
+    const { violations } = await page.checkA11y();
 
     expect(Array.isArray(violations)).toBe(true);
 
     // Basic page should have no serious/critical violations
-    expect(violations.length).toBe(0);
+    expect(violations).toHaveLength(0);
   });
 });

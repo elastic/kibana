@@ -9,6 +9,8 @@
 
 import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { AXE_OPTIONS } from '@kbn/axe-config';
+
 import type { KibanaUrl } from '../../..';
 
 export interface A11yViolation {
@@ -27,11 +29,9 @@ export interface A11yViolation {
 export interface RunA11yScanOptions {
   /** Optional CSS selectors to exclude from scan */
   exclude?: string[];
-  /** Optional axe rule IDs to disable */
-  disableRules?: string[];
   /** Optional result impact levels to include (e.g. \['critical','serious'\]) */
   impactLevels?: Array<'minor' | 'moderate' | 'serious' | 'critical'>;
-  /** Timeout in ms for the scan (defaults 15000) */
+  /** Timeout in ms for the scan (defaults 10000) */
   timeoutMs?: number;
 }
 
@@ -41,16 +41,14 @@ export interface RunA11yScanResult {
 
 export const runA11yScan = async (
   page: Page,
-  { exclude = [], disableRules = [], impactLevels, timeoutMs = 15000 }: RunA11yScanOptions = {}
+  { exclude = [], impactLevels, timeoutMs = 10000 }: RunA11yScanOptions = {}
 ): Promise<RunA11yScanResult> => {
   const builder = new AxeBuilder({ page });
 
+  builder.options(AXE_OPTIONS);
+
   for (const selector of exclude) {
     builder.exclude(selector);
-  }
-
-  if (disableRules.length) {
-    builder.disableRules(disableRules);
   }
 
   const controller = new AbortController();
@@ -81,17 +79,14 @@ export const runA11yScan = async (
 /**
  * Assert helper usable inside tests.
  */
-export const checkA11y = async (
-  page: Page,
-  kbnUrl: KibanaUrl,
-  options?: RunA11yScanOptions
-): Promise<void> => {
-  const { violations } = await runA11yScan(page, options);
+export const checkA11y = async (page: Page, kbnUrl?: KibanaUrl): Promise<void> => {
+  const { violations } = await runA11yScan(page);
+
   if (violations.length) {
     const formatted = violations
       .map(
         (v) =>
-          `${v.id} (${v.impact}): ${v.helpUrl}\n Url: ${kbnUrl.toString()} Nodes:\n${v.nodes
+          `${v.id} (${v.impact}): ${v.helpUrl}\n Url: ${kbnUrl?.toString()} Nodes:\n${v.nodes
             .map((n) => `    ${n.target.join(', ')} -> ${n.html}`)
             .join('\n')}`
       )
