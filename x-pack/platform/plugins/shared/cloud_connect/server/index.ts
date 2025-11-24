@@ -8,6 +8,9 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { CloudConnectedPlugin } from './plugin';
 
+export { config } from './config';
+export type { CloudConnectConfig } from './config';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new CloudConnectedPlugin(initializerContext);
 }
