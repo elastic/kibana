@@ -285,6 +285,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       );
       const { fetchSpanLinks } = await import('./services/rest/span_links');
       const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
+      const { fetchRootSpanByTraceId } = await import(
+        './services/rest/fetch_trace_root_span_by_trace_id'
+      );
+      const { fetchSpan } = await import('./services/rest/fetch_span');
+      const { fetchLatencyOverallTransactionDistribution } = await import(
+        './services/rest/fetch_latency_overall_transaction_distribution'
+      );
+      const { fetchLatencyOverallSpanDistribution } = await import(
+        './services/rest/fetch_latency_overall_span_distribution'
+      );
       const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
 
       const { createCallApmApi } = await import('./services/rest/create_call_apm_api');
@@ -298,6 +308,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         hasFleetApmIntegrations,
         fetchSpanLinks,
         fetchErrorsByTraceId,
+        fetchRootSpanByTraceId,
+        fetchSpan,
+        fetchLatencyOverallTransactionDistribution,
+        fetchLatencyOverallSpanDistribution,
       };
     };
 
@@ -370,6 +384,38 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       fetchErrorsByTraceId: async (params, signal) => {
         const { fetchErrorsByTraceId } = await getApmDataHelper();
         return fetchErrorsByTraceId(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-root-span-by-trace-id',
+      fetchRootSpanByTraceId: async (params, signal) => {
+        const { fetchRootSpanByTraceId } = await getApmDataHelper();
+        return fetchRootSpanByTraceId(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-span',
+      fetchSpan: async (params, signal) => {
+        const { fetchSpan } = await getApmDataHelper();
+        return fetchSpan(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-latency-overall-transaction-distribution',
+      fetchLatencyOverallTransactionDistribution: async (params, signal) => {
+        const { fetchLatencyOverallTransactionDistribution } = await getApmDataHelper();
+        return fetchLatencyOverallTransactionDistribution(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-latency-overall-span-distribution',
+      fetchLatencyOverallSpanDistribution: async (params, signal) => {
+        const { fetchLatencyOverallSpanDistribution } = await getApmDataHelper();
+        return fetchLatencyOverallSpanDistribution(params, signal);
       },
     });
 
