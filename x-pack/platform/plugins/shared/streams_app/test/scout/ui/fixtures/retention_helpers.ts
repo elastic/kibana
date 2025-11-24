@@ -349,17 +349,20 @@ export async function setFailureStoreRetention(
   unit: 'd' | 'h' | 'm' | 's' = 'd'
 ): Promise<void> {
   await page.getByTestId('streamFailureStoreEditRetention').click();
+  // Disable inherit failure store
+  await page.getByTestId('inheritFailureStoreSwitch').click();
+  // Update the retention period
   await page.getByTestId('custom').click();
   const dialog = page.getByRole('dialog');
   const field = dialog.getByTestId('selectFailureStorePeriodValue');
   await field.fill('');
   await field.fill(value);
-  
+
   if (unit !== 'd') {
     await dialog.getByTestId('failureStoreDslUnitButton').click();
     await dialog.getByTestId(`failureStoreDslUnitOption-${unit}`).click();
   }
-  
+
   await page.getByTestId('failureStoreModalSaveButton').click();
 }
 
