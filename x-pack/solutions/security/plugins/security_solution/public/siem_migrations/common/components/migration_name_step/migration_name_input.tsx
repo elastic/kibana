@@ -62,7 +62,6 @@ export const MigrationNameInput = React.memo<MigrationNameInputProps>(
                 onBlur={onBlur}
                 onKeyDown={onEnter}
                 fullWidth
-                autoFocus
                 data-test-subj="migrationNameInput"
               />
             </EuiFormRow>

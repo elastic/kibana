@@ -39,3 +39,8 @@ export interface FilterOptionsBase {
 export interface MigrationStats extends MigrationTaskStats {
   status: SiemMigrationTaskStatus; // use the native enum instead of the zod enum from the model
 }
+
+export enum MigrationSource {
+  SPLUNK = 'splunk',
+  QRADAR = 'qradar',
+}

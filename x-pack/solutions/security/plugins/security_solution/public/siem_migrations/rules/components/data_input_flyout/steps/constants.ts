@@ -11,3 +11,10 @@ export enum DataInputStep {
   Lookups = 3,
   End = 10,
 }
+
+export enum DataInputStepId {
+  SplunkRules = 'splunk_rules',
+  SplunkMacros = 'splunk_macros',
+  SplunkLookups = 'splunk_lookups',
+  QradarRules = 'qradar_rules',
+}

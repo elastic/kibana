@@ -23,6 +23,8 @@ import type { CreateRuleMigrationRulesRequestBody } from '../../../../../../../.
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
 import * as i18n from './translations';
+import { MigrationSource } from '../../../../../../../common/types';
+import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
 
 type SplunkRulesResult = Partial<Record<(typeof SPLUNK_RULES_COLUMNS)[number], string>>;
 
@@ -32,19 +34,33 @@ export interface RulesFileUploadProps {
   isCreated: boolean;
   onRulesFileChanged: (files: FileList | null) => void;
   migrationName: string | undefined;
+  migrationSource: MigrationSource;
   apiError: string | undefined;
 }
+
+const RULES_DATA_INPUT_FILE_UPLOAD_PROMPT: Record<MigrationSource, string> = {
+  [MigrationSource.SPLUNK]: i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_SPLUNK,
+  [MigrationSource.QRADAR]: i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_QRADAR,
+};
 export const RulesFileUpload = React.memo<RulesFileUploadProps>(
-  ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
+  ({
+    createMigration,
+    migrationName,
+    migrationSource,
+    apiError,
+    isLoading,
+    isCreated,
+    onRulesFileChanged,
+  }) => {
     const [rulesToUpload, setRulesToUpload] = useState<CreateRuleMigrationRulesRequestBody>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createRules = useCallback(() => {
       if (migrationName) {
         filePickerRef.current?.removeFiles();
-        createMigration(migrationName, rulesToUpload);
+        createMigration({ migrationName, rules: rulesToUpload, migrationSource });
       }
-    }, [createMigration, migrationName, rulesToUpload]);
+    }, [createMigration, migrationName, migrationSource, rulesToUpload]);
 
     const onFileParsed = useCallback((content: Array<SplunkRow<SplunkRulesResult>>) => {
       const rules = content.map(formatRuleRow);
@@ -53,13 +69,22 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
 
     const { parseFile, isParsing, error: fileError } = useParseFileInput(onFileParsed);
 
+    // const onFileChange = useCallback(
+    //   (files: FileList | null) => {
+    //     setRulesToUpload([]);
+    //     onRulesFileChanged(files);
+    //     parseFile(files);
+    //   },
+    //   [parseFile, onRulesFileChanged]
+    // );
+
     const onFileChange = useCallback(
       (files: FileList | null) => {
-        setRulesToUpload([]);
+        console.log('Files changed:', files);
+        setRulesToUpload(files?.length ? Array.from(files) : []);
         onRulesFileChanged(files);
-        parseFile(files);
       },
-      [parseFile, onRulesFileChanged]
+      [setRulesToUpload, onRulesFileChanged]
     );
 
     const error = useMemo(() => {
@@ -76,6 +101,9 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
+          <EuiText size="s">{RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <EuiFormRow isInvalid={error != null} fullWidth error={error}>
             <EuiFilePicker
               isInvalid={error != null}
@@ -84,10 +112,14 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT}
+                  {RULES_DATA_INPUT_FILE_UPLOAD_PROMPT[migrationSource]}
                 </EuiText>
               }
-              accept="application/json, application/x-ndjson"
+              accept={
+                migrationSource === MigrationSource.SPLUNK
+                  ? 'application/json, application/x-ndjson'
+                  : '.xml'
+              }
               onChange={onFileChange}
               display="large"
               aria-label="Upload rules file"

@@ -18,17 +18,25 @@ import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
 import type { RuleMigrationStats } from '../../../../types';
+import { MigrationSource } from '../../../../../common/types';
 
 interface RulesDataInputSubStepsProps {
   migrationStats?: RuleMigrationStats;
   onMigrationCreated: OnMigrationCreated;
   onMissingResourcesFetched: OnMissingResourcesFetched;
+  migrationSource: MigrationSource;
 }
 interface RulesDataInputProps extends RulesDataInputSubStepsProps {
   dataInputStep: DataInputStep;
 }
 export const RulesDataInput = React.memo<RulesDataInputProps>(
-  ({ dataInputStep, migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
+  ({
+    dataInputStep,
+    migrationStats,
+    migrationSource,
+    onMigrationCreated,
+    onMissingResourcesFetched,
+  }) => {
     const dataInputStatus = useMemo(
       () => getEuiStepStatus(DataInputStep.Rules, dataInputStep),
       [dataInputStep]
@@ -57,6 +65,7 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
           {dataInputStatus === 'current' && (
             <EuiFlexItem>
               <RulesDataInputSubSteps
+                migrationSource={migrationSource}
                 migrationStats={migrationStats}
                 onMigrationCreated={onMigrationCreated}
                 onMissingResourcesFetched={onMissingResourcesFetched}
@@ -73,7 +82,7 @@ RulesDataInput.displayName = 'RulesDataInput';
 const END = 10 as const;
 type SubStep = 1 | 2 | 3 | 4 | typeof END;
 export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
-  ({ migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
+  ({ migrationStats, onMigrationCreated, onMissingResourcesFetched, migrationSource }) => {
     const { telemetry } = useKibana().services.siemMigrations.rules;
     const [subStep, setSubStep] = useState<SubStep>(migrationStats ? 4 : 1);
 
@@ -103,13 +112,24 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
       setSubStep((currentSubStep) => (currentSubStep !== 1 ? 3 : currentSubStep)); // Move to the next step only if step 1 was completed
       telemetry.reportSetupQueryCopied({ migrationId: migrationStats?.id });
     }, [telemetry, migrationStats?.id]);
-    const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(2, subStep), onCopied });
+    const copyStep = useCopyExportQueryStep({
+      status: getEuiStepStatus(2, subStep),
+      onCopied,
+      migrationSource,
+    });
 
     // Upload rules step
-    const onMigrationCreatedStep = useCallback<OnMigrationCreated>(
+    const onSplunkMigrationCreatedStep = useCallback<OnMigrationCreated>(
       (stats) => {
         onMigrationCreated(stats);
         setSubStep(4);
+      },
+      [onMigrationCreated]
+    );
+    const onQradarMigrationCreatedStep = useCallback<OnMigrationCreated>(
+      (stats) => {
+        onMigrationCreated(stats);
+        setSubStep(END);
       },
       [onMigrationCreated]
     );
@@ -121,8 +141,12 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
       status: getEuiStepStatus(3, subStep),
       migrationStats,
       onRulesFileChanged,
-      onMigrationCreated: onMigrationCreatedStep,
+      onMigrationCreated:
+        migrationSource === MigrationSource.SPLUNK
+          ? onSplunkMigrationCreatedStep
+          : onQradarMigrationCreatedStep,
       migrationName,
+      migrationSource,
     });
 
     // Check missing resources step
@@ -140,8 +164,11 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
     });
 
     const steps = useMemo<EuiStepProps[]>(
-      () => [nameStep, copyStep, uploadStep, resourcesStep],
-      [nameStep, copyStep, uploadStep, resourcesStep]
+      () =>
+        migrationSource === MigrationSource.SPLUNK
+          ? [nameStep, copyStep, uploadStep, resourcesStep]
+          : [nameStep, copyStep, uploadStep],
+      [migrationSource, nameStep, copyStep, uploadStep, resourcesStep]
     );
 
     return <SubSteps steps={steps} data-test-subj="migrationsSubSteps" />;

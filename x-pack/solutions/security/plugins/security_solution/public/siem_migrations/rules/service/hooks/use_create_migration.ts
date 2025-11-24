@@ -11,6 +11,7 @@ import type { CreateRuleMigrationRulesRequestBody } from '../../../../../common/
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from '../../../common/service';
 import type { RuleMigrationStats } from '../../types';
+import type { MigrationSource } from '../../../common/types';
 
 export const RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.title',
@@ -26,10 +27,15 @@ export const RULES_DATA_INPUT_CREATE_MIGRATION_ERROR = i18n.translate(
   { defaultMessage: 'Failed to upload rules file' }
 );
 
-export type CreateMigration = (
-  migrationName: string,
-  rules: CreateRuleMigrationRulesRequestBody
-) => void;
+export type CreateMigration = ({
+  rules,
+  migrationName,
+  migrationSource,
+}: {
+  migrationName: string;
+  migrationSource: MigrationSource;
+  rules: CreateRuleMigrationRulesRequestBody;
+}) => void;
 export type OnSuccess = (migrationStats: RuleMigrationStats) => void;
 
 export const useCreateMigration = (onSuccess: OnSuccess) => {
@@ -37,12 +43,18 @@ export const useCreateMigration = (onSuccess: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const createMigration = useCallback<CreateMigration>(
-    (migrationName, rules) => {
+    ({ migrationName, migrationSource, rules }) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          const migrationId = await siemMigrations.rules.createRuleMigration(rules, migrationName);
-          const stats = await siemMigrations.rules.api.getRuleMigrationStats({ migrationId });
+          const migrationId = await siemMigrations.rules.createRuleMigration(
+            rules,
+            migrationName,
+            migrationSource
+          );
+          const stats = await siemMigrations.rules.api.getRuleMigrationStats({
+            migrationId,
+          });
 
           notifications.toasts.addSuccess({
             title: RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE,

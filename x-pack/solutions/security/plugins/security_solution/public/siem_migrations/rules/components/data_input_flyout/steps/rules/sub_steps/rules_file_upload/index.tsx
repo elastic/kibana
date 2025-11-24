@@ -15,11 +15,13 @@ import {
   type OnSuccess,
 } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
+import type { MigrationSource } from '../../../../../../../common/types';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
   migrationStats: RuleMigrationStats | undefined;
   migrationName: string | undefined;
+  migrationSource: MigrationSource;
   onMigrationCreated: OnMigrationCreated;
   onRulesFileChanged: (files: FileList | null) => void;
 }
@@ -27,6 +29,7 @@ export const useRulesFileUploadStep = ({
   status,
   migrationStats,
   migrationName,
+  migrationSource,
   onMigrationCreated,
   onRulesFileChanged,
 }: RulesFileUploadStepProps): EuiStepProps => {
@@ -57,6 +60,7 @@ export const useRulesFileUploadStep = ({
       <RulesFileUpload
         createMigration={createMigration}
         migrationName={migrationName}
+        migrationSource={migrationSource}
         isLoading={isLoading}
         isCreated={isCreated}
         apiError={error?.message}

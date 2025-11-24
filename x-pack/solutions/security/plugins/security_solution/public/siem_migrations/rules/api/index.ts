@@ -25,11 +25,12 @@ import {
   SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
   SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
-  SIEM_RULE_MIGRATION_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_STOP_PATH,
   SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH,
+  SIEM_RULE_MIGRATION_RULES_PATH,
+  SIEM_RULE_MIGRATION_QRADAR_RULES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
@@ -53,6 +54,7 @@ import type {
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
+import { MigrationSource } from '../../common/types';
 
 /** Retrieves the stats for the specific migration. */
 export const getRuleMigrationStats = async ({
@@ -102,6 +104,8 @@ export interface AddRulesToMigrationParams {
   body: CreateRuleMigrationRulesRequestBody;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
+  /** The source of the migration */
+  migrationSource: MigrationSource;
 }
 
 /** Adds provided rules to an existing migration */
@@ -109,9 +113,15 @@ export const addRulesToMigration = async ({
   migrationId,
   body,
   signal,
+  migrationSource,
 }: AddRulesToMigrationParams) => {
   return KibanaServices.get().http.post<void>(
-    replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }),
+    replaceParams(
+      migrationSource === MigrationSource.QRADAR
+        ? SIEM_RULE_MIGRATION_QRADAR_RULES_PATH
+        : SIEM_RULE_MIGRATION_RULES_PATH,
+      { migration_id: migrationId }
+    ),
     { body: JSON.stringify(body), version: '1', signal }
   );
 };
