@@ -31,7 +31,7 @@ import {
 import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
 
 /**
- * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
+ * Builds a subscribe function for the app state, that is executed when the app state changes in URL
  * or programmatically. It's main purpose is to detect which changes should trigger a refetch of the data.
  * @param stateContainer
  */

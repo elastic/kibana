@@ -34,7 +34,7 @@ let internalState: InternalStateStore;
 let tabsStorageManager: TabsStorageManager;
 let getCurrentTab: () => TabState;
 
-describe('Test discover app state container', () => {
+describe('Test discover app state', () => {
   beforeEach(async () => {
     const storeInSessionStorage = discoverServiceMock.uiSettings.get('state:storeInSessionStorage');
     const toasts = discoverServiceMock.core.notifications.toasts;

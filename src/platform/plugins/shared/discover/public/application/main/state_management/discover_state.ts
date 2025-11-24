@@ -601,7 +601,7 @@ export function getDiscoverStateContainer({
     // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
     const unsubscribeSavedSearchUrlTracking = savedSearchContainer.initUrlTracking();
 
-    // initialize app state container, syncing with _g and _a part of the URL
+    // initialize syncing with _g and _a part of the URL
     const unsubscribeUrlState = initializeAndSyncUrlState();
 
     // subscribing to state changes of appStateContainer, triggering data fetching
