@@ -38,6 +38,7 @@ import { getValueInputPopover } from './grid_custom_renderers/value_input_popove
 import { getAddRowControl } from './grid_custom_renderers/add_row_control';
 import { getCustomToolbar } from './grid_custom_renderers/custom_toolbar';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
+import { getAddColumnControl } from './grid_custom_renderers/add_column_control';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -243,11 +244,16 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     });
   }, [props.onOpenIndexInDiscover, rows]);
 
+  const trailingControlColumns = useMemo(() => {
+    return [getAddColumnControl(indexUpdateService, dataTableRef)];
+  }, [indexUpdateService, dataTableRef]);
+
   return (
     <UnifiedDataTable
       ref={dataTableRef}
       customGridColumnsConfiguration={customGridColumnsConfiguration}
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+      trailingControlColumns={trailingControlColumns}
       columns={renderedColumns}
       rows={rows}
       columnsMeta={columnsMeta}
@@ -297,6 +303,13 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         .euiDataGridHeaderCell {
           align-items: center;
           display: flex;
+          inline-size: auto;
+        }
+
+        .dataGrid__addColumnHeader,
+        .dataGrid__addColumnHeader > div {
+          justify-content: center;
+          inline-size: auto;
         }
 
         .dataGrid__addRowAction {

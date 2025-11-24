@@ -8,11 +8,22 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSearchBar } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSearchBar,
+  EuiToolTip,
+} from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { EditLookupIndexContentContext, KibanaContextExtra } from '../types';
+
+const openInDiscoverText = i18n.translate('indexEditor.toolbar.openInDiscover', {
+  defaultMessage: 'Open in Discover',
+});
 
 export const QueryBar = ({
   onOpenIndexInDiscover,
@@ -85,6 +96,9 @@ export const QueryBar = ({
               'data-test-subj': 'indexEditorQueryBar',
               disabled: !isIndexCreated,
               compressed: true,
+              placeholder: i18n.translate('indexEditor.queryBar.placeholder', {
+                defaultMessage: 'Type to filter...',
+              }),
             }}
             onChange={({ queryText, error }) => {
               if (error) {
@@ -98,19 +112,20 @@ export const QueryBar = ({
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          size="s"
-          color="text"
-          isDisabled={!isIndexCreated || !esqlDiscoverQuery}
-          onClick={openInDiscover}
-          href={discoverLink || undefined}
-          target="_blank"
-          iconType="discoverApp"
-          aria-label={i18n.translate('esqlDataGrid.openInDiscoverAriaLabel', {
-            defaultMessage: 'Open in Discover',
-          })}
-          data-test-subj="indexEditorOpenInDiscoverButton"
-        />
+        <EuiToolTip content={openInDiscoverText} disableScreenReaderOutput>
+          <EuiButtonIcon
+            size="s"
+            color="text"
+            display="base"
+            isDisabled={!isIndexCreated || !esqlDiscoverQuery}
+            onClick={openInDiscover}
+            href={discoverLink || undefined}
+            target="_blank"
+            iconType="discoverApp"
+            aria-label={openInDiscoverText}
+            data-test-subj="indexEditorOpenInDiscoverButton"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
