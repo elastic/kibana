@@ -490,7 +490,7 @@ export const ScheduledReportForm = ({
                         componentProps={{
                           compressed: true,
                           fullWidth: true,
-                          labelAppend: (
+                          labelAppend: !editMode ? (
                             <AddMessageVariablesOptional
                               isOptionalField
                               messageVariables={scheduledReportMessageVariables}
@@ -499,7 +499,7 @@ export const ScheduledReportForm = ({
                               }
                               paramsProperty="emailSubject"
                             />
-                          ),
+                          ) : undefined,
                           euiFieldProps: {
                             inputRef: emailSubjectFieldRef,
                             compressed: true,
@@ -515,7 +515,7 @@ export const ScheduledReportForm = ({
                         componentProps={{
                           compressed: true,
                           fullWidth: true,
-                          labelAppend: (
+                          labelAppend: !editMode ? (
                             <AddMessageVariablesOptional
                               isOptionalField
                               messageVariables={scheduledReportMessageVariables}
@@ -524,7 +524,7 @@ export const ScheduledReportForm = ({
                               }
                               paramsProperty="emailMessage"
                             />
-                          ),
+                          ) : undefined,
                           euiFieldProps: {
                             inputRef: emailMessageFieldRef,
                             compressed: true,
