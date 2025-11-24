@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -18,7 +18,15 @@
     "@kbn/es-query",
     "@kbn/core-elasticsearch-server",
     "@kbn/es-types",
-    "@kbn/metrics-data-access-plugin"
+    "@kbn/datemath",
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/rule-registry-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/core-http-server",
+    "@kbn/data-views-plugin",
+    "@kbn/metrics-data-access-plugin",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/ml-plugin"
   ],
   "exclude": ["target/**/*"]
 }

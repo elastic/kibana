@@ -14,7 +14,7 @@ import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch } from '@el
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
-import { getIndexPatternService } from '../../../kibana_services';
+import { getHttp, getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 
@@ -46,10 +46,11 @@ export function CreateSourceEditor(props: Props) {
     getDataView()
       .then(async (dataView) => {
         const adhocDataView = dataView
-          ? await getESQLAdHocDataview(
-              `from ${dataView.getIndexPattern()}`,
-              getIndexPatternService()
-            )
+          ? await getESQLAdHocDataview({
+              dataViewsService: getIndexPatternService(),
+              query: `FROM ${dataView.getIndexPattern()}`,
+              http: getHttp(),
+            })
           : undefined;
         if (ignore) {
           return;
