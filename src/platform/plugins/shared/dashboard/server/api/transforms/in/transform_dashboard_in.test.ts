@@ -106,6 +106,7 @@ describe('transformDashboardIn', () => {
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
+          "description": "",
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
@@ -123,7 +124,6 @@ describe('transformDashboardIn', () => {
   it('should return error when passed tag references', () => {
     const dashboardState: DashboardState = {
       title: 'title',
-      panels: [],
       references: [
         {
           name: 'someTagRef',
