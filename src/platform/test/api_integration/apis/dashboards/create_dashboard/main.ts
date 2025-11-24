@@ -57,44 +57,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.id).to.be(id);
     });
 
-    it('creates a dashboard with references', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}`;
-
-      const response = await supertest
-        .post(PUBLIC_API_PATH)
-        .set('kbn-xsrf', 'true')
-        .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-        .set('elastic-api-version', '1')
-        .send({
-          data: {
-            title,
-            panels: [
-              {
-                type: 'visualization',
-                grid: {
-                  x: 0,
-                  y: 0,
-                  w: 24,
-                  h: 15,
-                },
-                config: {},
-                uid: 'bizz',
-              },
-            ],
-            references: [
-              {
-                name: 'bizz:panel_bizz',
-                type: 'visualization',
-                id: 'my-saved-object',
-              },
-            ],
-          },
-        });
-
-      expect(response.status).to.be(200);
-      expect(response.body.data.panels).to.be.an('array');
-    });
-
     // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
     it('can create a dashboard in a defined space', async () => {
       const title = `foo-${Date.now()}-${Math.random()}`;

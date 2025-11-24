@@ -21,7 +21,7 @@ const getApmDocumentsFilter = async ({
   end,
   schema,
 }: {
-  apmDataAccessServices: ApmDataAccessServicesWrapper;
+  apmDataAccessServices: NonNullable<ApmDataAccessServicesWrapper>;
   apmDocumentSources: TimeRangeMetadata['sources'];
   start: number;
   end: number;
