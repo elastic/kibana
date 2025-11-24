@@ -239,10 +239,10 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     expect(page.url()).toContain('/app/lens');
   });
 
-  test('download CSV report and validate row length', async ({ page, pageObjects }) => {
+  test('download CSV report and validate row length', async ({ pageObjects }) => {
     // Can download saved searches only, so save first
     await pageObjects.discover.saveSearch(queryName3);
-    await page.testSubj.click('toastCloseButton'); // close toast to avoid obstruction
+    await pageObjects.toasts.closeAll(); // close toast to avoid obstruction
     // Wait for download
     const download = await pageObjects.discover.exportAsCsv();
     downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;

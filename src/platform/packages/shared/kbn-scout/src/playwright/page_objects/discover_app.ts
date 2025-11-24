@@ -184,9 +184,7 @@ export class DiscoverApp {
 
   async dragFieldToGrid(fieldName: string[]) {
     for (const field of fieldName) {
-      const sourceLocator = this.page.testSubj.locator(`field-${field}`);
-      const targetLocator = this.page.testSubj.locator('euiDataGridBody');
-      await sourceLocator.dragTo(targetLocator);
+      await this.page.testSubj.dragTo(`field-${field}`, 'euiDataGridBody');
     }
   }
 
@@ -199,12 +197,26 @@ export class DiscoverApp {
   }
 
   async exportAsCsv(): Promise<Download> {
-    const downloadPromise = this.page.waitForEvent('download', { timeout: 40000 });
+    // 1. Navigate to the export menu
     await this.page.testSubj.click('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
+
+    // 2. Trigger the report generation
     await this.page.testSubj.click('generateReportButton');
-    await this.page.testSubj.click('downloadCompletedReportButton', { timeout: 30000 });
-    const download = await downloadPromise;
+
+    // 3. Explicitly wait for the report to finish generating
+    // Ensure the button is ready before we try to download
+    const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
+    await expect(downloadBtn).toBeEnabled({
+      timeout: 30_000,
+    });
+
+    // 4. Coordinate the click and the event listener
+    const [download] = await Promise.all([
+      this.page.waitForEvent('download'), // Set listener
+      downloadBtn.click(), // Perform action
+    ]);
+
     return download;
   }
 
