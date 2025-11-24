@@ -80,10 +80,12 @@ export const createActionHandler = async (
     );
   }
 
+  const config = osqueryContext.config();
+  console.log({ config });
   const osqueryAction = {
     action_id: uuidv4(),
     '@timestamp': moment().toISOString(),
-    expiration: moment().add(5, 'minutes').toISOString(),
+    expiration: moment().add(15, 'minutes').toISOString(),
     type: 'INPUT_ACTION',
     input_type: 'osquery',
     alert_ids: params.alert_ids,
@@ -138,7 +140,7 @@ export const createActionHandler = async (
         (query) => ({
           action_id: query.action_id,
           '@timestamp': moment().toISOString(),
-          expiration: moment().add(5, 'minutes').toISOString(),
+          expiration: moment().add(15, 'minutes').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
           agents: query.agents,
