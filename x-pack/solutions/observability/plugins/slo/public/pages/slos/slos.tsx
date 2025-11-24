@@ -32,10 +32,10 @@ export function SlosPage() {
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
-  const { data: permissions, ...permissionsContext } = usePermissions();
+  const { data: permissions } = usePermissions();
   const history = useHistory();
 
-  const { isError, data: sloList, ...sloListContext } = useFetchSloList({ perPage: 0 });
+  const { isLoading, isError, data: sloList } = useFetchSloList({ perPage: 0 });
   const { total } = sloList ?? { total: 0 };
 
   useBreadcrumbs(
@@ -51,23 +51,15 @@ export function SlosPage() {
     { serverless }
   );
 
-  const shouldRedirect =
-    (!sloListContext.isLoading && total === 0) ||
-    hasAtLeast('platinum') === false ||
-    isError ||
-    permissions?.hasAllReadRequested === false;
-
   useEffect(() => {
-    if (shouldRedirect) {
-      // Use history.replace for in-app navigation to avoid adding a new entry in the browser history
+    if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
       history.replace(SLOS_WELCOME_PATH);
     }
-  }, [shouldRedirect, history]);
 
-  // Prevent flash of content while loading or during redirect
-  if (sloListContext.isLoading || permissionsContext.isLoading || shouldRedirect) {
-    return null;
-  }
+    if (permissions?.hasAllReadRequested === false) {
+      history.replace(SLOS_WELCOME_PATH);
+    }
+  }, [history, basePath, hasAtLeast, isError, isLoading, total, permissions]);
 
   return (
     <ObservabilityPageTemplate

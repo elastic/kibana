@@ -203,19 +203,13 @@ describe('SLOs Page', () => {
     });
 
     it('redirects to the SLOs Welcome Page', async () => {
-      let container: HTMLElement;
-
       await act(async () => {
-        const result = render(<SlosPage />);
-        container = result.container;
+        render(<SlosPage />);
       });
 
       await waitFor(() => {
         expect(mockHistoryReplace).toHaveBeenCalledWith('/welcome');
       });
-
-      // Should not render page content when redirecting
-      expect(container!.firstChild).toBeNull();
     });
   });
 
@@ -231,19 +225,13 @@ describe('SLOs Page', () => {
         data: {},
       });
 
-      let container: HTMLElement;
-
       await act(async () => {
-        const result = render(<SlosPage />);
-        container = result.container;
+        render(<SlosPage />);
       });
 
       await waitFor(() => {
         expect(mockHistoryReplace).toHaveBeenCalledWith('/welcome');
       });
-
-      // Should not render page content when redirecting
-      expect(container!.firstChild).toBeNull();
     });
 
     it('redirects to the SLOs Welcome Page when the user does not have the required read permissions', async () => {
@@ -257,61 +245,13 @@ describe('SLOs Page', () => {
         data: { hasAllReadRequested: false, hasAllWriteRequested: false },
       });
 
-      let container: HTMLElement;
-
       await act(async () => {
-        const result = render(<SlosPage />);
-        container = result.container;
+        render(<SlosPage />);
       });
 
       await waitFor(() => {
         expect(mockHistoryReplace).toHaveBeenCalledWith('/welcome');
       });
-
-      // Should not render page content when redirecting
-      expect(container!.firstChild).toBeNull();
-    });
-
-    it('returns null while loading SLO data', async () => {
-      useFetchSloListMock.mockReturnValue({ isLoading: true, data: undefined });
-      useFetchHistoricalSummaryMock.mockReturnValue({
-        isLoading: false,
-        data: {},
-      });
-
-      let container: HTMLElement;
-      await act(async () => {
-        const result = render(<SlosPage />);
-        container = result.container;
-      });
-
-      // Should not render page content while loading
-      expect(container!.firstChild).toBeNull();
-      // Should not redirect while loading
-      expect(mockHistoryReplace).not.toHaveBeenCalled();
-    });
-
-    it('returns null while loading permissions', async () => {
-      useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
-      useFetchHistoricalSummaryMock.mockReturnValue({
-        isLoading: false,
-        data: historicalSummaryData,
-      });
-      usePermissionsMock.mockReturnValue({
-        isLoading: true,
-        data: undefined,
-      });
-
-      let container: HTMLElement;
-      await act(async () => {
-        const result = render(<SlosPage />);
-        container = result.container;
-      });
-
-      // Should not render page content while loading permissions
-      expect(container!.firstChild).toBeNull();
-      // Should not redirect while loading
-      expect(mockHistoryReplace).not.toHaveBeenCalled();
     });
 
     it('should have a create new SLO button', async () => {

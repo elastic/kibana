@@ -37,12 +37,12 @@ export function SlosWelcomePage() {
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { data: permissions, ...permissionsContext } = usePermissions();
+  const { data: permissions } = usePermissions();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
   const history = useHistory();
 
-  const { data: sloList, ...sloListContext } = useFetchSloList();
+  const { data: sloList } = useFetchSloList();
   const { total } = sloList ?? { total: 0 };
 
   const hasSlosAndPermissions =
@@ -54,15 +54,9 @@ export function SlosWelcomePage() {
 
   useEffect(() => {
     if (hasSlosAndPermissions) {
-      // Use history.replace for in-app navigation to avoid adding to the browser history stack
       history.replace(SLOS_PATH);
     }
   }, [hasSlosAndPermissions, history]);
-
-  // Prevent flash of content while loading or during redirect
-  if (sloListContext.isLoading || permissionsContext.isLoading || hasSlosAndPermissions) {
-    return null;
-  }
 
   return (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
