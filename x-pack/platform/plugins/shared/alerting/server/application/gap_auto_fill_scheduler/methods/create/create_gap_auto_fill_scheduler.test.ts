@@ -137,32 +137,6 @@ describe('createGapFillAutoScheduler()', () => {
     };
     taskManager.ensureScheduled.mockResolvedValue(scheduledTask);
 
-    const soUpdated: SavedObject<GapAutoFillSchedulerSO> = {
-      id: 'gap-1',
-      type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      attributes: {
-        id: 'gap-1',
-        name: 'auto-fill',
-        enabled: true,
-        schedule: { interval: '1h' },
-        gapFillRange: 'now-1d',
-        maxBackfills: 100,
-        numRetries: 3,
-        scope: ['scope-1'],
-        ruleTypes: [
-          { type: 'test-rule-type1', consumer: 'test-consumer' },
-          { type: 'test-rule-type2', consumer: 'test-consumer' },
-        ],
-        ruleTypeConsumerPairs: ['test-rule-type1:test-consumer', 'test-rule-type2:test-consumer'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: 'elastic',
-        updatedBy: 'elastic',
-      },
-      references: [],
-    };
-    unsecuredSavedObjectsClient.update.mockResolvedValue(soUpdated);
-
     const soFetched: SavedObject<GapAutoFillSchedulerSO> = {
       id: 'gap-1',
       type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
