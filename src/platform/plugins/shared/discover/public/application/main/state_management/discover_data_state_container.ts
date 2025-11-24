@@ -106,11 +106,6 @@ export interface DiscoverDataStateContainer {
    * Emits when the chart should be fetched
    */
   fetchChart$: Observable<DiscoverLatestFetchDetails | null>;
-
-  /**
-   * Resets the fetchChart$ observable by emitting null
-   */
-  resetFetchChart$: () => void;
   /**
    * Used to disable the next fetch that would otherwise be triggered by a URL state change
    */
@@ -191,6 +186,11 @@ export function getDataStateContainer({
       !timefilter.getRefreshInterval().pause ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
+  };
+
+  // Reset fetchChart$ to avoid emitting stale values when re-mounting useDiscoverHistogram
+  const resetFetchChart$ = () => {
+    fetchChart$.next(null);
   };
 
   /**
@@ -325,11 +325,14 @@ export function getDataStateContainer({
             })
           );
 
-          await scopedProfilesManager.resolveDataSourceProfile({
-            dataSource: appStateContainer.get().dataSource,
-            dataView: savedSearchContainer.getState().searchSource.getField('index'),
-            query: appStateContainer.get().query,
-          });
+          await scopedProfilesManager.resolveDataSourceProfile(
+            {
+              dataSource: appStateContainer.get().dataSource,
+              dataView: savedSearchContainer.getState().searchSource.getField('index'),
+              query: appStateContainer.get().query,
+            },
+            resetFetchChart$
+          );
 
           const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
@@ -463,17 +466,12 @@ export function getDataStateContainer({
     return abortController;
   };
 
-  const resetFetchChart$ = () => {
-    fetchChart$.next(null);
-  };
-
   return {
     fetch: fetchQuery,
     fetchMore,
     data$: dataSubjects,
     refetch$,
     fetchChart$,
-    resetFetchChart$,
     disableNextFetchOnStateChange$,
     subscribe,
     reset,

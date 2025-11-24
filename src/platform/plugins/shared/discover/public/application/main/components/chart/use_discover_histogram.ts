@@ -306,10 +306,8 @@ export const useDiscoverHistogram = (
 
     return () => {
       subscription.unsubscribe();
-      // Reset fetchChart$ to avoid emitting stale values when re-mounting the component
-      stateContainer.dataState.resetFetchChart$();
     };
-  }, [stateContainer.dataState, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
+  }, [stateContainer.dataState.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
 
   useEffect(() => {
     const previousFetchParams = previousFetchParamsRef.current;
