@@ -164,6 +164,7 @@ export function getConnectorType(
     actionParamsFields: lazy(() => import('./email_params')),
     connectorForm: {
       deserializer: (data) => {
+        return data;
         return {
           ...data,
           config: {

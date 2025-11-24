@@ -29,7 +29,7 @@ import {
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { AdditionalEmailServices } from '../../../common';
-import { getEmailServices } from './email';
+import { emailServices, getEmailServices } from './email';
 import { useEmailConfig } from './use_email_config';
 import * as i18n from './translations';
 
@@ -116,17 +116,16 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     [docLinks.links.alerting.emailActionConfig, validateEmailAddresses]
   );
 
-  /**
-   * The deserializer in the connectorForm definition will set the service to OTHER
-   * if it is not defined.
-   */
-  const { service = null, hasAuth = false } = config ?? {};
+  const { service, hasAuth = false } = config ?? {};
+
   const disableServiceConfig = shouldDisableEmailConfiguration(service);
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });
   const initialService = useRef(service);
+
   if (!initialService.current && service) {
     initialService.current = service;
   }
+
   const availableEmailServices = getEmailServices(
     isCloud,
     enabledEmailServices,
@@ -145,17 +144,11 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
 
       const emailConfig = await getEmailServiceConfig(service);
 
-      /**
-       * The below updateFieldValues call will call the form deserializer.
-       * For this reason, we need to pass the service again because the deserializer
-       * sets the service to AdditionalEmailServices.OTHER when it is undefined.
-       */
       updateFieldValues({
         config: {
           host: emailConfig?.host,
           port: emailConfig?.port,
           secure: emailConfig?.secure,
-          service,
         },
       });
     }
@@ -183,6 +176,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
             path="config.service"
             component={SelectField}
             config={{
+              defaultValue: getDefaultService({ service, enabledEmailServices }),
               label: i18n.SERVICE_LABEL,
               validations: [
                 {
@@ -347,3 +341,28 @@ export function nullableString(str: string | null | undefined) {
 
 // eslint-disable-next-line import/no-default-export
 export { EmailActionConnectorFields as default };
+
+const getDefaultService = ({
+  service,
+  enabledEmailServices,
+}: {
+  service?: string | null;
+  enabledEmailServices?: string[];
+}): string => {
+  if (service || !enabledEmailServices) {
+    return service ?? '';
+  }
+
+  const hasAll = enabledEmailServices.some((emailService) => emailService === '*');
+  const firstAvailableService = enabledEmailServices[0];
+
+  const foundService = emailServices.find(
+    (emailService) => emailService['kbn-setting-value'] === firstAvailableService
+  );
+
+  const defaultService = hasAll
+    ? AdditionalEmailServices.OTHER
+    : (foundService?.value as string) ?? '';
+
+  return defaultService;
+};

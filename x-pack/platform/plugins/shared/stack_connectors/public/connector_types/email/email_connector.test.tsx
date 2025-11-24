@@ -121,7 +121,7 @@ describe('EmailActionConnectorFields', () => {
     expect(screen.queryByTestId('emailPasswordInput')).not.toBeInTheDocument();
   });
 
-  it('service field defaults to empty when not defined', async () => {
+  it('service field defaults to other when not defined', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -152,7 +152,7 @@ describe('EmailActionConnectorFields', () => {
 
     const emailServiceSelectInput = await screen.findByTestId('emailServiceSelectInput');
     expect(emailServiceSelectInput).toBeInTheDocument();
-    expect(emailServiceSelectInput).toHaveValue('');
+    expect(emailServiceSelectInput).toHaveValue('other');
   });
 
   it('service field are correctly selected when defined', async () => {
@@ -273,7 +273,7 @@ describe('EmailActionConnectorFields', () => {
     expect(emailSecureSwitch).not.toBeDisabled();
   });
 
-  it.each([[undefined], [null], [''], [AdditionalEmailServices.EXCHANGE]])(
+  it.each([[null], [''], [AdditionalEmailServices.EXCHANGE]])(
     'should not show the host, port, and secure fields when service field is %s',
     async (service) => {
       const actionConnector = {
@@ -561,49 +561,6 @@ describe('EmailActionConnectorFields', () => {
           test: 'test',
           hasAuth: true,
           service: 'other',
-        },
-      };
-
-      appMockRenderer.render(
-        <ConnectorFormTestProvider
-          connector={actionConnector}
-          onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
-        >
-          <EmailActionConnectorFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={() => {}}
-          />
-        </ConnectorFormTestProvider>
-      );
-
-      const submitButton = await screen.findByTestId('form-test-provide-submit');
-      await userEvent.click(submitButton);
-
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
-      });
-    });
-
-    it('connector validation fails when server type is not selected', async () => {
-      const actionConnector = {
-        secrets: {
-          user: 'user',
-          password: 'password',
-        },
-        id: 'test',
-        actionTypeId: '.email',
-        isPreconfigured: false,
-        isDeprecated: false,
-        name: 'email',
-        config: {
-          from: 'test@test.com',
-          port: 2323,
-          host: 'localhost',
-          test: 'test',
-          hasAuth: true,
         },
       };
 
