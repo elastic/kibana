@@ -9,7 +9,6 @@
 
 import { extendSearchParamsWithRuntimeFields, SearchAPI } from './search_api';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { searchResponseBody } from '@kbn/data-plugin/common';
 import { of } from 'rxjs';
 
 import type { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
@@ -80,11 +79,42 @@ describe('SearchAPI projectRouting', () => {
   let dataViewsStart: DataViewsPublicPluginStart;
   let mockDependencies: any;
 
+  const createSearchRequest = () => ({
+    url: 'test-url',
+    name: 'test-request',
+    index: 'test-index',
+    body: {
+      query: { match_all: {} },
+    },
+  });
+
+  const testProjectRouting = (
+    projectRouting: string | undefined,
+    expectedValue: string | undefined,
+    done: jest.DoneCallback
+  ) => {
+    const searchAPI = new SearchAPI(
+      mockDependencies,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      projectRouting
+    );
+
+    searchAPI.search([createSearchRequest()]).subscribe(() => {
+      expect(mockSearch).toHaveBeenCalled();
+      const callArgs = mockSearch.mock.calls[0][0];
+      expect(callArgs.params.body.project_routing).toBe(expectedValue);
+      done();
+    });
+  };
+
   beforeEach(() => {
     dataViewsStart = dataViewPluginMocks.createStartContract();
     mockSearch = jest.fn().mockReturnValue(
       of({
-        rawResponse: searchResponseBody,
+        rawResponse: [],
         isPartial: false,
         isRunning: false,
       })
@@ -102,84 +132,14 @@ describe('SearchAPI projectRouting', () => {
   });
 
   test('should include project_routing in ES params when projectRouting is provided', (done) => {
-    const searchAPI = new SearchAPI(
-      mockDependencies,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      '_alias:_origin'
-    );
-
-    const searchRequest = {
-      url: 'test-url',
-      name: 'test-request',
-      index: 'test-index',
-      body: {
-        query: { match_all: {} },
-      },
-    };
-
-    searchAPI.search([searchRequest]).subscribe(() => {
-      expect(mockSearch).toHaveBeenCalled();
-      const callArgs = mockSearch.mock.calls[0][0];
-      expect(callArgs.params.body.project_routing).toBe('_alias:_origin');
-      done();
-    });
+    testProjectRouting('_alias:_origin', '_alias:_origin', done);
   });
 
   test('should not include project_routing in ES params when projectRouting is undefined', (done) => {
-    const searchAPI = new SearchAPI(
-      mockDependencies,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined
-    );
-
-    const searchRequest = {
-      url: 'test-url',
-      name: 'test-request',
-      index: 'test-index',
-      body: {
-        query: { match_all: {} },
-      },
-    };
-
-    searchAPI.search([searchRequest]).subscribe(() => {
-      expect(mockSearch).toHaveBeenCalled();
-      const callArgs = mockSearch.mock.calls[0][0];
-      expect(callArgs.params.body.project_routing).toBeUndefined();
-      done();
-    });
+    testProjectRouting(undefined, undefined, done);
   });
 
   test('should sanitize ALL projectRouting value', (done) => {
-    const searchAPI = new SearchAPI(
-      mockDependencies,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      'ALL'
-    );
-
-    const searchRequest = {
-      url: 'test-url',
-      name: 'test-request',
-      index: 'test-index',
-      body: {
-        query: { match_all: {} },
-      },
-    };
-
-    searchAPI.search([searchRequest]).subscribe(() => {
-      expect(mockSearch).toHaveBeenCalled();
-      const callArgs = mockSearch.mock.calls[0][0];
-      // ALL gets sanitized to undefined
-      expect(callArgs.params.body.project_routing).toBeUndefined();
-      done();
-    });
+    testProjectRouting('ALL', undefined, done);
   });
 });

@@ -34,7 +34,9 @@ export function initializeProjectRoutingManager(
   }
 
   // pass the initial state to CPS manager from dashboard state or just reset to default on dashboard init
-  cpsService.cpsManager.setProjectRouting(initialState.projectRouting ?? cpsService.cpsManager.getDefaultProjectRouting());
+  cpsService.cpsManager.setProjectRouting(
+    initialState.projectRouting ?? cpsService.cpsManager.getDefaultProjectRouting()
+  );
 
   // Subscribe to CPS's projectRouting$ to sync changes from the project picker
   const cpsProjectRoutingSubscription: Subscription | undefined = cpsService?.cpsManager
