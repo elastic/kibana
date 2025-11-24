@@ -40,7 +40,7 @@ describe('search for alerts', () => {
     jest.restoreAllMocks();
   });
 
-  describe('search and agg on signals index', () => {
+  describe('search and aggregate on signals index', () => {
     test('returns 200 when using single search', async () => {
       const mockedResponse = responseMock.create();
       await searchAlertsHandler({
