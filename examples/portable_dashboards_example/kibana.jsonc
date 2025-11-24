@@ -20,7 +20,8 @@
       "navigation",
       "unifiedSearch",
       "developerExamples",
-      "uiActions"
+      "uiActions",
+      "kibanaReact"
     ]
   }
 }
