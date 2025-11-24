@@ -2433,8 +2433,8 @@ x-pack/solutions/security/test
 x-pack/solutions/security/test/moon.yml  @elastic/kibana-operations
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test/moon.yml @elastic/security-solution @elastic/kibana-operations
-x-pack/solutions/security/test/security_solution_api_integration @elastic/secutity-detection-engine
-x-pack/solutions/security/test/security_solution_api_integration/moon.yml @elastic/secutity-detection-engine @elastic/kibana-operations
+x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engine
+x-pack/solutions/security/test/security_solution_api_integration/moon.yml @elastic/security-detection-engine @elastic/kibana-operations
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/moon.yml @elastic/security-detection-engine @elastic/kibana-operations
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
