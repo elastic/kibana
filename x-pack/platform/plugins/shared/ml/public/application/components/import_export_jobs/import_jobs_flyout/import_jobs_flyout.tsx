@@ -524,7 +524,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                                     )}
                                     color="warning"
                                     size="s"
-                                    announceOnMount
                                   >
                                     <EuiText size="xs" className="eui-textBreakWord">
                                       {jobId.datafeedWarningMessage}
