@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { NewItemIndicator } from '../new_item_indicator';
 
 interface MenuItemBaseProps {
   children: ReactNode;
@@ -24,6 +25,7 @@ interface MenuItemBaseProps {
   isHighlighted: boolean;
   isHorizontal?: boolean;
   isLabelVisible?: boolean;
+  isNew?: boolean;
   isTruncated?: boolean;
 }
 
@@ -56,6 +58,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       isCurrent = false,
       isHighlighted,
       isLabelVisible = true,
+      isNew = false,
       isTruncated = true,
       ...props
     },
@@ -164,6 +167,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         <div className={iconWrapperClassName}>
           <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type="empty" />}>
             <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+            {isNew && <NewItemIndicator />}
           </Suspense>
         </div>
         {isLabelVisible ? (

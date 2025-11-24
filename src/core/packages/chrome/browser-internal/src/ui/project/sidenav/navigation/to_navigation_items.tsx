@@ -263,6 +263,7 @@ export const toNavigationItems = (
   if (!SKIP_WARNINGS) {
     warnAboutDuplicateIds(logoItem, primaryItems, footerItems);
     warnAboutDuplicateIcons(logoItem, primaryItems, footerItems);
+    warnAboutTooManyNewItems(primaryItems, footerItems);
   }
 
   return {
@@ -414,6 +415,61 @@ function warnAboutDuplicateIds(
     (id, count) =>
       `ID "${id}" is used ${count} times in navigation items. Each navigation item must have a unique ID.`
   );
+}
+
+function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuItem[]) {
+  if (SKIP_WARNINGS) return;
+
+  const maxNewItemsPerLevel = 2;
+  const allPrimaryItems = [...primaryItems, ...footerItems];
+  const newPrimaryItems: MenuItem[] = [];
+  const isNew = (item: MenuItem | SecondaryMenuItem) => item.badgeType === 'new';
+
+  const getHiddenItems = (items: { label: string }[]) =>
+    items
+      .slice(maxNewItemsPerLevel)
+      .map((item) => item.label)
+      .join(', ');
+
+  allPrimaryItems.forEach((item) => {
+    const isNewPrimaryItem = isNew(item);
+    const hasNewSecondaryItems = item.sections?.some((section) => section.items.some(isNew));
+
+    if (isNewPrimaryItem || hasNewSecondaryItems) {
+      newPrimaryItems.push(item);
+    }
+  });
+
+  // Warn if too many new primary items
+  if (newPrimaryItems.length > maxNewItemsPerLevel) {
+    const hiddenItems = getHiddenItems(newPrimaryItems);
+    warnOnce(
+      `Max of ${maxNewItemsPerLevel} new primary items reached. The following will not show new indicators: ${hiddenItems}.`
+    );
+  }
+
+  newPrimaryItems.slice(0, maxNewItemsPerLevel).forEach((item) => {
+    const isNewPrimaryItem = isNew(item);
+    const hasNewSecondaryItems = item.sections?.some((section) => section.items.some(isNew));
+
+    // Warn if primary is new AND has new secondary children items in submenu
+    if (isNewPrimaryItem && hasNewSecondaryItems) {
+      warnOnce(
+        `New primary item "${item.label}" should not have new secondary children items. They will not show new badges, only their parent will.`
+      );
+    }
+
+    // Warn if too many new secondary items per section
+    item.sections?.forEach((section) => {
+      const sectionNewItems = section.items.filter(isNew);
+      if (sectionNewItems.length > maxNewItemsPerLevel) {
+        const hiddenSecondary = getHiddenItems(sectionNewItems);
+        warnOnce(
+          `Too many new secondary items in "${item.label}". The following will not show new badges: ${hiddenSecondary}.`
+        );
+      }
+    });
+  });
 }
 
 const FALLBACK_ICON = 'broom' as const;

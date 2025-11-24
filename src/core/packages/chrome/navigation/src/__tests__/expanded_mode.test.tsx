@@ -270,10 +270,9 @@ describe('Expanded mode', () => {
        * GIVEN the side navigation is in expanded mode
        * AND a primary menu item is in beta
        * WHEN I hover over that item
-       * THEN a tooltip shows up with "Beta" text
-       * AND a beta badge with beta icon
+       * THEN a tooltip shows up with a beta badge with beta icon
        */
-      it('should show tooltip with "Beta" and beta badge on hover', async () => {
+      it('should show tooltip with beta badge on hover', async () => {
         render(
           <TestComponent
             isCollapsed={false}
@@ -291,7 +290,6 @@ describe('Expanded mode', () => {
         const betaIcon = tooltip.querySelector('[data-euiicon-type="beta"]');
 
         expect(tooltip).toBeInTheDocument();
-        expect(tooltip).toHaveTextContent('Beta');
         expect(betaIcon).toBeInTheDocument();
       });
 
@@ -299,10 +297,9 @@ describe('Expanded mode', () => {
        * GIVEN the side navigation is in expanded mode
        * AND a primary menu item is in tech preview
        * WHEN I hover over that item
-       * THEN a tooltip shows up with "Tech preview" text
-       * AND a beta badge with flask icon
+       * THEN a tooltip shows up with a beta badge with flask icon
        */
-      it('should show tooltip with "Tech preview" and flask badge on hover', async () => {
+      it('should show tooltip with flask badge on hover', async () => {
         render(
           <TestComponent
             isCollapsed={false}
@@ -320,7 +317,6 @@ describe('Expanded mode', () => {
         const flaskIcon = tooltip.querySelector('[data-euiicon-type="flask"]');
 
         expect(tooltip).toBeInTheDocument();
-        expect(tooltip).toHaveTextContent('Tech preview');
         expect(flaskIcon).toBeInTheDocument();
       });
     });

@@ -154,9 +154,9 @@ interface NodeDefinitionBase {
   renderAs?: RenderAs;
 
   /**
-   * Sidenav v2 for now supports only 2 types of badges:
+   * Sidenav for now supports only 3 types of badges:
    */
-  badgeType?: 'beta' | 'techPreview';
+  badgeType?: 'beta' | 'techPreview' | 'new';
 }
 
 /** @public */

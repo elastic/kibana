@@ -103,6 +103,12 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
             label: 'Settings',
             href: '/infrastructure/settings',
           },
+          {
+            id: 'infrastructure-services',
+            label: 'Services',
+            href: '/infrastructure/services',
+            badgeType: 'new',
+          },
         ],
       },
     ],
@@ -229,6 +235,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'project-integrations',
             label: 'Integrations',
             href: '/settings/project/integrations',
+            badgeType: 'new',
           },
           {
             id: 'project-fleet',

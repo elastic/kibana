@@ -190,25 +190,29 @@ exports[`Both modes should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
-              <a
-                aria-describedby="footer-navigation-instructions_generated-id"
-                aria-haspopup="false"
-                aria-label="Getting started"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-getting_started"
-                href="/getting-started"
-                rel="noreferrer"
-                tabindex="0"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="launch"
-                />
-              </a>
+                <a
+                  aria-describedby="footer-navigation-instructions_generated-id"
+                  aria-haspopup="false"
+                  aria-label="Getting started"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-getting_started"
+                  href="/getting-started"
+                  rel="noreferrer"
+                  tabindex="0"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="launch"
+                  />
+                </a>
+              </div>
             </span>
           </div>
         </div>
@@ -222,24 +226,28 @@ exports[`Both modes should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
-              <a
-                aria-haspopup="false"
-                aria-label="Developer tools"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-developer_tools"
-                href="/developer-tools"
-                rel="noreferrer"
-                tabindex="-1"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="code"
-                />
-              </a>
+                <a
+                  aria-haspopup="false"
+                  aria-label="Developer tools"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-developer_tools"
+                  href="/developer-tools"
+                  rel="noreferrer"
+                  tabindex="-1"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="code"
+                  />
+                </a>
+              </div>
             </span>
           </div>
         </div>
@@ -258,26 +266,30 @@ exports[`Both modes should render the side navigation 1`] = `
             <div
               class="css-1g7fa48-wrapperStyles"
             >
-              <a
-                aria-describedby="popover-enter-exit-instructions_generated-id"
-                aria-expanded="false"
-                aria-haspopup="true"
-                aria-label="Settings"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-integrations"
-                href="/integrations"
-                rel="noreferrer"
-                tabindex="-1"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="gear"
-                />
-              </a>
+                <a
+                  aria-describedby="popover-enter-exit-instructions_generated-id"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  aria-label="Settings"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-integrations"
+                  href="/integrations"
+                  rel="noreferrer"
+                  tabindex="-1"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="gear"
+                  />
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -291,24 +303,28 @@ exports[`Both modes should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
-              <a
-                aria-haspopup="false"
-                aria-label="Fourth item"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-fourth_item"
-                href="/fourth-item"
-                rel="noreferrer"
-                tabindex="-1"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="launch"
-                />
-              </a>
+                <a
+                  aria-haspopup="false"
+                  aria-label="Fourth item"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-fourth_item"
+                  href="/fourth-item"
+                  rel="noreferrer"
+                  tabindex="-1"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="launch"
+                  />
+                </a>
+              </div>
             </span>
           </div>
         </div>
@@ -322,24 +338,28 @@ exports[`Both modes should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
-              <a
-                aria-haspopup="false"
-                aria-label="Fifth item"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-fifth_item"
-                href="/fourth-item"
-                rel="noreferrer"
-                tabindex="-1"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="code"
-                />
-              </a>
+                <a
+                  aria-haspopup="false"
+                  aria-label="Fifth item"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-fifth_item"
+                  href="/fourth-item"
+                  rel="noreferrer"
+                  tabindex="-1"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="code"
+                  />
+                </a>
+              </div>
             </span>
           </div>
         </div>
