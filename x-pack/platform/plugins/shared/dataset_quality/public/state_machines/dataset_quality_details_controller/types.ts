@@ -6,9 +6,9 @@
  */
 
 import type { DoneInvokeEvent } from 'xstate';
+import type { FailureStore } from '@kbn/streams-schema';
 import type {
   Dashboard,
-  DataStreamDetails,
   DataStreamRolloverResponse,
   DataStreamSettings,
   DegradedFieldAnalysis,
@@ -21,6 +21,7 @@ import type {
   QualityIssue,
   UpdateFieldLimitResponse,
   UpdateFailureStoreResponse,
+  DataStreamDetails,
 } from '../../../common/api_types';
 import type { IntegrationType } from '../../../common/data_stream_details';
 import type { TableCriteria, TimeRangeConfig } from '../../../common/types';
@@ -86,7 +87,7 @@ export interface WithDefaultControllerState {
 }
 
 export interface WithDataStreamDetails {
-  dataStreamDetails: DataStreamDetails;
+  dataStreamDetails: DataStreamDetailsWithFailureStoreConfig;
 }
 
 export interface WithBreakdownField {
@@ -137,6 +138,14 @@ export interface WithNewFieldLimit {
 
 export interface WithNewFieldLimitResponse {
   fieldLimit: FieldLimit;
+}
+
+export interface DataStreamDetailsWithFailureStoreConfig extends DataStreamDetails {
+  failureStoreDataQualityConfig?: {
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  };
+  failureStoreStreamConfig?: FailureStore;
 }
 
 export type DefaultDatasetQualityDetailsContext = Pick<
@@ -303,10 +312,10 @@ export type DatasetQualityDetailsControllerEvent =
     }
   | {
       type: 'UPDATE_FAILURE_STORE';
-      dataStreamsDetails: DataStreamDetails;
+      dataStreamsDetails: DataStreamDetailsWithFailureStoreConfig;
     }
   | DoneInvokeEvent<NonAggregatableDatasets>
-  | DoneInvokeEvent<DataStreamDetails>
+  | DoneInvokeEvent<DataStreamDetailsWithFailureStoreConfig>
   | DoneInvokeEvent<Error>
   | DoneInvokeEvent<boolean>
   | DoneInvokeEvent<FailedDocsDetails>

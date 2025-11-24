@@ -519,6 +519,7 @@ describe('useFailureStoreModal', () => {
               isCurrentlyInherited: false,
             },
             canShowDisableLifecycle: true,
+            showIlmDescription: true,
           });
         });
 
@@ -555,6 +556,7 @@ describe('useFailureStoreModal', () => {
               isCurrentlyInherited: false,
             },
             canShowDisableLifecycle: false,
+            showIlmDescription: false,
           });
         });
       });
@@ -599,6 +601,7 @@ describe('useFailureStoreModal', () => {
               isCurrentlyInherited: false,
             },
             canShowDisableLifecycle: true,
+            showIlmDescription: true,
           });
         });
 
@@ -635,6 +638,7 @@ describe('useFailureStoreModal', () => {
               isCurrentlyInherited: false,
             },
             canShowDisableLifecycle: false,
+            showIlmDescription: false,
           });
         });
       });
@@ -690,6 +694,7 @@ describe('useFailureStoreModal', () => {
               retentionDisabled: false,
             },
             canShowDisableLifecycle: true,
+            showIlmDescription: true,
           });
         });
 
@@ -721,6 +726,7 @@ describe('useFailureStoreModal', () => {
               retentionDisabled: false,
             },
             canShowDisableLifecycle: false,
+            showIlmDescription: false,
           });
         });
       });
@@ -775,6 +781,7 @@ describe('useFailureStoreModal', () => {
               isCurrentlyInherited: true,
             },
             canShowDisableLifecycle: true,
+            showIlmDescription: true,
           });
         });
       });
@@ -831,6 +838,7 @@ describe('useFailureStoreModal', () => {
               isCurrentlyInherited: false,
             },
             canShowDisableLifecycle: true,
+            showIlmDescription: true,
           });
         });
       });
@@ -885,6 +893,7 @@ describe('useFailureStoreModal', () => {
               isCurrentlyInherited: false,
             },
             canShowDisableLifecycle: true,
+            showIlmDescription: true,
           });
         });
       });
