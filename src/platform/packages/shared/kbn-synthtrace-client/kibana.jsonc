@@ -1,7 +1,11 @@
 {
   "type": "shared-common",
   "id": "@kbn/synthtrace-client",
-  "owner": ["@elastic/obs-ux-infra_services-team", "@elastic/obs-onboarding-team"],
+  "owner": [
+    "@elastic/obs-ux-infra_services-team",
+    "@elastic/obs-onboarding-team",
+    "@elastic/obs-exploration-team"
+  ],
   "group": "platform",
   "visibility": "shared",
   "devOnly": true

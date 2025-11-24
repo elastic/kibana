@@ -3,7 +3,8 @@
   "id": "@kbn/synthtrace",
   "owner": [
     "@elastic/obs-ux-infra_services-team",
-    "@elastic/obs-onboarding-team"
+    "@elastic/obs-onboarding-team",
+    "@elastic/obs-exploration-team"
   ],
   "group": "platform",
   "visibility": "shared",
