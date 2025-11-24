@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
 
   describe('anomaly detection result views - cases attachments', function () {
-    this.tags(['ml', 'cases', 'dima']);
+    this.tags(['ml', 'cases']);
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
