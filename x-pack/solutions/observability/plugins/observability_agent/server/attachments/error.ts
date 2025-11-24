@@ -13,7 +13,7 @@ import {
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_ERROR_BY_ID_TOOL_ID,
   OBSERVABILITY_GET_TRANSACTION_BY_ID_TOOL_ID,
-  OBSERVABILITY_GET_TRACE_BY_ID_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_OVERVIEW_BY_ID_TOOL_ID,
   OBSERVABILITY_GET_SPAN_BY_ID_TOOL_ID,
   OBSERVABILITY_GET_ERROR_GROUP_BY_KEY_TOOL_ID,
 } from '../../common/constants';
@@ -154,7 +154,7 @@ export const createErrorAttachmentType = (): AttachmentTypeDefinition => {
         - ${OBSERVABILITY_GET_ERROR_BY_ID_TOOL_ID}: fetch the error document by error_id.
         - ${OBSERVABILITY_GET_ERROR_GROUP_BY_KEY_TOOL_ID}: fetch recent error samples and counts for an error_grouping_key. If only error_grouping_key is provided, use this first to obtain an error_id, then use ${OBSERVABILITY_GET_ERROR_BY_ID_TOOL_ID}.
         - ${OBSERVABILITY_GET_TRANSACTION_BY_ID_TOOL_ID}: fetch the transaction document by transaction_id (and optional trace_id).
-        - ${OBSERVABILITY_GET_TRACE_BY_ID_TOOL_ID}: fetch the root transaction for a trace by trace_id.
+        - ${OBSERVABILITY_GET_TRACE_OVERVIEW_BY_ID_TOOL_ID}: fetch the overview of a trace by trace_id.
         - ${OBSERVABILITY_GET_SPAN_BY_ID_TOOL_ID}: fetch a span by span_id and trace_id.
         - ${OBSERVABILITY_GET_SERVICES_TOOL_ID}: verify service and environment metadata.
         - ${OBSERVABILITY_GET_ALERTS_TOOL_ID}: retrieve related alerts in the recent time window.
@@ -165,7 +165,7 @@ export const createErrorAttachmentType = (): AttachmentTypeDefinition => {
       OBSERVABILITY_GET_ERROR_BY_ID_TOOL_ID,
       OBSERVABILITY_GET_ERROR_GROUP_BY_KEY_TOOL_ID,
       OBSERVABILITY_GET_TRANSACTION_BY_ID_TOOL_ID,
-      OBSERVABILITY_GET_TRACE_BY_ID_TOOL_ID,
+      OBSERVABILITY_GET_TRACE_OVERVIEW_BY_ID_TOOL_ID,
       OBSERVABILITY_GET_SPAN_BY_ID_TOOL_ID,
       OBSERVABILITY_GET_SERVICES_TOOL_ID,
       OBSERVABILITY_GET_ALERTS_TOOL_ID,
