@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RowControlComponent, RowControlRowProps } from '@kbn/discover-utils';
 import type { RefObject } from 'react';
-import React, { useCallback } from 'react';
-import { type EuiDataGridRefProps } from '@elastic/eui';
+import React from 'react';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
+import { EuiButtonIcon, type EuiDataGridRefProps } from '@elastic/eui';
 import type { IndexUpdateService } from '../../index_update_service';
 
-export const getAddRowControl =
-  (indexUpdateService: IndexUpdateService, dataTableRef: RefObject<EuiDataGridRefProps>) =>
-  (Control: RowControlComponent, props: RowControlRowProps) => {
-    const onAddRow = useCallback(() => {
+export const getAddRowControl = (
+  indexUpdateService: IndexUpdateService,
+  dataTableRef: RefObject<EuiDataGridRefProps>
+): EuiDataGridControlColumn => ({
+  id: 'add-row',
+  width: 40,
+  headerCellRender: () => <div />,
+  rowCellRender: (props) => {
+    const onAddRow = () => {
       indexUpdateService.addEmptyRow(props.rowIndex + 1);
 
       // Set focus to the new added row's first cell
@@ -26,26 +31,20 @@ export const getAddRowControl =
           colIndex: 2, // first data column (skip row control columns)
         });
       }, 100);
-    }, [props.rowIndex]);
+    };
 
     return (
       <div className="dataGrid__addRowAction">
-        <Control
-          color="text"
-          iconType="plus"
-          label="Add row"
-          tooltipContent="Add row"
-          onClick={() => onAddRow()}
-        />
-        {/* <EuiButtonIcon
+        <EuiButtonIcon
           color="text"
           display="base"
           iconType="plus"
           size="xs"
           aria-label="Add Row"
-          onClick={() => onAddRow()}
+          onClick={onAddRow}
           css={{ margin: '0px 4px' }}
-        /> */}
+        />
       </div>
     );
-  };
+  },
+});

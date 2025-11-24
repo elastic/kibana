@@ -6,15 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { RefObject } from 'react';
 import React from 'react';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { EuiButtonIcon, type EuiDataGridRefProps } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import type { IndexUpdateService } from '../../index_update_service';
 
 export const getAddColumnControl = (
-  indexUpdateService: IndexUpdateService,
-  dataTableRef: RefObject<EuiDataGridRefProps>
+  indexUpdateService: IndexUpdateService
 ): EuiDataGridControlColumn => ({
   id: 'add-column',
   width: 40,

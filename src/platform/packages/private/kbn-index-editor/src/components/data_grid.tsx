@@ -228,15 +228,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [indexUpdateService]
   );
 
-  const rowAdditionalLeadingControls = useMemo(() => {
-    return [
-      {
-        id: 'add-row',
-        render: getAddRowControl(indexUpdateService, dataTableRef),
-      },
-    ];
-  }, [indexUpdateService]);
-
   const customToolbar = useMemo(() => {
     return getCustomToolbar({
       rowsCount: rows.filter((row) => !row.id.startsWith(ROW_PLACEHOLDER_PREFIX)).length,
@@ -245,15 +236,19 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [props.onOpenIndexInDiscover, rows]);
 
   const trailingControlColumns = useMemo(() => {
-    return [getAddColumnControl(indexUpdateService, dataTableRef)];
+    return [getAddColumnControl(indexUpdateService)];
+  }, [indexUpdateService]);
+
+  const externalControlColumns = useMemo(() => {
+    return [getAddRowControl(indexUpdateService, dataTableRef)];
   }, [indexUpdateService, dataTableRef]);
 
   return (
     <UnifiedDataTable
       ref={dataTableRef}
       customGridColumnsConfiguration={customGridColumnsConfiguration}
-      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       trailingControlColumns={trailingControlColumns}
+      externalControlColumns={externalControlColumns}
       columns={renderedColumns}
       rows={rows}
       columnsMeta={columnsMeta}
@@ -290,6 +285,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       renderCustomToolbar={customToolbar}
       css={css`
         height: '100%';
+
+        .euiDataGridRowCell--controlColumn[data-gridcell-column-id='actions'] {
+          display: flex;
+          justify-content: center;
+        }
 
         .euiDataGridRowCell__content > div,
         .unifiedDataTable__cellValue {
