@@ -579,15 +579,15 @@ function SecondaryMetricEditor({
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.colorByValue.label', {
-          defaultMessage: 'Color by value',
+        label={i18n.translate('xpack.lens.secondaryMetric.colorMode.label', {
+          defaultMessage: 'Color mode',
         })}
       >
         <EuiButtonGroup
           isFullWidth
           buttonSize="compressed"
-          legend={i18n.translate('xpack.lens.metric.secondaryMetric.colorByValue.label', {
-            defaultMessage: 'Color by value',
+          legend={i18n.translate('xpack.lens.secondaryMetric.colorMode.label', {
+            defaultMessage: 'Color mode',
           })}
           data-test-subj="lnsMetric_color_mode_buttons"
           options={[
@@ -662,9 +662,30 @@ function SecondaryMetricEditor({
 const supportingVisualization = (state: MetricVisualizationState) =>
   state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'panel';
 
-function PrimaryMetricEditor({ state, setState }: SubProps) {
+function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps) {
+  const euiThemeContext = useEuiTheme();
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
+  const setColor = useCallback(
+    (color: string) => {
+      setState({ ...state, color: color === '' ? undefined : color });
+    },
+    [setState, state]
+  );
+  const getColor = useCallback(() => {
+    return state.color || getDefaultColor(state, isMetricNumeric);
+  }, [state, isMetricNumeric]);
+
+  if (accessor == null) return null;
+
+  // Show static color control in Primary Metric editor when is not numeric.
+  // Non-numeric metrics do not support the "Supporting visualization" section
+  const showStaticColorControl = !Boolean(isMetricNumeric && state.palette);
+
   return (
     <div className="lnsIndexPatternDimensionEditor--padded">
+      {showStaticColorControl ? (
+        <StaticColorControl getColor={getColor} setColor={setColor} />
+      ) : null}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -1094,14 +1115,14 @@ export function DimensionEditorAdditionalSection({
           <EuiFormRow
             display="columnCompressed"
             fullWidth
-            label={i18n.translate('xpack.lens.metric.colorByValue.label', {
+            label={i18n.translate('xpack.lens.metric.colorMode.label', {
               defaultMessage: 'Color mode',
             })}
           >
             <EuiButtonGroup
               isFullWidth
               buttonSize="compressed"
-              legend={i18n.translate('xpack.lens.metric.colorByValue.label', {
+              legend={i18n.translate('xpack.lens.metric.colorMode.label', {
                 defaultMessage: 'Color mode',
               })}
               data-test-subj="lnsMetric_color_mode_buttons"
