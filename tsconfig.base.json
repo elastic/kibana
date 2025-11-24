@@ -2453,7 +2453,7 @@
     "esModuleInterop": true,
     // Resolve modules in the same way as Node.js. Aka make `require` works the
     // same in TypeScript as it does in Node.js.
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node",
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.

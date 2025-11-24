@@ -98,11 +98,6 @@ describe('Endpoint fields', () => {
     jest.restoreAllMocks();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
-
   afterAll(() => {
     getFieldsForWildcardMock.mockRestore();
   });
