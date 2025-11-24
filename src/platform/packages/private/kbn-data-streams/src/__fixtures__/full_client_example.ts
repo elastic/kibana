@@ -53,10 +53,13 @@ export const exampleDataStreamClientOperations = async (
     dataStream: dataStreamDefinition,
     elasticsearchClient,
     logger,
+    lazyCreation: false,
   });
+  if (!client) {
+    throw new Error('Client not initialized properly');
+  }
 
   await client.index({
-    index: dataStreamDefinition.name,
     document: {
       name: 'John Doe',
       age: 30,
@@ -68,13 +71,14 @@ export const exampleDataStreamClientOperations = async (
   await client.bulk({
     operations: [
       {
-        index: {
-          document: {
-            name: 'John Doe',
-            age: 30,
-            unmappedField: 'Unmapped but defined in the document interface',
-            '@timestamp': new Date().toISOString(),
-          },
+        index: {},
+      },
+      {
+        doc: {
+          name: 'John Doe',
+          age: 30,
+          unmappedField: 'Unmapped but defined in the document interface',
+          '@timestamp': new Date().toISOString(),
         },
       },
       {

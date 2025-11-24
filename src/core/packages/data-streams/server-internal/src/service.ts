@@ -24,6 +24,7 @@ import type {
   DataStreamsStart,
 } from '@kbn/core-data-streams-server';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 interface StartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
@@ -54,47 +55,63 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
     };
   }
 
-  async start({ elasticsearch }: StartDeps) {
+  private async initializeDataStream(
+    dataStreamName: string,
+    elasticsearchClient: ElasticsearchClient,
+    lazyCreation: boolean
+  ) {
+    if (this.dataStreamClients.has(dataStreamName)) {
+      // already initialized
+      return;
+    }
+
+    const dataStreamDefinition = this.dataStreamDefinitions.get(dataStreamName);
+    if (!dataStreamDefinition) {
+      throw new Error(`Data stream ${dataStreamName} is not registered.`);
+    }
+
+    const maybeInitializedClient = await DataStreamClient.initialize({
+      dataStream: dataStreamDefinition,
+      elasticsearchClient,
+      logger: this.logger,
+      lazyCreation,
+    });
+
+    this.dataStreamClients.set(dataStreamName, maybeInitializedClient);
+  }
+
+  private async initializeAllDataStreams(elasticsearchClient: ElasticsearchClient) {
     const limit = pLimit(5);
     const setupPromises: Promise<void>[] = [];
 
-    const nonInitializedDataStreams = Array.from(this.dataStreamClients.entries())
-      .filter(([_, client]) => client === undefined)
-      .map(([name]) => name);
-    const elasticsearchClient = elasticsearch.client.asInternalUser;
-    for (const dataStreamName of nonInitializedDataStreams) {
-      const dataStreamDefinition = this.dataStreamDefinitions.get(dataStreamName);
-      if (!dataStreamDefinition) {
-        throw new Error(`Data stream ${dataStreamName} is not registered.`);
-      }
-
+    const allDataStreamNames = Array.from(this.dataStreamDefinitions.keys());
+    for (const dataStreamName of allDataStreamNames) {
       setupPromises.push(
-        limit(async () => {
-          this.dataStreamClients.set(
-            dataStreamName,
-            await DataStreamClient.initialize({
-              dataStream: dataStreamDefinition,
-              elasticsearchClient,
-              logger: this.logger,
-            })
-          );
-        })
+        limit(() => this.initializeDataStream(dataStreamName, elasticsearchClient, true))
       );
     }
 
     await Promise.all(setupPromises);
+  }
+
+  async start({ elasticsearch }: StartDeps) {
+    const elasticsearchClient = elasticsearch.client.asInternalUser;
+    await this.initializeAllDataStreams(elasticsearchClient);
 
     return {
-      getClient: <
+      getClient: async <
         S extends MappingsDefinition,
         FullDocumentType extends GetFieldsOf<S> = GetFieldsOf<S>,
         SRM extends BaseSearchRuntimeMappings = never
       >(
         dataStreamName: string
-      ): IDataStreamClient<S, FullDocumentType, SRM> => {
+      ): Promise<IDataStreamClient<S, FullDocumentType, SRM>> => {
         if (!this.dataStreamDefinitions.has(dataStreamName)) {
           throw new Error(`Data stream ${dataStreamName} is not registered.`);
         }
+
+        // initialize the data stream if it is not already initialized, disable lazy creation
+        await this.initializeDataStream(dataStreamName, elasticsearchClient, false);
 
         const dataStreamClient = this.dataStreamClients.get(dataStreamName);
         if (!dataStreamClient) {

@@ -10,11 +10,7 @@
 import type { QueryDslQueryContainer, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { ClientSearchRequest } from '@kbn/data-streams';
-import {
-  getDataStreamClient,
-  type LogsRepositoryDataStreamClient,
-  type WorkflowLogEvent,
-} from './data_stream';
+import { initializeDataStreamClient, type WorkflowLogEvent } from './data_stream';
 
 export interface LogSearchResult {
   total: number;
@@ -39,14 +35,12 @@ export interface SearchLogsParams {
 }
 
 export class LogsRepository {
-  private readonly dataStreamClient: LogsRepositoryDataStreamClient;
-
-  constructor(coreDataStreams: DataStreamsStart) {
-    this.dataStreamClient = getDataStreamClient(coreDataStreams);
-  }
+  constructor(private readonly coreDataStreams: DataStreamsStart) {}
 
   public async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
-    await this.dataStreamClient.bulk({
+    const dataStreamClient = await initializeDataStreamClient(this.coreDataStreams);
+
+    await dataStreamClient.bulk({
       operations: logEvents.flatMap((logEvent) => [{ create: {} }, logEvent]),
     });
   }
@@ -113,7 +107,9 @@ export class LogsRepository {
   }
 
   private async searchDataStream(query: ClientSearchRequest): Promise<LogSearchResult> {
-    const response = await this.dataStreamClient.search({
+    const dataStreamClient = await initializeDataStreamClient(this.coreDataStreams);
+
+    const response = await dataStreamClient.search({
       sort: [{ '@timestamp': { order: 'desc' } }],
       size: 1000,
       ...query,

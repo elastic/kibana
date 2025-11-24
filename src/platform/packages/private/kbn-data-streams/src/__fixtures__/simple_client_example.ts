@@ -48,10 +48,14 @@ export const simpleClientExample = async (
     dataStream: dataStreamDefinition,
     elasticsearchClient,
     logger,
+    lazyCreation: false,
   });
 
+  if (!client) {
+    throw new Error('Client not initialized properly');
+  }
+  // correct usage example
   await client.index({
-    index: dataStreamDefinition.name,
     document: {
       name: 'John Doe',
       age: 30,
@@ -61,6 +65,7 @@ export const simpleClientExample = async (
   });
 
   await client.index({
+    // @ts-expect-error - index is not a valid property of ClientIndexRequest
     index: dataStreamDefinition.name,
     document: {
       name: 'John Doe',
@@ -71,7 +76,6 @@ export const simpleClientExample = async (
   });
 
   await client.index({
-    index: dataStreamDefinition.name,
     document: {
       name: 'John Doe',
       age: 30,
@@ -95,16 +99,11 @@ export const simpleClientExample = async (
   await client.bulk({
     operations: [
       {
-        index: {
-          document: {
-            '@timestamp': new Date().toISOString(),
-          },
-        },
+        index: {},
+        doc: { '@timestamp': new Date().toISOString() },
       },
       {
-        delete: {
-          _id: '123',
-        },
+        delete: { _id: '123' },
       },
     ],
   });

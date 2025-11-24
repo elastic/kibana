@@ -89,8 +89,8 @@ export type LogsRepositoryDataStreamClient = IDataStreamClient<
   WorkflowLogEvent
 >;
 
-export const getDataStreamClient = (
+export const initializeDataStreamClient = (
   coreDataStreams: DataStreamsStart
-): LogsRepositoryDataStreamClient => {
-  return coreDataStreams.getClient(WORKFLOWS_EXECUTION_LOGS_DATA_STREAM);
+): Promise<LogsRepositoryDataStreamClient> => {
+  return coreDataStreams.initializeClient(WORKFLOWS_EXECUTION_LOGS_DATA_STREAM);
 };
