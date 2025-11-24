@@ -231,12 +231,12 @@ export class AttachmentClient {
    *
    * Removes the stream name from the attachment's link.
    * If this is the last stream associated with the link, deletes the link entirely.
+   * Does not validate that the attachment itself exists in the current space.
    *
    * @param streamName - The name of the stream to unlink the attachment from
    * @param attachmentLink - The attachment link containing the attachment id and type
    * @returns A promise that resolves when the unlinking operation is complete
    * @throws {AttachmentLinkNotFoundError} If the attachment link doesn't exist
-   * @throws {AttachmentNotFoundError} If the attachment doesn't exist in the current space
    *
    * @example
    * ```typescript
@@ -270,9 +270,6 @@ export class AttachmentClient {
       }
       throw error;
     }
-
-    // Validate that the attachment exists in the current space
-    await this.validateAttachmentExistsInSpace(attachmentLink);
 
     const existingStreamNames = existingAttachment[STREAM_NAMES];
 
@@ -316,13 +313,14 @@ export class AttachmentClient {
    * It handles both linking (index) and unlinking (delete) operations, managing stream name
    * associations and automatic cleanup when attachments have no remaining stream associations.
    *
-   * All attachments must exist in the current space and all storage operations must succeed,
-   * otherwise the entire operation fails atomically.
+   * All attachments being linked must exist in the current space and all storage operations must succeed,
+   * otherwise the entire operation fails atomically. Unlink operations do not validate that the attachment
+   * exists in the current space.
    *
    * @param streamName - The name of the stream for the bulk operations
    * @param operations - Array of bulk operations to perform (index or delete)
    * @returns A promise that resolves when all operations succeed
-   * @throws {AttachmentNotFoundError} If any attachment doesn't exist in the current space
+   * @throws {AttachmentNotFoundError} If any attachment being linked doesn't exist in the current space
    * @throws {Error} If any storage operation fails
    *
    * @example
@@ -352,15 +350,16 @@ export class AttachmentClient {
       const attachmentLink =
         'index' in operation ? operation.index.attachment : operation.delete.attachment;
       const uuid = getAttachmentLinkUuid(attachmentLink);
+      const isLinkOperation = 'index' in operation;
 
-      // Only add to validation array if this is a new attachment (no duplicates)
-      if (!attachmentMap.has(uuid)) {
+      // Only add to validation array if this is a link operation and a new attachment (no duplicates)
+      if (isLinkOperation && !attachmentMap.has(uuid)) {
         attachmentLinksToValidate.push(attachmentLink);
       }
 
       attachmentMap.set(uuid, {
         attachmentLink,
-        operation: 'index' in operation ? 'link' : 'unlink',
+        operation: isLinkOperation ? 'link' : 'unlink',
         uuid,
       });
     });

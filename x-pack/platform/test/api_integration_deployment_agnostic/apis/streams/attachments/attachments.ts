@@ -437,6 +437,101 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('Unlink deleted attachments', () => {
+      before(async () => {
+        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+        await kibanaServer.importExport.load(RULE_ARCHIVE, { space: SPACE_ID });
+      });
+
+      after(async () => {
+        // Make sure dashboards and rules are loaded for subsequent tests
+        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+        await kibanaServer.importExport.load(RULE_ARCHIVE, { space: SPACE_ID });
+      });
+
+      it('unlinks a dashboard even if the dashboard has been deleted', async () => {
+        // Link a dashboard to the stream
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+
+        // Verify the link was created
+        const linkedAttachments = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+        });
+        expect(linkedAttachments.attachments.length).to.eql(1);
+        expect(linkedAttachments.attachments[0].id).to.eql(SEARCH_DASHBOARD_ID);
+
+        // Delete the dashboard
+        await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+
+        // Try to unlink the attachment - should succeed even though dashboard no longer exists
+        const unlinkResponse = await unlinkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        expect(unlinkResponse.acknowledged).to.eql(true);
+
+        // Verify the link was removed
+        const unlinkedAttachments = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+        });
+        expect(unlinkedAttachments.attachments.length).to.eql(0);
+
+        // Restore dashboards for subsequent tests
+        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+      });
+
+      it('bulk unlinks a dashboard even if the dashboard has been deleted', async () => {
+        // Link a dashboard to the stream
+        await linkAttachment({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+          id: BASIC_DASHBOARD_ID,
+        });
+
+        // Verify the link was created
+        const linkedAttachments = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+        });
+        expect(linkedAttachments.attachments.length).to.eql(1);
+        expect(linkedAttachments.attachments[0].id).to.eql(BASIC_DASHBOARD_ID);
+
+        // Delete the dashboard
+        await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+
+        // Try to unlink the attachment using bulk operation - should succeed even though dashboard no longer exists
+        await bulkAttachments({
+          apiClient,
+          stream: 'logs',
+          operations: [{ delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } }],
+        });
+
+        // Verify the link was removed
+        const unlinkedAttachments = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          type: 'dashboard',
+        });
+        expect(unlinkedAttachments.attachments.length).to.eql(0);
+
+        // Restore dashboards for subsequent tests
+        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+      });
+    });
+
     describe('Suggestions', () => {
       before(async () => {
         await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
