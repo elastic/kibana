@@ -47,7 +47,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
           items={sortedRulesByLinkedRulesOnTop}
           loading={isLoading}
           columns={rulesTableColumnsWithLinkSwitch}
-          message={
+          noItemsMessage={
             isLoading ? (
               <EuiSkeletonText lines={4} data-test-subj="exceptionItemViewerEmptyPromptsLoading" />
             ) : undefined
