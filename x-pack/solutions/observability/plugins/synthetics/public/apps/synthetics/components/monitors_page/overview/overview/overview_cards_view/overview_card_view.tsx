@@ -18,7 +18,7 @@ import { OverviewLoader } from '../overview_loader';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
 import { selectOverviewState, selectOverviewTrends } from '../../../../../state';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
-import { useOverviewTrendsRequests } from '../../../hooks/use_overview_trends_requests';
+import { useInfiniteOverviewTrendsRequests } from '../../../hooks/use_infinite_overview_trends_requests';
 
 const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
@@ -53,13 +53,11 @@ export const OverviewCardView = ({
     visibleEndIndex: number;
   } | null>(null);
 
-  const monitorsToFetchTrendsFor = visibleIndices
-    ? monitorsSortedByStatus.slice(
-        visibleIndices.visibleStartIndex * rowCount,
-        (visibleIndices.visibleEndIndex + 1) * rowCount
-      )
-    : [];
-  useOverviewTrendsRequests(monitorsToFetchTrendsFor);
+  useInfiniteOverviewTrendsRequests({
+    monitorsSortedByStatus,
+    visibleIndices,
+    numOfColumns: rowCount,
+  });
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
