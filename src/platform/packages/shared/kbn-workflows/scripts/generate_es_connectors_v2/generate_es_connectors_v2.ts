@@ -159,7 +159,7 @@ function generateContractMeta(
 ): ContractMeta {
   const operations = getRelatedOperations(endpoint, openApiDocument);
   const type = `elasticsearch.${endpoint.name}`;
-  const description = endpoint.description;
+  const description = `${endpoint.description}\n\n Documentation: ${endpoint.docUrl}`;
   const summary = generateSummary(operations);
   const documentation = endpoint.docUrl;
   const { methods, patterns } = generateMethodsAndPatterns(endpoint);

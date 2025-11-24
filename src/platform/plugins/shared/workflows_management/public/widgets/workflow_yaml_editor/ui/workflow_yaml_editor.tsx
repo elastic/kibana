@@ -60,12 +60,6 @@ import type { YamlValidationResult } from '../../../features/validate_workflow_y
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
-import {
-  ElasticsearchMonacoConnectorHandler,
-  GenericMonacoConnectorHandler,
-  KibanaMonacoConnectorHandler,
-} from '../lib/monaco_connectors';
-import { registerMonacoConnectorHandler } from '../lib/monaco_providers';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -133,7 +127,7 @@ export const WorkflowYAMLEditor = ({
   onStepRun,
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications } = useKibana().services;
+  const { notifications } = useKibana().services;
 
   const saveYaml = useSaveYaml();
   const isSaving = useSelector(selectIsSavingYaml);
@@ -295,30 +289,6 @@ export const WorkflowYAMLEditor = ({
       setTimeout(() => {
         setIsEditorMounted(true);
       }, 0);
-
-      // Setup Elasticsearch step providers if we have the required services
-      if (http && notifications) {
-        // Register Elasticsearch connector handler
-        const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
-          http,
-          notifications,
-        });
-        registerMonacoConnectorHandler(elasticsearchHandler);
-
-        // Register Kibana connector handler
-        const kibanaHandler = new KibanaMonacoConnectorHandler({
-          http,
-          notifications,
-          kibanaHost: window.location.origin,
-        });
-        registerMonacoConnectorHandler(kibanaHandler);
-
-        // Monaco YAML hover is now disabled via configuration (hover: false)
-        // The unified hover provider will handle all hover content including validation errors
-
-        const genericHandler = new GenericMonacoConnectorHandler();
-        registerMonacoConnectorHandler(genericHandler);
-      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []

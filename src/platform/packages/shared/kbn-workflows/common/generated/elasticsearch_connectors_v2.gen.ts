@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
- * Generated at: 2025-11-24T08:49:20.920Z
+ * Generated at: 2025-11-24T11:06:10.793Z
  * Source: elasticsearch-specification repository (582 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -1652,7 +1652,9 @@ const ASYNC_SEARCH_DELETE_CONTRACT: InternalConnectorContract = {
 
 If the asynchronous search is still running, it is cancelled.
 Otherwise, the saved search results are deleted.
-If the Elasticsearch security features are enabled, the deletion of a specific async search is restricted to: the authenticated user that submitted the original search request; users that have the \`cancel_task\` cluster privilege.`,
+If the Elasticsearch security features are enabled, the deletion of a specific async search is restricted to: the authenticated user that submitted the original search request; users that have the \`cancel_task\` cluster privilege.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit`,
   methods: ['DELETE'],
   patterns: ['_async_search/{id}'],
   documentation:
@@ -1676,7 +1678,9 @@ const ASYNC_SEARCH_GET_CONTRACT: InternalConnectorContract = {
   description: `Get async search results.
 
 Retrieve the results of a previously submitted asynchronous search request.
-If the Elasticsearch security features are enabled, access to the results of a specific async search is restricted to the user or API key that submitted it.`,
+If the Elasticsearch security features are enabled, access to the results of a specific async search is restricted to the user or API key that submitted it.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit`,
   methods: ['GET'],
   patterns: ['_async_search/{id}'],
   documentation:
@@ -1703,7 +1707,9 @@ Get the status of a previously submitted async search request given its identifi
 If the Elasticsearch security features are enabled, the access to the status of a specific async search is restricted to:
 
 * The user or API key that submitted the original async search request.
-* Users that have the \`monitor\` cluster privilege or greater privileges.`,
+* Users that have the \`monitor\` cluster privilege or greater privileges.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit`,
   methods: ['GET'],
   patterns: ['_async_search/status/{id}'],
   documentation:
@@ -1731,7 +1737,9 @@ When the primary sort of the results is an indexed field, shards get sorted base
 Warning: Asynchronous search does not support scroll or search requests that include only the suggest section.
 
 By default, Elasticsearch does not allow you to store an async search response larger than 10Mb and an attempt to do this results in an error.
-The maximum allowed size for a stored async search response can be set by changing the \`search.max_async_search_response_size\` cluster level setting.`,
+The maximum allowed size for a stored async search response can be set by changing the \`search.max_async_search_response_size\` cluster level setting.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit`,
   methods: ['POST'],
   patterns: ['_async_search', '{index}/_async_search'],
   documentation:
@@ -1834,7 +1842,9 @@ const AUTOSCALING_DELETE_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract 
   summary: ``,
   description: `Delete an autoscaling policy.
 
-NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.`,
+NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-delete-autoscaling-policy`,
   methods: ['DELETE'],
   patterns: ['_autoscaling/policy/{name}'],
   documentation:
@@ -1864,7 +1874,9 @@ The operator should verify that the \`current_nodes\` match the operator’s kno
 
 The response contains decider-specific information you can use to diagnose how and why autoscaling determined a certain capacity was required.
 This information is provided for diagnosis only.
-Do not use this information to make autoscaling decisions.`,
+Do not use this information to make autoscaling decisions.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-get-autoscaling-capacity`,
   methods: ['GET'],
   patterns: ['_autoscaling/capacity'],
   documentation:
@@ -1883,7 +1895,9 @@ const AUTOSCALING_GET_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
   summary: ``,
   description: `Get an autoscaling policy.
 
-NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.`,
+NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-get-autoscaling-capacity`,
   methods: ['GET'],
   patterns: ['_autoscaling/policy/{name}'],
   documentation:
@@ -1902,7 +1916,9 @@ const AUTOSCALING_PUT_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
   summary: ``,
   description: `Create or update an autoscaling policy.
 
-NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.`,
+NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-put-autoscaling-policy`,
   methods: ['PUT'],
   patterns: ['_autoscaling/policy/{name}'],
   documentation:
@@ -2032,7 +2048,9 @@ The request will only wait for those three shards to refresh.
 The other two shards that make up the index do not participate in the \`_bulk\` request at all.
 
 You might want to disable the refresh interval temporarily to improve indexing throughput for large bulk requests.
-Refer to the linked documentation for step-by-step instructions using the index settings API.`,
+Refer to the linked documentation for step-by-step instructions using the index settings API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk`,
   methods: ['POST', 'PUT'],
   patterns: ['_bulk', '{index}/_bulk'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk',
@@ -2074,7 +2092,9 @@ const CAPABILITIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.capabilities',
   isInternal: true,
   summary: ``,
-  description: `Checks if the specified combination of method, API, parameters, and arbitrary capabilities are supported`,
+  description: `Checks if the specified combination of method, API, parameters, and arbitrary capabilities are supported
+
+ Documentation: https://github.com/elastic/elasticsearch/blob/main/rest-api-spec/src/yamlRestTest/resources/rest-api-spec/test/README.asciidoc#require-or-skip-api-capabilities`,
   methods: ['GET'],
   patterns: ['_capabilities'],
   documentation:
@@ -2096,7 +2116,9 @@ const CAT_ALIASES_CONTRACT: InternalConnectorContract = {
 Get the cluster's index aliases, including filter and routing information.
 This API does not return data stream aliases.
 
-IMPORTANT: CAT APIs are only intended for human consumption using the command line or the Kibana console. They are not intended for use by applications. For application consumption, use the aliases API.`,
+IMPORTANT: CAT APIs are only intended for human consumption using the command line or the Kibana console. They are not intended for use by applications. For application consumption, use the aliases API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-aliases`,
   methods: ['GET'],
   patterns: ['_cat/aliases', '_cat/aliases/{name}'],
   documentation:
@@ -2124,7 +2146,9 @@ const CAT_ALLOCATION_CONTRACT: InternalConnectorContract = {
 
 Get a snapshot of the number of shards allocated to each data node and their disk space.
 
-IMPORTANT: CAT APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications.`,
+IMPORTANT: CAT APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-allocation`,
   methods: ['GET'],
   patterns: ['_cat/allocation', '_cat/allocation/{node_id}'],
   documentation:
@@ -2148,7 +2172,9 @@ const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.circuit_breaker',
   isInternal: true,
   summary: ``,
-  description: `Get circuit breakers statistics`,
+  description: `Get circuit breakers statistics
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['GET'],
   patterns: ['_cat/circuit_breaker', '_cat/circuit_breaker/{circuit_breaker_patterns}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
@@ -2170,7 +2196,9 @@ Get information about component templates in a cluster.
 Component templates are building blocks for constructing index templates that specify index mappings, settings, and aliases.
 
 IMPORTANT: CAT APIs are only intended for human consumption using the command line or Kibana console.
-They are not intended for use by applications. For application consumption, use the get component template API.`,
+They are not intended for use by applications. For application consumption, use the get component template API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-component-templates`,
   methods: ['GET'],
   patterns: ['_cat/component_templates', '_cat/component_templates/{name}'],
   documentation:
@@ -2200,7 +2228,9 @@ Get quick access to a document count for a data stream, an index, or an entire c
 The document count only includes live documents, not deleted documents which have not yet been removed by the merge process.
 
 IMPORTANT: CAT APIs are only intended for human consumption using the command line or Kibana console.
-They are not intended for use by applications. For application consumption, use the count API.`,
+They are not intended for use by applications. For application consumption, use the count API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-count`,
   methods: ['GET'],
   patterns: ['_cat/count', '_cat/count/{index}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-count',
@@ -2228,7 +2258,9 @@ const CAT_FIELDDATA_CONTRACT: InternalConnectorContract = {
 Get the amount of heap memory currently used by the field data cache on every data node in the cluster.
 
 IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console.
-They are not intended for use by applications. For application consumption, use the nodes stats API.`,
+They are not intended for use by applications. For application consumption, use the nodes stats API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-fielddata`,
   methods: ['GET'],
   patterns: ['_cat/fielddata', '_cat/fielddata/{fields}'],
   documentation:
@@ -2262,7 +2294,9 @@ To help you track cluster health alongside log files and alerting systems, the A
 \`Unix epoch time\`, which is machine-sortable and includes date information.
 The latter format is useful for cluster recoveries that take multiple days.
 You can use the cat health API to verify cluster health across multiple nodes.
-You also can use the API to track the recovery of a large cluster over a longer period of time.`,
+You also can use the API to track the recovery of a large cluster over a longer period of time.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-health`,
   methods: ['GET'],
   patterns: ['_cat/health'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-health',
@@ -2284,7 +2318,9 @@ const CAT_HELP_CONTRACT: InternalConnectorContract = {
   summary: `Get CAT help`,
   description: `Get CAT help.
 
-Get help for the CAT APIs.`,
+Get help for the CAT APIs.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-cat`,
   methods: ['GET'],
   patterns: ['_cat'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-cat',
@@ -2319,7 +2355,9 @@ These metrics are retrieved directly from Lucene, which Elasticsearch uses inter
 To get an accurate count of Elasticsearch documents, use the cat count or count APIs.
 
 CAT APIs are only intended for human consumption using the command line or Kibana console.
-They are not intended for use by applications. For application consumption, use an index endpoint.`,
+They are not intended for use by applications. For application consumption, use an index endpoint.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-indices`,
   methods: ['GET'],
   patterns: ['_cat/indices', '_cat/indices/{index}'],
   documentation:
@@ -2355,7 +2393,9 @@ const CAT_MASTER_CONTRACT: InternalConnectorContract = {
 
 Get information about the master node, including the ID, bound IP address, and name.
 
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-master`,
   methods: ['GET'],
   patterns: ['_cat/master'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-master',
@@ -2381,7 +2421,9 @@ Get configuration and usage information about data frame analytics jobs.
 
 IMPORTANT: CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
-application consumption, use the get data frame analytics jobs statistics API.`,
+application consumption, use the get data frame analytics jobs statistics API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-data-frame-analytics`,
   methods: ['GET'],
   patterns: ['_cat/ml/data_frame/analytics', '_cat/ml/data_frame/analytics/{id}'],
   documentation:
@@ -2417,7 +2459,9 @@ cluster privileges to use this API.
 
 IMPORTANT: CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
-application consumption, use the get datafeed statistics API.`,
+application consumption, use the get datafeed statistics API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-datafeeds`,
   methods: ['GET'],
   patterns: ['_cat/ml/datafeeds', '_cat/ml/datafeeds/{datafeed_id}'],
   documentation:
@@ -2450,7 +2494,9 @@ If the Elasticsearch security features are enabled, you must have \`monitor_ml\`
 
 IMPORTANT: CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
-application consumption, use the get anomaly detection job statistics API.`,
+application consumption, use the get anomaly detection job statistics API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-jobs`,
   methods: ['GET'],
   patterns: ['_cat/ml/anomaly_detectors', '_cat/ml/anomaly_detectors/{job_id}'],
   documentation:
@@ -2480,7 +2526,9 @@ Get configuration and usage information about inference trained models.
 
 IMPORTANT: CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
-application consumption, use the get trained models statistics API.`,
+application consumption, use the get trained models statistics API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-trained-models`,
   methods: ['GET'],
   patterns: ['_cat/ml/trained_models', '_cat/ml/trained_models/{model_id}'],
   documentation:
@@ -2507,7 +2555,9 @@ const CAT_NODEATTRS_CONTRACT: InternalConnectorContract = {
   description: `Get node attribute information.
 
 Get information about custom node attributes.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-nodeattrs`,
   methods: ['GET'],
   patterns: ['_cat/nodeattrs'],
   documentation:
@@ -2531,7 +2581,9 @@ const CAT_NODES_CONTRACT: InternalConnectorContract = {
   description: `Get node information.
 
 Get information about the nodes in a cluster.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-nodes`,
   methods: ['GET'],
   patterns: ['_cat/nodes'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-nodes',
@@ -2554,7 +2606,9 @@ const CAT_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
   description: `Get pending task information.
 
 Get information about cluster-level changes that have not yet taken effect.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the pending cluster tasks API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the pending cluster tasks API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-pending-tasks`,
   methods: ['GET'],
   patterns: ['_cat/pending_tasks'],
   documentation:
@@ -2578,7 +2632,9 @@ const CAT_PLUGINS_CONTRACT: InternalConnectorContract = {
   description: `Get plugin information.
 
 Get a list of plugins running on each node of a cluster.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-plugins`,
   methods: ['GET'],
   patterns: ['_cat/plugins'],
   documentation:
@@ -2604,7 +2660,9 @@ const CAT_RECOVERY_CONTRACT: InternalConnectorContract = {
 Get information about ongoing and completed shard recoveries.
 Shard recovery is the process of initializing a shard copy, such as restoring a primary shard from a snapshot or syncing a replica shard from a primary shard. When a shard recovery completes, the recovered shard is available for search and indexing.
 For data streams, the API returns information about the stream’s backing indices.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the index recovery API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the index recovery API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-recovery`,
   methods: ['GET'],
   patterns: ['_cat/recovery', '_cat/recovery/{index}'],
   documentation:
@@ -2631,7 +2689,9 @@ const CAT_REPOSITORIES_CONTRACT: InternalConnectorContract = {
   description: `Get snapshot repository information.
 
 Get a list of snapshot repositories for a cluster.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the get snapshot repository API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the get snapshot repository API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-repositories`,
   methods: ['GET'],
   patterns: ['_cat/repositories'],
   documentation:
@@ -2656,7 +2716,9 @@ const CAT_SEGMENTS_CONTRACT: InternalConnectorContract = {
 
 Get low-level information about the Lucene segments in index shards.
 For data streams, the API returns information about the backing indices.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the index segments API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the index segments API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-segments`,
   methods: ['GET'],
   patterns: ['_cat/segments', '_cat/segments/{index}'],
   documentation:
@@ -2694,7 +2756,9 @@ const CAT_SHARDS_CONTRACT: InternalConnectorContract = {
 
 Get information about the shards in a cluster.
 For data streams, the API returns information about the backing indices.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-shards`,
   methods: ['GET'],
   patterns: ['_cat/shards', '_cat/shards/{index}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-shards',
@@ -2721,7 +2785,9 @@ const CAT_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
 
 Get information about the snapshots stored in one or more repositories.
 A snapshot is a backup of an index or running Elasticsearch cluster.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the get snapshot API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the get snapshot API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-snapshots`,
   methods: ['GET'],
   patterns: ['_cat/snapshots', '_cat/snapshots/{repository}'],
   documentation:
@@ -2748,7 +2814,9 @@ const CAT_TASKS_CONTRACT: InternalConnectorContract = {
   description: `Get task information.
 
 Get information about tasks currently running in the cluster.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the task management API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the task management API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-tasks`,
   methods: ['GET'],
   patterns: ['_cat/tasks'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-tasks',
@@ -2781,7 +2849,9 @@ const CAT_TEMPLATES_CONTRACT: InternalConnectorContract = {
 
 Get information about the index templates in a cluster.
 You can use index templates to apply index settings and field mappings to new indices at creation.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the get index template API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the get index template API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-templates`,
   methods: ['GET'],
   patterns: ['_cat/templates', '_cat/templates/{name}'],
   documentation:
@@ -2809,7 +2879,9 @@ const CAT_THREAD_POOL_CONTRACT: InternalConnectorContract = {
 
 Get thread pool statistics for each node in a cluster.
 Returned information includes all built-in thread pools and custom thread pools.
-IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.`,
+IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-thread-pool`,
   methods: ['GET'],
   patterns: ['_cat/thread_pool', '_cat/thread_pool/{thread_pool_patterns}'],
   documentation:
@@ -2839,7 +2911,9 @@ Get configuration and usage information about transforms.
 
 CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
-application consumption, use the get transform statistics API.`,
+application consumption, use the get transform statistics API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-transforms`,
   methods: ['GET'],
   patterns: ['_cat/transforms', '_cat/transforms/{transform_id}'],
   documentation:
@@ -2865,7 +2939,9 @@ const CCR_DELETE_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   summary: `Delete auto-follow patterns`,
   description: `Delete auto-follow patterns.
 
-Delete a collection of cross-cluster replication auto-follow patterns.`,
+Delete a collection of cross-cluster replication auto-follow patterns.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-delete-auto-follow-pattern`,
   methods: ['DELETE'],
   patterns: ['_ccr/auto_follow/{name}'],
   documentation:
@@ -2888,7 +2964,9 @@ const CCR_FOLLOW_CONTRACT: InternalConnectorContract = {
   summary: `Create a follower`,
   description: `Create a follower.
 Create a cross-cluster replication follower index that follows a specific leader index.
-When the API returns, the follower index exists and cross-cluster replication starts replicating operations from the leader index to the follower index.`,
+When the API returns, the follower index exists and cross-cluster replication starts replicating operations from the leader index to the follower index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow`,
   methods: ['PUT'],
   patterns: ['{index}/_ccr/follow'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow',
@@ -2926,7 +3004,9 @@ const CCR_FOLLOW_INFO_CONTRACT: InternalConnectorContract = {
   description: `Get follower information.
 
 Get information about all cross-cluster replication follower indices.
-For example, the results include follower index names, leader index names, replication options, and whether the follower indices are active or paused.`,
+For example, the results include follower index names, leader index names, replication options, and whether the follower indices are active or paused.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow-info`,
   methods: ['GET'],
   patterns: ['{index}/_ccr/info'],
   documentation:
@@ -2950,7 +3030,9 @@ const CCR_FOLLOW_STATS_CONTRACT: InternalConnectorContract = {
   description: `Get follower stats.
 
 Get cross-cluster replication follower stats.
-The API returns shard-level stats about the "following tasks" associated with each shard for the specified indices.`,
+The API returns shard-level stats about the "following tasks" associated with each shard for the specified indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow-stats`,
   methods: ['GET'],
   patterns: ['{index}/_ccr/stats'],
   documentation:
@@ -2982,7 +3064,9 @@ While the leases will eventually expire on their own, their extended existence c
 This API exists to enable manually removing the leases when the unfollow API is unable to do so.
 
 NOTE: This API does not stop replication by a following index. If you use this API with a follower index that is still actively following, the following index will add back retention leases on the leader.
-The only purpose of this API is to handle the case of failure to remove the following retention leases after the unfollow API is invoked.`,
+The only purpose of this API is to handle the case of failure to remove the following retention leases after the unfollow API is invoked.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-forget-follower`,
   methods: ['POST'],
   patterns: ['{index}/_ccr/forget_follower'],
   documentation:
@@ -3010,7 +3094,9 @@ const CCR_GET_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   summary: `Get auto-follow patterns`,
   description: `Get auto-follow patterns.
 
-Get cross-cluster replication auto-follow patterns.`,
+Get cross-cluster replication auto-follow patterns.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-get-auto-follow-pattern-1`,
   methods: ['GET'],
   patterns: ['_ccr/auto_follow', '_ccr/auto_follow/{name}'],
   documentation:
@@ -3045,7 +3131,9 @@ New indices that are created on the remote cluster and match the auto-follow pat
 
 You can resume auto-following with the resume auto-follow pattern API.
 When it resumes, the auto-follow pattern is active again and automatically configures follower indices for newly created indices on the remote cluster that match its patterns.
-Remote indices that were created while the pattern was paused will also be followed, unless they have been deleted or closed in the interim.`,
+Remote indices that were created while the pattern was paused will also be followed, unless they have been deleted or closed in the interim.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-pause-auto-follow-pattern`,
   methods: ['POST'],
   patterns: ['_ccr/auto_follow/{name}/pause'],
   documentation:
@@ -3071,7 +3159,9 @@ const CCR_PAUSE_FOLLOW_CONTRACT: InternalConnectorContract = {
 Pause a cross-cluster replication follower index.
 The follower index will not fetch any additional operations from the leader index.
 You can resume following with the resume follower API.
-You can pause and resume a follower index to change the configuration of the following task.`,
+You can pause and resume a follower index to change the configuration of the following task.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-pause-follow`,
   methods: ['POST'],
   patterns: ['{index}/_ccr/pause_follow'],
   documentation:
@@ -3098,7 +3188,9 @@ Newly created indices on the remote cluster that match any of the patterns are a
 Indices on the remote cluster that were created before the auto-follow pattern was created will not be auto-followed even if they match the pattern.
 
 This API can also be used to update auto-follow patterns.
-NOTE: Follower indices that were configured automatically before updating an auto-follow pattern will remain unchanged even if they do not match against the new patterns.`,
+NOTE: Follower indices that were configured automatically before updating an auto-follow pattern will remain unchanged even if they do not match against the new patterns.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-put-auto-follow-pattern`,
   methods: ['PUT'],
   patterns: ['_ccr/auto_follow/{name}'],
   documentation:
@@ -3139,7 +3231,9 @@ const CCR_RESUME_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
 
 Resume a cross-cluster replication auto-follow pattern that was paused.
 The auto-follow pattern will resume configuring following indices for newly created indices that match its patterns on the remote cluster.
-Remote indices created while the pattern was paused will also be followed unless they have been deleted or closed in the interim.`,
+Remote indices created while the pattern was paused will also be followed unless they have been deleted or closed in the interim.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-resume-auto-follow-pattern`,
   methods: ['POST'],
   patterns: ['_ccr/auto_follow/{name}/resume'],
   documentation:
@@ -3164,7 +3258,9 @@ const CCR_RESUME_FOLLOW_CONTRACT: InternalConnectorContract = {
 Resume a cross-cluster replication follower index that was paused.
 The follower index could have been paused with the pause follower API.
 Alternatively it could be paused due to replication that cannot be retried due to failures during following tasks.
-When this API returns, the follower index will resume fetching operations from the leader index.`,
+When this API returns, the follower index will resume fetching operations from the leader index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-resume-follow`,
   methods: ['POST'],
   patterns: ['{index}/_ccr/resume_follow'],
   documentation:
@@ -3198,7 +3294,9 @@ const CCR_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get cross-cluster replication stats`,
   description: `Get cross-cluster replication stats.
 
-This API returns stats about auto-following and the same shard-level stats as the get follower stats API.`,
+This API returns stats about auto-following and the same shard-level stats as the get follower stats API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-stats`,
   methods: ['GET'],
   patterns: ['_ccr/stats'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-stats',
@@ -3225,7 +3323,9 @@ The API stops the following task associated with a follower index and removes in
 The follower index must be paused and closed before you call the unfollow API.
 
 > info
-> Currently cross-cluster replication does not support converting an existing regular index to a follower index. Converting a follower index to a regular index is an irreversible operation.`,
+> Currently cross-cluster replication does not support converting an existing regular index to a follower index. Converting a follower index to a regular index is an irreversible operation.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-unfollow`,
   methods: ['POST'],
   patterns: ['{index}/_ccr/unfollow'],
   documentation:
@@ -3247,7 +3347,9 @@ const CLEAR_SCROLL_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Clear a scrolling search`,
   description: `Clear a scrolling search.
-Clear the search context and results for a scrolling search.`,
+Clear the search context and results for a scrolling search.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-clear-scroll`,
   methods: ['DELETE'],
   patterns: ['_search/scroll', '_search/scroll/{scroll_id}'],
   documentation:
@@ -3275,7 +3377,9 @@ const CLOSE_POINT_IN_TIME_CONTRACT: InternalConnectorContract = {
 A point in time must be opened explicitly before being used in search requests.
 The \`keep_alive\` parameter tells Elasticsearch how long it should persist.
 A point in time is automatically closed when the \`keep_alive\` period has elapsed.
-However, keeping points in time has a cost; close them as soon as they are no longer required for search requests.`,
+However, keeping points in time has a cost; close them as soon as they are no longer required for search requests.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-open-point-in-time`,
   methods: ['DELETE'],
   patterns: ['_pit'],
   documentation:
@@ -3302,7 +3406,9 @@ This API accepts the current_node, index, primary and shard parameters in the re
 For unassigned shards, it provides an explanation for why the shard is unassigned.
 For assigned shards, it provides an explanation for why the shard is remaining on its current node and has not moved or rebalanced to another node.
 This API can be very useful when attempting to diagnose why a shard is unassigned or why a shard continues to remain on its current node when you might expect otherwise.
-Refer to the linked documentation for examples of how to troubleshoot allocation issues using this API.`,
+Refer to the linked documentation for examples of how to troubleshoot allocation issues using this API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-allocation-explain`,
   methods: ['GET', 'POST'],
   patterns: ['_cluster/allocation/explain'],
   documentation:
@@ -3338,7 +3444,9 @@ const CLUSTER_DELETE_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete component templates`,
   description: `Delete component templates.
-Component templates are building blocks for constructing index templates that specify index mappings, settings, and aliases.`,
+Component templates are building blocks for constructing index templates that specify index mappings, settings, and aliases.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template`,
   methods: ['DELETE'],
   patterns: ['_component_template/{name}'],
   documentation:
@@ -3360,7 +3468,9 @@ const CLUSTER_DELETE_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContrac
   isInternal: true,
   summary: `Clear cluster voting config exclusions`,
   description: `Clear cluster voting config exclusions.
-Remove master-eligible nodes from the voting configuration exclusion list.`,
+Remove master-eligible nodes from the voting configuration exclusion list.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-post-voting-config-exclusions`,
   methods: ['DELETE'],
   patterns: ['_cluster/voting_config_exclusions'],
   documentation:
@@ -3382,7 +3492,9 @@ const CLUSTER_EXISTS_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Check component templates`,
   description: `Check component templates.
-Returns information about whether a particular component template exists.`,
+Returns information about whether a particular component template exists.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template`,
   methods: ['HEAD'],
   patterns: ['_component_template/{name}'],
   documentation:
@@ -3404,7 +3516,9 @@ const CLUSTER_GET_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get component templates`,
   description: `Get component templates.
-Get information about component templates.`,
+Get information about component templates.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template`,
   methods: ['GET'],
   patterns: ['_component_template', '_component_template/{name}'],
   documentation:
@@ -3433,7 +3547,9 @@ const CLUSTER_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   summary: `Get cluster-wide settings`,
   description: `Get cluster-wide settings.
 
-By default, it returns only settings that have been explicitly defined.`,
+By default, it returns only settings that have been explicitly defined.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-get-settings`,
   methods: ['GET'],
   patterns: ['_cluster/settings'],
   documentation:
@@ -3464,7 +3580,9 @@ On the shard level, a red status indicates that the specific shard is not alloca
 The index level status is controlled by the worst shard status.
 
 One of the main benefits of the API is the ability to wait until the cluster reaches a certain high watermark health level.
-The cluster status is controlled by the worst index status.`,
+The cluster status is controlled by the worst index status.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-health`,
   methods: ['GET'],
   patterns: ['_cluster/health', '_cluster/health/{index}'],
   documentation:
@@ -3501,7 +3619,9 @@ const CLUSTER_INFO_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get cluster info`,
   description: `Get cluster info.
-Returns basic information about the cluster.`,
+Returns basic information about the cluster.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-info`,
   methods: ['GET'],
   patterns: ['_info/{target}'],
   documentation:
@@ -3527,7 +3647,9 @@ Get information about cluster-level changes (such as create index, update mappin
 
 NOTE: This API returns a list of any pending updates to the cluster state.
 These are distinct from the tasks reported by the task management API which include periodic tasks and tasks initiated by the user, such as node stats, search queries, or create index requests.
-However, if a user-initiated task such as a create index command causes a cluster state update, the activity of this task might be reported by both task api and pending cluster tasks API.`,
+However, if a user-initiated task such as a create index command causes a cluster state update, the activity of this task might be reported by both task api and pending cluster tasks API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-pending-tasks`,
   methods: ['GET'],
   patterns: ['_cluster/pending_tasks'],
   documentation:
@@ -3565,7 +3687,9 @@ If the call to \`POST /_cluster/voting_config_exclusions\` fails or returns a re
 In that case, you may safely retry the call.
 
 NOTE: Voting exclusions are required only when you remove at least half of the master-eligible nodes from a cluster in a short time period.
-They are not required when removing master-ineligible nodes or when removing fewer than half of the master-eligible nodes.`,
+They are not required when removing master-ineligible nodes or when removing fewer than half of the master-eligible nodes.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-post-voting-config-exclusions`,
   methods: ['POST'],
   patterns: ['_cluster/voting_config_exclusions'],
   documentation:
@@ -3605,7 +3729,9 @@ You can include comments anywhere in the request body except before the opening 
 **Applying component templates**
 
 You cannot directly apply a component template to a data stream or index.
-To be applied, a component template must be included in an index template's \`composed_of\` list.`,
+To be applied, a component template must be included in an index template's \`composed_of\` list.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template`,
   methods: ['PUT', 'POST'],
   patterns: ['_component_template/{name}'],
   documentation:
@@ -3650,7 +3776,9 @@ Only use \`elasticsearch.yml\` for static cluster settings and node settings.
 The API doesn’t require a restart and ensures a setting’s value is the same on all nodes.
 
 WARNING: Transient cluster settings are no longer recommended. Use persistent cluster settings instead.
-If a cluster becomes unstable, transient settings can clear unexpectedly, resulting in a potentially undesired cluster configuration.`,
+If a cluster becomes unstable, transient settings can clear unexpectedly, resulting in a potentially undesired cluster configuration.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-settings`,
   methods: ['PUT'],
   patterns: ['_cluster/settings'],
   documentation:
@@ -3680,7 +3808,9 @@ The API returns connection and endpoint information keyed by the configured remo
 > This API returns information that reflects current state on the local cluster.
 > The \`connected\` field does not necessarily reflect whether a remote cluster is down or unavailable, only whether there is currently an open connection to it.
 > Elasticsearch does not spontaneously try to reconnect to a disconnected remote cluster.
-> To trigger a reconnection, attempt a cross-cluster search, ES|QL cross-cluster search, or try the [resolve cluster endpoint](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-cluster).`,
+> To trigger a reconnection, attempt a cross-cluster search, ES|QL cross-cluster search, or try the [resolve cluster endpoint](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-cluster).
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-remote-info`,
   methods: ['GET'],
   patterns: ['_remote/info'],
   documentation:
@@ -3714,7 +3844,9 @@ If allocations are disabled then the only allocations that will be performed are
 The cluster will attempt to allocate a shard a maximum of \`index.allocation.max_retries\` times in a row (defaults to \`5\`), before giving up and leaving the shard unallocated.
 This scenario can be caused by structural problems such as having an analyzer which refers to a stopwords file which doesn’t exist on all nodes.
 
-Once the problem has been corrected, allocation can be manually retried by calling the reroute API with the \`?retry_failed\` URI query parameter, which will attempt a single retry round for these shards.`,
+Once the problem has been corrected, allocation can be manually retried by calling the reroute API with the \`?retry_failed\` URI query parameter, which will attempt a single retry round for these shards.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-reroute`,
   methods: ['POST'],
   patterns: ['_cluster/reroute'],
   documentation:
@@ -3753,7 +3885,9 @@ If you use this API repeatedly, your cluster may become unstable.
 WARNING: The response is a representation of an internal data structure.
 Its format is not subject to the same compatibility guarantees as other more stable APIs and may change from version to version.
 Do not query this API using external monitoring tools.
-Instead, obtain the information you require using other more stable cluster APIs.`,
+Instead, obtain the information you require using other more stable cluster APIs.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-state`,
   methods: ['GET'],
   patterns: ['_cluster/state', '_cluster/state/{metric}', '_cluster/state/{metric}/{index}'],
   documentation:
@@ -3790,7 +3924,9 @@ const CLUSTER_STATS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get cluster statistics`,
   description: `Get cluster statistics.
-Get basic index metrics (shard numbers, store size, memory usage) and information about the current nodes that form the cluster (number, roles, os, jvm versions, memory usage, cpu and installed plugins).`,
+Get basic index metrics (shard numbers, store size, memory usage) and information about the current nodes that form the cluster (number, roles, os, jvm versions, memory usage, cpu and installed plugins).
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-stats`,
   methods: ['GET'],
   patterns: ['_cluster/stats', '_cluster/stats/nodes/{node_id}'],
   documentation:
@@ -3816,7 +3952,9 @@ const CONNECTOR_CHECK_IN_CONTRACT: InternalConnectorContract = {
   summary: `Check in a connector`,
   description: `Check in a connector.
 
-Update the \`last_seen\` field in the connector and set it to the current timestamp.`,
+Update the \`last_seen\` field in the connector and set it to the current timestamp.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-check-in`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_check_in'],
   documentation:
@@ -3842,7 +3980,9 @@ const CONNECTOR_DELETE_CONTRACT: InternalConnectorContract = {
 Removes a connector and associated sync jobs.
 This is a destructive action that is not recoverable.
 NOTE: This action doesn’t delete any API keys, ingest pipelines, or data indices associated with the connector.
-These need to be removed manually.`,
+These need to be removed manually.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-delete`,
   methods: ['DELETE'],
   patterns: ['_connector/{connector_id}'],
   documentation:
@@ -3865,7 +4005,9 @@ const CONNECTOR_GET_CONTRACT: InternalConnectorContract = {
   summary: `Get a connector`,
   description: `Get a connector.
 
-Get the details about a connector.`,
+Get the details about a connector.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-get`,
   methods: ['GET'],
   patterns: ['_connector/{connector_id}'],
   documentation:
@@ -3889,7 +4031,9 @@ const CONNECTOR_LAST_SYNC_CONTRACT: InternalConnectorContract = {
   description: `Update the connector last sync stats.
 
 Update the fields related to the last sync of a connector.
-This action is used for analytics and monitoring.`,
+This action is used for analytics and monitoring.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-last-sync`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_last_sync'],
   documentation:
@@ -3908,7 +4052,9 @@ const CONNECTOR_LIST_CONTRACT: InternalConnectorContract = {
   summary: `Get all connectors`,
   description: `Get all connectors.
 
-Get information about all connectors.`,
+Get information about all connectors.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-list`,
   methods: ['GET'],
   patterns: ['_connector'],
   documentation:
@@ -3941,7 +4087,9 @@ const CONNECTOR_POST_CONTRACT: InternalConnectorContract = {
 
 Connectors are Elasticsearch integrations that bring content from third-party data sources, which can be deployed on Elastic Cloud or hosted on your own infrastructure.
 Elastic managed connectors (Native connectors) are a managed service on Elastic Cloud.
-Self-managed connectors (Connector clients) are self-managed on your infrastructure.`,
+Self-managed connectors (Connector clients) are self-managed on your infrastructure.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-put`,
   methods: ['POST'],
   patterns: ['_connector'],
   documentation:
@@ -3962,7 +4110,9 @@ const CONNECTOR_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.put',
   isInternal: true,
   summary: `Create or update a connector`,
-  description: `Create or update a connector.`,
+  description: `Create or update a connector.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-put`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}', '_connector'],
   documentation:
@@ -3986,7 +4136,9 @@ const CONNECTOR_SECRET_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_delete',
   isInternal: true,
   summary: ``,
-  description: `Deletes a connector secret`,
+  description: `Deletes a connector secret
+
+ Documentation: null`,
   methods: ['DELETE'],
   patterns: ['_connector/_secret/{id}'],
   documentation: 'null',
@@ -4002,7 +4154,9 @@ const CONNECTOR_SECRET_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_get',
   isInternal: true,
   summary: ``,
-  description: `Retrieves a secret stored by Connectors`,
+  description: `Retrieves a secret stored by Connectors
+
+ Documentation: null`,
   methods: ['GET'],
   patterns: ['_connector/_secret/{id}'],
   documentation: 'null',
@@ -4018,7 +4172,9 @@ const CONNECTOR_SECRET_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_post',
   isInternal: true,
   summary: ``,
-  description: `Creates a secret for a Connector`,
+  description: `Creates a secret for a Connector
+
+ Documentation: null`,
   methods: ['POST'],
   patterns: ['_connector/_secret'],
   documentation: 'null',
@@ -4034,7 +4190,9 @@ const CONNECTOR_SECRET_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_put',
   isInternal: true,
   summary: ``,
-  description: `Creates or updates a secret for a Connector`,
+  description: `Creates or updates a secret for a Connector
+
+ Documentation: null`,
   methods: ['PUT'],
   patterns: ['_connector/_secret/{id}'],
   documentation: 'null',
@@ -4053,7 +4211,9 @@ const CONNECTOR_SYNC_JOB_CANCEL_CONTRACT: InternalConnectorContract = {
   description: `Cancel a connector sync job.
 
 Cancel a connector sync job, which sets the status to cancelling and updates \`cancellation_requested_at\` to the current time.
-The connector service is then responsible for setting the status of connector sync jobs to cancelled.`,
+The connector service is then responsible for setting the status of connector sync jobs to cancelled.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-cancel`,
   methods: ['PUT'],
   patterns: ['_connector/_sync_job/{connector_sync_job_id}/_cancel'],
   documentation:
@@ -4078,7 +4238,9 @@ const CONNECTOR_SYNC_JOB_CHECK_IN_CONTRACT: InternalConnectorContract = {
 Check in a connector sync job and set the \`last_seen\` field to the current time before updating it in the internal index.
 
 To sync data using self-managed connectors, you need to deploy the Elastic connector service on your own infrastructure.
-This service runs automatically on Elastic Cloud for Elastic managed connectors.`,
+This service runs automatically on Elastic Cloud for Elastic managed connectors.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-check-in`,
   methods: ['PUT'],
   patterns: ['_connector/_sync_job/{connector_sync_job_id}/_check_in'],
   documentation:
@@ -4107,7 +4269,9 @@ This API is not intended for direct connector management by users.
 It supports the implementation of services that utilize the connector protocol to communicate with Elasticsearch.
 
 To sync data using self-managed connectors, you need to deploy the Elastic connector service on your own infrastructure.
-This service runs automatically on Elastic Cloud for Elastic managed connectors.`,
+This service runs automatically on Elastic Cloud for Elastic managed connectors.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-claim`,
   methods: ['PUT'],
   patterns: ['_connector/_sync_job/{connector_sync_job_id}/_claim'],
   documentation:
@@ -4131,7 +4295,9 @@ const CONNECTOR_SYNC_JOB_DELETE_CONTRACT: InternalConnectorContract = {
   description: `Delete a connector sync job.
 
 Remove a connector sync job and its associated data.
-This is a destructive action that is not recoverable.`,
+This is a destructive action that is not recoverable.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-delete`,
   methods: ['DELETE'],
   patterns: ['_connector/_sync_job/{connector_sync_job_id}'],
   documentation:
@@ -4156,7 +4322,9 @@ const CONNECTOR_SYNC_JOB_ERROR_CONTRACT: InternalConnectorContract = {
 Set the \`error\` field for a connector sync job and set its \`status\` to \`error\`.
 
 To sync data using self-managed connectors, you need to deploy the Elastic connector service on your own infrastructure.
-This service runs automatically on Elastic Cloud for Elastic managed connectors.`,
+This service runs automatically on Elastic Cloud for Elastic managed connectors.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-error`,
   methods: ['PUT'],
   patterns: ['_connector/_sync_job/{connector_sync_job_id}/_error'],
   documentation:
@@ -4177,7 +4345,9 @@ const CONNECTOR_SYNC_JOB_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_get',
   isInternal: true,
   summary: `Get a connector sync job`,
-  description: `Get a connector sync job.`,
+  description: `Get a connector sync job.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-get`,
   methods: ['GET'],
   patterns: ['_connector/_sync_job/{connector_sync_job_id}'],
   documentation:
@@ -4200,7 +4370,9 @@ const CONNECTOR_SYNC_JOB_LIST_CONTRACT: InternalConnectorContract = {
   summary: `Get all connector sync jobs`,
   description: `Get all connector sync jobs.
 
-Get information about all stored connector sync jobs listed by their creation date in ascending order.`,
+Get information about all stored connector sync jobs listed by their creation date in ascending order.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-list`,
   methods: ['GET'],
   patterns: ['_connector/_sync_job'],
   documentation:
@@ -4223,7 +4395,9 @@ const CONNECTOR_SYNC_JOB_POST_CONTRACT: InternalConnectorContract = {
   summary: `Create a connector sync job`,
   description: `Create a connector sync job.
 
-Create a connector sync job document in the internal index and initialize its counters and timestamps with default values.`,
+Create a connector sync job document in the internal index and initialize its counters and timestamps with default values.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-post`,
   methods: ['POST'],
   patterns: ['_connector/_sync_job'],
   documentation:
@@ -4250,7 +4424,9 @@ You can also update \`last_seen\`.
 This API is mainly used by the connector service for updating sync job information.
 
 To sync data using self-managed connectors, you need to deploy the Elastic connector service on your own infrastructure.
-This service runs automatically on Elastic Cloud for Elastic managed connectors.`,
+This service runs automatically on Elastic Cloud for Elastic managed connectors.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-update-stats`,
   methods: ['PUT'],
   patterns: ['_connector/_sync_job/{connector_sync_job_id}/_stats'],
   documentation:
@@ -4280,7 +4456,9 @@ const CONNECTOR_UPDATE_ACTIVE_FILTERING_CONTRACT: InternalConnectorContract = {
   summary: `Activate the connector draft filter`,
   description: `Activate the connector draft filter.
 
-Activates the valid draft filtering for a connector.`,
+Activates the valid draft filtering for a connector.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-filtering`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_filtering/_activate'],
   documentation:
@@ -4306,7 +4484,9 @@ const CONNECTOR_UPDATE_API_KEY_ID_CONTRACT: InternalConnectorContract = {
 Update the \`api_key_id\` and \`api_key_secret_id\` fields of a connector.
 You can specify the ID of the API key used for authorization and the ID of the connector secret where the API key is stored.
 The connector secret ID is required only for Elastic managed (native) connectors.
-Self-managed connectors (connector clients) do not use this field.`,
+Self-managed connectors (connector clients) do not use this field.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-api-key-id`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_api_key_id'],
   documentation:
@@ -4329,7 +4509,9 @@ const CONNECTOR_UPDATE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   summary: `Update the connector configuration`,
   description: `Update the connector configuration.
 
-Update the configuration field in the connector document.`,
+Update the configuration field in the connector document.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-configuration`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_configuration'],
   documentation:
@@ -4354,7 +4536,9 @@ const CONNECTOR_UPDATE_ERROR_CONTRACT: InternalConnectorContract = {
 
 Set the error field for the connector.
 If the error provided in the request body is non-null, the connector’s status is updated to error.
-Otherwise, if the error is reset to null, the connector status is updated to connected.`,
+Otherwise, if the error is reset to null, the connector status is updated to connected.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-error`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_error'],
   documentation:
@@ -4388,7 +4572,9 @@ Normally, the running connector service automatically manages these features.
 However, you can use this API to override the default behavior.
 
 To sync data using self-managed connectors, you need to deploy the Elastic connector service on your own infrastructure.
-This service runs automatically on Elastic Cloud for Elastic managed connectors.`,
+This service runs automatically on Elastic Cloud for Elastic managed connectors.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-features`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_features'],
   documentation:
@@ -4413,7 +4599,9 @@ const CONNECTOR_UPDATE_FILTERING_CONTRACT: InternalConnectorContract = {
 
 Update the draft filtering configuration of a connector and marks the draft validation state as edited.
 The filtering draft is activated once validated by the running Elastic connector service.
-The filtering property is used to configure sync rules (both basic and advanced) for a connector.`,
+The filtering property is used to configure sync rules (both basic and advanced) for a connector.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-filtering`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_filtering'],
   documentation:
@@ -4436,7 +4624,9 @@ const CONNECTOR_UPDATE_FILTERING_VALIDATION_CONTRACT: InternalConnectorContract 
   summary: `Update the connector draft filtering validation`,
   description: `Update the connector draft filtering validation.
 
-Update the draft filtering validation info for a connector.`,
+Update the draft filtering validation info for a connector.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-filtering-validation`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_filtering/_validation'],
   documentation:
@@ -4459,7 +4649,9 @@ const CONNECTOR_UPDATE_INDEX_NAME_CONTRACT: InternalConnectorContract = {
   summary: `Update the connector index name`,
   description: `Update the connector index name.
 
-Update the \`index_name\` field of a connector, specifying the index where the data ingested by the connector is stored.`,
+Update the \`index_name\` field of a connector, specifying the index where the data ingested by the connector is stored.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-index-name`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_index_name'],
   documentation:
@@ -4480,7 +4672,9 @@ const CONNECTOR_UPDATE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_name',
   isInternal: true,
   summary: `Update the connector name and description`,
-  description: `Update the connector name and description.`,
+  description: `Update the connector name and description.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-name`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_name'],
   documentation:
@@ -4501,7 +4695,9 @@ const CONNECTOR_UPDATE_NATIVE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_native',
   isInternal: true,
   summary: `Update the connector is_native flag`,
-  description: `Update the connector is_native flag.`,
+  description: `Update the connector is_native flag.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-native`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_native'],
   documentation:
@@ -4524,7 +4720,9 @@ const CONNECTOR_UPDATE_PIPELINE_CONTRACT: InternalConnectorContract = {
   summary: `Update the connector pipeline`,
   description: `Update the connector pipeline.
 
-When you create a new connector, the configuration of an ingest pipeline is populated with default settings.`,
+When you create a new connector, the configuration of an ingest pipeline is populated with default settings.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-pipeline`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_pipeline'],
   documentation:
@@ -4545,7 +4743,9 @@ const CONNECTOR_UPDATE_SCHEDULING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_scheduling',
   isInternal: true,
   summary: `Update the connector scheduling`,
-  description: `Update the connector scheduling.`,
+  description: `Update the connector scheduling.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-scheduling`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_scheduling'],
   documentation:
@@ -4566,7 +4766,9 @@ const CONNECTOR_UPDATE_SERVICE_TYPE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_service_type',
   isInternal: true,
   summary: `Update the connector service type`,
-  description: `Update the connector service type.`,
+  description: `Update the connector service type.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-service-type`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_service_type'],
   documentation:
@@ -4587,7 +4789,9 @@ const CONNECTOR_UPDATE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_status',
   isInternal: true,
   summary: `Update the connector status`,
-  description: `Update the connector status.`,
+  description: `Update the connector status.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-status`,
   methods: ['PUT'],
   patterns: ['_connector/{connector_id}/_status'],
   documentation:
@@ -4618,7 +4822,9 @@ The count API supports multi-target syntax. You can run a single count API searc
 
 The operation is broadcast across all shards.
 For each shard ID group, a replica is chosen and the search is run against it.
-This means that replicas increase the scalability of the count.`,
+This means that replicas increase the scalability of the count.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-count`,
   methods: ['POST', 'GET'],
   patterns: ['_count', '{index}/_count'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-count',
@@ -4733,7 +4939,9 @@ The operation will timeout unless a new node is brought up in the cluster to hos
 
 It is important to note that this setting greatly reduces the chances of the write operation not writing to the requisite number of shard copies, but it does not completely eliminate the possibility, because this check occurs before the write operation starts.
 After the write operation is underway, it is still possible for replication to fail on any number of shard copies but still succeed on the primary.
-The \`_shards\` section of the API response reveals the number of shard copies on which replication succeeded and failed.`,
+The \`_shards\` section of the API response reveals the number of shard copies on which replication succeeded and failed.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create`,
   methods: ['PUT', 'POST'],
   patterns: ['{index}/_create/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create',
@@ -4769,7 +4977,9 @@ const DANGLING_INDICES_DELETE_DANGLING_INDEX_CONTRACT: InternalConnectorContract
   summary: `Delete a dangling index`,
   description: `Delete a dangling index.
 If Elasticsearch encounters index data that is absent from the current cluster state, those indices are considered to be dangling.
-For example, this can happen if you delete more than \`cluster.indices.tombstones.size\` indices while an Elasticsearch node is offline.`,
+For example, this can happen if you delete more than \`cluster.indices.tombstones.size\` indices while an Elasticsearch node is offline.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-delete-dangling-index`,
   methods: ['DELETE'],
   patterns: ['_dangling/{index_uuid}'],
   documentation:
@@ -4793,7 +5003,9 @@ const DANGLING_INDICES_IMPORT_DANGLING_INDEX_CONTRACT: InternalConnectorContract
   description: `Import a dangling index.
 
 If Elasticsearch encounters index data that is absent from the current cluster state, those indices are considered to be dangling.
-For example, this can happen if you delete more than \`cluster.indices.tombstones.size\` indices while an Elasticsearch node is offline.`,
+For example, this can happen if you delete more than \`cluster.indices.tombstones.size\` indices while an Elasticsearch node is offline.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-import-dangling-index`,
   methods: ['POST'],
   patterns: ['_dangling/{index_uuid}'],
   documentation:
@@ -4819,7 +5031,9 @@ const DANGLING_INDICES_LIST_DANGLING_INDICES_CONTRACT: InternalConnectorContract
 If Elasticsearch encounters index data that is absent from the current cluster state, those indices are considered to be dangling.
 For example, this can happen if you delete more than \`cluster.indices.tombstones.size\` indices while an Elasticsearch node is offline.
 
-Use this API to list dangling indices, which you can then import or delete.`,
+Use this API to list dangling indices, which you can then import or delete.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-list-dangling-indices`,
   methods: ['GET'],
   patterns: ['_dangling'],
   documentation:
@@ -4878,7 +5092,9 @@ The document is not deleted if the correct routing is not specified.
 **Distributed**
 
 The delete operation gets hashed into a specific shard ID.
-It then gets redirected into the primary shard within that ID group and replicated (if needed) to shard replicas within that ID group.`,
+It then gets redirected into the primary shard within that ID group and replicated (if needed) to shard replicas within that ID group.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete`,
   methods: ['DELETE'],
   patterns: ['{index}/_doc/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete',
@@ -4986,7 +5202,9 @@ POST _tasks/r1A2WoRbTwKZ516z6NEs5A:36619/_cancel
 The task ID can be found by using the get tasks API.
 
 Cancellation should happen quickly but might take a few seconds.
-The get task status API will continue to list the delete by query task until this task checks that it has been cancelled and terminates itself.`,
+The get task status API will continue to list the delete by query task until this task checks that it has been cancelled and terminates itself.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-by-query`,
   methods: ['POST'],
   patterns: ['{index}/_delete_by_query'],
   documentation:
@@ -5040,7 +5258,9 @@ const DELETE_BY_QUERY_RETHROTTLE_CONTRACT: InternalConnectorContract = {
   description: `Throttle a delete by query operation.
 
 Change the number of requests per second for a particular delete by query operation.
-Rethrottling that speeds up the query takes effect immediately but rethrotting that slows down the query takes effect after completing the current batch to prevent scroll timeouts.`,
+Rethrottling that speeds up the query takes effect immediately but rethrotting that slows down the query takes effect after completing the current batch to prevent scroll timeouts.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-by-query-rethrottle`,
   methods: ['POST'],
   patterns: ['_delete_by_query/{task_id}/_rethrottle'],
   documentation:
@@ -5062,7 +5282,9 @@ const DELETE_SCRIPT_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete a script or search template`,
   description: `Delete a script or search template.
-Deletes a stored script or search template.`,
+Deletes a stored script or search template.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-script`,
   methods: ['DELETE'],
   patterns: ['_scripts/{id}'],
   documentation:
@@ -5084,7 +5306,9 @@ const ENRICH_DELETE_POLICY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete an enrich policy`,
   description: `Delete an enrich policy.
-Deletes an existing enrich policy and its enrich index.`,
+Deletes an existing enrich policy and its enrich index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-delete-policy`,
   methods: ['DELETE'],
   patterns: ['_enrich/policy/{name}'],
   documentation:
@@ -5106,7 +5330,9 @@ const ENRICH_EXECUTE_POLICY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Run an enrich policy`,
   description: `Run an enrich policy.
-Create the enrich index for an existing enrich policy.`,
+Create the enrich index for an existing enrich policy.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-execute-policy`,
   methods: ['PUT'],
   patterns: ['_enrich/policy/{name}/_execute'],
   documentation:
@@ -5128,7 +5354,9 @@ const ENRICH_GET_POLICY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get an enrich policy`,
   description: `Get an enrich policy.
-Returns information about an enrich policy.`,
+Returns information about an enrich policy.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-get-policy`,
   methods: ['GET'],
   patterns: ['_enrich/policy/{name}', '_enrich/policy'],
   documentation:
@@ -5153,7 +5381,9 @@ const ENRICH_PUT_POLICY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Create an enrich policy`,
   description: `Create an enrich policy.
-Creates an enrich policy.`,
+Creates an enrich policy.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-put-policy`,
   methods: ['PUT'],
   patterns: ['_enrich/policy/{name}'],
   documentation:
@@ -5175,7 +5405,9 @@ const ENRICH_STATS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get enrich stats`,
   description: `Get enrich stats.
-Returns enrich coordinator statistics and information about enrich policies that are currently executing.`,
+Returns enrich coordinator statistics and information about enrich policies that are currently executing.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-stats`,
   methods: ['GET'],
   patterns: ['_enrich/_stats'],
   documentation:
@@ -5198,7 +5430,9 @@ const EQL_DELETE_CONTRACT: InternalConnectorContract = {
   summary: `Delete an async EQL search`,
   description: `Delete an async EQL search.
 Delete an async EQL search or a stored synchronous EQL search.
-The API also deletes results for the search.`,
+The API also deletes results for the search.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-delete`,
   methods: ['DELETE'],
   patterns: ['_eql/search/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-delete',
@@ -5219,7 +5453,9 @@ const EQL_GET_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get async EQL search results`,
   description: `Get async EQL search results.
-Get the current status and available results for an async EQL search or a stored synchronous EQL search.`,
+Get the current status and available results for an async EQL search or a stored synchronous EQL search.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-get`,
   methods: ['GET'],
   patterns: ['_eql/search/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-get',
@@ -5240,7 +5476,9 @@ const EQL_GET_STATUS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get the async EQL status`,
   description: `Get the async EQL status.
-Get the current status for an async EQL search or a stored synchronous EQL search without returning results.`,
+Get the current status for an async EQL search or a stored synchronous EQL search without returning results.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-get-status`,
   methods: ['GET'],
   patterns: ['_eql/search/status/{id}'],
   documentation:
@@ -5263,7 +5501,9 @@ const EQL_SEARCH_CONTRACT: InternalConnectorContract = {
   summary: `Get EQL search results`,
   description: `Get EQL search results.
 Returns search results for an Event Query Language (EQL) query.
-EQL assumes each document in a data stream or index corresponds to an event.`,
+EQL assumes each document in a data stream or index corresponds to an event.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-search`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_eql/search'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-search',
@@ -5317,7 +5557,9 @@ const ESQL_ASYNC_QUERY_CONTRACT: InternalConnectorContract = {
   description: `Run an async ES|QL query.
 Asynchronously run an ES|QL (Elasticsearch query language) query, monitor its progress, and retrieve results when they become available.
 
-The API accepts the same parameters and request body as the synchronous query API, along with additional async related properties.`,
+The API accepts the same parameters and request body as the synchronous query API, along with additional async related properties.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query`,
   methods: ['POST'],
   patterns: ['_query/async'],
   documentation:
@@ -5358,7 +5600,9 @@ Otherwise, the stored results are deleted.
 If the Elasticsearch security features are enabled, only the following users can use this API to delete a query:
 
 * The authenticated user that submitted the original query request
-* Users with the \`cancel_task\` cluster privilege`,
+* Users with the \`cancel_task\` cluster privilege
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-delete`,
   methods: ['DELETE'],
   patterns: ['_query/async/{id}'],
   documentation:
@@ -5381,7 +5625,9 @@ const ESQL_ASYNC_QUERY_GET_CONTRACT: InternalConnectorContract = {
   summary: `Get async ES|QL query results`,
   description: `Get async ES|QL query results.
 Get the current status and available results or stored results for an ES|QL asynchronous query.
-If the Elasticsearch security features are enabled, only the user who first submitted the ES|QL query can retrieve the results using this API.`,
+If the Elasticsearch security features are enabled, only the user who first submitted the ES|QL query can retrieve the results using this API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-get`,
   methods: ['GET'],
   patterns: ['_query/async/{id}'],
   documentation:
@@ -5405,7 +5651,9 @@ const ESQL_ASYNC_QUERY_STOP_CONTRACT: InternalConnectorContract = {
   description: `Stop async ES|QL query.
 
 This API interrupts the query execution and returns the results so far.
-If the Elasticsearch security features are enabled, only the user who first submitted the ES|QL query can stop it.`,
+If the Elasticsearch security features are enabled, only the user who first submitted the ES|QL query can stop it.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-stop`,
   methods: ['POST'],
   patterns: ['_query/async/{id}/stop'],
   documentation:
@@ -5427,7 +5675,9 @@ const ESQL_GET_QUERY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get a specific running ES|QL query information`,
   description: `Get a specific running ES|QL query information.
-Returns an object extended information about a running ES|QL query.`,
+Returns an object extended information about a running ES|QL query.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-get-query`,
   methods: ['GET'],
   patterns: ['_query/queries/{id}'],
   documentation:
@@ -5449,7 +5699,9 @@ const ESQL_LIST_QUERIES_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get running ES|QL queries information`,
   description: `Get running ES|QL queries information.
-Returns an object containing IDs and other information about the running ES|QL queries.`,
+Returns an object containing IDs and other information about the running ES|QL queries.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-list-queries`,
   methods: ['GET'],
   patterns: ['_query/queries'],
   documentation:
@@ -5471,7 +5723,9 @@ const ESQL_QUERY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Run an ES|QL query`,
   description: `Run an ES|QL query.
-Get search results for an ES|QL (Elasticsearch query language) query.`,
+Get search results for an ES|QL (Elasticsearch query language) query.
+
+ Documentation: https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql-rest`,
   methods: ['POST'],
   patterns: ['_query'],
   documentation: 'https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql-rest',
@@ -5519,7 +5773,9 @@ You can use the \`version\` parameter to check the document only if its current 
 
 Internally, Elasticsearch has marked the old document as deleted and added an entirely new document.
 The old version of the document doesn't disappear immediately, although you won't be able to access it.
-Elasticsearch cleans up deleted documents in the background as you continue to index more data.`,
+Elasticsearch cleans up deleted documents in the background as you continue to index more data.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get`,
   methods: ['HEAD'],
   patterns: ['{index}/_doc/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
@@ -5559,7 +5815,9 @@ For example:
 HEAD my-index-000001/_source/1
 \`\`\`
 
-A document's source is not available if it is disabled in the mapping.`,
+A document's source is not available if it is disabled in the mapping.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get`,
   methods: ['HEAD'],
   patterns: ['{index}/_source/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
@@ -5591,7 +5849,9 @@ const EXPLAIN_CONTRACT: InternalConnectorContract = {
   summary: `Explain a document match result`,
   description: `Explain a document match result.
 Get information about why a specific document matches, or doesn't match, a query.
-It computes a score explanation for a query and a specific document.`,
+It computes a score explanation for a query and a specific document.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-explain`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_explain/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-explain',
@@ -5636,7 +5896,9 @@ A feature state includes one or more system indices necessary for a given featur
 In order to ensure data integrity, all system indices that comprise a feature state are snapshotted and restored together.
 
 The features listed by this API are a combination of built-in features and features defined by plugins.
-In order for a feature state to be listed in this API and recognized as a valid feature state by the create snapshot API, the plugin that defines that feature must be installed on the master node.`,
+In order for a feature state to be listed in this API and recognized as a valid feature state by the create snapshot API, the plugin that defines that feature must be installed on the master node.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-features-get-features`,
   methods: ['GET'],
   patterns: ['_features'],
   documentation:
@@ -5673,7 +5935,9 @@ Using this API resets all features, both those that are built-in and implemented
 
 To list the features that will be affected, use the get features API.
 
-IMPORTANT: The features installed on the node you submit this request to are the features that will be reset. Run on the master node if you have any doubts about which plugins are installed on individual nodes.`,
+IMPORTANT: The features installed on the node you submit this request to are the features that will be reset. Run on the master node if you have any doubts about which plugins are installed on individual nodes.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-features-reset-features`,
   methods: ['POST'],
   patterns: ['_features/_reset'],
   documentation:
@@ -5700,7 +5964,9 @@ Get information about the capabilities of fields among multiple indices.
 
 For data streams, the API returns field capabilities among the stream’s backing indices.
 It returns runtime fields like any other field.
-For example, a runtime field with a type of keyword is returned the same as any other field that belongs to the \`keyword\` family.`,
+For example, a runtime field with a type of keyword is returned the same as any other field that belongs to the \`keyword\` family.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-field-caps`,
   methods: ['GET', 'POST'],
   patterns: ['_field_caps', '{index}/_field_caps'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-field-caps',
@@ -5743,7 +6009,9 @@ const FLEET_DELETE_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.delete_secret',
   isInternal: true,
   summary: ``,
-  description: `Deletes a secret stored by Fleet`,
+  description: `Deletes a secret stored by Fleet
+
+ Documentation: null`,
   methods: ['DELETE'],
   patterns: ['_fleet/secret/{id}'],
   documentation: 'null',
@@ -5759,7 +6027,9 @@ const FLEET_GET_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.get_secret',
   isInternal: true,
   summary: ``,
-  description: `Retrieves a secret stored by Fleet`,
+  description: `Retrieves a secret stored by Fleet
+
+ Documentation: null`,
   methods: ['GET'],
   patterns: ['_fleet/secret/{id}'],
   documentation: 'null',
@@ -5778,7 +6048,9 @@ const FLEET_GLOBAL_CHECKPOINTS_CONTRACT: InternalConnectorContract = {
   description: `Get global checkpoints.
 
 Get the current global checkpoints for an index.
-This API is designed for internal use by the Fleet server project.`,
+This API is designed for internal use by the Fleet server project.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-fleet`,
   methods: ['GET'],
   patterns: ['{index}/_fleet/global_checkpoints'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-fleet',
@@ -5801,7 +6073,9 @@ const FLEET_MSEARCH_CONTRACT: InternalConnectorContract = {
   description: `Run multiple Fleet searches.
 Run several Fleet searches with a single API request.
 The API follows the same structure as the multi search API.
-However, similar to the Fleet search API, it supports the \`wait_for_checkpoints\` parameter.`,
+However, similar to the Fleet search API, it supports the \`wait_for_checkpoints\` parameter.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-fleet-msearch`,
   methods: ['GET', 'POST'],
   patterns: ['_fleet/_fleet_msearch', '{index}/_fleet/_fleet_msearch'],
   documentation:
@@ -5850,7 +6124,9 @@ const FLEET_POST_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.post_secret',
   isInternal: true,
   summary: ``,
-  description: `Creates a secret stored by Fleet`,
+  description: `Creates a secret stored by Fleet
+
+ Documentation: null`,
   methods: ['POST'],
   patterns: ['_fleet/secret'],
   documentation: 'null',
@@ -5868,7 +6144,9 @@ const FLEET_SEARCH_CONTRACT: InternalConnectorContract = {
   summary: `Run a Fleet search`,
   description: `Run a Fleet search.
 The purpose of the Fleet search API is to provide an API where the search will be run only
-after the provided checkpoint has been processed and is visible for searches inside of Elasticsearch.`,
+after the provided checkpoint has been processed and is visible for searches inside of Elasticsearch.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-fleet-search`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_fleet/_fleet_search'],
   documentation:
@@ -6025,7 +6303,9 @@ You can use the \`version\` parameter to retrieve the document only if its curre
 
 Internally, Elasticsearch has marked the old document as deleted and added an entirely new document.
 The old version of the document doesn't disappear immediately, although you won't be able to access it.
-Elasticsearch cleans up deleted documents in the background as you continue to index more data.`,
+Elasticsearch cleans up deleted documents in the background as you continue to index more data.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get`,
   methods: ['GET'],
   patterns: ['{index}/_doc/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
@@ -6058,7 +6338,9 @@ const GET_SCRIPT_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get a script or search template`,
   description: `Get a script or search template.
-Retrieves a stored script or search template.`,
+Retrieves a stored script or search template.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script`,
   methods: ['GET'],
   patterns: ['_scripts/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script',
@@ -6080,7 +6362,9 @@ const GET_SCRIPT_CONTEXT_CONTRACT: InternalConnectorContract = {
   summary: `Get script contexts`,
   description: `Get script contexts.
 
-Get a list of supported script contexts and their methods.`,
+Get a list of supported script contexts and their methods.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script-context`,
   methods: ['GET'],
   patterns: ['_script_context'],
   documentation:
@@ -6103,7 +6387,9 @@ const GET_SCRIPT_LANGUAGES_CONTRACT: InternalConnectorContract = {
   summary: `Get script languages`,
   description: `Get script languages.
 
-Get a list of available script types, languages, and contexts.`,
+Get a list of available script types, languages, and contexts.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script-languages`,
   methods: ['GET'],
   patterns: ['_script_language'],
   documentation:
@@ -6137,7 +6423,9 @@ You can use the source filtering parameters to control which parts of the \`_sou
 
 \`\`\`
 GET my-index-000001/_source/1/?_source_includes=*.id&_source_excludes=entities
-\`\`\``,
+\`\`\`
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get`,
   methods: ['GET'],
   patterns: ['{index}/_source/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
@@ -6172,7 +6460,9 @@ Extract and summarize information about the documents and terms in an Elasticsea
 The easiest way to understand the behavior of this API is to use the Graph UI to explore connections.
 An initial request to the \`_explore\` API contains a seed query that identifies the documents of interest and specifies the fields that define the vertices and connections you want to include in the graph.
 Subsequent requests enable you to spider out from one more vertices of interest.
-You can exclude vertices that have already been returned.`,
+You can exclude vertices that have already been returned.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-graph`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_graph/explore'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-graph',
@@ -6212,7 +6502,9 @@ The root cause and remediation steps are encapsulated in a diagnosis.
 A diagnosis contains a cause detailing a root cause analysis, an action containing a brief description of the steps to take to fix the problem, the list of affected resources (if applicable), and a detailed step-by-step troubleshooting guide to fix the diagnosed problem.
 
 NOTE: The health indicators perform root cause analysis of non-green health statuses. This can be computationally expensive when called frequently.
-When setting up automated polling of the API for health status, set verbose to false to disable the more expensive analysis logic.`,
+When setting up automated polling of the API for health status, set verbose to false to disable the more expensive analysis logic.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-health-report`,
   methods: ['GET'],
   patterns: ['_health_report', '_health_report/{feature}'],
   documentation:
@@ -6237,7 +6529,9 @@ const ILM_DELETE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete a lifecycle policy`,
   description: `Delete a lifecycle policy.
-You cannot delete policies that are currently in use. If the policy is being used to manage any indices, the request fails and returns an error.`,
+You cannot delete policies that are currently in use. If the policy is being used to manage any indices, the request fails and returns an error.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-delete-lifecycle`,
   methods: ['DELETE'],
   patterns: ['_ilm/policy/{policy}'],
   documentation:
@@ -6262,7 +6556,9 @@ const ILM_EXPLAIN_LIFECYCLE_CONTRACT: InternalConnectorContract = {
 Get the current lifecycle status for one or more indices.
 For data streams, the API retrieves the current lifecycle status for the stream's backing indices.
 
-The response indicates when the index entered each lifecycle state, provides the definition of the running phase, and information about any failures.`,
+The response indicates when the index entered each lifecycle state, provides the definition of the running phase, and information about any failures.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-explain-lifecycle`,
   methods: ['GET'],
   patterns: ['{index}/_ilm/explain'],
   documentation:
@@ -6283,7 +6579,9 @@ const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.get_lifecycle',
   isInternal: true,
   summary: `Get lifecycle policies`,
-  description: `Get lifecycle policies.`,
+  description: `Get lifecycle policies.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-get-lifecycle`,
   methods: ['GET'],
   patterns: ['_ilm/policy/{policy}', '_ilm/policy'],
   documentation:
@@ -6309,7 +6607,9 @@ const ILM_GET_STATUS_CONTRACT: InternalConnectorContract = {
   summary: `Get the ILM status`,
   description: `Get the ILM status.
 
-Get the current index lifecycle management status.`,
+Get the current index lifecycle management status.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-get-status`,
   methods: ['GET'],
   patterns: ['_ilm/status'],
   documentation:
@@ -6343,7 +6643,9 @@ This API provides an automated way of performing three out of the four manual st
 1. Replace custom allocation settings from existing indices with the corresponding tier preference.
 
 ILM must be stopped before performing the migration.
-Use the stop ILM and get ILM status APIs to wait until the reported operation mode is \`STOPPED\`.`,
+Use the stop ILM and get ILM status APIs to wait until the reported operation mode is \`STOPPED\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-migrate-to-data-tiers`,
   methods: ['POST'],
   patterns: ['_ilm/migrate_to_data_tiers'],
   documentation:
@@ -6377,7 +6679,9 @@ When specifying the target (\`next_step\`) to which the index will be moved, eit
 If only the phase is specified, the index will move to the first step of the first action in the target phase.
 If the phase and action are specified, the index will move to the first step of the specified action in the specified phase.
 Only actions specified in the ILM policy are considered valid.
-An index cannot move to a step that is not part of its policy.`,
+An index cannot move to a step that is not part of its policy.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-move-to-step`,
   methods: ['POST'],
   patterns: ['_ilm/move/{index}'],
   documentation:
@@ -6401,7 +6705,9 @@ const ILM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   description: `Create or update a lifecycle policy.
 If the specified policy exists, it is replaced and the policy version is incremented.
 
-NOTE: Only the latest version of the policy is stored, you cannot revert to previous versions.`,
+NOTE: Only the latest version of the policy is stored, you cannot revert to previous versions.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle`,
   methods: ['PUT'],
   patterns: ['_ilm/policy/{policy}'],
   documentation:
@@ -6424,7 +6730,9 @@ const ILM_REMOVE_POLICY_CONTRACT: InternalConnectorContract = {
   summary: `Remove policies from an index`,
   description: `Remove policies from an index.
 Remove the assigned lifecycle policies from an index or a data stream's backing indices.
-It also stops managing the indices.`,
+It also stops managing the indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-remove-policy`,
   methods: ['POST'],
   patterns: ['{index}/_ilm/remove'],
   documentation:
@@ -6448,7 +6756,9 @@ const ILM_RETRY_CONTRACT: InternalConnectorContract = {
   description: `Retry a policy.
 Retry running the lifecycle policy for an index that is in the ERROR step.
 The API sets the policy back to the step where the error occurred and runs the step.
-Use the explain lifecycle state API to determine whether an index is in the ERROR step.`,
+Use the explain lifecycle state API to determine whether an index is in the ERROR step.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-retry`,
   methods: ['POST'],
   patterns: ['{index}/_ilm/retry'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-retry',
@@ -6471,7 +6781,9 @@ const ILM_START_CONTRACT: InternalConnectorContract = {
   description: `Start the ILM plugin.
 Start the index lifecycle management plugin if it is currently stopped.
 ILM is started automatically when the cluster is formed.
-Restarting ILM is necessary only when it has been stopped using the stop ILM API.`,
+Restarting ILM is necessary only when it has been stopped using the stop ILM API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-start`,
   methods: ['POST'],
   patterns: ['_ilm/start'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-start',
@@ -6496,7 +6808,9 @@ Halt all lifecycle management operations and stop the index lifecycle management
 This is useful when you are performing maintenance on the cluster and need to prevent ILM from performing any actions on your indices.
 
 The API returns as soon as the stop request has been acknowledged, but the plugin might continue to run until in-progress operations complete and the plugin can be safely stopped.
-Use the get ILM status API to check whether ILM is running.`,
+Use the get ILM status API to check whether ILM is running.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-stop`,
   methods: ['POST'],
   patterns: ['_ilm/stop'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-stop',
@@ -6634,7 +6948,9 @@ In this example, the operation will succeed since the supplied version of 2 is h
 If the document was already updated and its version was set to 2 or higher, the indexing command will fail and result in a conflict (409 HTTP status code).
 
 A nice side effect is that there is no need to maintain strict ordering of async indexing operations run as a result of changes to a source database, as long as version numbers from the source database are used.
-Even the simple case of updating the Elasticsearch index using data from a database is simplified if external versioning is used, as only the latest version will be used if the index operations arrive out of order.`,
+Even the simple case of updating the Elasticsearch index using data from a database is simplified if external versioning is used, as only the latest version will be used if the index operations arrive out of order.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create`,
   methods: ['PUT', 'POST'],
   patterns: ['{index}/_doc/{id}', '{index}/_doc'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create',
@@ -6677,7 +6993,9 @@ const INDICES_ADD_BLOCK_CONTRACT: InternalConnectorContract = {
   description: `Add an index block.
 
 Add an index block to an index.
-Index blocks limit the operations allowed on an index by blocking specific operation types.`,
+Index blocks limit the operations allowed on an index by blocking specific operation types.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-add-block`,
   methods: ['PUT'],
   patterns: ['{index}/_block/{block}'],
   documentation:
@@ -6710,7 +7028,9 @@ The analyze API performs analysis on a text string and returns the resulting tok
 Generating excessive amount of tokens may cause a node to run out of memory.
 The \`index.analyze.max_token_count\` setting enables you to limit the number of tokens that can be produced.
 If more than this limit of tokens gets generated, an error occurs.
-The \`_analyze\` endpoint without a specified index will always use \`10000\` as its limit.`,
+The \`_analyze\` endpoint without a specified index will always use \`10000\` as its limit.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-analyze`,
   methods: ['GET', 'POST'],
   patterns: ['_analyze', '{index}/_analyze'],
   documentation:
@@ -6757,7 +7077,9 @@ const INDICES_CANCEL_MIGRATE_REINDEX_CONTRACT: InternalConnectorContract = {
   summary: `Cancel a migration reindex operation`,
   description: `Cancel a migration reindex operation.
 
-Cancel a migration reindex attempt for a data stream or index.`,
+Cancel a migration reindex attempt for a data stream or index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-cancel-migrate-reindex`,
   methods: ['POST'],
   patterns: ['_migration/reindex/{index}/_cancel'],
   documentation:
@@ -6784,7 +7106,9 @@ For data streams, the API clears the caches of the stream's backing indices.
 
 By default, the clear cache API clears all caches.
 To clear only specific caches, use the \`fielddata\`, \`query\`, or \`request\` parameters.
-To clear the cache only of specific fields, use the \`fields\` parameter.`,
+To clear the cache only of specific fields, use the \`fields\` parameter.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-clear-cache`,
   methods: ['POST'],
   patterns: ['_cache/clear', '{index}/_cache/clear'],
   documentation:
@@ -6861,7 +7185,9 @@ At that point, Elasticsearch will try to allocate any replicas and may decide to
 
 **Wait for active shards**
 
-Because the clone operation creates a new index to clone the shards to, the wait for active shards setting on index creation applies to the clone index action as well.`,
+Because the clone operation creates a new index to clone the shards to, the wait for active shards setting on index creation applies to the clone index action as well.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-clone`,
   methods: ['PUT', 'POST'],
   patterns: ['{index}/_clone/{target}'],
   documentation:
@@ -6902,7 +7228,9 @@ By default, you must explicitly name the indices you are opening or closing.
 To open or close indices with \`_all\`, \`*\`, or other wildcard expressions, change the\` action.destructive_requires_name\` setting to \`false\`. This setting can also be changed with the cluster update settings API.
 
 Closed indices consume a significant amount of disk-space which can cause problems in managed environments.
-Closing indices can be turned off with the cluster settings API by setting \`cluster.indices.close.enable\` to \`false\`.`,
+Closing indices can be turned off with the cluster settings API by setting \`cluster.indices.close.enable\` to \`false\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-close`,
   methods: ['POST'],
   patterns: ['{index}/_close'],
   documentation:
@@ -6949,7 +7277,9 @@ If \`acknowledged\` is false, the request timed out before the cluster state was
 If \`shards_acknowledged\` is false, then the request timed out before the requisite number of shards were started (by default just the primaries), even if the cluster state was successfully updated to reflect the newly created index (that is to say, \`acknowledged\` is \`true\`).
 
 You can change the default of only waiting for the primary shards to start through the index setting \`index.write.wait_for_active_shards\`.
-Note that changing this setting will also affect the \`wait_for_active_shards\` value on all subsequent write operations.`,
+Note that changing this setting will also affect the \`wait_for_active_shards\` value on all subsequent write operations.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create`,
   methods: ['PUT'],
   patterns: ['{index}'],
   documentation:
@@ -6972,7 +7302,9 @@ const INDICES_CREATE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   summary: `Create a data stream`,
   description: `Create a data stream.
 
-You must have a matching index template with data stream enabled.`,
+You must have a matching index template with data stream enabled.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create-data-stream`,
   methods: ['PUT'],
   patterns: ['_data_stream/{name}'],
   documentation:
@@ -6995,7 +7327,9 @@ const INDICES_CREATE_FROM_CONTRACT: InternalConnectorContract = {
   summary: `Create an index from a source index`,
   description: `Create an index from a source index.
 
-Copy the mappings and settings from the source index to a destination index while allowing request settings and mappings to override the source values.`,
+Copy the mappings and settings from the source index to a destination index while allowing request settings and mappings to override the source values.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create-from`,
   methods: ['PUT', 'POST'],
   patterns: ['_create_from/{source}/{dest}'],
   documentation:
@@ -7021,7 +7355,9 @@ const INDICES_DATA_STREAMS_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get data stream stats`,
   description: `Get data stream stats.
 
-Get statistics for one or more data streams.`,
+Get statistics for one or more data streams.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-data-streams-stats-1`,
   methods: ['GET'],
   patterns: ['_data_stream/_stats', '_data_stream/{name}/_stats'],
   documentation:
@@ -7054,7 +7390,9 @@ It does not delete related Kibana components, such as data views, visualizations
 
 You cannot delete the current write index of a data stream.
 To delete the index, you must roll over the data stream so a new write index is created.
-You can then use the delete index API to delete the previous write index.`,
+You can then use the delete index API to delete the previous write index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete`,
   methods: ['DELETE'],
   patterns: ['{index}'],
   documentation:
@@ -7082,7 +7420,9 @@ const INDICES_DELETE_ALIAS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete an alias`,
   description: `Delete an alias.
-Removes a data stream or index from an alias.`,
+Removes a data stream or index from an alias.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-alias`,
   methods: ['DELETE'],
   patterns: ['{index}/_alias/{name}', '{index}/_aliases/{name}'],
   documentation:
@@ -7107,7 +7447,9 @@ const INDICES_DELETE_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete data stream lifecycles`,
   description: `Delete data stream lifecycles.
-Removes the data stream lifecycle from a data stream, rendering it not managed by the data stream lifecycle.`,
+Removes the data stream lifecycle from a data stream, rendering it not managed by the data stream lifecycle.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-lifecycle`,
   methods: ['DELETE'],
   patterns: ['_data_stream/{name}/_lifecycle'],
   documentation:
@@ -7129,7 +7471,9 @@ const INDICES_DELETE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete data streams`,
   description: `Delete data streams.
-Deletes one or more data streams and their backing indices.`,
+Deletes one or more data streams and their backing indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-stream`,
   methods: ['DELETE'],
   patterns: ['_data_stream/{name}'],
   documentation:
@@ -7151,7 +7495,9 @@ const INDICES_DELETE_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete data stream options`,
   description: `Delete data stream options.
-Removes the data stream options from a data stream.`,
+Removes the data stream options from a data stream.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-stream-options`,
   methods: ['DELETE'],
   patterns: ['_data_stream/{name}/_options'],
   documentation:
@@ -7175,7 +7521,9 @@ const INDICES_DELETE_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   description: `Delete an index template.
 The provided <index-template> may contain multiple template names separated by a comma. If multiple template
 names are specified then there is no wildcard support and the provided names should match completely with
-existing templates.`,
+existing templates.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-index-template`,
   methods: ['DELETE'],
   patterns: ['_index_template/{name}'],
   documentation:
@@ -7197,7 +7545,9 @@ const INDICES_DELETE_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = 
   isInternal: true,
   summary: ``,
   description: `Delete sampling configuration.
-Delete the sampling configuration for the specified index.`,
+Delete the sampling configuration for the specified index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
   methods: ['DELETE'],
   patterns: ['{index}/_sample/config'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
@@ -7214,7 +7564,9 @@ const INDICES_DELETE_TEMPLATE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete a legacy index template`,
   description: `Delete a legacy index template.
-IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.`,
+IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-template`,
   methods: ['DELETE'],
   patterns: ['_template/{name}'],
   documentation:
@@ -7244,7 +7596,9 @@ NOTE: The total size of fields of the analyzed shards of the index in the respon
 Since stored fields are stored together in a compressed format, the sizes of stored fields are also estimates and can be inaccurate.
 The stored size of the \`_id\` field is likely underestimated while the \`_source\` field is overestimated.
 
-For usage examples see the External documentation or refer to [Analyze the index disk usage example](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/index-disk-usage) for an example.`,
+For usage examples see the External documentation or refer to [Analyze the index disk usage example](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/index-disk-usage) for an example.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-disk-usage`,
   methods: ['POST'],
   patterns: ['{index}/_disk_usage'],
   documentation:
@@ -7283,7 +7637,9 @@ All documents within an hour interval are summarized and stored as a single docu
 
 NOTE: Only indices in a time series data stream are supported.
 Neither field nor document level security can be defined on the source index.
-The source index must be read-only (\`index.blocks.write: true\`).`,
+The source index must be read-only (\`index.blocks.write: true\`).
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-downsample`,
   methods: ['POST'],
   patterns: ['{index}/_downsample/{target_index}'],
   documentation:
@@ -7305,7 +7661,9 @@ const INDICES_EXISTS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Check indices`,
   description: `Check indices.
-Check if one or more indices, index aliases, or data streams exist.`,
+Check if one or more indices, index aliases, or data streams exist.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists`,
   methods: ['HEAD'],
   patterns: ['{index}'],
   documentation:
@@ -7335,7 +7693,9 @@ const INDICES_EXISTS_ALIAS_CONTRACT: InternalConnectorContract = {
   summary: `Check aliases`,
   description: `Check aliases.
 
-Check if one or more data stream or index aliases exist.`,
+Check if one or more data stream or index aliases exist.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-alias`,
   methods: ['HEAD'],
   patterns: ['_alias/{name}', '{index}/_alias/{name}'],
   documentation:
@@ -7361,7 +7721,9 @@ const INDICES_EXISTS_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   summary: `Check index templates`,
   description: `Check index templates.
 
-Check whether index templates exist.`,
+Check whether index templates exist.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-index-template`,
   methods: ['HEAD'],
   patterns: ['_index_template/{name}'],
   documentation:
@@ -7386,7 +7748,9 @@ const INDICES_EXISTS_TEMPLATE_CONTRACT: InternalConnectorContract = {
 Get information about whether index templates exist.
 Index templates define settings, mappings, and aliases that can be applied automatically to new indices.
 
-IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.`,
+IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-template`,
   methods: ['HEAD'],
   patterns: ['_template/{name}'],
   documentation:
@@ -7408,7 +7772,9 @@ const INDICES_EXPLAIN_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get the status for a data stream lifecycle`,
   description: `Get the status for a data stream lifecycle.
-Get information about an index or data stream's current data stream lifecycle status, such as time since index creation, time since rollover, the lifecycle configuration managing the index, or any errors encountered during lifecycle execution.`,
+Get information about an index or data stream's current data stream lifecycle status, such as time since index creation, time since rollover, the lifecycle configuration managing the index, or any errors encountered during lifecycle execution.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-explain-data-lifecycle`,
   methods: ['GET'],
   patterns: ['{index}/_lifecycle/explain'],
   documentation:
@@ -7435,7 +7801,9 @@ Field usage statistics are automatically captured when queries are running on a 
 A shard-level search request that accesses a given field, even if multiple times during that request, is counted as a single use.
 
 The response body reports the per-shard usage count of the data structures that back the fields in the index.
-A given request will increment each count by a maximum value of 1, even if the request accesses the same field multiple times.`,
+A given request will increment each count by a maximum value of 1, even if the request accesses the same field multiple times.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-field-usage-stats`,
   methods: ['GET'],
   patterns: ['{index}/_field_usage_stats'],
   documentation:
@@ -7466,7 +7834,9 @@ This may mean that there is no need to maintain an additional copy of it in the 
 The transaction log is made up of multiple files, called generations, and Elasticsearch will delete any generation files when they are no longer needed, freeing up disk space.
 
 It is also possible to trigger a flush on one or more indices using the flush API, although it is rare for users to need to call this API directly.
-If you call the flush API after indexing some documents then a successful response indicates that Elasticsearch has flushed all the documents that were indexed before the flush API was called.`,
+If you call the flush API after indexing some documents then a successful response indicates that Elasticsearch has flushed all the documents that were indexed before the flush API was called.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-flush`,
   methods: ['POST', 'GET'],
   patterns: ['_flush', '{index}/_flush'],
   documentation:
@@ -7559,7 +7929,9 @@ For example:
 
 \`\`\`
 POST /.ds-my-data-stream-2099.03.07-000001/_forcemerge?max_num_segments=1
-\`\`\``,
+\`\`\`
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-forcemerge`,
   methods: ['POST'],
   patterns: ['_forcemerge', '{index}/_forcemerge'],
   documentation:
@@ -7593,7 +7965,9 @@ const INDICES_GET_CONTRACT: InternalConnectorContract = {
   summary: `Get index information`,
   description: `Get index information.
 Get information about one or more indices. For data streams, the API returns information about the
-stream’s backing indices.`,
+stream’s backing indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get`,
   methods: ['GET'],
   patterns: ['{index}'],
   documentation:
@@ -7624,7 +7998,9 @@ const INDICES_GET_ALIAS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get aliases`,
   description: `Get aliases.
-Retrieves information for one or more data stream or index aliases.`,
+Retrieves information for one or more data stream or index aliases.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-alias`,
   methods: ['GET'],
   patterns: ['_alias', '_alias/{name}', '{index}/_alias/{name}', '{index}/_alias'],
   documentation:
@@ -7660,7 +8036,9 @@ const INDICES_GET_ALL_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract =
   isInternal: true,
   summary: ``,
   description: `Get all sampling configurations.
-Get the sampling configurations for all indices.`,
+Get the sampling configurations for all indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
   methods: ['GET'],
   patterns: ['_sample/config'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
@@ -7678,7 +8056,9 @@ const INDICES_GET_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   summary: `Get data stream lifecycles`,
   description: `Get data stream lifecycles.
 
-Get the data stream lifecycle configuration of one or more data streams.`,
+Get the data stream lifecycle configuration of one or more data streams.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-lifecycle`,
   methods: ['GET'],
   patterns: ['_data_stream/{name}/_lifecycle'],
   documentation:
@@ -7700,7 +8080,9 @@ const INDICES_GET_DATA_LIFECYCLE_STATS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get data stream lifecycle stats`,
   description: `Get data stream lifecycle stats.
-Get statistics about the data streams that are managed by a data stream lifecycle.`,
+Get statistics about the data streams that are managed by a data stream lifecycle.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-lifecycle-stats`,
   methods: ['GET'],
   patterns: ['_lifecycle/stats'],
   documentation:
@@ -7723,7 +8105,9 @@ const INDICES_GET_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   summary: `Get data streams`,
   description: `Get data streams.
 
-Get information about one or more data streams.`,
+Get information about one or more data streams.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream`,
   methods: ['GET'],
   patterns: ['_data_stream', '_data_stream/{name}'],
   documentation:
@@ -7749,7 +8133,9 @@ const INDICES_GET_DATA_STREAM_MAPPINGS_CONTRACT: InternalConnectorContract = {
   summary: `Get data stream mappings`,
   description: `Get data stream mappings.
 
-Get mapping information for one or more data streams.`,
+Get mapping information for one or more data streams.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream-mappings`,
   methods: ['GET'],
   patterns: ['_data_stream/{name}/_mappings'],
   documentation:
@@ -7772,7 +8158,9 @@ const INDICES_GET_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   summary: `Get data stream options`,
   description: `Get data stream options.
 
-Get the data stream options configuration of one or more data streams.`,
+Get the data stream options configuration of one or more data streams.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream-options`,
   methods: ['GET'],
   patterns: ['_data_stream/{name}/_options'],
   documentation:
@@ -7795,7 +8183,9 @@ const INDICES_GET_DATA_STREAM_SETTINGS_CONTRACT: InternalConnectorContract = {
   summary: `Get data stream settings`,
   description: `Get data stream settings.
 
-Get setting information for one or more data streams.`,
+Get setting information for one or more data streams.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream-settings`,
   methods: ['GET'],
   patterns: ['_data_stream/{name}/_settings'],
   documentation:
@@ -7820,7 +8210,9 @@ const INDICES_GET_FIELD_MAPPING_CONTRACT: InternalConnectorContract = {
 Retrieves mapping definitions for one or more fields.
 For data streams, the API retrieves field mappings for the stream’s backing indices.
 
-This API is useful if you don't need a complete mapping or if an index mapping contains a large number of fields.`,
+This API is useful if you don't need a complete mapping or if an index mapping contains a large number of fields.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-mapping`,
   methods: ['GET'],
   patterns: ['_mapping/field/{fields}', '{index}/_mapping/field/{fields}'],
   documentation:
@@ -7845,7 +8237,9 @@ const INDICES_GET_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get index templates`,
   description: `Get index templates.
-Get information about one or more index templates.`,
+Get information about one or more index templates.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-index-template`,
   methods: ['GET'],
   patterns: ['_index_template', '_index_template/{name}'],
   documentation:
@@ -7873,7 +8267,9 @@ const INDICES_GET_MAPPING_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get mapping definitions`,
   description: `Get mapping definitions.
-For data streams, the API retrieves mappings for the stream’s backing indices.`,
+For data streams, the API retrieves mappings for the stream’s backing indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-mapping`,
   methods: ['GET'],
   patterns: ['_mapping', '{index}/_mapping'],
   documentation:
@@ -7905,7 +8301,9 @@ const INDICES_GET_MIGRATE_REINDEX_STATUS_CONTRACT: InternalConnectorContract = {
   summary: `Get the migration reindexing status`,
   description: `Get the migration reindexing status.
 
-Get the status of a migration reindex attempt for a data stream or index.`,
+Get the status of a migration reindex attempt for a data stream or index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-migration`,
   methods: ['GET'],
   patterns: ['_migration/reindex/{index}/_status'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-migration',
@@ -7925,7 +8323,9 @@ const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_sample',
   isInternal: true,
   summary: ``,
-  description: `Request for a random sample of raw documents ingested into the given index or data stream.`,
+  description: `Request for a random sample of raw documents ingested into the given index or data stream.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
   methods: ['GET'],
   patterns: ['{index}/_sample'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
@@ -7942,7 +8342,9 @@ const INDICES_GET_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: ``,
   description: `Get sampling configuration.
-Get the sampling configuration for the specified index.`,
+Get the sampling configuration for the specified index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
   methods: ['GET'],
   patterns: ['{index}/_sample/config'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
@@ -7958,7 +8360,9 @@ const INDICES_GET_SAMPLE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_sample_stats',
   isInternal: true,
   summary: ``,
-  description: `Request stats for a random sample of raw documents ingested into the given index or data stream.`,
+  description: `Request stats for a random sample of raw documents ingested into the given index or data stream.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
   methods: ['GET'],
   patterns: ['{index}/_sample/stats'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
@@ -7976,7 +8380,9 @@ const INDICES_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   summary: `Get index settings`,
   description: `Get index settings.
 Get setting information for one or more indices.
-For data streams, it returns setting information for the stream's backing indices.`,
+For data streams, it returns setting information for the stream's backing indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-settings`,
   methods: ['GET'],
   patterns: ['_settings', '{index}/_settings', '{index}/_settings/{name}', '_settings/{name}'],
   documentation:
@@ -8022,7 +8428,9 @@ const INDICES_GET_TEMPLATE_CONTRACT: InternalConnectorContract = {
   description: `Get legacy index templates.
 Get information about one or more index templates.
 
-IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.`,
+IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-template`,
   methods: ['GET'],
   patterns: ['_template', '_template/{name}'],
   documentation:
@@ -8050,7 +8458,9 @@ const INDICES_MIGRATE_REINDEX_CONTRACT: InternalConnectorContract = {
 
 Reindex all legacy backing indices for a data stream.
 This operation occurs in a persistent task.
-The persistent task ID is returned immediately and the reindexing work is completed in that task.`,
+The persistent task ID is returned immediately and the reindexing work is completed in that task.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-migrate-reindex`,
   methods: ['POST'],
   patterns: ['_migration/reindex'],
   documentation:
@@ -8081,7 +8491,9 @@ The alias must not have any filters;
 The alias must not use custom routing.
 If successful, the request removes the alias and creates a data stream with the same name.
 The indices for the alias become hidden backing indices for the stream.
-The write index for the alias becomes the write index for the stream.`,
+The write index for the alias becomes the write index for the stream.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-migrate-to-data-stream`,
   methods: ['POST'],
   patterns: ['_data_stream/_migrate/{name}'],
   documentation:
@@ -8103,7 +8515,9 @@ const INDICES_MODIFY_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Update data streams`,
   description: `Update data streams.
-Performs one or more data stream modification actions in a single atomic operation.`,
+Performs one or more data stream modification actions in a single atomic operation.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-modify-data-stream`,
   methods: ['POST'],
   patterns: ['_data_stream/_modify'],
   documentation:
@@ -8146,7 +8560,9 @@ This setting can also be changed with the cluster update settings API.
 Closed indices consume a significant amount of disk-space which can cause problems in managed environments.
 Closing indices can be turned off with the cluster settings API by setting \`cluster.indices.close.enable\` to \`false\`.
 
-Because opening or closing an index allocates its shards, the \`wait_for_active_shards\` setting on index creation applies to the \`_open\` and \`_close\` index actions as well.`,
+Because opening or closing an index allocates its shards, the \`wait_for_active_shards\` setting on index creation applies to the \`_open\` and \`_close\` index actions as well.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-open`,
   methods: ['POST'],
   patterns: ['{index}/_open'],
   documentation:
@@ -8184,7 +8600,9 @@ In the event that the remote cluster is no longer available, the data stream in 
 
 NOTE: When promoting a data stream, ensure the local cluster has a data stream enabled index template that matches the data stream.
 If this is missing, the data stream will not be able to roll over until a matching index template is created.
-This will affect the lifecycle management of the data stream and interfere with the data stream size and retention.`,
+This will affect the lifecycle management of the data stream and interfere with the data stream size and retention.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-promote-data-stream`,
   methods: ['POST'],
   patterns: ['_data_stream/_promote/{name}'],
   documentation:
@@ -8206,7 +8624,9 @@ const INDICES_PUT_ALIAS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Create or update an alias`,
   description: `Create or update an alias.
-Adds a data stream or index to an alias.`,
+Adds a data stream or index to an alias.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-alias`,
   methods: ['PUT', 'POST'],
   patterns: ['{index}/_alias/{name}', '{index}/_aliases/{name}'],
   documentation:
@@ -8242,7 +8662,9 @@ const INDICES_PUT_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Update data stream lifecycles`,
   description: `Update data stream lifecycles.
-Update the data stream lifecycle of the specified data streams.`,
+Update the data stream lifecycle of the specified data streams.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-lifecycle`,
   methods: ['PUT'],
   patterns: ['_data_stream/{name}/_lifecycle'],
   documentation:
@@ -8267,7 +8689,9 @@ const INDICES_PUT_DATA_STREAM_MAPPINGS_CONTRACT: InternalConnectorContract = {
 
 This API can be used to override mappings on specific data streams. These overrides will take precedence over what
 is specified in the template that the data stream matches. The mapping change is only applied to new write indices
-that are created during rollover after this API is called. No indices are changed by this API.`,
+that are created during rollover after this API is called. No indices are changed by this API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-mappings`,
   methods: ['PUT'],
   patterns: ['_data_stream/{name}/_mappings'],
   documentation:
@@ -8289,7 +8713,9 @@ const INDICES_PUT_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Update data stream options`,
   description: `Update data stream options.
-Update the data stream options of the specified data streams.`,
+Update the data stream options of the specified data streams.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-options`,
   methods: ['PUT'],
   patterns: ['_data_stream/{name}/_options'],
   documentation:
@@ -8315,7 +8741,9 @@ const INDICES_PUT_DATA_STREAM_SETTINGS_CONTRACT: InternalConnectorContract = {
 This API can be used to override settings on specific data streams. These overrides will take precedence over what
 is specified in the template that the data stream matches. To prevent your data stream from getting into an invalid state,
 only certain settings are allowed. If possible, the setting change is applied to all
-backing indices. Otherwise, it will be applied when the data stream is next rolled over.`,
+backing indices. Otherwise, it will be applied when the data stream is next rolled over.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-settings`,
   methods: ['PUT'],
   patterns: ['_data_stream/{name}/_settings'],
   documentation:
@@ -8363,7 +8791,9 @@ Mapping definitions are merged recursively, which means that later mapping compo
 If a field mapping is already contained in an earlier component, its definition will be completely overwritten by the later one.
 This recursive merging strategy applies not only to field mappings, but also root options like \`dynamic_templates\` and \`meta\`.
 If an earlier component contains a \`dynamic_templates\` block, then by default new \`dynamic_templates\` entries are appended onto the end.
-If an entry already exists with the same key, then it is overwritten by the new definition.`,
+If an entry already exists with the same key, then it is overwritten by the new definition.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-index-template`,
   methods: ['PUT', 'POST'],
   patterns: ['_index_template/{name}'],
   documentation:
@@ -8413,7 +8843,9 @@ You can use the update mapping API to:
 - Change a field's mapping using reindexing
 - Rename a field using a field alias
 
-Learn how to use the update mapping API with practical examples in the [Update mapping API examples](https://www.elastic.co/docs/manage-data/data-store/mapping/update-mappings-examples) guide.`,
+Learn how to use the update mapping API with practical examples in the [Update mapping API examples](https://www.elastic.co/docs/manage-data/data-store/mapping/update-mappings-examples) guide.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-mapping`,
   methods: ['PUT', 'POST'],
   patterns: ['{index}/_mapping'],
   documentation:
@@ -8457,7 +8889,9 @@ const INDICES_PUT_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: ``,
   description: `Create or update sampling configuration.
-Create or update the sampling configuration for the specified index.`,
+Create or update the sampling configuration for the specified index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
   methods: ['PUT'],
   patterns: ['{index}/_sample/config'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
@@ -8527,7 +8961,9 @@ Then roll over the data stream to apply the new analyzer to the stream's write i
 This affects searches and any new data added to the stream after the rollover.
 However, it does not affect the data stream's backing indices or their existing data.
 To change the analyzer for existing backing indices, you must create a new data stream and reindex your data into it.
-Refer to [updating analyzers on existing indices](https://www.elastic.co/docs/manage-data/data-store/text-analysis/specify-an-analyzer#update-analyzers-on-existing-indices) for step-by-step examples.`,
+Refer to [updating analyzers on existing indices](https://www.elastic.co/docs/manage-data/data-store/text-analysis/specify-an-analyzer#update-analyzers-on-existing-indices) for step-by-step examples.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings`,
   methods: ['PUT'],
   patterns: ['_settings', '{index}/_settings'],
   documentation:
@@ -8580,7 +9016,9 @@ You can include comments anywhere in the request body, except before the opening
 
 Multiple index templates can potentially match an index, in this case, both the settings and mappings are merged into the final configuration of the index.
 The order of the merging can be controlled using the order parameter, with lower order being applied first, and higher orders overriding them.
-NOTE: Multiple matching templates with the same order value will result in a non-deterministic merging order.`,
+NOTE: Multiple matching templates with the same order value will result in a non-deterministic merging order.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-template`,
   methods: ['PUT', 'POST'],
   patterns: ['_template/{name}'],
   documentation:
@@ -8626,7 +9064,9 @@ You can determine the cause of a shard recovery using the recovery or cat recove
 
 The index recovery API reports information about completed recoveries only for shard copies that currently exist in the cluster.
 It only reports the last recovery for each shard copy and does not report historical information about earlier recoveries, nor does it report information about the recoveries of shard copies that no longer exist.
-This means that if a shard copy completes a recovery and then Elasticsearch relocates it onto a different node then the information about the original recovery will not be shown in the recovery API.`,
+This means that if a shard copy completes a recovery and then Elasticsearch relocates it onto a different node then the information about the original recovery will not be shown in the recovery API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-recovery`,
   methods: ['GET'],
   patterns: ['_recovery', '{index}/_recovery'],
   documentation:
@@ -8671,7 +9111,9 @@ Refreshes are resource-intensive.
 To ensure good cluster performance, it's recommended to wait for Elasticsearch's periodic refresh rather than performing an explicit refresh when possible.
 
 If your application workflow indexes documents and then runs a search to retrieve the indexed document, it's recommended to use the index API's \`refresh=wait_for\` query parameter option.
-This option ensures the indexing operation waits for a periodic refresh before running the search.`,
+This option ensures the indexing operation waits for a periodic refresh before running the search.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-refresh`,
   methods: ['POST', 'GET'],
   patterns: ['_refresh', '{index}/_refresh'],
   documentation:
@@ -8719,7 +9161,9 @@ NOTE: This API does not perform a reload for each shard of an index.
 Instead, it performs a reload for each node containing index shards.
 As a result, the total shard count returned by the API can differ from the number of index shards.
 Because reloading affects every node with an index shard, it is important to update the synonym file on every data node in the cluster--including nodes that don't contain a shard replica--before using this API.
-This ensures the synonym file is updated everywhere in the cluster in case shards are relocated in the future.`,
+This ensures the synonym file is updated everywhere in the cluster in case shards are relocated in the future.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-reload-search-analyzers`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_reload_search_analyzers'],
   documentation:
@@ -8749,7 +9193,9 @@ const INDICES_REMOVE_BLOCK_CONTRACT: InternalConnectorContract = {
   description: `Remove an index block.
 
 Remove an index block from an index.
-Index blocks limit the operations allowed on an index by blocking specific operation types.`,
+Index blocks limit the operations allowed on an index by blocking specific operation types.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-remove-block`,
   methods: ['DELETE'],
   patterns: ['{index}/_block/{block}'],
   documentation:
@@ -8821,7 +9267,9 @@ The remote cluster may be available, while the local cluster is not currently co
 You can use the \`_resolve/cluster\` API to attempt to reconnect to remote clusters.
 For example with \`GET _resolve/cluster\` or \`GET _resolve/cluster/*:*\`.
 The \`connected\` field in the response will indicate whether it was successful.
-If a connection was (re-)established, this will also cause the \`remote/info\` endpoint to now indicate a connected status.`,
+If a connection was (re-)established, this will also cause the \`remote/info\` endpoint to now indicate a connected status.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-cluster`,
   methods: ['GET'],
   patterns: ['_resolve/cluster', '_resolve/cluster/{name}'],
   documentation:
@@ -8853,7 +9301,9 @@ const INDICES_RESOLVE_INDEX_CONTRACT: InternalConnectorContract = {
   summary: `Resolve indices`,
   description: `Resolve indices.
 Resolve the names and/or index patterns for indices, aliases, and data streams.
-Multiple patterns and remote clusters are supported.`,
+Multiple patterns and remote clusters are supported.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-index`,
   methods: ['GET'],
   patterns: ['_resolve/index/{name}'],
   documentation:
@@ -8911,7 +9361,9 @@ This number is always six characters and zero-padded, regardless of the previous
 If you use an index alias for time series data, you can use date math in the index name to track the rollover date.
 For example, you can create an alias that points to an index named \`<my-index-{now/d}-000001>\`.
 If you create the index on May 6, 2099, the index's name is \`my-index-2099.05.06-000001\`.
-If you roll over the alias on May 7, 2099, the new index's name is \`my-index-2099.05.07-000002\`.`,
+If you roll over the alias on May 7, 2099, the new index's name is \`my-index-2099.05.07-000002\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-rollover`,
   methods: ['POST'],
   patterns: ['{alias}/_rollover', '{alias}/_rollover/{new_index}'],
   documentation:
@@ -8937,7 +9389,9 @@ const INDICES_SEGMENTS_CONTRACT: InternalConnectorContract = {
   summary: `Get index segments`,
   description: `Get index segments.
 Get low-level information about the Lucene segments in index shards.
-For data streams, the API returns information about the stream's backing indices.`,
+For data streams, the API returns information about the stream's backing indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-segments`,
   methods: ['GET'],
   patterns: ['_segments', '{index}/_segments'],
   documentation:
@@ -8972,7 +9426,9 @@ The index shard stores API returns the following information:
 * A unique ID for each replica shard.
 * Any errors encountered while opening the shard index or from an earlier failure.
 
-By default, the API returns store information only for primary shards that are unassigned or have one or more unassigned replica shards.`,
+By default, the API returns store information only for primary shards that are unassigned or have one or more unassigned replica shards.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-shard-stores`,
   methods: ['GET'],
   patterns: ['_shard_stores', '{index}/_shard_stores'],
   documentation:
@@ -9027,7 +9483,9 @@ IMPORTANT: Indices can only be shrunk if they satisfy the following requirements
 * The source index must have more primary shards than the target index.
 * The number of primary shards in the target index must be a factor of the number of primary shards in the source index. The source index must have more primary shards than the target index.
 * The index must not contain more than 2,147,483,519 documents in total across all shards that will be shrunk into a single shard on the target index as this is the maximum number of docs that can fit into a single shard.
-* The node handling the shrink process must have sufficient free disk space to accommodate a second copy of the existing index.`,
+* The node handling the shrink process must have sufficient free disk space to accommodate a second copy of the existing index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-shrink`,
   methods: ['PUT', 'POST'],
   patterns: ['{index}/_shrink/{target}'],
   documentation:
@@ -9052,7 +9510,9 @@ const INDICES_SIMULATE_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Simulate an index`,
   description: `Simulate an index.
-Get the index configuration that would be applied to the specified index from an existing index template.`,
+Get the index configuration that would be applied to the specified index from an existing index template.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-simulate-index-template`,
   methods: ['POST'],
   patterns: ['_index_template/_simulate_index/{name}'],
   documentation:
@@ -9074,7 +9534,9 @@ const INDICES_SIMULATE_TEMPLATE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Simulate an index template`,
   description: `Simulate an index template.
-Get the index configuration that would be applied by a particular index template.`,
+Get the index configuration that would be applied by a particular index template.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-simulate-template`,
   methods: ['POST'],
   patterns: ['_index_template/_simulate', '_index_template/_simulate/{name}'],
   documentation:
@@ -9141,7 +9603,9 @@ IMPORTANT: Indices can only be split if they satisfy the following requirements:
 * The target index must not exist.
 * The source index must have fewer primary shards than the target index.
 * The number of primary shards in the target index must be a multiple of the number of primary shards in the source index.
-* The node handling the split process must have sufficient free disk space to accommodate a second copy of the existing index.`,
+* The node handling the split process must have sufficient free disk space to accommodate a second copy of the existing index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-split`,
   methods: ['PUT', 'POST'],
   patterns: ['{index}/_split/{target}'],
   documentation:
@@ -9175,7 +9639,9 @@ By default, the returned statistics are index-level with \`primaries\` and \`tot
 To get shard-level statistics, set the \`level\` parameter to \`shards\`.
 
 NOTE: When moving to another node, the shard-level statistics for a shard are cleared.
-Although the shard is no longer part of the node, that node retains any node-level statistics to which the shard contributed.`,
+Although the shard is no longer part of the node, that node retains any node-level statistics to which the shard contributed.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-stats`,
   methods: ['GET'],
   patterns: ['_stats', '_stats/{metric}', '{index}/_stats', '{index}/_stats/{metric}'],
   documentation:
@@ -9221,7 +9687,9 @@ const INDICES_UPDATE_ALIASES_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Create or update an alias`,
   description: `Create or update an alias.
-Adds a data stream or index to an alias.`,
+Adds a data stream or index to an alias.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-update-aliases`,
   methods: ['POST'],
   patterns: ['_aliases'],
   documentation:
@@ -9243,7 +9711,9 @@ const INDICES_VALIDATE_QUERY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Validate a query`,
   description: `Validate a query.
-Validates a query without running it.`,
+Validates a query without running it.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-validate-query`,
   methods: ['GET', 'POST'],
   patterns: ['_validate/query', '{index}/_validate/query'],
   documentation:
@@ -9300,7 +9770,9 @@ It only works with the \`chat_completion\` task type for \`openai\` and \`elasti
 NOTE: The \`chat_completion\` task type is only available within the _stream API and only supports streaming.
 The Chat completion inference API and the Stream inference API differ in their response structure and capabilities.
 The Chat completion inference API provides more comprehensive customization options through more fields and function calling support.
-If you use the \`openai\`, \`hugging_face\` or the \`elastic\` service, use the Chat completion inference API.`,
+If you use the \`openai\`, \`hugging_face\` or the \`elastic\` service, use the Chat completion inference API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-unified-inference`,
   methods: ['POST'],
   patterns: ['_inference/chat_completion/{inference_id}/_stream'],
   documentation:
@@ -9328,7 +9800,9 @@ This API works only with the completion task type.
 
 IMPORTANT: The inference APIs enable you to use certain services, such as built-in machine learning models (ELSER, E5), models uploaded through Eland, Cohere, OpenAI, Azure, Google AI Studio, Google Vertex AI, Anthropic, Watsonx.ai, or Hugging Face. For built-in models and models uploaded through Eland, the inference APIs offer an alternative way to use and manage trained models. However, if you do not plan to use the inference APIs to use these models or if you want to use non-NLP models, use the machine learning trained model APIs.
 
-This API requires the \`monitor_inference\` cluster privilege (the built-in \`inference_admin\` and \`inference_user\` roles grant this privilege).`,
+This API requires the \`monitor_inference\` cluster privilege (the built-in \`inference_admin\` and \`inference_user\` roles grant this privilege).
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference`,
   methods: ['POST'],
   patterns: ['_inference/completion/{inference_id}'],
   documentation:
@@ -9351,7 +9825,9 @@ const INFERENCE_DELETE_CONTRACT: InternalConnectorContract = {
   summary: `Delete an inference endpoint
 `,
   description: `Delete an inference endpoint
-This API requires the manage_inference cluster privilege (the built-in \`inference_admin\` role grants this privilege).`,
+This API requires the manage_inference cluster privilege (the built-in \`inference_admin\` role grants this privilege).
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-delete`,
   methods: ['DELETE'],
   patterns: ['_inference/{inference_id}', '_inference/{task_type}/{inference_id}'],
   documentation:
@@ -9377,7 +9853,9 @@ const INFERENCE_GET_CONTRACT: InternalConnectorContract = {
   summary: `Get an inference endpoint
 `,
   description: `Get an inference endpoint
-This API requires the \`monitor_inference\` cluster privilege (the built-in \`inference_admin\` and \`inference_user\` roles grant this privilege).`,
+This API requires the \`monitor_inference\` cluster privilege (the built-in \`inference_admin\` and \`inference_user\` roles grant this privilege).
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-get`,
   methods: ['GET'],
   patterns: ['_inference', '_inference/{inference_id}', '_inference/{task_type}/{inference_id}'],
   documentation:
@@ -9413,7 +9891,9 @@ The inference endpoint you use can perform one specific task that has been defin
 For details about using this API with a service, such as Amazon Bedrock, Anthropic, or HuggingFace, refer to the service-specific documentation.
 
 > info
-> The inference APIs enable you to use certain services, such as built-in machine learning models (ELSER, E5), models uploaded through Eland, Cohere, OpenAI, Azure, Google AI Studio, Google Vertex AI, Anthropic, Watsonx.ai, or Hugging Face. For built-in models and models uploaded through Eland, the inference APIs offer an alternative way to use and manage trained models. However, if you do not plan to use the inference APIs to use these models or if you want to use non-NLP models, use the machine learning trained model APIs.`,
+> The inference APIs enable you to use certain services, such as built-in machine learning models (ELSER, E5), models uploaded through Eland, Cohere, OpenAI, Azure, Google AI Studio, Google Vertex AI, Anthropic, Watsonx.ai, or Hugging Face. For built-in models and models uploaded through Eland, the inference APIs offer an alternative way to use and manage trained models. However, if you do not plan to use the inference APIs to use these models or if you want to use non-NLP models, use the machine learning trained model APIs.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference`,
   methods: ['POST'],
   patterns: ['_inference/{inference_id}', '_inference/{task_type}/{inference_id}'],
   documentation:
@@ -9463,7 +9943,9 @@ The following integrations are available through the inference API. You can find
 * Mistral (\`chat_completion\`, \`completion\`, \`text_embedding\`)
 * OpenAI (\`chat_completion\`, \`completion\`, \`text_embedding\`)
 * VoyageAI (\`rerank\`, \`text_embedding\`)
-* Watsonx inference integration (\`text_embedding\`)`,
+* Watsonx inference integration (\`text_embedding\`)
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put`,
   methods: ['PUT'],
   patterns: ['_inference/{inference_id}', '_inference/{task_type}/{inference_id}'],
   documentation:
@@ -9489,7 +9971,9 @@ const INFERENCE_PUT_AI21_CONTRACT: InternalConnectorContract = {
   summary: `Create a AI21 inference endpoint`,
   description: `Create a AI21 inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`ai21\` service.`,
+Create an inference endpoint to perform an inference task with the \`ai21\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-ai21`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{ai21_inference_id}'],
   documentation:
@@ -9512,7 +9996,9 @@ const INFERENCE_PUT_ALIBABACLOUD_CONTRACT: InternalConnectorContract = {
   summary: `Create an AlibabaCloud AI Search inference endpoint`,
   description: `Create an AlibabaCloud AI Search inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`alibabacloud-ai-search\` service.`,
+Create an inference endpoint to perform an inference task with the \`alibabacloud-ai-search\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-alibabacloud`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{alibabacloud_inference_id}'],
   documentation:
@@ -9538,7 +10024,9 @@ const INFERENCE_PUT_AMAZONBEDROCK_CONTRACT: InternalConnectorContract = {
 Create an inference endpoint to perform an inference task with the \`amazonbedrock\` service.
 
 >info
-> You need to provide the access and secret keys only once, during the inference model creation. The get inference API does not retrieve your access or secret keys. After creating the inference model, you cannot change the associated key pairs. If you want to use a different access and secret key pair, delete the inference model and recreate it with the same name and the updated keys.`,
+> You need to provide the access and secret keys only once, during the inference model creation. The get inference API does not retrieve your access or secret keys. After creating the inference model, you cannot change the associated key pairs. If you want to use a different access and secret key pair, delete the inference model and recreate it with the same name and the updated keys.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-amazonbedrock`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{amazonbedrock_inference_id}'],
   documentation:
@@ -9561,7 +10049,9 @@ const INFERENCE_PUT_AMAZONSAGEMAKER_CONTRACT: InternalConnectorContract = {
   summary: `Create an Amazon SageMaker inference endpoint`,
   description: `Create an Amazon SageMaker inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`amazon_sagemaker\` service.`,
+Create an inference endpoint to perform an inference task with the \`amazon_sagemaker\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-amazonsagemaker`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{amazonsagemaker_inference_id}'],
   documentation:
@@ -9584,7 +10074,9 @@ const INFERENCE_PUT_ANTHROPIC_CONTRACT: InternalConnectorContract = {
   summary: `Create an Anthropic inference endpoint`,
   description: `Create an Anthropic inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`anthropic\` service.`,
+Create an inference endpoint to perform an inference task with the \`anthropic\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-anthropic`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{anthropic_inference_id}'],
   documentation:
@@ -9607,7 +10099,9 @@ const INFERENCE_PUT_AZUREAISTUDIO_CONTRACT: InternalConnectorContract = {
   summary: `Create an Azure AI studio inference endpoint`,
   description: `Create an Azure AI studio inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`azureaistudio\` service.`,
+Create an inference endpoint to perform an inference task with the \`azureaistudio\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-azureaistudio`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{azureaistudio_inference_id}'],
   documentation:
@@ -9637,7 +10131,9 @@ The list of chat completion models that you can choose from in your Azure OpenAI
 * [GPT-4 and GPT-4 Turbo models](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions#gpt-4-and-gpt-4-turbo-models)
 * [GPT-3.5](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions#gpt-35)
 
-The list of embeddings models that you can choose from in your deployment can be found in the [Azure models documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions#embeddings).`,
+The list of embeddings models that you can choose from in your deployment can be found in the [Azure models documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions#embeddings).
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-azureopenai`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{azureopenai_inference_id}'],
   documentation:
@@ -9660,7 +10156,9 @@ const INFERENCE_PUT_COHERE_CONTRACT: InternalConnectorContract = {
   summary: `Create a Cohere inference endpoint`,
   description: `Create a Cohere inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`cohere\` service.`,
+Create an inference endpoint to perform an inference task with the \`cohere\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-cohere`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{cohere_inference_id}'],
   documentation:
@@ -9685,7 +10183,9 @@ const INFERENCE_PUT_CONTEXTUALAI_CONTRACT: InternalConnectorContract = {
 
 Create an inference endpoint to perform an inference task with the \`contexualai\` service.
 
-To review the available \`rerank\` models, refer to <https://docs.contextual.ai/api-reference/rerank/rerank#body-model>.`,
+To review the available \`rerank\` models, refer to <https://docs.contextual.ai/api-reference/rerank/rerank#body-model>.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-contextualai`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{contextualai_inference_id}'],
   documentation:
@@ -9747,7 +10247,9 @@ Pre-defined templates:
 * \`\${input_type}\` refers to the input type translation values.
 * \`\${query}\` refers to the query field used specifically for reranking tasks.
 * \`\${top_n}\` refers to the \`top_n\` field available when performing rerank requests.
-* \`\${return_documents}\` refers to the \`return_documents\` field available when performing rerank requests.`,
+* \`\${return_documents}\` refers to the \`return_documents\` field available when performing rerank requests.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-custom`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{custom_inference_id}'],
   documentation:
@@ -9770,7 +10272,9 @@ const INFERENCE_PUT_DEEPSEEK_CONTRACT: InternalConnectorContract = {
   summary: `Create a DeepSeek inference endpoint`,
   description: `Create a DeepSeek inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`deepseek\` service.`,
+Create an inference endpoint to perform an inference task with the \`deepseek\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-deepseek`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{deepseek_inference_id}'],
   documentation:
@@ -9806,7 +10310,9 @@ If you use the ELSER or the E5 model through the \`elasticsearch\` service, the 
 After creating the endpoint, wait for the model deployment to complete before using it.
 To verify the deployment status, use the get trained model statistics API.
 Look for \`"state": "fully_allocated"\` in the response and ensure that the \`"allocation_count"\` matches the \`"target_allocation_count"\`.
-Avoid creating multiple endpoints for the same model unless required, as each endpoint consumes significant resources.`,
+Avoid creating multiple endpoints for the same model unless required, as each endpoint consumes significant resources.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-elasticsearch`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{elasticsearch_inference_id}'],
   documentation:
@@ -9843,7 +10349,9 @@ The API request will automatically download and deploy the ELSER model if it isn
 After creating the endpoint, wait for the model deployment to complete before using it.
 To verify the deployment status, use the get trained model statistics API.
 Look for \`"state": "fully_allocated"\` in the response and ensure that the \`"allocation_count"\` matches the \`"target_allocation_count"\`.
-Avoid creating multiple endpoints for the same model unless required, as each endpoint consumes significant resources.`,
+Avoid creating multiple endpoints for the same model unless required, as each endpoint consumes significant resources.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-elser`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{elser_inference_id}'],
   documentation:
@@ -9866,7 +10374,9 @@ const INFERENCE_PUT_GOOGLEAISTUDIO_CONTRACT: InternalConnectorContract = {
   summary: `Create an Google AI Studio inference endpoint`,
   description: `Create an Google AI Studio inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`googleaistudio\` service.`,
+Create an inference endpoint to perform an inference task with the \`googleaistudio\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-googleaistudio`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{googleaistudio_inference_id}'],
   documentation:
@@ -9889,7 +10399,9 @@ const INFERENCE_PUT_GOOGLEVERTEXAI_CONTRACT: InternalConnectorContract = {
   summary: `Create a Google Vertex AI inference endpoint`,
   description: `Create a Google Vertex AI inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`googlevertexai\` service.`,
+Create an inference endpoint to perform an inference task with the \`googlevertexai\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-googlevertexai`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{googlevertexai_inference_id}'],
   documentation:
@@ -9947,7 +10459,9 @@ After the endpoint is initialized, copy the full endpoint URL for use.
 Tested models for \`rerank\` task:
 
 * \`bge-reranker-base\`
-* \`jina-reranker-v1-turbo-en-GGUF\``,
+* \`jina-reranker-v1-turbo-en-GGUF\`
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-hugging-face`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{huggingface_inference_id}'],
   documentation:
@@ -9973,7 +10487,9 @@ const INFERENCE_PUT_JINAAI_CONTRACT: InternalConnectorContract = {
 Create an inference endpoint to perform an inference task with the \`jinaai\` service.
 
 To review the available \`rerank\` models, refer to <https://jina.ai/reranker>.
-To review the available \`text_embedding\` models, refer to the <https://jina.ai/embeddings/>.`,
+To review the available \`text_embedding\` models, refer to the <https://jina.ai/embeddings/>.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-jinaai`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{jinaai_inference_id}'],
   documentation:
@@ -9996,7 +10512,9 @@ const INFERENCE_PUT_LLAMA_CONTRACT: InternalConnectorContract = {
   summary: `Create a Llama inference endpoint`,
   description: `Create a Llama inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`llama\` service.`,
+Create an inference endpoint to perform an inference task with the \`llama\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-llama`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{llama_inference_id}'],
   documentation:
@@ -10019,7 +10537,9 @@ const INFERENCE_PUT_MISTRAL_CONTRACT: InternalConnectorContract = {
   summary: `Create a Mistral inference endpoint`,
   description: `Create a Mistral inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`mistral\` service.`,
+Create an inference endpoint to perform an inference task with the \`mistral\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-mistral`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{mistral_inference_id}'],
   documentation:
@@ -10042,7 +10562,9 @@ const INFERENCE_PUT_OPENAI_CONTRACT: InternalConnectorContract = {
   summary: `Create an OpenAI inference endpoint`,
   description: `Create an OpenAI inference endpoint.
 
-Create an inference endpoint to perform an inference task with the \`openai\` service or \`openai\` compatible APIs.`,
+Create an inference endpoint to perform an inference task with the \`openai\` service or \`openai\` compatible APIs.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-openai`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{openai_inference_id}'],
   documentation:
@@ -10067,7 +10589,9 @@ const INFERENCE_PUT_VOYAGEAI_CONTRACT: InternalConnectorContract = {
 
 Create an inference endpoint to perform an inference task with the \`voyageai\` service.
 
-Avoid creating multiple endpoints for the same model unless required, as each endpoint consumes significant resources.`,
+Avoid creating multiple endpoints for the same model unless required, as each endpoint consumes significant resources.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-voyageai`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{voyageai_inference_id}'],
   documentation:
@@ -10092,7 +10616,9 @@ const INFERENCE_PUT_WATSONX_CONTRACT: InternalConnectorContract = {
 
 Create an inference endpoint to perform an inference task with the \`watsonxai\` service.
 You need an IBM Cloud Databases for Elasticsearch deployment to use the \`watsonxai\` inference service.
-You can provision one through the IBM catalog, the Cloud Databases CLI plug-in, the Cloud Databases API, or Terraform.`,
+You can provision one through the IBM catalog, the Cloud Databases CLI plug-in, the Cloud Databases API, or Terraform.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-watsonx`,
   methods: ['PUT'],
   patterns: ['_inference/{task_type}/{watsonx_inference_id}'],
   documentation:
@@ -10113,7 +10639,9 @@ const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.rerank',
   isInternal: true,
   summary: `Perform reranking inference on the service`,
-  description: `Perform reranking inference on the service`,
+  description: `Perform reranking inference on the service
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference`,
   methods: ['POST'],
   patterns: ['_inference/rerank/{inference_id}'],
   documentation:
@@ -10134,7 +10662,9 @@ const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.sparse_embedding',
   isInternal: true,
   summary: `Perform sparse embedding inference on the service`,
-  description: `Perform sparse embedding inference on the service`,
+  description: `Perform sparse embedding inference on the service
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference`,
   methods: ['POST'],
   patterns: ['_inference/sparse_embedding/{inference_id}'],
   documentation:
@@ -10162,7 +10692,9 @@ This API works only with the completion task type.
 
 IMPORTANT: The inference APIs enable you to use certain services, such as built-in machine learning models (ELSER, E5), models uploaded through Eland, Cohere, OpenAI, Azure, Google AI Studio, Google Vertex AI, Anthropic, Watsonx.ai, or Hugging Face. For built-in models and models uploaded through Eland, the inference APIs offer an alternative way to use and manage trained models. However, if you do not plan to use the inference APIs to use these models or if you want to use non-NLP models, use the machine learning trained model APIs.
 
-This API requires the \`monitor_inference\` cluster privilege (the built-in \`inference_admin\` and \`inference_user\` roles grant this privilege). You must use a client that supports streaming.`,
+This API requires the \`monitor_inference\` cluster privilege (the built-in \`inference_admin\` and \`inference_user\` roles grant this privilege). You must use a client that supports streaming.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-stream-inference`,
   methods: ['POST'],
   patterns: ['_inference/completion/{inference_id}/_stream'],
   documentation:
@@ -10183,7 +10715,9 @@ const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.text_embedding',
   isInternal: true,
   summary: `Perform text embedding inference on the service`,
-  description: `Perform text embedding inference on the service`,
+  description: `Perform text embedding inference on the service
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference`,
   methods: ['POST'],
   patterns: ['_inference/text_embedding/{inference_id}'],
   documentation:
@@ -10210,7 +10744,9 @@ Modify \`task_settings\`, secrets (within \`service_settings\`), or \`num_alloca
 
 IMPORTANT: The inference APIs enable you to use certain services, such as built-in machine learning models (ELSER, E5), models uploaded through Eland, Cohere, OpenAI, Azure, Google AI Studio, Google Vertex AI, Anthropic, Watsonx.ai, or Hugging Face.
 For built-in models and models uploaded through Eland, the inference APIs offer an alternative way to use and manage trained models.
-However, if you do not plan to use the inference APIs to use these models or if you want to use non-NLP models, use the machine learning trained model APIs.`,
+However, if you do not plan to use the inference APIs to use these models or if you want to use non-NLP models, use the machine learning trained model APIs.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-update`,
   methods: ['PUT'],
   patterns: ['_inference/{inference_id}/_update', '_inference/{task_type}/{inference_id}/_update'],
   documentation:
@@ -10236,7 +10772,9 @@ const INFO_CONTRACT: InternalConnectorContract = {
   summary: `Get cluster info`,
   description: `Get cluster info.
 Get basic build, version, and cluster information.
-::: In Serverless, this API is retained for backward compatibility only. Some response fields, such as the version number, should be ignored.`,
+::: In Serverless, this API is retained for backward compatibility only. Some response fields, such as the version number, should be ignored.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-info`,
   methods: ['GET'],
   patterns: [''],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-info',
@@ -10258,7 +10796,9 @@ const INGEST_DELETE_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   summary: `Delete GeoIP database configurations`,
   description: `Delete GeoIP database configurations.
 
-Delete one or more IP geolocation database configurations.`,
+Delete one or more IP geolocation database configurations.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-geoip-database`,
   methods: ['DELETE'],
   patterns: ['_ingest/geoip/database/{id}'],
   documentation:
@@ -10279,7 +10819,9 @@ const INGEST_DELETE_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.delete_ip_location_database',
   isInternal: true,
   summary: `Delete IP geolocation database configurations`,
-  description: `Delete IP geolocation database configurations.`,
+  description: `Delete IP geolocation database configurations.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-ip-location-database`,
   methods: ['DELETE'],
   patterns: ['_ingest/ip_location/database/{id}'],
   documentation:
@@ -10301,7 +10843,9 @@ const INGEST_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete pipelines`,
   description: `Delete pipelines.
-Delete one or more ingest pipelines.`,
+Delete one or more ingest pipelines.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-pipeline`,
   methods: ['DELETE'],
   patterns: ['_ingest/pipeline/{id}'],
   documentation:
@@ -10323,7 +10867,9 @@ const INGEST_GEO_IP_STATS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get GeoIP statistics`,
   description: `Get GeoIP statistics.
-Get download statistics for GeoIP2 databases that are used with the GeoIP processor.`,
+Get download statistics for GeoIP2 databases that are used with the GeoIP processor.
+
+ Documentation: https://www.elastic.co/docs/reference/enrich-processor/geoip-processor`,
   methods: ['GET'],
   patterns: ['_ingest/geoip/stats'],
   documentation: 'https://www.elastic.co/docs/reference/enrich-processor/geoip-processor',
@@ -10345,7 +10891,9 @@ const INGEST_GET_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   summary: `Get GeoIP database configurations`,
   description: `Get GeoIP database configurations.
 
-Get information about one or more IP geolocation database configurations.`,
+Get information about one or more IP geolocation database configurations.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-geoip-database`,
   methods: ['GET'],
   patterns: ['_ingest/geoip/database', '_ingest/geoip/database/{id}'],
   documentation:
@@ -10369,7 +10917,9 @@ const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.get_ip_location_database',
   isInternal: true,
   summary: `Get IP geolocation database configurations`,
-  description: `Get IP geolocation database configurations.`,
+  description: `Get IP geolocation database configurations.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-ip-location-database`,
   methods: ['GET'],
   patterns: ['_ingest/ip_location/database', '_ingest/ip_location/database/{id}'],
   documentation:
@@ -10399,7 +10949,9 @@ const INGEST_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
   description: `Get pipelines.
 
 Get information about one or more ingest pipelines.
-This API returns a local reference of the pipeline.`,
+This API returns a local reference of the pipeline.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-pipeline`,
   methods: ['GET'],
   patterns: ['_ingest/pipeline', '_ingest/pipeline/{id}'],
   documentation:
@@ -10426,7 +10978,9 @@ const INGEST_PROCESSOR_GROK_CONTRACT: InternalConnectorContract = {
   description: `Run a grok processor.
 Extract structured fields out of a single text field within a document.
 You must choose which field to extract matched fields from, as well as the grok pattern you expect will match.
-A grok pattern is like a regular expression that supports aliased expressions that can be reused.`,
+A grok pattern is like a regular expression that supports aliased expressions that can be reused.
+
+ Documentation: https://www.elastic.co/docs/reference/enrich-processor/grok-processor`,
   methods: ['GET'],
   patterns: ['_ingest/processor/grok'],
   documentation: 'https://www.elastic.co/docs/reference/enrich-processor/grok-processor',
@@ -10448,7 +11002,9 @@ const INGEST_PUT_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   summary: `Create or update a GeoIP database configuration`,
   description: `Create or update a GeoIP database configuration.
 
-Refer to the create or update IP geolocation database configuration API.`,
+Refer to the create or update IP geolocation database configuration API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-put-geoip-database`,
   methods: ['PUT'],
   patterns: ['_ingest/geoip/database/{id}'],
   documentation:
@@ -10469,7 +11025,9 @@ const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.put_ip_location_database',
   isInternal: true,
   summary: `Create or update an IP geolocation database configuration`,
-  description: `Create or update an IP geolocation database configuration.`,
+  description: `Create or update an IP geolocation database configuration.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-put-ip-location-database`,
   methods: ['PUT'],
   patterns: ['_ingest/ip_location/database/{id}'],
   documentation:
@@ -10491,7 +11049,9 @@ const INGEST_PUT_PIPELINE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Create or update a pipeline`,
   description: `Create or update a pipeline.
-Changes made using this API take effect immediately.`,
+Changes made using this API take effect immediately.
+
+ Documentation: https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines`,
   methods: ['PUT'],
   patterns: ['_ingest/pipeline/{id}'],
   documentation: 'https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines',
@@ -10522,7 +11082,9 @@ const INGEST_SIMULATE_CONTRACT: InternalConnectorContract = {
   description: `Simulate a pipeline.
 
 Run an ingest pipeline against a set of provided documents.
-You can either specify an existing pipeline to use with the provided documents or supply a pipeline definition in the body of the request.`,
+You can either specify an existing pipeline to use with the provided documents or supply a pipeline definition in the body of the request.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-simulate`,
   methods: ['GET', 'POST'],
   patterns: ['_ingest/pipeline/_simulate', '_ingest/pipeline/{id}/_simulate'],
   documentation:
@@ -10557,7 +11119,9 @@ const KNN_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.knn_search',
   isInternal: true,
   summary: ``,
-  description: `Performs a kNN search`,
+  description: `Performs a kNN search
+
+ Documentation: null`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_knn_search'],
   documentation: 'null',
@@ -10577,7 +11141,9 @@ const LICENSE_DELETE_CONTRACT: InternalConnectorContract = {
 
 When the license expires, your subscription level reverts to Basic.
 
-If the operator privileges feature is enabled, only operator users can use this API.`,
+If the operator privileges feature is enabled, only operator users can use this API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-delete`,
   methods: ['DELETE'],
   patterns: ['_license'],
   documentation:
@@ -10604,7 +11170,9 @@ Get information about your Elastic license including its type, its status, when 
 
 >info
 > If the master node is generating a new cluster state, the get license API may return a \`404 Not Found\` response.
-> If you receive an unexpected 404 response after cluster startup, wait a short period and retry the request.`,
+> If you receive an unexpected 404 response after cluster startup, wait a short period and retry the request.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-get`,
   methods: ['GET'],
   patterns: ['_license'],
   documentation:
@@ -10625,7 +11193,9 @@ const LICENSE_GET_BASIC_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.get_basic_status',
   isInternal: true,
   summary: `Get the basic license status`,
-  description: `Get the basic license status.`,
+  description: `Get the basic license status.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-get-basic-status`,
   methods: ['GET'],
   patterns: ['_license/basic_status'],
   documentation:
@@ -10646,7 +11216,9 @@ const LICENSE_GET_TRIAL_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.get_trial_status',
   isInternal: true,
   summary: `Get the trial status`,
-  description: `Get the trial status.`,
+  description: `Get the trial status.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-get-trial-status`,
   methods: ['GET'],
   patterns: ['_license/trial_status'],
   documentation:
@@ -10675,7 +11247,9 @@ If the license you are installing does not support all of the features that were
 You must then re-submit the API request with the acknowledge parameter set to true.
 
 NOTE: If Elasticsearch security features are enabled and you are installing a gold or higher license, you must enable TLS on the transport networking layer before you install the license.
-If the operator privileges feature is enabled, only operator users can use this API.`,
+If the operator privileges feature is enabled, only operator users can use this API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-post`,
   methods: ['PUT', 'POST'],
   patterns: ['_license'],
   documentation:
@@ -10708,7 +11282,9 @@ NOTE: In order to start a basic license, you must not currently have a basic lic
 If the basic license does not support all of the features that are available with your current license, however, you are notified in the response.
 You must then re-submit the API request with the \`acknowledge\` parameter set to \`true\`.
 
-To check the status of your basic license, use the get basic license API.`,
+To check the status of your basic license, use the get basic license API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-post-start-basic`,
   methods: ['POST'],
   patterns: ['_license/start_basic'],
   documentation:
@@ -10735,7 +11311,9 @@ Start a 30-day trial, which gives access to all subscription features.
 NOTE: You are allowed to start a trial only if your cluster has not already activated a trial for the current major product version.
 For example, if you have already activated a trial for v8.0, you cannot start a new trial until v9.0. You can, however, request an extended trial at https://www.elastic.co/trialextension.
 
-To check the status of your trial, use the get trial status API.`,
+To check the status of your trial, use the get trial status API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-post-start-trial`,
   methods: ['POST'],
   patterns: ['_license/start_trial'],
   documentation:
@@ -10758,7 +11336,9 @@ const LOGSTASH_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
   summary: `Delete a Logstash pipeline`,
   description: `Delete a Logstash pipeline.
 Delete a pipeline that is used for Logstash Central Management.
-If the request succeeds, you receive an empty response with an appropriate status code.`,
+If the request succeeds, you receive an empty response with an appropriate status code.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-delete-pipeline`,
   methods: ['DELETE'],
   patterns: ['_logstash/pipeline/{id}'],
   documentation:
@@ -10780,7 +11360,9 @@ const LOGSTASH_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get Logstash pipelines`,
   description: `Get Logstash pipelines.
-Get pipelines that are used for Logstash Central Management.`,
+Get pipelines that are used for Logstash Central Management.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-get-pipeline`,
   methods: ['GET'],
   patterns: ['_logstash/pipeline', '_logstash/pipeline/{id}'],
   documentation:
@@ -10807,7 +11389,9 @@ const LOGSTASH_PUT_PIPELINE_CONTRACT: InternalConnectorContract = {
   description: `Create or update a Logstash pipeline.
 
 Create a pipeline that is used for Logstash Central Management.
-If the specified pipeline exists, it is replaced.`,
+If the specified pipeline exists, it is replaced.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-put-pipeline`,
   methods: ['PUT'],
   patterns: ['_logstash/pipeline/{id}'],
   documentation:
@@ -10844,7 +11428,9 @@ You can include the \`_source\`, \`_source_includes\`, and \`_source_excludes\` 
 
 Use the \`stored_fields\` attribute to specify the set of stored fields you want to retrieve.
 Any requested fields that are not stored are ignored.
-You can include the \`stored_fields\` query parameter in the request URI to specify the defaults to use when there are no per-document instructions.`,
+You can include the \`stored_fields\` query parameter in the request URI to specify the defaults to use when there are no per-document instructions.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mget`,
   methods: ['GET', 'POST'],
   patterns: ['_mget', '{index}/_mget'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mget',
@@ -10886,7 +11472,9 @@ const MIGRATION_DEPRECATIONS_CONTRACT: InternalConnectorContract = {
 Get information about different cluster, node, and index level settings that use deprecated features that will be removed or changed in the next major version.
 
 TIP: This APIs is designed for indirect use by the Upgrade Assistant.
-You are strongly recommended to use the Upgrade Assistant.`,
+You are strongly recommended to use the Upgrade Assistant.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-deprecations`,
   methods: ['GET'],
   patterns: ['_migration/deprecations', '{index}/_migration/deprecations'],
   documentation:
@@ -10915,7 +11503,9 @@ Version upgrades sometimes require changes to how features store configuration i
 Check which features need to be migrated and the status of any migrations that are in progress.
 
 TIP: This API is designed for indirect use by the Upgrade Assistant.
-You are strongly recommended to use the Upgrade Assistant.`,
+You are strongly recommended to use the Upgrade Assistant.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-get-feature-upgrade-status`,
   methods: ['GET'],
   patterns: ['_migration/system_features'],
   documentation:
@@ -10942,7 +11532,9 @@ This API starts the automatic migration process.
 
 Some functionality might be temporarily unavailable during the migration process.
 
-TIP: The API is designed for indirect use by the Upgrade Assistant. We strongly recommend you use the Upgrade Assistant.`,
+TIP: The API is designed for indirect use by the Upgrade Assistant. We strongly recommend you use the Upgrade Assistant.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-get-feature-upgrade-status`,
   methods: ['POST'],
   patterns: ['_migration/system_features'],
   documentation:
@@ -10968,7 +11560,9 @@ const ML_CLEAR_TRAINED_MODEL_DEPLOYMENT_CACHE_CONTRACT: InternalConnectorContrac
 Cache will be cleared on all nodes where the trained model is assigned.
 A trained model deployment may have an inference cache enabled.
 As requests are handled by each allocated node, their responses may be cached on that individual node.
-Calling this API clears the caches without restarting the deployment.`,
+Calling this API clears the caches without restarting the deployment.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-clear-trained-model-deployment-cache`,
   methods: ['POST'],
   patterns: ['_ml/trained_models/{model_id}/deployment/cache/_clear'],
   documentation:
@@ -10994,7 +11588,9 @@ const ML_CLOSE_JOB_CONTRACT: InternalConnectorContract = {
 A job can be opened and closed multiple times throughout its lifecycle. A closed job cannot receive data or perform analysis operations, but you can still explore and navigate results.
 When you close a job, it runs housekeeping tasks such as pruning the model history, flushing buffers, calculating final results and persisting the model snapshots. Depending upon the size of the job, it could take several minutes to close and the equivalent time to re-open. After it is closed, the job has a minimal overhead on the cluster except for maintaining its meta data. Therefore it is a best practice to close jobs that are no longer required to process data.
 If you close an anomaly detection job whose datafeed is running, the request first tries to stop the datafeed. This behavior is equivalent to calling stop datafeed API with the same timeout and force parameters as the close job request.
-When a datafeed that has a specified end date stops, it automatically closes its associated job.`,
+When a datafeed that has a specified end date stops, it automatically closes its associated job.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-close-job`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/_close'],
   documentation:
@@ -11017,7 +11613,9 @@ const ML_DELETE_CALENDAR_CONTRACT: InternalConnectorContract = {
   summary: `Delete a calendar`,
   description: `Delete a calendar.
 
-Remove all scheduled events from a calendar, then delete it.`,
+Remove all scheduled events from a calendar, then delete it.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-calendar`,
   methods: ['DELETE'],
   patterns: ['_ml/calendars/{calendar_id}'],
   documentation:
@@ -11038,7 +11636,9 @@ const ML_DELETE_CALENDAR_EVENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_calendar_event',
   isInternal: true,
   summary: `Delete events from a calendar`,
-  description: `Delete events from a calendar.`,
+  description: `Delete events from a calendar.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-calendar-event`,
   methods: ['DELETE'],
   patterns: ['_ml/calendars/{calendar_id}/events/{event_id}'],
   documentation:
@@ -11059,7 +11659,9 @@ const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_calendar_job',
   isInternal: true,
   summary: `Delete anomaly jobs from a calendar`,
-  description: `Delete anomaly jobs from a calendar.`,
+  description: `Delete anomaly jobs from a calendar.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-calendar-job`,
   methods: ['DELETE'],
   patterns: ['_ml/calendars/{calendar_id}/jobs/{job_id}'],
   documentation:
@@ -11080,7 +11682,9 @@ const ML_DELETE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_data_frame_analytics',
   isInternal: true,
   summary: `Delete a data frame analytics job`,
-  description: `Delete a data frame analytics job.`,
+  description: `Delete a data frame analytics job.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-data-frame-analytics`,
   methods: ['DELETE'],
   patterns: ['_ml/data_frame/analytics/{id}'],
   documentation:
@@ -11101,7 +11705,9 @@ const ML_DELETE_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_datafeed',
   isInternal: true,
   summary: `Delete a datafeed`,
-  description: `Delete a datafeed.`,
+  description: `Delete a datafeed.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-datafeed`,
   methods: ['DELETE'],
   patterns: ['_ml/datafeeds/{datafeed_id}'],
   documentation:
@@ -11131,7 +11737,9 @@ You can limit the request to a single or set of anomaly detection jobs by
 using a job identifier, a group name, a comma-separated list of jobs, or a
 wildcard expression. You can delete expired data for all anomaly detection
 jobs by using \`_all\`, by specifying \`*\` as the \`<job_id>\`, or by omitting the
-\`<job_id>\`.`,
+\`<job_id>\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-expired-data`,
   methods: ['DELETE'],
   patterns: ['_ml/_delete_expired_data/{job_id}', '_ml/_delete_expired_data'],
   documentation:
@@ -11158,7 +11766,9 @@ const ML_DELETE_FILTER_CONTRACT: InternalConnectorContract = {
   description: `Delete a filter.
 
 If an anomaly detection job references the filter, you cannot delete the
-filter. You must update or delete the job before you can delete the filter.`,
+filter. You must update or delete the job before you can delete the filter.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-filter`,
   methods: ['DELETE'],
   patterns: ['_ml/filters/{filter_id}'],
   documentation:
@@ -11184,7 +11794,9 @@ const ML_DELETE_FORECAST_CONTRACT: InternalConnectorContract = {
 By default, forecasts are retained for 14 days. You can specify a
 different retention period with the \`expires_in\` parameter in the forecast
 jobs API. The delete forecast API enables you to delete one or more
-forecasts before they expire.`,
+forecasts before they expire.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-forecast`,
   methods: ['DELETE'],
   patterns: [
     '_ml/anomaly_detectors/{job_id}/_forecast',
@@ -11218,7 +11830,9 @@ It is not currently possible to delete multiple jobs using wildcards or a
 comma separated list. If you delete a job that has a datafeed, the request
 first tries to delete the datafeed. This behavior is equivalent to calling
 the delete datafeed API with the same timeout and force parameters as the
-delete job request.`,
+delete job request.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-job`,
   methods: ['DELETE'],
   patterns: ['_ml/anomaly_detectors/{job_id}'],
   documentation:
@@ -11243,7 +11857,9 @@ const ML_DELETE_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
 
 You cannot delete the active model snapshot. To delete that snapshot, first
 revert to a different one. To identify the active model snapshot, refer to
-the \`model_snapshot_id\` in the results from the get jobs API.`,
+the \`model_snapshot_id\` in the results from the get jobs API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-model-snapshot`,
   methods: ['DELETE'],
   patterns: ['_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}'],
   documentation:
@@ -11266,7 +11882,9 @@ const ML_DELETE_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   summary: `Delete an unreferenced trained model`,
   description: `Delete an unreferenced trained model.
 
-The request deletes a trained inference model that is not referenced by an ingest pipeline.`,
+The request deletes a trained inference model that is not referenced by an ingest pipeline.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-trained-model`,
   methods: ['DELETE'],
   patterns: ['_ml/trained_models/{model_id}'],
   documentation:
@@ -11291,7 +11909,9 @@ const ML_DELETE_TRAINED_MODEL_ALIAS_CONTRACT: InternalConnectorContract = {
 
 This API deletes an existing model alias that refers to a trained model. If
 the model alias is missing or refers to a model other than the one identified
-by the \`model_id\`, this API returns an error.`,
+by the \`model_id\`, this API returns an error.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-trained-model-alias`,
   methods: ['DELETE'],
   patterns: ['_ml/trained_models/{model_id}/model_aliases/{model_alias}'],
   documentation:
@@ -11316,7 +11936,9 @@ const ML_ESTIMATE_MODEL_MEMORY_CONTRACT: InternalConnectorContract = {
 
 Make an estimation of the memory usage for an anomaly detection job model.
 The estimate is based on analysis configuration details for the job and cardinality
-estimates for the fields it references.`,
+estimates for the fields it references.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-estimate-model-memory`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/_estimate_model_memory'],
   documentation:
@@ -11342,7 +11964,9 @@ const ML_EVALUATE_DATA_FRAME_CONTRACT: InternalConnectorContract = {
 The API packages together commonly used evaluation metrics for various types
 of machine learning features. This has been designed for use on indexes
 created by data frame analytics. Evaluation requires both a ground truth
-field and an analytics result field to be present.`,
+field and an analytics result field to be present.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-evaluate-data-frame`,
   methods: ['POST'],
   patterns: ['_ml/data_frame/_evaluate'],
   documentation:
@@ -11370,7 +11994,9 @@ exists already or one that has not been created yet. The following
 explanations are provided:
 * which fields are included or not in the analysis and why,
 * how much memory is estimated to be required. The estimate can be used when deciding the appropriate value for model_memory_limit setting later on.
-If you have object fields or fields that are excluded via source filtering, they are not included in the explanation.`,
+If you have object fields or fields that are excluded via source filtering, they are not included in the explanation.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-explain-data-frame-analytics`,
   methods: ['GET', 'POST'],
   patterns: ['_ml/data_frame/analytics/_explain', '_ml/data_frame/analytics/{id}/_explain'],
   documentation:
@@ -11422,7 +12048,9 @@ similar, however the flush is more efficient if you are expecting to send
 more data for analysis. When flushing, the job remains open and is available
 to continue analyzing data. A close operation additionally prunes and
 persists the model state to disk and the job must be opened again before
-analyzing further data.`,
+analyzing further data.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-flush-job`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/_flush'],
   documentation:
@@ -11448,7 +12076,9 @@ const ML_FORECAST_CONTRACT: InternalConnectorContract = {
 Forecasts are not supported for jobs that perform population analysis; an
 error occurs if you try to create a forecast for a job that has an
 \`over_field_name\` in its configuration. Forcasts predict future behavior
-based on historical data.`,
+based on historical data.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-forecast`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/_forecast'],
   documentation:
@@ -11470,7 +12100,9 @@ const ML_GET_BUCKETS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get anomaly detection job results for buckets`,
   description: `Get anomaly detection job results for buckets.
-The API presents a chronological view of the records, grouped by bucket.`,
+The API presents a chronological view of the records, grouped by bucket.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-buckets`,
   methods: ['GET', 'POST'],
   patterns: [
     '_ml/anomaly_detectors/{job_id}/results/buckets/{timestamp}',
@@ -11527,7 +12159,9 @@ const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_calendar_events',
   isInternal: true,
   summary: `Get info about events in calendars`,
-  description: `Get info about events in calendars.`,
+  description: `Get info about events in calendars.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-calendar-events`,
   methods: ['GET'],
   patterns: ['_ml/calendars/{calendar_id}/events'],
   documentation:
@@ -11548,7 +12182,9 @@ const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_calendars',
   isInternal: true,
   summary: `Get calendar configuration info`,
-  description: `Get calendar configuration info.`,
+  description: `Get calendar configuration info.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-calendars`,
   methods: ['GET', 'POST'],
   patterns: ['_ml/calendars', '_ml/calendars/{calendar_id}'],
   documentation:
@@ -11583,7 +12219,9 @@ const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_categories',
   isInternal: true,
   summary: `Get anomaly detection job results for categories`,
-  description: `Get anomaly detection job results for categories.`,
+  description: `Get anomaly detection job results for categories.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-categories`,
   methods: ['GET', 'POST'],
   patterns: [
     '_ml/anomaly_detectors/{job_id}/results/categories/{category_id}',
@@ -11624,7 +12262,9 @@ const ML_GET_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   description: `Get data frame analytics job configuration info.
 You can get information for multiple data frame analytics jobs in a single
 API request by using a comma-separated list of data frame analytics jobs or a
-wildcard expression.`,
+wildcard expression.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-data-frame-analytics`,
   methods: ['GET'],
   patterns: ['_ml/data_frame/analytics/{id}', '_ml/data_frame/analytics'],
   documentation:
@@ -11651,7 +12291,9 @@ const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_data_frame_analytics_stats',
   isInternal: true,
   summary: `Get data frame analytics job stats`,
-  description: `Get data frame analytics job stats.`,
+  description: `Get data frame analytics job stats.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-data-frame-analytics-stats`,
   methods: ['GET'],
   patterns: ['_ml/data_frame/analytics/_stats', '_ml/data_frame/analytics/{id}/_stats'],
   documentation:
@@ -11684,7 +12326,9 @@ using a comma-separated list of datafeeds or a wildcard expression. You can
 get statistics for all datafeeds by using \`_all\`, by specifying \`*\` as the
 \`<feed_id>\`, or by omitting the \`<feed_id>\`. If the datafeed is stopped, the
 only information you receive is the \`datafeed_id\` and the \`state\`.
-This API returns a maximum of 10,000 datafeeds.`,
+This API returns a maximum of 10,000 datafeeds.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-datafeed-stats`,
   methods: ['GET'],
   patterns: ['_ml/datafeeds/{datafeed_id}/_stats', '_ml/datafeeds/_stats'],
   documentation:
@@ -11713,7 +12357,9 @@ You can get information for multiple datafeeds in a single API request by
 using a comma-separated list of datafeeds or a wildcard expression. You can
 get information for all datafeeds by using \`_all\`, by specifying \`*\` as the
 \`<feed_id>\`, or by omitting the \`<feed_id>\`.
-This API returns a maximum of 10,000 datafeeds.`,
+This API returns a maximum of 10,000 datafeeds.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-datafeeds`,
   methods: ['GET'],
   patterns: ['_ml/datafeeds/{datafeed_id}', '_ml/datafeeds'],
   documentation:
@@ -11738,7 +12384,9 @@ const ML_GET_FILTERS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get filters`,
   description: `Get filters.
-You can get a single filter or all filters.`,
+You can get a single filter or all filters.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-filters`,
   methods: ['GET'],
   patterns: ['_ml/filters', '_ml/filters/{filter_id}'],
   documentation:
@@ -11765,7 +12413,9 @@ const ML_GET_INFLUENCERS_CONTRACT: InternalConnectorContract = {
   description: `Get anomaly detection job results for influencers.
 Influencers are the entities that have contributed to, or are to blame for,
 the anomalies. Influencer results are available only if an
-\`influencer_field_name\` is specified in the job configuration.`,
+\`influencer_field_name\` is specified in the job configuration.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-influencers`,
   methods: ['GET', 'POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/results/influencers'],
   documentation:
@@ -11798,7 +12448,9 @@ const ML_GET_JOB_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_job_stats',
   isInternal: true,
   summary: `Get anomaly detection job stats`,
-  description: `Get anomaly detection job stats.`,
+  description: `Get anomaly detection job stats.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-job-stats`,
   methods: ['GET'],
   patterns: ['_ml/anomaly_detectors/_stats', '_ml/anomaly_detectors/{job_id}/_stats'],
   documentation:
@@ -11826,7 +12478,9 @@ const ML_GET_JOBS_CONTRACT: InternalConnectorContract = {
 You can get information for multiple anomaly detection jobs in a single API
 request by using a group name, a comma-separated list of jobs, or a wildcard
 expression. You can get information for all anomaly detection jobs by using
-\`_all\`, by specifying \`*\` as the \`<job_id>\`, or by omitting the \`<job_id>\`.`,
+\`_all\`, by specifying \`*\` as the \`<job_id>\`, or by omitting the \`<job_id>\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-jobs`,
   methods: ['GET'],
   patterns: ['_ml/anomaly_detectors/{job_id}', '_ml/anomaly_detectors'],
   documentation:
@@ -11852,7 +12506,9 @@ const ML_GET_MEMORY_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get machine learning memory usage info`,
   description: `Get machine learning memory usage info.
 Get information about how machine learning jobs and trained models are using memory,
-on each node, both within the JVM heap, and natively, outside of the JVM.`,
+on each node, both within the JVM heap, and natively, outside of the JVM.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-memory-stats`,
   methods: ['GET'],
   patterns: ['_ml/memory/_stats', '_ml/memory/{node_id}/_stats'],
   documentation:
@@ -11876,7 +12532,9 @@ const ML_GET_MODEL_SNAPSHOT_UPGRADE_STATS_CONTRACT: InternalConnectorContract = 
   type: 'elasticsearch.ml.get_model_snapshot_upgrade_stats',
   isInternal: true,
   summary: `Get anomaly detection job model snapshot upgrade usage info`,
-  description: `Get anomaly detection job model snapshot upgrade usage info.`,
+  description: `Get anomaly detection job model snapshot upgrade usage info.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-model-snapshot-upgrade-stats`,
   methods: ['GET'],
   patterns: ['_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_upgrade/_stats'],
   documentation:
@@ -11897,7 +12555,9 @@ const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_model_snapshots',
   isInternal: true,
   summary: `Get model snapshots info`,
-  description: `Get model snapshots info.`,
+  description: `Get model snapshots info.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-model-snapshots`,
   methods: ['GET', 'POST'],
   patterns: [
     '_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}',
@@ -11953,7 +12613,9 @@ the \`overall_score\` is high only when all jobs detect anomalies in that
 overall bucket. If you set the \`bucket_span\` parameter (to a value
 greater than its default), the \`overall_score\` is the maximum
 \`overall_score\` of the overall buckets that have a span equal to the
-jobs' largest bucket span.`,
+jobs' largest bucket span.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-overall-buckets`,
   methods: ['GET', 'POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/results/overall_buckets'],
   documentation:
@@ -12003,7 +12665,9 @@ manually process them. The machine learning features therefore perform a
 sophisticated aggregation of the anomaly records into buckets.
 The number of record results depends on the number of anomalies found in each
 bucket, which relates to the number of time series being modeled and the
-number of detectors.`,
+number of detectors.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-records`,
   methods: ['GET', 'POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/results/records'],
   documentation:
@@ -12027,7 +12691,9 @@ const ML_GET_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_trained_models',
   isInternal: true,
   summary: `Get trained model configuration info`,
-  description: `Get trained model configuration info.`,
+  description: `Get trained model configuration info.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-trained-models`,
   methods: ['GET'],
   patterns: ['_ml/trained_models/{model_id}', '_ml/trained_models'],
   documentation:
@@ -12061,7 +12727,9 @@ const ML_GET_TRAINED_MODELS_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get trained models usage info`,
   description: `Get trained models usage info.
 You can get usage information for multiple trained
-models in a single API request by using a comma-separated list of model IDs or a wildcard expression.`,
+models in a single API request by using a comma-separated list of model IDs or a wildcard expression.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-trained-models-stats`,
   methods: ['GET'],
   patterns: ['_ml/trained_models/{model_id}/_stats', '_ml/trained_models/_stats'],
   documentation:
@@ -12088,7 +12756,9 @@ const ML_INFER_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.infer_trained_model',
   isInternal: true,
   summary: `Evaluate a trained model`,
-  description: `Evaluate a trained model.`,
+  description: `Evaluate a trained model.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-infer-trained-model`,
   methods: ['POST'],
   patterns: ['_ml/trained_models/{model_id}/_infer'],
   documentation:
@@ -12116,7 +12786,9 @@ understand machine learning configurations where some options are not
 specified, meaning that the defaults should be used. This endpoint may be
 used to find out what those defaults are. It also provides information about
 the maximum size of machine learning jobs that could run in the current
-cluster configuration.`,
+cluster configuration.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-info`,
   methods: ['GET'],
   patterns: ['_ml/info'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-info',
@@ -12143,7 +12815,9 @@ data. It can be opened and closed multiple times throughout its lifecycle.
 When you open a new job, it starts with an empty model.
 When you open an existing job, the most recent model state is automatically
 loaded. The job is ready to resume its analysis from where it left off, once
-new data is received.`,
+new data is received.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-open-job`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/_open'],
   documentation:
@@ -12164,7 +12838,9 @@ const ML_POST_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.post_calendar_events',
   isInternal: true,
   summary: `Add scheduled events to the calendar`,
-  description: `Add scheduled events to the calendar.`,
+  description: `Add scheduled events to the calendar.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-post-calendar-events`,
   methods: ['POST'],
   patterns: ['_ml/calendars/{calendar_id}/events'],
   documentation:
@@ -12188,7 +12864,9 @@ const ML_POST_DATA_CONTRACT: InternalConnectorContract = {
   description: `Send data to an anomaly detection job for analysis.
 
 IMPORTANT: For each job, data can be accepted from only a single connection at a time.
-It is not currently possible to post data to multiple jobs using wildcards or a comma-separated list.`,
+It is not currently possible to post data to multiple jobs using wildcards or a comma-separated list.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-post-data`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/_data'],
   documentation:
@@ -12210,7 +12888,9 @@ const ML_PREVIEW_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Preview features used by data frame analytics`,
   description: `Preview features used by data frame analytics.
-Preview the extracted features used by a data frame analytics config.`,
+Preview the extracted features used by a data frame analytics config.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-preview-data-frame-analytics`,
   methods: ['GET', 'POST'],
   patterns: ['_ml/data_frame/analytics/_preview', '_ml/data_frame/analytics/{id}/_preview'],
   documentation:
@@ -12253,7 +12933,9 @@ that will be passed to the anomaly detection engine.
 IMPORTANT: When Elasticsearch security features are enabled, the preview uses the credentials of the user that
 called the API. However, when the datafeed starts it uses the roles of the last user that created or updated the
 datafeed. To get a preview that accurately reflects the behavior of the datafeed, use the appropriate credentials.
-You can also use secondary authorization headers to supply the credentials.`,
+You can also use secondary authorization headers to supply the credentials.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-preview-datafeed`,
   methods: ['GET', 'POST'],
   patterns: ['_ml/datafeeds/{datafeed_id}/_preview', '_ml/datafeeds/_preview'],
   documentation:
@@ -12288,7 +12970,9 @@ const ML_PUT_CALENDAR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_calendar',
   isInternal: true,
   summary: `Create a calendar`,
-  description: `Create a calendar.`,
+  description: `Create a calendar.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-calendar`,
   methods: ['PUT'],
   patterns: ['_ml/calendars/{calendar_id}'],
   documentation:
@@ -12309,7 +12993,9 @@ const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_calendar_job',
   isInternal: true,
   summary: `Add anomaly detection job to calendar`,
-  description: `Add anomaly detection job to calendar.`,
+  description: `Add anomaly detection job to calendar.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-calendar-job`,
   methods: ['PUT'],
   patterns: ['_ml/calendars/{calendar_id}/jobs/{job_id}'],
   documentation:
@@ -12337,7 +13023,9 @@ By default, the query used in the source configuration is \`{"match_all": {}}\`.
 
 If the destination index does not exist, it is created automatically when you start the job.
 
-If you supply only a subset of the regression or classification parameters, hyperparameter optimization occurs. It determines a value for each of the undefined parameters.`,
+If you supply only a subset of the regression or classification parameters, hyperparameter optimization occurs. It determines a value for each of the undefined parameters.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-data-frame-analytics`,
   methods: ['PUT'],
   patterns: ['_ml/data_frame/analytics/{id}'],
   documentation:
@@ -12381,7 +13069,9 @@ When Elasticsearch security features are enabled, your datafeed remembers which 
 at the time of creation and runs the query using those same roles. If you provide secondary authorization headers,
 those credentials are used instead.
 You must use Kibana, this API, or the create anomaly detection jobs API to create a datafeed. Do not add a datafeed
-directly to the \`.ml-config\` index. Do not give users \`write\` privileges on the \`.ml-config\` index.`,
+directly to the \`.ml-config\` index. Do not give users \`write\` privileges on the \`.ml-config\` index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-datafeed`,
   methods: ['PUT'],
   patterns: ['_ml/datafeeds/{datafeed_id}'],
   documentation:
@@ -12419,7 +13109,9 @@ const ML_PUT_FILTER_CONTRACT: InternalConnectorContract = {
   summary: `Create a filter`,
   description: `Create a filter.
 A filter contains a list of strings. It can be used by one or more anomaly detection jobs.
-Specifically, filters are referenced in the \`custom_rules\` property of detector configuration objects.`,
+Specifically, filters are referenced in the \`custom_rules\` property of detector configuration objects.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-filter`,
   methods: ['PUT'],
   patterns: ['_ml/filters/{filter_id}'],
   documentation:
@@ -12443,7 +13135,9 @@ const ML_PUT_JOB_CONTRACT: InternalConnectorContract = {
   description: `Create an anomaly detection job.
 
 If you include a \`datafeed_config\`, you must have read index privileges on the source index.
-If you include a \`datafeed_config\` but do not provide a query, the datafeed uses \`{"match_all": {"boost": 1}}\`.`,
+If you include a \`datafeed_config\` but do not provide a query, the datafeed uses \`{"match_all": {"boost": 1}}\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-job`,
   methods: ['PUT'],
   patterns: ['_ml/anomaly_detectors/{job_id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-job',
@@ -12481,7 +13175,9 @@ const ML_PUT_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Create a trained model`,
   description: `Create a trained model.
-Enable you to supply a trained model that is not created by data frame analytics.`,
+Enable you to supply a trained model that is not created by data frame analytics.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model`,
   methods: ['PUT'],
   patterns: ['_ml/trained_models/{model_id}'],
   documentation:
@@ -12530,7 +13226,9 @@ analysis; you cannot reassign an alias from one type of trained model to
 another.
 If you use this API to update an alias and there are very few input fields in
 common between the old and new trained models for the model alias, the API
-returns a warning.`,
+returns a warning.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model-alias`,
   methods: ['PUT'],
   patterns: ['_ml/trained_models/{model_id}/model_aliases/{model_alias}'],
   documentation:
@@ -12551,7 +13249,9 @@ const ML_PUT_TRAINED_MODEL_DEFINITION_PART_CONTRACT: InternalConnectorContract =
   type: 'elasticsearch.ml.put_trained_model_definition_part',
   isInternal: true,
   summary: `Create part of a trained model definition`,
-  description: `Create part of a trained model definition.`,
+  description: `Create part of a trained model definition.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model-definition-part`,
   methods: ['PUT'],
   patterns: ['_ml/trained_models/{model_id}/definition/{part}'],
   documentation:
@@ -12574,7 +13274,9 @@ const ML_PUT_TRAINED_MODEL_VOCABULARY_CONTRACT: InternalConnectorContract = {
   summary: `Create a trained model vocabulary`,
   description: `Create a trained model vocabulary.
 This API is supported only for natural language processing (NLP) models.
-The vocabulary is stored in the index as described in \`inference_config.*.vocabulary\` of the trained model definition.`,
+The vocabulary is stored in the index as described in \`inference_config.*.vocabulary\` of the trained model definition.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model-vocabulary`,
   methods: ['PUT'],
   patterns: ['_ml/trained_models/{model_id}/vocabulary'],
   documentation:
@@ -12599,7 +13301,9 @@ const ML_RESET_JOB_CONTRACT: InternalConnectorContract = {
 All model state and results are deleted. The job is ready to start over as if
 it had just been created.
 It is not currently possible to reset multiple jobs using wildcards or a
-comma separated list.`,
+comma separated list.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-reset-job`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/_reset'],
   documentation:
@@ -12627,7 +13331,9 @@ models whilst the system learns whether this is a new step-change in behavior
 or a one-off event. In the case where this anomalous input is known to be a
 one-off, then it might be appropriate to reset the model state to a time
 before this event. For example, you might consider reverting to a saved
-snapshot after Black Friday or a critical system failure.`,
+snapshot after Black Friday or a critical system failure.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-revert-model-snapshot`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_revert'],
   documentation:
@@ -12660,7 +13366,9 @@ datafeeds and prevent new jobs from opening. You can also use this API
 during upgrades that do not require you to reindex your machine learning
 indices, though stopping jobs is not a requirement in that case.
 You can see the current value for the upgrade_mode setting by using the get
-machine learning info API.`,
+machine learning info API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-set-upgrade-mode`,
   methods: ['POST'],
   patterns: ['_ml/set_upgrade_mode'],
   documentation:
@@ -12692,7 +13400,9 @@ source indices, the destination index copies the highest setting values. The
 mappings for the destination index are also copied from the source indices.
 If there are any mapping conflicts, the job fails to start.
 If the destination index exists, it is used as is. You can therefore set up
-the destination index in advance with custom settings and mappings.`,
+the destination index in advance with custom settings and mappings.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-data-frame-analytics`,
   methods: ['POST'],
   patterns: ['_ml/data_frame/analytics/{id}/_start'],
   documentation:
@@ -12725,7 +13435,9 @@ If new data was indexed for that exact millisecond between stopping and starting
 
 When Elasticsearch security features are enabled, your datafeed remembers which roles the last user to create or
 update it had at the time of creation or update and runs the query using those same roles. If you provided secondary
-authorization headers when you created or updated the datafeed, those credentials are used instead.`,
+authorization headers when you created or updated the datafeed, those credentials are used instead.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-datafeed`,
   methods: ['POST'],
   patterns: ['_ml/datafeeds/{datafeed_id}/_start'],
   documentation:
@@ -12747,7 +13459,9 @@ const ML_START_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Start a trained model deployment`,
   description: `Start a trained model deployment.
-It allocates the model to every machine learning node.`,
+It allocates the model to every machine learning node.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-trained-model-deployment`,
   methods: ['POST'],
   patterns: ['_ml/trained_models/{model_id}/deployment/_start'],
   documentation:
@@ -12779,7 +13493,9 @@ const ML_STOP_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   summary: `Stop data frame analytics jobs`,
   description: `Stop data frame analytics jobs.
 A data frame analytics job can be started and stopped multiple times
-throughout its lifecycle.`,
+throughout its lifecycle.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-stop-data-frame-analytics`,
   methods: ['POST'],
   patterns: ['_ml/data_frame/analytics/{id}/_stop'],
   documentation:
@@ -12802,7 +13518,9 @@ const ML_STOP_DATAFEED_CONTRACT: InternalConnectorContract = {
   summary: `Stop datafeeds`,
   description: `Stop datafeeds.
 A datafeed that is stopped ceases to retrieve data from Elasticsearch. A datafeed can be started and stopped
-multiple times throughout its lifecycle.`,
+multiple times throughout its lifecycle.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-stop-datafeed`,
   methods: ['POST'],
   patterns: ['_ml/datafeeds/{datafeed_id}/_stop'],
   documentation:
@@ -12823,7 +13541,9 @@ const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.stop_trained_model_deployment',
   isInternal: true,
   summary: `Stop a trained model deployment`,
-  description: `Stop a trained model deployment.`,
+  description: `Stop a trained model deployment.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-stop-trained-model-deployment`,
   methods: ['POST'],
   patterns: ['_ml/trained_models/{model_id}/deployment/_stop'],
   documentation:
@@ -12844,7 +13564,9 @@ const ML_UPDATE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_data_frame_analytics',
   isInternal: true,
   summary: `Update a data frame analytics job`,
-  description: `Update a data frame analytics job.`,
+  description: `Update a data frame analytics job.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-data-frame-analytics`,
   methods: ['POST'],
   patterns: ['_ml/data_frame/analytics/{id}/_update'],
   documentation:
@@ -12869,7 +13591,9 @@ const ML_UPDATE_DATAFEED_CONTRACT: InternalConnectorContract = {
 You must stop and start the datafeed for the changes to be applied.
 When Elasticsearch security features are enabled, your datafeed remembers which roles the user who updated it had at
 the time of the update and runs the query using those same roles. If you provide secondary authorization headers,
-those credentials are used instead.`,
+those credentials are used instead.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-datafeed`,
   methods: ['POST'],
   patterns: ['_ml/datafeeds/{datafeed_id}/_update'],
   documentation:
@@ -12905,7 +13629,9 @@ const ML_UPDATE_FILTER_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Update a filter`,
   description: `Update a filter.
-Updates the description of a filter, adds items, or removes items from the list.`,
+Updates the description of a filter, adds items, or removes items from the list.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-filter`,
   methods: ['POST'],
   patterns: ['_ml/filters/{filter_id}/_update'],
   documentation:
@@ -12927,7 +13653,9 @@ const ML_UPDATE_JOB_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Update an anomaly detection job`,
   description: `Update an anomaly detection job.
-Updates certain properties of an anomaly detection job.`,
+Updates certain properties of an anomaly detection job.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-job`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/_update'],
   documentation:
@@ -12965,7 +13693,9 @@ const ML_UPDATE_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Update a snapshot`,
   description: `Update a snapshot.
-Updates certain properties of a snapshot.`,
+Updates certain properties of a snapshot.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-model-snapshot`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_update'],
   documentation:
@@ -12986,7 +13716,9 @@ const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_trained_model_deployment',
   isInternal: true,
   summary: `Update a trained model deployment`,
-  description: `Update a trained model deployment.`,
+  description: `Update a trained model deployment.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-trained-model-deployment`,
   methods: ['POST'],
   patterns: ['_ml/trained_models/{model_id}/deployment/_update'],
   documentation:
@@ -13016,7 +13748,9 @@ This API provides a means to upgrade a snapshot to the current major version.
 This aids in preparing the cluster for an upgrade to the next major version.
 Only one snapshot per anomaly detection job can be upgraded at a time and the
 upgraded snapshot cannot be the current snapshot of the anomaly detection
-job.`,
+job.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-upgrade-job-snapshot`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_upgrade'],
   documentation:
@@ -13037,7 +13771,9 @@ const ML_VALIDATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.validate',
   isInternal: true,
   summary: ``,
-  description: `Validate an anomaly detection job.`,
+  description: `Validate an anomaly detection job.
+
+ Documentation: https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/_validate'],
   documentation: 'https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html',
@@ -13053,7 +13789,9 @@ const ML_VALIDATE_DETECTOR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.validate_detector',
   isInternal: true,
   summary: ``,
-  description: `Validate an anomaly detection job.`,
+  description: `Validate an anomaly detection job.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch`,
   methods: ['POST'],
   patterns: ['_ml/anomaly_detectors/_validate/detector'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch',
@@ -13070,7 +13808,9 @@ const MONITORING_BULK_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: ``,
   description: `Send monitoring data.
-This API is used by the monitoring features to send monitoring data.`,
+This API is used by the monitoring features to send monitoring data.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch`,
   methods: ['POST', 'PUT'],
   patterns: ['_monitoring/bulk', '_monitoring/{type}/bulk'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch',
@@ -13102,7 +13842,9 @@ This structure is specifically optimized to reduce parsing if a specific search 
 
 IMPORTANT: The final line of data must end with a newline character \`\\n\`.
 Each newline character may be preceded by a carriage return \`\\r\`.
-When sending requests to this endpoint the \`Content-Type\` header should be set to \`application/x-ndjson\`.`,
+When sending requests to this endpoint the \`Content-Type\` header should be set to \`application/x-ndjson\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch`,
   methods: ['GET', 'POST'],
   patterns: ['_msearch', '{index}/_msearch'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch',
@@ -13165,7 +13907,9 @@ For example:
 { "id": "my-other-search-template", "params": { "query_type": "match_all" }}
 
 \$ curl -H "Content-Type: application/x-ndjson" -XGET localhost:9200/_msearch/template --data-binary "@requests"; echo
-\`\`\``,
+\`\`\`
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch-template`,
   methods: ['GET', 'POST'],
   patterns: ['_msearch/template', '{index}/_msearch/template'],
   documentation:
@@ -13217,7 +13961,9 @@ Each element has the structure provided by the termvectors API.
 **Artificial documents**
 
 You can also use \`mtermvectors\` to generate term vectors for artificial documents provided in the body of the request.
-The mapping used is determined by the specified \`_index\`.`,
+The mapping used is determined by the specified \`_index\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mtermvectors`,
   methods: ['GET', 'POST'],
   patterns: ['_mtermvectors', '{index}/_mtermvectors'],
   documentation:
@@ -13266,7 +14012,9 @@ const NODES_CLEAR_REPOSITORIES_METERING_ARCHIVE_CONTRACT: InternalConnectorContr
   isInternal: true,
   summary: `Clear the archived repositories metering`,
   description: `Clear the archived repositories metering.
-Clear the archived repositories metering information in the cluster.`,
+Clear the archived repositories metering information in the cluster.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-clear-repositories-metering-archive`,
   methods: ['DELETE'],
   patterns: ['_nodes/{node_id}/_repositories_metering/{max_archive_version}'],
   documentation:
@@ -13290,7 +14038,9 @@ const NODES_GET_REPOSITORIES_METERING_INFO_CONTRACT: InternalConnectorContract =
   description: `Get cluster repositories metering.
 Get repositories metering information for a cluster.
 This API exposes monotonically non-decreasing counters and it is expected that clients would durably store the information needed to compute aggregations over a period of time.
-Additionally, the information exposed by this API is volatile, meaning that it will not be present after node restarts.`,
+Additionally, the information exposed by this API is volatile, meaning that it will not be present after node restarts.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-get-repositories-metering-info`,
   methods: ['GET'],
   patterns: ['_nodes/{node_id}/_repositories_metering'],
   documentation:
@@ -13313,7 +14063,9 @@ const NODES_HOT_THREADS_CONTRACT: InternalConnectorContract = {
   summary: `Get the hot threads for nodes`,
   description: `Get the hot threads for nodes.
 Get a breakdown of the hot threads on each selected node in the cluster.
-The output is plain text with a breakdown of the top hot threads for each node.`,
+The output is plain text with a breakdown of the top hot threads for each node.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-hot-threads`,
   methods: ['GET'],
   patterns: ['_nodes/hot_threads', '_nodes/{node_id}/hot_threads'],
   documentation:
@@ -13347,7 +14099,9 @@ const NODES_INFO_CONTRACT: InternalConnectorContract = {
   summary: `Get node information`,
   description: `Get node information.
 
-By default, the API returns all attributes and core settings for cluster nodes.`,
+By default, the API returns all attributes and core settings for cluster nodes.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-info`,
   methods: ['GET'],
   patterns: ['_nodes', '_nodes/{node_id}', '_nodes/{metric}', '_nodes/{node_id}/{metric}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-info',
@@ -13389,7 +14143,9 @@ When you have updated reloadable secure settings in your keystore, you can use t
 
 When the Elasticsearch keystore is password protected and not simply obfuscated, you must provide the password for the keystore when you reload the secure settings.
 Reloading the settings for the whole cluster assumes that the keystores for all nodes are protected with the same password; this method is allowed only when inter-node communications are encrypted.
-Alternatively, you can reload the secure settings on each node by locally accessing the API and passing the node-specific Elasticsearch keystore password.`,
+Alternatively, you can reload the secure settings on each node by locally accessing the API and passing the node-specific Elasticsearch keystore password.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-reload-secure-settings`,
   methods: ['POST'],
   patterns: ['_nodes/reload_secure_settings', '_nodes/{node_id}/reload_secure_settings'],
   documentation:
@@ -13418,7 +14174,9 @@ const NODES_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get node statistics`,
   description: `Get node statistics.
 Get statistics for nodes in a cluster.
-By default, all stats are returned. You can limit the returned information by using metrics.`,
+By default, all stats are returned. You can limit the returned information by using metrics.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-stats`,
   methods: ['GET'],
   patterns: [
     '_nodes/stats',
@@ -13478,7 +14236,9 @@ const NODES_USAGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.usage',
   isInternal: true,
   summary: `Get feature usage information`,
-  description: `Get feature usage information.`,
+  description: `Get feature usage information.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-usage`,
   methods: ['GET'],
   patterns: [
     '_nodes/usage',
@@ -13554,7 +14314,9 @@ Ensure that you have configured your nodes to have ample free file handles.
 Additionally, if a segment contains deleted or updated documents then the point in time must keep track of whether each document in the segment was live at the time of the initial search request.
 Ensure that your nodes have sufficient heap space if you have many open point-in-times on an index that is subject to ongoing deletes or updates.
 Note that a point-in-time doesn't prevent its associated indices from being deleted.
-You can check how many point-in-times (that is, search contexts) are open with the nodes stats API.`,
+You can check how many point-in-times (that is, search contexts) are open with the nodes stats API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-open-point-in-time`,
   methods: ['POST'],
   patterns: ['{index}/_pit'],
   documentation:
@@ -13584,7 +14346,9 @@ const PING_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Ping the cluster`,
   description: `Ping the cluster.
-Get information about whether the cluster is running.`,
+Get information about whether the cluster is running.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-cluster`,
   methods: ['HEAD'],
   patterns: [''],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-cluster',
@@ -13604,7 +14368,9 @@ const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.flamegraph',
   isInternal: true,
   summary: ``,
-  description: `Extracts a UI-optimized structure to render flamegraphs from Universal Profiling`,
+  description: `Extracts a UI-optimized structure to render flamegraphs from Universal Profiling
+
+ Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
   methods: ['POST'],
   patterns: ['_profiling/flamegraph'],
   documentation: 'https://www.elastic.co/guide/en/observability/current/universal-profiling.html',
@@ -13620,7 +14386,9 @@ const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.stacktraces',
   isInternal: true,
   summary: ``,
-  description: `Extracts raw stacktrace information from Universal Profiling`,
+  description: `Extracts raw stacktrace information from Universal Profiling
+
+ Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
   methods: ['POST'],
   patterns: ['_profiling/stacktraces'],
   documentation: 'https://www.elastic.co/guide/en/observability/current/universal-profiling.html',
@@ -13636,7 +14404,9 @@ const PROFILING_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.status',
   isInternal: true,
   summary: ``,
-  description: `Returns basic information about the status of Universal Profiling`,
+  description: `Returns basic information about the status of Universal Profiling
+
+ Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
   methods: ['GET'],
   patterns: ['_profiling/status'],
   documentation: 'https://www.elastic.co/guide/en/observability/current/universal-profiling.html',
@@ -13652,7 +14422,9 @@ const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.topn_functions',
   isInternal: true,
   summary: ``,
-  description: `Extracts a list of topN functions from Universal Profiling`,
+  description: `Extracts a list of topN functions from Universal Profiling
+
+ Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
   methods: ['POST'],
   patterns: ['_profiling/topn/functions'],
   documentation: 'https://www.elastic.co/guide/en/observability/current/universal-profiling.html',
@@ -13669,7 +14441,9 @@ const PROJECT_TAGS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: ``,
   description: `Get tags.
-Get the tags that are defined for the project.`,
+Get the tags that are defined for the project.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-project-tags`,
   methods: ['GET'],
   patterns: ['_project/tags'],
   documentation:
@@ -13687,7 +14461,9 @@ const PUT_SCRIPT_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Create or update a script or search template`,
   description: `Create or update a script or search template.
-Creates or updates a stored script or search template.`,
+Creates or updates a stored script or search template.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-put-script`,
   methods: ['PUT', 'POST'],
   patterns: ['_scripts/{id}', '_scripts/{id}/{context}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-put-script',
@@ -13723,7 +14499,9 @@ const QUERY_RULES_DELETE_RULE_CONTRACT: InternalConnectorContract = {
   summary: `Delete a query rule`,
   description: `Delete a query rule.
 Delete a query rule within a query ruleset.
-This is a destructive action that is only recoverable by re-adding the same rule with the create or update query rule API.`,
+This is a destructive action that is only recoverable by re-adding the same rule with the create or update query rule API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-delete-rule`,
   methods: ['DELETE'],
   patterns: ['_query_rules/{ruleset_id}/_rule/{rule_id}'],
   documentation:
@@ -13746,7 +14524,9 @@ const QUERY_RULES_DELETE_RULESET_CONTRACT: InternalConnectorContract = {
   summary: `Delete a query ruleset`,
   description: `Delete a query ruleset.
 Remove a query ruleset and its associated data.
-This is a destructive action that is not recoverable.`,
+This is a destructive action that is not recoverable.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-delete-ruleset`,
   methods: ['DELETE'],
   patterns: ['_query_rules/{ruleset_id}'],
   documentation:
@@ -13768,7 +14548,9 @@ const QUERY_RULES_GET_RULE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get a query rule`,
   description: `Get a query rule.
-Get details about a query rule within a query ruleset.`,
+Get details about a query rule within a query ruleset.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-get-rule`,
   methods: ['GET'],
   patterns: ['_query_rules/{ruleset_id}/_rule/{rule_id}'],
   documentation:
@@ -13790,7 +14572,9 @@ const QUERY_RULES_GET_RULESET_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get a query ruleset`,
   description: `Get a query ruleset.
-Get details about a query ruleset.`,
+Get details about a query ruleset.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-get-ruleset`,
   methods: ['GET'],
   patterns: ['_query_rules/{ruleset_id}'],
   documentation:
@@ -13812,7 +14596,9 @@ const QUERY_RULES_LIST_RULESETS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get all query rulesets`,
   description: `Get all query rulesets.
-Get summarized information about the query rulesets.`,
+Get summarized information about the query rulesets.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-list-rulesets`,
   methods: ['GET'],
   patterns: ['_query_rules'],
   documentation:
@@ -13839,7 +14625,9 @@ Create or update a query rule within a query ruleset.
 IMPORTANT: Due to limitations within pinned queries, you can only pin documents using ids or docs, but cannot use both in single rule.
 It is advised to use one or the other in query rulesets, to avoid errors.
 Additionally, pinned queries have a maximum limit of 100 pinned hits.
-If multiple matching rules pin more than 100 documents, only the first 100 documents are pinned in the order they are specified in the ruleset.`,
+If multiple matching rules pin more than 100 documents, only the first 100 documents are pinned in the order they are specified in the ruleset.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-put-rule`,
   methods: ['PUT'],
   patterns: ['_query_rules/{ruleset_id}/_rule/{rule_id}'],
   documentation:
@@ -13867,7 +14655,9 @@ This limit can be increased by using the \`xpack.applications.rules.max_rules_pe
 IMPORTANT: Due to limitations within pinned queries, you can only select documents using \`ids\` or \`docs\`, but cannot use both in single rule.
 It is advised to use one or the other in query rulesets, to avoid errors.
 Additionally, pinned queries have a maximum limit of 100 pinned hits.
-If multiple matching rules pin more than 100 documents, only the first 100 documents are pinned in the order they are specified in the ruleset.`,
+If multiple matching rules pin more than 100 documents, only the first 100 documents are pinned in the order they are specified in the ruleset.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-put-ruleset`,
   methods: ['PUT'],
   patterns: ['_query_rules/{ruleset_id}'],
   documentation:
@@ -13889,7 +14679,9 @@ const QUERY_RULES_TEST_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Test a query ruleset`,
   description: `Test a query ruleset.
-Evaluate match criteria against a query ruleset to identify the rules that would match that criteria.`,
+Evaluate match criteria against a query ruleset to identify the rules that would match that criteria.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-test`,
   methods: ['POST'],
   patterns: ['_query_rules/{ruleset_id}/_test'],
   documentation:
@@ -13912,7 +14704,9 @@ const RANK_EVAL_CONTRACT: InternalConnectorContract = {
   summary: `Evaluate ranked search results`,
   description: `Evaluate ranked search results.
 
-Evaluate the quality of ranked search results over a set of typical search queries.`,
+Evaluate the quality of ranked search results over a set of typical search queries.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rank-eval`,
   methods: ['GET', 'POST'],
   patterns: ['_rank_eval', '{index}/_rank_eval'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rank-eval',
@@ -13993,7 +14787,9 @@ It's recommended to reindex on indices with a green status. Reindexing can fail 
 When retrying a failed reindex operation, it might be necessary to set \`conflicts=proceed\` or to first delete the partial destination index.
 Additionally, dry runs, checking disk space, and fetching index recovery information can help address the root cause.
 
-Refer to the linked documentation for examples of how to reindex documents.`,
+Refer to the linked documentation for examples of how to reindex documents.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex`,
   methods: ['POST'],
   patterns: ['_reindex'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex',
@@ -14034,7 +14830,9 @@ POST _reindex/r1A2WoRbTwKZ516z6NEs5A:36619/_rethrottle?requests_per_second=-1
 
 Rethrottling that speeds up the query takes effect immediately.
 Rethrottling that slows down the query will take effect after completing the current batch.
-This behavior prevents scroll timeouts.`,
+This behavior prevents scroll timeouts.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex`,
   methods: ['POST'],
   patterns: ['_reindex/{task_id}/_rethrottle'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex',
@@ -14056,7 +14854,9 @@ const RENDER_SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   summary: `Render a search template`,
   description: `Render a search template.
 
-Render a search template as a search request body.`,
+Render a search template as a search request body.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-render-search-template`,
   methods: ['GET', 'POST'],
   patterns: ['_render/template', '_render/template/{id}'],
   documentation:
@@ -14114,7 +14914,9 @@ POST my_rollup_index/_delete_by_query
     }
   }
 }
-\`\`\``,
+\`\`\`
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-delete-job`,
   methods: ['DELETE'],
   patterns: ['_rollup/job/{id}'],
   documentation:
@@ -14140,7 +14942,9 @@ Get the configuration, stats, and status of rollup jobs.
 
 NOTE: This API returns only active (both \`STARTED\` and \`STOPPED\`) jobs.
 If a job was created, ran for a while, then was deleted, the API does not return any details about it.
-For details about a historical rollup job, the rollup capabilities API may be more useful.`,
+For details about a historical rollup job, the rollup capabilities API may be more useful.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-get-jobs`,
   methods: ['GET'],
   patterns: ['_rollup/job/{id}', '_rollup/job'],
   documentation:
@@ -14172,7 +14976,9 @@ Furthermore, only certain aggregations can be configured for various fields, lea
 This API enables you to inspect an index and determine:
 
 1. Does this index have associated rollup data somewhere in the cluster?
-2. If yes to the first question, what fields were rolled up, what aggregations can be performed, and where does the data live?`,
+2. If yes to the first question, what fields were rolled up, what aggregations can be performed, and where does the data live?
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-get-rollup-caps`,
   methods: ['GET'],
   patterns: ['_rollup/data/{id}', '_rollup/data'],
   documentation:
@@ -14201,7 +15007,9 @@ Get the rollup capabilities of all jobs inside of a rollup index.
 A single rollup index may store the data for multiple rollup jobs and may have a variety of capabilities depending on those jobs. This API enables you to determine:
 
 * What jobs are stored in an index (or indices specified via a pattern)?
-* What target indices were rolled up, what fields were used in those rollups, and what aggregations can be performed on each job?`,
+* What target indices were rolled up, what fields were used in those rollups, and what aggregations can be performed on each job?
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-get-rollup-index-caps`,
   methods: ['GET'],
   patterns: ['{index}/_rollup/data'],
   documentation:
@@ -14230,7 +15038,9 @@ The rollup job configuration contains all the details about how the job should r
 
 There are three main sections to the job configuration: the logistical details about the job (for example, the cron schedule), the fields that are used for grouping, and what metrics to collect for each group.
 
-Jobs are created in a \`STOPPED\` state. You can start them with the start rollup jobs API.`,
+Jobs are created in a \`STOPPED\` state. You can start them with the start rollup jobs API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-put-job`,
   methods: ['PUT'],
   patterns: ['_rollup/job/{id}'],
   documentation:
@@ -14270,7 +15080,9 @@ The following functionality is not available:
 \`size\`: Because rollups work on pre-aggregated data, no search hits can be returned and so size must be set to zero or omitted entirely.
 \`highlighter\`, \`suggestors\`, \`post_filter\`, \`profile\`, \`explain\`: These are similarly disallowed.
 
-For more detailed examples of using the rollup search API, including querying rolled-up data only or combining rolled-up and live data, refer to the External documentation.`,
+For more detailed examples of using the rollup search API, including querying rolled-up data only or combining rolled-up and live data, refer to the External documentation.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-rollup-search`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_rollup_search'],
   documentation:
@@ -14296,7 +15108,9 @@ const ROLLUP_START_JOB_CONTRACT: InternalConnectorContract = {
   summary: `Start rollup jobs`,
   description: `Start rollup jobs.
 If you try to start a job that does not exist, an exception occurs.
-If you try to start a job that is already started, nothing happens.`,
+If you try to start a job that is already started, nothing happens.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-start-job`,
   methods: ['POST'],
   patterns: ['_rollup/job/{id}/_start'],
   documentation:
@@ -14328,7 +15142,9 @@ This is accomplished with the \`wait_for_completion\` query parameter, and optio
 POST _rollup/job/sensor/_stop?wait_for_completion=true&timeout=10s
 \`\`\`
 The parameter blocks the API call from returning until either the job has moved to STOPPED or the specified time has elapsed.
-If the specified time elapses without the job moving to STOPPED, a timeout exception occurs.`,
+If the specified time elapses without the job moving to STOPPED, a timeout exception occurs.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-stop-job`,
   methods: ['POST'],
   patterns: ['_rollup/job/{id}/_stop'],
   documentation:
@@ -14357,7 +15173,9 @@ This API requires very few dependencies and is especially useful if you don't ha
 
 The API uses several _contexts_, which control how scripts are run, what variables are available at runtime, and what the return type is.
 
-Each context requires a script, but additional parameters depend on the context you're using for that script.`,
+Each context requires a script, but additional parameters depend on the context you're using for that script.
+
+ Documentation: https://www.elastic.co/docs/reference/scripting-languages/painless/painless-api-examples`,
   methods: ['GET', 'POST'],
   patterns: ['_scripts/painless/_execute'],
   documentation:
@@ -14394,7 +15212,9 @@ If the Elasticsearch security features are enabled, the access to the results of
 
 You can also use the scroll API to specify a new scroll parameter that extends or shortens the retention period for the search context.
 
-IMPORTANT: Results from a scrolling search reflect the state of the index at the time of the initial search request. Subsequent indexing or document changes only affect later search and scroll requests.`,
+IMPORTANT: Results from a scrolling search reflect the state of the index at the time of the initial search request. Subsequent indexing or document changes only affect later search and scroll requests.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-scroll`,
   methods: ['GET', 'POST'],
   patterns: ['_search/scroll', '_search/scroll/{scroll_id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-scroll',
@@ -14442,7 +15262,9 @@ For instance if the number of shards is equal to 2 and you request 4 slices, the
 
 IMPORTANT: The same point-in-time ID should be used for all slices.
 If different PIT IDs are used, slices can overlap and miss documents.
-This situation can occur because the splitting criterion is based on Lucene document IDs, which are not stable across changes to the index.`,
+This situation can occur because the splitting criterion is based on Lucene document IDs, which are not stable across changes to the index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search`,
   methods: ['GET', 'POST'],
   patterns: ['_search', '{index}/_search'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search',
@@ -14553,7 +15375,9 @@ const SEARCH_APPLICATION_DELETE_CONTRACT: InternalConnectorContract = {
   summary: `Delete a search application`,
   description: `Delete a search application.
 
-Remove a search application and its associated alias. Indices attached to the search application are not removed.`,
+Remove a search application and its associated alias. Indices attached to the search application are not removed.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-delete`,
   methods: ['DELETE'],
   patterns: ['_application/search_application/{name}'],
   documentation:
@@ -14575,7 +15399,9 @@ const SEARCH_APPLICATION_DELETE_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnector
   isInternal: true,
   summary: `Delete a behavioral analytics collection`,
   description: `Delete a behavioral analytics collection.
-The associated data stream is also deleted.`,
+The associated data stream is also deleted.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-delete-behavioral-analytics`,
   methods: ['DELETE'],
   patterns: ['_application/analytics/{name}'],
   documentation:
@@ -14596,7 +15422,9 @@ const SEARCH_APPLICATION_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.get',
   isInternal: true,
   summary: `Get search application details`,
-  description: `Get search application details.`,
+  description: `Get search application details.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get`,
   methods: ['GET'],
   patterns: ['_application/search_application/{name}'],
   documentation:
@@ -14617,7 +15445,9 @@ const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
   type: 'elasticsearch.search_application.get_behavioral_analytics',
   isInternal: true,
   summary: `Get behavioral analytics collections`,
-  description: `Get behavioral analytics collections.`,
+  description: `Get behavioral analytics collections.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get-behavioral-analytics`,
   methods: ['GET'],
   patterns: ['_application/analytics', '_application/analytics/{name}'],
   documentation:
@@ -14645,7 +15475,9 @@ const SEARCH_APPLICATION_LIST_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get search applications`,
   description: `Get search applications.
-Get information about search applications.`,
+Get information about search applications.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get-behavioral-analytics`,
   methods: ['GET'],
   patterns: ['_application/search_application'],
   documentation:
@@ -14666,7 +15498,9 @@ const SEARCH_APPLICATION_POST_BEHAVIORAL_ANALYTICS_EVENT_CONTRACT: InternalConne
   type: 'elasticsearch.search_application.post_behavioral_analytics_event',
   isInternal: true,
   summary: `Create a behavioral analytics collection event`,
-  description: `Create a behavioral analytics collection event.`,
+  description: `Create a behavioral analytics collection event.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-post-behavioral-analytics-event`,
   methods: ['POST'],
   patterns: ['_application/analytics/{collection_name}/event/{event_type}'],
   documentation:
@@ -14687,7 +15521,9 @@ const SEARCH_APPLICATION_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.put',
   isInternal: true,
   summary: `Create or update a search application`,
-  description: `Create or update a search application.`,
+  description: `Create or update a search application.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-put`,
   methods: ['PUT'],
   patterns: ['_application/search_application/{name}'],
   documentation:
@@ -14708,7 +15544,9 @@ const SEARCH_APPLICATION_PUT_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
   type: 'elasticsearch.search_application.put_behavioral_analytics',
   isInternal: true,
   summary: `Create a behavioral analytics collection`,
-  description: `Create a behavioral analytics collection.`,
+  description: `Create a behavioral analytics collection.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-put-behavioral-analytics`,
   methods: ['PUT'],
   patterns: ['_application/analytics/{name}'],
   documentation:
@@ -14734,7 +15572,9 @@ Generate an Elasticsearch query using the specified query parameters and the sea
 If a parameter used in the search template is not specified in \`params\`, the parameter's default value will be used.
 The API returns the specific Elasticsearch query that would be generated and run by calling the search application search API.
 
-You must have \`read\` privileges on the backing alias of the search application.`,
+You must have \`read\` privileges on the backing alias of the search application.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-render-query`,
   methods: ['POST'],
   patterns: ['_application/search_application/{name}/_render_query'],
   documentation:
@@ -14757,7 +15597,9 @@ const SEARCH_APPLICATION_SEARCH_CONTRACT: InternalConnectorContract = {
   summary: `Run a search application search`,
   description: `Run a search application search.
 Generate and run an Elasticsearch query that uses the specified query parameteter and the search template associated with the search application or default template.
-Unspecified template parameters are assigned their default values if applicable.`,
+Unspecified template parameters are assigned their default values if applicable.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-search`,
   methods: ['GET', 'POST'],
   patterns: ['_application/search_application/{name}/_search'],
   documentation:
@@ -14869,7 +15711,9 @@ Some cells may intersect more than one vector tile.
 To compute the H3 resolution for each precision, Elasticsearch compares the average density of hexagonal bins at each resolution with the average density of tile bins at each zoom level.
 Elasticsearch uses the H3 resolution that is closest to the corresponding geotile density.
 
-Learn how to use the vector tile search API with practical examples in the [Vector tile search examples](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/vector-tile-search) guide.`,
+Learn how to use the vector tile search API with practical examples in the [Vector tile search examples](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/vector-tile-search) guide.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-mvt`,
   methods: ['POST', 'GET'],
   patterns: ['{index}/_mvt/{field}/{zoom}/{x}/{y}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-mvt',
@@ -14922,7 +15766,9 @@ Get the indices and shards that a search request would be run against.
 This information can be useful for working out issues or planning optimizations with routing and shard preferences.
 When filtered aliases are used, the filter is returned as part of the \`indices\` section.
 
-If the Elasticsearch security features are enabled, you must have the \`view_index_metadata\` or \`manage\` index privilege for the target data stream, index, or alias.`,
+If the Elasticsearch security features are enabled, you must have the \`view_index_metadata\` or \`manage\` index privilege for the target data stream, index, or alias.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-shards`,
   methods: ['GET', 'POST'],
   patterns: ['_search_shards', '{index}/_search_shards'],
   documentation:
@@ -14965,7 +15811,9 @@ const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_template',
   isInternal: true,
   summary: `Run a search with a search template`,
-  description: `Run a search with a search template.`,
+  description: `Run a search with a search template.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-template`,
   methods: ['GET', 'POST'],
   patterns: ['_search/template', '{index}/_search/template'],
   documentation:
@@ -15015,7 +15863,9 @@ const SEARCHABLE_SNAPSHOTS_CACHE_STATS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get cache statistics`,
   description: `Get cache statistics.
-Get statistics about the shared cache for partially mounted indices.`,
+Get statistics about the shared cache for partially mounted indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-cache-stats`,
   methods: ['GET'],
   patterns: ['_searchable_snapshots/cache/stats', '_searchable_snapshots/{node_id}/cache/stats'],
   documentation:
@@ -15043,7 +15893,9 @@ const SEARCHABLE_SNAPSHOTS_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Clear the cache`,
   description: `Clear the cache.
-Clear indices and data streams from the shared cache for partially mounted indices.`,
+Clear indices and data streams from the shared cache for partially mounted indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-clear-cache`,
   methods: ['POST'],
   patterns: ['_searchable_snapshots/cache/clear', '{index}/_searchable_snapshots/cache/clear'],
   documentation:
@@ -15073,7 +15925,9 @@ const SEARCHABLE_SNAPSHOTS_MOUNT_CONTRACT: InternalConnectorContract = {
   description: `Mount a snapshot.
 Mount a snapshot as a searchable snapshot index.
 Do not use this API for snapshots managed by index lifecycle management (ILM).
-Manually mounting ILM-managed snapshots can interfere with ILM processes.`,
+Manually mounting ILM-managed snapshots can interfere with ILM processes.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-mount`,
   methods: ['POST'],
   patterns: ['_snapshot/{repository}/{snapshot}/_mount'],
   documentation:
@@ -15094,7 +15948,9 @@ const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.stats',
   isInternal: true,
   summary: `Get searchable snapshot statistics`,
-  description: `Get searchable snapshot statistics.`,
+  description: `Get searchable snapshot statistics.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-stats`,
   methods: ['GET'],
   patterns: ['_searchable_snapshots/stats', '{index}/_searchable_snapshots/stats'],
   documentation:
@@ -15134,7 +15990,9 @@ This API creates or updates a profile document for end users with information th
 For example, in the JWT \`access_token\` case, the profile user's \`username\` is extracted from the JWT token claim pointed to by the \`claims.principal\` setting of the JWT realm that authenticated the token.
 
 When updating a profile document, the API enables the document if it was disabled.
-Any updates do not change existing content for either the \`labels\` or \`data\` fields.`,
+Any updates do not change existing content for either the \`labels\` or \`data\` fields.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-activate-user-profile`,
   methods: ['POST'],
   patterns: ['_security/profile/_activate'],
   documentation:
@@ -15160,7 +16018,9 @@ const SECURITY_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
 Authenticates a user and returns information about the authenticated user.
 Include the user information in a [basic auth header](https://en.wikipedia.org/wiki/Basic_access_authentication).
 A successful call returns a JSON structure that shows user information such as their username, the roles that are assigned to the user, any assigned metadata, and information about the realms that authenticated and authorized the user.
-If the user cannot be authenticated, this API returns a 401 status code.`,
+If the user cannot be authenticated, this API returns a 401 status code.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-authenticate`,
   methods: ['GET'],
   patterns: ['_security/_authenticate'],
   documentation:
@@ -15184,7 +16044,9 @@ const SECURITY_BULK_DELETE_ROLE_CONTRACT: InternalConnectorContract = {
   description: `Bulk delete roles.
 
 The role management APIs are generally the preferred way to manage roles, rather than using file-based role management.
-The bulk delete roles API cannot delete roles that are defined in roles files.`,
+The bulk delete roles API cannot delete roles that are defined in roles files.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-bulk-delete-role`,
   methods: ['DELETE'],
   patterns: ['_security/role'],
   documentation:
@@ -15208,7 +16070,9 @@ const SECURITY_BULK_PUT_ROLE_CONTRACT: InternalConnectorContract = {
   description: `Bulk create or update roles.
 
 The role management APIs are generally the preferred way to manage roles, rather than using file-based role management.
-The bulk create or update roles API cannot update roles that are defined in roles files.`,
+The bulk create or update roles API cannot update roles that are defined in roles files.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-bulk-put-role`,
   methods: ['POST'],
   patterns: ['_security/role'],
   documentation:
@@ -15244,7 +16108,9 @@ The snapshot of the owner's permissions is updated automatically on every call.
 
 IMPORTANT: If you don't specify \`role_descriptors\` in the request, a call to this API might still change an API key's access scope. This change can occur if the owner user's permissions have changed since the API key was created or last modified.
 
-A successful request returns a JSON structure that contains the IDs of all updated API keys, the IDs of API keys that already had the requested changes and did not require an update, and error details for any failed update.`,
+A successful request returns a JSON structure that contains the IDs of all updated API keys, the IDs of API keys that already had the requested changes and did not require an update, and error details for any failed update.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-bulk-update-api-keys`,
   methods: ['POST'],
   patterns: ['_security/api_key/_bulk_update'],
   documentation:
@@ -15267,7 +16133,9 @@ const SECURITY_CHANGE_PASSWORD_CONTRACT: InternalConnectorContract = {
   summary: `Change passwords`,
   description: `Change passwords.
 
-Change the passwords of users in the native realm and built-in users.`,
+Change the passwords of users in the native realm and built-in users.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-change-password`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/user/{username}/_password', '_security/user/_password'],
   documentation:
@@ -15305,7 +16173,9 @@ const SECURITY_CLEAR_API_KEY_CACHE_CONTRACT: InternalConnectorContract = {
   description: `Clear the API key cache.
 
 Evict a subset of all entries from the API key cache.
-The cache is also automatically cleared on state changes of the security index.`,
+The cache is also automatically cleared on state changes of the security index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-api-key-cache`,
   methods: ['POST'],
   patterns: ['_security/api_key/{ids}/_clear_cache'],
   documentation:
@@ -15329,7 +16199,9 @@ const SECURITY_CLEAR_CACHED_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   description: `Clear the privileges cache.
 
 Evict privileges from the native application privilege cache.
-The cache is also automatically cleared for applications that have their privileges updated.`,
+The cache is also automatically cleared for applications that have their privileges updated.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-privileges`,
   methods: ['POST'],
   patterns: ['_security/privilege/{application}/_clear_cache'],
   documentation:
@@ -15357,7 +16229,9 @@ You can completely clear the cache or evict specific users.
 
 User credentials are cached in memory on each node to avoid connecting to a remote authentication service or hitting the disk for every incoming request.
 There are realm settings that you can use to configure the user cache.
-For more information, refer to the documentation about controlling the user cache.`,
+For more information, refer to the documentation about controlling the user cache.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-realms`,
   methods: ['POST'],
   patterns: ['_security/realm/{realms}/_clear_cache'],
   documentation:
@@ -15380,7 +16254,9 @@ const SECURITY_CLEAR_CACHED_ROLES_CONTRACT: InternalConnectorContract = {
   summary: `Clear the roles cache`,
   description: `Clear the roles cache.
 
-Evict roles from the native role cache.`,
+Evict roles from the native role cache.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-roles`,
   methods: ['POST'],
   patterns: ['_security/role/{name}/_clear_cache'],
   documentation:
@@ -15408,7 +16284,9 @@ Two separate caches exist for service account tokens: one cache for tokens backe
 This API clears matching entries from both caches.
 
 The cache for service account tokens backed by the \`.security\` index is cleared automatically on state changes of the security index.
-The cache for tokens backed by the \`service_tokens\` file is cleared automatically on file changes.`,
+The cache for tokens backed by the \`service_tokens\` file is cleared automatically on file changes.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-service-tokens`,
   methods: ['POST'],
   patterns: ['_security/service/{namespace}/{service}/credential/token/{name}/_clear_cache'],
   documentation:
@@ -15442,7 +16320,9 @@ If applicable, it also returns expiration information for the API key in millise
 NOTE: By default, API keys never expire. You can specify expiration information when you create the API keys.
 
 The API keys are created by the Elasticsearch API key service, which is automatically enabled.
-To configure or turn off the API key service, refer to API key service setting documentation.`,
+To configure or turn off the API key service, refer to API key service setting documentation.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/api_key'],
   documentation:
@@ -15482,7 +16362,9 @@ A successful request returns a JSON structure that contains the API key, its uni
 By default, API keys never expire. You can specify expiration information when you create the API keys.
 
 Cross-cluster API keys can only be updated with the update cross-cluster API key API.
-Attempting to update them with the update REST API key API or the bulk update REST API keys API will result in an error.`,
+Attempting to update them with the update REST API key API or the bulk update REST API keys API will result in an error.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-cross-cluster-api-key`,
   methods: ['POST'],
   patterns: ['_security/cross_cluster/api_key'],
   documentation:
@@ -15508,7 +16390,9 @@ const SECURITY_CREATE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {
 Create a service accounts token for access without requiring basic authentication.
 
 NOTE: Service account tokens never expire.
-You must actively delete them if they are no longer needed.`,
+You must actively delete them if they are no longer needed.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-service-token`,
   methods: ['PUT', 'POST'],
   patterns: [
     '_security/service/{namespace}/{service}/credential/token/{name}',
@@ -15552,7 +16436,9 @@ This API is called by smart and trusted proxies, such as Kibana, which terminate
 
 IMPORTANT: The association between the subject public key in the target certificate and the corresponding private key is not validated.
 This is part of the TLS authentication process and it is delegated to the proxy that calls this API.
-The proxy is trusted to have performed the TLS authentication and this API translates that authentication into an Elasticsearch access token.`,
+The proxy is trusted to have performed the TLS authentication and this API translates that authentication into an Elasticsearch access token.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delegate-pki`,
   methods: ['POST'],
   patterns: ['_security/delegate_pki'],
   documentation:
@@ -15578,7 +16464,9 @@ const SECURITY_DELETE_PRIVILEGES_CONTRACT: InternalConnectorContract = {
 To use this API, you must have one of the following privileges:
 
 * The \`manage_security\` cluster privilege (or a greater privilege such as \`all\`).
-* The "Manage Application Privileges" global privilege for the application being referenced in the request.`,
+* The "Manage Application Privileges" global privilege for the application being referenced in the request.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-privileges`,
   methods: ['DELETE'],
   patterns: ['_security/privilege/{application}/{name}'],
   documentation:
@@ -15603,7 +16491,9 @@ const SECURITY_DELETE_ROLE_CONTRACT: InternalConnectorContract = {
 
 Delete roles in the native realm.
 The role management APIs are generally the preferred way to manage roles, rather than using file-based role management.
-The delete roles API cannot remove roles that are defined in roles files.`,
+The delete roles API cannot remove roles that are defined in roles files.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-role`,
   methods: ['DELETE'],
   patterns: ['_security/role/{name}'],
   documentation:
@@ -15628,7 +16518,9 @@ const SECURITY_DELETE_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
 
 Role mappings define which roles are assigned to each user.
 The role mapping APIs are generally the preferred way to manage role mappings rather than using role mapping files.
-The delete role mappings API cannot remove role mappings that are defined in role mapping files.`,
+The delete role mappings API cannot remove role mappings that are defined in role mapping files.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-role-mapping`,
   methods: ['DELETE'],
   patterns: ['_security/role_mapping/{name}'],
   documentation:
@@ -15651,7 +16543,9 @@ const SECURITY_DELETE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {
   summary: `Delete service account tokens`,
   description: `Delete service account tokens.
 
-Delete service account tokens for a service in a specified namespace.`,
+Delete service account tokens for a service in a specified namespace.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-service-token`,
   methods: ['DELETE'],
   patterns: ['_security/service/{namespace}/{service}/credential/token/{name}'],
   documentation:
@@ -15674,7 +16568,9 @@ const SECURITY_DELETE_USER_CONTRACT: InternalConnectorContract = {
   summary: `Delete users`,
   description: `Delete users.
 
-Delete users from the native realm.`,
+Delete users from the native realm.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-user`,
   methods: ['DELETE'],
   patterns: ['_security/user/{username}'],
   documentation:
@@ -15699,7 +16595,9 @@ const SECURITY_DISABLE_USER_CONTRACT: InternalConnectorContract = {
 
 Disable users in the native realm.
 By default, when you create users, they are enabled.
-You can use this API to revoke a user's access to Elasticsearch.`,
+You can use this API to revoke a user's access to Elasticsearch.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-disable-user`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/user/{username}/_disable'],
   documentation:
@@ -15732,7 +16630,9 @@ Individual users and external applications should not call this API directly.
 Elastic reserves the right to change or remove this feature in future releases without prior notice.
 
 When you activate a user profile, its automatically enabled and visible in user profile searches. You can use the disable user profile API to disable a user profile so it’s not visible in these searches.
-To re-enable a disabled user profile, use the enable user profile API .`,
+To re-enable a disabled user profile, use the enable user profile API .
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-disable-user-profile`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/profile/{uid}/_disable'],
   documentation:
@@ -15762,7 +16662,9 @@ const SECURITY_ENABLE_USER_CONTRACT: InternalConnectorContract = {
   description: `Enable users.
 
 Enable users in the native realm.
-By default, when you create users, they are enabled.`,
+By default, when you create users, they are enabled.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/user/{username}/_enable'],
   documentation:
@@ -15795,7 +16697,9 @@ Individual users and external applications should not call this API directly.
 Elastic reserves the right to change or remove this feature in future releases without prior notice.
 
 When you activate a user profile, it's automatically enabled and visible in user profile searches.
-If you later disable the user profile, you can use the enable user profile API to make the profile visible in these searches again.`,
+If you later disable the user profile, you can use the enable user profile API to make the profile visible in these searches again.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user-profile`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/profile/{uid}/_enable'],
   documentation:
@@ -15827,7 +16731,9 @@ const SECURITY_ENROLL_KIBANA_CONTRACT: InternalConnectorContract = {
 Enable a Kibana instance to configure itself for communication with a secured Elasticsearch cluster.
 
 NOTE: This API is currently intended for internal use only by Kibana.
-Kibana uses this API internally to configure itself for communications with an Elasticsearch cluster that already has security features enabled.`,
+Kibana uses this API internally to configure itself for communications with an Elasticsearch cluster that already has security features enabled.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enroll-kibana`,
   methods: ['GET'],
   patterns: ['_security/enroll/kibana'],
   documentation:
@@ -15853,7 +16759,9 @@ const SECURITY_ENROLL_NODE_CONTRACT: InternalConnectorContract = {
 Enroll a new node to allow it to join an existing cluster with security features enabled.
 
 The response contains all the necessary information for the joining node to bootstrap discovery and security related settings so that it can successfully join the cluster.
-The response contains key and certificate material that allows the caller to generate valid signed certificates for the HTTP layer of all nodes in the cluster.`,
+The response contains key and certificate material that allows the caller to generate valid signed certificates for the HTTP layer of all nodes in the cluster.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enroll-node`,
   methods: ['GET'],
   patterns: ['_security/enroll/node'],
   documentation:
@@ -15878,7 +16786,9 @@ const SECURITY_GET_API_KEY_CONTRACT: InternalConnectorContract = {
 
 Retrieves information for one or more API keys.
 NOTE: If you have only the \`manage_own_api_key\` privilege, this API returns only the API keys that you own.
-If you have \`read_security\`, \`manage_api_key\` or greater privileges (including \`manage_security\`), this API returns all API keys regardless of ownership.`,
+If you have \`read_security\`, \`manage_api_key\` or greater privileges (including \`manage_security\`), this API returns all API keys regardless of ownership.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-api-key`,
   methods: ['GET'],
   patterns: ['_security/api_key'],
   documentation:
@@ -15910,7 +16820,9 @@ const SECURITY_GET_BUILTIN_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   summary: `Get builtin privileges`,
   description: `Get builtin privileges.
 
-Get the list of cluster privileges and index privileges that are available in this version of Elasticsearch.`,
+Get the list of cluster privileges and index privileges that are available in this version of Elasticsearch.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-builtin-privileges`,
   methods: ['GET'],
   patterns: ['_security/privilege/_builtin'],
   documentation:
@@ -15936,7 +16848,9 @@ const SECURITY_GET_PRIVILEGES_CONTRACT: InternalConnectorContract = {
 To use this API, you must have one of the following privileges:
 
 * The \`read_security\` cluster privilege (or a greater privilege such as \`manage_security\` or \`all\`).
-* The "Manage Application Privileges" global privilege for the application being referenced in the request.`,
+* The "Manage Application Privileges" global privilege for the application being referenced in the request.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-privileges`,
   methods: ['GET'],
   patterns: [
     '_security/privilege',
@@ -15975,7 +16889,9 @@ const SECURITY_GET_ROLE_CONTRACT: InternalConnectorContract = {
 
 Get roles in the native realm.
 The role management APIs are generally the preferred way to manage roles, rather than using file-based role management.
-The get roles API cannot retrieve roles that are defined in roles files.`,
+The get roles API cannot retrieve roles that are defined in roles files.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-role`,
   methods: ['GET'],
   patterns: ['_security/role/{name}', '_security/role'],
   documentation:
@@ -16003,7 +16919,9 @@ const SECURITY_GET_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
 
 Role mappings define which roles are assigned to each user.
 The role mapping APIs are generally the preferred way to manage role mappings rather than using role mapping files.
-The get role mappings API cannot retrieve role mappings that are defined in role mapping files.`,
+The get role mappings API cannot retrieve role mappings that are defined in role mapping files.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-role-mapping`,
   methods: ['GET'],
   patterns: ['_security/role_mapping/{name}', '_security/role_mapping'],
   documentation:
@@ -16031,7 +16949,9 @@ const SECURITY_GET_SERVICE_ACCOUNTS_CONTRACT: InternalConnectorContract = {
 
 Get a list of service accounts that match the provided path parameters.
 
-NOTE: Currently, only the \`elastic/fleet-server\` service account is available.`,
+NOTE: Currently, only the \`elastic/fleet-server\` service account is available.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-service-accounts`,
   methods: ['GET'],
   patterns: [
     '_security/service/{namespace}/{service}',
@@ -16073,7 +16993,9 @@ To use this API, you must have at least the \`read_security\` cluster privilege 
 The response includes service account tokens that were created with the create service account tokens API as well as file-backed tokens from all nodes of the cluster.
 
 NOTE: For tokens backed by the \`service_tokens\` file, the API collects them from all nodes of the cluster.
-Tokens with the same name from different nodes are assumed to be the same token and are only counted once towards the total number of service tokens.`,
+Tokens with the same name from different nodes are assumed to be the same token and are only counted once towards the total number of service tokens.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-service-credentials`,
   methods: ['GET'],
   patterns: ['_security/service/{namespace}/{service}/credential'],
   documentation:
@@ -16101,7 +17023,9 @@ Only a subset of the index settings — those that are user-configurable—will 
 This includes:
 
 * \`index.auto_expand_replicas\`
-* \`index.number_of_replicas\``,
+* \`index.number_of_replicas\`
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-settings`,
   methods: ['GET'],
   patterns: ['_security/settings'],
   documentation:
@@ -16124,7 +17048,9 @@ const SECURITY_GET_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get security stats`,
   description: `Get security stats.
 
-Gather security usage statistics from all node(s) within the cluster.`,
+Gather security usage statistics from all node(s) within the cluster.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-stats`,
   methods: ['GET'],
   patterns: ['_security/stats'],
   documentation:
@@ -16158,7 +17084,9 @@ A successful get token API call returns a JSON structure that contains the acces
 
 The tokens returned by the get token API have a finite period of time for which they are valid and after that time period, they can no longer be used.
 That time period is defined by the \`xpack.security.authc.token.timeout\` setting.
-If you want to invalidate a token immediately, you can do so by using the invalidate token API.`,
+If you want to invalidate a token immediately, you can do so by using the invalidate token API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-token`,
   methods: ['POST'],
   patterns: ['_security/oauth2/token'],
   documentation:
@@ -16181,7 +17109,9 @@ const SECURITY_GET_USER_CONTRACT: InternalConnectorContract = {
   summary: `Get users`,
   description: `Get users.
 
-Get information about users in the native realm and built-in users.`,
+Get information about users in the native realm and built-in users.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-user`,
   methods: ['GET'],
   patterns: ['_security/user/{username}', '_security/user'],
   documentation:
@@ -16210,7 +17140,9 @@ const SECURITY_GET_USER_PRIVILEGES_CONTRACT: InternalConnectorContract = {
 Get the security privileges for the logged in user.
 All users can use this API, but only to determine their own privileges.
 To check the privileges of other users, you must use the run as feature.
-To check whether a user has a specific list of privileges, use the has privileges API.`,
+To check whether a user has a specific list of privileges, use the has privileges API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-user-privileges`,
   methods: ['GET'],
   patterns: ['_security/user/_privileges'],
   documentation:
@@ -16237,7 +17169,9 @@ Get a user's profile using the unique profile ID.
 
 NOTE: The user profile feature is designed only for use by Kibana and Elastic's Observability, Enterprise Search, and Elastic Security solutions.
 Individual users and external applications should not call this API directly.
-Elastic reserves the right to change or remove this feature in future releases without prior notice.`,
+Elastic reserves the right to change or remove this feature in future releases without prior notice.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-user-profile`,
   methods: ['GET'],
   patterns: ['_security/profile/{uid}'],
   documentation:
@@ -16279,7 +17213,9 @@ The API keys are created by the Elasticsearch API key service, which is automati
 A successful grant API key API call returns a JSON structure that contains the API key, its unique id, and its name.
 If applicable, it also returns expiration information for the API key in milliseconds.
 
-By default, API keys never expire. You can specify expiration information when you create the API keys.`,
+By default, API keys never expire. You can specify expiration information when you create the API keys.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-grant-api-key`,
   methods: ['POST'],
   patterns: ['_security/api_key/grant'],
   documentation:
@@ -16304,7 +17240,9 @@ const SECURITY_HAS_PRIVILEGES_CONTRACT: InternalConnectorContract = {
 
 Determine whether the specified user has a specified list of privileges.
 All users can use this API, but only to determine their own privileges.
-To check the privileges of other users, you must use the run as feature.`,
+To check the privileges of other users, you must use the run as feature.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-has-privileges`,
   methods: ['GET', 'POST'],
   patterns: ['_security/user/_has_privileges', '_security/user/{user}/_has_privileges'],
   documentation:
@@ -16344,7 +17282,9 @@ const SECURITY_HAS_PRIVILEGES_USER_PROFILE_CONTRACT: InternalConnectorContract =
 Determine whether the users associated with the specified user profile IDs have all the requested privileges.
 
 NOTE: The user profile feature is designed only for use by Kibana and Elastic's Observability, Enterprise Search, and Elastic Security solutions. Individual users and external applications should not call this API directly.
-Elastic reserves the right to change or remove this feature in future releases without prior notice.`,
+Elastic reserves the right to change or remove this feature in future releases without prior notice.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-has-privileges-user-profile`,
   methods: ['GET', 'POST'],
   patterns: ['_security/profile/_has_privileges'],
   documentation:
@@ -16384,7 +17324,9 @@ In addition, with the \`manage_own_api_key\` privilege, an invalidation request 
 
 - Set the parameter \`owner=true\`.
 - Or, set both \`username\` and \`realm_name\` to match the user's identity.
-- Or, if the request is issued by an API key, that is to say an API key invalidates itself, specify its ID in the \`ids\` field.`,
+- Or, if the request is issued by an API key, that is to say an API key invalidates itself, specify its ID in the \`ids\` field.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-invalidate-api-key`,
   methods: ['DELETE'],
   patterns: ['_security/api_key'],
   documentation:
@@ -16417,7 +17359,9 @@ If you want to invalidate one or more access or refresh tokens immediately, use 
 
 NOTE: While all parameters are optional, at least one of them is required.
 More specifically, either one of \`token\` or \`refresh_token\` parameters is required.
-If none of these two are specified, then \`realm_name\` and/or \`username\` need to be specified.`,
+If none of these two are specified, then \`realm_name\` and/or \`username\` need to be specified.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-invalidate-token`,
   methods: ['DELETE'],
   patterns: ['_security/oauth2/token'],
   documentation:
@@ -16443,7 +17387,9 @@ const SECURITY_OIDC_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
 Exchange an OpenID Connect authentication response message for an Elasticsearch internal access token and refresh token that can be subsequently used for authentication.
 
 Elasticsearch exposes all the necessary OpenID Connect related functionality with the OpenID Connect APIs.
-These APIs are used internally by Kibana in order to provide OpenID Connect based authentication, but can also be used by other, custom web applications or other clients.`,
+These APIs are used internally by Kibana in order to provide OpenID Connect based authentication, but can also be used by other, custom web applications or other clients.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-oidc-authenticate`,
   methods: ['POST'],
   patterns: ['_security/oidc/authenticate'],
   documentation:
@@ -16471,7 +17417,9 @@ Invalidate an access token and a refresh token that were generated as a response
 If the OpenID Connect authentication realm in Elasticsearch is accordingly configured, the response to this call will contain a URI pointing to the end session endpoint of the OpenID Connect Provider in order to perform single logout.
 
 Elasticsearch exposes all the necessary OpenID Connect related functionality with the OpenID Connect APIs.
-These APIs are used internally by Kibana in order to provide OpenID Connect based authentication, but can also be used by other, custom web applications or other clients.`,
+These APIs are used internally by Kibana in order to provide OpenID Connect based authentication, but can also be used by other, custom web applications or other clients.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-oidc-logout`,
   methods: ['POST'],
   patterns: ['_security/oidc/logout'],
   documentation:
@@ -16499,7 +17447,9 @@ Create an oAuth 2.0 authentication request as a URL string based on the configur
 The response of this API is a URL pointing to the Authorization Endpoint of the configured OpenID Connect Provider, which can be used to redirect the browser of the user in order to continue the authentication process.
 
 Elasticsearch exposes all the necessary OpenID Connect related functionality with the OpenID Connect APIs.
-These APIs are used internally by Kibana in order to provide OpenID Connect based authentication, but can also be used by other, custom web applications or other clients.`,
+These APIs are used internally by Kibana in order to provide OpenID Connect based authentication, but can also be used by other, custom web applications or other clients.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-oidc-prepare-authentication`,
   methods: ['POST'],
   patterns: ['_security/oidc/prepare'],
   documentation:
@@ -16538,7 +17488,9 @@ Application names are formed from a prefix, with an optional suffix that conform
 
 Privilege names must begin with a lowercase ASCII letter and must contain only ASCII letters and digits along with the characters \`_\`, \`-\`, and \`.\`.
 
-Action names can contain any number of printable ASCII characters and must contain at least one of the following characters: \`/\`, \`*\`, \`:\`.`,
+Action names can contain any number of printable ASCII characters and must contain at least one of the following characters: \`/\`, \`*\`, \`:\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-privileges`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/privilege'],
   documentation:
@@ -16566,7 +17518,9 @@ const SECURITY_PUT_ROLE_CONTRACT: InternalConnectorContract = {
 
 The role management APIs are generally the preferred way to manage roles in the native realm, rather than using file-based role management.
 The create or update roles API cannot update roles that are defined in roles files.
-File-based role management is not available in Elastic Serverless.`,
+File-based role management is not available in Elastic Serverless.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-role`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/role/{name}'],
   documentation:
@@ -16626,7 +17580,9 @@ All of the user fields that are available in the role mapping rules are also ava
 Thus it is possible to assign a user to a role that reflects their username, their groups, or the name of the realm to which they authenticated.
 
 By default a template is evaluated to produce a single string that is the name of the role which should be assigned to the user.
-If the format of the template is set to "json" then the template is expected to produce a JSON string or an array of JSON strings for the role names.`,
+If the format of the template is set to "json" then the template is expected to produce a JSON string or an array of JSON strings for the role names.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-role-mapping`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/role_mapping/{name}'],
   documentation:
@@ -16654,7 +17610,9 @@ const SECURITY_PUT_USER_CONTRACT: InternalConnectorContract = {
 
 Add and update users in the native realm.
 A password is required for adding a new user but is optional when updating an existing user.
-To change a user's password without updating any other fields, use the change password API.`,
+To change a user's password without updating any other fields, use the change password API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-user`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/user/{username}'],
   documentation:
@@ -16695,7 +17653,9 @@ You can optionally filter the results with a query.
 To use this API, you must have at least the \`manage_own_api_key\` or the \`read_security\` cluster privileges.
 If you have only the \`manage_own_api_key\` privilege, this API returns only the API keys that you own.
 If you have the \`read_security\`, \`manage_api_key\`, or greater privileges (including \`manage_security\`), this API returns all API keys regardless of ownership.
-Refer to the linked documentation for examples of how to find API keys:`,
+Refer to the linked documentation for examples of how to find API keys:
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-query-api-keys`,
   methods: ['GET', 'POST'],
   patterns: ['_security/_query/api_key'],
   documentation:
@@ -16725,7 +17685,9 @@ Get roles in a paginated manner.
 The role management APIs are generally the preferred way to manage roles, rather than using file-based role management.
 The query roles API does not retrieve roles that are defined in roles files, nor built-in ones.
 You can optionally filter the results with a query.
-Also, the results can be paginated and sorted.`,
+Also, the results can be paginated and sorted.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-query-role`,
   methods: ['GET', 'POST'],
   patterns: ['_security/_query/role'],
   documentation:
@@ -16755,7 +17717,9 @@ Get information for users in a paginated manner.
 You can optionally filter the results with a query.
 
 NOTE: As opposed to the get user API, built-in users are excluded from the result.
-This API is only for native users.`,
+This API is only for native users.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-query-user`,
   methods: ['GET', 'POST'],
   patterns: ['_security/_query/user'],
   documentation:
@@ -16794,7 +17758,9 @@ The SAML message that is submitted can be:
 In either case, the SAML message needs to be a base64 encoded XML document with a root element of \`<Response>\`.
 
 After successful validation, Elasticsearch responds with an Elasticsearch internal access token and refresh token that can be subsequently used for authentication.
-This API endpoint essentially exchanges SAML responses that indicate successful authentication in the IdP for Elasticsearch access and refresh tokens, which can be used for authentication against Elasticsearch.`,
+This API endpoint essentially exchanges SAML responses that indicate successful authentication in the IdP for Elasticsearch access and refresh tokens, which can be used for authentication against Elasticsearch.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-authenticate`,
   methods: ['POST'],
   patterns: ['_security/saml/authenticate'],
   documentation:
@@ -16826,7 +17792,9 @@ The SAML IdP may send a logout response back to the SP after handling the SP-ini
 This API verifies the response by ensuring the content is relevant and validating its signature.
 An empty response is returned if the verification process is successful.
 The response can be sent by the IdP with either the HTTP-Redirect or the HTTP-Post binding.
-The caller of this API must prepare the request accordingly so that this API can handle either of them.`,
+The caller of this API must prepare the request accordingly so that this API can handle either of them.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-complete-logout`,
   methods: ['POST'],
   patterns: ['_security/saml/complete_logout'],
   documentation:
@@ -16857,7 +17825,9 @@ If you are using Kibana, refer to the documentation for configuring SAML single-
 The logout request comes from the SAML IdP during an IdP initiated Single Logout.
 The custom web application can use this API to have Elasticsearch process the \`LogoutRequest\`.
 After successful validation of the request, Elasticsearch invalidates the access token and refresh token that corresponds to that specific SAML principal and provides a URL that contains a SAML LogoutResponse message.
-Thus the user can be redirected back to their IdP.`,
+Thus the user can be redirected back to their IdP.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-invalidate`,
   methods: ['POST'],
   patterns: ['_security/saml/invalidate'],
   documentation:
@@ -16886,7 +17856,9 @@ NOTE: This API is intended for use by custom web applications other than Kibana.
 If you are using Kibana, refer to the documentation for configuring SAML single-sign-on on the Elastic Stack.
 
 This API invalidates the tokens that were generated for a user by the SAML authenticate API.
-If the SAML realm in Elasticsearch is configured accordingly and the SAML IdP supports this, the Elasticsearch response contains a URL to redirect the user to the IdP that contains a SAML logout request (starting an SP-initiated SAML Single Logout).`,
+If the SAML realm in Elasticsearch is configured accordingly and the SAML IdP supports this, the Elasticsearch response contains a URL to redirect the user to the IdP that contains a SAML logout request (starting an SP-initiated SAML Single Logout).
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-logout`,
   methods: ['POST'],
   patterns: ['_security/saml/logout'],
   documentation:
@@ -16920,7 +17892,9 @@ The URL includes a single parameter named \`SAMLRequest\`, which contains a SAML
 If the configuration dictates that SAML authentication requests should be signed, the URL has two extra parameters named \`SigAlg\` and \`Signature\`.
 These parameters contain the algorithm used for the signature and the signature value itself.
 It also returns a random string that uniquely identifies this SAML Authentication request.
-The caller of this API needs to store this identifier as it needs to be used in a following step of the authentication process.`,
+The caller of this API needs to store this identifier as it needs to be used in a following step of the authentication process.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-prepare-authentication`,
   methods: ['POST'],
   patterns: ['_security/saml/prepare'],
   documentation:
@@ -16946,7 +17920,9 @@ const SECURITY_SAML_SERVICE_PROVIDER_METADATA_CONTRACT: InternalConnectorContrac
 Generate SAML metadata for a SAML 2.0 Service Provider.
 
 The SAML 2.0 specification provides a mechanism for Service Providers to describe their capabilities and configuration using a metadata file.
-This API generates Service Provider metadata based on the configuration of a SAML realm in Elasticsearch.`,
+This API generates Service Provider metadata based on the configuration of a SAML realm in Elasticsearch.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-service-provider-metadata`,
   methods: ['GET'],
   patterns: ['_security/saml/metadata/{realm_name}'],
   documentation:
@@ -16973,7 +17949,9 @@ Get suggestions for user profiles that match specified search criteria.
 
 NOTE: The user profile feature is designed only for use by Kibana and Elastic's Observability, Enterprise Search, and Elastic Security solutions.
 Individual users and external applications should not call this API directly.
-Elastic reserves the right to change or remove this feature in future releases without prior notice.`,
+Elastic reserves the right to change or remove this feature in future releases without prior notice.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-suggest-user-profiles`,
   methods: ['GET', 'POST'],
   patterns: ['_security/profile/_suggest'],
   documentation:
@@ -17019,7 +17997,9 @@ The access scope of an API key is derived from the \`role_descriptors\` you spec
 The snapshot of the owner's permissions is updated automatically on every call.
 
 IMPORTANT: If you don't specify \`role_descriptors\` in the request, a call to this API might still change the API key's access scope.
-This change can occur if the owner user's permissions have changed since the API key was created or last modified.`,
+This change can occur if the owner user's permissions have changed since the API key was created or last modified.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-api-key`,
   methods: ['PUT'],
   patterns: ['_security/api_key/{id}'],
   documentation:
@@ -17058,7 +18038,9 @@ The owner user's information, such as the \`username\` and \`realm\`, is also up
 
 NOTE: This API cannot update REST API keys, which should be updated by either the update API key or bulk update API keys API.
 
-To learn more about how to use this API, refer to the [Update cross cluter API key API examples page](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/update-cc-api-key-examples).`,
+To learn more about how to use this API, refer to the [Update cross cluter API key API examples page](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/update-cc-api-key-examples).
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-cross-cluster-api-key`,
   methods: ['PUT'],
   patterns: ['_security/cross_cluster/api_key/{id}'],
   documentation:
@@ -17086,7 +18068,9 @@ Update the user-configurable settings for the security internal index (\`.securi
 NOTE: If \`index.auto_expand_replicas\` is set, \`index.number_of_replicas\` will be ignored during updates.
 
 If a specific index is not in use on the system and settings are provided for it, the request will be rejected.
-This API does not yet support configuring the settings for indices before they are in use.`,
+This API does not yet support configuring the settings for indices before they are in use.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-settings`,
   methods: ['PUT'],
   patterns: ['_security/settings'],
   documentation:
@@ -17124,7 +18108,9 @@ This API updates the \`labels\` and \`data\` fields of an existing user profile 
 New keys and their values are added to the profile document and conflicting keys are replaced by data that's included in the request.
 
 For both labels and data, content is namespaced by the top-level fields.
-The \`update_profile_data\` global privilege grants privileges for updating only the allowed namespaces.`,
+The \`update_profile_data\` global privilege grants privileges for updating only the allowed namespaces.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-user-profile-data`,
   methods: ['PUT', 'POST'],
   patterns: ['_security/profile/{uid}/_data'],
   documentation:
@@ -17159,7 +18145,9 @@ Shutdown requests are never removed automatically by Elasticsearch.
 NOTE: This feature is designed for indirect use by Elastic Cloud, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes.
 Direct use is not supported.
 
-If the operator privileges feature is enabled, you must be an operator to use this API.`,
+If the operator privileges feature is enabled, you must be an operator to use this API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-shutdown-delete-node`,
   methods: ['DELETE'],
   patterns: ['_nodes/{node_id}/shutdown'],
   documentation:
@@ -17183,7 +18171,9 @@ The API returns status information for each part of the shut down process.
 
 NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
 
-If the operator privileges feature is enabled, you must be an operator to use this API.`,
+If the operator privileges feature is enabled, you must be an operator to use this API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-shutdown-get-node`,
   methods: ['GET'],
   patterns: ['_nodes/shutdown', '_nodes/{node_id}/shutdown'],
   documentation:
@@ -17215,7 +18205,9 @@ You must specify the type of shutdown: \`restart\`, \`remove\`, or \`replace\`.
 If a node is already being prepared for shutdown, you can use this API to change the shutdown type.
 
 IMPORTANT: This API does NOT terminate the Elasticsearch process.
-Monitor the node shutdown status to determine when it is safe to stop Elasticsearch.`,
+Monitor the node shutdown status to determine when it is safe to stop Elasticsearch.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-shutdown-put-node`,
   methods: ['PUT'],
   patterns: ['_nodes/{node_id}/shutdown'],
   documentation:
@@ -17248,7 +18240,9 @@ The simulate pipeline API is more useful for developing a single pipeline, while
 
 By default, the pipeline definitions that are currently in the system are used.
 However, you can supply substitute pipeline definitions in the body of the request.
-These will be used in place of the pipeline definitions that are already in the system. This can be used to replace existing pipeline definitions or to create new ones. The pipeline substitutions are used only within this request.`,
+These will be used in place of the pipeline definitions that are already in the system. This can be used to replace existing pipeline definitions or to create new ones. The pipeline substitutions are used only within this request.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-simulate-ingest`,
   methods: ['GET', 'POST'],
   patterns: ['_ingest/_simulate', '_ingest/{index}/_simulate'],
   documentation:
@@ -17291,7 +18285,9 @@ const SLM_DELETE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   summary: `Delete a policy`,
   description: `Delete a policy.
 Delete a snapshot lifecycle policy definition.
-This operation prevents any future snapshots from being taken but does not cancel in-progress snapshots or remove previously-taken snapshots.`,
+This operation prevents any future snapshots from being taken but does not cancel in-progress snapshots or remove previously-taken snapshots.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-delete-lifecycle`,
   methods: ['DELETE'],
   patterns: ['_slm/policy/{policy_id}'],
   documentation:
@@ -17314,7 +18310,9 @@ const SLM_EXECUTE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   summary: `Run a policy`,
   description: `Run a policy.
 Immediately create a snapshot according to the snapshot lifecycle policy without waiting for the scheduled time.
-The snapshot policy is normally applied according to its schedule, but you might want to manually run a policy before performing an upgrade or other maintenance.`,
+The snapshot policy is normally applied according to its schedule, but you might want to manually run a policy before performing an upgrade or other maintenance.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-execute-lifecycle`,
   methods: ['PUT'],
   patterns: ['_slm/policy/{policy_id}/_execute'],
   documentation:
@@ -17337,7 +18335,9 @@ const SLM_EXECUTE_RETENTION_CONTRACT: InternalConnectorContract = {
   summary: `Run a retention policy`,
   description: `Run a retention policy.
 Manually apply the retention policy to force immediate removal of snapshots that are expired according to the snapshot lifecycle policy retention rules.
-The retention policy is normally applied according to its schedule.`,
+The retention policy is normally applied according to its schedule.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-execute-retention`,
   methods: ['POST'],
   patterns: ['_slm/_execute_retention'],
   documentation:
@@ -17359,7 +18359,9 @@ const SLM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get policy information`,
   description: `Get policy information.
-Get snapshot lifecycle policy definitions and information about the latest snapshot attempts.`,
+Get snapshot lifecycle policy definitions and information about the latest snapshot attempts.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-get-lifecycle`,
   methods: ['GET'],
   patterns: ['_slm/policy/{policy_id}', '_slm/policy'],
   documentation:
@@ -17384,7 +18386,9 @@ const SLM_GET_STATS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get snapshot lifecycle management statistics`,
   description: `Get snapshot lifecycle management statistics.
-Get global and policy-level statistics about actions taken by snapshot lifecycle management.`,
+Get global and policy-level statistics about actions taken by snapshot lifecycle management.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-get-stats`,
   methods: ['GET'],
   patterns: ['_slm/stats'],
   documentation:
@@ -17405,7 +18409,9 @@ const SLM_GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.get_status',
   isInternal: true,
   summary: `Get the snapshot lifecycle management status`,
-  description: `Get the snapshot lifecycle management status.`,
+  description: `Get the snapshot lifecycle management status.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-get-status`,
   methods: ['GET'],
   patterns: ['_slm/status'],
   documentation:
@@ -17429,7 +18435,9 @@ const SLM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   description: `Create or update a policy.
 Create or update a snapshot lifecycle policy.
 If the policy already exists, this request increments the policy version.
-Only the latest version of a policy is stored.`,
+Only the latest version of a policy is stored.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-put-lifecycle`,
   methods: ['PUT'],
   patterns: ['_slm/policy/{policy_id}'],
   documentation:
@@ -17452,7 +18460,9 @@ const SLM_START_CONTRACT: InternalConnectorContract = {
   summary: `Start snapshot lifecycle management`,
   description: `Start snapshot lifecycle management.
 Snapshot lifecycle management (SLM) starts automatically when a cluster is formed.
-Manually starting SLM is necessary only if it has been stopped using the stop SLM API.`,
+Manually starting SLM is necessary only if it has been stopped using the stop SLM API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-start`,
   methods: ['POST'],
   patterns: ['_slm/start'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-start',
@@ -17479,7 +18489,9 @@ Stopping SLM does not stop any snapshots that are in progress.
 You can manually trigger snapshots with the run snapshot lifecycle policy API even if SLM is stopped.
 
 The API returns a response as soon as the request is acknowledged, but the plugin might continue to run until in-progress operations complete and it can be safely stopped.
-Use the get snapshot lifecycle management status API to see if SLM is running.`,
+Use the get snapshot lifecycle management status API to see if SLM is running.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-stop`,
   methods: ['POST'],
   patterns: ['_slm/stop'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-stop',
@@ -17500,7 +18512,9 @@ const SNAPSHOT_CLEANUP_REPOSITORY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Clean up the snapshot repository`,
   description: `Clean up the snapshot repository.
-Trigger the review of the contents of a snapshot repository and delete any stale data not referenced by existing snapshots.`,
+Trigger the review of the contents of a snapshot repository and delete any stale data not referenced by existing snapshots.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-cleanup-repository`,
   methods: ['POST'],
   patterns: ['_snapshot/{repository}/_cleanup'],
   documentation:
@@ -17522,7 +18536,9 @@ const SNAPSHOT_CLONE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Clone a snapshot`,
   description: `Clone a snapshot.
-Clone part of all of a snapshot into another snapshot in the same repository.`,
+Clone part of all of a snapshot into another snapshot in the same repository.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-clone`,
   methods: ['PUT'],
   patterns: ['_snapshot/{repository}/{snapshot}/_clone/{target_snapshot}'],
   documentation:
@@ -17544,7 +18560,9 @@ const SNAPSHOT_CREATE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Create a snapshot`,
   description: `Create a snapshot.
-Take a snapshot of a cluster or of data streams and indices.`,
+Take a snapshot of a cluster or of data streams and indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-create`,
   methods: ['PUT', 'POST'],
   patterns: ['_snapshot/{repository}/{snapshot}'],
   documentation:
@@ -17582,7 +18600,9 @@ To register a snapshot repository, the cluster's global metadata must be writeab
 Ensure there are no cluster blocks (for example, \`cluster.blocks.read_only\` and \`clsuter.blocks.read_only_allow_delete\` settings) that prevent write access.
 
 Several options for this API can be specified using a query parameter or a request body parameter.
-If both parameters are specified, only the query parameter is used.`,
+If both parameters are specified, only the query parameter is used.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-create-repository`,
   methods: ['PUT', 'POST'],
   patterns: ['_snapshot/{repository}'],
   documentation:
@@ -17609,7 +18629,9 @@ const SNAPSHOT_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.delete',
   isInternal: true,
   summary: `Delete snapshots`,
-  description: `Delete snapshots.`,
+  description: `Delete snapshots.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-delete`,
   methods: ['DELETE'],
   patterns: ['_snapshot/{repository}/{snapshot}'],
   documentation:
@@ -17632,7 +18654,9 @@ const SNAPSHOT_DELETE_REPOSITORY_CONTRACT: InternalConnectorContract = {
   summary: `Delete snapshot repositories`,
   description: `Delete snapshot repositories.
 When a repository is unregistered, Elasticsearch removes only the reference to the location where the repository is storing the snapshots.
-The snapshots themselves are left untouched and in place.`,
+The snapshots themselves are left untouched and in place.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-delete-repository`,
   methods: ['DELETE'],
   patterns: ['_snapshot/{repository}'],
   documentation:
@@ -17657,7 +18681,9 @@ const SNAPSHOT_GET_CONTRACT: InternalConnectorContract = {
 
 NOTE: The \`after\` parameter and \`next\` field enable you to iterate through snapshots with some consistency guarantees regarding concurrent creation or deletion of snapshots.
 It is guaranteed that any snapshot that exists at the beginning of the iteration and is not concurrently deleted will be seen during the iteration.
-Snapshots concurrently created may be seen during an iteration.`,
+Snapshots concurrently created may be seen during an iteration.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-get`,
   methods: ['GET'],
   patterns: ['_snapshot/{repository}/{snapshot}'],
   documentation:
@@ -17693,7 +18719,9 @@ const SNAPSHOT_GET_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.get_repository',
   isInternal: true,
   summary: `Get snapshot repository information`,
-  description: `Get snapshot repository information.`,
+  description: `Get snapshot repository information.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-get-repository`,
   methods: ['GET'],
   patterns: ['_snapshot', '_snapshot/{repository}'],
   documentation:
@@ -17820,7 +18848,9 @@ Repository analysis verifies that that uncontended compare-and-exchange operatio
 Repository analysis also verifies that contended operations either succeed or report the contention but do not return incorrect results.
 If an operation fails due to contention, Elasticsearch retries the operation until it succeeds.
 Most of the compare-and-exchange operations performed by repository analysis atomically increment a counter which is represented as an 8-byte blob.
-Some operations also verify the behavior on small blobs with sizes other than 8 bytes.`,
+Some operations also verify the behavior on small blobs with sizes other than 8 bytes.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-repository-analyze`,
   methods: ['POST'],
   patterns: ['_snapshot/{repository}/_analyze'],
   documentation:
@@ -17889,7 +18919,9 @@ If you modify these parameters to speed up the verification process, you risk di
 For large repositories, consider setting up a separate single-node Elasticsearch cluster just for running the integrity verification API.
 
 The response exposes implementation details of the analysis which may change from version to version.
-The response body format is therefore not considered stable and may be different in newer versions.`,
+The response body format is therefore not considered stable and may be different in newer versions.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-repository-verify-integrity`,
   methods: ['POST'],
   patterns: ['_snapshot/{repository}/_verify_integrity'],
   documentation:
@@ -17936,7 +18968,9 @@ GET _index_template/*?filter_path=index_templates.name,index_templates.index_tem
 
 If no such template exists, you can create one or restore a cluster state that contains one. Without a matching index template, a data stream can't roll over or create backing indices.
 
-If your snapshot contains data from App Search or Workplace Search, you must restore the Enterprise Search encryption key before you restore the snapshot.`,
+If your snapshot contains data from App Search or Workplace Search, you must restore the Enterprise Search encryption key before you restore the snapshot.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-restore`,
   methods: ['POST'],
   patterns: ['_snapshot/{repository}/{snapshot}/_restore'],
   documentation:
@@ -17989,7 +19023,9 @@ The API requires a read from the repository for each shard in each snapshot.
 For example, if you have 100 snapshots with 1,000 shards each, an API request that includes all snapshots will require 100,000 reads (100 snapshots x 1,000 shards).
 
 Depending on the latency of your storage, such requests can take an extremely long time to return results.
-These requests can also tax machine resources and, when using cloud storage, incur high processing costs.`,
+These requests can also tax machine resources and, when using cloud storage, incur high processing costs.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-status`,
   methods: ['GET'],
   patterns: [
     '_snapshot/_status',
@@ -18025,7 +19061,9 @@ const SNAPSHOT_VERIFY_REPOSITORY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Verify a snapshot repository`,
   description: `Verify a snapshot repository.
-Check for common misconfigurations in a snapshot repository.`,
+Check for common misconfigurations in a snapshot repository.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-verify-repository`,
   methods: ['POST'],
   patterns: ['_snapshot/{repository}/_verify'],
   documentation:
@@ -18046,7 +19084,9 @@ const SQL_CLEAR_CURSOR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.clear_cursor',
   isInternal: true,
   summary: `Clear an SQL search cursor`,
-  description: `Clear an SQL search cursor.`,
+  description: `Clear an SQL search cursor.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-clear-cursor`,
   methods: ['POST'],
   patterns: ['_sql/close'],
   documentation:
@@ -18074,7 +19114,9 @@ If the search is still running, the API cancels it.
 If the Elasticsearch security features are enabled, only the following users can use this API to delete a search:
 
 * Users with the \`cancel_task\` cluster privilege.
-* The user who first submitted the search.`,
+* The user who first submitted the search.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-delete-async`,
   methods: ['DELETE'],
   patterns: ['_sql/async/delete/{id}'],
   documentation:
@@ -18098,7 +19140,9 @@ const SQL_GET_ASYNC_CONTRACT: InternalConnectorContract = {
   description: `Get async SQL search results.
 Get the current status and available results for an async SQL search or stored synchronous SQL search.
 
-If the Elasticsearch security features are enabled, only the user who first submitted the SQL search can retrieve the search using this API.`,
+If the Elasticsearch security features are enabled, only the user who first submitted the SQL search can retrieve the search using this API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-get-async`,
   methods: ['GET'],
   patterns: ['_sql/async/{id}'],
   documentation:
@@ -18120,7 +19164,9 @@ const SQL_GET_ASYNC_STATUS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get the async SQL search status`,
   description: `Get the async SQL search status.
-Get the current status of an async SQL search or a stored synchronous SQL search.`,
+Get the current status of an async SQL search or a stored synchronous SQL search.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-get-async-status`,
   methods: ['GET'],
   patterns: ['_sql/async/status/{id}'],
   documentation:
@@ -18142,7 +19188,9 @@ const SQL_QUERY_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get SQL search results`,
   description: `Get SQL search results.
-Run an SQL request.`,
+Run an SQL request.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-query`,
   methods: ['POST', 'GET'],
   patterns: ['_sql'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-query',
@@ -18185,7 +19233,9 @@ const SQL_TRANSLATE_CONTRACT: InternalConnectorContract = {
   summary: `Translate SQL into Elasticsearch queries`,
   description: `Translate SQL into Elasticsearch queries.
 Translate an SQL search into a search API request containing Query DSL.
-It accepts the same request body parameters as the SQL search API, excluding \`cursor\`.`,
+It accepts the same request body parameters as the SQL search API, excluding \`cursor\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-translate`,
   methods: ['POST', 'GET'],
   patterns: ['_sql/translate'],
   documentation:
@@ -18225,7 +19275,9 @@ The list does not include certificates that are sourced from the default SSL con
 
 NOTE: When a PKCS#11 token is configured as the truststore of the JRE, the API returns all the certificates that are included in the PKCS#11 token irrespective of whether these are used in the Elasticsearch TLS configuration.
 
-If Elasticsearch is configured to use a keystore or truststore, the API output includes all certificates in that store, even though some of the certificates might not be in active use within the cluster.`,
+If Elasticsearch is configured to use a keystore or truststore, the API output includes all certificates in that store, even though some of the certificates might not be in active use within the cluster.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ssl-certificates`,
   methods: ['GET'],
   patterns: ['_ssl/certificates'],
   documentation:
@@ -18248,7 +19300,9 @@ const STREAMS_LOGS_DISABLE_CONTRACT: InternalConnectorContract = {
   summary: ``,
   description: `Disable logs stream.
 
-Turn off the logs stream feature for this cluster.`,
+Turn off the logs stream feature for this cluster.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['POST'],
   patterns: ['_streams/logs/_disable'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
@@ -18270,7 +19324,9 @@ Turn on the logs stream feature for this cluster.
 
 NOTE: To protect existing data, this feature can be turned on only if the
 cluster does not have existing indices or data streams that match the pattern \`logs|logs.*\`.
-If those indices or data streams exist, a \`409 - Conflict\` response and error is returned.`,
+If those indices or data streams exist, a \`409 - Conflict\` response and error is returned.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['POST'],
   patterns: ['_streams/logs/_enable'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
@@ -18288,7 +19344,9 @@ const STREAMS_STATUS_CONTRACT: InternalConnectorContract = {
   summary: ``,
   description: `Get the status of streams.
 
-Get the current status for all types of streams.`,
+Get the current status for all types of streams.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['GET'],
   patterns: ['_streams/status'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
@@ -18321,7 +19379,9 @@ A delete request in this case will return a 400 response code.
 To remove a synonyms set, you must first remove all indices that contain analyzers using it.
 You can migrate an index by creating a new index that does not contain the token filter with the synonyms set, and use the reindex API in order to copy over the index data.
 Once finished, you can delete the index.
-When the synonyms set is not used in analyzers, you will be able to delete it.`,
+When the synonyms set is not used in analyzers, you will be able to delete it.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-delete-synonym`,
   methods: ['DELETE'],
   patterns: ['_synonyms/{id}'],
   documentation:
@@ -18343,7 +19403,9 @@ const SYNONYMS_DELETE_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Delete a synonym rule`,
   description: `Delete a synonym rule.
-Delete a synonym rule from a synonym set.`,
+Delete a synonym rule from a synonym set.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-delete-synonym-rule`,
   methods: ['DELETE'],
   patterns: ['_synonyms/{set_id}/{rule_id}'],
   documentation:
@@ -18364,7 +19426,9 @@ const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.get_synonym',
   isInternal: true,
   summary: `Get a synonym set`,
-  description: `Get a synonym set.`,
+  description: `Get a synonym set.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym`,
   methods: ['GET'],
   patterns: ['_synonyms/{id}'],
   documentation:
@@ -18386,7 +19450,9 @@ const SYNONYMS_GET_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get a synonym rule`,
   description: `Get a synonym rule.
-Get a synonym rule from a synonym set.`,
+Get a synonym rule from a synonym set.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym-rule`,
   methods: ['GET'],
   patterns: ['_synonyms/{set_id}/{rule_id}'],
   documentation:
@@ -18408,7 +19474,9 @@ const SYNONYMS_GET_SYNONYMS_SETS_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get all synonym sets`,
   description: `Get all synonym sets.
-Get a summary of all defined synonym sets.`,
+Get a summary of all defined synonym sets.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym`,
   methods: ['GET'],
   patterns: ['_synonyms'],
   documentation:
@@ -18436,7 +19504,9 @@ If you need to manage more synonym rules, you can create multiple synonym sets.
 When an existing synonyms set is updated, the search analyzers that use the synonyms set are reloaded automatically for all indices.
 This is equivalent to invoking the reload search analyzers API for all indices that use the synonyms set.
 
-For practical examples of how to create or update a synonyms set, refer to the External documentation.`,
+For practical examples of how to create or update a synonyms set, refer to the External documentation.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-put-synonym`,
   methods: ['PUT'],
   patterns: ['_synonyms/{id}'],
   documentation:
@@ -18462,7 +19532,9 @@ Create or update a synonym rule in a synonym set.
 
 If any of the synonym rules included is invalid, the API returns an error.
 
-When you update a synonym rule, all analyzers using the synonyms set will be reloaded automatically to reflect the new rule.`,
+When you update a synonym rule, all analyzers using the synonyms set will be reloaded automatically to reflect the new rule.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-put-synonym-rule`,
   methods: ['PUT'],
   patterns: ['_synonyms/{set_id}/{rule_id}'],
   documentation:
@@ -18494,7 +19566,9 @@ The get task information API will continue to list these cancelled tasks until t
 The cancelled flag in the response indicates that the cancellation command has been processed and the task will stop as soon as possible.
 
 To troubleshoot why a cancelled task does not complete promptly, use the get task information API with the \`?detailed\` parameter to identify the other tasks the system is running.
-You can also use the node hot threads API to obtain detailed information about the work the system is doing instead of completing the cancelled task.`,
+You can also use the node hot threads API to obtain detailed information about the work the system is doing instead of completing the cancelled task.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks`,
   methods: ['POST'],
   patterns: ['_tasks/_cancel', '_tasks/{task_id}/_cancel'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks',
@@ -18523,7 +19597,9 @@ Get information about a task currently running in the cluster.
 WARNING: The task management API is new and should still be considered a beta feature.
 The API may change in ways that are not backwards compatible.
 
-If the task identifier is not found, a 404 response code indicates that there are no resources that match the request.`,
+If the task identifier is not found, a 404 response code indicates that there are no resources that match the request.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks`,
   methods: ['GET'],
   patterns: ['_tasks/{task_id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks',
@@ -18601,7 +19677,9 @@ content-length: 831
 \`\`\`
 In this example, \`X-Opaque-Id: 123456\` is the ID as a part of the response header.
 The \`X-Opaque-Id\` in the task \`headers\` is the ID for the task that was initiated by the REST request.
-The \`X-Opaque-Id\` in the children \`headers\` is the child task of the task that was initiated by the REST request.`,
+The \`X-Opaque-Id\` in the children \`headers\` is the child task of the task that was initiated by the REST request.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks`,
   methods: ['GET'],
   patterns: ['_tasks'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks',
@@ -18635,7 +19713,9 @@ Discover terms that match a partial string in an index.
 This API is designed for low-latency look-ups used in auto-complete scenarios.
 
 > info
-> The terms enum API may return terms from deleted documents. Deleted documents are initially only marked as deleted. It is not until their segments are merged that documents are actually deleted. Until that happens, the terms enum API will return terms from these documents.`,
+> The terms enum API may return terms from deleted documents. Deleted documents are initially only marked as deleted. It is not until their segments are merged that documents are actually deleted. Until that happens, the terms enum API will return terms from these documents.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-terms-enum`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_terms_enum'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-terms-enum',
@@ -18707,7 +19787,9 @@ The information is only retrieved for the shard the requested document resides i
 The term and field statistics are therefore only useful as relative measures whereas the absolute numbers have no meaning in this context.
 By default, when requesting term vectors of artificial documents, a shard to get the statistics from is randomly selected.
 Use \`routing\` only to hit a particular shard.
-Refer to the linked documentation for detailed examples of how to use this API.`,
+Refer to the linked documentation for detailed examples of how to use this API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-termvectors`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_termvectors/{id}', '{index}/_termvectors'],
   documentation:
@@ -18784,7 +19866,9 @@ All this information can be calculated by the structure finder with no guidance.
 However, you can optionally override some of the decisions about the text structure by specifying one or more query parameters.
 
 If the structure finder produces unexpected results, specify the \`explain\` query parameter and an explanation will appear in the response.
-It helps determine why the returned structure was chosen.`,
+It helps determine why the returned structure was chosen.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-text_structure`,
   methods: ['GET'],
   patterns: ['_text_structure/find_field_structure'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-text_structure',
@@ -18837,7 +19921,9 @@ All this information can be calculated by the structure finder with no guidance.
 However, you can optionally override some of the decisions about the text structure by specifying one or more query parameters.
 
 If the structure finder produces unexpected results, specify the \`explain\` query parameter and an explanation will appear in the response.
-It helps determine why the returned structure was chosen.`,
+It helps determine why the returned structure was chosen.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-text-structure-find-message-structure`,
   methods: ['GET', 'POST'],
   patterns: ['_text_structure/find_message_structure'],
   documentation:
@@ -18892,7 +19978,9 @@ The response from the API contains:
 * Appropriate mappings for an Elasticsearch index, which you could use to ingest the text.
 
 All this information can be calculated by the structure finder with no guidance.
-However, you can optionally override some of the decisions about the text structure by specifying one or more query parameters.`,
+However, you can optionally override some of the decisions about the text structure by specifying one or more query parameters.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-text-structure-find-structure`,
   methods: ['POST'],
   patterns: ['_text_structure/find_structure'],
   documentation:
@@ -18931,7 +20019,9 @@ const TEXT_STRUCTURE_TEST_GROK_PATTERN_CONTRACT: InternalConnectorContract = {
   summary: `Test a Grok pattern`,
   description: `Test a Grok pattern.
 Test a Grok pattern on one or more lines of text.
-The API indicates whether the lines match the pattern together with the offsets and lengths of the matched substrings.`,
+The API indicates whether the lines match the pattern together with the offsets and lengths of the matched substrings.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-text-structure-test-grok-pattern`,
   methods: ['GET', 'POST'],
   patterns: ['_text_structure/test_grok_pattern'],
   documentation:
@@ -18958,7 +20048,9 @@ const TRANSFORM_DELETE_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.delete_transform',
   isInternal: true,
   summary: `Delete a transform`,
-  description: `Delete a transform.`,
+  description: `Delete a transform.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-delete-transform`,
   methods: ['DELETE'],
   patterns: ['_transform/{transform_id}'],
   documentation:
@@ -18979,7 +20071,9 @@ const TRANSFORM_GET_NODE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.get_node_stats',
   isInternal: true,
   summary: ``,
-  description: `Retrieves transform usage information for transform nodes`,
+  description: `Retrieves transform usage information for transform nodes
+
+ Documentation: https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform-node-stats.html`,
   methods: ['GET'],
   patterns: ['_transform/_node_stats'],
   documentation:
@@ -18997,7 +20091,9 @@ const TRANSFORM_GET_TRANSFORM_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Get transforms`,
   description: `Get transforms.
-Get configuration information for transforms.`,
+Get configuration information for transforms.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-get-transform`,
   methods: ['GET'],
   patterns: ['_transform/{transform_id}', '_transform'],
   documentation:
@@ -19023,7 +20119,9 @@ const TRANSFORM_GET_TRANSFORM_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get transform stats`,
   description: `Get transform stats.
 
-Get usage information for transforms.`,
+Get usage information for transforms.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-get-transform-stats`,
   methods: ['GET'],
   patterns: ['_transform/{transform_id}/_stats'],
   documentation:
@@ -19049,7 +20147,9 @@ Generates a preview of the results that you will get when you create a transform
 
 It returns a maximum of 100 results. The calculations are based on all the current data in the source index. It also
 generates a list of mappings and settings for the destination index. These values are determined based on the field
-types of the source index and the transform aggregations.`,
+types of the source index and the transform aggregations.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-preview-transform`,
   methods: ['GET', 'POST'],
   patterns: ['_transform/{transform_id}/_preview', '_transform/_preview'],
   documentation:
@@ -19115,7 +20215,9 @@ attempts unauthorized operations.
 NOTE: You must use Kibana or this API to create a transform. Do not add a transform directly into any
 \`.transform-internal*\` indices using the Elasticsearch index API. If Elasticsearch security features are enabled, do
 not give users any privileges on \`.transform-internal*\` indices. If you used transforms prior to 7.5, also do not
-give users any privileges on \`.data-frame-internal*\` indices.`,
+give users any privileges on \`.data-frame-internal*\` indices.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-put-transform`,
   methods: ['PUT'],
   patterns: ['_transform/{transform_id}'],
   documentation:
@@ -19150,7 +20252,9 @@ const TRANSFORM_RESET_TRANSFORM_CONTRACT: InternalConnectorContract = {
   description: `Reset a transform.
 
 Before you can reset it, you must stop it; alternatively, use the \`force\` query parameter.
-If the destination index was created by the transform, it is deleted.`,
+If the destination index was created by the transform, it is deleted.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-reset-transform`,
   methods: ['POST'],
   patterns: ['_transform/{transform_id}/_reset'],
   documentation:
@@ -19177,7 +20281,9 @@ Instantly run a transform to process data.
 If you run this API, the transform will process the new data instantly,
 without waiting for the configured frequency interval. After the API is called,
 the transform will be processed again at \`now + frequency\` unless the API
-is called again in the meantime.`,
+is called again in the meantime.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-schedule-now-transform`,
   methods: ['POST'],
   patterns: ['_transform/{transform_id}/_schedule_now'],
   documentation:
@@ -19210,7 +20316,9 @@ and prevent new transforms from opening. You can also use this API
 during upgrades that do not require you to reindex your transform
 indices, though stopping transforms is not a requirement in that case.
 You can see the current value for the upgrade_mode setting by using the get
-transform info API.`,
+transform info API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-set-upgrade-mode`,
   methods: ['POST'],
   patterns: ['_transform/set_upgrade_mode'],
   documentation:
@@ -19246,7 +20354,9 @@ When the transform starts, a series of validations occur to ensure its success. 
 created the transform, they occur when you start the transform—​with the exception of privilege checks. When
 Elasticsearch security features are enabled, the transform remembers which roles the user that created it had at the
 time of creation and uses those same roles. If those roles do not have the required privileges on the source and
-destination indices, the transform fails when it attempts unauthorized operations.`,
+destination indices, the transform fails when it attempts unauthorized operations.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-start-transform`,
   methods: ['POST'],
   patterns: ['_transform/{transform_id}/_start'],
   documentation:
@@ -19268,7 +20378,9 @@ const TRANSFORM_STOP_TRANSFORM_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Stop transforms`,
   description: `Stop transforms.
-Stops one or more transforms.`,
+Stops one or more transforms.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-stop-transform`,
   methods: ['POST'],
   patterns: ['_transform/{transform_id}/_stop'],
   documentation:
@@ -19296,7 +20408,9 @@ All updated properties except \`description\` do not take effect until after the
 thus there is data consistency in each checkpoint. To use this API, you must have \`read\` and \`view_index_metadata\`
 privileges for the source indices. You must also have \`index\` and \`read\` privileges for the destination index. When
 Elasticsearch security features are enabled, the transform remembers which roles the user who updated it had at the
-time of update and runs with those privileges.`,
+time of update and runs with those privileges.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-update-transform`,
   methods: ['POST'],
   patterns: ['_transform/{transform_id}/_update'],
   documentation:
@@ -19340,7 +20454,9 @@ Resolve the issue then re-run the process again.
 A summary is returned when the upgrade is finished.
 
 To ensure continuous transforms remain running during a major version upgrade of the cluster – for example, from 7.16 to 8.0 – it is recommended to upgrade transforms before upgrading the cluster.
-You may want to perform a recent cluster backup prior to the upgrade.`,
+You may want to perform a recent cluster backup prior to the upgrade.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-upgrade-transforms`,
   methods: ['POST'],
   patterns: ['_transform/_upgrade'],
   documentation:
@@ -19380,7 +20496,9 @@ The document must still be reindexed, but using this API removes some network ro
 
 The \`_source\` field must be enabled to use this API.
 In addition to \`_source\`, you can access the following variables through the \`ctx\` map: \`_index\`, \`_type\`, \`_id\`, \`_version\`, \`_routing\`, and \`_now\` (the current timestamp).
-For usage examples such as partial updates, upserts, and scripted updates, see the External documentation.`,
+For usage examples such as partial updates, upserts, and scripted updates, see the External documentation.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update`,
   methods: ['POST'],
   patterns: ['{index}/_update/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update',
@@ -19514,7 +20632,9 @@ If you're slicing manually or otherwise tuning automatic slicing, keep in mind t
 * Update performance scales linearly across available resources with the number of slices.
 
 Whether query or update performance dominates the runtime depends on the documents being reindexed and cluster resources.
-Refer to the linked documentation for examples of how to update documents using the \`_update_by_query\` API:`,
+Refer to the linked documentation for examples of how to update documents using the \`_update_by_query\` API:
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update-by-query`,
   methods: ['POST'],
   patterns: ['{index}/_update_by_query'],
   documentation:
@@ -19570,7 +20690,9 @@ const UPDATE_BY_QUERY_RETHROTTLE_CONTRACT: InternalConnectorContract = {
   description: `Throttle an update by query operation.
 
 Change the number of requests per second for a particular update by query operation.
-Rethrottling that speeds up the query takes effect immediately but rethrotting that slows down the query takes effect after completing the current batch to prevent scroll timeouts.`,
+Rethrottling that speeds up the query takes effect immediately but rethrotting that slows down the query takes effect after completing the current batch to prevent scroll timeouts.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update-by-query-rethrottle`,
   methods: ['POST'],
   patterns: ['_update_by_query/{task_id}/_rethrottle'],
   documentation:
@@ -19601,7 +20723,9 @@ The reason for this behavior is to prevent overwriting the watch status from a w
 
 Acknowledging an action throttles further executions of that action until its \`ack.state\` is reset to \`awaits_successful_execution\`.
 This happens when the condition of the watch is not met (the condition evaluates to false).
-To demonstrate how throttling works in practice and how it can be configured for individual actions within a watch, refer to External documentation.`,
+To demonstrate how throttling works in practice and how it can be configured for individual actions within a watch, refer to External documentation.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-ack-watch`,
   methods: ['PUT', 'POST'],
   patterns: ['_watcher/watch/{watch_id}/_ack', '_watcher/watch/{watch_id}/_ack/{action_id}'],
   documentation:
@@ -19637,7 +20761,9 @@ const WATCHER_ACTIVATE_WATCH_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Activate a watch`,
   description: `Activate a watch.
-A watch can be either active or inactive.`,
+A watch can be either active or inactive.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-activate-watch`,
   methods: ['PUT', 'POST'],
   patterns: ['_watcher/watch/{watch_id}/_activate'],
   documentation:
@@ -19662,7 +20788,9 @@ const WATCHER_DEACTIVATE_WATCH_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Deactivate a watch`,
   description: `Deactivate a watch.
-A watch can be either active or inactive.`,
+A watch can be either active or inactive.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-deactivate-watch`,
   methods: ['PUT', 'POST'],
   patterns: ['_watcher/watch/{watch_id}/_deactivate'],
   documentation:
@@ -19693,7 +20821,9 @@ Deleting a watch does not delete any watch execution records related to this wat
 
 IMPORTANT: Deleting a watch must be done by using only this API.
 Do not delete the watch directly from the \`.watches\` index using the Elasticsearch delete document API
-When Elasticsearch security features are enabled, make sure no write privileges are granted to anyone for the \`.watches\` index.`,
+When Elasticsearch security features are enabled, make sure no write privileges are granted to anyone for the \`.watches\` index.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-delete-watch`,
   methods: ['DELETE'],
   patterns: ['_watcher/watch/{id}'],
   documentation:
@@ -19728,7 +20858,9 @@ When Elasticsearch security features are enabled on your cluster, watches are ru
 If your user is allowed to read index \`a\`, but not index \`b\`, then the exact same set of rules will apply during execution of a watch.
 
 When using the run watch API, the authorization data of the user that called the API will be used as a base, instead of the information who stored the watch.
-Refer to the external documentation for examples of watch execution requests, including existing, customized, and inline watches.`,
+Refer to the external documentation for examples of watch execution requests, including existing, customized, and inline watches.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-execute-watch`,
   methods: ['PUT', 'POST'],
   patterns: ['_watcher/watch/{id}/_execute', '_watcher/watch/_execute'],
   documentation:
@@ -19773,7 +20905,9 @@ const WATCHER_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   summary: `Get Watcher index settings`,
   description: `Get Watcher index settings.
 Get settings for the Watcher internal index (\`.watches\`).
-Only a subset of settings are shown, for example \`index.auto_expand_replicas\` and \`index.number_of_replicas\`.`,
+Only a subset of settings are shown, for example \`index.auto_expand_replicas\` and \`index.number_of_replicas\`.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-get-settings`,
   methods: ['GET'],
   patterns: ['_watcher/settings'],
   documentation:
@@ -19794,7 +20928,9 @@ const WATCHER_GET_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.get_watch',
   isInternal: true,
   summary: `Get a watch`,
-  description: `Get a watch.`,
+  description: `Get a watch.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-get-watch`,
   methods: ['GET'],
   patterns: ['_watcher/watch/{id}'],
   documentation:
@@ -19826,7 +20962,9 @@ If Elasticsearch security features are enabled, do not give users write privileg
 When you add a watch you can also define its initial active state by setting the *active* parameter.
 
 When Elasticsearch security features are enabled, your watch can index or search only on indices for which the user that stored the watch has privileges.
-If the user is able to read index \`a\`, but not index \`b\`, the same will apply when the watch runs.`,
+If the user is able to read index \`a\`, but not index \`b\`, the same will apply when the watch runs.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-put-watch`,
   methods: ['PUT', 'POST'],
   patterns: ['_watcher/watch/{id}'],
   documentation:
@@ -19862,7 +21000,9 @@ const WATCHER_QUERY_WATCHES_CONTRACT: InternalConnectorContract = {
   description: `Query watches.
 Get all registered watches in a paginated manner and optionally filter watches by a query.
 
-Note that only the \`_id\` and \`metadata.*\` fields are queryable or sortable.`,
+Note that only the \`_id\` and \`metadata.*\` fields are queryable or sortable.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-query-watches`,
   methods: ['GET', 'POST'],
   patterns: ['_watcher/_query/watches'],
   documentation:
@@ -19887,7 +21027,9 @@ const WATCHER_START_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Start the watch service`,
   description: `Start the watch service.
-Start the Watcher service if it is not already running.`,
+Start the Watcher service if it is not already running.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-start`,
   methods: ['POST'],
   patterns: ['_watcher/_start'],
   documentation:
@@ -19910,7 +21052,9 @@ const WATCHER_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get Watcher statistics`,
   description: `Get Watcher statistics.
 This API always returns basic metrics.
-You retrieve more metrics by using the metric parameter.`,
+You retrieve more metrics by using the metric parameter.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-stats`,
   methods: ['GET'],
   patterns: ['_watcher/stats', '_watcher/stats/{metric}'],
   documentation:
@@ -19935,7 +21079,9 @@ const WATCHER_STOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   summary: `Stop the watch service`,
   description: `Stop the watch service.
-Stop the Watcher service if it is running.`,
+Stop the Watcher service if it is running.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-stop`,
   methods: ['POST'],
   patterns: ['_watcher/_stop'],
   documentation:
@@ -19962,7 +21108,9 @@ Only a subset of settings can be modified.
 This includes \`index.auto_expand_replicas\`, \`index.number_of_replicas\`, \`index.routing.allocation.exclude.*\`,
 \`index.routing.allocation.include.*\` and \`index.routing.allocation.require.*\`.
 Modification of \`index.routing.allocation.include._tier_preference\` is an exception and is not allowed as the
-Watcher shards must always be in the \`data_content\` tier.`,
+Watcher shards must always be in the \`data_content\` tier.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-update-settings`,
   methods: ['PUT'],
   patterns: ['_watcher/settings'],
   documentation:
@@ -19988,7 +21136,9 @@ The information provided by the API includes:
 
 * Build information including the build number and timestamp.
 * License information about the currently installed license.
-* Feature information for the features that are currently enabled and available under the current license.`,
+* Feature information for the features that are currently enabled and available under the current license.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-info`,
   methods: ['GET'],
   patterns: ['_xpack'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-info',
@@ -20010,7 +21160,9 @@ const XPACK_USAGE_CONTRACT: InternalConnectorContract = {
   summary: `Get usage information`,
   description: `Get usage information.
 Get information about the features that are currently enabled and available under the current license.
-The API also provides some usage statistics.`,
+The API also provides some usage statistics.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-xpack`,
   methods: ['GET'],
   patterns: ['_xpack/usage'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-xpack',
