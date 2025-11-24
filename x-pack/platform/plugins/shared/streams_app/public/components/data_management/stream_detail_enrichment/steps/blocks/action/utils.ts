@@ -87,10 +87,32 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           }
         );
       }
+    } else if (step.action === 'remove_by_prefix') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.removeByPrefixProcessorDescription',
+        {
+          defaultMessage: 'Removes {field} and all nested fields',
+          values: {
+            field: step.from,
+          },
+        }
+      );
+    } else if (step.action === 'remove') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.removeProcessorDescription',
+        {
+          defaultMessage: 'Removes {field}',
+          values: {
+            field: step.from,
+          },
+        }
+      );
     } else {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { action, parentId, customIdentifier, where, ignore_failure, ...rest } = step;
-      return JSON.stringify(rest);
+      const { action, parentId, customIdentifier, ignore_failure, ...rest } = step;
+      // Remove 'where' if it exists (some processors have it, some don't)
+      const { where, ...restWithoutWhere } = rest;
+      return JSON.stringify(restWithoutWhere);
     }
   }
 

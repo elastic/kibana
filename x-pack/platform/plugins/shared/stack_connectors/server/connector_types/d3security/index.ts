@@ -8,21 +8,33 @@
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { D3SecurityConfigSchema, D3SecuritySecretsSchema } from '../../../common/d3security/schema';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  D3SecurityConfigSchema,
+  D3SecuritySecretsSchema,
+} from '@kbn/connector-schemas/d3security';
+import type { D3SecurityConfig, D3SecuritySecrets } from '@kbn/connector-schemas/d3security';
 import { renderParameterTemplates } from './render';
 import { D3SecurityConnector } from './d3security';
-import { D3_SECURITY_CONNECTOR_ID, D3_SECURITY_TITLE } from '../../../common/d3security/constants';
-import type { D3SecurityConfig, D3SecuritySecrets } from '../../../common/d3security/types';
 export type D3SecurityConnectorType = SubActionConnectorType<D3SecurityConfig, D3SecuritySecrets>;
 
 export function getConnectorType(): D3SecurityConnectorType {
   return {
-    id: D3_SECURITY_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: D3_SECURITY_TITLE,
+    name: CONNECTOR_NAME,
     getService: (params) => new D3SecurityConnector(params),
-    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
+    ],
     schema: {
       config: D3SecurityConfigSchema,
       secrets: D3SecuritySecretsSchema,

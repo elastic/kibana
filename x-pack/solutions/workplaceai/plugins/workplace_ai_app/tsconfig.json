@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,7 +9,8 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -28,6 +29,17 @@
     "@kbn/logging",
     "@kbn/data-sources-registry-plugin",
     "@kbn/react-query",
+    "@kbn/workplaceai-api-keys-components",
+    "@kbn/workplaceai-api-keys-server",
+    "@kbn/deeplinks-agent-builder",
+    "@kbn/deeplinks-data-connectors",
+    "@kbn/deeplinks-analytics",
+    "@kbn/deeplinks-workflows",
+    "@kbn/onechat-common",
+    "@kbn/cloud",
+    "@kbn/cloud-plugin",
+    "@kbn/share-plugin",
+    "@kbn/spaces-plugin"
   ],
   "exclude": [
     "target/**/*",

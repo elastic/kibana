@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
+import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
+import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
 import { useFilteredSigEvents } from './hooks/use_filtered_sig_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
@@ -23,8 +25,6 @@ import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
 import { NO_FEATURE } from './add_significant_event_flyout/utils/default_query';
 import { NoFeaturesEmptyState } from './empty_state/no_features';
-import { StreamFeaturesFlyout } from '../data_management/stream_detail_management/stream_features/stream_features_flyout';
-import { useStreamFeatures } from '../data_management/stream_detail_management/stream_features/hooks/use_stream_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useAIFeatures } from './add_significant_event_flyout/generated_flow_form/use_ai_features';
 import {

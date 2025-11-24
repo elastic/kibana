@@ -8,6 +8,7 @@
  */
 
 import * as Fs from 'fs';
+import os from 'os';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
@@ -21,19 +22,409 @@ import { CiStatsClient } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
-import { collectEnvFromLabels, expandAgentQueue } from '#pipeline-utils';
+import { filterEmptyJestConfigs } from './get_tests_from_config';
+import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
+interface FtrConfigsManifest {
+  defaultQueue?: string;
+  disabled?: string[];
+  enabled?: Array<string | { [configPath: string]: { queue: string } }>;
+}
 
-const getRequiredEnv = (name: string) => {
-  const value = process.env[name];
-  if (typeof value !== 'string' || !value) {
-    throw new Error(`Missing required environment variable "${name}"`);
+export async function pickTestGroupRunOrder() {
+  const bk = new BuildkiteClient();
+  const ciStats = new CiStatsClient();
+
+  // these keys are synchronized in a few placed by storing them in the env during builds
+  const UNIT_TYPE = getRequiredEnv('TEST_GROUP_TYPE_UNIT');
+  const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
+  const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
+
+  const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
+    ? parseFloat(process.env.JEST_MAX_MINUTES)
+    : 40;
+  if (Number.isNaN(JEST_MAX_MINUTES)) {
+    throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
   }
-  return value;
-};
+
+  const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
+    ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
+    : 37;
+  if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
+    throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
+  }
+
+  /**
+   * This env variable corresponds to the env stanza within
+   * https://github.com/elastic/kibana/blob/bc2cb5dc613c3d455a5fed9c54450fd7e46ffd92/.buildkite/pipelines/code_coverage/daily.yml#L17
+   *
+   * It is a flag that signals the job for which test runners will be executed.
+   *
+   * For example in code coverage pipeline definition, it is "limited"
+   * to 'unit,integration'.  This means FTR tests will not be executed.
+   */
+  const LIMIT_CONFIG_TYPE = process.env.LIMIT_CONFIG_TYPE
+    ? process.env.LIMIT_CONFIG_TYPE.split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : ['unit', 'integration', 'functional'];
+
+  const LIMIT_SOLUTIONS = process.env.LIMIT_SOLUTIONS
+    ? process.env.LIMIT_SOLUTIONS.split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : undefined;
+  if (LIMIT_SOLUTIONS) {
+    const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
+    const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
+    if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
+  }
+
+  const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
+    ? process.env.FTR_CONFIG_PATTERNS.split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : undefined;
+
+  const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
+    ? parseFloat(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN)
+    : undefined;
+  if (
+    FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined &&
+    Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)
+  ) {
+    throw new Error(
+      `invalid FUNCTIONAL_MINIMUM_ISOLATION_MIN: ${process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN}`
+    );
+  }
+
+  const FTR_CONFIGS_RETRY_COUNT = process.env.FTR_CONFIGS_RETRY_COUNT
+    ? parseInt(process.env.FTR_CONFIGS_RETRY_COUNT, 10)
+    : 1;
+  if (Number.isNaN(FTR_CONFIGS_RETRY_COUNT)) {
+    throw new Error(`invalid FTR_CONFIGS_RETRY_COUNT: ${process.env.FTR_CONFIGS_RETRY_COUNT}`);
+  }
+  const JEST_CONFIGS_RETRY_COUNT = process.env.JEST_CONFIGS_RETRY_COUNT
+    ? parseInt(process.env.JEST_CONFIGS_RETRY_COUNT, 10)
+    : 1;
+  if (Number.isNaN(JEST_CONFIGS_RETRY_COUNT)) {
+    throw new Error(`invalid JEST_CONFIGS_RETRY_COUNT: ${process.env.JEST_CONFIGS_RETRY_COUNT}`);
+  }
+
+  const FTR_CONFIGS_DEPS =
+    process.env.FTR_CONFIGS_DEPS !== undefined
+      ? process.env.FTR_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build'];
+
+  const JEST_CONFIGS_DEPS =
+    process.env.JEST_CONFIGS_DEPS !== undefined
+      ? process.env.JEST_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build'];
+
+  const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
+    ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
+    : {};
+  const envFromlabels: Record<string, string> = collectEnvFromLabels();
+
+  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
+    FTR_CONFIG_PATTERNS,
+    LIMIT_SOLUTIONS
+  );
+
+  const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
+
+  if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
+
+  const getJestConfigGlobs = (patterns: string[]) => {
+    if (!LIMIT_SOLUTIONS) {
+      return patterns;
+    }
+
+    const platformPatterns = ['src/', 'x-pack/platform/'].flatMap((platformPrefix: string) =>
+      patterns.map((pattern: string) => `${platformPrefix}${pattern}`)
+    );
+
+    return (
+      LIMIT_SOLUTIONS.flatMap((solution: string) =>
+        patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
+      )
+        // When applying the solution filter, still allow platform tests
+        .concat(platformPatterns)
+    );
+  };
+
+  const jestUnitConfigsWithEmpties = LIMIT_CONFIG_TYPE.includes('unit')
+    ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
+        cwd: process.cwd(),
+        absolute: false,
+        ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
+      })
+    : [];
+  const jestUnitConfigs = await filterEmptyJestConfigs(
+    jestUnitConfigsWithEmpties,
+    os.availableParallelism()
+  );
+
+  const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
+    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
+        cwd: process.cwd(),
+        absolute: false,
+        ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
+      })
+    : [];
+
+  if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
+    throw new Error('unable to find any unit, integration, or FTR configs');
+  }
+
+  const trackedBranch = getTrackedBranch();
+  const ownBranch = process.env.BUILDKITE_BRANCH as string;
+  const pipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG as string;
+  const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
+
+  const { sources, types } = await ciStats.pickTestGroupRunOrder({
+    sources: [
+      // try to get times from a recent successful job on this PR
+      ...(prNumber
+        ? [
+            {
+              prId: prNumber,
+              jobName: 'kibana-pull-request',
+            },
+          ]
+        : []),
+      // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
+      // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
+      // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
+      // of too many ftr groups instead of potential timeouts.
+      ...(!prNumber &&
+      pipelineSlug !== 'kibana-on-merge' &&
+      pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
+        ? [
+            {
+              branch: ownBranch,
+              jobName: pipelineSlug,
+            },
+            {
+              branch: trackedBranch,
+              jobName: pipelineSlug,
+            },
+          ]
+        : []),
+      // try to get times from the mergeBase commit
+      ...(process.env.GITHUB_PR_MERGE_BASE
+        ? [
+            {
+              commit: process.env.GITHUB_PR_MERGE_BASE,
+              jobName: 'kibana-on-merge',
+            },
+          ]
+        : []),
+      // fallback to the latest times from the tracked branch
+      {
+        branch: trackedBranch,
+        jobName: 'kibana-on-merge',
+      },
+      // finally fallback to the latest times from the main branch in case this branch is brand new
+      {
+        branch: 'main',
+        jobName: 'kibana-on-merge',
+      },
+    ],
+    groups: [
+      {
+        type: UNIT_TYPE,
+        defaultMin: 4,
+        maxMin: JEST_MAX_MINUTES,
+        overheadMin: 0.2,
+        names: jestUnitConfigs,
+      },
+      {
+        type: INTEGRATION_TYPE,
+        defaultMin: 60,
+        maxMin: JEST_MAX_MINUTES,
+        overheadMin: 0.2,
+        names: jestIntegrationConfigs,
+      },
+      ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
+        type: FUNCTIONAL_TYPE,
+        defaultMin: 60,
+        queue,
+        maxMin: FUNCTIONAL_MAX_MINUTES,
+        minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
+        overheadMin: 0,
+        names,
+      })),
+    ],
+  });
+
+  console.log('test run order is determined by builds:');
+  console.dir(sources, { depth: Infinity, maxArrayLength: Infinity });
+
+  const unit = getRunGroup(bk, types, UNIT_TYPE);
+  const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
+
+  let configCounter = 0;
+  let groupCounter = 0;
+
+  // the relevant data we will use to define the pipeline steps
+  const functionalGroups: Array<{
+    title: string;
+    key: string;
+    sortBy: number | string;
+    queue: string;
+  }> = [];
+  // the map that we will write to the artifacts for informing ftr config jobs of what they should do
+  const ftrRunOrder: Record<
+    string,
+    { title: string; expectedDurationMin: number; names: string[] }
+  > = {};
+
+  if (ftrConfigsByQueue.size) {
+    for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
+      for (const group of groups) {
+        if (!group.names.length) {
+          continue;
+        }
+
+        const key = `ftr_configs_${configCounter++}`;
+        let sortBy;
+        let title;
+        if (group.names.length === 1) {
+          title = group.names[0];
+          sortBy = title;
+        } else {
+          sortBy = ++groupCounter;
+          title = `FTR Configs #${sortBy}`;
+        }
+
+        functionalGroups.push({
+          title,
+          key,
+          sortBy,
+          queue: queue ?? defaultQueue,
+        });
+        ftrRunOrder[key] = {
+          title,
+          expectedDurationMin: group.durationMin,
+          names: group.names,
+        };
+      }
+    }
+  }
+
+  // write the config for each step to an artifact that can be used by the individual jest jobs
+  Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
+  bk.uploadArtifacts('jest_run_order.json');
+
+  if (ftrConfigsIncluded) {
+    // write the config for functional steps to an artifact that can be used by the individual functional jobs
+    Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
+    bk.uploadArtifacts('ftr_run_order.json');
+  }
+
+  // upload the step definitions to Buildkite
+  bk.uploadSteps(
+    [
+      unit.count > 0
+        ? {
+            label: 'Jest Tests',
+            command: getRequiredEnv('JEST_UNIT_SCRIPT'),
+            parallelism: unit.count,
+            timeout_in_minutes: 120,
+            key: 'jest',
+            agents: {
+              ...expandAgentQueue('n2-4-spot'),
+              diskSizeGb: 115,
+            },
+            env: {
+              SCOUT_TARGET_TYPE: 'local',
+            },
+            depends_on: JEST_CONFIGS_DEPS,
+            retry: {
+              automatic: [
+                { exit_status: '-1', limit: 3 },
+                ...(JEST_CONFIGS_RETRY_COUNT > 0
+                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+                  : []),
+              ],
+            },
+          }
+        : [],
+      integration.count > 0
+        ? {
+            label: 'Jest Integration Tests',
+            command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
+            parallelism: integration.count,
+            timeout_in_minutes: 120,
+            key: 'jest-integration',
+            agents: expandAgentQueue('n2-4-spot'),
+            env: {
+              SCOUT_TARGET_TYPE: 'local',
+            },
+            depends_on: JEST_CONFIGS_DEPS,
+            retry: {
+              automatic: [
+                { exit_status: '-1', limit: 3 },
+                ...(JEST_CONFIGS_RETRY_COUNT > 0
+                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+                  : []),
+              ],
+            },
+          }
+        : [],
+      functionalGroups.length
+        ? {
+            group: 'FTR Configs',
+            key: 'ftr-configs',
+            depends_on: FTR_CONFIGS_DEPS,
+            steps: functionalGroups
+              .sort((a, b) =>
+                // if both groups are sorted by number then sort by that
+                typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
+                  ? a.sortBy - b.sortBy
+                  : // if both groups are sorted by string, sort by that
+                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
+                  ? a.sortBy.localeCompare(b.sortBy)
+                  : // if a is sorted by number then order it later than b
+                  typeof a.sortBy === 'number'
+                  ? 1
+                  : -1
+              )
+              .map(
+                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                  label: title,
+                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                  timeout_in_minutes: 120,
+                  agents: expandAgentQueue(queue),
+                  env: {
+                    SCOUT_TARGET_TYPE: 'local',
+                    FTR_CONFIG_GROUP_KEY: key,
+                    ...ftrExtraArgs,
+                    ...envFromlabels,
+                  },
+                  retry: {
+                    automatic: [
+                      { exit_status: '-1', limit: 3 },
+                      ...(FTR_CONFIGS_RETRY_COUNT > 0
+                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                        : []),
+                    ],
+                  },
+                })
+              ),
+          }
+        : [],
+    ].flat()
+  );
+}
 
 function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup[] {
   const types = allTypes.filter((t) => t.type === typeName);
@@ -112,12 +503,6 @@ function getTrackedBranch(): string {
 
 function isObj(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null;
-}
-
-interface FtrConfigsManifest {
-  defaultQueue?: string;
-  disabled?: string[];
-  enabled?: Array<string | { [configPath: string]: { queue: string } }>;
 }
 
 function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
@@ -208,449 +593,4 @@ function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
     throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
   }
-}
-
-export async function pickTestGroupRunOrder() {
-  const bk = new BuildkiteClient();
-  const ciStats = new CiStatsClient();
-
-  // these keys are synchronized in a few placed by storing them in the env during builds
-  const UNIT_TYPE = getRequiredEnv('TEST_GROUP_TYPE_UNIT');
-  const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
-  const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
-
-  const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
-    ? parseFloat(process.env.JEST_MAX_MINUTES)
-    : 40;
-  if (Number.isNaN(JEST_MAX_MINUTES)) {
-    throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
-  }
-
-  const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
-    ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
-    : 37;
-  if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
-    throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
-  }
-
-  /**
-   * This env variable corresponds to the env stanza within
-   * https://github.com/elastic/kibana/blob/bc2cb5dc613c3d455a5fed9c54450fd7e46ffd92/.buildkite/pipelines/code_coverage/daily.yml#L17
-   *
-   * It is a flag that signals the job for which test runners will be executed.
-   *
-   * For example in code coverage pipeline definition, it is "limited"
-   * to 'unit,integration'.  This means FTR tests will not be executed.
-   */
-  const LIMIT_CONFIG_TYPE = process.env.LIMIT_CONFIG_TYPE
-    ? process.env.LIMIT_CONFIG_TYPE.split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
-    : ['unit', 'integration', 'functional'];
-
-  const LIMIT_SOLUTIONS = process.env.LIMIT_SOLUTIONS
-    ? process.env.LIMIT_SOLUTIONS.split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
-    : undefined;
-  if (LIMIT_SOLUTIONS) {
-    const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
-    const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
-    if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
-  }
-
-  const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
-    ? process.env.FTR_CONFIG_PATTERNS.split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
-    : undefined;
-
-  const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
-    ? parseFloat(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN)
-    : undefined;
-  if (
-    FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined &&
-    Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)
-  ) {
-    throw new Error(
-      `invalid FUNCTIONAL_MINIMUM_ISOLATION_MIN: ${process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN}`
-    );
-  }
-
-  const FTR_CONFIGS_RETRY_COUNT = process.env.FTR_CONFIGS_RETRY_COUNT
-    ? parseInt(process.env.FTR_CONFIGS_RETRY_COUNT, 10)
-    : 1;
-  if (Number.isNaN(FTR_CONFIGS_RETRY_COUNT)) {
-    throw new Error(`invalid FTR_CONFIGS_RETRY_COUNT: ${process.env.FTR_CONFIGS_RETRY_COUNT}`);
-  }
-  const JEST_CONFIGS_RETRY_COUNT = process.env.JEST_CONFIGS_RETRY_COUNT
-    ? parseInt(process.env.JEST_CONFIGS_RETRY_COUNT, 10)
-    : 1;
-  if (Number.isNaN(JEST_CONFIGS_RETRY_COUNT)) {
-    throw new Error(`invalid JEST_CONFIGS_RETRY_COUNT: ${process.env.JEST_CONFIGS_RETRY_COUNT}`);
-  }
-
-  const FTR_CONFIGS_DEPS =
-    process.env.FTR_CONFIGS_DEPS !== undefined
-      ? process.env.FTR_CONFIGS_DEPS.split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : ['build'];
-
-  const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
-    ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
-    : {};
-  const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
-  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
-    FTR_CONFIG_PATTERNS,
-    LIMIT_SOLUTIONS
-  );
-
-  const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
-
-  if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
-
-  const getJestConfigGlobs = (patterns: string[]) => {
-    if (!LIMIT_SOLUTIONS) {
-      return patterns;
-    }
-
-    const platformPatterns = ['src/', 'x-pack/platform/'].flatMap((platformPrefix: string) =>
-      patterns.map((pattern: string) => `${platformPrefix}${pattern}`)
-    );
-
-    return (
-      LIMIT_SOLUTIONS.flatMap((solution: string) =>
-        patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
-      )
-        // When applying the solution filter, still allow platform tests
-        .concat(platformPatterns)
-    );
-  };
-
-  const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
-        cwd: process.cwd(),
-        absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
-      })
-    : [];
-
-  const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
-        cwd: process.cwd(),
-        absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
-      })
-    : [];
-
-  if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
-    throw new Error('unable to find any unit, integration, or FTR configs');
-  }
-
-  const trackedBranch = getTrackedBranch();
-  const ownBranch = process.env.BUILDKITE_BRANCH as string;
-  const pipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG as string;
-  const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
-
-  const { sources, types } = await ciStats.pickTestGroupRunOrder({
-    sources: [
-      // try to get times from a recent successful job on this PR
-      ...(prNumber
-        ? [
-            {
-              prId: prNumber,
-              jobName: 'kibana-pull-request',
-            },
-          ]
-        : []),
-      // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
-      // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
-      // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
-      // of too many ftr groups instead of potential timeouts.
-      ...(!prNumber &&
-      pipelineSlug !== 'kibana-on-merge' &&
-      pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
-        ? [
-            {
-              branch: ownBranch,
-              jobName: pipelineSlug,
-            },
-            {
-              branch: trackedBranch,
-              jobName: pipelineSlug,
-            },
-          ]
-        : []),
-      // try to get times from the mergeBase commit
-      ...(process.env.GITHUB_PR_MERGE_BASE
-        ? [
-            {
-              commit: process.env.GITHUB_PR_MERGE_BASE,
-              jobName: 'kibana-on-merge',
-            },
-          ]
-        : []),
-      // fallback to the latest times from the tracked branch
-      {
-        branch: trackedBranch,
-        jobName: 'kibana-on-merge',
-      },
-      // finally fallback to the latest times from the main branch in case this branch is brand new
-      {
-        branch: 'main',
-        jobName: 'kibana-on-merge',
-      },
-    ],
-    groups: [
-      {
-        type: UNIT_TYPE,
-        defaultMin: 4,
-        maxMin: JEST_MAX_MINUTES,
-        overheadMin: 0.2,
-        names: jestUnitConfigs,
-      },
-      {
-        type: INTEGRATION_TYPE,
-        defaultMin: 60,
-        maxMin: JEST_MAX_MINUTES,
-        overheadMin: 0.2,
-        names: jestIntegrationConfigs,
-      },
-      ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
-        type: FUNCTIONAL_TYPE,
-        defaultMin: 60,
-        queue,
-        maxMin: FUNCTIONAL_MAX_MINUTES,
-        minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 1.5,
-        names,
-      })),
-    ],
-  });
-
-  console.log('test run order is determined by builds:');
-  console.dir(sources, { depth: Infinity, maxArrayLength: Infinity });
-
-  const unit = getRunGroup(bk, types, UNIT_TYPE);
-  const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
-
-  let configCounter = 0;
-  let groupCounter = 0;
-
-  // the relevant data we will use to define the pipeline steps
-  const functionalGroups: Array<{
-    title: string;
-    key: string;
-    sortBy: number | string;
-    queue: string;
-  }> = [];
-  // the map that we will write to the artifacts for informing ftr config jobs of what they should do
-  const ftrRunOrder: Record<
-    string,
-    { title: string; expectedDurationMin: number; names: string[] }
-  > = {};
-
-  if (ftrConfigsByQueue.size) {
-    for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
-      for (const group of groups) {
-        if (!group.names.length) {
-          continue;
-        }
-
-        const key = `ftr_configs_${configCounter++}`;
-        let sortBy;
-        let title;
-        if (group.names.length === 1) {
-          title = group.names[0];
-          sortBy = title;
-        } else {
-          sortBy = ++groupCounter;
-          title = `FTR Configs #${sortBy}`;
-        }
-
-        functionalGroups.push({
-          title,
-          key,
-          sortBy,
-          queue: queue ?? defaultQueue,
-        });
-        ftrRunOrder[key] = {
-          title,
-          expectedDurationMin: group.durationMin,
-          names: group.names,
-        };
-      }
-    }
-  }
-
-  // write the config for each step to an artifact that can be used by the individual jest jobs
-  Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
-  bk.uploadArtifacts('jest_run_order.json');
-
-  if (ftrConfigsIncluded) {
-    // write the config for functional steps to an artifact that can be used by the individual functional jobs
-    Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
-    bk.uploadArtifacts('ftr_run_order.json');
-  }
-
-  // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      unit.count > 0
-        ? {
-            label: 'Jest Tests',
-            command: getRequiredEnv('JEST_UNIT_SCRIPT'),
-            parallelism: unit.count,
-            timeout_in_minutes: 120,
-            key: 'jest',
-            agents: {
-              ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 100,
-            },
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
-      integration.count > 0
-        ? {
-            label: 'Jest Integration Tests',
-            command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
-            parallelism: integration.count,
-            timeout_in_minutes: 120,
-            key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot'),
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
-      functionalGroups.length
-        ? {
-            group: 'FTR Configs',
-            key: 'ftr-configs',
-            depends_on: FTR_CONFIGS_DEPS,
-            steps: functionalGroups
-              .sort((a, b) =>
-                // if both groups are sorted by number then sort by that
-                typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
-                  ? a.sortBy - b.sortBy
-                  : // if both groups are sorted by string, sort by that
-                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
-                  ? a.sortBy.localeCompare(b.sortBy)
-                  : // if a is sorted by number then order it later than b
-                  typeof a.sortBy === 'number'
-                  ? 1
-                  : -1
-              )
-              .map(
-                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
-                  label: title,
-                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 120,
-                  agents: expandAgentQueue(queue),
-                  env: {
-                    SCOUT_TARGET_TYPE: 'local',
-                    FTR_CONFIG_GROUP_KEY: key,
-                    ...ftrExtraArgs,
-                    ...envFromlabels,
-                  },
-                  retry: {
-                    automatic: [
-                      { exit_status: '-1', limit: 3 },
-                      ...(FTR_CONFIGS_RETRY_COUNT > 0
-                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                        : []),
-                    ],
-                  },
-                })
-              ),
-          }
-        : [],
-    ].flat()
-  );
-}
-
-// copied from src/platform/packages/shared/kbn-scout/src/config/discovery/search_configs.ts
-interface ScoutTestDiscoveryConfig {
-  group: string;
-  path: string;
-  usesParallelWorkers: boolean;
-  configs: string[];
-  type: 'plugin' | 'package';
-}
-
-export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
-  const bk = new BuildkiteClient();
-  const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
-  if (!Fs.existsSync(scoutConfigsPath)) {
-    throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
-  }
-
-  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8')) as Record<
-    string,
-    ScoutTestDiscoveryConfig
-  >;
-  const pluginsOrPackagesWithScoutTests: string[] = Object.keys(rawScoutConfigs);
-
-  if (pluginsOrPackagesWithScoutTests.length === 0) {
-    // no scout configs found, nothing to need to upload steps
-    return;
-  }
-
-  const scoutCiRunGroups = pluginsOrPackagesWithScoutTests.map((name) => ({
-    label: `Scout: [ ${rawScoutConfigs[name].group} / ${name} ] ${rawScoutConfigs[name].type}`,
-    key: name,
-    agents: expandAgentQueue(rawScoutConfigs[name].usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-    group: rawScoutConfigs[name].group,
-  }));
-
-  // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      {
-        group: 'Scout Configs',
-        key: 'scout-configs',
-        depends_on: ['build_scout_tests'],
-        steps: scoutCiRunGroups.map(
-          ({ label, key, group, agents }): BuildkiteStep => ({
-            label,
-            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
-            timeout_in_minutes: 60,
-            agents,
-            env: {
-              SCOUT_CONFIG_GROUP_KEY: key,
-              SCOUT_CONFIG_GROUP_TYPE: group,
-              ...envFromlabels,
-            },
-            retry: {
-              automatic: [
-                { exit_status: '10', limit: 1 },
-                { exit_status: '*', limit: 3 },
-              ],
-            },
-          })
-        ),
-      },
-    ].flat()
-  );
 }

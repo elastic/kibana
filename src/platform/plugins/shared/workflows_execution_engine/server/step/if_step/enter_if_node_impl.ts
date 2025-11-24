@@ -94,20 +94,32 @@ export class EnterIfNodeImpl implements NodeImplementation {
   private evaluateCondition(condition: string | boolean | undefined): boolean {
     if (typeof condition === 'boolean') {
       return condition;
-    } else if (typeof condition === 'undefined') {
-      return false; // Undefined condition defaults to false
+    }
+    if (typeof condition === 'undefined') {
+      return false;
     }
 
-    try {
-      return evaluateKql(condition, this.stepExecutionRuntime.contextManager.getContext());
-    } catch (error) {
-      if (error instanceof KQLSyntaxError) {
-        throw new Error(
-          `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(error)}`
-        );
+    if (typeof condition === 'string') {
+      try {
+        return evaluateKql(condition, this.stepExecutionRuntime.contextManager.getContext());
+      } catch (error) {
+        if (error instanceof KQLSyntaxError) {
+          throw new Error(
+            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
+              error
+            )}`
+          );
+        }
+        throw error;
       }
-
-      throw error;
     }
+
+    throw new Error(
+      `Invalid condition type for step ${this.node.stepId}. ` +
+        `Got ${JSON.stringify(
+          condition
+        )} (type: ${typeof condition}), but expected boolean or string. ` +
+        `When using templating syntax, the expression must evaluate to a boolean or string (KQL expression).`
+    );
   }
 }

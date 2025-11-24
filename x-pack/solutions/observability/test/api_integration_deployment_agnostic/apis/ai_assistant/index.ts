@@ -39,13 +39,12 @@ export default function aiAssistantApiIntegrationTests({
     // Misc.
     loadTestFile(require.resolve('./chat/chat.spec.ts'));
     loadTestFile(require.resolve('./complete/complete.spec.ts'));
+    loadTestFile(require.resolve('./complete/public_complete.spec.ts'));
     loadTestFile(require.resolve('./index_assets/index_assets.spec.ts'));
     loadTestFile(require.resolve('./connectors/connectors.spec.ts'));
     loadTestFile(require.resolve('./conversations/conversations.spec.ts'));
     loadTestFile(require.resolve('./anonymization/anonymization.spec.ts'));
 
-    // public endpoints
-    loadTestFile(require.resolve('./public_complete/public_complete.spec.ts'));
     loadTestFile(require.resolve('./distributed_lock_manager/distributed_lock_manager.spec.ts'));
   });
 }

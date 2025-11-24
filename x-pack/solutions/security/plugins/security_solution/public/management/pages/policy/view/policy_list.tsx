@@ -9,15 +9,15 @@ import React, { memo, useCallback, useMemo } from 'react';
 
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
-  EuiBasicTable,
-  EuiText,
-  EuiHorizontalRule,
   EuiAvatar,
+  EuiBasicTable,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
+  EuiHorizontalRule,
   EuiIconTip,
-  EuiCallOut,
+  EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +26,6 @@ import { useLocation } from 'react-router-dom';
 import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import moment from 'moment';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -69,7 +68,6 @@ const policyListErrorToastText = i18n.translate(
 
 export const PolicyList = memo(() => {
   const { canReadEndpointList, loading: authLoading } = useUserPrivileges().endpointPrivileges;
-  const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
   const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -90,7 +88,7 @@ export const PolicyList = memo(() => {
   });
 
   const { data: outdatedManifestsCountResponse, isLoading: isOutdatedManifestsCountLoading } =
-    useEndpointPackagePoliciesStats(isProtectionUpdatesEnabled);
+    useEndpointPackagePoliciesStats();
 
   // grab endpoint version for empty page
   const { data: endpointPackageInfo, isFetching: packageIsFetching } =
@@ -155,7 +153,6 @@ export const PolicyList = memo(() => {
 
   const outdatedManifestsCallOut = useMemo(() => {
     if (
-      !isProtectionUpdatesEnabled ||
       isOutdatedManifestsCountLoading ||
       !outdatedManifestsCountResponse ||
       outdatedManifestsCountResponse.outdatedManifestsCount === 0
@@ -175,7 +172,7 @@ export const PolicyList = memo(() => {
         })}
       />
     );
-  }, [isOutdatedManifestsCountLoading, isProtectionUpdatesEnabled, outdatedManifestsCountResponse]);
+  }, [isOutdatedManifestsCountLoading, outdatedManifestsCountResponse]);
 
   const policyColumns = useMemo(() => {
     const updatedAtColumnName = i18n.translate('xpack.securitySolution.policy.list.updatedAt', {
@@ -245,35 +242,33 @@ export const PolicyList = memo(() => {
           );
         },
       },
-      ...(isProtectionUpdatesEnabled
-        ? [
-            {
-              field: '',
-              name: i18n.translate('xpack.securitySolution.policy.list.deployedVersion', {
-                defaultMessage: 'Deployed Version',
-              }),
-              truncateText: true,
-              render: (policy: PolicyData) => {
-                const [color, displayText, tooltip] = generateDeployedVersionEntry(
-                  policy.inputs[0]?.config?.policy.value.global_manifest_version
-                );
+      ...[
+        {
+          field: '',
+          name: i18n.translate('xpack.securitySolution.policy.list.deployedVersion', {
+            defaultMessage: 'Deployed Version',
+          }),
+          truncateText: true,
+          render: (policy: PolicyData) => {
+            const [color, displayText, tooltip] = generateDeployedVersionEntry(
+              policy.inputs[0]?.config?.policy.value.global_manifest_version
+            );
 
-                return (
-                  <EuiFlexGroup responsive={false} gutterSize={'xs'} alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip type={'dot'} color={color} content={tooltip} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" data-test-subj="policyDeployedVersion">
-                        {displayText}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                );
-              },
-            },
-          ]
-        : []),
+            return (
+              <EuiFlexGroup responsive={false} gutterSize={'xs'} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip type={'dot'} color={color} content={tooltip} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" data-test-subj="policyDeployedVersion">
+                    {displayText}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          },
+        },
+      ],
       {
         field: 'created_by',
         name: i18n.translate('xpack.securitySolution.policy.list.createdBy', {
@@ -366,13 +361,7 @@ export const PolicyList = memo(() => {
         },
       },
     ];
-  }, [
-    isProtectionUpdatesEnabled,
-    euiTheme.colors.warning,
-    backLink,
-    authLoading,
-    canReadEndpointList,
-  ]);
+  }, [euiTheme.colors.warning, backLink, authLoading, canReadEndpointList]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {

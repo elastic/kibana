@@ -11,6 +11,7 @@ import type { Condition } from './conditions';
 import { conditionSchema } from './conditions';
 import type { StreamlangProcessorDefinition } from './processors';
 import { streamlangProcessorSchema } from './processors';
+import type { StreamlangStepWithUIAttributes } from './ui';
 
 // Recursive schema for ConditionWithSteps
 export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(() =>
@@ -64,8 +65,10 @@ export const isActionBlockSchema = (obj: any): obj is StreamlangProcessorDefinit
 
 // Cheap check that bypasses having to do full schema checks.
 // This is useful for quickly identifying action blocks without full recursive validation.
-export const isActionBlock = (obj: any): obj is StreamlangProcessorDefinition => {
-  return 'action' in obj;
+export const isActionBlock = <TBlock extends StreamlangStep | StreamlangStepWithUIAttributes>(
+  obj?: TBlock
+): obj is Extract<TBlock, { action: string }> => {
+  return obj !== undefined && 'action' in obj;
 };
 
 /**

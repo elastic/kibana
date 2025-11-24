@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 137
- * Metric groups: 483
+ * Metric groups: 488
  * Hardcoded fields: 34
- * Total fields: 1177
+ * Total fields: 1178
  *
  * @internal
  *
- * WARNING: This object contains 1177+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1178+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -2962,12 +2962,6 @@ export const semconvFlat = {
     description: 'Tracestate of the linked span.',
     type: 'keyword',
   },
-  'linux.memory.slab.state': {
-    name: 'linux.memory.slab.state',
-    description: 'The Linux Slab memory state',
-    type: 'keyword',
-    example: 'reclaimable',
-  },
   'log.file.name': {
     name: 'log.file.name',
     description: 'The basename of the file.',
@@ -4332,24 +4326,14 @@ export const semconvFlat = {
     description: 'Describes number of K8s namespaces that are currently in a given phase.',
     type: 'double',
   },
-  'metrics.k8s.node.allocatable.cpu': {
-    name: 'metrics.k8s.node.allocatable.cpu',
-    description: 'Amount of cpu allocatable on the node.',
-    type: 'double',
-  },
-  'metrics.k8s.node.allocatable.ephemeral_storage': {
-    name: 'metrics.k8s.node.allocatable.ephemeral_storage',
-    description: 'Amount of ephemeral-storage allocatable on the node.',
-    type: 'double',
-  },
-  'metrics.k8s.node.allocatable.memory': {
-    name: 'metrics.k8s.node.allocatable.memory',
-    description: 'Amount of memory allocatable on the node.',
-    type: 'double',
-  },
   'metrics.k8s.node.condition.status': {
     name: 'metrics.k8s.node.condition.status',
     description: 'Describes the condition of a particular Node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.cpu.allocatable': {
+    name: 'metrics.k8s.node.cpu.allocatable',
+    description: 'Amount of cpu allocatable on the node.',
     type: 'double',
   },
   'metrics.k8s.node.cpu.time': {
@@ -4361,6 +4345,11 @@ export const semconvFlat = {
     name: 'metrics.k8s.node.cpu.usage',
     description:
       "Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+    type: 'double',
+  },
+  'metrics.k8s.node.ephemeral_storage.allocatable': {
+    name: 'metrics.k8s.node.ephemeral_storage.allocatable',
+    description: 'Amount of ephemeral-storage allocatable on the node.',
     type: 'double',
   },
   'metrics.k8s.node.filesystem.available': {
@@ -4376,6 +4365,11 @@ export const semconvFlat = {
   'metrics.k8s.node.filesystem.usage': {
     name: 'metrics.k8s.node.filesystem.usage',
     description: 'Node filesystem usage.',
+    type: 'double',
+  },
+  'metrics.k8s.node.memory.allocatable': {
+    name: 'metrics.k8s.node.memory.allocatable',
+    description: 'Amount of memory allocatable on the node.',
     type: 'double',
   },
   'metrics.k8s.node.memory.available': {
@@ -5258,21 +5252,21 @@ export const semconvFlat = {
     description: 'Fraction of filesystem bytes used.',
     type: 'double',
   },
-  'metrics.system.linux.memory.available': {
-    name: 'metrics.system.linux.memory.available',
+  'metrics.system.memory.limit': {
+    name: 'metrics.system.memory.limit',
+    description: 'Total virtual memory available in the system.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.available': {
+    name: 'metrics.system.memory.linux.available',
     description:
       'An estimate of how much memory is available for starting new applications, without causing swapping.',
     type: 'double',
   },
-  'metrics.system.linux.memory.slab.usage': {
-    name: 'metrics.system.linux.memory.slab.usage',
+  'metrics.system.memory.linux.slab.usage': {
+    name: 'metrics.system.memory.linux.slab.usage',
     description:
       'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
-    type: 'double',
-  },
-  'metrics.system.memory.limit': {
-    name: 'metrics.system.memory.limit',
-    description: 'Total virtual memory available in the system.',
     type: 'double',
   },
   'metrics.system.memory.shared': {
@@ -5675,6 +5669,12 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'batching_span_processor',
   },
+  'otel.event.name': {
+    name: 'otel.event.name',
+    description: 'Identifies the class / type of event.',
+    type: 'keyword',
+    example: 'browser.mouse.click',
+  },
   'otel.scope.name': {
     name: 'otel.scope.name',
     description: 'The name of the instrumentation scope - (`InstrumentationScope.Name` in OTLP).',
@@ -5939,6 +5939,13 @@ export const semconvFlat = {
       "The PID of the process's session leader. This is also the session ID (SID) of the process.",
     type: 'long',
     example: '14',
+  },
+  'process.state': {
+    name: 'process.state',
+    description:
+      'The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)',
+    type: 'keyword',
+    example: 'running',
   },
   'process.title': {
     name: 'process.title',
@@ -6306,6 +6313,12 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'ext4',
   },
+  'system.memory.linux.slab.state': {
+    name: 'system.memory.linux.slab.state',
+    description: 'The Linux Slab memory state',
+    type: 'keyword',
+    example: 'reclaimable',
+  },
   'system.memory.state': {
     name: 'system.memory.state',
     description: 'The memory state',
@@ -6329,13 +6342,6 @@ export const semconvFlat = {
     description: 'The memory paging state',
     type: 'keyword',
     example: 'free',
-  },
-  'system.process.status': {
-    name: 'system.process.status',
-    description:
-      'The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)',
-    type: 'keyword',
-    example: 'running',
   },
   'telemetry.distro.name': {
     name: 'telemetry.distro.name',
