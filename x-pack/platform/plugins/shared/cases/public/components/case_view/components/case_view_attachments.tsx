@@ -6,14 +6,45 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSelectable } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import { useCaseViewNavigation } from '../../../common/navigation';
-import type { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
 import { CaseViewTabs } from '../case_view_tabs';
 import { useCaseAttachmentTabs } from '../use_case_attachment_tabs';
+import {
+  ALERTS_TAB,
+  ATTACHMENTS_TAB,
+  EVENTS_TAB,
+  FILES_TAB,
+  OBSERVABLES_TAB,
+} from '../translations';
+
+const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
+  switch (activeTab) {
+    case CASE_VIEW_PAGE_TABS.ALERTS: {
+      return ALERTS_TAB;
+    }
+
+    case CASE_VIEW_PAGE_TABS.EVENTS: {
+      return EVENTS_TAB;
+    }
+
+    case CASE_VIEW_PAGE_TABS.FILES: {
+      return FILES_TAB;
+    }
+
+    case CASE_VIEW_PAGE_TABS.OBSERVABLES: {
+      return OBSERVABLES_TAB;
+    }
+
+    // NOTE:this should not be called
+    default:
+      return ATTACHMENTS_TAB;
+  }
+};
 
 export const CaseViewAttachments = ({
   caseData,
@@ -52,7 +83,13 @@ export const CaseViewAttachments = ({
               {(list) => list}
             </EuiSelectable>
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>{children}</EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="s">
+              <h3>{translateTitle(activeTab)}</h3>
+            </EuiTitle>
+            <EuiSpacer />
+            {children}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </>
