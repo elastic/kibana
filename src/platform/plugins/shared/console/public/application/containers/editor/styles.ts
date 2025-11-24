@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css as cssClassName } from '@emotion/css';
 import { css } from '@emotion/react';
 
