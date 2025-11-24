@@ -16,8 +16,11 @@ export const HEADER_TITLE_TEST_ID = 'attack-details-flyout-header-title';
  */
 export const HeaderTitle = memo(() => {
   const {
-    attack: { title },
+    searchHit: { fields },
   } = useAttackDetailsContext();
+
+  // TODO: implement a better data extraction logic
+  const title = fields?.['kibana.alert.attack_discovery.title']?.[0] ?? '';
 
   return <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'warning'} />;
 });

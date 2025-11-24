@@ -28,7 +28,7 @@ export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
 export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
   const { storage } = useKibana().services;
   const { openRightPanel } = useExpandableFlyoutApi();
-  const { attackId } = useAttackDetailsContext();
+  const { attackId, indexName } = useAttackDetailsContext();
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
 
@@ -37,12 +37,12 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
       openRightPanel({
         id: AttackDetailsRightPanelKey,
         path: { tab: tabId },
-        params: { attackId },
+        params: { attackId, indexName },
       });
       // saving which tab is currently selected in the right panel in local storage
       storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
     },
-    [attackId, openRightPanel, storage]
+    [attackId, indexName, openRightPanel, storage]
   );
 
   return (

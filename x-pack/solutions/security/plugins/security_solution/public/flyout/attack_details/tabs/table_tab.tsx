@@ -49,9 +49,10 @@ export const TableTab = memo(() => {
     pageIndex: 0,
   });
 
-  const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
-    setPagination({ pageIndex: index });
-  }, []);
+  const onTableChange = useCallback(
+    ({ page: { index } }: { page: { index: number } }) => setPagination({ pageIndex: index }),
+    []
+  );
 
   const paginationSettings = useMemo(
     () => ({
@@ -61,13 +62,15 @@ export const TableTab = memo(() => {
     [pagination]
   );
 
-  const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
-
   const columns = useMemo(() => getTableTabColumns(), []);
 
   const items = useMemo(
-    () => getTableTabItems({ dataFormattedForFieldBrowser, fieldsByName }),
-    [dataFormattedForFieldBrowser, fieldsByName]
+    () =>
+      getTableTabItems({
+        dataFormattedForFieldBrowser,
+        fieldsByName: getAllFieldsByName(browserFields),
+      }),
+    [browserFields, dataFormattedForFieldBrowser]
   );
 
   return (

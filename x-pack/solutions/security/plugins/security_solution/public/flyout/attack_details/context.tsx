@@ -5,13 +5,11 @@
  * 2.0.
  */
 import React, { createContext, memo, useContext, useMemo } from 'react';
-import { useAssistantContext } from '@kbn/elastic-assistant';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { SearchHit } from '../../../common/search_strategy';
 import type { AttackDetailsProps } from './types';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { FlyoutError } from '../shared/components/flyout_error';
-import { useFindAttackDiscoveries } from '../../attack_discovery/pages/use_find_attack_discoveries';
 import { useAttackDetails } from './hooks/use_attack_details';
 
 export interface AttackDetailsContext {
@@ -20,9 +18,13 @@ export interface AttackDetailsContext {
    */
   attackId: string;
   /**
-   * Attack details
+   * Index name where the attack document is stored
    */
-  attack: AttackDiscoveryAlert;
+  indexName: string;
+  /**
+   * The actual raw document object
+   */
+  searchHit: SearchHit;
   /**
    * Browser fields for the data view (for field browser / flyout sections)
    */
@@ -48,43 +50,27 @@ export type AttackDetailsProviderProps = {
 
 export const AttackDetailsProvider = memo(
   ({ attackId, indexName, children }: AttackDetailsProviderProps) => {
-    const { assistantAvailability, http } = useAssistantContext();
-
-    // get high-level AttackDiscoveryAlert (summary, markdown, etc.)
-    const { data, isLoading: loading } = useFindAttackDiscoveries({
-      ids: [attackId || ''],
-      http,
-      isAssistantEnabled: assistantAvailability.isAssistantEnabled,
-    });
-
     // data view side: browserFields + field-browser data
-    const {
-      browserFields,
-      dataAsNestedObject,
-      dataFormattedForFieldBrowser,
-      loading: detailsLoading,
-    } = useAttackDetails({
+    const { browserFields, dataFormattedForFieldBrowser, searchHit, loading } = useAttackDetails({
       attackId,
       indexName,
     });
 
-    const attack = useMemo<AttackDiscoveryAlert | null>(() => data?.data?.[0] ?? null, [data]);
-
     const contextValue = useMemo<AttackDetailsContext | undefined>(
       () =>
-        attack && attackId && browserFields && dataAsNestedObject && dataFormattedForFieldBrowser
+        attackId && browserFields && dataFormattedForFieldBrowser && indexName && searchHit
           ? {
-              attack,
               attackId,
               browserFields,
-              dataAsNestedObject,
+              indexName,
+              searchHit,
               dataFormattedForFieldBrowser,
             }
           : undefined,
-      [attack, attackId, browserFields, dataAsNestedObject, dataFormattedForFieldBrowser]
+      [attackId, browserFields, indexName, dataFormattedForFieldBrowser, searchHit]
     );
 
-    if (loading || detailsLoading) {
+    if (loading) {
       return <FlyoutLoading />;
     }
 
