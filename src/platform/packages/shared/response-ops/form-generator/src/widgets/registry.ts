@@ -61,14 +61,14 @@ export function getWidgetComponent(
 
   if (!widgetType) {
     throw new Error(
-      `No widget found for schema type: ${schema.def.type}. Please specify a widget in the schema metadata.`
+      `No widget found for schema type: ${schema.constructor.name}. Please specify a widget in the schema metadata.`
     );
   }
 
   const component = WIDGET_REGISTRY[widgetType];
   if (!component) {
     throw new Error(
-      `Widget "${widgetType}" specified in ${schema.def.type} metadata is not registered in the widget registry.`
+      `Widget "${widgetType}" specified in ${schema.constructor.name} metadata is not registered in the widget registry.`
     );
   }
 
