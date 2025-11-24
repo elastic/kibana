@@ -13,6 +13,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
+import type { MultiMatchAnalysis } from '@kbn/data-plugin/common/search';
 import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -129,8 +130,15 @@ export function fetchAll(
 
     // Build the search request body first (this triggers buildEsQuery)
     // Then analyze the BUILT ES DSL query
-    searchSource.getSearchRequestBody();
-    const queryAnalysis = searchSource.getQueryAnalysis();
+    // Wrap in try-catch to handle bad query syntax gracefully.
+    let queryAnalysis: MultiMatchAnalysis = { typeCounts: new Map(), rawTypes: [] };
+    try {
+      searchSource.getSearchRequestBody();
+      queryAnalysis = searchSource.getQueryAnalysis();
+    } catch {
+      // If building the query fails (e.g. invalid user input), skip telemetry.
+      // The fetch will proceed and its error handling will catch and display the error properly.
+    }
 
     const fetchAllRequestOnlyTracker = scopedEbtManager.trackPerformanceEvent(
       'discoverFetchAllRequestsOnly'

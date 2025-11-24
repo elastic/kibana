@@ -33,7 +33,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   fetch: jest.fn().mockResolvedValue({}),
   onRequestStart: jest.fn(),
   getSearchRequestBody: jest.fn(),
-  getQueryAnalysis: jest.fn().mockReturnValue({ types: new Set() }),
+  getQueryAnalysis: jest.fn().mockReturnValue({ typeCounts: new Map(), rawTypes: [] }),
   destroy: jest.fn(),
   history: [],
   getSerializedFields: jest.fn(),
