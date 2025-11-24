@@ -275,11 +275,38 @@ export default function (providerContext: FtrProviderContextWithServices) {
         })
         .expect(200);
       await waitForTask();
-      // Check that agent1 was upgraded.
-      let res = await supertest.get('/api/fleet/agents/agent1').set('kbn-xsrf', 'xxx').expect(200);
-      expect(res.body.item.upgrade_started_at).to.be(undefined);
-      res = await supertest.get('/api/fleet/agents/agent2').set('kbn-xsrf', 'xxx').expect(200);
-      expect(typeof res.body.item.upgrade_started_at).to.be('string');
+
+      await new Promise((resolve, reject) => {
+        let attempts = 0;
+        const intervalId = setInterval(async () => {
+          if (attempts > 10) {
+            clearInterval(intervalId);
+            reject(new Error('wait timed out'));
+          }
+          ++attempts;
+
+          // Check that agent2 upgrade was retried
+          const res2 = await supertest
+            .get('/api/fleet/agents/agent2')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+          expect(typeof res2.body.item.upgrade_started_at).to.be('string');
+
+          if (res2.body.item.upgrade_started_at) {
+            expect(typeof res2.body.item.upgrade_started_at).to.be('string');
+            // Check that agent1 was upgraded.
+            const res1 = await supertest
+              .get('/api/fleet/agents/agent1')
+              .set('kbn-xsrf', 'xxx')
+              .expect(200);
+            expect(res1.body.item.upgrade_started_at).to.be(undefined);
+            clearInterval(intervalId);
+            resolve({});
+          }
+        }, 3000);
+      }).catch((e) => {
+        throw e;
+      });
     });
 
     it('should retry upgrading agents stuck in updating', async () => {
