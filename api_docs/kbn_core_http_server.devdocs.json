@@ -6325,6 +6325,10 @@
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_summary.ts"
               },
               {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/bulk_update_tags.ts"
+              },
+              {
                 "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
               },
