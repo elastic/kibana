@@ -50,7 +50,7 @@ function getFilterTypeForOperator(operator: string): string {
 }
 
 /**
- * Convert AsCodeFilter to stored Filter for runtime compatibility
+ * Convert AsCodeFilter to stored Filter
  *
  * @param filter The AsCodeFilter to convert
  * @param logger Optional logger for warnings

@@ -15,6 +15,5 @@
  */
 
 // Conversion utilities
-export { FilterConversionError } from './errors';
 export { fromStoredFilter } from './from_stored_filter';
 export { toStoredFilter } from './to_stored_filter';

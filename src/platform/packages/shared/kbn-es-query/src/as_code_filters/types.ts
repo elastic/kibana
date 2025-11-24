@@ -12,23 +12,7 @@ import type { Writable } from 'utility-types';
 import type { storedFilterSchema } from '@kbn/es-query-server';
 
 /**
- * Local type definition for stored filters (legacy/runtime format)
+ * Local type definition for stored filters
  * Inferred from the storedFilterSchema in @kbn/es-query-server
  */
 export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;
-
-// ====================================================================
-// VALIDATION TYPES
-// ====================================================================
-
-export interface ValidationError {
-  path: string;
-  message: string;
-  code: string;
-}
-
-export interface ValidationResult {
-  valid: boolean;
-  errors: ValidationError[];
-  warnings?: string[];
-}

@@ -148,7 +148,6 @@ export type { ExecutionContextSearch } from './src/expressions/types';
 
 // As Code Filters
 export {
-  FilterConversionError,
   // Conversion utilities
   fromStoredFilter,
   toStoredFilter,
