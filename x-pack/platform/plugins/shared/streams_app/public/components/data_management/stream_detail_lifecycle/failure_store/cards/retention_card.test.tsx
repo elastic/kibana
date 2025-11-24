@@ -26,8 +26,6 @@ const mockUseFailureStoreConfig = useFailureStoreConfig as jest.MockedFunction<
 
 const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
-const mockRefresh = jest.fn();
-
 const createMockConfig = (
   config: Partial<ReturnType<typeof useFailureStoreConfig>>
 ): ReturnType<typeof useFailureStoreConfig> => {
