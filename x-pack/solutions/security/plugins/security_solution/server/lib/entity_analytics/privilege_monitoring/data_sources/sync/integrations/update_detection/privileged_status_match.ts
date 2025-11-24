@@ -11,7 +11,7 @@ import moment from 'moment';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildPrivilegedSearchBody } from './queries';
-import type { PrivMonBulkUser } from '../../../../types';
+import type { MonitoringEntitySyncType, PrivMonBulkUser } from '../../../../types';
 import { createSearchService } from '../../../../users/search';
 import { generateMonitoringLabels } from '../../generate_monitoring_labels';
 import { createSyncMarkersService } from '../sync_markers/sync_markers';
@@ -61,12 +61,12 @@ interface PrivMatcherModeConfig {
   emptyMatcherPolicy: 'none' | 'all';
 }
 
-const PRIV_MATCHER_MODE_CONFIG: Record<PrivMatcherMode, PrivMatcherModeConfig> = {
+const PRIV_MATCHER_MODE_CONFIG: Record<MonitoringEntitySyncType, PrivMatcherModeConfig> = {
   /**
    * - Uses lastProcessedTimestamp
    * - If no matchers → return 0 privileged users
    */
-  integrations: {
+  entity_analytics_integration: {
     useTimestamps: true,
     emptyMatcherPolicy: 'none',
   },
@@ -80,21 +80,25 @@ const PRIV_MATCHER_MODE_CONFIG: Record<PrivMatcherMode, PrivMatcherModeConfig> =
   },
 };
 
-export const createPatternMatcherService = (
-  dataClient: PrivilegeMonitoringDataClient,
-  soClient: SavedObjectsClientContract,
-  matcherMode: PrivMatcherMode = 'integrations'
-) => {
+export const createPatternMatcherService = ({
+  dataClient,
+  soClient,
+  sourceType,
+}: {
+  dataClient: PrivilegeMonitoringDataClient;
+  soClient: SavedObjectsClientContract;
+  sourceType: MonitoringEntitySyncType;
+}) => {
   const searchService = createSearchService(dataClient);
   const syncMarkerService = createSyncMarkersService(dataClient, soClient);
 
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonBulkUser[]> => {
-    const config = PRIV_MATCHER_MODE_CONFIG[matcherMode];
+    const config = PRIV_MATCHER_MODE_CONFIG[sourceType];
 
     if (!source.matchers?.length) {
-      defaultMatchersPolicy(config.emptyMatcherPolicy, dataClient, source, matcherMode); // TODO: too many params
+      defaultMatchersPolicy(config.emptyMatcherPolicy, source); // TODO: too many params
     }
 
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
@@ -189,31 +193,31 @@ export const createPatternMatcherService = (
     return { users, maxTimestamp };
   };
 
+  const defaultMatchersPolicy = async (
+    // TODO: this assumes type is the index or integrations type
+    emptyMatcherPolicy: string,
+    source: MonitoringEntitySource
+  ) => {
+    if (emptyMatcherPolicy === 'none') {
+      dataClient.log(
+        'info',
+        `No matchers for source id=${source.id ?? '(unknown)'} (type=${
+          source.type
+        }). Returning 0 privileged users.`
+      );
+      return [];
+    }
+    if (emptyMatcherPolicy === 'all') {
+      dataClient.log(
+        'info',
+        `No matchers for source id=${source.id ?? '(unknown)'} (type=${
+          source.type
+        }). Treating ALL users as privileged.`
+      );
+      // You’ll plug in whatever “fetch all users” logic makes sense here:
+      return []; //  fetchAllUsersAsPrivileged(esClient, source); // TODO: implement this function
+    }
+  };
+
   return { findPrivilegedUsersFromMatchers };
 };
-function defaultMatchersPolicy(
-  emptyMatcherPolicy: string,
-  dataClient: PrivilegeMonitoringDataClient,
-  source: MonitoringEntitySource,
-  mode: PrivMatcherMode
-) {
-  if (emptyMatcherPolicy === 'none') {
-    dataClient.log(
-      'info',
-      `No matchers for source id=${
-        source.id ?? '(unknown)'
-      } (mode=${mode}). Returning 0 privileged users.`
-    );
-    return [];
-  }
-  if (emptyMatcherPolicy === 'all') {
-    dataClient.log(
-      'info',
-      `No matchers for source id=${
-        source.id ?? '(unknown)'
-      } (mode=${mode}). Treating ALL users as privileged.`
-    );
-    // You’ll plug in whatever “fetch all users” logic makes sense here:
-    return fetchAllUsersAsPrivileged(esClient, source); // TODO: implement this function
-  }
-}

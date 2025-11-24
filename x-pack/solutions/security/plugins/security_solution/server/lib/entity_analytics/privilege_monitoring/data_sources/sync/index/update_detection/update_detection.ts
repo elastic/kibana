@@ -5,31 +5,29 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server/src/saved_objects_client';
+import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
+import { createPatternMatcherService } from '../../integrations/update_detection/privileged_status_match';
 import type { PrivMonBulkUser } from '../../../../types';
-import { createPatternMatcherService } from './privileged_status_match';
-import { createPrivilegeStatusUpdateService } from './privileged_status_update';
-export const createUpdateDetectionService = (
+
+export const createIndexUpdateDetectionService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract
 ) => {
   const patternMatcherService = createPatternMatcherService({
     dataClient,
     soClient,
-    sourceType: 'entity_analytics_integration',
+    sourceType: 'index',
   });
-  const statusUpdateService = createPrivilegeStatusUpdateService(dataClient);
-
   const updateDetection = async (source: MonitoringEntitySource) => {
+    /**
+     * 1. Get privileged users from the index source using pattern matchers
+     * 2. Update their privileged status in the internal index using statusUpdateService
+     * 3. Log the completion of the update detection process
+     */
     const users: PrivMonBulkUser[] = await patternMatcherService.findPrivilegedUsersFromMatchers(
       source
-    );
-    await statusUpdateService.updatePrivilegedStatus(users, source);
-    dataClient.log(
-      'info',
-      `Completed update detection for source ${source.id}. Processed ${users.length} users.`
     );
   };
   return {
