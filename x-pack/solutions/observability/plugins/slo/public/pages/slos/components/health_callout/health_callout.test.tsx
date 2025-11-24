@@ -8,7 +8,9 @@
 import { I18nProvider } from '@kbn/i18n-react';
 import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { cloneDeep } from 'lodash';
 import React from 'react';
+import { baseSlo } from '../../../../data/slo';
 import {
   aHealthyTransformHealth,
   aMissingTransformHealth,
@@ -21,38 +23,8 @@ jest.mock('../../../../hooks/use_fetch_slo_health');
 
 const mockUseFetchSloHealth = useFetchSloHealth as jest.Mock;
 
-const mockSlo1: SLOWithSummaryResponse = {
-  id: '1',
-  name: 'Test SLO 1',
-  revision: 1,
-  budgetingMethod: 'occurrences',
-  objective: { target: 0.99 },
-  timeWindow: { duration: '30d', type: 'rolling' },
-  indicator: {
-    type: 'sli.kql.custom',
-    params: {
-      index: 'test-index',
-      good: 'status: 200',
-      total: '*',
-    },
-  },
-  summary: {
-    sliValue: 0.95,
-    errorBudget: {
-      initial: 0.01,
-      consumed: 0.5,
-      remaining: 0.5,
-    },
-    status: 'HEALTHY',
-  },
-  instanceId: ALL_VALUE,
-} as SLOWithSummaryResponse;
-
-const mockSlo2: SLOWithSummaryResponse = {
-  ...mockSlo1,
-  id: '2',
-  name: 'Test SLO 2',
-} as SLOWithSummaryResponse;
+const mockSlo1: SLOWithSummaryResponse = cloneDeep({ ...baseSlo, id: '1', name: 'Test SLO 1' });
+const mockSlo2: SLOWithSummaryResponse = cloneDeep({ ...baseSlo, id: '2', name: 'Test SLO 2' });
 
 describe('HealthCallout', () => {
   it('should render unhealthy message when an unhealthy rollup transform is present', () => {

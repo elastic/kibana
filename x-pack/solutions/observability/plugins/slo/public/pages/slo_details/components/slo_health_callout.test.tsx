@@ -10,8 +10,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { cloneDeep } from 'lodash';
 import React from 'react';
 import { useActionModal } from '../../../context/action_modal';
+import { baseSlo } from '../../../data/slo';
 import {
   aHealthyTransformHealth,
   aMissingTransformHealth,
@@ -28,31 +30,11 @@ const mockUseFetchSloHealth = useFetchSloHealth as jest.MockedFunction<typeof us
 const mockUseActionModal = useActionModal as jest.MockedFunction<typeof useActionModal>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const mockSlo: SLOWithSummaryResponse = {
+const mockSlo: SLOWithSummaryResponse = cloneDeep({
+  ...baseSlo,
   id: 'test-slo-id',
   name: 'Test SLO',
-  revision: 1,
-  budgetingMethod: 'occurrences',
-  objective: { target: 0.99 },
-  timeWindow: { duration: '30d', type: 'rolling' },
-  indicator: {
-    type: 'sli.kql.custom',
-    params: {
-      index: 'test-index',
-      good: 'status: 200',
-      total: '*',
-    },
-  },
-  summary: {
-    sliValue: 0.95,
-    errorBudget: {
-      initial: 0.01,
-      consumed: 0.5,
-      remaining: 0.5,
-    },
-    status: 'HEALTHY',
-  },
-} as SLOWithSummaryResponse;
+});
 
 const mockTriggerAction = jest.fn();
 const mockCreateUrl = jest.fn().mockReturnValue('#/management/data/transform/slo-test-slo-id-1');
