@@ -1826,6 +1826,8 @@
       "@kbn/scout/*": ["src/platform/packages/shared/kbn-scout/*"],
       "@kbn/scout-info": ["src/platform/packages/private/kbn-scout-info"],
       "@kbn/scout-info/*": ["src/platform/packages/private/kbn-scout-info/*"],
+      "@kbn/scout-mcp": ["packages/kbn-scout-mcp"],
+      "@kbn/scout-mcp/*": ["packages/kbn-scout-mcp/*"],
       "@kbn/scout-oblt": ["x-pack/solutions/observability/packages/kbn-scout-oblt"],
       "@kbn/scout-oblt/*": ["x-pack/solutions/observability/packages/kbn-scout-oblt/*"],
       "@kbn/scout-release-testing": ["x-pack/platform/packages/private/kbn-scout-release-testing"],

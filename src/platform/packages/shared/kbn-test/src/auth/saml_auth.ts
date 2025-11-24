@@ -266,6 +266,11 @@ export const finishSAMLHandshake = async ({
   log,
   maxRetryCount = 3,
 }: SAMLCallbackParams) => {
+  // Validate SAML response before encoding
+  if (!samlResponse || typeof samlResponse !== 'string' || samlResponse.trim().length === 0) {
+    throw new Error('SAML response is empty or invalid');
+  }
+
   const encodedResponse = encodeURIComponent(samlResponse);
   const url = kbnHost + '/api/security/saml/callback';
   const request = {
@@ -293,6 +298,25 @@ export const finishSAMLHandshake = async ({
         );
       }
 
+      // Provide helpful error message for 404 errors
+      if (authResponse.status === 404) {
+        const errorMessage = `SAML callback failed: expected 302, got 404. The endpoint '${url}' was not found.`;
+        const suggestions = [
+          `1. SAML authentication may not be configured. The SAML routes are only registered when:`,
+          `   - Elasticsearch has a SAML realm configured (xpack.security.authc.realms.saml.*)`,
+          `   - Kibana has a SAML provider configured (xpack.security.authc.providers with saml provider)`,
+          `2. If your Kibana instance has a base path configured (e.g., server.basePath: "/kibana"),`,
+          `   make sure to include it in your Kibana URL when connecting (e.g., "http://localhost:5601/kibana").`,
+          `3. Scout/MCP is designed to work with test instances that have SAML pre-configured.`,
+          `   For regular Kibana instances, SAML authentication needs to be set up first.`,
+        ];
+        throw new Error(`${errorMessage}\n\n${suggestions.join('\n')}`, {
+          cause: {
+            status: authResponse.status,
+          },
+        });
+      }
+
       throw new Error(`SAML callback failed: expected 302, got ${authResponse.status}`, {
         cause: {
           status: authResponse.status, // use response status to retry on 5xx errors
@@ -313,7 +337,7 @@ export const finishSAMLHandshake = async ({
         }
       } else {
         // exit for non 5xx errors
-        // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
+        // Logging the `Cookie: sid=xxxx` header is safe here since it's an intermediate, non-authenticated cookie that cannot be reused if leaked.
         log.error(`Request sent: ${util.inspect(request)}`);
         throw ex;
       }
@@ -363,13 +387,25 @@ export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => 
 
 export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => {
   const { username, email, fullname, role, kbnHost, log } = params;
-  const samlResponse = await createMockedSAMLResponse({
-    kibanaUrl: kbnHost + '/api/security/saml/callback',
-    username,
-    full_name: fullname,
-    email,
-    roles: [role],
-  });
+  let samlResponse: string;
+  try {
+    samlResponse = await createMockedSAMLResponse({
+      kibanaUrl: kbnHost + '/api/security/saml/callback',
+      username,
+      full_name: fullname,
+      email,
+      roles: [role],
+    });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    log.error(`Failed to create SAML response: ${errorMessage}`);
+    throw new Error(`Failed to create SAML response for role '${role}': ${errorMessage}`);
+  }
+
+  if (!samlResponse || typeof samlResponse !== 'string' || samlResponse.trim().length === 0) {
+    throw new Error(`SAML response is empty or invalid for role '${role}'`);
+  }
+
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, log });
   return new Session(cookie, email);
 };

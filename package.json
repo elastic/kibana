@@ -908,6 +908,7 @@
     "@kbn/saved-objects-tagging-plugin": "link:x-pack/platform/plugins/shared/saved_objects_tagging",
     "@kbn/saved-search-component": "link:src/platform/packages/shared/kbn-saved-search-component",
     "@kbn/saved-search-plugin": "link:src/platform/plugins/shared/saved_search",
+    "@kbn/scout-mcp": "link:packages/kbn-scout-mcp",
     "@kbn/screenshot-mode-example-plugin": "link:examples/screenshot_mode_example",
     "@kbn/screenshot-mode-plugin": "link:src/platform/plugins/shared/screenshot_mode",
     "@kbn/screenshotting-example-plugin": "link:x-pack/examples/screenshotting_example",
