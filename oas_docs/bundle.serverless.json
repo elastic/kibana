@@ -860,7 +860,7 @@
     },
     "/api/agent_builder/a2a/{agentId}": {
       "post": {
-        "description": "WARNING: This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "> warn\n> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "post-agent-builder-a2a-agentid",
         "parameters": [
           {
@@ -1967,7 +1967,7 @@
     },
     "/api/agent_builder/mcp": {
       "post": {
-        "description": "WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "> warn\n> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "post-agent-builder-mcp",
         "parameters": [],
         "requestBody": {
