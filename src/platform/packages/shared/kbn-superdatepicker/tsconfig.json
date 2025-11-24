@@ -21,5 +21,6 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/core",
+    "@kbn/i18n",
   ],
 }
