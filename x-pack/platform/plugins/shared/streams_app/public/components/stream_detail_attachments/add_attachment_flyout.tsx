@@ -62,14 +62,14 @@ export function AddAttachmentFlyout({
     return debounce(setSubmittedQuery, 150);
   }, []);
 
-  const dashboardSuggestionsFetch = useStreamsAppFetch(
+  const attachmentSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient
-        .fetch('POST /internal/streams/{name}/dashboards/_suggestions', {
+        .fetch('POST /internal/streams/{streamName}/attachments/_suggestions', {
           signal,
           params: {
             path: {
-              name: entityId,
+              streamName: entityId,
             },
             query: {
               query: submittedQuery,
@@ -123,8 +123,8 @@ export function AddAttachmentFlyout({
   }, [linkedAttachments]);
 
   const allAttachments = useMemo(() => {
-    return dashboardSuggestionsFetch.value?.attachments || [];
-  }, [dashboardSuggestionsFetch.value]);
+    return attachmentSuggestionsFetch.value?.attachments || [];
+  }, [attachmentSuggestionsFetch.value]);
 
   return (
     <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
@@ -209,7 +209,7 @@ export function AddAttachmentFlyout({
           <AttachmentsTable
             entityId={entityId}
             attachments={allAttachments}
-            loading={dashboardSuggestionsFetch.loading}
+            loading={attachmentSuggestionsFetch.loading}
             selectedAttachments={selectedAttachments}
             setSelectedAttachments={setSelectedAttachments}
             dataTestSubj="streamsAppAddAttachmentFlyoutAttachmentsTable"

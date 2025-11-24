@@ -6,8 +6,19 @@
  */
 
 import objectHash from 'object-hash';
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import type { AttachmentLink, AttachmentDocument, AttachmentType, Attachment } from './types';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+} from '@kbn/core/server';
+import type {
+  AttachmentLink,
+  AttachmentDocument,
+  AttachmentType,
+  Attachment,
+  DashboardSOAttributes,
+  SloSOAttributes,
+} from './types';
 import { ATTACHMENT_ID, ATTACHMENT_TYPE, ATTACHMENT_UUID, STREAM_NAMES } from './storage_settings';
 
 export function getAttachmentLinkUuid(attachment: AttachmentLink): string {
@@ -31,16 +42,30 @@ export const getAttachmentDocument = (attachment: {
   };
 };
 
-const soToAttachment = (
-  savedObject: SavedObject<{ title: string }>,
-  attachmentType: AttachmentType
-): Attachment => {
-  return {
-    id: savedObject.id,
-    type: attachmentType,
-    title: savedObject.attributes.title,
-    tags: savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id),
-  };
+const processDashboardResults = (
+  savedObjects: Array<SavedObject<DashboardSOAttributes>>
+): Attachment[] => {
+  return savedObjects
+    .filter((savedObject) => !savedObject.error)
+    .map((savedObject) => ({
+      id: savedObject.id,
+      redirectId: savedObject.id,
+      type: 'dashboard',
+      title: savedObject.attributes.title,
+      tags: savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id),
+    }));
+};
+
+const processSloResults = (savedObjects: Array<SavedObject<SloSOAttributes>>): Attachment[] => {
+  return savedObjects
+    .filter((savedObject) => !savedObject.error)
+    .map((savedObject) => ({
+      id: savedObject.id,
+      redirectId: savedObject.attributes.id,
+      type: 'slo',
+      title: savedObject.attributes.name,
+      tags: savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id),
+    }));
 };
 
 export const getSoByIds = async ({
@@ -49,15 +74,22 @@ export const getSoByIds = async ({
   ids,
 }: {
   soClient: SavedObjectsClientContract;
-  attachmentType: AttachmentType;
+  attachmentType: Extract<AttachmentType, 'dashboard' | 'slo'>;
   ids: string[];
 }): Promise<Attachment[]> => {
-  const result = await soClient.bulkGet<{ title: string }>(
-    ids.map((id) => ({ id, type: attachmentType }))
-  );
-  return result.saved_objects
-    .filter((savedObject) => !savedObject.error)
-    .map((savedObject) => soToAttachment(savedObject, attachmentType));
+  if (attachmentType === 'dashboard') {
+    const result = await soClient.bulkGet<DashboardSOAttributes>(
+      ids.map((id) => ({ id, type: attachmentType }))
+    );
+    return processDashboardResults(result.saved_objects);
+  } else if (attachmentType === 'slo') {
+    const result = await soClient.bulkGet<SloSOAttributes>(
+      ids.map((id) => ({ id, type: attachmentType }))
+    );
+    return processSloResults(result.saved_objects);
+  } else {
+    throw new Error(`Unsupported attachment type: ${attachmentType}`);
+  }
 };
 
 export const getSuggestedSo = async ({
@@ -68,12 +100,12 @@ export const getSuggestedSo = async ({
   perPage,
 }: {
   soClient: SavedObjectsClientContract;
-  attachmentType: AttachmentType;
+  attachmentType: Extract<AttachmentType, 'dashboard' | 'slo'>;
   query: string;
   tags?: string[];
   perPage: number;
 }): Promise<Attachment[]> => {
-  const result = await soClient.find<{ title: string }>({
+  const searchOptions: SavedObjectsFindOptions = {
     type: attachmentType,
     search: query,
     perPage,
@@ -83,8 +115,15 @@ export const getSuggestedSo = async ({
           hasReference: tags.map((tag) => ({ type: 'tag', id: tag })),
         }
       : {}),
-  });
-  return result.saved_objects
-    .filter((savedObject) => !savedObject.error)
-    .map((savedObject) => soToAttachment(savedObject, attachmentType));
+  };
+
+  if (attachmentType === 'dashboard') {
+    const result = await soClient.find<DashboardSOAttributes>(searchOptions);
+    return processDashboardResults(result.saved_objects);
+  } else if (attachmentType === 'slo') {
+    const result = await soClient.find<SloSOAttributes>(searchOptions);
+    return processSloResults(result.saved_objects);
+  } else {
+    throw new Error(`Unsupported attachment type: ${attachmentType}`);
+  }
 };

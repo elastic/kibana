@@ -13,7 +13,7 @@ import type {
   STREAM_NAMES,
 } from './storage_settings';
 
-export const ATTACHMENT_TYPES = ['dashboard', 'rule'] as const;
+export const ATTACHMENT_TYPES = ['dashboard', 'rule', 'slo'] as const;
 
 export type AttachmentType = ValuesType<typeof ATTACHMENT_TYPES>;
 
@@ -25,6 +25,14 @@ export interface AttachmentLink {
 export interface Attachment extends AttachmentLink {
   title: string;
   tags: string[];
+  /**
+   * The identifier used for navigation to the attachment's detail page.
+   *
+   * For most attachment types, this matches the `id` field. However, for SLOs,
+   * `id` refers to the saved object ID while `redirectId` contains the SLO's
+   * own ID, which is required for proper navigation.
+   */
+  redirectId: string;
 }
 
 export interface AttachmentDocument {
@@ -42,3 +50,12 @@ interface AttachmentBulkDeleteOperation {
 }
 
 export type AttachmentBulkOperation = AttachmentBulkIndexOperation | AttachmentBulkDeleteOperation;
+
+export interface DashboardSOAttributes {
+  title: string;
+}
+
+export interface SloSOAttributes {
+  name: string;
+  id: string;
+}

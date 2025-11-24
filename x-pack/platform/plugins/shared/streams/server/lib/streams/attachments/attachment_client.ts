@@ -15,6 +15,7 @@ import { AttachmentLinkNotFoundError } from '../errors/attachment_link_not_found
 import type { AttachmentStorageSettings } from './storage_settings';
 import { ATTACHMENT_ID, ATTACHMENT_TYPE, ATTACHMENT_UUID, STREAM_NAMES } from './storage_settings';
 import {
+  ATTACHMENT_TYPES,
   type Attachment,
   type AttachmentBulkOperation,
   type AttachmentDocument,
@@ -55,6 +56,7 @@ export class AttachmentClient {
 
         return rules.map((rule) => ({
           id: rule.id,
+          redirectId: rule.id,
           title: rule.name,
           tags: rule.tags,
           type: 'rule',
@@ -66,6 +68,7 @@ export class AttachmentClient {
         throw error;
       }
     },
+    slo: async (ids) => getSoByIds({ soClient: this.clients.soClient, attachmentType: 'slo', ids }),
   };
 
   private getSuggestedEntitiesMap: Record<
@@ -95,11 +98,20 @@ export class AttachmentClient {
 
       return data.map((rule) => ({
         id: rule.id,
+        redirectId: rule.id,
         title: rule.name,
         tags: rule.tags,
         type: 'rule',
       }));
     },
+    slo: async ({ query, tags, perPage }) =>
+      getSuggestedSo({
+        soClient: this.clients.soClient,
+        attachmentType: 'slo',
+        query,
+        tags,
+        perPage,
+      }),
   };
 
   /**
@@ -124,6 +136,13 @@ export class AttachmentClient {
         await this.clients.rulesClient.get({ id });
       } catch (error) {
         throw new AttachmentNotFoundError(`Rule with id "${id}" not found in the current space`);
+      }
+    },
+    slo: async (id) => {
+      try {
+        await this.clients.soClient.get('slo', id);
+      } catch (error) {
+        throw new AttachmentNotFoundError(`SLO with id "${id}" not found in the current space`);
       }
     },
   };
@@ -561,30 +580,17 @@ export class AttachmentClient {
   }): Promise<{ hasMore: boolean; attachments: Attachment[] }> {
     const perPage = 101;
 
-    const searchAll = !attachmentTypes;
+    // Search all types if none specified, otherwise only search the requested types
+    const typesToSearch = attachmentTypes || [...ATTACHMENT_TYPES];
 
-    const searchDashboards = searchAll || attachmentTypes.includes('dashboard');
-    const searchRules = searchAll || attachmentTypes.includes('rule');
-    const suggestionsPromises: Promise<Attachment[]>[] = [];
-    if (searchDashboards) {
-      suggestionsPromises.push(
-        this.getSuggestedEntitiesMap.dashboard({
-          query,
-          tags,
-          perPage,
-        })
-      );
-    }
+    const suggestionsPromises = typesToSearch.map((type) =>
+      this.getSuggestedEntitiesMap[type]({
+        query,
+        tags,
+        perPage,
+      })
+    );
 
-    if (searchRules) {
-      suggestionsPromises.push(
-        this.getSuggestedEntitiesMap.rule({
-          query,
-          tags,
-          perPage,
-        })
-      );
-    }
     const suggestions = (await Promise.all(suggestionsPromises)).flat();
 
     return {

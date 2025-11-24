@@ -5,15 +5,62 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import type {
+  Attachment,
+  AttachmentType,
+} from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 import { useTimefilter } from '../../hooks/use_timefilter';
+
+// TODO: They are both solution constants, how can I import them here?
+const RULE_DETAILS_LOCATOR_ID = 'RULE_DETAILS_LOCATOR';
+const SLO_DETAILS_LOCATOR_ID = 'SLO_DETAILS_LOCATOR';
+
+const ATTACHMENT_TYPE_LABELS: Record<AttachmentType, string> = {
+  dashboard: i18n.translate('xpack.streams.attachmentTable.attachmentTypeDashboard', {
+    defaultMessage: 'Dashboard',
+  }),
+  rule: i18n.translate('xpack.streams.attachmentTable.attachmentTypeRule', {
+    defaultMessage: 'Rule',
+  }),
+  slo: i18n.translate('xpack.streams.attachmentTable.attachmentTypeSlo', {
+    defaultMessage: 'SLO',
+  }),
+};
+
+const ATTACHMENT_URL_GETTERS: Record<
+  AttachmentType,
+  (
+    redirectId: string,
+    locatorsService: LocatorClient,
+    timeRange: { from: string; to: string }
+  ) => string
+> = {
+  dashboard: (redirectId, locatorsService, timeRange) => {
+    const dashboardLocator = locatorsService.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
+    return (
+      dashboardLocator?.getRedirectUrl({
+        dashboardId: redirectId,
+        timeRange,
+      }) || ''
+    );
+  },
+  rule: (redirectId, locatorsService) => {
+    const ruleLocator = locatorsService.get(RULE_DETAILS_LOCATOR_ID);
+    return ruleLocator?.getRedirectUrl({ ruleId: redirectId }) || '';
+  },
+  slo: (redirectId, locatorsService) => {
+    const sloLocator = locatorsService.get(SLO_DETAILS_LOCATOR_ID);
+    return sloLocator?.getRedirectUrl({ sloId: redirectId }) || '';
+  },
+};
 
 export function AttachmentsTable({
   attachments,
@@ -45,7 +92,6 @@ export function AttachmentsTable({
 
   const { timeState } = useTimefilter();
 
-  const dashboardLocator = share.url.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const columns = useMemo((): Array<EuiBasicTableColumn<Attachment>> => {
     return [
       {
@@ -53,38 +99,43 @@ export function AttachmentsTable({
         name: i18n.translate('xpack.streams.attachmentTable.attachmentNameColumnTitle', {
           defaultMessage: 'Attachment name',
         }),
-        render: (_, { title, id }) => (
-          <EuiLink
-            data-test-subj="streamsAppAttachmentColumnsLink"
-            onClick={() => {
-              if (entityId) {
-                telemetryClient.trackAttachmentClick({
-                  attachment_id: id,
-                  attachment_type: 'dashboard',
-                  name: entityId,
-                });
-              }
-              const url = dashboardLocator?.getRedirectUrl(
-                { dashboardId: id, timeRange: timeState.timeRange } || ''
-              );
-              if (url) {
+        render: (_, { title, id, redirectId, type }) => {
+          const url = ATTACHMENT_URL_GETTERS[type](
+            redirectId,
+            share.url.locators,
+            timeState.timeRange
+          );
+
+          if (!url) {
+            return <EuiText size="s">{title}</EuiText>;
+          }
+
+          return (
+            <EuiLink
+              data-test-subj="streamsAppAttachmentColumnsLink"
+              onClick={() => {
+                if (entityId) {
+                  telemetryClient.trackAttachmentClick({
+                    attachment_id: id,
+                    attachment_type: type,
+                    name: entityId,
+                  });
+                }
                 application.navigateToUrl(url);
-              }
-            }}
-          >
-            {title}
-          </EuiLink>
-        ),
+              }}
+            >
+              {title}
+            </EuiLink>
+          );
+        },
       },
       {
         field: 'type',
         name: i18n.translate('xpack.streams.attachmentTable.attachmentTypeColumnTitle', {
           defaultMessage: 'Attachment type',
         }),
-        render: () => {
-          return i18n.translate('xpack.streams.attachmentTable.attachmentType', {
-            defaultMessage: 'Dashboard',
-          });
+        render: (type: AttachmentType) => {
+          return ATTACHMENT_TYPE_LABELS[type];
         },
       },
       ...(!compact
@@ -107,15 +158,7 @@ export function AttachmentsTable({
           ] satisfies Array<EuiBasicTableColumn<Attachment>>)
         : []),
     ];
-  }, [
-    application,
-    compact,
-    dashboardLocator,
-    entityId,
-    savedObjectsTaggingUi,
-    telemetryClient,
-    timeState,
-  ]);
+  }, [application, compact, share, entityId, savedObjectsTaggingUi, telemetryClient, timeState]);
 
   const items = useMemo(() => {
     return attachments ?? [];
