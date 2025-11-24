@@ -272,6 +272,7 @@
     "@kbn/content-management-user-profiles": "link:src/platform/packages/shared/content-management/user_profiles",
     "@kbn/content-management-utils": "link:src/platform/packages/shared/kbn-content-management-utils",
     "@kbn/content-packs-schema": "link:x-pack/platform/packages/shared/kbn-content-packs-schema",
+    "@kbn/contextual-insights-button": "link:x-pack/platform/packages/shared/ai-assistant/contextual-insights-button",
     "@kbn/controls-constants": "link:src/platform/packages/shared/controls/controls-constants",
     "@kbn/controls-example-plugin": "link:examples/controls_example",
     "@kbn/controls-plugin": "link:src/platform/plugins/shared/controls",

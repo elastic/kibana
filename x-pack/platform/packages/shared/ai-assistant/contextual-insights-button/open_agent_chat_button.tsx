@@ -23,6 +23,7 @@ export interface OpenAgentChatButtonProps {
   'data-test-subj'?: string;
   onClick?: () => void;
   onClose?: () => void;
+  onechat?: OnechatPluginStart;
 }
 
 /**
@@ -55,10 +56,13 @@ export function OpenAgentChatButton({
   'data-test-subj': dataTestSubj = 'open-agent-chat-button',
   onClick,
   onClose,
+  onechat: onechatProp,
 }: OpenAgentChatButtonProps) {
   const {
-    services: { onechat },
+    services: { onechat: onechatFromContext },
   } = useKibana<{ onechat?: OnechatPluginStart }>();
+  
+  const onechat = onechatProp ?? onechatFromContext;
 
   const handleClick = useCallback(() => {
     onClick?.();

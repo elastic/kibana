@@ -268,6 +268,8 @@
       "@kbn/content-management-utils/*": ["src/platform/packages/shared/kbn-content-management-utils/*"],
       "@kbn/content-packs-schema": ["x-pack/platform/packages/shared/kbn-content-packs-schema"],
       "@kbn/content-packs-schema/*": ["x-pack/platform/packages/shared/kbn-content-packs-schema/*"],
+      "@kbn/contextual-insights-button": ["x-pack/platform/packages/shared/ai-assistant/contextual-insights-button"],
+      "@kbn/contextual-insights-button/*": ["x-pack/platform/packages/shared/ai-assistant/contextual-insights-button/*"],
       "@kbn/controls-constants": ["src/platform/packages/shared/controls/controls-constants"],
       "@kbn/controls-constants/*": ["src/platform/packages/shared/controls/controls-constants/*"],
       "@kbn/controls-example-plugin": ["examples/controls_example"],

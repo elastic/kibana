@@ -5035,6 +5035,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/contextual-insights-button@link:x-pack/platform/packages/shared/ai-assistant/contextual-insights-button":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-constants@link:src/platform/packages/shared/controls/controls-constants":
   version "0.0.0"
   uid ""

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import type { UiAttachment } from '@kbn/onechat-plugin/public/embeddable/types';
 import { OpenAgentChatButton } from '@kbn/contextual-insights-button';
-import { type AlertDetailsContextualInsight } from '../../../server/services';
 
 const OBSERVABILITY_AGENT_ID = 'observability.agent';
 import { useKibana } from '../../utils/kibana_react';
@@ -18,72 +16,9 @@ import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 
 export function AlertDetailContextualInsights({ alert }: { alert: AlertData | null }) {
   const {
-    services: { http },
+    services: { onechat },
   } = useKibana();
 
-  // Fetch alert context, maybe use useEffect is not best choice, but it was the fastest one to start
-  const [alertContext, setAlertContext] = useState<AlertDetailsContextualInsight[] | null>(null);
-
-  useEffect(() => {
-    if (!alert) {
-      setAlertContext(null);
-      return;
-    }
-
-    const fields = alert.formatted.fields as unknown as
-      | Record<string, string | string[]>
-      | undefined;
-    if (!fields) {
-      setAlertContext(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    http
-      .get<{ alertContext: AlertDetailsContextualInsight[] }>(
-        '/internal/observability/assistant/alert_details_contextual_insights',
-        {
-          query: {
-            alert_started_at: new Date(alert.formatted.start).toISOString(),
-
-            // alert fields used for log rate analysis
-            alert_rule_parameter_time_size: alert.formatted.fields[ALERT_RULE_PARAMETERS]
-              ?.timeSize as string | undefined,
-            alert_rule_parameter_time_unit: alert.formatted.fields[ALERT_RULE_PARAMETERS]
-              ?.timeUnit as string | undefined,
-
-            // service fields
-            'service.name': fields['service.name'],
-            'service.environment': fields['service.environment'],
-            'transaction.type': fields['transaction.type'],
-            'transaction.name': fields['transaction.name'],
-
-            // infra fields
-            'host.name': fields['host.name'],
-            'container.id': fields['container.id'],
-            'kubernetes.pod.name': fields['kubernetes.pod.name'],
-          },
-        }
-      )
-      .then(({ alertContext: context }) => {
-        if (!cancelled) {
-          setAlertContext(context);
-        }
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          console.error('An error occurred while fetching alert context', e);
-          setAlertContext(null);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [alert, http]);
-
-  // Create attachments from alert context
   const attachments: UiAttachment[] = useMemo(() => {
     if (!alert) {
       return [];
@@ -98,73 +33,63 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
 
     const attachmentList: UiAttachment[] = [];
 
-    // Add screen context attachment
+    const alertStartTime = new Date(alert.formatted.start).toISOString();
+    const alertLastUpdate = new Date(alert.formatted.lastUpdated).toISOString();
+    const currentTime = new Date().toISOString();
+    const timeRangeStart = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const timeRangeEnd = currentTime;
+
+    const screenDescription = `The user is looking at ${window.location.href}. The current time range is ${timeRangeStart} - ${timeRangeEnd}.
+
+The user is looking at an active alert. It started at ${alertStartTime}, and was last updated at ${alertLastUpdate}.
+
+The reason given for the alert is ${alert.formatted.reason}.
+
+Use the following alert fields as background information for generating a response. Do not list them as bullet points in the response.`;
+
+    // Add screen description attachment
     attachmentList.push({
-      id: 'alert-screen-context',
-      type: 'screen_context',
+      id: 'alert-screen-description',
+      type: 'text',
       getContent: async () => ({
-        app: 'observability',
-        url: window.location.href,
-        description: 'Alert details page',
-        additional_data: {
-          alert_id: alert.formatted.fields['kibana.alert.uuid'] || '',
-          alert_name: alert.formatted.fields['kibana.alert.rule.name'] || '',
-          alert_reason: alert.formatted.reason || '',
-        },
+        content: screenDescription,
       }),
     });
 
-    if (alertContext && alertContext.length > 0) {
-      const alertContextText = alertContext
-        .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
-        .join('\n\n');
-
-      attachmentList.push({
-        id: 'alert-context',
-        type: 'text',
-        getContent: async () => ({
-          content: `Alert Context Information:\n\n${alertContextText}\n\nAlert Reason: ${alert.formatted.reason}`,
-        }),
-      });
-    } else {
-      attachmentList.push({
-        id: 'alert-basic-info',
-        type: 'text',
-        getContent: async () => ({
-          content: `Alert Reason: ${alert.formatted.reason}`,
-        }),
-      });
-    }
-
-    const relevantFields = Object.entries(fields)
-      .filter(
-        ([key]) =>
-          key.startsWith('kibana.alert.') ||
-          key.startsWith('service.') ||
-          key === 'host.name' ||
-          key === 'container.id' ||
-          key === 'kubernetes.pod.name'
-      )
-      .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+    // Build alert fields content
+    const alertFieldsContent = Object.entries(fields)
+      .map(([key, value]) => {
+        const formattedValue =
+          typeof value === 'object' && value !== null && !Array.isArray(value)
+            ? JSON.stringify(value)
+            : Array.isArray(value)
+            ? JSON.stringify(value)
+            : value;
+        return `${key}: ${formattedValue}`;
+      })
       .join('\n');
 
-    if (relevantFields) {
-      attachmentList.push({
-        id: 'alert-fields',
-        type: 'text',
-        getContent: async () => ({
-          content: `Alert Fields:\n${relevantFields}`,
-        }),
-      });
-    }
+    // Add alert fields attachment
+    attachmentList.push({
+      id: 'alert-fields-data',
+      type: 'text',
+      getContent: async () => ({
+        content: `Alert Fields:\n\n${alertFieldsContent}`,
+      }),
+    });
 
     return attachmentList;
-  }, [alert, alertContext]);
+  }, [alert]);
   const uniqueSessionTagRef = useRef<string | null>(null);
   if (!uniqueSessionTagRef.current) {
     uniqueSessionTagRef.current = `observability-alert-details-${Date.now()}`;
   }
   const uniqueSessionTag = uniqueSessionTagRef.current;
+
+  // Don't render the button if onechat service is not available
+  if (!onechat) {
+    return null;
+  }
 
   return (
     <OpenAgentChatButton
@@ -181,6 +106,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
         }
       )}
       data-test-subj="observability-alert-details-open-chat-button"
+      onechat={onechat}
     />
   );
 }
@@ -202,4 +128,3 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
 //         If the alert is a false positive, mention that in the first paragraph.
 //         `
 //         ),
-
