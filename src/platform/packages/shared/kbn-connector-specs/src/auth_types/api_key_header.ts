@@ -14,12 +14,11 @@ import type { AuthTypeSpec } from '../connector_spec';
 
 const HEADER_FIELD_DEFAULT = 'Api-Key';
 const authSchema = z.object({
-  headerField: z
-    .string()
-    .meta({ sensitive: true })
-    .describe('API Key header field')
-    .default(HEADER_FIELD_DEFAULT),
-  apiKey: z.string().meta({ sensitive: true }).describe('API Key'),
+  headerField: z.string().describe('API Key header field').default(HEADER_FIELD_DEFAULT),
+  apiKey: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+    widget: 'password',
+    label: 'API Key',
+  }),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;

@@ -1,5 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getSchemaForAuthType() correctly returns schema for auth type definition when defaults and meta overrides are provided 1`] = `
+Object {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": Object {
+    "authType": Object {
+      "const": "api_key_header",
+      "type": "string",
+    },
+    "custom-api-key-field": Object {
+      "label": "Custom API Key Label",
+      "minLength": 1,
+      "placeholder": "enter a key!",
+      "type": "string",
+      "widget": "password",
+    },
+  },
+  "required": Array [
+    "custom-api-key-field",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
 exports[`getSchemaForAuthType() correctly returns schema for auth type definition when defaults are provided 1`] = `
 Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10,9 +35,10 @@ Object {
       "type": "string",
     },
     "custom-api-key-field": Object {
-      "description": "API Key",
-      "sensitive": true,
+      "label": "API Key",
+      "minLength": 1,
       "type": "string",
+      "widget": "password",
     },
   },
   "required": Array [
@@ -58,9 +84,10 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "Api-Key": Object {
-      "description": "API Key",
-      "sensitive": true,
+      "label": "API Key",
+      "minLength": 1,
       "type": "string",
+      "widget": "password",
     },
     "authType": Object {
       "const": "api_key_header",
