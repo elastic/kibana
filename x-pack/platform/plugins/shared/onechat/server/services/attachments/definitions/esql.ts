@@ -6,11 +6,13 @@
  */
 
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
-import type { EsqlAttachmentData } from '@kbn/onechat-common/attachments';
+import type { EsqlAttachment, EsqlAttachmentData } from '@kbn/onechat-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/onechat-common/attachments';
-import { platformCoreTools } from '@kbn/onechat-common/tools';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
+import { ToolType } from '@kbn/onechat-common/tools';
+import type {
+  AttachmentBoundedTool,
+  AttachmentTypeDefinition,
+} from '@kbn/onechat-server/attachments';
 
 /**
  * Creates the definition for the `text` attachment type.
@@ -42,14 +44,25 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
         getRepresentation: () => {
           return { type: 'text', value: formatEsqlAttachment(attachment.data) };
         },
+        getBoundedTools: () => [createBoundedExecuteEsqlTool(attachment)],
       };
     },
     getAgentDescription: () => {
-      return `${AttachmentType.esql} can be executed using the ${sanitizeToolId(
-        platformCoreTools.executeEsql
-      )} tool`;
+      return `Those attachments represent ES|QL queries. Each query has a unique tool associated with it, which can be used to execute the query.`;
     },
-    getTools: () => [platformCoreTools.executeEsql, platformCoreTools.generateEsql],
+    getTools: () => [],
+  };
+};
+
+const createBoundedExecuteEsqlTool = (attachment: EsqlAttachment): AttachmentBoundedTool => {
+  return {
+    id: `execute_query_${attachment.id}`,
+    description: `Executes the ES|QL query defined by attachment ${attachment.id}`,
+    type: ToolType.esql,
+    configuration: {
+      query: attachment.data.query,
+      params: {},
+    },
   };
 };
 
