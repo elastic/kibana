@@ -17,6 +17,13 @@ export const gapAutoFillSchedulerSchema = schema.object({
   schedule: schema.object({
     interval: schema.string(),
   }),
+  ruleTypes: schema.arrayOf(
+    schema.object({
+      type: schema.string(),
+      consumer: schema.string(),
+    })
+  ),
+  scope: schema.arrayOf(schema.string()),
   gapFillRange: schema.string(),
   maxBackfills: schema.number(maxBackfills),
   numRetries: schema.number(numRetries),

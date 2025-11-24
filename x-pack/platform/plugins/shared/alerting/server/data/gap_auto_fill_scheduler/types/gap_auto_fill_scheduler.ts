@@ -13,7 +13,7 @@ export interface GapAutoFillSchedulerSO {
   gapFillRange: string;
   maxBackfills: number;
   numRetries: number;
-  scope?: string[];
+  scope: string[];
   ruleTypes: Array<{ type: string; consumer: string }>;
   ruleTypeConsumerPairs: string[];
   createdBy?: string | null;
@@ -30,7 +30,7 @@ export interface GapAutoFillScheduler {
   gapFillRange: string;
   maxBackfills: number;
   numRetries: number;
-  scope?: string[];
+  scope: string[];
   ruleTypes: Array<{ type: string; consumer: string }>;
   createdBy?: string | null;
   updatedBy?: string | null;
