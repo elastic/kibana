@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -134,7 +134,7 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
 
 export const CostSavingsKeyInsight: React.FC<Props> = (props) => {
   const exportContext = useAIValueExportContext();
-  const Loading = <CostSavingsKeyInsightView isLoading={true} insight={''} />;
+  const Loading = useMemo(() => <CostSavingsKeyInsightView isLoading={true} insight={''} />, []);
 
   if (props.isLoading) {
     return Loading;
