@@ -18,9 +18,11 @@ import {
   checkBackfillCapacity,
   filterGapsWithOverlappingBackfills,
   handleCancellation,
+  getGapAutoFillRunOutcome,
   type AggregatedByRuleEntry,
 } from './utils';
 import type { GapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
+import { GapFillSchedulePerRuleStatus } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
 
 describe('gap auto fill task utils', () => {
   describe('resultsFromMap and formatConsolidatedSummary', () => {
@@ -31,7 +33,7 @@ describe('gap auto fill task utils', () => {
           {
             ruleId: 'rule-1',
             processedGaps: 3,
-            status: 'success',
+            status: GapFillSchedulePerRuleStatus.SUCCESS,
           },
         ],
         [
@@ -39,7 +41,7 @@ describe('gap auto fill task utils', () => {
           {
             ruleId: 'rule-2',
             processedGaps: 0,
-            status: 'error',
+            status: GapFillSchedulePerRuleStatus.ERROR,
             error: 'boom',
           },
         ],
@@ -140,7 +142,7 @@ describe('gap auto fill task utils', () => {
           {
             ruleId: 'rule-1',
             processedGaps: 2,
-            status: 'success',
+            status: GapFillSchedulePerRuleStatus.SUCCESS,
           },
         ],
       ]);
@@ -160,6 +162,46 @@ describe('gap auto fill task utils', () => {
       expect(arg.status).toBe(GAP_AUTO_FILL_STATUS.SUCCESS);
       expect(String(arg.message)).toContain('cancelled by timeout');
       expect(String(arg.message)).toContain('processed 2 gap');
+    });
+  });
+
+  describe('getGapAutoFillRunOutcome', () => {
+    const buildEntry = (status: GapFillSchedulePerRuleStatus): AggregatedByRuleEntry => ({
+      ruleId: `${status}-rule`,
+      processedGaps: 1,
+      status,
+    });
+
+    it('returns success when all rules succeed', () => {
+      const { status, message } = getGapAutoFillRunOutcome([
+        buildEntry(GapFillSchedulePerRuleStatus.SUCCESS),
+        buildEntry(GapFillSchedulePerRuleStatus.SUCCESS),
+      ]);
+      expect(status).toBe(GAP_AUTO_FILL_STATUS.SUCCESS);
+      expect(message).toContain('All rules successfully scheduled gap fills');
+    });
+
+    it('returns error with partial failure message when some rules fail', () => {
+      const { status, message } = getGapAutoFillRunOutcome([
+        buildEntry(GapFillSchedulePerRuleStatus.SUCCESS),
+        buildEntry(GapFillSchedulePerRuleStatus.ERROR),
+      ]);
+      expect(status).toBe(GAP_AUTO_FILL_STATUS.ERROR);
+      expect(message).toContain('At least one rule successfully scheduled gap fills');
+    });
+
+    it('returns error when all rules fail', () => {
+      const { status, message } = getGapAutoFillRunOutcome([
+        buildEntry(GapFillSchedulePerRuleStatus.ERROR),
+      ]);
+      expect(status).toBe(GAP_AUTO_FILL_STATUS.ERROR);
+      expect(message).toContain('All rules failed to schedule gap fills');
+    });
+
+    it('returns skipped when no rules can be scheduled', () => {
+      const { status, message } = getGapAutoFillRunOutcome([]);
+      expect(status).toBe(GAP_AUTO_FILL_STATUS.SKIPPED);
+      expect(message).toContain("Skipped execution: can't schedule gap fills for any enabled rule");
     });
   });
 });

@@ -14,7 +14,7 @@ import {
   AZURE_OPENAI_CHAT_URL,
   AZURE_OPENAI_COMPLETIONS_URL,
   AZURE_OPENAI_COMPLETIONS_EXTENSIONS_URL,
-} from '../../../../common/openai/constants';
+} from '@kbn/connector-schemas/openai';
 
 describe('Azure Open AI Utils', () => {
   const chatUrl =

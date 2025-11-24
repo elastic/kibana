@@ -15,13 +15,13 @@ export function isValidFixtureFile(
   current: string
 ): boolean {
   return (
-    typeof fixtures !== 'object' ||
-    !fixtures[previous]?.length ||
-    !fixtures[current]?.length ||
-    fixtures[previous]?.length !== fixtures[current]?.length ||
-    (Boolean(fixtures[previous]?.[0]?.TODO) &&
-      Boolean(fixtures[previous]?.[0]?.NOTE) &&
-      Boolean(fixtures[previous]?.[0]?.HINT) &&
-      Boolean(fixtures[previous]?.[0]?.HINT2))
+    typeof fixtures === 'object' &&
+    Boolean(fixtures[previous]?.length) &&
+    Boolean(fixtures[current]?.length) &&
+    fixtures[previous]?.length === fixtures[current]?.length &&
+    !Boolean(fixtures[previous]?.[0]?.TODO) &&
+    !Boolean(fixtures[previous]?.[0]?.NOTE) &&
+    !Boolean(fixtures[previous]?.[0]?.HINT) &&
+    !Boolean(fixtures[previous]?.[0]?.HINT2)
   );
 }

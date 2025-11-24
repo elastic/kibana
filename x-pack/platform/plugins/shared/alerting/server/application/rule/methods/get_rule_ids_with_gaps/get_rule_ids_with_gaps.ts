@@ -60,8 +60,8 @@ export async function getRuleIdsWithGaps(
     if (ruleTypes?.length) {
       const ruleTypesFilter = ruleTypes
         .map(
-          (rt) =>
-            `(kibana.alert.rule.rule_type_id: "${rt.type}" AND kibana.alert.rule.consumer: "${rt.consumer}")`
+          (ruleType) =>
+            `(kibana.alert.rule.rule_type_id: "${ruleType.type}" AND kibana.alert.rule.consumer: "${ruleType.consumer}")`
         )
         .join(' OR ');
       filter = `${filter} AND (${ruleTypesFilter})`;

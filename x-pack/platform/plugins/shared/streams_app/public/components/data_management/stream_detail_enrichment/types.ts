@@ -10,8 +10,10 @@ import type {
   ConvertProcessor,
   DateProcessor,
   DissectProcessor,
+  DropDocumentProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
+  ReplaceProcessor,
   SetProcessor,
   StreamlangWhereBlockWithUIAttributes,
 } from '@kbn/streamlang';
@@ -28,8 +30,10 @@ export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
 
 export type DissectFormState = DissectProcessor;
 export type DateFormState = DateProcessor;
+export type DropFormState = DropDocumentProcessor;
 export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
 export type ConvertFormState = ConvertProcessor;
+export type ReplaceFormState = ReplaceProcessor;
 
 export type SetFormState = SetProcessor;
 
@@ -37,8 +41,10 @@ export type SpecialisedFormState =
   | GrokFormState
   | DissectFormState
   | DateFormState
+  | DropFormState
   | ManualIngestPipelineFormState
   | ConvertFormState
+  | ReplaceFormState
   | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
@@ -61,7 +67,7 @@ export type EnrichmentDataSourceWithUIAttributes = EnrichmentDataSource & {
 
 export type RandomSamplesDataSourceWithUIAttributes = Extract<
   EnrichmentDataSourceWithUIAttributes,
-  { type: 'random-samples' }
+  { type: 'latest-samples' }
 >;
 
 export type KqlSamplesDataSourceWithUIAttributes = Extract<

@@ -15,7 +15,7 @@ import { backfillInitiator } from '../../../../common/constants';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import type { GapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
-import { GAP_AUTO_FILL_STATUS } from '../types/scheduler';
+import { GAP_AUTO_FILL_STATUS, type GapAutoFillStatus } from '../types/scheduler';
 import type { Gap } from '../gap';
 import { getOverlap } from '../gap/interval_utils';
 import { GapFillSchedulePerRuleStatus } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
@@ -25,7 +25,7 @@ export type LogMessageFunction = (message: string) => void;
 export interface AggregatedByRuleEntry {
   ruleId: string;
   processedGaps: number;
-  status: 'success' | 'error';
+  status: GapFillSchedulePerRuleStatus;
   error?: string;
 }
 
@@ -66,6 +66,40 @@ export function formatConsolidatedSummary(consolidated: AggregatedByRuleEntry[])
   }
 
   return `\n${parts.join(' \n')}`;
+}
+
+export function getGapAutoFillRunOutcome(consolidated: AggregatedByRuleEntry[]): {
+  status: GapAutoFillStatus;
+  message: string;
+} {
+  const anySuccess = consolidated.some((r) => r.status === GapFillSchedulePerRuleStatus.SUCCESS);
+  const anyError = consolidated.some((r) => r.status === GapFillSchedulePerRuleStatus.ERROR);
+
+  if (consolidated.length === 0) {
+    return {
+      status: GAP_AUTO_FILL_STATUS.SKIPPED,
+      message: "Skipped execution: can't schedule gap fills for any enabled rule",
+    };
+  }
+
+  if (anySuccess && !anyError) {
+    return {
+      status: GAP_AUTO_FILL_STATUS.SUCCESS,
+      message: 'All rules successfully scheduled gap fills',
+    };
+  }
+
+  if (!anySuccess && anyError) {
+    return {
+      status: GAP_AUTO_FILL_STATUS.ERROR,
+      message: 'All rules failed to schedule gap fills',
+    };
+  }
+
+  return {
+    status: GAP_AUTO_FILL_STATUS.ERROR,
+    message: 'At least one rule successfully scheduled gap fills, but others failed to schedule',
+  };
 }
 
 export async function handleCancellation({

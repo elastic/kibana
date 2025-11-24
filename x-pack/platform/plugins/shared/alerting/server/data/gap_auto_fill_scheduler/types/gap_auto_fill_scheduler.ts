@@ -15,8 +15,8 @@ export interface GapAutoFillSchedulerSO {
   numRetries: number;
   ruleTypes: Array<{ type: string; consumer: string }>;
   ruleTypeConsumerPairs: string[];
-  createdBy?: string;
-  updatedBy?: string;
+  createdBy?: string | null;
+  updatedBy?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,8 +30,8 @@ export interface GapAutoFillScheduler {
   maxBackfills: number;
   numRetries: number;
   ruleTypes: Array<{ type: string; consumer: string }>;
-  createdBy?: string;
-  updatedBy?: string;
+  createdBy?: string | null;
+  updatedBy?: string | null;
   createdAt: string;
   updatedAt: string;
 }

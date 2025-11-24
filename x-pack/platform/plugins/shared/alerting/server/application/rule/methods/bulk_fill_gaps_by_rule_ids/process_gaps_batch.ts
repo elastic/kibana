@@ -42,13 +42,10 @@ export const processGapsBatch = async (
   const gapsByRuleId = new Map<string, Gap[]>();
   for (const gap of gapsBatch) {
     const ruleId = gap.ruleId;
-    if (!ruleId) {
-      continue; // Skip gaps without ruleId
-    }
     if (!gapsByRuleId.has(ruleId)) {
       gapsByRuleId.set(ruleId, []);
     }
-    gapsByRuleId.get(ruleId)!.push(gap);
+    gapsByRuleId.get(ruleId)?.push(gap);
   }
 
   const schedulingPayloads: Array<{

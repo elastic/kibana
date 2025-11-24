@@ -2656,6 +2656,10 @@
         "index": false,
         "type": "boolean"
       },
+      "ilm_migration_status": {
+        "dynamic": false,
+        "properties": {}
+      },
       "output_secret_storage_requirements_met": {
         "type": "boolean"
       },

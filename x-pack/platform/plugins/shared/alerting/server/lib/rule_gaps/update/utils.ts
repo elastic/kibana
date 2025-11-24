@@ -124,13 +124,13 @@ export const findOverlappingIntervals = (gaps: Gap[], scheduledItems: ScheduledI
 export const prepareGapsForUpdate = (
   gaps: Gap[]
 ): Array<{ gap: GapBase; internalFields: InternalFields }> => {
-  return gaps
-    .map((gap) => {
-      if (!gap.internalFields) return null;
-      return {
+  return gaps.reduce<Array<{ gap: GapBase; internalFields: InternalFields }>>((acc, gap) => {
+    if (gap.internalFields) {
+      acc.push({
         gap: gap.toObject(),
         internalFields: gap.internalFields,
-      };
-    })
-    .filter((g): g is NonNullable<typeof g> => g !== null);
+      });
+    }
+    return acc;
+  }, []);
 };

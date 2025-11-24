@@ -35,8 +35,12 @@ import {
   filterGapsWithOverlappingBackfills,
   initRun,
   checkBackfillCapacity,
+  getGapAutoFillRunOutcome,
 } from './utils';
 import { cleanupStuckInProgressGaps } from '../update/cleanup_stuck_in_progress_gaps';
+
+// Circuit breaker to prevent infinite pagination loops when fetching gaps
+const GAP_FETCH_MAX_ITERATIONS = 1000;
 
 function addChunkResultsToAggregation(
   aggregatedByRule: Map<string, AggregatedByRuleEntry>,
@@ -80,8 +84,8 @@ function addChunkResultsToAggregation(
  * - Loads its runtime configuration from a `gap_auto_fill_scheduler` saved object
  *   (referenced by `configId` in task params)
  * - Cleans up stuck in-progress gaps that don't have corresponding backfills
- * - Honors a global backfill capacity limit before and after each batch to avoid
- *   overscheduling system-initiated backfills
+ * - Honors a global backfill capacity limit before scheduling and tracks the
+ *   remaining capacity locally throughout the task run
  * - Processes rules in batches, prioritizing the rules with the oldest gaps first
  * - Uses PIT + search_after pagination to fetch gaps efficiently from event log
  * - Skips gaps that overlap with already scheduled/running backfills to prevent duplicates
@@ -111,7 +115,7 @@ export function registerGapAutoFillSchedulerTask({
       createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
         return {
           async run() {
-            const loggerMesage = (message: string) =>
+            const loggerMessage = (message: string) =>
               `[gap-fill-auto-scheduler-task][${taskInstance.id}] ${message}`;
             const startTime = new Date();
             // Step 1: Initialization
@@ -140,8 +144,8 @@ export function registerGapAutoFillSchedulerTask({
               logEvent = initResult.logEvent;
             } catch (e) {
               const errMsg = e instanceof Error ? e.message : String(e);
-              logger.warn(loggerMesage(`initialization failed: ${errMsg}`));
-              return { state: {} };
+              logger.error(loggerMessage(`initialization failed: ${errMsg}`));
+              return { state: {}, shouldDeleteTask: true };
             }
 
             try {
@@ -164,7 +168,7 @@ export function registerGapAutoFillSchedulerTask({
               } catch (cleanupError) {
                 const errMsg =
                   cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
-                logger.warn(loggerMesage(`cleanup of stuck in-progress gaps failed: ${errMsg}`));
+                logger.warn(loggerMessage(`cleanup of stuck in-progress gaps failed: ${errMsg}`));
                 // Continue with normal flow even if cleanup fails
               }
 
@@ -172,7 +176,7 @@ export function registerGapAutoFillSchedulerTask({
               const capacityCheckInitial = await checkBackfillCapacity({
                 rulesClient,
                 maxBackfills: config.maxBackfills,
-                logMessage: (message) => logger.warn(loggerMesage(message)),
+                logMessage: (message) => logger.warn(loggerMessage(message)),
                 initiatorId: taskInstance.id,
               });
               if (!capacityCheckInitial.canSchedule) {
@@ -265,10 +269,22 @@ export function registerGapAutoFillSchedulerTask({
 
                 let searchAfter: SortResults[] | undefined;
                 let pitId: string | undefined;
+                let scheduledBackfillsCount = 0;
 
                 const gapsPerPage = DEFAULT_GAPS_PER_PAGE;
+                let gapFetchIterationCount = 0;
 
                 while (true) {
+                  if (gapFetchIterationCount >= GAP_FETCH_MAX_ITERATIONS) {
+                    logger.debug(
+                      loggerMessage(
+                        `Circuit breaker triggered: reached maximum number of gap fetch iterations`
+                      )
+                    );
+                    break;
+                  }
+                  gapFetchIterationCount++;
+
                   if (
                     await handleCancellation({
                       abortController,
@@ -310,10 +326,12 @@ export function registerGapAutoFillSchedulerTask({
                   const filteredGaps = await filterGapsWithOverlappingBackfills(
                     gapsPage,
                     rulesClientContext,
-                    (message) => logger.warn(loggerMesage(message))
+                    (message) => logger.warn(loggerMessage(message))
                   );
 
+                  // there are no gaps to process in this page
                   if (!filteredGaps.length) {
+                    // if the page is not full, we've reached the end for this batch
                     if (gapsPage.length < gapsPerPage) {
                       break;
                     }
@@ -330,6 +348,11 @@ export function registerGapAutoFillSchedulerTask({
                     initiatorId: taskInstance.id,
                   });
                   addChunkResultsToAggregation(aggregatedByRule, chunkResults);
+                  chunkResults.forEach((result) => {
+                    if (result.status === GapFillSchedulePerRuleStatus.SUCCESS) {
+                      scheduledBackfillsCount++;
+                    }
+                  });
 
                   // If fewer than gapsPerPage gaps returned, we've reached the end for this batch
                   if (gapsPage.length < gapsPerPage) {
@@ -337,51 +360,23 @@ export function registerGapAutoFillSchedulerTask({
                   }
                 }
 
-                // After finishing this rule batch, re-check backfill capacity
-                const capacityCheckPostBatch = await checkBackfillCapacity({
-                  rulesClient,
-                  maxBackfills: config.maxBackfills,
-                  logMessage: (message) => logger.warn(loggerMesage(message)),
-                  initiatorId: taskInstance.id,
-                });
-                if (!capacityCheckPostBatch.canSchedule) {
-                  const consolidated = resultsFromMap(aggregatedByRule);
-                  await logEvent({
-                    status: GAP_AUTO_FILL_STATUS.SUCCESS,
-                    results: consolidated,
-                    message: `Stopped early: no backfill capacity (${
-                      capacityCheckPostBatch.currentCount
-                    }/${capacityCheckPostBatch.maxBackfills}) | ${formatConsolidatedSummary(
-                      consolidated
-                    )}`,
-                  });
-                  return { state: {} };
+                if (scheduledBackfillsCount > 0) {
+                  remainingBackfills = Math.max(remainingBackfills - scheduledBackfillsCount, 0);
                 }
-                // Update remaining capacity from the latest system state
-                remainingBackfills = capacityCheckPostBatch.remainingCapacity;
               }
 
               // Step 5: Finalize and log results
-              const consolidated = Array.from(aggregatedByRule.values());
-              if (consolidated.length === 0) {
-                await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SKIPPED,
-                  results: [],
-                  message: "Skipped execution: can't schedule gap fills for any enabled rule",
-                });
-                return { state: {} };
-              }
-              const overallStatus = consolidated.every(
-                (r) => r.status === GapFillSchedulePerRuleStatus.ERROR
-              )
-                ? GAP_AUTO_FILL_STATUS.ERROR
-                : GAP_AUTO_FILL_STATUS.SUCCESS;
+              const consolidated = resultsFromMap(aggregatedByRule);
+              const { status: outcomeStatus, message: outcomeMessage } =
+                getGapAutoFillRunOutcome(consolidated);
+              const summary = consolidated.length
+                ? ` | ${formatConsolidatedSummary(consolidated)}`
+                : '';
 
-              // Build summary message with counts and error details
               await logEvent({
-                status: overallStatus,
+                status: outcomeStatus,
                 results: consolidated,
-                message: `completed | ${formatConsolidatedSummary(consolidated)}`,
+                message: `${outcomeMessage}${summary}`,
               });
 
               return { state: {} };
@@ -392,7 +387,7 @@ export function registerGapAutoFillSchedulerTask({
                 message: `Error during execution: ${error && error.message}`,
               });
 
-              logger.error(loggerMesage(`error: ${error && error.message}`));
+              logger.error(loggerMessage(`error: ${error && error.message}`));
               return { state: {} };
             }
           },

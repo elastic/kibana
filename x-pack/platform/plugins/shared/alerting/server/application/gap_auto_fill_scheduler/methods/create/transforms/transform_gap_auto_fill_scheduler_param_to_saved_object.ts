@@ -33,9 +33,9 @@ export const transformGapAutoFillSchedulerCreateParamToSavedObject = (
     ruleTypeConsumerPairs: Array.from(
       new Set(params.ruleTypes.map((rt) => `${rt.type}:${rt.consumer}`))
     ),
-    createdBy: createdBy ?? undefined,
+    createdBy: createdBy ?? null,
     createdAt,
     updatedAt,
-    updatedBy: updatedBy ?? undefined,
+    updatedBy: updatedBy ?? null,
   };
 };

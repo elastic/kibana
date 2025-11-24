@@ -47,7 +47,7 @@ export const cleanupStuckInProgressGaps = async ({
     const cutoffTime = new Date(now.getTime() - STUCK_GAP_THRESHOLD_HOURS * 60 * 60 * 1000);
     const cutoffTimeISO = cutoffTime.toISOString();
 
-    logger.info(
+    logger.debug(
       `Starting cleanup of stuck in-progress gaps updated before ${cutoffTimeISO} (max ${MAX_GAPS_TO_PROCESS} gaps)`
     );
 
@@ -64,7 +64,7 @@ export const cleanupStuckInProgressGaps = async ({
     }
 
     const ruleIdsToProcess = allRuleIds.slice(0, MAX_RULES_TO_PROCESS);
-    logger.info(
+    logger.debug(
       `Processing ${ruleIdsToProcess.length} rules (out of ${allRuleIds.length} total) for stuck gap cleanup`
     );
 
@@ -95,7 +95,7 @@ export const cleanupStuckInProgressGaps = async ({
       return;
     }
 
-    logger.info(`Found ${gapsToCheck.length} gaps to check for stuck in-progress intervals`);
+    logger.debug(`Found ${gapsToCheck.length} gaps to check for stuck in-progress intervals`);
 
     const gapsWithoutBackfills = await filterGapsWithOverlappingBackfills(
       gapsToCheck,
@@ -104,11 +104,12 @@ export const cleanupStuckInProgressGaps = async ({
     );
 
     // Build a set of gaps that require reset
-    const withoutBackfillsSet = new Set(
-      gapsWithoutBackfills
-        .filter((gap) => gap.internalFields !== undefined)
-        .map((gap) => gap.internalFields?._id)
-    );
+    const withoutBackfillsSet = gapsWithoutBackfills.reduce((acc, gap) => {
+      if (gap.internalFields?._id) {
+        acc.add(gap.internalFields._id);
+      }
+      return acc;
+    }, new Set<string>());
 
     // Group all checked gaps by rule (we'll update all, resetting only those in withoutSet)
     const gapsByRuleId = groupBy(gapsToCheck, 'ruleId');
@@ -117,7 +118,7 @@ export const cleanupStuckInProgressGaps = async ({
     const alertingEventLogger = new AlertingEventLogger(eventLogger);
     for (const [ruleId, gaps] of Object.entries(gapsByRuleId)) {
       for (const gap of gaps) {
-        if (withoutBackfillsSet.has(gap.internalFields?._id)) {
+        if (gap.internalFields?._id && withoutBackfillsSet.has(gap.internalFields._id)) {
           gap.resetInProgressIntervals();
         }
         gap.setUpdatedAt(now.toISOString());

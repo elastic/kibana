@@ -60,6 +60,12 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
   try {
     const soClient = context.unsecuredSavedObjectsClient;
     const taskManager = context.taskManager;
+    const uniqueRuleTypeIds = new Set(params.ruleTypes.map(({ type }) => type));
+
+    // Throw error if a rule type is not registered
+    for (const ruleTypeId of uniqueRuleTypeIds) {
+      context.ruleTypeRegistry.get(ruleTypeId);
+    }
 
     // Throw error if a gap auto fill scheduler already exists for the same (rule type, consumer) pair
     const pairs = Array.from(new Set(params.ruleTypes.map((rt) => `${rt.type}:${rt.consumer}`)));
@@ -124,6 +130,9 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
         }
       );
     } catch (e) {
+      context.logger.error(
+        `Failed to schedule task for gap auto fill scheduler ${so.id}. Will attempt to delete the saved object.`
+      );
       await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, so.id);
       throw e;
     }
