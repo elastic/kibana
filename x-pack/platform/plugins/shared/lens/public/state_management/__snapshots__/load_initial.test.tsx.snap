@@ -106,6 +106,7 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
+      "selectedLayerId": null,
       "state": "testVis initial state",
     },
   },
