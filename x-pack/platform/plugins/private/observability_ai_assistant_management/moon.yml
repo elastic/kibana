@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/licensing-plugin'
   - '@kbn/react-query'
+  - '@kbn/ml-trained-models-utils'
 tags:
   - plugin
   - prod
