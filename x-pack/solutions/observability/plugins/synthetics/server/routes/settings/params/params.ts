@@ -66,9 +66,7 @@ const canReadDecryptedParams = async (routeContext: RouteContext) => {
     capabilityPath: 'uptime.*',
   });
 
-  const hasReadParamsPrivilege = capabilities.uptime?.canReadParams ?? false;
-
-  return hasReadParamsPrivilege;
+  return capabilities.uptime?.canReadParamValues ?? false;
 };
 
 const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: string) => {

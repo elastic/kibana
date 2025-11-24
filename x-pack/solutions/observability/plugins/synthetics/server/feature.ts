@@ -88,9 +88,9 @@ const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
       includeIn: 'none', // This ensures it is not granted by default
       savedObject: {
         all: [],
-        read: [syntheticsParamType],
+        read: [],
       },
-      ui: ['canReadParams'],
+      ui: ['canReadParamValues'],
       api: [], // Access is controlled via saved object permissions
     },
   ],
