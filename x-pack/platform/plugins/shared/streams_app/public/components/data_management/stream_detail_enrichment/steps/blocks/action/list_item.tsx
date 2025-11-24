@@ -61,13 +61,6 @@ export const ActionBlockListItem = ({
     stepRef.send({ type: 'step.edit' });
   };
 
-  const dropProcessorDescription = i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.dropProcessorDescription',
-    {
-      defaultMessage: 'Drops documents',
-    }
-  );
-
   return (
     <>
       {/* The step under edit is part of the same root level hierarchy,
@@ -175,7 +168,12 @@ export const ActionBlockListItem = ({
               <ConditionDisplay
                 condition={step.where as Condition}
                 showKeyword
-                prefix={dropProcessorDescription}
+                prefix={i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dropProcessorDescription',
+                  {
+                    defaultMessage: 'Drops documents',
+                  }
+                )}
               />
             ) : (
               <EuiTextTruncate

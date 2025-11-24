@@ -283,7 +283,7 @@ const getAvailableProcessors: (
     inputDisplay: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.processor.dropInputDisplay',
       {
-        defaultMessage: 'Drop',
+        defaultMessage: 'Drop document',
       }
     ),
     getDocUrl: (docLinks: DocLinksStart) => {
