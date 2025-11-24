@@ -234,7 +234,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
 
   test('should show dropped documents in the simulation preview', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('Drop');
+    await pageObjects.streams.selectProcessorType('Drop document');
     // drop 'info' logs, perhaps they create too much noise/cost for a customer
     await pageObjects.streams.fillConditionEditor({
       field: 'log.level',
