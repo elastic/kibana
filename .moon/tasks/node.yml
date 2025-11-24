@@ -6,4 +6,41 @@ fileGroups:
     - '**/*'
   production: [ ]
 
-tasks: {}
+tasks:
+  eslint:
+    command: node
+    args:
+      - scripts/eslint.js
+      - '$projectSource'
+      - '--no-error-on-unmatched-pattern'
+    options:
+      runFromWorkspaceRoot: true
+      cache: true
+    inputs:
+      - '@group(src)'
+      # Other config files
+      - '*.config.*'
+      # Project configs, any format, any depth
+      - '**/.eslintrc.*'
+      # Root configs, any format
+      - '/.eslintignore'
+      - '/.eslintrc.*'
+
+  eslint-fix:
+    command: node
+    args:
+      - scripts/eslint.js
+      - '$projectSource'
+      - '--no-error-on-unmatched-pattern'
+      - '--fix'
+    options:
+      runFromWorkspaceRoot: true
+    inputs:
+      - '@group(src)'
+      # Other config files
+      - '*.config.*'
+      # Project configs, any format, any depth
+      - '**/.eslintrc.*'
+      # Root configs, any format
+      - '/.eslintignore'
+      - '/.eslintrc.*'

@@ -9,40 +9,40 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
+import path from 'path';
 
-const batchSize = 250;
-const maxParallelism = 8;
+const IS_CI = !!process.env.CI;
 
 run(
   async ({ log, flags }) => {
     const bail = !!(flags.bail || false);
 
-    const { batches, files } = getLintableFileBatches(flags._);
-    log.info(`Found ${files.length} files in ${batches.length} batches to lint.`);
-
     const eslintArgs = [...(flags.fix ? ['--fix'] : []), flags.cache ? '--cache' : '--no-cache'];
+    const moonCommand = ['run', ':eslint'];
+    if (IS_CI) {
+      moonCommand.push('--affected', '--remote');
+    }
 
-    // ESLint has no cache by default
-    log.info(
-      `Running ESLint with args: ${pretty({
-        args: eslintArgs.concat(flags._),
-        batchSize,
-        maxParallelism,
-      })}`
-    );
+    const fullArgs = [...moonCommand, '--', ...eslintArgs].concat(flags._);
 
-    const lintPromiseThunks = batches.map(
-      (batch, idx) => () =>
-        lintFileBatch({ batch, idx, eslintArgs, batchCount: batches.length, bail, log })
-    );
-    const results = await runBatchedPromises(lintPromiseThunks, maxParallelism);
+    log.info(`Running ESLint: 'moon ${fullArgs.join(' ')}'`);
 
-    const failedBatches = results.filter((result) => !result.success);
-    if (failedBatches.length > 0) {
+    const { exitCode } = await execa('moon', fullArgs, {
+      cwd: REPO_ROOT,
+      env: {
+        // Disable CI stats for individual runs, to avoid overloading ci-stats
+        CI_STATS_DISABLED: 'true',
+        PATH: process.env.PATH + `:${path.join('node_modules', '.bin')}`,
+        MOON_NO_ACTIONS: 'true',
+      },
+      stdio: 'inherit',
+      reject: bail, // Don't throw on non-zero exit code
+    });
+
+    if (exitCode > 0) {
       log.error(`Linting errors found ❌`);
-      process.exit(1);
+      process.exit(exitCode);
     } else {
       log.info('Linting successful ✅');
     }
@@ -63,95 +63,3 @@ run(
     },
   }
 );
-
-function getLintableFileBatches(filePatterns: string[]) {
-  const files = execa
-    .sync('git', ['ls-files', ...filePatterns], {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-    })
-    .stdout.trim()
-    .split('\n')
-    .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
-  const batches = [];
-  for (let i = 0; i < files.length; i += batchSize) {
-    batches.push(files.slice(i, i + batchSize));
-  }
-
-  return { batches, files };
-}
-
-async function lintFileBatch({
-  batch,
-  bail,
-  idx,
-  eslintArgs,
-  batchCount,
-  log,
-}: {
-  batch: string[];
-  bail: boolean;
-  idx: number;
-  eslintArgs: string[];
-  batchCount: number;
-  log: ToolingLog;
-}) {
-  log.info(`Running batch ${idx + 1}/${batchCount} with ${batch.length} files...`);
-
-  const timeBefore = Date.now();
-  const args = ['scripts/eslint'].concat(eslintArgs).concat(batch);
-  const { stdout, stderr, exitCode } = await execa('node', args, {
-    cwd: REPO_ROOT,
-    env: {
-      // Disable CI stats for individual runs, to avoid overloading ci-stats
-      CI_STATS_DISABLED: 'true',
-    },
-    reject: bail, // Don't throw on non-zero exit code
-  });
-
-  const time = Date.now() - timeBefore;
-  if (exitCode !== 0) {
-    const errorMessage = stderr?.toString() || stdout?.toString();
-    log.error(`Batch ${idx + 1}/${batchCount} failed (${time}ms) ❌: ${errorMessage}`);
-    return {
-      success: false,
-      idx,
-      time,
-      error: errorMessage,
-    };
-  } else {
-    log.info(`Batch ${idx + 1}/${batchCount} success (${time}ms) ✅: ${stdout.toString()}`);
-    return {
-      success: true,
-      idx,
-      time,
-    };
-  }
-}
-
-function runBatchedPromises<T>(
-  promiseCreators: Array<() => Promise<T>>,
-  maxParallel: number
-): Promise<T[]> {
-  const results: T[] = [];
-  let i = 0;
-
-  const next: () => Promise<any> = () => {
-    if (i >= promiseCreators.length) {
-      return Promise.resolve();
-    }
-
-    const promiseCreator = promiseCreators[i++];
-    return Promise.resolve(promiseCreator()).then((result) => {
-      results.push(result);
-      return next();
-    });
-  };
-
-  const tasks = Array.from({ length: maxParallel }, () => next());
-  return Promise.all(tasks).then(() => results);
-}
-
-function pretty(obj: any) {
-  return JSON.stringify(obj, null, 2);
-}
