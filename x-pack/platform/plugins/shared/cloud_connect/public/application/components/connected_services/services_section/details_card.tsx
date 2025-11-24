@@ -34,7 +34,8 @@ export interface ServiceCardProps {
   badgeTooltip?: string;
   region?: string;
   description: string;
-  learnMoreUrl: string;
+  learnMoreUrl?: string;
+  serviceUrl?: string;
   enableServiceByUrl?: string;
   onEnable?: () => void;
   onDisable?: () => void;
@@ -52,6 +53,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   region,
   description,
   learnMoreUrl,
+  serviceUrl,
   enableServiceByUrl,
   onEnable,
   onDisable,
@@ -147,23 +149,25 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
       return (
         <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              href="https://cloud.elastic.co/deployments"
-              target="_blank"
-              iconSide="right"
-              iconType="popout"
-              onClick={onOpen}
-              disabled={!onOpen || isLoading}
-              isLoading={isLoading}
-            >
-              <FormattedMessage
-                id="xpack.cloudConnect.connectedServices.service.open"
-                defaultMessage="Open"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {serviceUrl && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                href={serviceUrl}
+                target="_blank"
+                iconSide="right"
+                iconType="popout"
+                onClick={onOpen}
+                disabled={isLoading}
+                isLoading={isLoading}
+              >
+                <FormattedMessage
+                  id="xpack.cloudConnect.connectedServices.service.open"
+                  defaultMessage="Open"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiPopover
               button={moreActionsButton}
@@ -237,21 +241,25 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
           <EuiSpacer size="s" />
           <EuiText size="s">
-            <FormattedMessage
-              id="xpack.cloudConnect.connectedServices.service.description"
-              defaultMessage="{description} {learnMore}"
-              values={{
-                description,
-                learnMore: (
-                  <EuiLink href={learnMoreUrl} target="_blank" external>
-                    <FormattedMessage
-                      id="xpack.cloudConnect.connectedServices.service.learnMore"
-                      defaultMessage="Learn more"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
+            {learnMoreUrl ? (
+              <FormattedMessage
+                id="xpack.cloudConnect.connectedServices.service.description"
+                defaultMessage="{description} {learnMore}"
+                values={{
+                  description,
+                  learnMore: (
+                    <EuiLink href={learnMoreUrl} target="_blank" external>
+                      <FormattedMessage
+                        id="xpack.cloudConnect.connectedServices.service.learnMore"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ) : (
+              description
+            )}
           </EuiText>
         </EuiFlexItem>
 

@@ -12,7 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { ServiceCard } from './details_card';
 import { DisableServiceModal } from '../disable_service_modal';
 import { useCloudConnectedAppContext } from '../../../app_context';
-import { SERVICE_CONFIG, CLOUD_DEPLOYMENTS_URL } from '../../../../../common/constants';
+import { SERVICE_CONFIG } from '../../../../../common/constants';
+
+interface ServiceMetadata {
+  documentation_url?: string;
+  service_url?: string;
+  connect_url?: string;
+}
 
 interface Service {
   enabled: boolean;
@@ -24,6 +30,7 @@ interface Service {
   config?: {
     region_id?: string;
   };
+  metadata?: ServiceMetadata;
 }
 
 interface ServicesSectionProps {
@@ -146,10 +153,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
     setDisableModalService(null);
   };
 
-  const handleOpenService = () => {
-    window.open(CLOUD_DEPLOYMENTS_URL, '_blank');
-  };
-
   const handleEnableServiceByUrl = (url: string) => {
     window.open(url, '_blank');
   };
@@ -175,7 +178,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
       description: i18n.translate(SERVICE_CONFIG.eis.descriptionId, {
         defaultMessage: SERVICE_CONFIG.eis.descriptionDefault,
       }),
-      learnMoreUrl: SERVICE_CONFIG.eis.docsUrl,
+      learnMoreUrl: services.eis?.metadata?.documentation_url,
+      serviceUrl: services.eis?.metadata?.service_url,
       onEnable: services.eis?.support?.supported ? () => handleEnableService('eis') : undefined,
       onDisable: () =>
         showDisableModal(
@@ -184,7 +188,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
             defaultMessage: SERVICE_CONFIG.eis.titleDefault,
           })
         ),
-      onOpen: handleOpenService,
       isLoading: loadingService === 'eis',
     },
     // AutoOps Service
@@ -204,11 +207,13 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
       description: i18n.translate(SERVICE_CONFIG.auto_ops.descriptionId, {
         defaultMessage: SERVICE_CONFIG.auto_ops.descriptionDefault,
       }),
-      learnMoreUrl: SERVICE_CONFIG.auto_ops.docsUrl,
-      enableServiceByUrl: SERVICE_CONFIG.auto_ops.enableServiceByUrl,
-      onEnable: services.auto_ops?.support?.supported
-        ? () => handleEnableServiceByUrl(SERVICE_CONFIG.auto_ops.enableServiceByUrl!)
-        : undefined,
+      learnMoreUrl: services.auto_ops?.metadata?.documentation_url,
+      serviceUrl: services.auto_ops?.metadata?.service_url,
+      enableServiceByUrl: services.auto_ops?.metadata?.connect_url,
+      onEnable:
+        services.auto_ops?.support?.supported && services.auto_ops?.metadata?.connect_url
+          ? () => handleEnableServiceByUrl(services.auto_ops!.metadata!.connect_url!)
+          : undefined,
       onDisable: () =>
         showDisableModal(
           'auto_ops',
@@ -216,7 +221,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
             defaultMessage: SERVICE_CONFIG.auto_ops.titleDefault,
           })
         ),
-      onOpen: handleOpenService,
       isLoading: loadingService === 'auto_ops',
     },
     // Synthetics Service (hardcoded as coming soon)
@@ -232,7 +236,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
       description: i18n.translate(SERVICE_CONFIG.synthetics.descriptionId, {
         defaultMessage: SERVICE_CONFIG.synthetics.descriptionDefault,
       }),
-      learnMoreUrl: SERVICE_CONFIG.synthetics.docsUrl,
       isCardDisabled: true,
     },
   ];

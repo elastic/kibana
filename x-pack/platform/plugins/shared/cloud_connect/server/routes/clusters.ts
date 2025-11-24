@@ -118,7 +118,7 @@ export const registerClustersRoute = ({
         return response.customError({
           statusCode: 500,
           body: {
-            message: error
+            message: error,
           },
         });
       }
@@ -224,7 +224,7 @@ export const registerClustersRoute = ({
 
         // If EIS service is enabled, the response will return a keys.eis string that
         // needs to be stored in ES for inference nodes to use EIS.
-        const eisRequest = request.body.services['eis'];
+        const eisRequest = request.body.services.eis;
         if (eisRequest) {
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const eisKey = updatedCluster.keys?.eis;
@@ -237,7 +237,7 @@ export const registerClustersRoute = ({
               body: {
                 success: true,
                 warning:
-                'EIS service was enabled but inference could not be configured. Please contact support.',
+                  'EIS service was enabled but inference could not be configured. Please contact support.',
               },
             });
           }
@@ -252,8 +252,7 @@ export const registerClustersRoute = ({
             return response.ok({
               body: {
                 success: true,
-                warning:
-                  'Cluster service updated, but failed to update inference ccm settings.',
+                warning: 'Cluster service updated, but failed to update inference ccm settings.',
                 warningError: (inferenceError as Error).message,
               },
             });

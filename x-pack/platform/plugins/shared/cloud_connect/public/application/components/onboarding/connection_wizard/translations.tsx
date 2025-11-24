@@ -16,12 +16,12 @@ export const STEP_1_TITLE = i18n.translate('xpack.cloudConnect.wizard.step1.titl
 
 export const STEP_1_DESCRIPTION_1 = i18n.translate('xpack.cloudConnect.wizard.step1.description', {
   defaultMessage:
-    "If you have an existing Elastic Cloud account with Admin privileges, log in below to generate the Cloud Connect API key.",
+    'If you have an existing Elastic Cloud account with Admin privileges, log in below to generate the Cloud Connect API key.',
 });
 
 export const STEP_1_DESCRIPTION_2 = i18n.translate('xpack.cloudConnect.wizard.step1.description', {
   defaultMessage:
-    "Otherwise, sign up for an account below and follow the prompts to create your account and generate the Cloud Connect API key.",
+    'Otherwise, sign up for an account below and follow the prompts to create your account and generate the Cloud Connect API key.',
 });
 
 export const STEP_2_TITLE = i18n.translate('xpack.cloudConnect.wizard.step2.title', {
@@ -51,7 +51,7 @@ export const STEP_3_TITLE = i18n.translate('xpack.cloudConnect.wizard.step3.titl
 
 export const STEP_3_DESCRIPTION = i18n.translate('xpack.cloudConnect.wizard.step3.description', {
   defaultMessage:
-    "Paste your generated Cloud Connect API key in the field below and click Connect.",
+    'Paste your generated Cloud Connect API key in the field below and click Connect.',
 });
 
 export const SIGN_UP_BUTTON = i18n.translate('xpack.cloudConnect.wizard.signUpButton', {
@@ -69,4 +69,3 @@ export const CONNECT_BUTTON = i18n.translate('xpack.cloudConnect.wizard.connectB
 export const API_KEY_PLACEHOLDER = i18n.translate('xpack.cloudConnect.wizard.apiKeyPlaceholder', {
   defaultMessage: 'Paste your cloud connected API key',
 });
-

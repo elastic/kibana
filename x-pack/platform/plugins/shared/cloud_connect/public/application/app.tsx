@@ -7,10 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  useCloudConnectedAppContext,
-  CloudConnectedAppContextProvider,
-} from './app_context';
+import { useCloudConnectedAppContext, CloudConnectedAppContextProvider } from './app_context';
 import { useBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useCloudConnectConfig } from './hooks/use_cloud_connect_config';
 import { OnboardingPage } from './components/onboarding';

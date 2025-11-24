@@ -51,11 +51,20 @@ export interface ClusterDetails {
       enabled: boolean;
       supported: boolean;
       config?: { region_id?: string };
+      metadata?: {
+        documentation_url?: string;
+        service_url?: string;
+        connect_url?: string;
+      };
     };
     eis?: {
       enabled: boolean;
       supported: boolean;
       config?: { region_id?: string };
+      metadata?: {
+        documentation_url?: string;
+        service_url?: string;
+      };
     };
   };
 }

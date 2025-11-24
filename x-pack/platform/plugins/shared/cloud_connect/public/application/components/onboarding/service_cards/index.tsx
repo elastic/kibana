@@ -7,13 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiCard, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { COLUMN_SIZE } from '../constants';
 
 interface ServiceCardsProps {
