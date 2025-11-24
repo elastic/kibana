@@ -424,9 +424,9 @@ export class SearchSource {
   }
 
   /**
-   * Analyzes the query DSL to detect multi_match query types and phrase queries.
+   * Analyzes the query DSL to detect and count multi_match query types and phrase queries.
    * This method analyzes the BUILT Elasticsearch query (after buildEsQuery transformation)
-   * to accurately detect phrase queries in the actual DSL sent to Elasticsearch.
+   * to accurately count phrase queries in the actual DSL sent to Elasticsearch.
    *
    * IMPORTANT: Must be called AFTER getSearchRequestBody() to analyze the correct query.
    */
@@ -434,7 +434,7 @@ export class SearchSource {
     // If no built query exists yet, return empty analysis
     // This can happen if getQueryAnalysis is called before getSearchRequestBody
     if (!this.lastBuiltQuery) {
-      return { types: new Set() };
+      return { typeCounts: new Map(), rawTypes: [] };
     }
 
     // Analyze the BUILT ES query (not the high-level Kibana Query object)

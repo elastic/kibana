@@ -1665,7 +1665,7 @@ describe('SearchSource', () => {
   });
 
   describe('getQueryAnalysis()', () => {
-    it('should analyze query and return multi_match types', () => {
+    it('should analyze query and count multi_match types', () => {
       const testSearchSource = new SearchSource({}, searchSourceDependencies);
 
       // Simulate what getSearchRequestBody() does - sets lastBuiltQuery
@@ -1684,17 +1684,55 @@ describe('SearchSource', () => {
       };
 
       const analysis = testSearchSource.getQueryAnalysis();
-      expect(analysis.types.has('match_phrase')).toBe(true);
+      expect(analysis.typeCounts.get('match_phrase')).toBe(1);
+      expect(analysis.typeCounts.size).toBe(1);
+      expect(analysis.rawTypes).toEqual(['phrase']); // Non-normalized
     });
 
     it('should return empty analysis for undefined query', () => {
       const testSearchSource = new SearchSource({}, searchSourceDependencies);
 
       const analysis = testSearchSource.getQueryAnalysis();
-      expect(analysis.types.size).toBe(0);
+      expect(analysis.typeCounts.size).toBe(0);
+      expect(analysis.rawTypes).toEqual([]);
     });
 
-    it('should detect multiple query types in complex queries', () => {
+    it('should count multiple occurrences of the same query type', () => {
+      const testSearchSource = new SearchSource({}, searchSourceDependencies);
+
+      // Simulate a query with multiple phrase queries
+      (testSearchSource as any).lastBuiltQuery = {
+        bool: {
+          should: [
+            {
+              multi_match: {
+                type: 'phrase',
+                query: 'foo bar',
+              },
+            },
+            {
+              multi_match: {
+                type: 'phrase',
+                query: 'baz qux',
+              },
+            },
+            {
+              match_phrase: {
+                message: 'test phrase',
+              },
+            },
+          ],
+        },
+      };
+
+      const analysis = testSearchSource.getQueryAnalysis();
+      expect(analysis.typeCounts.get('match_phrase')).toBe(3);
+      expect(analysis.typeCounts.size).toBe(1);
+      // rawTypes shows all occurrences with non-normalized names
+      expect(analysis.rawTypes).toEqual(['phrase', 'phrase', 'match_phrase']);
+    });
+
+    it('should count different query types separately', () => {
       const testSearchSource = new SearchSource({}, searchSourceDependencies);
 
       // Simulate a complex built query with multiple query types
@@ -1705,6 +1743,12 @@ describe('SearchSource', () => {
               multi_match: {
                 type: 'phrase',
                 query: 'foo bar',
+              },
+            },
+            {
+              multi_match: {
+                type: 'phrase',
+                query: 'another phrase',
               },
             },
             {
@@ -1723,9 +1767,10 @@ describe('SearchSource', () => {
       };
 
       const analysis = testSearchSource.getQueryAnalysis();
-      expect(analysis.types.has('match_phrase')).toBe(true);
-      expect(analysis.types.has('best_fields')).toBe(true);
-      expect(analysis.types.size).toBe(2);
+      expect(analysis.typeCounts.get('match_phrase')).toBe(3);
+      expect(analysis.typeCounts.get('best_fields')).toBe(1);
+      expect(analysis.typeCounts.size).toBe(2);
+      expect(analysis.rawTypes).toEqual(['phrase', 'phrase', 'best_fields', 'match_phrase']);
     });
 
     it('should analyze different queries independently', () => {
@@ -1740,8 +1785,9 @@ describe('SearchSource', () => {
       };
 
       const analysis1 = testSearchSource.getQueryAnalysis();
-      expect(analysis1.types.has('match_phrase')).toBe(true);
-      expect(analysis1.types.size).toBe(1);
+      expect(analysis1.typeCounts.get('match_phrase')).toBe(1);
+      expect(analysis1.typeCounts.size).toBe(1);
+      expect(analysis1.rawTypes).toEqual(['phrase']);
 
       // Different query - simulates what happens after a new getSearchRequestBody() call
       (testSearchSource as any).lastBuiltQuery = {
@@ -1754,6 +1800,12 @@ describe('SearchSource', () => {
               },
             },
             {
+              multi_match: {
+                type: 'best_fields',
+                query: 'test3',
+              },
+            },
+            {
               match_phrase: {
                 field: 'value',
               },
@@ -1763,9 +1815,10 @@ describe('SearchSource', () => {
       };
 
       const analysis2 = testSearchSource.getQueryAnalysis();
-      expect(analysis2.types.has('best_fields')).toBe(true);
-      expect(analysis2.types.has('match_phrase')).toBe(true);
-      expect(analysis2.types.size).toBe(2);
+      expect(analysis2.typeCounts.get('best_fields')).toBe(2);
+      expect(analysis2.typeCounts.get('match_phrase')).toBe(1);
+      expect(analysis2.typeCounts.size).toBe(2);
+      expect(analysis2.rawTypes).toEqual(['best_fields', 'best_fields', 'match_phrase']);
     });
   });
 });

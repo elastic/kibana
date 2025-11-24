@@ -147,11 +147,11 @@ export function fetchAll(
         fetchAllRequestOnlyTracker.reportEvent({
           key1: 'query_range_secs',
           value1: queryRangeSeconds,
-          key2: 'has_phrase_query',
-          value2: queryAnalysis.types.has('match_phrase') ? 1 : 0,
+          key2: 'phrase_query_count',
+          value2: queryAnalysis.typeCounts.get('match_phrase') || 0,
           meta: {
             fetchType,
-            multi_match_types: Array.from(queryAnalysis.types),
+            multi_match_types: queryAnalysis.rawTypes,
           },
         });
 

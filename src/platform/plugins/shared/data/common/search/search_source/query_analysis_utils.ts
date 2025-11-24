@@ -15,24 +15,31 @@ import type { estypes } from '@elastic/elasticsearch';
  */
 export interface MultiMatchAnalysis {
   /**
-   * Set of unique multi_match query types found in the query
-   * e.g., Set(['match_phrase', 'best_fields', 'phrase_prefix'])
+   * Map of normalized multi_match query types to their occurrence counts
+   * e.g., Map([['match_phrase', 3], ['best_fields', 2]])
    * Note: Both multi_match with type:'phrase' and match_phrase queries
-   * are normalized to 'match_phrase' for consistency
+   * are normalized to 'match_phrase' for the counts
    */
-  types: Set<string>;
+  typeCounts: Map<string, number>;
+
+  /**
+   * Array of all query types found, in their original non-normalized form
+   * e.g., ['phrase', 'phrase', 'match_phrase', 'best_fields']
+   * This preserves the distinction between multi_match type:'phrase' and match_phrase queries
+   */
+  rawTypes: string[];
 }
 
 /**
  * Analyzes an Elasticsearch query DSL to extract multi_match query types
- * and related phrase query patterns.
+ * and count their occurrences.
  *
- * This function recursively traverses the query DSL tree to identify:
+ * This function recursively traverses the query DSL tree to identify and count:
  * - multi_match queries with their type parameter
  * - match_phrase queries (normalized to 'match_phrase' type)
  *
  * @param query - The Elasticsearch query DSL to analyze
- * @returns MultiMatchAnalysis containing found types
+ * @returns MultiMatchAnalysis containing type counts
  *
  * @example
  * ```typescript
@@ -40,13 +47,14 @@ export interface MultiMatchAnalysis {
  *   bool: {
  *     must: [
  *       { multi_match: { type: 'phrase', query: 'foo bar' } },
- *       { multi_match: { query: 'baz' } } // defaults to best_fields
+ *       { multi_match: { type: 'phrase', query: 'baz qux' } },
+ *       { multi_match: { query: 'test' } } // defaults to best_fields
  *     ]
  *   }
  * };
  *
  * const result = analyzeMultiMatchTypes(query);
- * // result.types: Set(['match_phrase', 'best_fields'])
+ * // result.typeCounts: Map([['match_phrase', 2], ['best_fields', 1]])
  * ```
  *
  * @internal
@@ -55,12 +63,23 @@ export function analyzeMultiMatchTypes(
   query: estypes.QueryDslQueryContainer | undefined
 ): MultiMatchAnalysis {
   const result: MultiMatchAnalysis = {
-    types: new Set(),
+    typeCounts: new Map(),
+    rawTypes: [],
   };
 
   // Handle null/undefined queries
   if (!query) {
     return result;
+  }
+
+  // Helper to track both normalized counts and raw types
+  function trackType(rawType: string, normalizedType: string): void {
+    // Add to raw types array (non-normalized)
+    result.rawTypes.push(rawType);
+
+    // Increment normalized type count
+    const currentCount = result.typeCounts.get(normalizedType) || 0;
+    result.typeCounts.set(normalizedType, currentCount + 1);
   }
 
   // Recursively visits nodes in the query DSL tree
@@ -76,18 +95,18 @@ export function analyzeMultiMatchTypes(
     if ('multi_match' in nodeObj && typeof nodeObj.multi_match === 'object') {
       const multiMatch = nodeObj.multi_match as Record<string, unknown>;
       // Default to 'best_fields' if type is not specified (ES default behavior)
-      let type = (multiMatch.type as string) || 'best_fields';
-      // Normalize multi_match with type:'phrase' to 'match_phrase' for consistency
-      if (type === 'phrase') {
-        type = 'match_phrase';
-      }
-      result.types.add(type);
+      const rawType = (multiMatch.type as string) || 'best_fields';
+
+      // Normalize 'phrase' to 'match_phrase' for counting
+      const normalizedType = rawType === 'phrase' ? 'match_phrase' : rawType;
+
+      trackType(rawType, normalizedType);
       return; // Don't recurse further, we've found a leaf query
     }
 
-    // Handle match_phrase queries (normalize to 'match_phrase' type for consistency)
+    // Handle match_phrase queries
     if ('match_phrase' in nodeObj) {
-      result.types.add('match_phrase');
+      trackType('match_phrase', 'match_phrase');
       return; // Don't recurse further, we've found a leaf query
     }
 
