@@ -33,9 +33,6 @@ const integrationsRoute = createDatasetQualityServerRoute({
 
     const integrations = await getIntegrations({ packageClient, logger });
 
-    // Add 40 seconds of delay to simulate a slow response for testing purposes
-    await new Promise((resolve) => setTimeout(resolve, 40000));
-
     return { integrations };
   },
 });
