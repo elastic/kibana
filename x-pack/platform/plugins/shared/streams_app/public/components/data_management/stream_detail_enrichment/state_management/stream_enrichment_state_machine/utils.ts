@@ -164,7 +164,7 @@ export const spawnStep = <
 >(
   step: StreamlangStepWithUIAttributes,
   assignArgs: TAssignArgs,
-  options?: { isNew: boolean }
+  options?: { isNew: boolean; isUpdated?: boolean }
 ) => {
   const { spawn, self } = assignArgs;
 
@@ -174,6 +174,7 @@ export const spawnStep = <
       parentRef: self,
       step,
       isNew: options?.isNew ?? false,
+      isUpdated: options?.isUpdated ?? false,
     },
   });
 };

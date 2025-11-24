@@ -229,11 +229,11 @@ export const streamEnrichmentMachine = setup({
       assignArgs.context.stepRefs.forEach(stopChild);
 
       // Convert new steps to UI format and spawn new step refs
+      // Mark as isNew: true so they're tracked as new additions
+      // Mark as isUpdated: true so they skip draft and go to configured state (can be simulated)
       const uiSteps = convertStepsForUI({ steps: params.steps });
       const stepRefs = uiSteps.map((step) => {
-        const stepRef = spawnStep(step, assignArgs, { isNew: true });
-        stepRef.send({ type: 'step.save' });
-        return stepRef;
+        return spawnStep(step, assignArgs, { isNew: true, isUpdated: true });
       });
 
       return {
@@ -565,7 +565,7 @@ export const streamEnrichmentMachine = setup({
                       guard: 'hasManagePrivileges',
                       actions: [
                         { type: 'resetSteps', params: ({ event }) => event },
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                        { type: 'sendStepsEventToSimulator' },
                       ],
                     },
                   },

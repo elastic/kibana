@@ -30,11 +30,15 @@ import { css } from '@emotion/react';
 import { getStepDescription } from '../steps/blocks/action/utils';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
 import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
+import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
+import type {
+  Simulation,
+  ProcessorMetrics,
+} from '../state_management/simulation_state_machine/types';
 
 export interface PipelineSuggestionProps {
   aiFeatures: AIFeatures;
   pipeline: StreamlangDSL;
-  // simulationResult: APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
   onAccept(): void;
   onDismiss(): void;
   onRegenerate(connectorId: string): void;
@@ -43,12 +47,13 @@ export interface PipelineSuggestionProps {
 export function PipelineSuggestion({
   aiFeatures,
   pipeline,
-  // simulationResult,
   onAccept,
   onDismiss,
   onRegenerate,
 }: PipelineSuggestionProps) {
-  // const processorMetrics = simulationResult.processors_metrics['grok-processor'];
+  const simulation = useSimulatorSelector((state) => state.context.simulation);
+  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
+
   return (
     <EuiCallOut
       iconType="sparkles"
@@ -69,7 +74,14 @@ export function PipelineSuggestion({
       {pipeline.steps.map((step, i) =>
         isActionBlock(step) ? (
           <>
-            <ActionBlock key={i} step={step} />
+            <ActionBlock
+              key={i}
+              step={step}
+              stepIndex={i}
+              pipeline={pipeline}
+              simulation={simulation}
+              isSimulating={isSimulating}
+            />
             <EuiSpacer size="s" />
           </>
         ) : null
@@ -116,9 +128,34 @@ export function PipelineSuggestion({
   );
 }
 
-const ActionBlock = ({ step }: { step: StreamlangProcessorDefinition }) => {
+const ActionBlock = ({
+  step,
+  stepIndex,
+  pipeline,
+  simulation,
+  isSimulating,
+}: {
+  step: StreamlangProcessorDefinition;
+  stepIndex: number;
+  pipeline: StreamlangDSL;
+  simulation: Simulation | undefined;
+  isSimulating: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
   const stepDescription = getStepDescription(step as StreamlangProcessorDefinitionWithUIAttributes);
+
+  // Get processor metrics - since suggested steps don't have IDs yet, we match by index
+  const processorKeys = simulation?.processors_metrics
+    ? Object.keys(simulation.processors_metrics)
+    : [];
+  const processorMetrics: ProcessorMetrics | undefined =
+    processorKeys[stepIndex] && simulation?.processors_metrics
+      ? simulation.processors_metrics[processorKeys[stepIndex]]
+      : undefined;
+
+  const parsedRate = processorMetrics?.parsed_rate;
+  const hasErrors = processorMetrics && processorMetrics.errors.length > 0;
+
   return (
     <EuiPanel
       hasShadow={false}
@@ -149,6 +186,29 @@ const ActionBlock = ({ step }: { step: StreamlangProcessorDefinition }) => {
                 >
                   {step.action.toUpperCase()}
                 </EuiText>
+                {!isSimulating && processorMetrics && (
+                  <>
+                    {parsedRate !== undefined && parsedRate > 0 && (
+                      <EuiText size="xs" color="success">
+                        {i18n.translate('xpack.streams.processingSuggestion.stepParsedRate', {
+                          defaultMessage: '{percentage}% success',
+                          values: { percentage: (parsedRate * 100).toFixed(0) },
+                        })}
+                      </EuiText>
+                    )}
+                    {hasErrors && (
+                      <EuiText size="xs" color="danger">
+                        {i18n.translate('xpack.streams.processingSuggestion.stepHasErrors', {
+                          defaultMessage: '{count} error{plural}',
+                          values: {
+                            count: processorMetrics.errors.length,
+                            plural: processorMetrics.errors.length > 1 ? 's' : '',
+                          },
+                        })}
+                      </EuiText>
+                    )}
+                  </>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { EuiAccordion, EuiCode, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -65,10 +65,20 @@ export const StepsEditor = React.memo(() => {
 
   const abortController = useAbortController();
   const aiFeatures = useAIFeatures();
-  const [suggestionsState, suggestPipeline] = useSuggestPipeline(abortController);
+  const [suggestionsState, suggestPipeline, clearSuggestedSteps] =
+    useSuggestPipeline(abortController);
   const {
     definition: { stream },
   } = useStreamDetail();
+
+  const [showSuggestion, setShowSuggestion] = useState(true);
+
+  // Reset showSuggestion when a new suggestion request starts
+  useEffect(() => {
+    if (suggestionsState.loading) {
+      setShowSuggestion(true);
+    }
+  }, [suggestionsState.loading]);
 
   if (aiFeatures && aiFeatures.enabled) {
     if (suggestionsState.loading) {
@@ -77,22 +87,32 @@ export const StepsEditor = React.memo(() => {
           onCancel={() => {
             abortController.abort();
             abortController.refresh();
+            clearSuggestedSteps();
           }}
         />
       );
     }
 
-    if (suggestionsState.value) {
+    if (suggestionsState.value && showSuggestion) {
       return (
         <PipelineSuggestion
           aiFeatures={aiFeatures}
           pipeline={suggestionsState.value}
           onAccept={() => {
-            reassignSteps(suggestionsState.value.steps);
-            suggestPipeline(null);
+            // Just hide the suggestion panel, keep the steps
+            setShowSuggestion(false);
           }}
-          onDismiss={() => suggestPipeline(null)}
-          onRegenerate={(connectorId) => suggestPipeline({ connectorId, streamName: stream.name })}
+          onDismiss={() => {
+            // Remove suggested steps and hide panel
+            clearSuggestedSteps();
+            setShowSuggestion(false);
+          }}
+          onRegenerate={(connectorId) => {
+            // Remove current suggested steps before regenerating
+            clearSuggestedSteps();
+            setShowSuggestion(true);
+            suggestPipeline({ connectorId, streamName: stream.name });
+          }}
         />
       );
     }
