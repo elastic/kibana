@@ -525,8 +525,8 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     </FormRow>
                     {canManageCrossClusterApiKeys ? (
                       <FormRow name="type" label={<TypeLabel />} fullWidth>
-                        <EuiFlexGroup gutterSize="m">
-                          <EuiFlexItem>
+                        <EuiFlexGroup wrap gutterSize="m">
+                          <EuiFlexItem style={{ minWidth: 200 }}>
                             <EuiCheckableCard
                               id="rest"
                               label={
@@ -552,7 +552,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                               checked={formik.values.type === 'rest'}
                             />
                           </EuiFlexItem>
-                          <EuiFlexItem>
+                          <EuiFlexItem style={{ minWidth: 200 }}>
                             <EuiCheckableCard
                               id="cross_cluster"
                               label={
