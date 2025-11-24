@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/get_downstream_dependencies.spec.ts'));
     loadTestFile(require.resolve('./tools/get_services.spec.ts'));
     loadTestFile(require.resolve('./tools/get_anomaly_detection_jobs.spec.ts'));
+    loadTestFile(require.resolve('./tools/run_log_rate_analysis.spec.ts'));
   });
 }

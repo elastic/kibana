@@ -17,6 +17,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Observability
   'observability.get_data_sources',
   'observability.get_anomaly_detection_jobs',
+  'observability.run_log_rate_analysis',
   'observability.get_alerts',
   'observability.get_services',
   'observability.get_downstream_dependencies',
