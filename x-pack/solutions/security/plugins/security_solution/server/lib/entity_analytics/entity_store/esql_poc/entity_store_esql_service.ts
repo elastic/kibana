@@ -109,5 +109,9 @@ export class EntityStoreESQLService {
     await storeEntityStoreDocs(this.esClient, type, this.namespace, docs);
 
     await updateEntityStoreLastExecutionTime(this.soClient, type, this.namespace, now);
+
+    this.logger.info(
+      `Processed ${docs.length} entities for type ${type} on namespace ${this.namespace}`
+    );
   }
 }
