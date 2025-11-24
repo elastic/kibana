@@ -24,7 +24,7 @@ export enum SuggestionCategory {
   FUNCTION_AGG = 'function_agg',
   FUNCTION_SCALAR = 'function_scalar',
 
-  RECOMMENDED_QUERY_SEARCH = 'recommended_query_search', // Search query (highest priority recommended query)
+  RECOMMENDED_QUERY_WITH_PRIORITY = 'recommended_query_with_priority', // Search query (highest priority recommended query)
   RECOMMENDED_QUERY = 'recommended_query',
 
   VALUE = 'value', // METADATA, settings, special keywords

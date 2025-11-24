@@ -39,6 +39,7 @@ export const getRecommendedQueriesTemplates = ({
       }),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
       sortText: 'D',
+      category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
     },
     {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.aggregateExample.label', {
@@ -202,10 +203,7 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       kind: 'Issue',
       detail: query.description,
       sortText: query?.sortText ?? 'E',
-      category:
-        query.sortText === 'D'
-          ? SuggestionCategory.RECOMMENDED_QUERY_SEARCH
-          : SuggestionCategory.RECOMMENDED_QUERY,
+      category: query.category ?? SuggestionCategory.RECOMMENDED_QUERY,
       command: {
         id: 'esql.recommendedQuery.accept',
         title: 'Accept recommended query',
@@ -244,7 +242,7 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
           : {}),
         kind: 'Issue',
         sortText: 'D',
-        category: SuggestionCategory.RECOMMENDED_QUERY_SEARCH,
+        category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
       };
     }
   );
