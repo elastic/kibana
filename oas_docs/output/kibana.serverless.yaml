@@ -8305,7 +8305,7 @@ paths:
             -F 'service_name="foo"' \
             -F 'service_version="1.0.0"' \
             -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
-            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
+            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"'
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11688,7 +11688,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+            $ref: '#/components/schemas/Security_Detections_API_UUID'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -11737,7 +11737,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+            $ref: '#/components/schemas/Security_Detections_API_UUID'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -11894,7 +11894,7 @@ paths:
                   query: |
                     FROM logs-abc*
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
-                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) 
+                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW())
                     | KEEP event_rate
               example6:
                 summary: Patch indicator match rule
@@ -12852,7 +12852,7 @@ paths:
 
         Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
-        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once.
         The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
         > warn
         > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
@@ -14332,7 +14332,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_RuleId'
+            $ref: '#/components/schemas/Security_Exceptions_API_UUID'
       requestBody:
         content:
           application/json:
@@ -15112,7 +15112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -15181,7 +15181,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
                 type: array
           description: Successful response
         '400':
@@ -15271,7 +15271,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -15365,7 +15365,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -15424,7 +15424,7 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         - description: The page number to return
           in: query
           name: page
@@ -15463,7 +15463,7 @@ paths:
                 properties:
                   data:
                     items:
-                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
                     type: array
                   page:
                     minimum: 0
@@ -15707,7 +15707,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download a file from an endpoint. 
+        Download a file from an endpoint.
         > info
         > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
         > {`file_id`} = {`action_id`}`.`{`agent_id`}
@@ -19459,7 +19459,7 @@ paths:
           schema:
             default: []
             items:
-              $ref: '#/components/schemas/Security_Exceptions_API_FindExceptionListItemsFilter'
+              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
             type: array
         - description: |
             Determines whether the returned containers are Kibana associated with a Kibana space
@@ -49684,11 +49684,11 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new chat completion by using the Observability AI Assistant. 
+        Create a new chat completion by using the Observability AI Assistant.
 
-        The API returns the model's response based on the current conversation context. 
+        The API returns the model's response based on the current conversation context.
 
-        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
+        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
 
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: observability-ai-assistant-chat-complete
@@ -65885,7 +65885,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the Timeline was successfully updated.
         '405':
           content:
@@ -65958,7 +65958,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates the Timeline was successfully created.
         '405':
           content:
@@ -66010,7 +66010,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the timeline has been successfully copied.
       summary: Copies timeline or timeline template
       tags:
@@ -66040,7 +66040,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
@@ -66099,7 +66099,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
         '403':
           content:
@@ -73489,7 +73489,7 @@ components:
         - value
     Security_Detections_API_BulkActionEditPayloadSchedule:
       description: |
-        Overwrites schedule of rules. 
+        Overwrites schedule of rules.
 
         - `set_schedule` sets a schedule for rules. If the same schedule already exists for a rule, no changes are made.
 
@@ -74346,7 +74346,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -74450,7 +74450,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -74818,7 +74818,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -74947,7 +74947,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -75427,7 +75427,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -75547,7 +75547,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -75928,7 +75928,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -76057,7 +76057,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -76556,7 +76556,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -76679,7 +76679,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -76880,7 +76880,7 @@ components:
         execution_summary:
           $ref: '#/components/schemas/Security_Detections_API_RuleExecutionSummary'
         id:
-          $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+          $ref: '#/components/schemas/Security_Detections_API_UUID'
         immutable:
           $ref: '#/components/schemas/Security_Detections_API_IsRuleImmutable'
         required_fields:
@@ -77371,8 +77371,8 @@ components:
       description: |
         The rule's version number.
 
-        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules). 
-        - For custom rules it is set to `1` when the rule is created. 
+        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules).
+        - For custom rules it is set to `1` when the rule is created.
         > info
         > It is not incremented on each update. Compare this to the `revision` field.
       minimum: 1
@@ -77682,7 +77682,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -77805,7 +77805,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -78035,7 +78035,7 @@ components:
         - field: field from the event indices on which the rule runs
         - type: must be mapping
         - value: field from the Elasticsearch threat index
-          
+
         You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
       items:
         type: object
@@ -78370,7 +78370,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -78502,7 +78502,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -78972,7 +78972,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -79098,7 +79098,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -81459,7 +81459,7 @@ components:
         installed:
           type: boolean
         metadata:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_Metadata'
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
         resource:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentResource'
       required:
@@ -83127,19 +83127,19 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_CreateLiveQueryRequestBody:
       example:
         agent_all: true
@@ -83178,7 +83178,7 @@ components:
             type: string
           type: array
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         event_ids:
           description: A list of event IDs associated with the live query.
           items:
@@ -83189,13 +83189,13 @@ components:
           nullable: true
           type: object
         pack_id:
-          $ref: '#/components/schemas/Security_Osquery_API_PackIdOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackId'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ArrayQueries'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
     Security_Osquery_API_CreateLiveQueryResponse:
       example:
         data:
@@ -83253,13 +83253,13 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
@@ -83307,23 +83307,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_CreateSavedQueryResponse:
       example:
         data: {}
@@ -83555,21 +83555,21 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_PackDescription:
       description: The pack description.
       example: Pack description
@@ -83680,13 +83680,13 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
@@ -83725,23 +83725,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_IntervalOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_UpdateSavedQueryResponse:
       example:
         data: {}
@@ -87136,7 +87136,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
         message:
           type: string
           description: The email message text. Markdown format is supported.
@@ -88898,7 +88898,7 @@ components:
                                 - min
                                 - cardinality
                               description: |
-                                An aggregation to gather data for the rule. For example, find the average, highest or lowest value of a numeric field. Or use a cardinality aggregation to find the approximate number of unique values in a field. 
+                                An aggregation to gather data for the rule. For example, find the average, highest or lowest value of a numeric field. Or use a cardinality aggregation to find the approximate number of unique values in a field.
                             field:
                               type: string
                         - type: object
