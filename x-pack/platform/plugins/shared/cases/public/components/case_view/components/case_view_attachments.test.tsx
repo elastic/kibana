@@ -19,7 +19,6 @@ import { useCaseViewNavigation } from '../../../common/navigation';
 import * as similarCasesHook from '../../../containers/use_get_similar_cases';
 import { useCaseObservables } from '../use_case_observables';
 
-jest.mock('../../../containers/api');
 jest.mock('../../../containers/use_get_case_file_stats');
 jest.mock('../../../common/navigation/hooks');
 jest.mock('../use_case_observables', () => ({
@@ -43,11 +42,11 @@ const platinumLicense = licensingMock.createLicense({
   license: { type: 'platinum' },
 });
 
-const data = { total: 3 };
+const fileStatsData = { total: 3 };
 
 describe('Case View Attachments tab', () => {
   beforeEach(() => {
-    useGetCaseFileStatsMock.mockReturnValue({ data });
+    useGetCaseFileStatsMock.mockReturnValue({ data: fileStatsData });
   });
 
   afterEach(() => {
@@ -104,7 +103,7 @@ describe('Case View Attachments tab', () => {
   });
 
   it('do not show count on the files tab if the call isLoading', async () => {
-    useGetCaseFileStatsMock.mockReturnValue({ isLoading: true, data });
+    useGetCaseFileStatsMock.mockReturnValue({ isLoading: true, data: fileStatsData });
 
     renderWithTestingProviders(
       <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
