@@ -254,7 +254,7 @@ describe('ChangeKbModel', () => {
   });
 
   describe('when KB was installed with ELSER on ML node and ELSER in EIS later becomes available', () => {
-    it('shows ELSER and enables the Update button by default', async () => {
+    it('shows ELSER as the selected model in the dropdown', async () => {
       setupMockGetModelOptions([
         {
           key: ELSER_IN_EIS_INFERENCE_ID,
