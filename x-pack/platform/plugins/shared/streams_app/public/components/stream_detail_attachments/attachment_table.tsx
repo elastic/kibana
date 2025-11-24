@@ -65,7 +65,7 @@ export function AttachmentsTable({
                 });
               }
               const url = dashboardLocator?.getRedirectUrl(
-                { dashboardId: id, timeRange: timeState.timeRange } || ''
+                { dashboardId: id, time_range: timeState.timeRange } || ''
               );
               if (url) {
                 application.navigateToUrl(url);
