@@ -71,10 +71,7 @@ import { auditLoggingService } from '../../audit_logging';
 import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
-import type {
-  PackageAssetReference,
-  RegistryPolicyTemplate,
-} from '../../../../common/types/models/epm';
+import type { PackageAssetReference } from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
 import {
