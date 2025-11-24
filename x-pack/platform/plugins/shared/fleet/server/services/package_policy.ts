@@ -2164,7 +2164,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             policy_ids: packagePolicy.policy_ids,
           });
           if (packagePolicy?.secret_references?.length) {
-            secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+            // protect cloud connectors secrets from being deleted, including a rollback scenario
+            if (!packagePolicy.supports_cloud_connector || !packagePolicy.cloud_connector_id) {
+              secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+            }
           }
         } else if (!success && error) {
           result.push({
