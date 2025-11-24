@@ -186,33 +186,33 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     </EuiContextMenuItem>,
     ...(!isWhere
       ? [
-        <EuiContextMenuItem
-          data-test-subj="stepContextMenuEditDescriptionItem"
-          key="editDescription"
-          icon="editorComment"
-          disabled={!canEdit}
-          onClick={() => {
-            togglePopover(false);
-            toggleEditDescriptionModal(true);
-          }}
-        >
-          {hasCustomDescription ? editDescriptionItemText : addDescriptionItemText}
-        </EuiContextMenuItem>,
-        hasCustomDescription && (
           <EuiContextMenuItem
-            data-test-subj="stepContextMenuRemoveDescriptionItem"
-            key="removeDescription"
-            icon="minusInCircle"
+            data-test-subj="stepContextMenuEditDescriptionItem"
+            key="editDescription"
+            icon="editorComment"
             disabled={!canEdit}
             onClick={() => {
               togglePopover(false);
-              stepRef.send({ type: 'step.changeDescription', description: '' });
+              toggleEditDescriptionModal(true);
             }}
           >
-            {removeDescriptionItemText}
-          </EuiContextMenuItem>
-        ),
-      ].filter(isNonNull)
+            {hasCustomDescription ? editDescriptionItemText : addDescriptionItemText}
+          </EuiContextMenuItem>,
+          hasCustomDescription && (
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuRemoveDescriptionItem"
+              key="removeDescription"
+              icon="minusInCircle"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                stepRef.send({ type: 'step.changeDescription', description: '' });
+              }}
+            >
+              {removeDescriptionItemText}
+            </EuiContextMenuItem>
+          ),
+        ].filter(isNonNull)
       : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"

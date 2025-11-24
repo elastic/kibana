@@ -63,17 +63,16 @@ export const EditStepDescriptionModal: React.FC<EditStepDescriptionModalProps> =
 
   const title = isEditMode
     ? i18n.translate('xpack.streams.enrichment.processor.editDescription.title', {
-      defaultMessage: 'Edit description',
-    })
+        defaultMessage: 'Edit description',
+      })
     : i18n.translate('xpack.streams.enrichment.processor.addDescription.title', {
-      defaultMessage: 'Add description',
-    });
+        defaultMessage: 'Add description',
+      });
 
   const helpText = i18n.translate('xpack.streams.enrichment.processor.editDescription.helpText', {
     defaultMessage:
       'Explain this step, this would override the metadata. If you decide to remove the description, the metadata would appear back.',
   });
-
 
   const textAreaAriaLabel = i18n.translate(
     'xpack.streams.enrichment.processor.editDescription.fieldAriaLabel',
@@ -81,14 +80,11 @@ export const EditStepDescriptionModal: React.FC<EditStepDescriptionModalProps> =
   );
 
   return (
-    <EuiModal
-      onClose={onCancel}
-      maxWidth={600}
-    >
+    <EuiModal onClose={onCancel} maxWidth={600}>
       <EuiModalHeader css={modalHeaderCss}>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody >
+      <EuiModalBody>
         <EuiText size="s" color="subdued">
           {helpText}
         </EuiText>
@@ -105,21 +101,14 @@ export const EditStepDescriptionModal: React.FC<EditStepDescriptionModalProps> =
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel}>
-          {i18n.translate(
-            'xpack.streams.enrichment.processor.editDescription.cancelButtonLabel',
-            { defaultMessage: 'Cancel' }
-          )}
+          {i18n.translate('xpack.streams.enrichment.processor.editDescription.cancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
         </EuiButtonEmpty>
-        <EuiButton
-          onClick={handleSave}
-          fill
-        >
+        <EuiButton onClick={handleSave} fill>
           {title}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
 };
-
-
-
