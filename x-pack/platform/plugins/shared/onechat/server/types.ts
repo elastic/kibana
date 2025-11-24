@@ -17,6 +17,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
+import type { CasesServerStart } from '@kbn/cases-plugin/server';
 
 export interface OnechatSetupDependencies {
   cloud?: CloudSetup;
@@ -32,6 +33,7 @@ export interface OnechatStartDependencies {
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
+  cases?: CasesServerStart;
 }
 
 export interface AttachmentsSetup {
