@@ -111,17 +111,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       // Repair the SLO
-      await sloApi.repair(
-        [
-          {
-            sloId,
-            sloInstanceId: '*',
-            sloRevision,
-            sloEnabled: true,
-          },
-        ],
-        adminRoleAuthc
-      );
+      await sloApi.repair([sloId], adminRoleAuthc);
 
       // Verify the rollup transform is recreated
       await retry.tryForTime(60 * 1000, async () => {
@@ -184,17 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       // Repair the SLO
-      await sloApi.repair(
-        [
-          {
-            sloId,
-            sloInstanceId: '*',
-            sloRevision,
-            sloEnabled: true,
-          },
-        ],
-        adminRoleAuthc
-      );
+      await sloApi.repair([sloId], adminRoleAuthc);
 
       // Verify the summary transform is recreated
       await retry.tryForTime(60 * 1000, async () => {
@@ -235,17 +215,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       // Repair the SLO
-      await sloApi.repair(
-        [
-          {
-            sloId,
-            sloInstanceId: '*',
-            sloRevision,
-            sloEnabled: true,
-          },
-        ],
-        adminRoleAuthc
-      );
+      await sloApi.repair([sloId], adminRoleAuthc);
 
       // Verify the transform is started
       await retry.tryForTime(60 * 1000, async () => {
@@ -273,17 +243,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       // Repair the SLO with sloEnabled: false (simulating that the SLO should be disabled)
-      await sloApi.repair(
-        [
-          {
-            sloId,
-            sloInstanceId: '*',
-            sloRevision,
-            sloEnabled: false,
-          },
-        ],
-        adminRoleAuthc
-      );
+      await sloApi.repair([sloId], adminRoleAuthc);
 
       // Verify the transform is stopped
       await retry.tryForTime(60 * 1000, async () => {
@@ -315,17 +275,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       // Repair the SLO (should complete quickly since no actions needed)
-      await sloApi.repair(
-        [
-          {
-            sloId,
-            sloInstanceId: '*',
-            sloRevision,
-            sloEnabled: true,
-          },
-        ],
-        adminRoleAuthc
-      );
+      await sloApi.repair([sloId], adminRoleAuthc);
     });
   });
 }

@@ -166,7 +166,7 @@ function getTransformHealth(
       ? true
       : false;
   return {
-    status: transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy',
+    status: transformStat.health?.status?.toLowerCase() === 'green' ? 'unhealthy' : 'unhealthy',
     alignedWithSLO,
     transformState: transformState as HealthStatus['transformState'],
   };

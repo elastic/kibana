@@ -206,20 +206,11 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
-    async repair(
-      list: Array<{
-        sloId: string;
-        sloInstanceId: string;
-        sloRevision: number;
-        sloEnabled: boolean;
-      }>,
-      roleAuthc: RoleCredentials
-    ) {
+    async repair(list: string[], roleAuthc: RoleCredentials) {
       await supertestWithoutAuth
         .post(`/api/observability/slos/_repair`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        // .set('Elastic-Api-Version', '2023-10-31')
         .send({ list })
         .expect(204);
     },

@@ -10,7 +10,7 @@ import { type Logger } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RepairParams } from '@kbn/slo-schema';
 import pLimit from 'p-limit';
-import { computeHealth, SLOHealth } from '../domain/services/compute_health';
+import { computeHealth, type SLOHealth } from '../domain/services/compute_health';
 import { getSLOTransformId, getSLOSummaryTransformId } from '../../common/constants';
 import type { DefaultTransformManager } from './transform_manager';
 import type { DefaultSummaryTransformManager } from './summay_transform_manager';
@@ -40,121 +40,109 @@ export class RepairSLO {
     }
 
     try {
-      // use pLimiter(10)
-      // find definitions for the provided list, dedup/filter out the inexistant tuples (ids.)
-      // definitions.map({...definition, instanceId})
-
-      const sloDefinitions = await this.repository.findAllByIds(
-        params.list.map((item) => item.sloId)
-      );
-
-      const health = await computeHealth(
-        sloDefinitions.map((definition) => ({
-          id: definition.id,
-          instanceId: '*',
-          revision: definition.revision,
-          name: definition.name,
-          enabled: definition.enabled,
-        })),
-        {
-          scopedClusterClient: this.scopedClusterClient,
-        }
-      );
-
-      const repairActions = this.identifyRepairActions(health);
-      this.logger.debug(`Identified ${repairActions.length} repair actions needed`);
-
-      if (repairActions.length === 0) {
-        this.logger.debug('No repair actions needed');
-        return;
-      }
-
-      const actionsBySloId = new Map<string, RepairAction[]>();
-      for (const action of repairActions) {
-        const key = `${action.sloId}-${action.sloRevision}`;
-        if (!actionsBySloId.has(key)) {
-          actionsBySloId.set(key, []);
-        }
-        actionsBySloId.get(key)!.push(action);
-      }
+      const definitions = await this.repository.findAllByIds(params.list);
 
       let successCount = 0;
       let errorCount = 0;
-      const allResults: Array<{ id: string; success: boolean; error?: string }> = [];
 
-      for (const [sloKey, actions] of actionsBySloId.entries()) {
-        try {
-          const lastDashIndex = sloKey.lastIndexOf('-');
-          if (lastDashIndex === -1) {
-            this.logger.warn(`Invalid sloKey format [${sloKey}], expected format: sloId-revision`);
-            errorCount++;
-            continue;
-          }
-          const sloId = sloKey.substring(0, lastDashIndex);
-          const revisionStr = sloKey.substring(lastDashIndex + 1);
-          const revision = parseInt(revisionStr, 10);
+      const headLimiter = pLimit(10);
 
-          if (isNaN(revision)) {
-            this.logger.warn(`Invalid revision in sloKey [${sloKey}], revision: ${revisionStr}`);
-            errorCount++;
-            continue;
-          }
+      await Promise.all(
+        definitions.map(async (definition) => {
+          return headLimiter(async () => {
+            const health = await computeHealth([{ ...definition, instanceId: '*' }], {
+              scopedClusterClient: this.scopedClusterClient,
+            });
 
-          const sloDefinition = await this.repository.findById(sloId);
+            const repairActions = this.identifyRepairActions(health[0]);
+            this.logger.debug(`Identified ${repairActions.length} repair actions needed`);
 
-          // alreasdy done at the beginning
-          if (!sloDefinition) {
-            this.logger.warn(`SLO [${sloId}] revision [${revision}] not found, skipping repairs`);
-            errorCount++;
-            allResults.push({ id: sloId, success: false, error: 'SLO not found' });
-            continue;
-          }
+            if (repairActions.length === 0) {
+              this.logger.debug('No repair actions needed');
+              return;
+            }
 
-          const limiter = pLimit(3);
+            const actionsBySloId = new Map<string, RepairAction[]>();
+            for (const action of repairActions) {
+              const key = `${action.sloId}-${action.sloRevision}`;
+              if (!actionsBySloId.has(key)) {
+                actionsBySloId.set(key, []);
+              }
+              actionsBySloId.get(key)!.push(action);
+            }
 
-          const promises = actions.map(async (action) => {
-            return limiter(async () => {
+            const allResults: Array<{ id: string; success: boolean; error?: string }> = [];
+
+            for (const [sloKey, actions] of actionsBySloId.entries()) {
               try {
-                await this.executeRepairAction(
-                  action,
-                  sloDefinition,
-                  this.transformManager,
-                  this.summaryTransformManager
-                );
-                successCount++;
-                return { id: sloId, success: true };
+                const lastDashIndex = sloKey.lastIndexOf('-');
+                if (lastDashIndex === -1) {
+                  this.logger.warn(
+                    `Invalid sloKey format [${sloKey}], expected format: sloId-revision`
+                  );
+                  errorCount++;
+                  continue;
+                }
+                const sloId = sloKey.substring(0, lastDashIndex);
+                const revisionStr = sloKey.substring(lastDashIndex + 1);
+                const revision = parseInt(revisionStr, 10);
+
+                if (isNaN(revision)) {
+                  this.logger.warn(
+                    `Invalid revision in sloKey [${sloKey}], revision: ${revisionStr}`
+                  );
+                  errorCount++;
+                  continue;
+                }
+
+                const limiter = pLimit(3);
+
+                const promises = actions.map(async (action) => {
+                  return limiter(async () => {
+                    try {
+                      await this.executeRepairAction(
+                        action,
+                        definition,
+                        this.transformManager,
+                        this.summaryTransformManager
+                      );
+                      successCount++;
+                      return { id: sloId, success: true };
+                    } catch (err) {
+                      this.logger.error(
+                        `Failed to execute repair action [${action.action}] for SLO [${action.sloId}] transform [${action.transformType}]: ${err}`
+                      );
+                      errorCount++;
+                      return {
+                        id: sloId,
+                        success: false,
+                        error: err instanceof Error ? err.message : String(err),
+                      };
+                    }
+                  });
+                });
+
+                const results = await Promise.all(promises);
+                // Aggregate results - use the first result per SLO (all actions for same SLO should have same outcome)
+                const sloResult = results[0];
+                if (sloResult) {
+                  allResults.push(sloResult);
+                }
               } catch (err) {
-                this.logger.error(
-                  `Failed to execute repair action [${action.action}] for SLO [${action.sloId}] transform [${action.transformType}]: ${err}`
-                );
+                this.logger.error(`Failed to process repairs for SLO [${sloKey}]: ${err}`);
                 errorCount++;
-                return {
+                const lastDashIndex = sloKey.lastIndexOf('-');
+                const sloId = lastDashIndex !== -1 ? sloKey.substring(0, lastDashIndex) : sloKey;
+                allResults.push({
                   id: sloId,
                   success: false,
                   error: err instanceof Error ? err.message : String(err),
-                };
+                });
               }
-            });
+            }
           });
-
-          const results = await Promise.all(promises);
-          // Aggregate results - use the first result per SLO (all actions for same SLO should have same outcome)
-          const sloResult = results[0];
-          if (sloResult) {
-            allResults.push(sloResult);
-          }
-        } catch (err) {
-          this.logger.error(`Failed to process repairs for SLO [${sloKey}]: ${err}`);
-          errorCount++;
-          const lastDashIndex = sloKey.lastIndexOf('-');
-          const sloId = lastDashIndex !== -1 ? sloKey.substring(0, lastDashIndex) : sloKey;
-          allResults.push({
-            id: sloId,
-            success: false,
-            error: err instanceof Error ? err.message : String(err),
-          });
-        }
-      }
+        })
+      );
 
       this.logger.info(
         `Repair task completed: ${successCount} successful repairs, ${errorCount} errors`
@@ -168,49 +156,47 @@ export class RepairSLO {
     }
   }
 
-  private identifyRepairActions(healthData: SLOHealth[]): RepairAction[] {
+  private identifyRepairActions(healthData: SLOHealth): RepairAction[] {
     const actions: RepairAction[] = [];
 
-    for (const item of healthData) {
-      const { sloId, sloRevision, health, sloEnabled } = item;
+    const { sloId, sloRevision, health, sloEnabled } = healthData;
 
-      // check rollup transform
-      if (health.rollup.status === 'missing') {
-        actions.push({
-          sloId,
-          sloRevision,
-          action: 'recreate-transform',
-          transformType: 'rollup',
-          sloEnabled,
-        });
-      } else if (health.rollup.match === false) {
-        actions.push({
-          sloId,
-          sloRevision,
-          action: sloEnabled ? 'start-transform' : 'stop-transform',
-          transformType: 'rollup',
-          sloEnabled,
-        });
-      }
+    // check rollup transform
+    if (health.rollup.status === 'missing') {
+      actions.push({
+        sloId,
+        sloRevision,
+        action: 'recreate-transform',
+        transformType: 'rollup',
+        sloEnabled,
+      });
+    } else if (health.rollup.alignedWithSLO === false) {
+      actions.push({
+        sloId,
+        sloRevision,
+        action: sloEnabled ? 'start-transform' : 'stop-transform',
+        transformType: 'rollup',
+        sloEnabled,
+      });
+    }
 
-      // Check summary transform
-      if (health.summary.status === 'missing') {
-        actions.push({
-          sloId,
-          sloRevision,
-          action: 'recreate-transform',
-          transformType: 'summary',
-          sloEnabled,
-        });
-      } else if (health.summary.match === false) {
-        actions.push({
-          sloId,
-          sloRevision,
-          action: sloEnabled ? 'start-transform' : 'stop-transform',
-          transformType: 'summary',
-          sloEnabled,
-        });
-      }
+    // Check summary transform
+    if (health.summary.status === 'missing') {
+      actions.push({
+        sloId,
+        sloRevision,
+        action: 'recreate-transform',
+        transformType: 'summary',
+        sloEnabled,
+      });
+    } else if (health.summary.alignedWithSLO === false) {
+      actions.push({
+        sloId,
+        sloRevision,
+        action: sloEnabled ? 'start-transform' : 'stop-transform',
+        transformType: 'summary',
+        sloEnabled,
+      });
     }
 
     return actions;

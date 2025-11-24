@@ -60,7 +60,7 @@ export const sloKeys = {
     validTags: string;
   }) => [...sloKeys.allDefinitions(), params],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
-  health: (list: Array<{ sloId: string; sloInstanceId: string; sloEnabled: boolean }>) =>
+  health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,
   burnRates: (
     sloId: string,

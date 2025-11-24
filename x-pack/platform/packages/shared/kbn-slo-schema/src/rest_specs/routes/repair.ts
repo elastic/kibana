@@ -6,18 +6,10 @@
  */
 import * as t from 'io-ts';
 import { sloIdSchema } from '../../schema/slo';
-import { allOrAnyString } from '../../schema';
 
 const repairParamsSchema = t.type({
   body: t.type({
-    list: t.array(
-      t.type({
-        sloId: sloIdSchema,
-        sloInstanceId: allOrAnyString,
-        sloRevision: t.number,
-        sloEnabled: t.boolean,
-      })
-    ),
+    list: t.array(sloIdSchema),
   }),
 });
 

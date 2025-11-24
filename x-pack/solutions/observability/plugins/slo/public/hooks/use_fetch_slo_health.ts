@@ -27,7 +27,6 @@ export function useFetchSloHealth({ list }: Params): UseFetchSloHealth {
     ? list.map((slo) => ({
         sloId: slo.id,
         sloInstanceId: slo.instanceId ?? ALL_VALUE,
-        sloEnabled: slo.enabled,
       }))
     : [];
 
