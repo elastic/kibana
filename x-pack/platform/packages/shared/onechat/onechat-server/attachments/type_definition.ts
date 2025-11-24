@@ -7,7 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Attachment } from '@kbn/onechat-common/attachments';
-import type { AttachmentScopedTool } from './tools';
+import type { AttachmentBoundedTool } from './tools';
 
 /**
  * Server-side definition of an attachment type.
@@ -89,5 +89,5 @@ export interface AgentFormattedAttachment {
    * - the tool ids should be unique (so generated based on the attachment instance or attachment id)
    * - the descriptions should be explicit that they are specific to the attachment instance (specifying the attachment id for example)
    */
-  getAttachmentTools?: () => MaybePromise<AttachmentScopedTool[]>;
+  getBoundedTools?: () => MaybePromise<AttachmentBoundedTool[]>;
 }

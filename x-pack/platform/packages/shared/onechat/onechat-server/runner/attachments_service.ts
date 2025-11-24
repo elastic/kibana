@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentScopedTool, AttachmentTypeDefinition } from '../attachments';
+import type { AttachmentBoundedTool, AttachmentTypeDefinition } from '../attachments';
 import type { ExecutableTool } from './tool_provider';
 
 /**
@@ -19,5 +19,5 @@ export interface AttachmentsService {
   /**
    * Convert an attachment-scoped tool to a generic executable tool
    */
-  convertAttachmentTool(tool: AttachmentScopedTool): ExecutableTool;
+  convertAttachmentTool(tool: AttachmentBoundedTool): ExecutableTool;
 }

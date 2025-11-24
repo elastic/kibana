@@ -12,13 +12,13 @@ import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import type {
   AttachmentRepresentation,
-  AttachmentScopedTool,
+  AttachmentBoundedTool,
 } from '@kbn/onechat-server/attachments';
 
 export interface ProcessedAttachment {
   attachment: Attachment;
   representation: AttachmentRepresentation;
-  tools: AttachmentScopedTool[];
+  tools: AttachmentBoundedTool[];
 }
 
 export interface ProcessedAttachmentType {
@@ -70,7 +70,7 @@ export const prepareConversation = async ({
   const attachmentTypes = await Promise.all(
     attachmentTypeIds.map<Promise<ProcessedAttachmentType>>(async (type) => {
       const definition = attachmentsService.getTypeDefinition(type);
-      const description = definition?.getAgentDescription?.() ?? '';
+      const description = definition?.getAgentDescription?.() ?? undefined;
       return {
         type,
         description,
@@ -134,7 +134,7 @@ const prepareAttachment = async ({
 
   const attachment = inputToFinal(input);
   const formatted = await definition.format(attachment);
-  const tools = formatted.getAttachmentTools ? await formatted.getAttachmentTools() : [];
+  const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
 
   return {
     attachment,

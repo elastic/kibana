@@ -8,5 +8,12 @@
 import type { ZodObject } from '@kbn/zod';
 import type { StaticToolRegistration } from '../tools/builtin';
 
-export type AttachmentScopedTool<RunInput extends ZodObject<any> = ZodObject<any>> =
-  StaticToolRegistration<RunInput>;
+/**
+ * Definition of a tool which is bounded to an attachment instance.
+ *
+ * Refer to {@link AttachmentTypeDefinition}.
+ */
+export type AttachmentBoundedTool<RunInput extends ZodObject<any> = ZodObject<any>> = Omit<
+  StaticToolRegistration<RunInput>,
+  'availability' | 'tags'
+>;

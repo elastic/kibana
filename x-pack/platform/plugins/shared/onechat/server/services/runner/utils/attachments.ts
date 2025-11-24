@@ -7,9 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AttachmentsService, ExecutableTool } from '@kbn/onechat-server/runner';
-import type { Runner } from '@kbn/onechat-server';
+import type { Runner, StaticToolRegistration } from '@kbn/onechat-server';
 import type { ToolType } from '@kbn/onechat-common';
-import type { AttachmentScopedTool } from '@kbn/onechat-server/attachments';
+import type { AttachmentBoundedTool } from '@kbn/onechat-server/attachments';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../../tools/tool_types';
 import { convertTool } from '../../tools/builtin/converter';
 import { toExecutableTool } from '../../tools/utils/tool_conversion';
@@ -48,7 +48,7 @@ export const createAttachmentsService = ({
   };
 };
 
-type AttachmentToolConverterFn = (tool: AttachmentScopedTool) => ExecutableTool;
+type AttachmentToolConverterFn = (tool: AttachmentBoundedTool) => ExecutableTool;
 
 export const createToolConverter = ({
   request,
@@ -77,7 +77,11 @@ export const createToolConverter = ({
 
   return (tool) => {
     const definition = definitionMap[tool.type]!;
-    const internal = convertTool({ tool, context, definition, cache });
+    const converted: StaticToolRegistration = {
+      ...tool,
+      tags: [] as string[],
+    } as StaticToolRegistration;
+    const internal = convertTool({ tool: converted, context, definition, cache });
     return toExecutableTool({ tool: internal, request, runner });
   };
 };

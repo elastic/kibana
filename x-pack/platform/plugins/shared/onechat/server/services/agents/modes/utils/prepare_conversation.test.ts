@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type { ConversationRound, RawRoundInput } from '@kbn/onechat-common';
-import { ConversationRoundStepType, ToolResultType } from '@kbn/onechat-common';
+import { ConversationRoundStepType, ToolResultType, ToolType } from '@kbn/onechat-common';
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import type {
+  AttachmentBoundedTool,
   AttachmentRepresentation,
   AttachmentTypeDefinition,
 } from '@kbn/onechat-server/attachments';
@@ -25,19 +27,41 @@ const mockGetToolResultId = getToolResultId as jest.MockedFunction<typeof getToo
 describe('prepareConversation', () => {
   let mockAttachmentsService: jest.Mocked<AttachmentsService>;
 
-  const mockDefinition = (repr: AttachmentRepresentation): AttachmentTypeDefinition => {
+  const attachmentDefinition = ({
+    id = 'text',
+    description,
+    repr,
+    boundedTools = [],
+  }: {
+    id?: string;
+    description?: string;
+    repr: AttachmentRepresentation;
+    boundedTools?: AttachmentBoundedTool[];
+  }): AttachmentTypeDefinition => {
     return {
-      id: 'foo',
+      id,
       validate: jest.fn(),
       format: jest.fn().mockImplementation(() => {
         return {
           getRepresentation: () => repr,
+          getBoundedTools: () => boundedTools,
         };
       }),
+      getAgentDescription: description ? () => description : undefined,
     };
   };
 
   const textRepresentation = (value: string): AttachmentRepresentation => ({ type: 'text', value });
+
+  const boundedTool = (id = 'bounded_tool'): AttachmentBoundedTool => {
+    return {
+      id,
+      type: ToolType.builtin,
+      description: 'test tool',
+      handler: jest.fn(),
+      schema: z.object({}),
+    } as AttachmentBoundedTool;
+  };
 
   beforeEach(() => {
     mockAttachmentsService = {
@@ -116,6 +140,96 @@ describe('prepareConversation', () => {
   });
 
   describe('nextInput with attachments', () => {
+    it('collect attachment types', async () => {
+      const attachment1: AttachmentInput = {
+        type: 'text',
+        data: { content: 'content 1' },
+      };
+
+      const attachment2: AttachmentInput = {
+        type: 'screen_context',
+        data: { url: 'http://example.com' },
+        hidden: true,
+      };
+
+      const mockRepresentation1 = textRepresentation('formatted 1');
+      const mockRepresentation2 = textRepresentation('formatted 2');
+
+      const textDefinition = attachmentDefinition({
+        id: 'text',
+        description: 'foobar',
+        repr: mockRepresentation1,
+      });
+      const screenContextDefinition = attachmentDefinition({
+        id: 'screen_context',
+        repr: mockRepresentation2,
+      });
+
+      mockAttachmentsService.getTypeDefinition.mockImplementation((id) => {
+        if (id === 'text') {
+          return textDefinition;
+        }
+        if (id === 'screen_context') {
+          return screenContextDefinition;
+        }
+        throw new Error(`Unexpected attachment type: ${id}`);
+      });
+
+      const nextInput: RawRoundInput = {
+        message: 'Hello',
+        attachments: [attachment1, attachment2],
+      };
+
+      const result = await prepareConversation({
+        nextInput,
+        previousRounds: [],
+        attachmentsService: mockAttachmentsService,
+      });
+
+      expect(result.nextInput.attachments).toHaveLength(2);
+
+      expect(result.attachmentTypes).toEqual([
+        {
+          type: 'text',
+          description: 'foobar',
+        },
+        {
+          type: 'screen_context',
+        },
+      ]);
+    });
+
+    it('collect bounded tools', async () => {
+      const attachment: AttachmentInput = {
+        type: 'text',
+        data: { content: 'content 1' },
+      };
+
+      const mockRepresentation = textRepresentation('formatted 1');
+
+      const textDefinition = attachmentDefinition({
+        id: 'text',
+        repr: mockRepresentation,
+        boundedTools: [boundedTool('tool_1'), boundedTool('tool_2')],
+      });
+
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(textDefinition);
+
+      const nextInput: RawRoundInput = {
+        message: 'Hello',
+        attachments: [attachment],
+      };
+
+      const result = await prepareConversation({
+        nextInput,
+        previousRounds: [],
+        attachmentsService: mockAttachmentsService,
+      });
+
+      expect(result.nextInput.attachments).toHaveLength(1);
+      expect(result.nextInput.attachments[0].tools.map((t) => t.id)).toEqual(['tool_1', 'tool_2']);
+    });
+
     it('should generate ID for attachment without ID', async () => {
       const attachment: AttachmentInput = {
         type: 'text',
@@ -124,7 +238,9 @@ describe('prepareConversation', () => {
 
       const mockRepresentation = textRepresentation('formatted text');
 
-      mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
       const nextInput: RawRoundInput = {
         message: 'Hello',
@@ -153,7 +269,9 @@ describe('prepareConversation', () => {
 
       const mockRepresentation = textRepresentation('formatted text');
 
-      mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
       const nextInput: RawRoundInput = {
         message: 'Hello',
@@ -252,7 +370,9 @@ describe('prepareConversation', () => {
 
       const mockRepresentation = textRepresentation('formatted');
 
-      mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
       const nextInput: RawRoundInput = {
         message: 'Hello',
@@ -313,7 +433,9 @@ describe('prepareConversation', () => {
 
       const mockRepresentation = textRepresentation('formatted previous');
 
-      mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
       const previousRounds = [
         createRound({
@@ -351,7 +473,9 @@ describe('prepareConversation', () => {
     it('should process multiple previous rounds', async () => {
       const mockRepresentation = textRepresentation('formatted');
 
-      mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
       const previousRounds = [
         createRound({
