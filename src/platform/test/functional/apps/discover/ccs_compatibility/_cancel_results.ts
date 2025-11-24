@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('classic mode', () => {
-      it('timeout on single shard shows warning and results', async () => {
+      it('should show warning and results', async () => {
         await common.navigateToApp('discover');
         await dataViews.createFromSearchBar({
           name: 'ftr-remote:logstash-*,logstash-*',

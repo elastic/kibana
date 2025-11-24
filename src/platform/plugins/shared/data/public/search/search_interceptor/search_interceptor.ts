@@ -65,6 +65,7 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import {
+  EVENT_TYPE_DATA_SEARCH_CANCEL,
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
   EVENT_PROPERTY_EXECUTION_CONTEXT,
@@ -412,11 +413,18 @@ export class SearchInterceptor {
       }),
       catchError((e: Error) => {
         // If we aborted (search:timeout advanced setting) or the user canceled and there was a partial response, return it instead of just erroring out
-        if (searchAbortController.isTimeout() || searchAbortController.isCanceled()) {
-          this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
-            [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
-            [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
-          });
+        if (id && (searchAbortController.isTimeout() || searchAbortController.isCanceled())) {
+          this.startRenderServices.analytics.reportEvent(
+            searchAbortController.isTimeout()
+              ? EVENT_TYPE_DATA_SEARCH_TIMEOUT
+              : EVENT_TYPE_DATA_SEARCH_CANCEL,
+            {
+              ...(searchAbortController.isTimeout() && {
+                [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
+              }),
+              [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
+            }
+          );
           return from(
             this.runSearch(
               { id, ...request },

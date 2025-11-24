@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const EVENT_TYPE_DATA_SEARCH_CANCEL = 'data_search_cancel';
 export const EVENT_TYPE_DATA_SEARCH_TIMEOUT = 'data_search_timeout';
 export const EVENT_PROPERTY_SEARCH_TIMEOUT_MS = 'timeout_ms';
 export const EVENT_PROPERTY_EXECUTION_CONTEXT = 'execution_context';
