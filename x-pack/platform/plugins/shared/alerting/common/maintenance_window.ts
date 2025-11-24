@@ -13,6 +13,7 @@ export enum MaintenanceWindowStatus {
   Upcoming = 'upcoming',
   Finished = 'finished',
   Archived = 'archived',
+  Disabled = 'disabled',
 }
 export interface MaintenanceWindowModificationMetadata {
   createdBy: string | null;

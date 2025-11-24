@@ -10208,6 +10208,20 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ElasticsearchSettingsDefinition.ignoreAsSuggestion",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreAsSuggestion",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10402,6 +10416,59 @@
                 "text": "ESQLColumn"
               },
               "; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLAstForkCommand",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLAstForkCommand",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstForkCommand",
+            "text": "ESQLAstForkCommand"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommand",
+            "text": "ESQLCommand"
+          },
+          "<\"fork\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstForkCommand.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLForkParens",
+                "text": "ESQLForkParens"
+              },
+              "[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
@@ -10805,6 +10872,51 @@
                 "text": "ESQLAstItem"
               },
               "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLForkParens",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLForkParens",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLForkParens",
+            "text": "ESQLForkParens"
+          },
+          " extends ",
+          "ESQLParens"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLForkParens.child",
+            "type": "Object",
+            "tags": [],
+            "label": "child",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstQueryExpression",
+                "text": "ESQLAstQueryExpression"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
@@ -14890,7 +15002,15 @@
           " | ",
           "ESQLAstCompletionCommand",
           " | ",
-          "ESQLAstFuseCommand"
+          "ESQLAstFuseCommand",
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstForkCommand",
+            "text": "ESQLAstForkCommand"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -14966,6 +15086,14 @@
           "ESQLAstCompletionCommand",
           " | ",
           "ESQLAstFuseCommand",
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstForkCommand",
+            "text": "ESQLAstForkCommand"
+          },
           " | ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -16897,7 +17025,7 @@
           "\nAll supported field types in ES|QL. This is all the types\nthat can come back in the table from a query."
         ],
         "signature": [
-          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\"]"
+          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\", \"histogram\", \"exponential_histogram\", \"tdigest\"]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,

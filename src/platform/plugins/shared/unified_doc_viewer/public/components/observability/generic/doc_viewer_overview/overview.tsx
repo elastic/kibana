@@ -20,7 +20,7 @@ import {
   DEFAULT_MARGIN_BOTTOM,
 } from '../../../doc_viewer_source/get_height';
 import { About } from '../../traces/components/about';
-import { TraceRootItemProvider } from '../../traces/doc_viewer_overview/hooks/use_fetch_trace_root_item';
+import { TraceRootSpanProvider } from '../../traces/doc_viewer_overview/hooks/use_fetch_trace_root_span';
 import { TraceWaterfall } from '../../traces/components/trace_waterfall';
 import { ErrorsTable } from '../../traces/components/errors';
 import { TraceContextLogEvents } from '../../traces/components/trace_context_log_events';
@@ -59,7 +59,7 @@ export function Overview({
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <TraceRootItemProvider traceId={traceId}>
+      <TraceRootSpanProvider traceId={traceId}>
         <div
           ref={setContainerRef}
           css={
@@ -93,7 +93,7 @@ export function Overview({
           <EuiSpacer size="m" />
           <TraceContextLogEvents traceId={traceId} spanId={spanId} transactionId={transactionId} />
         </div>
-      </TraceRootItemProvider>
+      </TraceRootSpanProvider>
     </DataSourcesProvider>
   );
 }
