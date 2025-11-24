@@ -109,8 +109,8 @@ export function StreamsTreeTable({
     if (!totalDocsResult.value) {
       return {} as Record<string, number>;
     }
-    return totalDocsResult.value.reduce((acc, { dataset, count }) => {
-      acc[dataset] = count;
+    return totalDocsResult.value.reduce((acc, { stream, count }) => {
+      acc[stream] = count;
       return acc;
     }, {} as Record<string, number>);
   }, [totalDocsResult.value]);
@@ -119,8 +119,8 @@ export function StreamsTreeTable({
     if (!failedDocsResult.value) {
       return {} as Record<string, number>;
     }
-    return failedDocsResult.value.reduce((acc, { dataset, count }) => {
-      acc[dataset] = count;
+    return failedDocsResult.value.reduce((acc, { stream, count }) => {
+      acc[stream] = count;
       return acc;
     }, {} as Record<string, number>);
   }, [failedDocsResult.value]);
@@ -129,8 +129,8 @@ export function StreamsTreeTable({
     if (!degradedDocsResult.value) {
       return {} as Record<string, number>;
     }
-    return degradedDocsResult.value.reduce((acc, { dataset, count }) => {
-      acc[dataset] = count;
+    return degradedDocsResult.value.reduce((acc, { stream, count }) => {
+      acc[stream] = count;
       return acc;
     }, {} as Record<string, number>);
   }, [degradedDocsResult.value]);

@@ -6,6 +6,6 @@
  */
 
 export interface StreamDocsStat {
-  dataset: string;
+  stream: string;
   count: number;
 }

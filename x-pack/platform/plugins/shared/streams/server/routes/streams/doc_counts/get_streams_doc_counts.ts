@@ -16,7 +16,6 @@ const BATCH_SIZE = 100;
 
 /**
  * Fetches document counts for multiple streams using msearch to batch requests.
- * This approach queries each stream individually, avoiding reliance on backing index naming patterns.
  */
 export async function getDocCountsForStreams(options: {
   esClient: ElasticsearchClient;
@@ -87,7 +86,7 @@ export async function getDocCountsForStreams(options: {
 
       if (count > 0) {
         results.push({
-          dataset: streamName,
+          stream: streamName,
           count,
         });
       }

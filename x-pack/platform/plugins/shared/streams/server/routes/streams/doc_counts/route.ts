@@ -9,13 +9,12 @@ import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES, FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import type { StreamDocsStat } from '../../../../common';
 import { createServerRoute } from '../../create_server_route';
-import { getDocCountsForStreams } from './get_streams_aggregated_paginated_results';
+import { getDocCountsForStreams } from './get_streams_doc_counts';
 
 const docCountsQuerySchema = z.object({
   start: z.string(),
   end: z.string(),
   streams: z.string().optional(),
-  datasetQuery: z.string().optional(),
 });
 
 const degradedDocCountsRoute = createServerRoute({
@@ -35,9 +34,9 @@ const degradedDocCountsRoute = createServerRoute({
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { start, end, streams, datasetQuery } = params.query;
+    const { start, end, streams } = params.query;
 
-    const streamNames = datasetQuery ? [datasetQuery] : streams ? streams.split(',') : [];
+    const streamNames = streams ? streams.split(',') : [];
 
     return await getDocCountsForStreams({
       esClient,
@@ -68,11 +67,9 @@ const failedDocCountsRoute = createServerRoute({
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { start, end, streams, datasetQuery } = params.query;
+    const { start, end, streams } = params.query;
 
-    const streamNames = datasetQuery
-      ? [`${datasetQuery}${FAILURE_STORE_SELECTOR}`]
-      : streams
+    const streamNames = streams
       ? streams.split(',').map((stream) => `${stream}${FAILURE_STORE_SELECTOR}`)
       : [];
 
@@ -83,10 +80,10 @@ const failedDocCountsRoute = createServerRoute({
       end,
     });
 
-    // Strip the ::failures suffix from dataset names so they match the base stream names
+    // Strip the ::failures suffix from stream names so they match the base stream names
     return results.map((result) => ({
       ...result,
-      dataset: result.dataset.replace(FAILURE_STORE_SELECTOR, ''),
+      stream: result.stream.replace(FAILURE_STORE_SELECTOR, ''),
     }));
   },
 });
@@ -108,9 +105,9 @@ const totalDocCountsRoute = createServerRoute({
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { start, end, streams, datasetQuery } = params.query;
+    const { start, end, streams } = params.query;
 
-    const streamNames = datasetQuery ? [datasetQuery] : streams ? streams.split(',') : [];
+    const streamNames = streams ? streams.split(',') : [];
 
     return await getDocCountsForStreams({
       esClient,
