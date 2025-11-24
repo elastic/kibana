@@ -34,7 +34,6 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   const {
     dependencies: {
       start: { dataViews, share, streams },
-
     },
   } = useKibana();
   const { streamsRepositoryClient } = streams;

@@ -25,7 +25,6 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime, UI_SETTINGS } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-plugin/common';
 import type { GeoJsonProperties } from 'geojson';
 import { asyncMap } from '@kbn/std';
 import {
