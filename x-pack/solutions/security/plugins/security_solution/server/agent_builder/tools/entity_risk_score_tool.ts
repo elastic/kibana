@@ -75,7 +75,7 @@ export const entityRiskScoreTool = (): BuiltinToolDefinition<typeof entityRiskSc
       const alertsIndexPattern = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
       logger.debug(
-        `entity-risk-score tool called with identifierType: ${identifierType}, identifier: ${identifier}`
+        `${SECURITY_ENTITY_RISK_SCORE_TOOL_ID} tool called with identifierType: ${identifierType}, identifier: ${identifier}`
       );
 
       try {
@@ -140,7 +140,7 @@ export const entityRiskScoreTool = (): BuiltinToolDefinition<typeof entityRiskSc
           ],
         };
       } catch (error) {
-        logger.error(`Error in entity-risk-score tool: ${error.message}`);
+        logger.error(`Error in ${SECURITY_ENTITY_RISK_SCORE_TOOL_ID} tool: ${error.message}`);
         return {
           results: [
             {

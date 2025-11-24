@@ -33,7 +33,7 @@ export const securityLabsSearchTool = (): BuiltinToolDefinition<
     description: `Search and analyze Security Labs knowledge base content. Use this tool to find Security Labs articles about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names. Automatically filters to Security Labs content only and limits results to 10 articles.`,
     schema: securityLabsSearchSchema,
     handler: async ({ query: nlQuery }, { esClient, modelProvider, logger, events }) => {
-      logger.debug(`security-labs-search tool called with query: ${nlQuery}`);
+      logger.debug(`${SECURITY_LABS_SEARCH_TOOL_ID} tool called with query: ${nlQuery}`);
 
       try {
         // Enhance query to filter by Security Labs resource and limit results
@@ -50,7 +50,7 @@ export const securityLabsSearchTool = (): BuiltinToolDefinition<
 
         return { results };
       } catch (error) {
-        logger.error(`Error in security-labs-search tool: ${error.message}`);
+        logger.error(`Error in ${SECURITY_LABS_SEARCH_TOOL_ID} tool: ${error.message}`);
         return {
           results: [
             {

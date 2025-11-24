@@ -416,7 +416,9 @@ export const evaluateAlertTool = (): BuiltinToolDefinition<typeof evaluateAlertS
 CRITICAL INSTRUCTION: This tool returns a COMPLETE FINAL ANSWER in the 'answer' field. You MUST return this answer EXACTLY as-is without any modification, summarization, or additional commentary. Copy the entire 'answer' field content verbatim and return it directly to the user. Do NOT synthesize, summarize, or rephrase this content.`,
     schema: evaluateAlertSchema,
     handler: async ({ alertData }, { request, esClient, modelProvider, logger, events }) => {
-      logger.debug(`evaluate-alert tool called with alert data length: ${alertData.length}`);
+      logger.debug(
+        `${EVALUATE_ALERT_TOOL_ID} tool called with alert data length: ${alertData.length}`
+      );
 
       try {
         const spaceId = getSpaceIdFromRequest(request);
@@ -474,7 +476,7 @@ CRITICAL INSTRUCTION: This tool returns a COMPLETE FINAL ANSWER in the 'answer' 
         };
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error(`Error in evaluate-alert tool: ${errorMessage}`);
+        logger.error(`Error in ${EVALUATE_ALERT_TOOL_ID} tool: ${errorMessage}`);
         return {
           results: [
             {

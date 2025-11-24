@@ -45,7 +45,9 @@ export const alertsTool = (): BuiltinToolDefinition<typeof alertsSchema> => {
       const spaceId = getSpaceIdFromRequest(request);
       const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
-      logger.debug(`alerts tool called with query: ${nlQuery}, index: ${searchIndex}`);
+      logger.debug(
+        `${SECURITY_ALERTS_TOOL_ID} tool called with query: ${nlQuery}, index: ${searchIndex}`
+      );
 
       try {
         // Generate ES|QL query with automatic KEEP field filtering
@@ -107,7 +109,7 @@ export const alertsTool = (): BuiltinToolDefinition<typeof alertsSchema> => {
 
         return { results };
       } catch (error) {
-        logger.error(`Error in alerts tool: ${error.message}`);
+        logger.error(`Error in ${SECURITY_ALERTS_TOOL_ID} tool: ${error.message}`);
         return {
           results: [
             {

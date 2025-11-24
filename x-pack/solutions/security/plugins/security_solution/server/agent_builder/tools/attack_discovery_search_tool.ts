@@ -34,7 +34,9 @@ export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
       const spaceId = getSpaceIdFromRequest(request);
 
       logger.debug(
-        `attack-discovery-search tool called with alertIds: ${JSON.stringify(alertIds)}`
+        `${SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID} tool called with alertIds: ${JSON.stringify(
+          alertIds
+        )}`
       );
 
       try {
@@ -83,7 +85,7 @@ export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
 
         return { results };
       } catch (error) {
-        logger.error(`Error in attack-discovery-search tool: ${error.message}`);
+        logger.error(`Error in ${SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID} tool: ${error.message}`);
         return {
           results: [
             {
