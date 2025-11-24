@@ -40,6 +40,10 @@ export type ScoutPage = Page & {
    * @returns A Promise that resolves once the the element with the css selector is focused, or an error occurs.
    */
   keyTo: (selector: string, key: string, maxElementsToTraverse?: number) => Promise<void>;
+
+  // @todo
+  checkA11y: () => Promise<void>;
+
   /**
    * Types text into an input field character by character with a specified delay between each character.
    * @param selector - The css selector for the input element.
