@@ -12,10 +12,10 @@ import { waffleStateSchema } from './waffle';
 
 describe('Waffle Schema', () => {
   const baseWaffleConfig = {
-    type: 'waffle' as const,
+    type: 'waffle',
     dataset: {
-      type: 'dataView' as const,
-      name: 'test-data-view',
+      type: 'dataView',
+      id: 'test-data-view',
     },
   };
 
@@ -29,14 +29,14 @@ describe('Waffle Schema', () => {
       ...baseWaffleConfig,
       metrics: [
         {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       ],
       group_by: [
         {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
         },
       ],
@@ -56,25 +56,25 @@ describe('Waffle Schema', () => {
       title: 'Sales Waffle',
       metrics: [
         {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'sales',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       ],
       group_by: [
         {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
         },
       ],
       legend: {
-        values: ['absolute' as const],
+        values: ['absolute'],
         truncate_after_lines: 2,
-        visible: 'show' as const,
-        size: 'medium' as const,
+        visible: 'show',
+        size: 'medium',
       },
       value_display: {
-        mode: 'percentage' as const,
+        mode: 'percentage',
         percent_decimals: 1,
       },
     };
@@ -92,14 +92,14 @@ describe('Waffle Schema', () => {
       ...baseWaffleConfig,
       metrics: [
         {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       ],
       group_by: [
         {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
         },
       ],
@@ -112,14 +112,14 @@ describe('Waffle Schema', () => {
 
   it('validates ESQL configuration', () => {
     const input = {
-      type: 'waffle' as const,
+      type: 'waffle',
       dataset: {
-        type: 'esql' as const,
+        type: 'esql',
         query: 'FROM my-index | STATS count() BY category',
       },
       metrics: {
         operation: 'value',
-        column: 'count' as const,
+        column: 'count',
       },
     };
 
@@ -133,12 +133,99 @@ describe('Waffle Schema', () => {
       metrics: [],
       group_by: [
         {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
         },
       ],
     };
 
     expect(() => waffleStateSchema.validate(input)).toThrow();
+  });
+
+  it('should work without group_by', () => {
+    const input = {
+      ...baseWaffleConfig,
+      metrics: [
+        {
+          operation: 'count',
+          field: 'test_field',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+      ],
+    };
+
+    const validated = waffleStateSchema.validate(input);
+    expect(validated).toEqual({
+      ...defaultValues,
+      ...input,
+    });
+  });
+
+  it('throws with an empty array of group_by dimension', () => {
+    const input = {
+      ...baseWaffleConfig,
+      metrics: [
+        {
+          operation: 'count',
+          field: 'test_field',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+      ],
+      group_by: [],
+    };
+
+    expect(() => waffleStateSchema.validate(input)).toThrow();
+  });
+
+  it('throws for invalid metric operation', () => {
+    const input = {
+      ...baseWaffleConfig,
+      metrics: [
+        {
+          operation: 'invalid_operation',
+          field: 'test_field',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+      ],
+      group_by: [
+        {
+          operation: 'value',
+          column: 'category',
+        },
+      ],
+    };
+
+    expect(() => waffleStateSchema.validate(input)).toThrow();
+  });
+
+  it('should work with multiple metrics', () => {
+    const input = {
+      ...baseWaffleConfig,
+      metrics: [
+        {
+          operation: 'count',
+          field: 'test_field',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        {
+          operation: 'sum',
+          field: 'another_field',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+      ],
+      group_by: [
+        {
+          operation: 'terms',
+          fields: ['category'],
+        },
+      ],
+    };
+
+    const validated = waffleStateSchema.validate(input);
+    expect(validated).toEqual({
+      ...defaultValues,
+      ...input,
+      group_by: [{ ...input.group_by[0], size: 5 }],
+    });
   });
 });

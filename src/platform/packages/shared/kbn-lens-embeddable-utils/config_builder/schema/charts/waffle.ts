@@ -37,150 +37,243 @@ import {
 } from '../bucket_ops';
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 
+/**
+ * Shared visualization options for waffle charts including legend and value display
+ */
 const partitionStateSharedOptionsSchema = {
   legend: schema.maybe(
-    schema.object({
-      values: schema.maybe(
-        schema.arrayOf(schema.oneOf([schema.literal('absolute')]), { minSize: 1, maxSize: 1 })
-      ),
-      truncate_after_lines: schema.maybe(
-        schema.number({
-          defaultValue: 1,
-          min: 1,
-          max: 10,
-        })
-      ),
-      visible: schema.maybe(
-        schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')])
-      ),
-      size: schema.maybe(
-        schema.oneOf([
-          schema.literal('auto'),
-          schema.literal('small'),
-          schema.literal('medium'),
-          schema.literal('large'),
-          schema.literal('xlarge'),
-        ])
-      ),
-    })
+    schema.object(
+      {
+        values: schema.maybe(
+          schema.arrayOf(
+            schema.oneOf([schema.literal('absolute')], {
+              meta: {
+                description:
+                  'Legend value display mode: absolute (show raw metric values in legend)',
+              },
+            }),
+            { minSize: 1, maxSize: 1 }
+          )
+        ),
+        truncate_after_lines: schema.maybe(
+          schema.number({
+            defaultValue: 1,
+            min: 1,
+            max: 10,
+            meta: { description: 'Maximum lines before truncating legend items (1-10)' },
+          })
+        ),
+        visible: schema.maybe(
+          schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')], {
+            meta: { description: 'Legend visibility: auto, show, or hide' },
+          })
+        ),
+        size: schema.maybe(
+          schema.oneOf(
+            [
+              schema.literal('auto'),
+              schema.literal('small'),
+              schema.literal('medium'),
+              schema.literal('large'),
+              schema.literal('xlarge'),
+            ],
+            { meta: { description: 'Legend size: auto, small, medium, large, or xlarge' } }
+          )
+        ),
+      },
+      { meta: { description: 'Legend configuration for waffle chart' } }
+    )
   ),
   value_display: schema.maybe(
-    schema.object({
-      mode: schema.oneOf([
-        schema.literal('hidden'),
-        schema.literal('absolute'),
-        schema.literal('percentage'),
-      ]),
-      percent_decimals: schema.maybe(
-        schema.number({
-          defaultValue: 2,
-          min: 0,
-          max: 10,
-        })
-      ),
-    })
+    schema.object(
+      {
+        mode: schema.oneOf(
+          [schema.literal('hidden'), schema.literal('absolute'), schema.literal('percentage')],
+          { meta: { description: 'Value display mode: hidden, absolute, or percentage' } }
+        ),
+        percent_decimals: schema.maybe(
+          schema.number({
+            defaultValue: 2,
+            min: 0,
+            max: 10,
+            meta: { description: 'Decimal places for percentage display (0-10)' },
+          })
+        ),
+      },
+      { meta: { description: 'Configuration for displaying values in chart cells' } }
+    )
   ),
 };
 
-const partitionStatePrimaryMetricOptionsSchema = schema.object({
-  /**
-   * Color configuration
-   */
-  color: schema.maybe(staticColorSchema),
-});
+/**
+ * Color configuration for primary metric in waffle chart
+ */
+const partitionStatePrimaryMetricOptionsSchema = schema.object(
+  {
+    color: schema.maybe(staticColorSchema),
+  },
+  { meta: { description: 'Primary metric visual options including static color' } }
+);
 
-const partitionStateBreakdownByOptionsSchema = schema.object({
-  /**
-   * Color configuration
-   */
-  color: schema.maybe(schema.oneOf([colorByValueSchema, colorMappingSchema])),
-  /**
-   * Collapse by function. This parameter is used to collapse the
-   * metric chart when the number of columns is bigger than the
-   * number of columns specified in the columns parameter.
-   * Possible values:
-   * - 'avg': Collapse by average
-   * - 'sum': Collapse by sum
-   * - 'max': Collapse by max
-   * - 'min': Collapse by min
-   * - 'none': Do not collapse
-   */
-  collapse_by: schema.maybe(collapseBySchema),
-});
-
-export const waffleStateSchemaNoESQL = schema.object({
-  type: schema.literal('waffle'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  ...partitionStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metrics: schema.arrayOf(
-    schema.oneOf([
-      // oneOf allows only 12 items
-      // so break down metrics based on the type: field-based, reference-based, formula-like
-      schema.oneOf([
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, metricOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, sumMetricOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
-      ]),
-      schema.oneOf([
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, movingAverageOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
-      ]),
-      schema.oneOf([
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
-      ]),
-    ]),
-    { minSize: 1 }
-  ),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  group_by: schema.arrayOf(
-    schema.maybe(
-      schema.oneOf([
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketDateHistogramOperationSchema]),
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketHistogramOperationSchema]),
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketFiltersOperationSchema]),
-      ])
+/**
+ * Breakdown configuration including color mapping and collapse behavior
+ */
+const partitionStateBreakdownByOptionsSchema = schema.object(
+  {
+    color: schema.maybe(
+      schema.oneOf([colorByValueSchema, colorMappingSchema], {
+        meta: {
+          description: 'Color configuration: by value (palette-based) or mapping (custom rules)',
+        },
+      })
     ),
-    { minSize: 1 }
-  ),
-});
+    collapse_by: schema.maybe(collapseBySchema),
+  },
+  { meta: { description: 'Breakdown dimension options with color and collapse configuration' } }
+);
 
-const waffleStateSchemaESQL = schema.object({
-  type: schema.literal('waffle'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  ...partitionStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metrics: schema.allOf([
-    schema.object(genericOperationOptionsSchema),
-    partitionStatePrimaryMetricOptionsSchema,
-    esqlColumnSchema,
-  ]),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
-});
+/**
+ * Waffle chart configuration for standard (non-ES|QL) queries
+ */
+export const waffleStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('waffle'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    ...partitionStateSharedOptionsSchema,
+    metrics: schema.arrayOf(
+      schema.oneOf(
+        [
+          schema.oneOf(
+            [
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
+              schema.allOf([
+                partitionStatePrimaryMetricOptionsSchema,
+                uniqueCountMetricOperationSchema,
+              ]),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, metricOperationSchema]),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, sumMetricOperationSchema]),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
+              schema.allOf([
+                partitionStatePrimaryMetricOptionsSchema,
+                percentileRanksOperationSchema,
+              ]),
+            ],
+            {
+              meta: {
+                description:
+                  'Field-based metrics: count, unique_count, average, min, max, median, sum, standard_deviation, last_value, percentile, percentile_rank',
+              },
+            }
+          ),
+          schema.oneOf(
+            [
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
+              schema.allOf([
+                partitionStatePrimaryMetricOptionsSchema,
+                movingAverageOperationSchema,
+              ]),
+              schema.allOf([
+                partitionStatePrimaryMetricOptionsSchema,
+                cumulativeSumOperationSchema,
+              ]),
+              schema.allOf([partitionStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
+            ],
+            {
+              meta: {
+                description:
+                  'Reference-based metrics: differences, moving_average, cumulative_sum, counter_rate',
+              },
+            }
+          ),
+          schema.oneOf(
+            [
+              schema.allOf([
+                partitionStatePrimaryMetricOptionsSchema,
+                staticOperationDefinitionSchema,
+              ]),
+              schema.allOf([
+                partitionStatePrimaryMetricOptionsSchema,
+                formulaOperationDefinitionSchema,
+              ]),
+            ],
+            { meta: { description: 'Calculated metrics: static_value, formula' } }
+          ),
+        ],
+        { meta: { description: 'Metric operations for waffle chart primary value' } }
+      ),
+      { minSize: 1, meta: { description: 'Array of metric configurations (minimum 1)' } }
+    ),
+    group_by: schema.maybe(
+      schema.arrayOf(
+        schema.maybe(
+          schema.oneOf(
+            [
+              schema.allOf([
+                partitionStateBreakdownByOptionsSchema,
+                bucketDateHistogramOperationSchema,
+              ]),
+              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
+              schema.allOf([
+                partitionStateBreakdownByOptionsSchema,
+                bucketHistogramOperationSchema,
+              ]),
+              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
+              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketFiltersOperationSchema]),
+            ],
+            {
+              meta: {
+                description:
+                  'Breakdown operations: date_histogram, terms, histogram, range, filters',
+              },
+            }
+          )
+        ),
+        { minSize: 1, meta: { description: 'Array of breakdown dimensions (minimum 1)' } }
+      )
+    ),
+  },
+  { meta: { description: 'Waffle chart configuration for standard queries' } }
+);
 
-export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL]);
+/**
+ * Waffle chart configuration for ES|QL queries
+ */
+const waffleStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('waffle'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    ...partitionStateSharedOptionsSchema,
+    metrics: schema.allOf(
+      [
+        schema.object(genericOperationOptionsSchema),
+        partitionStatePrimaryMetricOptionsSchema,
+        esqlColumnSchema,
+      ],
+      { meta: { description: 'ES|QL column reference for primary metric' } }
+    ),
+    group_by: schema.maybe(
+      schema.arrayOf(
+        schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
+          meta: { description: 'ES|QL column reference for breakdown dimension' },
+        }),
+        { minSize: 1, meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' } }
+      )
+    ),
+  },
+  { meta: { description: 'Waffle chart configuration for ES|QL queries' } }
+);
+
+/**
+ * Complete waffle chart configuration supporting both standard and ES|QL queries
+ */
+export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
+  meta: { description: 'Waffle chart state: standard query or ES|QL query' },
+});
 
 export type WaffleState = TypeOf<typeof waffleStateSchema>;
 export type WaffleStateNoESQL = TypeOf<typeof waffleStateSchemaNoESQL>;
