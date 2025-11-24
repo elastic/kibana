@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/connector-schemas'
   - '@kbn/connector-specs'
+  - '@kbn/response-ops-form-generator'
 tags:
   - plugin
   - prod
