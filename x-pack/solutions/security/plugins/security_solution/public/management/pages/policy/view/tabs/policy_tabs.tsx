@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -93,6 +94,7 @@ export const PolicyTabs = React.memo(() => {
   const history = useHistory();
   const http = useHttp();
   const toasts = useToasts();
+  const theme = useEuiTheme();
 
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
@@ -658,6 +660,13 @@ export const PolicyTabs = React.memo(() => {
         selectedTab={currentSelectedTab}
         size="l"
         onTabClick={onTabClickHandler}
+        css={css`
+          & [role='tablist'] {
+            flex-wrap: wrap;
+            row-gap: ${theme.euiTheme.size.xs};
+            column-gap: ${theme.euiTheme.size.l};
+          }
+        `}
       />
     </>
   );
