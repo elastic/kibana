@@ -8,15 +8,21 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import {
   type AttackDiscovery,
+  getAttackDiscoveryMarkdown,
   replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
+import { AttachmentType } from '@kbn/onechat-common/attachments';
 import React, { useMemo } from 'react';
 
+import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../../agent_builder/components/prompts';
 import { SECURITY_FEATURE_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../attack_discovery_markdown_formatter';
 import { ViewInAiAssistant } from '../view_in_ai_assistant';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../../agent_builder/hooks/use_agent_builder_attachment';
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -68,6 +74,23 @@ const ActionableSummaryComponent: React.FC<Props> = ({
   const entitySummaryOrTitle =
     entitySummary != null && entitySummary.length > 0 ? entitySummary : title;
 
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const attackDiscoveryWithOriginalValues = useMemo(
+    () =>
+      // Agent builder is not anonymized
+      getAttackDiscoveryMarkdown({
+        attackDiscovery,
+        replacements,
+      }),
+    [attackDiscovery, replacements]
+  );
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
+    attachmentType: AttachmentType.attack_discovery,
+    attachmentData: { attackDiscovery: attackDiscoveryWithOriginalValues },
+    attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
+  });
+
   return (
     <EuiPanel color="subdued" data-test-subj="actionableSummary">
       <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
@@ -79,11 +102,15 @@ const ActionableSummaryComponent: React.FC<Props> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant
-            compact={true}
-            attackDiscovery={attackDiscovery}
-            replacements={replacements}
-          />
+          {isAgentBuilderEnabled ? (
+            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} size="xs" />
+          ) : (
+            <ViewInAiAssistant
+              compact={true}
+              attackDiscovery={attackDiscovery}
+              replacements={replacements}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

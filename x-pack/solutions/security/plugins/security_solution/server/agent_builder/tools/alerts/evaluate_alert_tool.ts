@@ -14,10 +14,10 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateEsql } from '@kbn/onechat-genai-utils/tools';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
-import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../../common/constants';
 import { getRiskIndex } from '../../../../common/search_strategy/security_solution/risk_score/common';
 import { getSpaceIdFromRequest } from '../helpers';
-import { ESSENTIAL_ALERT_FIELDS, securityTool } from '../constants';
+import { securityTool } from '../constants';
 
 const evaluateAlertSchema = z.object({
   alertData: z

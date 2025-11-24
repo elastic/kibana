@@ -6,15 +6,20 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
+import { ALERT_ATTACHMENT_PROMPT } from '../../../agent_builder/components/prompts';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../shared/context';
 import { useAssistant } from './hooks/use_assistant';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import { TakeActionButton } from '../shared/components/take_action_button';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agent_builder_attachment';
+import { getRawData, filterAndStringifyAlertData } from '../../../assistant/helpers';
 
 export const ASK_AI_ASSISTANT = i18n.translate(
   'xpack.securitySolution.ease.flyout.right.footer.askAIAssistant',
@@ -40,6 +45,18 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
     dataFormattedForFieldBrowser,
     isAlert,
   });
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+
+  const alertData = useMemo(() => {
+    const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
+    return filterAndStringifyAlertData(rawData);
+  }, [dataFormattedForFieldBrowser]);
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
+    attachmentType: 'alert',
+    attachmentData: { alert: alertData },
+    attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
+  });
 
   if (isRulePreview) return null;
 
@@ -49,7 +66,14 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           {showAssistant && (
             <EuiFlexItem grow={false}>
-              <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
+              {isAgentBuilderEnabled ? (
+                <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+              ) : (
+                <NewChatByTitle
+                  showAssistantOverlay={showAssistantOverlay}
+                  text={ASK_AI_ASSISTANT}
+                />
+              )}
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>

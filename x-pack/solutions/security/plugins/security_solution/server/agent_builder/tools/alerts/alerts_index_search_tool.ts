@@ -9,9 +9,9 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { generateEsql } from '@kbn/onechat-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../../common/constants';
 import { getSpaceIdFromRequest } from '../helpers';
-import { ESSENTIAL_ALERT_FIELDS, securityTool } from '../constants';
+import { securityTool } from '../constants';
 
 const alertsIndexSearchSchema = z.object({
   query: z

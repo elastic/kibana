@@ -13,9 +13,9 @@ import { getToolResultId } from '@kbn/onechat-server/tools';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../common/entity_analytics/types';
-import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import { getSpaceIdFromRequest } from './helpers';
-import { ESSENTIAL_ALERT_FIELDS, securityTool } from './constants';
+import { securityTool } from './constants';
 
 const entityRiskScoreSchema = z.object({
   identifierType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
