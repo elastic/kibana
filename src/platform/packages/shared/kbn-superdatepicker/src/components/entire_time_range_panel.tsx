@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback } from 'react';
-import { EuiLink, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useState, useCallback, useRef } from 'react';
+import {
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { EntireTimeRangePanelProps } from '../types';
 
 export const EntireTimeRangePanel = ({
@@ -17,12 +25,14 @@ export const EntireTimeRangePanel = ({
   getEntireTimeRange,
 }: EntireTimeRangePanelProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleApplyTime = useCallback(async () => {
     try {
+      abortControllerRef.current = new AbortController();
       setIsLoading(true);
 
-      const response = await getEntireTimeRange();
+      const response = await getEntireTimeRange(abortControllerRef.current.signal);
 
       if (response?.start && response?.end) {
         onTimeChange({
@@ -33,11 +43,20 @@ export const EntireTimeRangePanel = ({
         });
       }
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       return;
     } finally {
       setIsLoading(false);
     }
   }, [onTimeChange, getEntireTimeRange]);
+
+  const handleAbort = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
 
   return (
     <>
@@ -52,9 +71,25 @@ export const EntireTimeRangePanel = ({
           </EuiLink>
         </EuiFlexItem>
         {isLoading && (
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="s" />
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                onClick={handleAbort}
+                aria-label={i18n.translate(
+                  'kbnSuperDatePicker.entireTimeRangePanel.cancelRequestAriaLabel',
+                  {
+                    defaultMessage: 'Cancel request',
+                  }
+                )}
+                size="xs"
+                color="danger"
+              />
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
     </>

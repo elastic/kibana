@@ -10,9 +10,9 @@
 import type { EuiSuperDatePickerProps } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 
-export type GetEntireTimeRange = () =>
-  | Promise<{ start: string; end: string }>
-  | { start: string; end: string };
+export type GetEntireTimeRange = (
+  signal?: AbortSignal
+) => Promise<{ start: string; end: string }> | { start: string; end: string };
 
 export interface KbnSuperDatePickerProps extends EuiSuperDatePickerProps {
   uiSettings?: CoreStart['uiSettings'];
