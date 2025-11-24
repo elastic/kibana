@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StickyControlState } from '@kbn/controls-schemas';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
@@ -57,11 +58,10 @@ describe('transformDashboardOut', () => {
       controlGroupInput: {
         controls: [
           {
-            anyKey: 'some value',
-            id: 'foo',
-            // @ts-expect-error Test type
+            config: { anyKey: 'some value' },
+            uid: 'foo',
             type: 'type1',
-          },
+          } as unknown as StickyControlState,
         ],
       },
       description: 'my description',
@@ -138,14 +138,14 @@ describe('transformDashboardOut', () => {
       controlGroupInput: {
         controls: [
           {
-            anyKey: 'some value',
-            id: 'foo',
+            uid: 'foo',
             grow: false,
             width: 'small',
-            useGlobalFilters: false,
-            // @ts-expect-error Test type
+            config: {
+              anyKey: 'some value',
+            },
             type: 'type1',
-          },
+          } as unknown as StickyControlState,
         ],
       },
       description: 'description',
