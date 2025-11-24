@@ -78,6 +78,7 @@ export class AiopsPlugin
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
+      transformOutInjectsReferences: true,
       transformIn: logRateTransformIn,
       transformOut: logRateTransformOut,
     });
