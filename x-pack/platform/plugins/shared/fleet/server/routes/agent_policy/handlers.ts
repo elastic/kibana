@@ -379,7 +379,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       request.body.supports_agentless
     ) {
       throw new FleetError(
-        'Creating agentless agent policies should be done through the agentless policies API.'
+        'To create agentless agent policies, use the Fleet agentless policies API.'
       );
     }
 
