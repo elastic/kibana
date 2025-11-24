@@ -26,6 +26,7 @@ import { OverviewSection } from './overview_section';
 import { ServicesSection } from './services_section';
 import { MigrationSection } from './migration_section';
 import { DisconnectClusterModal } from './disconnect_cluster_modal';
+import { apiService } from '../../../lib/api';
 
 interface ClusterDetails {
   id: string;
@@ -61,14 +62,16 @@ interface ClusterDetails {
 export interface ConnectedServicesPageProps {
   clusterDetails: ClusterDetails;
   onRefetch: () => void;
+  onDisconnect: () => void;
 }
 
 export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   clusterDetails,
   onRefetch,
+  onDisconnect,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications } = useCloudConnectedAppContext();
+  const { notifications } = useCloudConnectedAppContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -87,30 +90,33 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
 
   const handleDisconnectCluster = async () => {
     setIsDisconnecting(true);
-    try {
-      await http.delete('/internal/cloud_connect/cluster');
 
-      notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.cloudConnect.connectedServices.disconnect.successTitle', {
-          defaultMessage: 'Cluster disconnected successfully',
-        }),
-        text: i18n.translate('xpack.cloudConnect.connectedServices.disconnect.successMessage', {
-          defaultMessage: 'Your cluster has been disconnected from Cloud Connect.',
-        }),
-      });
+    const { error } = await apiService.disconnectCluster();
 
-      closeDisconnectModal();
-
-      // Reload the page to show onboarding view
-      window.location.reload();
-    } catch (error) {
-      notifications.toasts.addError(error as Error, {
+    if (error) {
+      notifications.toasts.addDanger({
         title: i18n.translate('xpack.cloudConnect.connectedServices.disconnect.errorTitle', {
           defaultMessage: 'Failed to disconnect cluster',
         }),
+        text: error.message,
       });
       setIsDisconnecting(false);
+      return;
     }
+
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.cloudConnect.connectedServices.disconnect.successTitle', {
+        defaultMessage: 'Cluster disconnected successfully',
+      }),
+      text: i18n.translate('xpack.cloudConnect.connectedServices.disconnect.successMessage', {
+        defaultMessage: 'Your cluster has been disconnected from Cloud Connect.',
+      }),
+    });
+
+    closeDisconnectModal();
+
+    // Clear cluster details to immediately show onboarding view
+    onDisconnect();
   };
 
   const actionsMenuItems = [

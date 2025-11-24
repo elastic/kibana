@@ -42,7 +42,6 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleConnect = async () => {
     if (!apiKey.trim()) {
@@ -51,7 +50,6 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
 
     setIsLoading(true);
     setError(null);
-    setSuccess(false);
 
     const { data, error: apiError } = await apiService.authenticate(apiKey.trim());
 
@@ -62,7 +60,6 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
     }
 
     if (data?.success) {
-      setSuccess(true);
       onConnect();
     }
 
@@ -108,8 +105,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
   };
 
   const step2 = {
-    // @ts-expect-error - title can also be a ReactNode but types don't reflect this
-    title: <>{STEP_2_TITLE}</>,
+    title: STEP_2_TITLE,
     titleSize: 'xs' as const,
     status: 'incomplete' as const,
     children: (
@@ -154,14 +150,6 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
             <EuiSpacer size="m" />
             <EuiCallOut title="Authentication failed" color="danger" iconType="error">
               <p>{error}</p>
-            </EuiCallOut>
-          </>
-        )}
-        {success && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut title="Successfully connected!" color="success" iconType="check">
-              <p>Your cluster has been authenticated and onboarded to Cloud Connect.</p>
             </EuiCallOut>
           </>
         )}
