@@ -234,7 +234,7 @@ export const ProjectHeader = ({
       content: '';
       position: absolute;
       top: 10px;
-      height: 30px;
+      bottom: 10px;
       width: ${euiTheme.border.width.thin};
       background-color: ${euiTheme.colors.borderBaseSubdued};
     }

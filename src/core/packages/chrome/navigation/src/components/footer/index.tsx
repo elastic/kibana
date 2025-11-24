@@ -20,12 +20,22 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 
 const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
   align-items: center;
-  border-top: ${theme.border.width.thin} solid ${theme.colors.borderBaseSubdued};
   display: flex;
+  position: relative;
   flex-direction: column;
   gap: ${theme.size.xs};
   justify-content: center;
   padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 8px;
+    right: 8px;
+    height: ${theme.border.width.thin};
+    background-color: ${theme.colors.borderBaseSubdued};
+  }
 `;
 
 export interface FooterProps {
