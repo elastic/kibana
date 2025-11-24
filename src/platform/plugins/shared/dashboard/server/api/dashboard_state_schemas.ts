@@ -97,10 +97,10 @@ export function getSectionSchema() {
       })
     ),
     grid: sectionGridSchema,
-    panels: schema.arrayOf(getPanelSchema(), {
+    panels: schema.maybe(schema.arrayOf(getPanelSchema(), {
       meta: { description: 'The panels that belong to the section.' },
       defaultValue: [],
-    }),
+    })),
     uid: schema.maybe(
       schema.string({
         meta: { description: 'The unique ID of the section.' },
