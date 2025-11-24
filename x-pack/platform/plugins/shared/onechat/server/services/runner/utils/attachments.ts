@@ -82,6 +82,6 @@ export const createToolConverter = ({
       tags: [] as string[],
     } as StaticToolRegistration;
     const internal = convertTool({ tool: converted, context, definition, cache });
-    return toExecutableTool({ tool: internal, request, runner });
+    return toExecutableTool({ tool: internal, request, runner, asInternal: true });
   };
 };

@@ -13,10 +13,10 @@ import type {
   ExecutableToolHandlerFn,
   ToolHandlerFn,
   ToolProvider,
+  InternalToolDefinition,
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../services/tools/types';
 import type { ToolRegistry } from '../services/tools/tool_registry';
-import type { InternalToolDefinition } from '../services/tools/tool_provider';
 
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
 export type ToolRegistryMock = jest.Mocked<ToolRegistry>;

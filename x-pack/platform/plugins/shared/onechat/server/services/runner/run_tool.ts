@@ -9,18 +9,17 @@ import type { ZodObject } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/onechat-common';
 import { createBadRequestError } from '@kbn/onechat-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import type { RunToolReturn, ToolHandlerContext, ToolHandlerReturn } from '@kbn/onechat-server';
 import type {
-  RunToolReturn,
   ScopedRunnerRunToolsParams,
-  ToolHandlerContext,
-  ToolHandlerReturn,
-} from '@kbn/onechat-server';
+  ScopedRunnerRunInternalToolParams,
+} from '@kbn/onechat-server/runner';
 import { createErrorResult } from '@kbn/onechat-server';
+import type { InternalToolDefinition } from '@kbn/onechat-server/tools';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import { ToolCallSource } from '../../telemetry';
 import { forkContextForToolRun, createToolEventEmitter, createToolProvider } from './utils';
 import type { RunnerManager } from './runner';
-import type { InternalToolDefinition } from '../tools/tool_provider';
 
 export const runTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams,
@@ -29,11 +28,15 @@ export const runTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   parentManager: RunnerManager;
 }): Promise<RunToolReturn> => {
-  const { toolId, toolParams } = toolExecutionParams;
+  const { trackingService, toolsService, request } = parentManager.deps;
+  const { toolId, ...scopedParams } = toolExecutionParams;
 
-  const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
-  const manager = parentManager.createChild(context);
-  const { toolsService, request, resultStore, trackingService } = manager.deps;
+  const toolRegistry = await toolsService.getRegistry({ request });
+  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
+    ToolType,
+    any,
+    ZodObject<any>
+  >;
 
   if (trackingService) {
     try {
@@ -43,12 +46,21 @@ export const runTool = async <TParams = Record<string, unknown>>({
     }
   }
 
-  const toolRegistry = await toolsService.getRegistry({ request });
-  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
-    ToolType,
-    any,
-    ZodObject<any>
-  >;
+  return runInternalTool({ toolExecutionParams: { ...scopedParams, tool }, parentManager });
+};
+
+export const runInternalTool = async <TParams = Record<string, unknown>>({
+  toolExecutionParams,
+  parentManager,
+}: {
+  toolExecutionParams: ScopedRunnerRunInternalToolParams<TParams>;
+  parentManager: RunnerManager;
+}): Promise<RunToolReturn> => {
+  const { tool, toolParams } = toolExecutionParams;
+
+  const context = forkContextForToolRun({ parentContext: parentManager.context, toolId: tool.id });
+  const manager = parentManager.createChild(context);
+  const { resultStore } = manager.deps;
 
   const { results } = await withExecuteToolSpan(
     tool.id,
@@ -58,12 +70,12 @@ export const runTool = async <TParams = Record<string, unknown>>({
       const validation = schema.safeParse(toolParams);
       if (validation.error) {
         throw createBadRequestError(
-          `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
+          `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
         );
       }
 
       const toolHandlerContext = await createToolHandlerContext<TParams>({
-        toolExecutionParams,
+        toolExecutionParams: { ...toolExecutionParams, toolId: tool.id },
         manager,
       });
 
