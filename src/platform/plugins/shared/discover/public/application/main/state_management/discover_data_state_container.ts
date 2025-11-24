@@ -30,7 +30,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
-import type { MultiMatchAnalysis } from '../../../../../data/common/search/search_source/query_analysis_utils';
+import type { MultiMatchAnalysis } from '@kbn/data-plugin/common/search/search_source/query_analysis_utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
