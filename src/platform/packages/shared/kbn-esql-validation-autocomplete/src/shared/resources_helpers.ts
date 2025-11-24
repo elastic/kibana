@@ -25,7 +25,7 @@ export const NOT_SUGGESTED_TYPES = ['unsupported'];
 export class QueryColumns {
   private static readonly cache = new Map<string, ESQLColumnData[]>();
   // Adding a max size to the cache to prevent unbounded memory growth
-  private static readonly MAX_CACHE_SIZE = 100;
+  private static readonly MAX_CACHE_SIZE = 200;
 
   /**
    * Retrieves from cache the columns for a given query, ignoring case.
