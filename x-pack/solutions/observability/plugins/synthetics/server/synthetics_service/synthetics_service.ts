@@ -112,8 +112,30 @@ export class SyntheticsService {
   public start(taskManager: TaskManagerStartContract) {
     if (this.config?.manifestUrl) {
       void this.scheduleSyncTask(taskManager);
+    } else {
+      const logLevel = this.shouldLogAsError() ? 'error' : 'debug';
+      const message =
+        'Synthetics sync task is not being scheduled because manifestUrl is not configured.';
+      this.logger[logLevel](message);
     }
     void this.setupIndexTemplates();
+  }
+
+  private shouldLogAsError(): boolean {
+    const cloud = this.server.cloud;
+    if (!cloud) {
+      return false; // Self-managed, use DEBUG
+    }
+    // Serverless deployments should log as ERROR
+    if (cloud.isServerlessEnabled) {
+      return true;
+    }
+    // ECH (stateful) deployments have deploymentId, should log as ERROR
+    if (cloud.isCloudEnabled && cloud.deploymentId) {
+      return true;
+    }
+    // ECE or self-managed, use DEBUG
+    return false;
   }
 
   public async setupIndexTemplates() {
