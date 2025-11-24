@@ -97,12 +97,10 @@ export function getSectionSchema() {
       })
     ),
     grid: sectionGridSchema,
-    panels: schema.maybe(
-      schema.arrayOf(getPanelSchema(), {
-        meta: { description: 'The panels that belong to the section.' },
-        defaultValue: [],
-      })
-    ),
+    panels: schema.arrayOf(getPanelSchema(), {
+      meta: { description: 'The panels that belong to the section.' },
+      defaultValue: [],
+    }),
     uid: schema.maybe(
       schema.string({
         meta: { description: 'The unique ID of the section.' },
@@ -163,9 +161,11 @@ export function getDashboardStateSchema() {
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
     options: schema.maybe(optionsSchema),
-    panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
-      defaultValue: [],
-    }),
+    panels: schema.maybe(
+      schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
+        defaultValue: [],
+      })
+    ),
     query: schema.maybe(querySchema),
     refreshInterval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(
