@@ -23,7 +23,9 @@ const casesSchema = z.object({
     ),
   query: z
     .string()
-    .describe('Natural language query describing which cases to retrieve (e.g., "cases updated in the last week", "cases from November 2nd")'),
+    .describe(
+      'Natural language query describing which cases to retrieve (e.g., "cases updated in the last week", "cases from November 2nd")'
+    ),
 });
 
 const getUsername = (user: any): string | null => {
@@ -48,7 +50,8 @@ const normalizeTimeRange = (
   let startDate: Date;
   if (start) {
     // If no year is specified, assume current year
-    const startStr = start.includes('T') && !start.match(/^\d{4}/) ? `${currentYear}-${start}` : start;
+    const startStr =
+      start.includes('T') && !start.match(/^\d{4}/) ? `${currentYear}-${start}` : start;
     startDate = new Date(startStr);
     if (isNaN(startDate.getTime())) {
       logger.warn(`Invalid start date: ${start}, using default`);
@@ -108,8 +111,12 @@ The 'query' parameter should be a natural language description of which cases to
 - "cases from November 2nd"
 - "cases updated between January 1st and January 15th"
 - "recent cases"
+- "cases with alert ID abc-123-def"
+- "find cases containing alert xyz"
 
 The optional 'owner' parameter filters cases by owner: "cases" (Stack Management/General Cases), "observability" (Observability), or "securitySolution" (Elastic Security). If not provided, returns all cases the user has access to.
+
+If the query mentions a specific alert ID, the tool will find all cases that contain that alert. Otherwise, it will search for cases based on date ranges or other criteria.
 
 Returns cases with detailed information including id, title, description, status, severity, tags, assignees, observables, total alerts/comments, and recent comments. Each case includes a URL for direct access.
 
@@ -117,7 +124,7 @@ Returns cases with detailed information including id, title, description, status
     schema: casesSchema,
     handler: async ({ owner, query }, { request, logger, modelProvider }) => {
       try {
-        // Parse natural language query to extract date ranges
+        // Parse natural language query to extract date ranges and alert IDs
         const model = await modelProvider.getDefaultModel();
         const parsedQuery = await parseCasesQuery({
           nlQuery: query,
@@ -134,15 +141,192 @@ Returns cases with detailed information including id, title, description, status
 
         if (!casesPlugin) {
           logger.warn('[Cases Tool] Cases plugin not available, returning empty results');
-          return createEmptyResults(
-            timeRange.start,
-            timeRange.end,
-            'Cases plugin not available'
-          );
+          return createEmptyResults(timeRange.start, timeRange.end, 'Cases plugin not available');
         }
 
         // Get cases client
         const casesClient = await casesPlugin.getCasesClientWithRequest(request);
+
+        // Check if query is asking for cases by alert ID
+        if (parsedQuery.alertId) {
+          try {
+            logger.info(`[Cases Tool] Querying cases by alert ID: ${parsedQuery.alertId}`);
+            const relatedCases = await casesClient.cases.getCasesByAlertID({
+              alertID: parsedQuery.alertId,
+              options: owner ? { owner } : {},
+            });
+
+            if (relatedCases.length === 0) {
+              return {
+                results: [
+                  {
+                    type: ToolResultType.other,
+                    data: {
+                      cases: [],
+                      total: 0,
+                      start: timeRange.start,
+                      end: timeRange.end,
+                      message: `No cases found containing alert ID: ${parsedQuery.alertId}`,
+                    },
+                  },
+                ],
+              };
+            }
+
+            // Fetch full case details for each related case
+            const casesWithDetails = await Promise.all(
+              relatedCases.map(async (relatedCase: any) => {
+                try {
+                  const fullCase = await casesClient.cases.get({
+                    id: relatedCase.id,
+                    includeComments: false,
+                  });
+                  return fullCase;
+                } catch (error) {
+                  logger.warn(
+                    `[Cases Tool] Failed to fetch full details for case ${relatedCase.id}: ${error}`
+                  );
+                  // Return minimal case info if full fetch fails
+                  return {
+                    id: relatedCase.id,
+                    title: relatedCase.title,
+                    description: relatedCase.description,
+                    status: relatedCase.status,
+                    severity: null,
+                    owner: '',
+                    tags: [],
+                    assignees: [],
+                    observables: [],
+                    total_observables: 0,
+                    totalAlerts: relatedCase.totals.alerts,
+                    totalComment: relatedCase.totals.userComments,
+                    created_at: relatedCase.createdAt,
+                    createdBy: null,
+                    updated_at: null,
+                    updatedBy: null,
+                  };
+                }
+              })
+            );
+
+            // Fetch comments for each case in parallel
+            const casesWithComments = await Promise.all(
+              casesWithDetails.map(async (caseItem) => {
+                try {
+                  const commentsResponse = await casesClient.attachments.find({
+                    caseID: caseItem.id,
+                    findQueryParams: {
+                      page: 1,
+                      perPage: 10,
+                      sortOrder: 'desc',
+                    },
+                  });
+
+                  const commentSummaries = (commentsResponse.comments || [])
+                    .filter((att: any) => att.type === 'user')
+                    .slice(0, 5)
+                    .map((comment: any) => ({
+                      id: comment.id,
+                      comment: comment.comment?.substring(0, 200) || '',
+                      created_by: getUsername(comment.createdBy || comment.created_by),
+                      created_at: comment.createdAt || comment.created_at || null,
+                    }));
+
+                  return {
+                    case: caseItem,
+                    comments: commentSummaries,
+                    totalComments: commentsResponse.total || 0,
+                  };
+                } catch (error) {
+                  logger.warn(
+                    `[Cases Tool] Failed to fetch comments for case ${caseItem.id}: ${error}`
+                  );
+                  return {
+                    case: caseItem,
+                    comments: [],
+                    totalComments: 0,
+                  };
+                }
+              })
+            );
+
+            // Get core services for generating case URLs
+            const [, pluginsStart] = await coreSetup.getStartServices();
+            const spacesPlugin = pluginsStart.spaces;
+
+            // Format cases data with rich details, including URLs
+            const casesData = casesWithComments.map(
+              ({ case: caseItem, comments, totalComments }) => {
+                // Generate case URL based on owner
+                const spaceId = spacesPlugin?.spacesService.getSpaceId(request) ?? 'default';
+
+                // Determine app route based on owner
+                let appRoute = '/app/management/insightsAndAlerting'; // default for 'cases' owner
+                if (caseItem.owner === 'securitySolution') {
+                  appRoute = '/app/security';
+                } else if (caseItem.owner === 'observability') {
+                  appRoute = '/app/observability';
+                }
+
+                const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
+                const caseUrl = `${spacePath}${appRoute}/cases/${caseItem.id}`;
+
+                return {
+                  id: caseItem.id,
+                  title: caseItem.title,
+                  description: caseItem.description || null,
+                  status: caseItem.status,
+                  severity: caseItem.severity || null,
+                  owner: caseItem.owner,
+                  tags: caseItem.tags || [],
+                  assignees: caseItem.assignees?.map((a: any) => a.uid || a.username || a) || [],
+                  observables_count:
+                    caseItem.total_observables ?? caseItem.observables?.length ?? 0,
+                  observables: (caseItem.observables || []).slice(0, 5).map((obs: any) => ({
+                    type: obs.typeKey || obs.type || null,
+                    value: obs.value || null,
+                  })),
+                  total_alerts: caseItem.totalAlerts || 0,
+                  total_comments: totalComments,
+                  created_by: getUsername(caseItem.createdBy || caseItem.created_by),
+                  created_at: caseItem.created_at || null,
+                  updated_by: getUsername(caseItem.updatedBy || caseItem.updated_by),
+                  updated_at: caseItem.updated_at || caseItem.created_at || null,
+                  comments_summary: comments,
+                  url: caseUrl,
+                };
+              }
+            );
+
+            // Return detailed case information
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    total: casesData.length,
+                    cases: casesData,
+                    start: timeRange.start,
+                    end: timeRange.end,
+                    message: `Found ${casesData.length} case(s) containing alert ID: ${parsedQuery.alertId}`,
+                  },
+                },
+              ],
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.error(
+              `[Cases Tool] Error fetching cases by alert ID ${parsedQuery.alertId}: ${errorMessage}`
+            );
+            return {
+              results: [
+                createErrorResult(
+                  `Error fetching cases for alert ID ${parsedQuery.alertId}: ${errorMessage}`
+                ),
+              ],
+            };
+          }
+        }
 
         // Use Cases API search
         const searchParams: any = {
@@ -171,7 +355,7 @@ Returns cases with detailed information including id, title, description, status
           }
 
           // Filter cases by updatedAt date range
-          const pageFilteredCases = searchResult.cases.filter((caseItem) => {
+          const pageFilteredCases = searchResult.cases.filter((caseItem: any) => {
             const timestamp = getCaseTimestamp(caseItem);
             if (timestamp === null) {
               logger.warn(
@@ -242,15 +426,14 @@ Returns cases with detailed information including id, title, description, status
         );
 
         // Get core services for generating case URLs
-        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+        const [, pluginsStart] = await coreSetup.getStartServices();
         const spacesPlugin = pluginsStart.spaces;
 
         // Format cases data with rich details, including URLs
         const casesData = casesWithComments.map(({ case: caseItem, comments, totalComments }) => {
           // Generate case URL based on owner
           const spaceId = spacesPlugin?.spacesService.getSpaceId(request) ?? 'default';
-          const publicBaseUrl = coreStart.http.basePath.publicBaseUrl || '';
-          
+
           // Determine app route based on owner
           let appRoute = '/app/management/insightsAndAlerting'; // default for 'cases' owner
           if (caseItem.owner === 'securitySolution') {
@@ -258,7 +441,7 @@ Returns cases with detailed information including id, title, description, status
           } else if (caseItem.owner === 'observability') {
             appRoute = '/app/observability';
           }
-          
+
           const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
           const caseUrl = `${spacePath}${appRoute}/cases/${caseItem.id}`;
 
@@ -303,9 +486,7 @@ Returns cases with detailed information including id, title, description, status
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error(`[Cases Tool] Error in cases tool: ${errorMessage}`, {
-          error: error instanceof Error ? error.stack : undefined,
-        });
+        logger.error(`[Cases Tool] Error in cases tool: ${errorMessage}`);
         return {
           results: [createErrorResult(`Error fetching cases: ${errorMessage}`)],
         };
@@ -314,4 +495,3 @@ Returns cases with detailed information including id, title, description, status
     tags: ['cases'],
   };
 };
-
