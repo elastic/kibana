@@ -544,7 +544,7 @@ describe('EntityStoreCrudClient', () => {
           total: { value: 0, relation: 'eq' },
           hits: [],
         },
-      } as SearchResponse<Entity>);
+      } as unknown as SearchResponse<Entity>);
 
       await expect(async () => client.getEntity('host', 'host-id')).rejects.toThrow(
         "Entity with id 'host-id' not found"

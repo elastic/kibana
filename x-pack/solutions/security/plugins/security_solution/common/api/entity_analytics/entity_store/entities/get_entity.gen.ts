@@ -13,6 +13,9 @@
  *   title: Entity Store - Get Single Entity
  *   version: 2023-10-31
  */
+
+import { z } from '@kbn/zod';
+
 import { EntityType } from '../common.gen';
 import { Entity } from './common.gen';
 
