@@ -116,7 +116,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                     content={
                       health.summary.status === 'unhealthy'
                         ? getUnhealthyText(summaryTransformId)
-                        : getStateConflictText(rollupTransformId)
+                        : getStateConflictText(summaryTransformId)
                     }
                     url={summaryUrl}
                   />
