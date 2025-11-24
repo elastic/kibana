@@ -19,7 +19,7 @@ export class EnterTryBlockNodeImpl implements NodeImplementation, NodeWithErrorC
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     this.stepExecutionRuntime.startStep();
     this.wfExecutionRuntimeManager.navigateToNode(this.node.enterNormalPathNodeId);
   }

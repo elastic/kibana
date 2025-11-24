@@ -19,7 +19,7 @@ export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorC
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     this.workflowRuntime.navigateToNextNode();
   }
 

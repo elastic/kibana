@@ -36,7 +36,7 @@ export interface BaseStep {
 export type StepDefinition = BaseStep;
 
 export interface NodeImplementation {
-  run(): Promise<void>;
+  run(): Promise<void> | void;
 }
 
 export interface NodeWithErrorCatching {
@@ -47,9 +47,7 @@ export interface MonitorableNode {
   monitor(monitoredContext: StepExecutionRuntime): Promise<void>;
 }
 
-export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
-  implements NodeImplementation
-{
+export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep> implements NodeImplementation {
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
   protected connectorExecutor: ConnectorExecutor;
@@ -95,7 +93,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         this.stepExecutionRuntime.finishStep(result.output);
       }
     } catch (error) {
-      const result = await this.handleFailure(input, error);
+      const result = this.handleFailure(input, error);
       this.stepExecutionRuntime.failStep(result.error);
     }
 
@@ -106,7 +104,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   protected abstract _run(input?: any): Promise<RunStepResult>;
 
   // Helper for handling on-failure, retries, etc.
-  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
+  protected handleFailure(input: any, error: any): RunStepResult {
     // Implement retry logic based on step['on-failure']
     // Build comprehensive error message including cause chain (messages only)
     const getErrorMessage = (err: any): string => {

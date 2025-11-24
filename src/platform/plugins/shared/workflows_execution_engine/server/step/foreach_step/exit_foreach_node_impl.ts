@@ -21,7 +21,7 @@ export class ExitForeachNodeImpl implements NodeImplementation {
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     const foreachState = this.stepExecutionRuntime.getCurrentStepState();
 
     if (!foreachState) {
