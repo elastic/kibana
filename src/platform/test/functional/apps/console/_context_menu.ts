@@ -277,7 +277,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display keyboard shortcut badges for Auto indent and API reference', async () => {
+      // Setup: clear editor and enter a request
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('GET _search');
+
+      // Select the request to show action panel
+      await PageObjects.console.selectAllRequests();
+
+      // Click context menu
       await PageObjects.console.clickContextMenu();
+
+      // Wait for context menu to be fully open
+      await retry.waitFor('context menu to be visible', async () => {
+        return await testSubjects.exists('consoleMenu');
+      });
 
       // Check Auto indent shortcut badge exists
       const autoIndentShortcutExists = await testSubjects.exists('consoleMenuAutoIndentShortcut');
