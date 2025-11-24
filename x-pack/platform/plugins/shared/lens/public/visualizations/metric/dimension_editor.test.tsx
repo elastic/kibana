@@ -208,7 +208,7 @@ describe('dimension editor', () => {
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).not.toBeInTheDocument();
     });
 
-    it('is visible when metric is non-numeric even if palette is set', () => {
+    it('static color control is visible when metric is non-numeric even if palette is set', () => {
       const { getStaticColorPicker } = renderPrimaryMetricEditor({
         datasource: getNonNumericDatasource(),
         state: { ...metricAccessorState, palette },

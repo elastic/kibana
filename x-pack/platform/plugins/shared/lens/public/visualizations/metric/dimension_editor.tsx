@@ -764,7 +764,7 @@ function StaticColorControl({
   setColor: (color: string) => void;
   swatches?: string[];
 }) {
-  const colorLabel = i18n.translate('xpack.lens.metric.color', {
+  const colorLabel = i18n.translate('xpack.lens.metric.selectColor.label', {
     defaultMessage: 'Select color',
   });
 
@@ -920,7 +920,7 @@ export function DimensionEditorAdditionalSection({
   const showVisTextColorSwatches =
     supportingVisualization(state) === 'panel' && state.applyColorTo === 'value';
 
-  const colorByValue = state.palette ? 'dynamic' : 'static';
+  const colorMode = state.palette ? 'dynamic' : 'static';
 
   return (
     <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
@@ -1143,13 +1143,13 @@ export function DimensionEditorAdditionalSection({
                   'data-test-subj': 'lnsMetric_color_mode_dynamic',
                 },
               ]}
-              idSelected={`${idPrefix}${colorByValue}`}
-              onChange={(_id, newColorByValue) => {
-                if (newColorByValue === colorByValue) return;
+              idSelected={`${idPrefix}${colorMode}`}
+              onChange={(_id, newColorMode) => {
+                if (newColorMode === colorMode) return;
 
                 setState({
                   ...state,
-                  ...(newColorByValue === 'dynamic'
+                  ...(newColorMode === 'dynamic'
                     ? {
                         palette: {
                           ...activePalette,
@@ -1173,7 +1173,7 @@ export function DimensionEditorAdditionalSection({
           <EuiFormRow
             display="columnCompressed"
             fullWidth
-            label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
+            label={i18n.translate('xpack.lens.metric.dynamicColorMapping.label', {
               defaultMessage: 'Dynamic color mapping',
             })}
           >
