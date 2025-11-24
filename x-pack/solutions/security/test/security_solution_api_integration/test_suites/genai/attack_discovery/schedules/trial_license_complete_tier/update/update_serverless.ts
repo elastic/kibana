@@ -50,7 +50,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Happy path for predefined users', () => {
       const roles = [
-        'viewer',
         'editor',
         ROLES.t1_analyst,
         ROLES.t2_analyst,
@@ -85,6 +84,31 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('RBAC', () => {
+      it('should not be able to update a schedule with the "viewer" role', async () => {
+        const testAgent = await utils.createSuperTest('viewer');
+
+        const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
+
+        const scheduleToUpdate = {
+          params: createdSchedule.params,
+          schedule: createdSchedule.schedule,
+          actions: createdSchedule.actions,
+          name: 'Updated Schedule',
+        };
+        const result = await apis.update({
+          id: createdSchedule.id,
+          schedule: scheduleToUpdate,
+          kibanaSpace: kibanaSpace1,
+          expectedHttpCode: 403,
+        });
+
+        expect(result).toEqual(
+          getMissingScheduleKibanaPrivilegesError({
+            routeDetails: `PUT ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}`,
+          })
+        );
+      });
+
       it('should not be able to update a schedule without `assistant` kibana privileges', async () => {
         const superTest = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
 
