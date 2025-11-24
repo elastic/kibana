@@ -95,15 +95,16 @@ export const useDiscoverHistogram = (
    * Sync Unified Histogram state with Discover state
    */
 
-  const hideChart = useAppStateSelector((state) => state.hideChart);
-  const interval = useAppStateSelector((state) => state.interval);
-
   useEffect(() => {
     const subscription = createUnifiedHistogramStateObservable(
       unifiedHistogramApi?.state$
     )?.subscribe((changes) => {
       const { lensRequestAdapter, ...stateChanges } = changes;
-      const oldState = { hideChart, interval };
+      const appState = stateContainer.getCurrentTab().appState;
+      const oldState = {
+        hideChart: appState.hideChart,
+        interval: appState.interval,
+      };
       const newState = { ...oldState, ...stateChanges };
 
       if ('lensRequestAdapter' in changes) {
@@ -118,14 +119,7 @@ export const useDiscoverHistogram = (
     return () => {
       subscription?.unsubscribe();
     };
-  }, [
-    dispatch,
-    hideChart,
-    inspectorAdapters,
-    interval,
-    unifiedHistogramApi?.state$,
-    updateAppState,
-  ]);
+  }, [dispatch, inspectorAdapters, stateContainer, unifiedHistogramApi?.state$, updateAppState]);
 
   /**
    * Sync URL query params with Unified Histogram
