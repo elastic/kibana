@@ -73,8 +73,8 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     // Change date picker
     await pageObjects.datePicker.setAbsoluteRange(dataQualityTimeRange);
 
-    // Go to Data Quality tab
-    await pageObjects.streams.clickGoBackToStreams();
+    // Go to Streams main page
+    await pageObjects.streams.clickRootBreadcrumb();
     await pageObjects.streams.verifyDatePickerTimeRange(dataQualityTimeRange);
   });
 });
