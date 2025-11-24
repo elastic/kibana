@@ -262,6 +262,7 @@
     "@kbn/response-ops-rule-form",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/connector-schemas",
+    "@kbn/tour-queue",
     "@kbn/onechat-common",
     "@kbn/spaces-utils",
     "@kbn/onechat-plugin"
