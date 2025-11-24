@@ -44,7 +44,6 @@ import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabSta
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import { analyzeMultiMatchTypes } from '../../../utils/query_analysis';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -288,10 +287,10 @@ export function getDataStateContainer({
           abortController?.abort();
           abortControllerFetchMore?.abort();
 
-          // Analyze query for multi_match types - reused across both branches
+          // Build search request body and analyze the BUILT ES DSL - reused across both branches
           const searchSource = savedSearchContainer.getState().searchSource;
-          const searchRequestBody = searchSource.getSearchRequestBody();
-          const queryAnalysis = analyzeMultiMatchTypes(searchRequestBody.query);
+          searchSource.getSearchRequestBody();
+          const queryAnalysis = searchSource.getQueryAnalysis();
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();

@@ -37,7 +37,6 @@ import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
-import { analyzeMultiMatchTypes } from '../../../utils/query_analysis';
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -128,9 +127,10 @@ export function fetchAll(
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
 
-    // Analyze query for multi_match types before tracking
-    const searchRequestBody = searchSource.getSearchRequestBody();
-    const queryAnalysis = analyzeMultiMatchTypes(searchRequestBody.query);
+    // Build the search request body first (this triggers buildEsQuery)
+    // Then analyze the BUILT ES DSL query
+    searchSource.getSearchRequestBody();
+    const queryAnalysis = searchSource.getQueryAnalysis();
 
     const fetchAllRequestOnlyTracker = scopedEbtManager.trackPerformanceEvent(
       'discoverFetchAllRequestsOnly'

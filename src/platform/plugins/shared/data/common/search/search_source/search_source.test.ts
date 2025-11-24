@@ -1663,4 +1663,109 @@ describe('SearchSource', () => {
       expect(result).toEqual(expectedResult);
     });
   });
+
+  describe('getQueryAnalysis()', () => {
+    it('should analyze query and return multi_match types', () => {
+      const testSearchSource = new SearchSource({}, searchSourceDependencies);
+
+      // Simulate what getSearchRequestBody() does - sets lastBuiltQuery
+      (testSearchSource as any).lastBuiltQuery = {
+        bool: {
+          must: [
+            {
+              multi_match: {
+                type: 'phrase',
+                query: 'test query',
+                fields: ['*'],
+              },
+            },
+          ],
+        },
+      };
+
+      const analysis = testSearchSource.getQueryAnalysis();
+      expect(analysis.types.has('match_phrase')).toBe(true);
+    });
+
+    it('should return empty analysis for undefined query', () => {
+      const testSearchSource = new SearchSource({}, searchSourceDependencies);
+
+      const analysis = testSearchSource.getQueryAnalysis();
+      expect(analysis.types.size).toBe(0);
+    });
+
+    it('should detect multiple query types in complex queries', () => {
+      const testSearchSource = new SearchSource({}, searchSourceDependencies);
+
+      // Simulate a complex built query with multiple query types
+      (testSearchSource as any).lastBuiltQuery = {
+        bool: {
+          should: [
+            {
+              multi_match: {
+                type: 'phrase',
+                query: 'foo bar',
+              },
+            },
+            {
+              multi_match: {
+                type: 'best_fields',
+                query: 'baz',
+              },
+            },
+            {
+              match_phrase: {
+                message: 'test phrase',
+              },
+            },
+          ],
+        },
+      };
+
+      const analysis = testSearchSource.getQueryAnalysis();
+      expect(analysis.types.has('match_phrase')).toBe(true);
+      expect(analysis.types.has('best_fields')).toBe(true);
+      expect(analysis.types.size).toBe(2);
+    });
+
+    it('should analyze different queries independently', () => {
+      const testSearchSource = new SearchSource({}, searchSourceDependencies);
+
+      // First query
+      (testSearchSource as any).lastBuiltQuery = {
+        multi_match: {
+          type: 'phrase',
+          query: 'test',
+        },
+      };
+
+      const analysis1 = testSearchSource.getQueryAnalysis();
+      expect(analysis1.types.has('match_phrase')).toBe(true);
+      expect(analysis1.types.size).toBe(1);
+
+      // Different query - simulates what happens after a new getSearchRequestBody() call
+      (testSearchSource as any).lastBuiltQuery = {
+        bool: {
+          must: [
+            {
+              multi_match: {
+                type: 'best_fields',
+                query: 'test2',
+              },
+            },
+            {
+              match_phrase: {
+                field: 'value',
+              },
+            },
+          ],
+        },
+      };
+
+      const analysis2 = testSearchSource.getQueryAnalysis();
+      expect(analysis2.types.has('best_fields')).toBe(true);
+      expect(analysis2.types.has('match_phrase')).toBe(true);
+      expect(analysis2.types.size).toBe(2);
+    });
+  });
 });

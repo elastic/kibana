@@ -88,6 +88,8 @@ import { normalizeSortRequest } from './normalize_sort_request';
 
 import type { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 import { queryToFields } from './query_to_fields';
+import type { MultiMatchAnalysis } from './query_analysis_utils';
+import { analyzeMultiMatchTypes } from './query_analysis_utils';
 
 import type { EsQuerySortValue } from '../..';
 import { AggConfigs } from '../..';
@@ -157,6 +159,13 @@ export class SearchSource {
   public history: SearchRequest[] = [];
   private fields: SearchSourceFields;
   private readonly dependencies: SearchSourceDependencies;
+
+  /**
+   * The last built ES query DSL from getSearchRequestBody().
+   * Used to ensure query analysis is performed on the actual query sent to ES.
+   * @private
+   */
+  private lastBuiltQuery?: estypes.QueryDslQueryContainer;
 
   constructor(fields: SearchSourceFields = {}, dependencies: SearchSourceDependencies) {
     const { parent, ...currentFields } = fields;
@@ -405,7 +414,31 @@ export class SearchSource {
    * Returns body contents of the search request, often referred as query DSL.
    */
   getSearchRequestBody() {
-    return this.flatten().body;
+    const body = this.flatten().body;
+
+    // Cache the built ES query for analysis
+    // This is the ACTUAL query that will be sent to Elasticsearch after buildEsQuery
+    this.lastBuiltQuery = body.query;
+
+    return body;
+  }
+
+  /**
+   * Analyzes the query DSL to detect multi_match query types and phrase queries.
+   * This method analyzes the BUILT Elasticsearch query (after buildEsQuery transformation)
+   * to accurately detect phrase queries in the actual DSL sent to Elasticsearch.
+   *
+   * IMPORTANT: Must be called AFTER getSearchRequestBody() to analyze the correct query.
+   */
+  getQueryAnalysis(): MultiMatchAnalysis {
+    // If no built query exists yet, return empty analysis
+    // This can happen if getQueryAnalysis is called before getSearchRequestBody
+    if (!this.lastBuiltQuery) {
+      return { types: new Set() };
+    }
+
+    // Analyze the BUILT ES query (not the high-level Kibana Query object)
+    return analyzeMultiMatchTypes(this.lastBuiltQuery);
   }
 
   /**

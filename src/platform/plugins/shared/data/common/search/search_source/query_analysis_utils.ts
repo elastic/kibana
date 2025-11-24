@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
+/**
+ * Analysis result for multi_match query types found in ES query DSL.
+ * @public
+ */
 export interface MultiMatchAnalysis {
   /**
    * Set of unique multi_match query types found in the query
@@ -26,7 +30,6 @@ export interface MultiMatchAnalysis {
  * This function recursively traverses the query DSL tree to identify:
  * - multi_match queries with their type parameter
  * - match_phrase queries (normalized to 'match_phrase' type)
- * - match queries within bool clauses
  *
  * @param query - The Elasticsearch query DSL to analyze
  * @returns MultiMatchAnalysis containing found types
@@ -35,7 +38,7 @@ export interface MultiMatchAnalysis {
  * ```typescript
  * const query = {
  *   bool: {
- *     should: [
+ *     must: [
  *       { multi_match: { type: 'phrase', query: 'foo bar' } },
  *       { multi_match: { query: 'baz' } } // defaults to best_fields
  *     ]
@@ -45,9 +48,11 @@ export interface MultiMatchAnalysis {
  * const result = analyzeMultiMatchTypes(query);
  * // result.types: Set(['match_phrase', 'best_fields'])
  * ```
+ *
+ * @internal
  */
 export function analyzeMultiMatchTypes(
-  query: QueryDslQueryContainer | undefined
+  query: estypes.QueryDslQueryContainer | undefined
 ): MultiMatchAnalysis {
   const result: MultiMatchAnalysis = {
     types: new Set(),
