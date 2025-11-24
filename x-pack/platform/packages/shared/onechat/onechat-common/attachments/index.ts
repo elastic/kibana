@@ -13,6 +13,7 @@ export type {
   EsqlAttachment,
   AlertAttachment,
   AttackDiscoveryAttachment,
+  RiskEntityAttachment,
 } from './attachments';
 export {
   AttachmentType,
@@ -21,9 +22,11 @@ export {
   screenContextAttachmentDataSchema,
   alertAttachmentDataSchema,
   attackDiscoveryAttachmentDataSchema,
+  riskEntityAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type EsqlAttachmentData,
   type AlertAttachmentData,
   type AttackDiscoveryAttachmentData,
+  type RiskEntityAttachmentData,
 } from './attachment_types';

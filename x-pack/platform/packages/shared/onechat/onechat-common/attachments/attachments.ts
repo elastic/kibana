@@ -31,6 +31,7 @@ export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
 export type AlertAttachment = Attachment<AttachmentType.alert>;
 export type AttackDiscoveryAttachment = Attachment<AttachmentType.attack_discovery>;
+export type RiskEntityAttachment = Attachment<AttachmentType.risk_entity>;
 
 /**
  * Input version of an attachment, where the id is optional

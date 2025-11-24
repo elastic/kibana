@@ -18,6 +18,7 @@ export enum AttachmentType {
   esql = 'esql',
   alert = 'alert',
   attack_discovery = 'attack_discovery',
+  risk_entity = 'risk_entity',
 }
 
 interface AttachmentDataMap {
@@ -26,6 +27,7 @@ interface AttachmentDataMap {
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.alert]: AlertAttachmentData;
   [AttachmentType.attack_discovery]: AttackDiscoveryAttachmentData;
+  [AttachmentType.risk_entity]: RiskEntityAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -103,6 +105,21 @@ export const attackDiscoveryAttachmentDataSchema = z.object({
 export interface AttackDiscoveryAttachmentData {
   /** The formatted attack discovery data including title, summary, details, and attack chain */
   attackDiscovery: string;
+}
+
+export const riskEntityAttachmentDataSchema = z.object({
+  identifierType: z.enum(['host', 'user', 'service', 'generic']),
+  identifier: z.string().min(1),
+});
+
+/**
+ * Data for a risk entity attachment.
+ */
+export interface RiskEntityAttachmentData {
+  /** The type of entity: host, user, service, or generic */
+  identifierType: 'host' | 'user' | 'service' | 'generic';
+  /** The value that identifies the entity (e.g., hostname, username) */
+  identifier: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

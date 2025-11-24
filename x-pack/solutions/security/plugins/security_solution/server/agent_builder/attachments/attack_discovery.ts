@@ -66,7 +66,7 @@ MANDATORY WORKFLOW - Complete in order:
    - Look for alert IDs referenced in the attack discovery
    - These may be mentioned in the details or summary sections
 
-4. Query RISK SCORES for entities:
+4. Query ENTITY RISK SCORE for entities:
    Tool: ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)}
    Parameters: { identifierType: "host.name", identifier: "[host name]" }
    Repeat for each unique host.name, user.name found

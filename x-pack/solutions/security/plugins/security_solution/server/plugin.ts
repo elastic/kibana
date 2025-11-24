@@ -149,6 +149,7 @@ import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 import {
   createAlertAttachmentType,
   createAttackDiscoveryAttachmentType,
+  createRiskEntityAttachmentType,
 } from './agent_builder/attachments';
 import {
   alertsTool,
@@ -645,6 +646,20 @@ export class Plugin implements ISecuritySolutionPlugin {
           );
         } else {
           this.logger.warn(`Failed to register attack discovery attachment type: ${error}`);
+          // Don't throw - allow plugin to continue loading even if attachment registration fails
+        }
+      }
+
+      try {
+        // Register risk entity attachment type
+        plugins.onechat.attachments.registerType(createRiskEntityAttachmentType());
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('already registered')) {
+          this.logger.debug(
+            'Risk entity attachment type already registered by onechat plugin, using built-in version'
+          );
+        } else {
+          this.logger.warn(`Failed to register risk entity attachment type: ${error}`);
           // Don't throw - allow plugin to continue loading even if attachment registration fails
         }
       }
