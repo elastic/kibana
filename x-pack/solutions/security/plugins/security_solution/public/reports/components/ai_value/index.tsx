@@ -32,14 +32,19 @@ export const AIValueMetrics: React.FC<Props> = (props) => {
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
 
-  let from = props.from;
-  let to = props.to;
-
-  if (exportContext?.forwardedState) {
-    const { timeRange } = exportContext.forwardedState;
-    from = timeRange.from;
-    to = timeRange.to;
-  }
+  const { from, to } = useMemo(() => {
+    if (exportContext?.forwardedState) {
+      const { timeRange } = exportContext.forwardedState;
+      return {
+        from: timeRange.from,
+        to: timeRange.to,
+      };
+    }
+    return {
+      from: props.from,
+      to: props.to,
+    };
+  }, [props.from, props.to, exportContext?.forwardedState]);
 
   const { analystHourlyRate, minutesPerAlert } = useMemo(
     () => ({
