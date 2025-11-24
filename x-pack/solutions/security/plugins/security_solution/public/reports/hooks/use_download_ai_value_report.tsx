@@ -31,7 +31,7 @@ export const useDownloadAIValueReport = ({
     }
 
     return aiValueExportContext.buildForwardedState({ timeRange });
-  }, [timeRange, aiValueExportContext]);
+  }, [timeRange, aiValueExportContext?.buildForwardedState]);
 
   const isExportEnabled =
     forwardedState !== undefined &&
