@@ -121,7 +121,7 @@ test.describe('Stream list view', { tag: ['@ess', '@svlOblt'] }, () => {
         await pageObjects.streams.verifyDocCount(DEGRADED_QUALITY_STREAM, 52);
         await pageObjects.streams.verifyDocCount(POOR_QUALITY_STREAM, 60);
       }).toPass({
-        intervals: [2_000],
+        intervals: [3_000],
         timeout: 60_000,
       });
     });
