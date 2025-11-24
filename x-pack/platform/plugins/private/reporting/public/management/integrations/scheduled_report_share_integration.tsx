@@ -29,8 +29,6 @@ export interface CreateScheduledReportProviderOptions {
   services: ReportingPublicPluginStartDependencies;
 }
 
-const unsupportedObjectTypes = ['ai_value_report'];
-
 export const shouldRegisterScheduledReportShareIntegration = async (http: HttpSetup) => {
   const { isSufficientlySecure, hasPermanentEncryptionKey } = await queryClient.fetchQuery({
     queryKey: getReportingHealthQueryKey(),
@@ -77,8 +75,8 @@ export const createScheduledReportShareIntegration = ({
         flyoutSizing: { size: 'm', maxWidth: 500 },
       };
     },
-    prerequisiteCheck: ({ license, objectType }) => {
-      if (!license || !license.type || unsupportedObjectTypes.includes(objectType)) {
+    prerequisiteCheck: ({ license }) => {
+      if (!license || !license.type) {
         return false;
       }
       return SCHEDULED_REPORT_VALID_LICENSES.includes(license.type);
