@@ -242,7 +242,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     request.body.supports_agentless
   ) {
     throw new FleetError(
-      'Creating agentless package policies should be done through the agentless policies API.'
+      'To create agentless package policies, use the Fleet agentless policies API.'
     );
   }
 
