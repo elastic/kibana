@@ -140,11 +140,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
         .expect(200);
       await waitForTask();
       // Check that only one agent on 8.17.0 was upgraded.
-      let res: any;
-      await waitForResult(async () => {
-        res = await supertest.get('/api/fleet/agents').set('kbn-xsrf', 'xxx').expect(200);
-        return res.body.items.filter((item: any) => item.status === 'updating').length === 1;
-      });
+      const res = await supertest.get('/api/fleet/agents').set('kbn-xsrf', 'xxx').expect(200);
+      expect(res.body.items.length).to.be(4);
+      expect(res.body.items.filter((item: any) => item.status === 'updating').length).to.be(1);
       expect(
         res.body.items.filter((item: any) => item.upgrade_started_at !== undefined).length
       ).to.be(1);
@@ -176,14 +174,11 @@ export default function (providerContext: FtrProviderContextWithServices) {
         .expect(200);
       await waitForTask();
       // Check that two agents on 8.17.0 were upgraded.
-      let res: any;
-      await waitForResult(async () => {
-        res = await supertest
-          .get('/api/fleet/agents?showInactive=true')
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        return res.body.items.filter((item: any) => item.status === 'updating').length === 1;
-      });
+      const res = await supertest
+        .get('/api/fleet/agents?showInactive=true')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+      expect(res.body.items.length).to.be(4);
       expect(res.body.items.filter((item: any) => item.status === 'updating').length).to.be(1);
       expect(
         res.body.items.filter((item: any) => item.upgrade_started_at !== undefined).length
@@ -309,7 +304,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await new Promise((resolve, reject) => {
         let attempts = 0;
         const intervalId = setInterval(async () => {
-          if (attempts > 15) {
+          if (attempts > 10) {
             clearInterval(intervalId);
             reject(new Error('wait timed out'));
           }
