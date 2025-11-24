@@ -106,8 +106,11 @@ describe('ContextMenu', () => {
       await userEvent.click(menuButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('consoleMenuCopyToLanguage')).toBeInTheDocument();
+        expect(screen.getByTestId('consoleMenuCopyAsButton')).toBeInTheDocument();
       });
+
+      // Also verify "Select language" menu item is present
+      expect(screen.getByTestId('consoleMenuSelectLanguage')).toBeInTheDocument();
     });
 
     it('should hide "Copy to language" menu item when isPackagedEnvironment is true', async () => {
@@ -131,7 +134,10 @@ describe('ContextMenu', () => {
       });
 
       // Verify "Copy to language" button is NOT in the document
-      expect(screen.queryByTestId('consoleMenuCopyToLanguage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('consoleMenuCopyAsButton')).not.toBeInTheDocument();
+
+      // Also verify "Select language" menu item is NOT in the document
+      expect(screen.queryByTestId('consoleMenuSelectLanguage')).not.toBeInTheDocument();
     });
   });
 });
