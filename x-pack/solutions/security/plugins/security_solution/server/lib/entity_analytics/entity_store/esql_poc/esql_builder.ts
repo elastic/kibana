@@ -14,7 +14,7 @@ import type { EntityDescription } from '../entity_definitions/types';
 import { generateLatestIndex } from './latest_index';
 import type { FieldDescription } from '../installation/types';
 
-const MAX_PAGE_SIZE = 1000;
+const MAX_PAGE_SIZE = 10000;
 const DEFAULT_FIELDS = ['@timestamp', `entity.id`];
 
 const RECENT_DATA_PREFIX = 'recent';
