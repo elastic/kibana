@@ -108,4 +108,17 @@ describe('transformReferencesOut', () => {
       ).toEqual(references);
     });
   });
+
+  describe('tag references', () => {
+    test('should drop tag references', () => {
+      const references = [
+        {
+          name: 'someTagRef',
+          type: 'tag',
+          id: '1',
+        },
+      ];
+      expect(transformReferencesOut(references, [])).toEqual([]);
+    });
+  });
 });
