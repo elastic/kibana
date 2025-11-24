@@ -13,18 +13,18 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
-  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { LanguageSelectorModal } from './language_selector_modal';
 import { convertRequestToLanguage } from '../../../../../services';
 import type { EditorRequest } from '../../types';
-import { LanguageSelectorModal } from './language_selector_modal';
 
 import { useServicesContext } from '../../../../contexts';
 import { StorageKeys } from '../../../../../services';
@@ -92,7 +92,6 @@ export const ContextMenu = ({
   );
   const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
 
-  // When a Kibana request is selected, force language to curl
   useEffect(() => {
     if (isKbnRequestSelected) {
       setCurrentLanguage(DEFAULT_LANGUAGE);
@@ -173,17 +172,18 @@ export const ContextMenu = ({
     // Show loading spinner
     setRequestConverterLoading(true);
 
-    try {
-      // When copying as worked as expected, close the context menu popover
-      await copyAs(withLanguage);
-      setIsPopoverOpen(false);
-    } finally {
-      // Delay hiding the spinner to avoid flickering between the spinner and
-      // the change language button
-      setTimeout(() => {
-        setRequestConverterLoading(false);
-      }, DELAY_FOR_HIDING_SPINNER);
-    }
+    // When copying as worked as expected, close the context menu popover
+    copyAs(withLanguage)
+      .then(() => {
+        setIsPopoverOpen(false);
+      })
+      .finally(() => {
+        // Delay hiding the spinner to avoid flickering between the spinner and
+        // the change language button
+        setTimeout(() => {
+          setRequestConverterLoading(false);
+        }, DELAY_FOR_HIDING_SPINNER);
+      });
   };
 
   const changeDefaultLanguage = (language: string) => {

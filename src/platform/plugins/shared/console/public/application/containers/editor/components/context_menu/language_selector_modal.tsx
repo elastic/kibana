@@ -97,7 +97,6 @@ export const LanguageSelectorModal = ({
   };
 
   const onCloseModal = () => {
-    // Save the selected language as default when modal closes
     changeDefaultLanguage(selectedLanguage);
     closeModal();
   };
