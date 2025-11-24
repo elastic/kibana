@@ -9,11 +9,21 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { AppStateUrl } from '../discover_app_state_container';
 import type { DiscoverAppState } from '../redux';
 import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
 import { getMaxAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
+
+export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
+  /**
+   * Necessary to take care of legacy links [fieldName,direction]
+   */
+  sort?: string[][] | [string, string];
+  /**
+   * Legacy data view ID prop
+   */
+  index?: string;
+}
 
 /**
  * Takes care of the given url state, migrates legacy props and cleans up empty props

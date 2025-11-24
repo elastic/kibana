@@ -12,20 +12,9 @@ import { COMPARE_ALL_OPTIONS, compareFilters } from '@kbn/es-query';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
 import type { DiscoverServices } from '../../../build_services';
-import { cleanupUrlState } from './utils/cleanup_url_state';
+import { type AppStateUrl, cleanupUrlState } from './utils/cleanup_url_state';
 import { APP_STATE_URL_KEY } from '../../../../common';
 import type { DiscoverAppState } from './redux';
-
-export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
-  /**
-   * Necessary to take care of legacy links [fieldName,direction]
-   */
-  sort?: string[][] | [string, string];
-  /**
-   * Legacy data view ID prop
-   */
-  index?: string;
-}
 
 export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
   return (

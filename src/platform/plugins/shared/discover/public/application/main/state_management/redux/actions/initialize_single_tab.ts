@@ -16,12 +16,11 @@ import {
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import { type AppStateUrl } from '../../discover_app_state_container';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
 import { appendAdHocDataViews, setDataView } from './data_views';
-import { cleanupUrlState } from '../../utils/cleanup_url_state';
+import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import { getEsqlDataView } from '../../utils/get_esql_data_view';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 import { isDataViewSource } from '../../../../../../common/data_sources';
