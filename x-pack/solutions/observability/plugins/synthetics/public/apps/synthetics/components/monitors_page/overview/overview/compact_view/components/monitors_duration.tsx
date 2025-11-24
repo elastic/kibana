@@ -20,10 +20,11 @@ export const MonitorsDuration = ({
   onClickDuration: () => void;
 }) => {
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
-  const duration = trendData === 'loading' || !trendData?.median ? 0 : trendData.median;
+  const isLoading = trendData === 'loading';
+  const duration = isLoading || !trendData?.median ? 0 : trendData.median;
   return (
     <EuiText size="s" onClick={onClickDuration}>
-      {formatDuration(duration)}
+      {isLoading ? '--' : formatDuration(duration)}
     </EuiText>
   );
 };
