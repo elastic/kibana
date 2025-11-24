@@ -163,7 +163,6 @@ EOF
 
   cat >> "$REPORT_FILE" <<EOF
 ## Test Results
-- **Status**: $([ $TEST_EXIT_CODE -eq 0 ] && echo "✅ PASSED" || echo "❌ FAILED")
 - **Exit Code**: $TEST_EXIT_CODE
 
 EOF
@@ -263,12 +262,8 @@ EOF
   echo "--- Create PR Comment"
   PR_COMMENT_FILE="entity-store-performance-pr-comment.txt"
   
-  # Determine status emoji
-  STATUS_EMOJI=$([ $TEST_EXIT_CODE -eq 0 ] && echo "✅" || echo "❌")
-  STATUS_TEXT=$([ $TEST_EXIT_CODE -eq 0 ] && echo "PASSED" || echo "FAILED")
-  
   {
-    echo "## ${STATUS_EMOJI} Entity Store Performance Tests ${STATUS_TEXT}"
+    echo "## Entity Store Performance Tests"
     echo ""
     echo "**Build**: [${BUILDKITE_BUILD_NUMBER:-N/A}](${BUILDKITE_BUILD_URL:-})"
     echo "**Duration**: ${TEST_DURATION}s"
@@ -286,12 +281,6 @@ EOF
   buildkite-agent artifact upload "$PR_COMMENT_FILE"
 
   # Set metadata for PR comment
-  if [ $TEST_EXIT_CODE -eq 0 ]; then
-    buildkite-agent meta-data set "entity_store_performance_status" "passed"
-  else
-    buildkite-agent meta-data set "entity_store_performance_status" "failed"
-  fi
-
   buildkite-agent meta-data set "entity_store_performance_duration" "$TEST_DURATION"
   buildkite-agent meta-data set "entity_store_performance_data_file" "$PERF_DATA_FILE"
 }

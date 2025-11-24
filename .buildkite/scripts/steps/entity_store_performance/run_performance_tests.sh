@@ -12,6 +12,8 @@ set -euo pipefail
 # Optional environment variables:
 #   PERF_INTERVAL - interval in seconds (default: 30)
 #   PERF_COUNT - number of uploads (default: 10)
+#   PERF_SAMPLING_INTERVAL - sampling interval in seconds (default: 1)
+#   PERF_DATA_FILE - data file name (default: "big")
 #
 # Exports:
 #   TEST_EXIT_CODE - exit code from test execution
@@ -36,9 +38,10 @@ run_performance_tests() {
   # Performance test parameters (configurable via env vars)
   PERF_INTERVAL="${PERF_INTERVAL:-30}"
   PERF_COUNT="${PERF_COUNT:-10}"
-  PERF_DATA_FILE="big"
-  PERF_ENTITY_COUNT=1000000
-  PERF_LOGS_PER_ENTITY=1
+  PERF_SAMPLING_INTERVAL="${PERF_SAMPLING_INTERVAL:-1}"
+  PERF_DATA_FILE="${PERF_DATA_FILE:-standard}"
+  PERF_ENTITY_COUNT=100000
+  PERF_LOGS_PER_ENTITY=10
   PERF_TOTAL_ROWS=$((PERF_ENTITY_COUNT * PERF_LOGS_PER_ENTITY))
 
   echo "--- Run Entity Store Performance Tests"
@@ -46,6 +49,7 @@ run_performance_tests() {
   echo "Entities: $PERF_ENTITY_COUNT, Logs per entity: $PERF_LOGS_PER_ENTITY (Total rows: $PERF_TOTAL_ROWS)"
   echo "Interval: ${PERF_INTERVAL}s"
   echo "Count: $PERF_COUNT"
+  echo "Sampling Interval: ${PERF_SAMPLING_INTERVAL}s"
 
   # Change to repository directory
   cd "$SECURITY_DOCS_GEN_DIR"
@@ -84,7 +88,8 @@ run_performance_tests() {
   yarn start upload-perf-data-interval "$PERF_DATA_FILE" \
     --deleteData \
     --interval "$PERF_INTERVAL" \
-    --count "$PERF_COUNT"
+    --count "$PERF_COUNT" \
+    --samplingInterval "$PERF_SAMPLING_INTERVAL"
   TEST_EXIT_CODE=$?
   set -e
   TEST_END_TIME=$(date +%s)
