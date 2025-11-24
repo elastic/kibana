@@ -6,14 +6,14 @@ pageLoadAssetSize:
   alerting: 28395
   apm: 38573
   apmSourcesAccess: 2278
-  automaticImport: 12327
+  automaticImport: 12162
   banners: 4087
   canvas: 15142
   cases: 153204
   charts: 40269
   cloud: 10648
   cloudDataMigration: 5687
-  cloudDefend: 18697
+  cloudDefend: 7718
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
@@ -39,7 +39,7 @@ pageLoadAssetSize:
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
   dataViews: 65000
-  dataVisualizer: 29533
+  dataVisualizer: 32800
   developerToolbar: 4467
   devTools: 8109
   discover: 26000
@@ -110,7 +110,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 15000
+  navigation: 18200
   newsfeed: 12371
   noDataPage: 1749
   observability: 107955
@@ -167,7 +167,7 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 30665
   stackAlerts: 31499
-  stackConnectors: 85053
+  stackConnectors: 80788
   streams: 10000
   streamsApp: 19225
   synthetics: 31571
@@ -201,5 +201,5 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsManagement: 7267
-  workplaceAIApp: 5759
+  workflowsManagement: 7163
+  workplaceAIApp: 6454
