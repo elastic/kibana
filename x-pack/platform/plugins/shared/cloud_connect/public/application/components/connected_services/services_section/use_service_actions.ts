@@ -15,7 +15,9 @@ interface DisableModalService {
   name: string;
 }
 
-export const useServiceActions = (onRefetch: () => void) => {
+export const useServiceActions = (
+  onServiceUpdate: (serviceKey: string, enabled: boolean) => void
+) => {
   const { notifications } = useCloudConnectedAppContext();
 
   // Tracks which service is currently being updated (for loading spinner)
@@ -26,6 +28,7 @@ export const useServiceActions = (onRefetch: () => void) => {
 
   /**
    * Core function to enable or disable a service via API.
+   * On success, optimistically updates the UI via onServiceUpdate callback.
    */
   const handleServiceUpdate = async (serviceKey: string, enabled: boolean) => {
     setLoadingService(serviceKey);
@@ -73,7 +76,8 @@ export const useServiceActions = (onRefetch: () => void) => {
     }
 
     setLoadingService(null);
-    onRefetch();
+    // Optimistically update the UI
+    onServiceUpdate(serviceKey, enabled);
   };
 
   // Enables a service directly without confirmation

@@ -38,10 +38,10 @@ interface ServicesSectionProps {
     auto_ops?: Service;
     eis?: Service;
   };
-  onRefetch: () => void;
+  onServiceUpdate: (serviceKey: string, enabled: boolean) => void;
 }
 
-export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRefetch }) => {
+export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onServiceUpdate }) => {
   const {
     loadingService,
     disableModalService,
@@ -50,7 +50,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
     showDisableModal,
     closeDisableModal,
     handleEnableServiceByUrl,
-  } = useServiceActions(onRefetch);
+  } = useServiceActions(onServiceUpdate);
 
   // Build service cards array
   const allServiceCards = [

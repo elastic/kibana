@@ -28,6 +28,8 @@ import { MigrationSection } from './migration_section';
 import { DisconnectClusterModal } from './disconnect_cluster_modal';
 import { apiService } from '../../../lib/api';
 
+export { useClusterConnection } from './use_cluster_connection';
+
 interface ClusterDetails {
   id: string;
   name: string;
@@ -61,13 +63,13 @@ interface ClusterDetails {
 
 export interface ConnectedServicesPageProps {
   clusterDetails: ClusterDetails;
-  onRefetch: () => void;
+  onServiceUpdate: (serviceKey: string, enabled: boolean) => void;
   onDisconnect: () => void;
 }
 
 export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   clusterDetails,
-  onRefetch,
+  onServiceUpdate,
   onDisconnect,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -207,7 +209,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
 
         <EuiSpacer size="xxl" />
 
-        <ServicesSection services={clusterDetails.services} onRefetch={onRefetch} />
+        <ServicesSection services={clusterDetails.services} onServiceUpdate={onServiceUpdate} />
 
         <MigrationSection />
       </EuiPageBody>
