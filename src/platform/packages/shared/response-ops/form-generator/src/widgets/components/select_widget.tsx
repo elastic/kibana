@@ -38,16 +38,20 @@ export const SelectWidget: React.FC<SelectWidgetProps> = ({
 
   const options = getOptions(schema) ?? [];
 
+  const config =
+    fieldConfig?.defaultValue !== undefined
+      ? { ...fieldConfig, defaultValue: fieldConfig.defaultValue }
+      : fieldConfig;
+
   return (
     <UseField
       path={path}
       component={FormSelectField}
-      config={{ ...fieldConfig, defaultValue: fieldConfig?.defaultValue || options[0].value }}
+      config={config}
       componentProps={{
         ...fieldProps,
         euiFieldProps: {
           ...fieldProps.euiFieldProps,
-          disabled: formConfig.disabled,
           options,
         },
       }}

@@ -27,7 +27,7 @@ export const HiddenWidget: React.FC<HiddenWidgetProps> = ({
     <UseField
       path={path}
       component={FormHiddenField}
-      config={{ ...fieldConfig, validations: [] }}
+      config={fieldConfig}
       componentProps={fieldProps}
     />
   );

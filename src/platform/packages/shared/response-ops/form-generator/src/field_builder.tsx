@@ -73,6 +73,8 @@ export const getFieldFromSchema = ({
           // The ValidationFunc type requires message to be a string, not an array
           return { path: formPath, message: errors.join(', ') };
         }
+
+        return undefined;
       }
     },
   };

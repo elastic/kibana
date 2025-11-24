@@ -24,6 +24,8 @@ export type DiscriminatedUnionWidgetProps = BaseWidgetPropsWithOptions<
   discriminatorKey: string;
 };
 
+// We couldn't find a better way to get the discriminator key from a ZodDiscriminatedUnion schema.
+// It accesses the internal `_def` property, which is not part of the public API.
 export const getDiscriminatorKey = (schema: z.ZodDiscriminatedUnion): string => {
   return (schema as unknown as { _def: { discriminator: string } })._def.discriminator;
 };

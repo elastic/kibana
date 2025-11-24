@@ -140,14 +140,9 @@ const webhookConnectorFormSchema = z.object({
       z
         .object({
           authType: z.literal('basic'),
-          username: z
-            .string()
-            .min(1, { message: 'Username cannot be empty' })
-            .meta({
-              label: 'Username',
-              disabled: true,
-            })
-            .default('Freddy'),
+          username: z.string().min(1, { message: 'Username cannot be empty' }).meta({
+            label: 'Username',
+          }),
           password: z.string().min(1, { message: 'Password cannot be empty' }).meta({
             label: 'Password',
             sensitive: true,

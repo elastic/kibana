@@ -106,7 +106,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const isChecked = selectedOption === discriminatorValue;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
-        if (isFieldsetDisabled && !optionMeta.disabled) {
+        if (isFieldsetDisabled && optionMeta.disabled !== false) {
           addMeta(option, { disabled: true });
         }
         const isDisabled = getMeta(option).disabled;

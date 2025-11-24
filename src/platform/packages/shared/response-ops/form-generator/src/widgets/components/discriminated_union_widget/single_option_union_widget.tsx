@@ -9,7 +9,7 @@
 
 import type React from 'react';
 import type { z } from '@kbn/zod/v4';
-import { addMeta } from '@kbn/connector-specs/src/connector_spec_ui';
+import { addMeta, getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import { type DiscriminatedUnionWidgetProps } from './discriminated_union_widget';
 import { getFieldsFromSchema, renderField } from '../../../field_builder';
 
@@ -26,6 +26,7 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
   path: rootPath,
   options,
   discriminatorKey,
+  schema,
   fieldConfig,
   fieldProps,
   formConfig,
@@ -42,6 +43,12 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
     hidden: true,
     disabled: true,
   });
+
+  // If the parent discriminated union is disabled, propagate that to the option schema
+  const isParentDisabled = formConfig.disabled || getMeta(schema).disabled;
+  if (isParentDisabled && getMeta(optionSchema).disabled !== false) {
+    addMeta(optionSchema, { disabled: true });
+  }
 
   const fields = getFieldsFromSchema({
     schema: optionSchema,

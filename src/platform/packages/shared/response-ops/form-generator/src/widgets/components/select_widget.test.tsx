@@ -67,6 +67,7 @@ describe('SelectWidget', () => {
             euiFieldProps: {},
           }}
           fieldConfig={{
+            defaultValue: 'UK',
             validations: [
               {
                 validator: () => undefined,
@@ -97,6 +98,7 @@ describe('SelectWidget', () => {
             euiFieldProps: {},
           }}
           fieldConfig={{
+            defaultValue: 'user',
             validations: [
               {
                 validator: () => undefined,
