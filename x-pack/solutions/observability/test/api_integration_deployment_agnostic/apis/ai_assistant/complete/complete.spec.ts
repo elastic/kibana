@@ -585,7 +585,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             actionId: connectorId,
           });
         });
-        describe('when invoking the chat complete with the tool request', function () {
+
+        describe('when invoking the /chat/complete with the tool request', function () {
           let events: MessageAddEvent[];
 
           before(async () => {
@@ -675,7 +676,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             expect(messageAddedEvents.length).to.be(5);
           });
 
-          it('conversation has the correct messages', () => {
+          it('returns the conversation with the correct messages', () => {
             expect(fullConversation.messages.length).to.be(6);
             // user prompt
             expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
@@ -683,9 +684,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             expect(fullConversation.messages[1].message.function_call?.name).to.be('context');
             // context function response
             expect(fullConversation.messages[2].message.name).to.be('context');
-            // unknown tool function call
+            // unknown tool call
             expect(fullConversation.messages[3].message.function_call?.name).to.be('unknown_tool');
-            // unknown tool function response with error message
+            // unknown tool response with error message
             expect(fullConversation.messages[4].message.name).to.contain('unknown_tool');
             expect(fullConversation.messages[4].message.content).to.contain('toolNotFoundError');
             // interaction with the LLM to fix the error
@@ -710,7 +711,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             actionId: connectorId,
           });
         });
-        describe('when invoking the chat complete with the function request with invalid arguments', function () {
+        describe('when invoking the /chat/complete with the function request and invalid arguments', function () {
           let events: MessageAddEvent[];
 
           before(async () => {
@@ -737,14 +738,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             expect(events.length).to.be(2);
           });
 
-          it('the first message add event has the tool name and an error', () => {
+          it('includes the tool name and an error in the first message add event', () => {
             expect(events[0].message.message.name).to.be('kibana');
             expect(events[0].message.message.content).to.contain(
               'Tool call arguments for kibana were invalid'
             );
           });
 
-          it('the second message add event interact with the LLM to fix the error', () => {
+          it('emits the second message add event that interacts with the LLM to fix the error', () => {
             expect(events[1].message.message.content).to.be('Hello from LLM Proxy');
           });
         });
@@ -803,7 +804,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             expect(messageAddedEvents.length).to.be(5);
           });
 
-          it('conversation has the correct messages', () => {
+          it('returns the conversation with the correct messages', () => {
             expect(fullConversation.messages.length).to.be(6);
             // user prompt
             expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
