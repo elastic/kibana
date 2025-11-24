@@ -1,3 +1,4 @@
 redirects:
   # Contributing to docs
   'extend/development-documentation.md': 'docs-content://extend/contribute/index.md'
+  'extend/saved-objects-service.md': 'docs-content://extend/saved-objects.md'

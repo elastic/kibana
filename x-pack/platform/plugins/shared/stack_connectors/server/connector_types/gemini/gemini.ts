@@ -19,14 +19,16 @@ import type {
 import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import { trace } from '@opentelemetry/api';
 import {
+  SUB_ACTION,
+  DEFAULT_TIMEOUT_MS,
   RunActionParamsSchema,
   RunApiResponseSchema,
   RunActionRawResponseSchema,
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
   StreamingResponseSchema,
-} from '../../../common/gemini/schema';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
+  DashboardActionParamsSchema,
+} from '@kbn/connector-schemas/gemini';
 import type {
   Config,
   Secrets,
@@ -41,9 +43,8 @@ import type {
   InvokeAIActionResponse,
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
-} from '../../../common/gemini/types';
-import { SUB_ACTION, DEFAULT_TIMEOUT_MS } from '../../../common/gemini/constants';
-import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
+} from '@kbn/connector-schemas/gemini';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 /** Interfaces to define Gemini model response type */
 
 interface MessagePart {
