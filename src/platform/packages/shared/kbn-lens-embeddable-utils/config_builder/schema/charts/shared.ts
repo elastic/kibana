@@ -123,12 +123,3 @@ export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(
     schema.allOf([baseSchema, bucketFiltersOperationSchema]),
   ]);
 }
-
-export function mergeFiltersAndTermsBucketsWithChartDimensionSchema<T extends Props>(
-  baseSchema: ObjectType<T>
-) {
-  return schema.oneOf([
-    schema.allOf([baseSchema, bucketFiltersOperationSchema]),
-    schema.allOf([baseSchema, bucketTermsOperationSchema]),
-  ]);
-}

@@ -24,7 +24,7 @@ import {
 } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
-import { mergeFiltersAndTermsBucketsWithChartDimensionSchema } from './shared';
+import { mergeAllBucketsWithChartDimensionSchema } from './shared';
 
 const regionMapStateRegionOptionsSchema = schema.object({
   ems: schema.maybe(
@@ -48,7 +48,7 @@ export const regionMapStateSchemaNoESQL = schema.object({
   /**
    * Configure how to break down to regions
    */
-  region: mergeFiltersAndTermsBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
+  region: mergeAllBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
 });
 
 const regionMapStateSchemaESQL = schema.object({
