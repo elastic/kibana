@@ -96,5 +96,6 @@
     "@kbn/esql-utils",
     "@kbn/tooling-log",
     "@kbn/inference-common",
+    "@kbn/core-chrome-navigation",
   ]
 }
