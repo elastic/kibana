@@ -60,6 +60,7 @@ import type { YamlValidationResult } from '../../../features/validate_workflow_y
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
+import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -184,6 +185,11 @@ export const WorkflowYAMLEditor = ({
 
   // Only show debug features in development
   const isDevelopment = process.env.NODE_ENV !== 'production';
+
+  // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
+  useEffect(() => {
+    interceptMonacoYamlProvider();
+  }, []);
 
   // Validation
   const { jsonSchema: workflowJsonSchemaStrict, uri: workflowSchemaUriStrict } =

@@ -95,18 +95,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
   })),
 }));
 
-// Mock Monaco handlers
-jest.mock('../lib/monaco_connectors', () => ({
-  ElasticsearchMonacoConnectorHandler: jest.fn(),
-  GenericMonacoConnectorHandler: jest.fn(),
-  KibanaMonacoConnectorHandler: jest.fn(),
-}));
-
-jest.mock('../lib/monaco_providers', () => ({
-  registerMonacoConnectorHandler: jest.fn(),
-  registerUnifiedHoverProvider: jest.fn(() => jest.fn()),
-}));
-
 const mockRegisterKeyboardCommands = jest.fn();
 const mockUnregisterKeyboardCommands = jest.fn();
 let capturedKeyboardHandlers: {
@@ -195,6 +183,11 @@ const mockCompletionProvider = {
 
 jest.mock('../lib/autocomplete/get_completion_item_provider', () => ({
   getCompletionItemProvider: jest.fn(() => mockCompletionProvider),
+}));
+
+// Mock interceptMonacoYamlProvider to be a no-op so the original mock remains
+jest.mock('../lib/autocomplete/intercept_monaco_yaml_provider', () => ({
+  interceptMonacoYamlProvider: jest.fn(),
 }));
 
 jest.mock('@kbn/monaco', () => ({
@@ -406,20 +399,21 @@ steps:
       store.dispatch(setYamlString(yamlContent));
       store.dispatch(setActiveTab('workflow'));
 
-      const { unmount } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+      const mockDispose = jest.fn();
+      (monaco.languages.registerCompletionItemProvider as jest.Mock).mockReturnValue({
+        dispose: mockDispose,
+      });
 
+      const { unmount } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
       // Wait for async state updates (setTimeout in handleEditorDidMount)
       await waitFor(() => {
         expect(monaco.languages.registerCompletionItemProvider).toHaveBeenCalled();
       });
 
-      const registeredProvider = (monaco.languages.registerCompletionItemProvider as jest.Mock).mock
-        .results[0].value;
-
       unmount();
 
       // Verify that dispose was called on the completion provider
-      expect(registeredProvider.dispose).toHaveBeenCalled();
+      expect(mockDispose).toHaveBeenCalled();
     });
   });
 
