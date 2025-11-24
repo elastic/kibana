@@ -7,7 +7,7 @@
 
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { config, expectedValues, generateData } from './generate_data';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 

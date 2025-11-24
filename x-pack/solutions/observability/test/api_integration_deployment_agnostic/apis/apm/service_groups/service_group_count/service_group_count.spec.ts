@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';

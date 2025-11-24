@@ -445,8 +445,8 @@ src/platform/packages/shared/kbn-ambient-storybook-types @elastic/kibana-operati
 src/platform/packages/shared/kbn-ambient-ui-types @elastic/kibana-operations
 src/platform/packages/shared/kbn-analytics @elastic/kibana-core
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
-src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team

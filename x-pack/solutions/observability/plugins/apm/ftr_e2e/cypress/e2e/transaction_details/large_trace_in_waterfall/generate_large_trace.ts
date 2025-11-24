@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable @typescript-eslint/no-shadow */
-import { apm, timerange, DistributedTrace } from '@kbn/apm-synthtrace-client';
+import { apm, timerange, DistributedTrace } from '@kbn/synthtrace-client';
 import { synthtrace } from '../../../../synthtrace';
 
 const RATE_PER_MINUTE = 1;

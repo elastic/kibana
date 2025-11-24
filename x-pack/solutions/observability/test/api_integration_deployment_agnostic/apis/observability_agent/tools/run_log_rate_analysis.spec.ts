@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { ErrorResult } from '@kbn/onechat-common';

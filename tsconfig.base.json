@@ -102,10 +102,6 @@
       "@kbn/apm-plugin/*": ["x-pack/solutions/observability/plugins/apm/*"],
       "@kbn/apm-sources-access-plugin": ["x-pack/platform/plugins/shared/apm_sources_access"],
       "@kbn/apm-sources-access-plugin/*": ["x-pack/platform/plugins/shared/apm_sources_access/*"],
-      "@kbn/apm-synthtrace": ["src/platform/packages/shared/kbn-apm-synthtrace"],
-      "@kbn/apm-synthtrace/*": ["src/platform/packages/shared/kbn-apm-synthtrace/*"],
-      "@kbn/apm-synthtrace-client": ["src/platform/packages/shared/kbn-apm-synthtrace-client"],
-      "@kbn/apm-synthtrace-client/*": ["src/platform/packages/shared/kbn-apm-synthtrace-client/*"],
       "@kbn/apm-types": ["x-pack/platform/packages/shared/kbn-apm-types"],
       "@kbn/apm-types/*": ["x-pack/platform/packages/shared/kbn-apm-types/*"],
       "@kbn/apm-types-shared": ["src/platform/packages/shared/kbn-apm-types-shared"],
@@ -2196,6 +2192,10 @@
       "@kbn/synthetics-plugin/*": ["x-pack/solutions/observability/plugins/synthetics/*"],
       "@kbn/synthetics-private-location": ["x-pack/packages/kbn-synthetics-private-location"],
       "@kbn/synthetics-private-location/*": ["x-pack/packages/kbn-synthetics-private-location/*"],
+      "@kbn/synthtrace": ["src/platform/packages/shared/kbn-synthtrace"],
+      "@kbn/synthtrace/*": ["src/platform/packages/shared/kbn-synthtrace/*"],
+      "@kbn/synthtrace-client": ["src/platform/packages/shared/kbn-synthtrace-client"],
+      "@kbn/synthtrace-client/*": ["src/platform/packages/shared/kbn-synthtrace-client/*"],
       "@kbn/task-manager-dependencies-plugin": ["x-pack/platform/plugins/private/task_manager_dependencies"],
       "@kbn/task-manager-dependencies-plugin/*": ["x-pack/platform/plugins/private/task_manager_dependencies/*"],
       "@kbn/task-manager-fixture-plugin": ["x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture"],
@@ -2451,27 +2451,17 @@
       // END AUTOMATED PACKAGE LISTING
       // Map @elastic/kibana-d3-color to @types/d3-color for TypeScript compatibility.
       // Can be removed once we're able to update d3-color to the v3.1.0 ESM-only package.
-      "@elastic/kibana-d3-color": [
-        "node_modules/@types/d3-color"
-      ],
+      "@elastic/kibana-d3-color": ["node_modules/@types/d3-color"],
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": [
-        "typings/@emotion"
-      ],
+      "@emotion/core": ["typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": [
-        "typings/@elastic/opentelemetry-node/sdk"
-      ],
+      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
       "@opentelemetry/semantic-conventions/incubating": [
         "typings/@opentelemetry/semantic-conventions/incubating"
       ],
-      "@typescript-eslint/parser": [
-        "typings/@typescript-eslint/parser"
-      ],
-      "@a2a-js/sdk/server": [
-        "typings/@a2a-js-sdk/server"
-      ],
+      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
+      "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

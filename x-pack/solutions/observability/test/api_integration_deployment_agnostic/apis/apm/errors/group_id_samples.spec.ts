@@ -5,11 +5,11 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { timerange } from '@kbn/apm-synthtrace-client';
-import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
+import { timerange } from '@kbn/synthtrace-client';
+import { service } from '@kbn/synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 

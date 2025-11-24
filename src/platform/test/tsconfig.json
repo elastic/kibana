@@ -73,14 +73,14 @@
     "@kbn/data-grid-in-table-search",
     "@kbn/scout-info",
     "@kbn/esql-utils",
-    "@kbn/apm-synthtrace-client",
-    "@kbn/apm-synthtrace",
+    "@kbn/synthtrace-client",
+    "@kbn/synthtrace",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
     "@kbn/field-formats-common",
     "@kbn/ai-assistant-management-plugin",
     "@kbn/core-chrome-navigation-tour",
     "@kbn/setup-node-env",
-    "@kbn/visualizations-common",
+    "@kbn/visualizations-common"
   ]
 }

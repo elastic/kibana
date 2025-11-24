@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import type { QueryResult, TabularDataResult } from '@kbn/onechat-common';
 import { setupAgentCallSearchToolWithEsqlThenAnswer } from '../../utils/proxy_scenario';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';

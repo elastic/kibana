@@ -99,7 +99,7 @@ paths-ignore:
   - src/platform/packages/private/kbn-some-dev-log
   - src/platform/packages/private/kbn-stdio-dev-helpers
   - src/platform/packages/private/kbn-telemetry-tools
-  - src/platform/packages/shared/kbn-apm-synthtrace
+  - src/platform/packages/shared/kbn-synthtrace
   - src/platform/packages/shared/kbn-axe-config
   - src/platform/packages/shared/kbn-cache-cli
   - src/platform/packages/shared/kbn-dev-cli-errors

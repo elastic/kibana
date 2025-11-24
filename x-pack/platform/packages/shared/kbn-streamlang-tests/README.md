@@ -11,10 +11,10 @@ One such circular dependency chain is illustrated below:
 ```mermaid
 graph TD
     A["@kbn/streamlang"] -->|_imports for co-living tests_| B["@kbn/scout"]
-    B -->|_imports_| C["@kbn/apm-synthtrace"]
+    B -->|_imports_| C["@kbn/synthtrace"]
     C -->|_imports_| D["@kbn/streams-schema"]
     D -->|_imports_| A
-    
+
     style A fill:#555577
     style D fill:#555577
 
@@ -26,8 +26,8 @@ graph TD
 
 **The circular dependency chain:**
 1. `@kbn/streamlang` needs `@kbn/scout` for testing
-2. `@kbn/scout` imports `@kbn/apm-synthtrace`
-3. `@kbn/apm-synthtrace` imports from `@kbn/streams-schema`
+2. `@kbn/scout` imports `@kbn/synthtrace`
+3. `@kbn/synthtrace` imports from `@kbn/streams-schema`
 4. `@kbn/streams-schema` imports from `@kbn/streamlang` ← **CIRCULAR!**
 
 By isolating the test code into this independent package:

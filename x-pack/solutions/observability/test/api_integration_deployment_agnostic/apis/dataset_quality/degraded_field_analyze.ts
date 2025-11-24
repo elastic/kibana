@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { log, timerange } from '@kbn/synthtrace-client';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './utils';

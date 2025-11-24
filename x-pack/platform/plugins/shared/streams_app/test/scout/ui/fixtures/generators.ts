@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SynthtraceFixture } from '@kbn/scout';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, timerange } from '@kbn/synthtrace-client';
 
 export const DATE_RANGE = {
   from: 'Jan 1, 2025 @ 00:00:00.000',

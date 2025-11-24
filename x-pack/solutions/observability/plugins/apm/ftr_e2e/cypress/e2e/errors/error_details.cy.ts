@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
+import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/generate_id';
 
 import url from 'url';
 import { synthtrace } from '../../../synthtrace';

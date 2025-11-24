@@ -39,11 +39,11 @@
     "@kbn/apm-plugin",
     "@kbn/apm-sources-access-plugin",
     "@kbn/server-route-repository",
-    "@kbn/apm-synthtrace",
+    "@kbn/synthtrace",
     "@kbn/test-suites-xpack-platform",
     "@kbn/tooling-log",
     "@kbn/rule-data-utils",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/ml-anomaly-utils",
     "@kbn/rule-registry-plugin",
     "@kbn/alerts-as-data-utils",
@@ -98,6 +98,6 @@
     "@kbn/onechat-common",
     "@kbn/observability-agent-plugin",
     "@kbn/onechat-plugin",
-    "@kbn/aiops-log-rate-analysis",
+    "@kbn/aiops-log-rate-analysis"
   ]
 }

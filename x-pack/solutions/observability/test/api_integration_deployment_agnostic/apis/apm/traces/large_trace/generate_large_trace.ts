@@ -7,8 +7,8 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { apm, timerange, DistributedTrace } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { apm, timerange, DistributedTrace } from '@kbn/synthtrace-client';
 
 const RATE_PER_MINUTE = 1;
 
