@@ -133,7 +133,13 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
       context.logger.error(
         `Failed to schedule task for gap auto fill scheduler ${so.id}. Will attempt to delete the saved object.`
       );
-      await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, so.id);
+      try {
+        await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, so.id);
+      } catch (deleteError) {
+        context.logger.error(
+          `Failed to delete gap auto fill saved object for gap auto fill scheduler ${so.id}.`
+        );
+      }
       throw e;
     }
 
