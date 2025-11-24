@@ -17,6 +17,10 @@ import {
   createSearchKnowledgeBaseTool,
 } from './search_knowledge_base/search_knowledge_base';
 import {
+  OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
+  createRunLogRateAnalysisTool,
+} from './run_log_rate_analysis/run_log_rate_analysis';
+import {
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   createGetAnomalyDetectionJobsTool,
 } from './get_anomaly_detection_jobs/get_anomaly_detection_jobs';
@@ -41,6 +45,7 @@ const PLATFORM_TOOL_IDS = [
 const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
+  OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
 ];
@@ -69,7 +74,8 @@ export async function registerTools({
   const observabilityTools: StaticToolRegistration<any>[] = [
     createGetDataSourcesTool({ core, plugins, logger }),
     createSearchKnowledgeBaseTool({ core, logger }),
-    createGetAnomalyDetectionJobsTool({ core, logger }),
+    createRunLogRateAnalysisTool({ logger }),
+    createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
   ];
 
