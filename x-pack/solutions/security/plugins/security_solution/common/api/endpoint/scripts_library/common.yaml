@@ -1,14 +1,58 @@
 openapi: 3.0.0
 info:
-  title: Common Endpoint Attributes
+  title: Common Endpoint Scripts Library schemas
   version: '2023-10-31'
 paths: {}
 components:
   schemas:
+    EndpointScriptPlatform:
+      type: string
+      enum:
+        - linux
+        - macos
+        - windows
+        -
     EndpointScript:
       type: object
       properties:
         id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        platform:
+          type: array
+          items:
+            $ref: '#/components/schemas/EndpointScriptPlatform'
+        requiresInput:
+          type: boolean
+        downloadUri:
+          type: string
+          description: URI to download the script file. Note that this is the relative path and does not include the space (if applicable)
+        description:
+          type: string
+          description: Description of the script and its purpose/functionality
+        instructions:
+          type: string
+          description: Instructions for using the script, including details around its supported input arguments
+        example:
+          type: string
+        executable:
+          type: string
+          description: >
+            The relative path to the file included in the archive that should be executed once its contents
+            are extracted. Applicable only for scripts uploaded as an archive (ex. zip file).
+        createdBy:
+          type: string
+        createAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        version:
           type: string
 
     ScriptsApiResponse:

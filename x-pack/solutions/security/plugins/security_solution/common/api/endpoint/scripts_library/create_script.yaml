@@ -42,14 +42,38 @@ components:
           description: Name of the script
         platform:
           type: array
-          items:
-            type: string
           description: Platforms supported by the the script
+          items:
+            $ref: './common.yaml#/components/schemas/EndpointScriptPlatform'
         file:
           type: object
           format: binary
+          description: The script file upload
+        description:
+          type: string
+          description: Description of the script and its purpose/functionality
+        instructions:
+          type: string
+          description: Instructions for using the script, including details around its supported input arguments
+        example:
+          type: string
+          description: Example usage of the script
+        requiresInput:
+          type: boolean
+          description: Whether the script requires input arguments
+        executable:
+          type: string
+          description: >
+            Used only for when the uploaded script is an archive (ex. zip file).
+            This property defines the relative path to the file included in the archive that should be executed
+            once its contents are extracted. The path should be relative to the root of the archive.
+          example: |
+            script.zip contains:
+            /bin/script.sh
+            /lib/lib.h
+            /readme.txt
 
-
+            executable should be defined as: ./bin/script.sh
 
 
 
