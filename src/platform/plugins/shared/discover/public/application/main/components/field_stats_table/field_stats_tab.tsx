@@ -15,7 +15,7 @@ import type { DataVisualizerTableState } from '@kbn/data-visualizer-plugin/commo
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FieldStatisticsTable } from './field_stats_table';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/redux';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FetchStatus } from '../../../types';
 import type { FieldStatisticsTableProps } from './types';

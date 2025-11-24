@@ -81,6 +81,7 @@ export {
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
+  useAppStateSelector,
   useCurrentTabAction,
   useCurrentChartPortalNode,
   useDataViewsForPicker,

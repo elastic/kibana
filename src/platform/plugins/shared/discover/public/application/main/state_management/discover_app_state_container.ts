@@ -13,13 +13,11 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import defaultComparator from 'fast-deep-equal';
 import type { DiscoverServices } from '../../../build_services';
 import { cleanupUrlState } from './utils/cleanup_url_state';
 import { getStateDefaults } from './utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { createEsqlDataSource, isEsqlSource } from '../../../../common/data_sources';
-import { useCurrentTabSelector } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
 import type { DiscoverAppState } from './redux';
 
@@ -33,9 +31,6 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
    */
   index?: string;
 }
-
-export const useAppStateSelector = <T>(selector: (state: DiscoverAppState) => T): T =>
-  useCurrentTabSelector((tab) => selector(tab.appState), defaultComparator);
 
 export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
   return (

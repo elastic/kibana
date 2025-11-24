@@ -37,7 +37,7 @@ import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
