@@ -11,15 +11,12 @@ export const THREAT_HUNTING_PRIORITIES_TAG = 'threat-hunting-priorities';
 
 // Node types specific to threat hunting priorities graph
 export const ThreatHuntingPrioritiesNodeType = {
-  FIND_CANDIDATE_ENTITIES_NODE: 'find_candidate_entities',
-  SELECT_CANDIDATES_NODE: 'select_candidates',
+  FIND_AND_SELECT_CANDIDATES_NODE: 'find_and_select_candidates',
   ENRICH_ENTITIES_NODE: 'enrich_entities',
-  FINALIZE_PRIORITIES_NODE: 'finalize_priorities',
-  REFINE_PRIORITIES_NODE: 'refine_priorities',
+  GENERATE_PRIORITIES_NODE: 'generate_priorities',
 } as const;
 
 // Limits
 export const DEFAULT_MAX_GENERATION_ATTEMPTS = 10;
 export const DEFAULT_MAX_HALLUCINATION_FAILURES = 5;
 export const DEFAULT_MAX_REPEATED_GENERATIONS = 3;
-export const DEFAULT_MAX_REFINEMENT_ATTEMPTS = 2; // Limit refinement to 1-2 attempts

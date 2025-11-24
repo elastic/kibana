@@ -12,18 +12,11 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import type { RiskScoreDataClient } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_score/risk_score_data_client';
 
 import { ThreatHuntingPrioritiesNodeType } from './constants';
-import { getFindCandidateEntitiesNode } from './nodes/find_candidates';
-import { getSelectCandidatesNode } from './nodes/select_candidates';
+import { getFindAndSelectCandidatesNode } from './nodes/find_and_select_candidates';
 import { getEnrichEntitiesNode } from './nodes/enrich_entities';
 import type { EntityDetailsHighlightsService } from './nodes/enrich_entities/types';
-import { getFinalizePrioritiesNode } from './nodes/finalize_priorities';
-import { getRefinePrioritiesNode } from './nodes/refine_priorities';
-import {
-  getSelectCandidatesOrEndEdge,
-  getEnrichOrEndEdge,
-  getFinalizeOrRefineOrEndEdge,
-  getRefineOrEndEdge,
-} from './edges';
+import { getGeneratePrioritiesNode } from './nodes/generate_priorities';
+import { getEnrichOrEndEdge } from './edges';
 import type { CombinedPrompts } from './prompts';
 import { getDefaultGraphAnnotation } from './state';
 
@@ -57,16 +50,12 @@ export type DefaultThreatHuntingPrioritiesGraph = ReturnType<
  * Graph flow:
  * START
  *   ↓
- * FIND_CANDIDATE_ENTITIES_NODE (find entities with risk spikes, high alerts, etc.)
- *   ↓
- * LLM_SELECT_CANDIDATES_NODE (LLM chooses which candidates to enrich)
- *   ↓
- * ENRICH_ENTITIES_NODE (fetch entity store records, alerts, risk score history)
- *   ↓
- * LLM_FINALIZE_PRIORITIES_NODE (LLM chooses final priorities and summarizes)
- *   ↓ (optional)
- * REFINE_PRIORITIES_NODE (optional refinement)
- *   ↓
+ * FIND_AND_SELECT_CANDIDATES_NODE (find entities with risk spikes, optionally use LLM to select top candidates)
+ *   ↓ (conditional: if candidates selected)
+ * ENRICH_ENTITIES_NODE (fetch entity store records, alerts, risk score history, asset criticality, vulnerabilities, anomalies)
+ *   ↓ (always)
+ * GENERATE_PRIORITIES_NODE (LLM generates high-quality, refined prioritized threat hunting priorities)
+ *   ↓ (always)
  * END
  */
 export const getDefaultThreatHuntingPrioritiesGraph = ({
@@ -91,19 +80,15 @@ export const getDefaultThreatHuntingPrioritiesGraph = ({
     const graphState = getDefaultGraphAnnotation({ end, filter, prompts, start });
 
     // get nodes:
-    const findCandidateEntitiesNode = getFindCandidateEntitiesNode({
+    const findAndSelectCandidatesNode = getFindAndSelectCandidatesNode({
       alertsIndexPattern,
       esClient,
-      logger,
-      namespace,
-      riskScoreDataClient,
-      riskScoreIndexPattern,
-    });
-
-    const selectCandidatesNode = getSelectCandidatesNode({
       llm,
       logger,
+      namespace,
       prompts,
+      riskScoreDataClient,
+      riskScoreIndexPattern,
     });
 
     const enrichEntitiesNode = getEnrichEntitiesNode({
@@ -119,45 +104,26 @@ export const getDefaultThreatHuntingPrioritiesGraph = ({
       end,
     });
 
-    const finalizePrioritiesNode = getFinalizePrioritiesNode({
-      llm,
-      logger,
-      prompts,
-    });
-
-    const refinePrioritiesNode = getRefinePrioritiesNode({
+    const generatePrioritiesNode = getGeneratePrioritiesNode({
       llm,
       logger,
       prompts,
     });
 
     // get edges:
-    const selectCandidatesOrEndEdge = getSelectCandidatesOrEndEdge(logger);
     const enrichOrEndEdge = getEnrichOrEndEdge(logger);
-    const finalizeOrRefineOrEndEdge = getFinalizeOrRefineOrEndEdge(logger);
-    const refineOrEndEdge = getRefineOrEndEdge(logger);
 
     // create the graph:
     const graph = new StateGraph(graphState)
       .addNode(
-        ThreatHuntingPrioritiesNodeType.FIND_CANDIDATE_ENTITIES_NODE,
-        findCandidateEntitiesNode
+        ThreatHuntingPrioritiesNodeType.FIND_AND_SELECT_CANDIDATES_NODE,
+        findAndSelectCandidatesNode
       )
-      .addNode(ThreatHuntingPrioritiesNodeType.SELECT_CANDIDATES_NODE, selectCandidatesNode)
       .addNode(ThreatHuntingPrioritiesNodeType.ENRICH_ENTITIES_NODE, enrichEntitiesNode)
-      .addNode(ThreatHuntingPrioritiesNodeType.FINALIZE_PRIORITIES_NODE, finalizePrioritiesNode)
-      .addNode(ThreatHuntingPrioritiesNodeType.REFINE_PRIORITIES_NODE, refinePrioritiesNode)
-      .addEdge(START, ThreatHuntingPrioritiesNodeType.FIND_CANDIDATE_ENTITIES_NODE)
+      .addNode(ThreatHuntingPrioritiesNodeType.GENERATE_PRIORITIES_NODE, generatePrioritiesNode)
+      .addEdge(START, ThreatHuntingPrioritiesNodeType.FIND_AND_SELECT_CANDIDATES_NODE)
       .addConditionalEdges(
-        ThreatHuntingPrioritiesNodeType.FIND_CANDIDATE_ENTITIES_NODE,
-        selectCandidatesOrEndEdge,
-        {
-          end: END,
-          select_candidates: ThreatHuntingPrioritiesNodeType.SELECT_CANDIDATES_NODE,
-        }
-      )
-      .addConditionalEdges(
-        ThreatHuntingPrioritiesNodeType.SELECT_CANDIDATES_NODE,
+        ThreatHuntingPrioritiesNodeType.FIND_AND_SELECT_CANDIDATES_NODE,
         enrichOrEndEdge,
         {
           end: END,
@@ -166,25 +132,9 @@ export const getDefaultThreatHuntingPrioritiesGraph = ({
       )
       .addEdge(
         ThreatHuntingPrioritiesNodeType.ENRICH_ENTITIES_NODE,
-        ThreatHuntingPrioritiesNodeType.FINALIZE_PRIORITIES_NODE
+        ThreatHuntingPrioritiesNodeType.GENERATE_PRIORITIES_NODE
       )
-      .addConditionalEdges(
-        ThreatHuntingPrioritiesNodeType.FINALIZE_PRIORITIES_NODE,
-        finalizeOrRefineOrEndEdge,
-        {
-          end: END,
-          finalize: ThreatHuntingPrioritiesNodeType.FINALIZE_PRIORITIES_NODE,
-          refine: ThreatHuntingPrioritiesNodeType.REFINE_PRIORITIES_NODE,
-        }
-      )
-      .addConditionalEdges(
-        ThreatHuntingPrioritiesNodeType.REFINE_PRIORITIES_NODE,
-        refineOrEndEdge,
-        {
-          end: END,
-          refine: ThreatHuntingPrioritiesNodeType.REFINE_PRIORITIES_NODE,
-        }
-      );
+      .addEdge(ThreatHuntingPrioritiesNodeType.GENERATE_PRIORITIES_NODE, END);
 
     // compile the graph:
     return graph.compile();

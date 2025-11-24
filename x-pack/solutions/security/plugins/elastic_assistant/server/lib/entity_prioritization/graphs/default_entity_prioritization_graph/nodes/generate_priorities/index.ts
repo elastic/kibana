@@ -9,6 +9,7 @@ import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { Logger } from '@kbn/core/server';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+
 import type { ThreatHuntingPrioritiesGraphState } from '../../../../state';
 import { getThreatHuntingPrioritiesGenerationSchema } from '../../schemas';
 import type { CombinedPrompts } from '../../prompts';
@@ -88,7 +89,19 @@ const formatEnrichedEntities = (state: ThreatHuntingPrioritiesGraphState): strin
     .join('\n\n');
 };
 
-export const getFinalizePrioritiesNode = ({
+/**
+ * Simple hallucination detection for threat hunting priorities
+ * Checks if the response contains placeholder-like patterns that suggest hallucination
+ */
+const responseIsHallucinated = (response: string): boolean => {
+  // Check for placeholder patterns that suggest the LLM is hallucinating entity values
+  return (
+    response.includes('{{ host.name hostNameValue }}') ||
+    response.includes('{{ user.name userNameValue }}')
+  );
+};
+
+export const getGeneratePrioritiesNode = ({
   llm,
   logger,
   prompts,
@@ -97,15 +110,38 @@ export const getFinalizePrioritiesNode = ({
   logger?: Logger;
   prompts: CombinedPrompts;
 }): ((state: ThreatHuntingPrioritiesGraphState) => Promise<ThreatHuntingPrioritiesGraphState>) => {
-  const finalizePriorities = async (
+  const generatePriorities = async (
     state: ThreatHuntingPrioritiesGraphState
   ): Promise<ThreatHuntingPrioritiesGraphState> => {
-    logger?.debug(() => '---FINALIZE PRIORITIES---');
+    logger?.debug(() => '---GENERATE PRIORITIES---');
 
-    const { selectedCandidateIds } = state;
+    const { selectedCandidateIds, generationAttempts, hallucinationFailures, maxGenerationAttempts, maxHallucinationFailures } = state;
 
     if (selectedCandidateIds.length === 0) {
-      logger?.warn(() => 'No selected candidates to finalize');
+      logger?.warn(() => 'No selected candidates to generate priorities from');
+      return {
+        ...state,
+        priorities: [],
+      };
+    }
+
+    // Check if we've exceeded max attempts
+    if (generationAttempts >= maxGenerationAttempts) {
+      logger?.warn(
+        () => `Max generation attempts (${maxGenerationAttempts}) reached, returning empty priorities`
+      );
+      return {
+        ...state,
+        priorities: [],
+      };
+    }
+
+    // Check if we've exceeded max hallucination failures
+    if (hallucinationFailures >= maxHallucinationFailures) {
+      logger?.warn(
+        () =>
+          `Max hallucination failures (${maxHallucinationFailures}) reached, returning empty priorities`
+      );
       return {
         ...state,
         priorities: [],
@@ -118,10 +154,11 @@ export const getFinalizePrioritiesNode = ({
       const formatInstructions = outputParser.getFormatInstructions();
 
       // Build the prompt with enriched entity data
+      // Combined prompt that asks for high-quality, refined priorities from the start
       const enrichedEntitiesText = formatEnrichedEntities(state);
       const prompt = `${
         prompts.finalizePriorities ||
-        'Analyze the following enriched entities and create a prioritized list of threat hunting priorities. Each priority should group related entities together when they represent the same threat or attack pattern. For each priority, provide a title (few words), byline (one sentence), detailed description, the associated entities, relevant tags (including MITRE ATT&CK techniques if applicable), a priority score (1-10, where 10 is highest priority), and chat recommendations (questions for further investigation).'
+        'Analyze the following enriched entities and create a high-quality, refined prioritized list of threat hunting priorities. Each priority should group related entities together when they represent the same threat or attack pattern. Ensure priorities are well-grouped, descriptions are clear, and low-quality items are excluded. For each priority, provide a title (few words), byline (one sentence), detailed description, the associated entities, relevant tags (including MITRE ATT&CK techniques if applicable), a priority score (1-10, where 10 is highest priority), and chat recommendations (questions for further investigation).'
       }
 
 Enriched Entities:
@@ -161,7 +198,7 @@ ${formatInstructions}`;
       const chain = chatPrompt.pipe(llm);
       const llmType = llm._llmType();
 
-      logger?.debug(() => `Finalize priorities node is invoking the chain (${llmType})`);
+      logger?.debug(() => `Generate priorities node is invoking the chain (${llmType})`);
 
       const rawResponse = (await chain.invoke({
         format_instructions: formatInstructions,
@@ -171,27 +208,47 @@ ${formatInstructions}`;
       // Extract JSON from response
       const jsonResponse = extractJson(rawResponse);
 
+      // Check for hallucinations
+      if (responseIsHallucinated(jsonResponse)) {
+        logger?.debug(
+          () =>
+            `Generate priorities node detected a hallucination (${llmType}), on attempt ${generationAttempts}`
+        );
+        return {
+          ...state,
+          generationAttempts: generationAttempts + 1,
+          hallucinationFailures: hallucinationFailures + 1,
+          priorities: null,
+          errors: [
+            ...(state.errors || []),
+            'Hallucination detected in generated priorities',
+          ],
+        };
+      }
+
       // Parse and validate the response
       const parsed = await outputParser.parse(jsonResponse);
 
       const priorities = parsed.priorities || [];
 
-      logger?.debug(() => `Finalized ${priorities.length} priorities`);
+      logger?.debug(() => `Generated ${priorities.length} priorities`);
 
       return {
         ...state,
         priorities,
-        unrefinedResults: priorities,
+        generationAttempts: generationAttempts + 1,
       };
     } catch (error) {
-      logger?.error(() => `Error finalizing priorities: ${error}`);
+      logger?.error(() => `Error generating priorities: ${error}`);
       return {
         ...state,
         priorities: null,
-        errors: [...(state.errors || []), `Error finalizing priorities: ${error}`],
+        errors: [...(state.errors || []), `Error generating priorities: ${error}`],
+        generationAttempts: generationAttempts + 1,
       };
     }
   };
 
-  return finalizePriorities;
+  return generatePriorities;
 };
+
