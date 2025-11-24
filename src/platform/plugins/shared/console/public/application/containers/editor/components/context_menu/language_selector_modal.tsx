@@ -117,7 +117,7 @@ export const LanguageSelectorModal = ({
           <p>
             <FormattedMessage
               id="console.requestPanel.contextMenu.languageSelectorModalDescription"
-              defaultMessage="Copy the selected code to your preferred client language."
+              defaultMessage="Convert Console requests into your preferred programming language."
             />
           </p>
         </EuiText>
