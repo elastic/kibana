@@ -51,6 +51,7 @@ const PostThreatHuntingPrioritiesGenerateResponse = z.object({
     .array(
       z.object({
         title: z.string(),
+        byline: z.string(),
         description: z.string(),
         entities: z.array(
           z.object({
@@ -61,6 +62,7 @@ const PostThreatHuntingPrioritiesGenerateResponse = z.object({
         ),
         tags: z.array(z.string()),
         priority: z.number().min(1).max(10),
+        chatRecommendations: z.array(z.string()),
       })
     )
     .nullable(),
@@ -347,10 +349,12 @@ export const postThreatHuntingPrioritiesGenerateRoute = (
                     created_at: now,
                     namespace: spaceId,
                     title: priority.title,
+                    byline: priority.byline,
                     description: priority.description,
                     entities: priority.entities,
                     tags: priority.tags,
                     priority: priority.priority,
+                    chat_recommendations: priority.chatRecommendations,
                     enriched_data: priority.enrichedData,
                     api_config: {
                       connector_id: apiConfig.connectorId,

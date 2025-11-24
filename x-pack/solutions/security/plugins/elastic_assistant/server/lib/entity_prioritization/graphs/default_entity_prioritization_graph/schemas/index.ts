@@ -25,11 +25,14 @@ export const getThreatHuntingPrioritiesGenerationSchema = (prompts: GenerationPr
         z.object({
           title: z
             .string()
-            .describe('A concise title for this threat hunting priority (e.g., "Lateral Movement Detected")'),
+            .describe('A few words summarizing the threat (e.g., "Lateral Movement Detected")'),
+          byline: z
+            .string()
+            .describe('A single sentence expanding on the threat and providing context'),
           description: z
             .string()
             .describe(
-              'A detailed description explaining why this is a priority and what threat hunting actions should be taken'
+              'A more detailed description explaining why this is a priority, what threats are indicated, and what investigation steps should be taken'
             ),
           entities: z
             .array(
@@ -52,6 +55,11 @@ export const getThreatHuntingPrioritiesGenerationSchema = (prompts: GenerationPr
             .min(1)
             .max(10)
             .describe(prompts.priority || 'Priority score from 1-10, where 10 is highest priority'),
+          chatRecommendations: z
+            .array(z.string())
+            .describe(
+              'Array of questions the user could ask the chat agent to continue investigating this threat. Focus on Elasticsearch-related topics like risk scores, asset criticality, entity store data, alerts, vulnerabilities, anomalies, and security analytics. Each question should be a complete, actionable query (e.g., "What is the risk score history for host.example.com over the last 30 days?", "Show me all alerts associated with user john.doe in the entity store", "What is the asset criticality level for these entities?")'
+            ),
         })
       )
       .describe('Array of prioritized threat hunting priorities'),

@@ -6,9 +6,9 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { RiskScoreDataClient } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_score/risk_score_data_client';
 
 import type { ThreatHuntingPrioritiesGraphState, CandidateEntity } from '../../../../state';
-import type { RiskScoreDataClient } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_score/risk_score_data_client';
 
 /**
  * Maps a SpikeEntity identifierKey to CandidateEntity entityType

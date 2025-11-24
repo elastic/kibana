@@ -121,18 +121,26 @@ export const getFinalizePrioritiesNode = ({
       const enrichedEntitiesText = formatEnrichedEntities(state);
       const prompt = `${
         prompts.finalizePriorities ||
-        'Analyze the following enriched entities and create a prioritized list of threat hunting priorities. Each priority should group related entities together when they represent the same threat or attack pattern. For each priority, provide a title, detailed description, the associated entities, relevant tags (including MITRE ATT&CK techniques if applicable), and a priority score (1-10, where 10 is highest priority).'
+        'Analyze the following enriched entities and create a prioritized list of threat hunting priorities. Each priority should group related entities together when they represent the same threat or attack pattern. For each priority, provide a title (few words), byline (one sentence), detailed description, the associated entities, relevant tags (including MITRE ATT&CK techniques if applicable), a priority score (1-10, where 10 is highest priority), and chat recommendations (questions for further investigation).'
       }
 
 Enriched Entities:
 ${enrichedEntitiesText}
 
 Create a prioritized list of threat hunting priorities. Each priority can include one or more entities if they are related to the same threat. For each priority:
-- Title: A concise, descriptive title (e.g., "Lateral Movement Between Critical Hosts")
-- Description: A detailed explanation of why this is a priority, what threats are indicated, and what investigation steps should be taken
+- Title: A few words summarizing the threat (e.g., "Lateral Movement Detected")
+- Byline: A single sentence expanding on the threat and providing context (e.g., "Multiple hosts showing signs of unauthorized lateral movement between critical systems")
+- Description: A more detailed explanation of why this is a priority, what threats are indicated, and what investigation steps should be taken
 - Entities: Array of entities (with type, idField like "host.name" or "user.name", and idValue) associated with this priority
 - Tags: Array of tags including key themes (e.g., "Lateral Movement", "Credential Theft") and MITRE ATT&CK techniques/tactics (e.g., "T1021", "Lateral Movement", "Credential Access")
 - Priority: A score from 1-10 based on threat level, asset criticality, and urgency
+- Chat Recommendations: Array of 3-5 short questions the user could ask the chat agent to continue investigating. Focus on Elasticsearch-related topics like:
+  * Risk scores: "What is the risk score history for [entity] over the last [time period]?"
+  * Asset criticality: "What is the asset criticality level for [entity]?"
+  * Entity store: "Show me the entity store details for [entity]"
+  * Vulnerabilities: "What vulnerabilities are associated with [entity]?"
+  * Anomalies: "What anomalies have been detected for [entity]?"
+  Each question should be short complete, actionable, and reference specific entities from the priority.
 
 Consider when grouping entities:
 - Entities involved in the same attack pattern or campaign

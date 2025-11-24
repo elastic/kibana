@@ -22,13 +22,14 @@ export interface ThreatHuntingPriorityEntity {
   idValue: string; // The actual entity identifier value
 }
 
-// TODO: Define ThreatHuntingPriority type based on your requirements
 export interface ThreatHuntingPriority {
-  title: string;
-  description: string;
+  title: string; // A few words summarizing the threat
+  byline: string; // A sentence expanding on the threat
+  description: string; // More detailed description of the threat and investigation steps
   entities: ThreatHuntingPriorityEntity[];
   tags: string[]; // Key themes or MITRE ATT&CK techniques
   priority: number; // 1-10, where 10 is highest priority
+  chatRecommendations: string[]; // Questions the user could ask the chat agent to continue investigating
   enrichedData?: {
     entityRecord?: unknown;
     alerts?: unknown[];
