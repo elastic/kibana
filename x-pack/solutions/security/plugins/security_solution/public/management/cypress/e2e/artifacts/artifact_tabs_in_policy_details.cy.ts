@@ -55,11 +55,6 @@ const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
   };
 };
 
-const visitArtifactTab = (tabId: string) => {
-  visitPolicyDetailsPage();
-  clickArtifactTab(tabId);
-};
-
 const clickArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
@@ -80,10 +75,17 @@ describe(
   },
   () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let policyId: string;
+
+    const visitArtifactTab = (tabId: string) => {
+      visitPolicyDetailsPage(policyId);
+      clickArtifactTab(tabId);
+    };
 
     before(() => {
       indexEndpointHosts().then((indexEndpoints) => {
         endpointData = indexEndpoints;
+        policyId = indexEndpoints.data.integrationPolicies[0].id;
       });
     });
 
@@ -107,7 +109,7 @@ describe(
           { tags: ['@skipInServerless'] },
           () => {
             loginWithPrivilegeNone(testData.privilegePrefix);
-            visitPolicyDetailsPage();
+            visitPolicyDetailsPage(policyId);
 
             cy.get(`#${testData.tabId}`).should('not.exist');
           }
