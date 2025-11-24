@@ -47,7 +47,11 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
     } catch (error) {
-      log.error(`[${phase}] Error logging index contents for ${indexPattern}:`, error);
+      log.error(
+        `[${phase}] Error logging index contents for ${indexPattern}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   };
 
@@ -75,7 +79,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
       return users;
     } catch (error) {
-      log.error(`[${phase}] Error logging users from API:`, error);
+      log.error(
+        `[${phase}] Error logging users from API: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return [];
     }
   };
@@ -93,7 +101,11 @@ export default ({ getService }: FtrProviderContext) => {
       log.info(`[${phase}] Last Processed Marker: ${lastProcessedMarker}`);
       return { syncData, lastProcessedMarker };
     } catch (error) {
-      log.error(`[${phase}] Error logging sync data:`, error);
+      log.error(
+        `[${phase}] Error logging sync data: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return { syncData: null, lastProcessedMarker: null };
     }
   };

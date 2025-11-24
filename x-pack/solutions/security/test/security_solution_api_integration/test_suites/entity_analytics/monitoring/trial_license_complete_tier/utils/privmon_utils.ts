@@ -43,6 +43,20 @@ interface TimestampSource {
   '@timestamp'?: string;
 }
 
+interface IntegrationUserSource {
+  '@timestamp'?: string;
+  user?: {
+    name?: string;
+    is_privileged?: boolean;
+    roles?: string[];
+    entity?: {
+      attributes?: {
+        Privileged?: boolean;
+      };
+    };
+  };
+}
+
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
@@ -417,7 +431,7 @@ export const PrivMonUtils = (
 
     // Verify the update by reading the document
     try {
-      const verifyResult = await es.search({
+      const verifyResult = await es.search<IntegrationUserSource>({
         index: indexPattern,
         query: { ids: { values: [id] } },
         size: 1,
@@ -439,7 +453,11 @@ export const PrivMonUtils = (
         );
       }
     } catch (error) {
-      log.error(`[setIntegrationUserPrivilege] Error verifying update:`, error);
+      log.error(
+        `[setIntegrationUserPrivilege] Error verifying update: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   };
 
@@ -529,7 +547,7 @@ export const PrivMonUtils = (
 
     // Verify the update by reading the document
     try {
-      const verifyResult = await es.search({
+      const verifyResult = await es.search<IntegrationUserSource>({
         index: indexPattern,
         query: { ids: { values: [id] } },
         size: 1,
@@ -548,7 +566,11 @@ export const PrivMonUtils = (
         );
       }
     } catch (error) {
-      log.error(`[updateIntegrationsUserTimeStamp] Error verifying update:`, error);
+      log.error(
+        `[updateIntegrationsUserTimeStamp] Error verifying update: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   };
 
