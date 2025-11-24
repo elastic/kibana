@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/expect'
   - '@kbn/dev-utils'
   - '@kbn/zod'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod

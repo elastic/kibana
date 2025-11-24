@@ -62,6 +62,7 @@ dependsOn:
   - '@kbn/lazy-object'
   - '@kbn/zod'
   - '@kbn/connector-schemas'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod

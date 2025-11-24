@@ -94,10 +94,10 @@ dependsOn:
   - '@kbn/elastic-assistant'
   - '@kbn/react-kibana-mount'
   - '@kbn/react-query'
-  - '@kbn/maps-plugin'
   - '@kbn/shared-ux-utility'
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-notifications-browser'
+  - '@kbn/deeplinks-agent-builder'
 tags:
   - plugin
   - prod

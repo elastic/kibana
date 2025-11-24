@@ -31,8 +31,7 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
+    - '**/*'
     - '!target/**/*'
 tasks:
   jest:

@@ -92,6 +92,7 @@ dependsOn:
   - '@kbn/onechat-common'
   - '@kbn/observability-agent-plugin'
   - '@kbn/onechat-plugin'
+  - '@kbn/aiops-log-rate-analysis'
 tags:
   - test-helper
   - package

@@ -155,7 +155,6 @@ dependsOn:
   - '@kbn/product-intercept-plugin'
   - '@kbn/onechat-common'
   - '@kbn/reindex-service-plugin'
-  - '@kbn/streamlang'
   - '@kbn/onechat-plugin'
   - '@kbn/field-formats-common'
   - '@kbn/reporting-test-routes'

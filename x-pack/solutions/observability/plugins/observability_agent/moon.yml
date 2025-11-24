@@ -31,11 +31,15 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/es-types'
+  - '@kbn/datemath'
+  - '@kbn/aiops-log-rate-analysis'
   - '@kbn/rule-registry-plugin'
   - '@kbn/observability-plugin'
   - '@kbn/core-http-server'
   - '@kbn/data-views-plugin'
   - '@kbn/metrics-data-access-plugin'
+  - '@kbn/ml-anomaly-utils'
+  - '@kbn/ml-plugin'
 tags:
   - plugin
   - prod

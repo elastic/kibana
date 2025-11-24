@@ -145,6 +145,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/lens-common-2'
   - '@kbn/react-kibana-context-common'
+  - '@kbn/unified-tabs'
 tags:
   - plugin
   - prod

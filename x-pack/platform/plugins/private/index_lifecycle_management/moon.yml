@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/shared-ux-table-persist'
   - '@kbn/index-lifecycle-management-common-shared'
   - '@kbn/licensing-types'
+  - '@kbn/test-eui-helpers'
 tags:
   - plugin
   - prod
