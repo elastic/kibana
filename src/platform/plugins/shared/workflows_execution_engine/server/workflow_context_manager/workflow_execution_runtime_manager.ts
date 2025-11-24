@@ -431,7 +431,6 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
-    await this.workflowExecutionState.flush();
   }
 
   private logWorkflowStart(): void {
