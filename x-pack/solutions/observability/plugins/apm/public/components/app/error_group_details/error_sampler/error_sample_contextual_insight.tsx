@@ -15,6 +15,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { ErrorSampleDetailTabContent } from './error_sample_detail';
 import { exceptionStacktraceTab, logStacktraceTab } from './error_tabs';
+import { getIsObservabilityAgentEnabled } from '../../../../../common/observability_agent/get_is_obs_agent_enabled';
 
 export function ErrorSampleContextualInsight({
   error,
@@ -41,7 +42,9 @@ export function ErrorSampleContextualInsight({
     };
   };
 }) {
-  const { observabilityAIAssistant, onechat } = useApmPluginContext();
+  const { observabilityAIAssistant, onechat, core } = useApmPluginContext();
+  const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
+  console.log('isObservabilityAgentEnabled', isObservabilityAgentEnabled);
 
   const [logStacktrace, setLogStacktrace] = useState('');
   const [exceptionStacktrace, setExceptionStacktrace] = useState('');
@@ -80,6 +83,96 @@ export function ErrorSampleContextualInsight({
     });
   }, [error, transaction, logStacktrace, exceptionStacktrace, observabilityAIAssistant]);
 
+  if (onechat && isObservabilityAgentEnabled) {
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="apmOnechatExplainThisErrorButton"
+            iconType="sparkles"
+            onClick={() => {
+              const serviceName = error.service.name;
+              const languageName = error.service.language?.name ?? '';
+              const runtimeName = error.service.runtime?.name ?? '';
+              const runtimeVersion = error.service.runtime?.version ?? '';
+              const transactionName = transaction?.transaction.name ?? '';
+
+              const attachments = [
+                {
+                  id: 'apm_error_details_screen_ctx',
+                  type: 'screen_context',
+                  getContent: () => ({
+                    app: 'apm',
+                    url: window.location.href,
+                    description: `APM error details page for ${serviceName}`,
+                  }),
+                },
+                {
+                  id: 'apm_error_details_error_ctx',
+                  type: OBSERVABILITY_ERROR_CONTEXT_ATTACHMENT_TYPE_ID,
+                  getContent: () => ({
+                    service: {
+                      name: serviceName,
+                      environment: error.service.environment,
+                      language: languageName,
+                      runtime_name: runtimeName,
+                      runtime_version: runtimeVersion,
+                    },
+                    transaction_name: transactionName,
+                    error_id: error.error.id,
+                    occurred_at: error['@timestamp'],
+                    log_stacktrace: logStacktrace,
+                    exception_stacktrace: exceptionStacktrace,
+                  }),
+                },
+              ];
+
+              onechat.openConversationFlyout({
+                initialMessage: i18n.translate(
+                  'xpack.apm.errorGroupContextualInsight.agentBuilderFlyoutInitialMessage',
+                  {
+                    defaultMessage:
+                      "I'm looking at an exception and trying to understand what it means",
+                  }
+                ),
+                attachments,
+                sessionTag: 'apm-error-context',
+                newConversation: true,
+                // agentId: OBSERVABILITY_AGENT_ID,
+              });
+            }}
+          >
+            {i18n.translate('xpack.apm.errorGroupContextualInsight.explainButtonLabel', {
+              defaultMessage: 'Explain this error',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiSpacer size="s" />
+        <div
+          ref={(next) => {
+            setLogStacktrace(next?.innerText ?? '');
+          }}
+          style={{ display: 'none' }}
+        >
+          {error.error.log?.message && (
+            <ErrorSampleDetailTabContent error={error} currentTab={logStacktraceTab} />
+          )}
+        </div>
+        <div
+          ref={(next) => {
+            setExceptionStacktrace(next?.innerText ?? '');
+          }}
+          style={{ display: 'none' }}
+        >
+          {error.error.exception?.length && (
+            <ErrorSampleDetailTabContent error={error} currentTab={exceptionStacktraceTab} />
+          )}
+        </div>
+      </>
+    );
+  }
+
   return observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight && messages ? (
     <>
       <EuiFlexItem>
@@ -90,72 +183,6 @@ export function ErrorSampleContextualInsight({
           })}
         />
       </EuiFlexItem>
-      {onechat ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="apmOnechatExplainThisErrorButton"
-              iconType="sparkles"
-              onClick={() => {
-                const serviceName = error.service.name;
-                const languageName = error.service.language?.name ?? '';
-                const runtimeName = error.service.runtime?.name ?? '';
-                const runtimeVersion = error.service.runtime?.version ?? '';
-                const transactionName = transaction?.transaction.name ?? '';
-
-                const attachments = [
-                  {
-                    id: 'apm_error_details_screen_ctx',
-                    type: 'screen_context',
-                    getContent: () => ({
-                      app: 'apm',
-                      url: window.location.href,
-                      description: `APM error details page for ${serviceName}`,
-                    }),
-                  },
-                  {
-                    id: 'apm_error_details_error_ctx',
-                    type: OBSERVABILITY_ERROR_CONTEXT_ATTACHMENT_TYPE_ID,
-                    getContent: () => ({
-                      service: {
-                        name: serviceName,
-                        environment: error.service.environment,
-                        language: languageName,
-                        runtime_name: runtimeName,
-                        runtime_version: runtimeVersion,
-                      },
-                      transaction_name: transactionName,
-                      error_id: error.error.id,
-                      occurred_at: error['@timestamp'],
-                      log_stacktrace: logStacktrace,
-                      exception_stacktrace: exceptionStacktrace,
-                    }),
-                  },
-                ];
-
-                onechat.openConversationFlyout({
-                  initialMessage: i18n.translate(
-                    'xpack.apm.errorGroupContextualInsight.agentBuilderFlyoutInitialMessage',
-                    {
-                      defaultMessage:
-                        "I'm looking at an exception and trying to understand what it means",
-                    }
-                  ),
-                  attachments,
-                  sessionTag: 'apm-error-context',
-                  newConversation: true,
-                  // agentId: OBSERVABILITY_AGENT_ID,
-                });
-              }}
-            >
-              {i18n.translate('xpack.apm.errorGroupContextualInsight.explainButtonLabel', {
-                defaultMessage: 'Explain this error',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </>
-      ) : null}
       <EuiSpacer size="s" />
       <div
         ref={(next) => {
