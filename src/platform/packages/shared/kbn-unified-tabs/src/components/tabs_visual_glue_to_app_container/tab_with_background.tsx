@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HTMLAttributes } from 'react';
-import React from 'react';
+import React, { type HTMLAttributes } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiSlightShadowHover, type EuiThemeComputed } from '@elastic/eui';
 import type { TabsServices } from '../../types';
@@ -56,19 +55,19 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
               filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.06))
                       drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.04));
             `
-            : `
-          `}
+            : ''}
         `}
       >
         <div
           css={css`
-            ${!isSelected &&
-            `
+            ${!isSelected
+              ? `
               &:hover {
                 background-color: ${euiTheme.colors.lightShade};
                 border-radius: ${euiTheme.border.radius.small};
               }
-            `}
+            `
+              : ''}
           `}
         >
           {children}
