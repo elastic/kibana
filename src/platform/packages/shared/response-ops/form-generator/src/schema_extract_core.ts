@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { addMeta } from './schema_connector_metadata';
+import { addMeta, getMeta, setMeta } from './schema_connector_metadata';
 
 interface HasUnwrap {
   unwrap(): z.ZodType;
@@ -37,17 +37,26 @@ export const extractSchemaCore = (schema: z.ZodType) => {
     if (current instanceof z.ZodDefault) {
       defaultValue = current.parse(undefined);
     }
+
     if (current instanceof z.ZodReadonly) {
+      // Readonly had no unwarp fn until v4.0.6
+      // https://github.com/colinhacks/zod/issues/4951
+      // This if statement can be removed when we upgrade
+      current = current.def.innerType as z.ZodType;
       addMeta(current, { readOnly: true });
+      continue;
     }
+
+    const actualMeta = getMeta(current);
     current = current.unwrap();
+    setMeta(current, actualMeta);
   }
 
   // If the schema is a literal, we need it as defaultValue.
   // Works for fields that are literally a non editable value, but also
   // for hidden fields like the discriminator value in a discriminated union.
-  if (schema instanceof z.ZodLiteral) {
-    defaultValue = schema.value;
+  if (current instanceof z.ZodLiteral) {
+    defaultValue = current.value;
   }
 
   return { schema: current as z.ZodType, defaultValue };

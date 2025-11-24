@@ -51,6 +51,11 @@ export function getMeta(schema: z.ZodType): BaseMetadata {
   return z.globalRegistry.get(schema) || {};
 }
 
+export function setMeta<T extends z.ZodType>(schema: T, meta: BaseMetadata): T {
+  z.globalRegistry.add(schema, meta as Record<string, unknown>);
+  return schema;
+}
+
 export function addMeta<T extends z.ZodType>(schema: T, meta: Partial<BaseMetadata>): T {
   const existing = getMeta(schema);
   z.globalRegistry.add(schema, { ...existing, ...meta } as Record<string, unknown>);
