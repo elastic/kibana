@@ -15,6 +15,7 @@ import type { MonitoringEntitySyncType, PrivMonBulkUser } from '../../../../type
 import { createSearchService } from '../../../../users/search';
 import { generateMonitoringLabels } from '../../generate_monitoring_labels';
 import { createSyncMarkersService } from '../sync_markers/sync_markers';
+import { createSyncMarkersStrategy } from '../../sync_markers_strategy';
 export type AfterKey = Record<string, string> | undefined;
 
 export interface PrivTopHitSource {
@@ -54,10 +55,8 @@ export interface PrivMatchersAggregation {
   };
 }
 
-type PrivMatcherMode = 'index' | 'integrations';
-
 interface PrivMatcherModeConfig {
-  useTimestamps: boolean;
+  useSyncMarkers: boolean;
   emptyMatcherPolicy: 'none' | 'all';
 }
 
@@ -67,7 +66,7 @@ const PRIV_MATCHER_MODE_CONFIG: Record<MonitoringEntitySyncType, PrivMatcherMode
    * - If no matchers → return 0 privileged users
    */
   entity_analytics_integration: {
-    useTimestamps: true,
+    useSyncMarkers: true,
     emptyMatcherPolicy: 'none',
   },
   /**
@@ -75,7 +74,7 @@ const PRIV_MATCHER_MODE_CONFIG: Record<MonitoringEntitySyncType, PrivMatcherMode
    * - If no matchers → treat all as privileged
    */
   index: {
-    useTimestamps: false,
+    useSyncMarkers: false,
     emptyMatcherPolicy: 'all',
   },
 };
@@ -92,18 +91,22 @@ export const createPatternMatcherService = ({
   const searchService = createSearchService(dataClient);
   const syncMarkerService = createSyncMarkersService(dataClient, soClient);
 
+  const modeConfig = PRIV_MATCHER_MODE_CONFIG[sourceType];
+  const syncMarkersStrategy = createSyncMarkersStrategy(
+    modeConfig.useSyncMarkers,
+    syncMarkerService
+  );
+
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonBulkUser[]> => {
-    const config = PRIV_MATCHER_MODE_CONFIG[sourceType];
-
     if (!source.matchers?.length) {
-      defaultMatchersPolicy(config.emptyMatcherPolicy, source); // TODO: too many params
+      defaultMatchersPolicy(modeConfig.emptyMatcherPolicy, source); // TODO: too many params
     }
 
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
     // the last processed user from previous task run.
-    const lastProcessedTimeStamp = await syncMarkerService.getLastProcessedMarker(source);
+    const lastProcessedTimeStamp = await syncMarkersStrategy.getLastProcessedMarker(source);
 
     let afterKey: AfterKey | undefined;
     let fetchMore = true;
@@ -117,7 +120,12 @@ export const createPatternMatcherService = ({
       while (fetchMore) {
         const response = await esClient.search<never, PrivMatchersAggregation>({
           index: source.indexPattern,
-          ...buildPrivilegedSearchBody(source.matchers, lastProcessedTimeStamp, afterKey, pageSize),
+          ...buildPrivilegedSearchBody(
+            source.matchers,
+            syncMarkersStrategy.getSearchTimestamp(lastProcessedTimeStamp),
+            afterKey,
+            pageSize
+          ),
         });
 
         const aggregations = response.aggregations;
@@ -129,8 +137,11 @@ export const createPatternMatcherService = ({
             aggregations,
             source
           );
-          // update running max timestamp seen
-          maxProcessedTimeStamp = maxTimestamp ?? maxProcessedTimeStamp;
+          // update running max timestamp seen (strategy handles timestamp-less mode)
+          maxProcessedTimeStamp = syncMarkersStrategy.pickLaterTimestamp(
+            maxProcessedTimeStamp,
+            maxTimestamp
+          );
 
           users.push(...privMonUsers);
         }
@@ -141,7 +152,7 @@ export const createPatternMatcherService = ({
       }
 
       dataClient.log('info', `Found ${users.length} privileged users from matchers.`);
-      await syncMarkerService.updateLastProcessedMarker(source, maxProcessedTimeStamp);
+      await syncMarkersStrategy.updateLastProcessedMarker(source, maxProcessedTimeStamp);
       return users;
     } catch (error) {
       dataClient.log('error', `Error finding privileged users from matchers: ${error.message}`);
@@ -195,7 +206,7 @@ export const createPatternMatcherService = ({
 
   const defaultMatchersPolicy = async (
     // TODO: this assumes type is the index or integrations type
-    emptyMatcherPolicy: string,
+    emptyMatcherPolicy: PrivMatcherModeConfig['emptyMatcherPolicy'],
     source: MonitoringEntitySource
   ) => {
     if (emptyMatcherPolicy === 'none') {
