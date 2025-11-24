@@ -8410,11 +8410,6 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               "can_read_param_values": Array [
                 "login:",
-                "saved_object:synthetics-param/bulk_get",
-                "saved_object:synthetics-param/get",
-                "saved_object:synthetics-param/find",
-                "saved_object:synthetics-param/open_point_in_time",
-                "saved_object:synthetics-param/close_point_in_time",
                 "ui:uptime/canReadParamValues",
               ],
               "elastic_managed_locations_enabled": Array [
