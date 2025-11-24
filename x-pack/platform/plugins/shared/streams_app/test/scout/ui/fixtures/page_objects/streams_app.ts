@@ -47,7 +47,7 @@ export class StreamsApp {
 
   async gotoStreamManagementTab(streamName: string, tabName: string) {
     await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
-    await expect(this.page.testSubj.locator('backToStreamsButton')).toBeVisible({
+    await expect(this.page.locator('[data-test-subj^="streamsDiscoverActionButton"]')).toBeVisible({
       timeout: 20_000,
     });
   }
