@@ -717,7 +717,7 @@ describe('When calling package policy', () => {
       });
 
       await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
-        /Creating agentless package policies should be done through the agentless policies API./
+        /To create agentless package policies, use the Fleet agentless policies API./
       );
     });
 
