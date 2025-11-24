@@ -11,7 +11,6 @@ import type { Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { PROPERTY_PATH_REGEX } from '../../../../../../../common/lib/regex';
 
-// TODO: extract the formatting logic, which is related only to the variable completions
 export function wrapAsMonacoSuggestion(
   key: string,
   triggerCharacter: string | null,
@@ -36,6 +35,7 @@ export function wrapAsMonacoSuggestion(
   let insertText = keyToInsert;
   let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
   if (isAt) {
+    // $0 is the cursor position
     insertText = `${key}$0`;
     if (useCurlyBraces) {
       insertText = `{{ ${insertText} }}`;
@@ -46,7 +46,6 @@ export function wrapAsMonacoSuggestion(
   if (shouldBeQuoted) {
     insertText = `"${insertText}"`;
   }
-  // $0 is the cursor position
   return {
     label: key,
     kind: monaco.languages.CompletionItemKind.Field,

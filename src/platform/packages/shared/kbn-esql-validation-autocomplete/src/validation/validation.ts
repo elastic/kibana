@@ -20,7 +20,7 @@ import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
-import type { ReferenceMaps, ValidationResult } from './types';
+import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './helpers';
 
 /**
@@ -29,12 +29,18 @@ import { getSubqueriesToValidate } from './helpers';
  * The astProvider is optional, but if not provided the default one from '@kbn/esql-validation-autocomplete' will be used.
  * This is useful for async loading the ES|QL parser and reduce the bundle size, or to swap grammar version.
  * As for the callbacks, while optional, the validation function will selectively ignore some errors types based on each callback missing.
+ *
+ * @param queryString - The query string to validate
+ * @param callbacks - Optional callbacks for resource retrieval.
+ * @param options.invalidateColumnsCache - Invalidates the columns metadata cache before validation. Has no effect if 'getColumnsFor' callback is not provided.
+ *
  */
 export async function validateQuery(
   queryString: string,
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  options?: ValidationOptions
 ): Promise<ValidationResult> {
-  return validateAst(queryString, callbacks);
+  return validateAst(queryString, callbacks, options);
 }
 
 function shouldValidateCallback<K extends keyof ESQLCallbacks>(
@@ -52,7 +58,8 @@ function shouldValidateCallback<K extends keyof ESQLCallbacks>(
  */
 async function validateAst(
   queryString: string,
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  options?: ValidationOptions
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
@@ -74,7 +81,12 @@ async function validateAst(
 
   const sourceQuery = queryString.split('|')[0];
   const sourceFields = shouldValidateCallback(callbacks, 'getColumnsFor')
-    ? await new QueryColumns(EsqlQuery.fromSrc(sourceQuery).ast, sourceQuery, callbacks).asMap()
+    ? await new QueryColumns(
+        EsqlQuery.fromSrc(sourceQuery).ast,
+        sourceQuery,
+        callbacks,
+        options
+      ).asMap()
     : new Map();
 
   if (shouldValidateCallback(callbacks, 'getColumnsFor') && sourceFields.size > 0) {
@@ -122,7 +134,7 @@ async function validateAst(
         : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryForColumns, queryString, callbacks).asMap()
+      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
