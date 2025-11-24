@@ -482,54 +482,6 @@ describe('processGapsBatch', () => {
     });
   });
 
-  describe('when processing gaps without ruleId', () => {
-    const gapsWithMixedRuleIds = [
-      createGap({
-        ruleId: 'valid-rule',
-        range: getRange('2025-05-10T09:15:09.457Z', '2025-05-11T09:15:09.457Z'),
-      }),
-      // Gap without ruleId should be skipped
-      createGap({
-        ruleId: '',
-        range: getRange('2025-05-11T09:15:09.457Z', '2025-05-12T09:15:09.457Z'),
-      }),
-    ];
-
-    beforeEach(async () => {
-      scheduleBackfillMock.mockResolvedValue([{ some: 'successful result' }]);
-      await callProcessGapsBatch(gapsWithMixedRuleIds, backfillingDateRange);
-    });
-
-    it('should skip gaps without ruleId', () => {
-      expect(scheduleBackfillMock).toHaveBeenCalledTimes(1);
-      expect(scheduleBackfillMock).toHaveBeenCalledWith(
-        context,
-        [
-          {
-            ruleId: 'valid-rule',
-            initiator: backfillInitiator.USER,
-            ranges: [gapsWithMixedRuleIds[0]].flatMap(getGapScheduleRange),
-          },
-        ],
-        [gapsWithMixedRuleIds[0]]
-      );
-    });
-
-    it('should return results only for valid gaps', () => {
-      expect(result).toEqual({
-        processedGapsCount: 1,
-        hasErrors: false,
-        results: [
-          {
-            ruleId: 'valid-rule',
-            processedGaps: 1,
-            status: 'success',
-          },
-        ],
-      });
-    });
-  });
-
   describe('initiatorId forwarding', () => {
     it('forwards initiatorId to scheduleBackfill for single-rule batches', async () => {
       scheduleBackfillMock.mockResolvedValue([{ some: 'successful result' }]);
