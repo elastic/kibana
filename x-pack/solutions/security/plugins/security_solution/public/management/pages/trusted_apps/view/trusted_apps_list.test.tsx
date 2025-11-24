@@ -45,7 +45,7 @@ describe('When on the trusted applications page', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
     // enable process descendants feature flag
-    mockedContext.setExperimentalFlag({'filterProcessDescendantsForTrustedAppsEnabled': true});
+    mockedContext.setExperimentalFlag({ filterProcessDescendantsForTrustedAppsEnabled: true });
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<TrustedAppsList />));
 

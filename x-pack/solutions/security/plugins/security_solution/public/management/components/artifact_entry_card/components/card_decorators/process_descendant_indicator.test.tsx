@@ -59,20 +59,29 @@ describe('ProcessDescendantIndicator', () => {
   });
 
   it('should display indication if Event Filter is for process descendants', () => {
-    render({ item: getProcessDescendantEventFilter(), labels: EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS });
+    render({
+      item: getProcessDescendantEventFilter(),
+      labels: EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS,
+    });
 
     expect(renderResult.getByTestId('test-processDescendantsIndication')).toBeInTheDocument();
   });
 
   it('should display indication if Trusted App is for process descendants', () => {
-    render({ item: getProcessDescendantTrustedApp(), labels: TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS });
+    render({
+      item: getProcessDescendantTrustedApp(),
+      labels: TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS,
+    });
 
     expect(renderResult.getByTestId('test-processDescendantsIndication')).toBeInTheDocument();
   });
 
   it('should mention additional `event.category is process` entry in tooltip for event filters', async () => {
     const prefix = 'test-processDescendantsIndicationTooltip';
-    render({ item: getProcessDescendantEventFilter(), labels: EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS });
+    render({
+      item: getProcessDescendantEventFilter(),
+      labels: EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS,
+    });
 
     expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();
 
