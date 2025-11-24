@@ -68,7 +68,9 @@ const BaseComponent = () => {
   const { serverless } = useKibana().services;
   const isServerless = !!serverless;
 
-  const exportButtonRef = useRef<HTMLButtonElement>(null);
+  const [exportButtonElement, setExportButtonElement] = useState<
+    HTMLAnchorElement | HTMLButtonElement | null
+  >(null);
 
   // since we do not have a search bar in the AI Value page, we need to sync the timerange
   useSyncTimerangeUrlParam();
@@ -76,7 +78,7 @@ const BaseComponent = () => {
   const timeRange = useMemo(() => ({ to, from }), [to, from]);
 
   const { toggleContextMenu, isExportEnabled } = useDownloadAIValueReport({
-    anchorElement: exportButtonRef.current,
+    anchorElement: exportButtonElement,
     timeRange,
   });
 
@@ -96,7 +98,7 @@ const BaseComponent = () => {
         <EuiButtonEmpty
           className="exportPdfButton"
           iconType="export"
-          buttonRef={exportButtonRef}
+          buttonRef={setExportButtonElement}
           size="s"
           aria-label={EXPORT_REPORT}
           onClick={toggleContextMenu}
@@ -105,7 +107,7 @@ const BaseComponent = () => {
           {EXPORT_REPORT}
         </EuiButtonEmpty>
       ),
-    [isServerless, isExportEnabled, exportButtonRef, toggleContextMenu]
+    [isServerless, isExportEnabled, toggleContextMenu]
   );
 
   if (!hasSocManagementCapability) {
