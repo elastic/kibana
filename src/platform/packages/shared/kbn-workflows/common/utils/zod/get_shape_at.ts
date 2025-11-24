@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { getShape } from './get_shape';
 import { getZodObjectProperty } from './get_zod_object_property';
 
@@ -18,6 +18,10 @@ export function getShapeAt(
   const schemaAtProperty = getZodObjectProperty(schema, property);
   if (schemaAtProperty === null) {
     return {};
+  }
+  // SPECIAL handling for bulk request body. It is an array of objects, in workflows we wrap it in "operations" property.
+  if (property === 'body' && schemaAtProperty instanceof z.ZodArray) {
+    return { operations: schemaAtProperty.describe('Bulk request body') };
   }
   return getShape(schemaAtProperty as z.ZodObject);
 }
