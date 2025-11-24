@@ -615,7 +615,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         describe('when the LLM calls a tool that is not available', function () {
-          let messageAddedEvents: MessageAddEvent[];
           let fullConversation: Conversation;
           before(async () => {
             void proxy.interceptTitle('LLM-generated title');
@@ -631,14 +630,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
             void proxy.interceptWithResponse('Hello from LLM Proxy, again!');
 
-            const { messageAddedEvents: messageAddedEventsResponse, conversationCreateEvent } =
-              await chatComplete({
-                userPrompt: 'user prompt test spec',
-                connectorId,
-                persist: true,
-                observabilityAIAssistantAPIClient,
-              });
-            messageAddedEvents = messageAddedEventsResponse;
+            const { conversationCreateEvent } = await chatComplete({
+              userPrompt: 'user prompt test spec',
+              connectorId,
+              persist: true,
+              observabilityAIAssistantAPIClient,
+            });
 
             await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
@@ -725,7 +722,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         describe('when the LLM calls a tool with invalid arguments', function () {
-          let messageAddedEvents: MessageAddEvent[];
           let fullConversation: Conversation;
           before(async () => {
             void proxy.interceptTitle('LLM-generated title');
@@ -742,14 +738,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             void proxy.interceptWithResponse('I will not call the kibana function!');
             void proxy.interceptWithResponse('Hello from LLM Proxy, again!');
 
-            const { messageAddedEvents: messageAddedEventsResponse, conversationCreateEvent } =
-              await chatComplete({
-                userPrompt: 'user prompt test spec',
-                connectorId,
-                persist: true,
-                observabilityAIAssistantAPIClient,
-              });
-            messageAddedEvents = messageAddedEventsResponse;
+            const { conversationCreateEvent } = await chatComplete({
+              userPrompt: 'user prompt test spec',
+              connectorId,
+              persist: true,
+              observabilityAIAssistantAPIClient,
+            });
 
             await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
