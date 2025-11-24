@@ -22,15 +22,11 @@ export async function update(
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const { references: incomingReferences, ...incomingDashboardState } = searchBody.data;
   const {
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn({
-    dashboardState: incomingDashboardState,
-    incomingReferences,
-  });
+  } = transformDashboardIn(searchBody.data);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }

@@ -54,3 +54,20 @@ export const InheritanceModal: Story = {
     showIlmDescription: false,
   },
 };
+
+export const InheritanceModalWithRetentionDisabled: Story = {
+  args: {
+    failureStoreProps: {
+      failureStoreEnabled: true,
+      defaultRetentionPeriod: '30d',
+      retentionDisabled: true,
+    },
+    inheritOptions: {
+      canShowInherit: true,
+      isWired: false,
+      isCurrentlyInherited: false,
+    },
+    showIlmDescription: true,
+    canShowDisableLifecycle: true,
+  },
+};
