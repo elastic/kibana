@@ -103,28 +103,33 @@ describe('SloHealthCallout', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('should not render when SLO health is healthy', () => {
+  it('should not render when SLO health is not problematic', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'healthy',
+            isProblematic: false,
             rollup: {
+              isProblematic: false,
+              missing: false,
               status: 'healthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
             summary: {
+              isProblematic: false,
+              missing: false,
               status: 'healthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -139,22 +144,27 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
+              isProblematic: true,
+              missing: false,
               status: 'unhealthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
             summary: {
+              isProblematic: false,
+              missing: false,
               status: 'healthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -172,21 +182,26 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
-              status: 'missing',
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
             },
             summary: {
+              isProblematic: false,
+              missing: false,
               status: 'healthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -204,22 +219,27 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
+              isProblematic: false,
+              missing: false,
               status: 'healthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
             summary: {
+              isProblematic: true,
+              missing: false,
               status: 'unhealthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -237,21 +257,26 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
+              isProblematic: false,
+              missing: false,
               status: 'healthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
             summary: {
-              status: 'missing',
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -269,21 +294,26 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
+              isProblematic: true,
+              missing: false,
               status: 'unhealthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
             summary: {
-              status: 'missing',
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -308,21 +338,26 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
-              status: 'missing',
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
             },
             summary: {
+              isProblematic: true,
+              missing: false,
               status: 'unhealthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -347,22 +382,27 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
+              isProblematic: true,
+              missing: false,
               status: 'unhealthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
             summary: {
+              isProblematic: true,
+              missing: false,
               status: 'unhealthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -387,20 +427,25 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
-              status: 'missing',
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
             },
             summary: {
-              status: 'missing',
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -425,21 +470,26 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
-              status: 'missing',
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
             },
             summary: {
+              isProblematic: false,
+              missing: false,
               status: 'healthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
           },
-          state: 'running',
         },
       ],
     });
@@ -461,22 +511,27 @@ describe('SloHealthCallout', () => {
       isError: false,
       data: [
         {
-          sloId: 'test-slo-id',
-          sloInstanceId: 'irrelevant',
-          sloRevision: 1,
-          sloName: 'Test SLO',
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
           health: {
-            overall: 'unhealthy',
+            isProblematic: true,
             rollup: {
+              isProblematic: true,
+              missing: false,
               status: 'unhealthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
             summary: {
+              isProblematic: false,
+              missing: false,
               status: 'healthy',
-              transformState: 'started',
+              state: 'started',
+              stateMatches: true,
             },
           },
-          state: 'running',
         },
       ],
     });
