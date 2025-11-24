@@ -6,10 +6,15 @@
  */
 
 import { Readable } from 'stream';
+import { createFileClientMock, createFileMock } from '@kbn/files-plugin/server/mocks';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ScriptsLibrarySavedObjectAttributes, ScriptsLibraryClientInterface } from './types';
+import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
+import { createHapiReadableStreamMock } from '../actions/mocks';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
 import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointScript } from '../../../../common/endpoint/types';
-import type { ScriptsLibraryClientInterface } from './types';
 
 const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): EndpointScript => {
   return {
@@ -41,8 +46,39 @@ const generateCreateScriptBodyMock = (
     instructions: 'just execute it',
     example: 'bash -c script_one.sh',
     requiresInput: false,
-    file: Readable.from(['test']),
+    file: createHapiReadableStreamMock(),
     ...overrides,
+  };
+};
+
+const generateSavedObjectScriptEntryMock = (
+  scriptEntrySoAttributeOverrides: Partial<ScriptsLibrarySavedObjectAttributes> = {}
+): SavedObject<ScriptsLibrarySavedObjectAttributes> => {
+  return {
+    type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+    id: '1-2-3',
+    namespaces: ['default'],
+    attributes: {
+      id: '1-2-3',
+      hash: 'e5441eb2bb',
+      name: 'my script',
+      platform: ['macos', 'linux'],
+      requires_input: undefined,
+      description: undefined,
+      instructions: undefined,
+      example: undefined,
+      executable: undefined,
+      created_by: 'elastic',
+      updated_by: 'elastic',
+      ...scriptEntrySoAttributeOverrides,
+    },
+    references: [],
+    managed: false,
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '10.1.0',
+    updated_at: '2025-11-24T16:04:17.471Z',
+    created_at: '2025-11-24T16:04:17.471Z',
+    version: 'WzgsMV0=',
   };
 };
 
@@ -63,8 +99,48 @@ const getScriptsLibraryClientMock = (): jest.Mocked<ScriptsLibraryClientInterfac
   };
 };
 
+const createFilesPluginClientMock = <Meta = unknown>(
+  fileDataOverride: Partial<FileJSON<Meta>> = {}
+): {
+  client: ReturnType<typeof createFileClientMock>;
+  file: ReturnType<typeof createFileMock>;
+} => {
+  const file = createFileMock(fileDataOverride);
+  const client = createFileClientMock<Meta>();
+
+  file.update.mockImplementation(async (attr) => {
+    Object.assign(file.data, attr);
+    return file;
+  });
+  file.uploadContent.mockResolvedValue(file);
+  file.delete.mockResolvedValue(undefined);
+
+  client.create.mockResolvedValue(file);
+  client.get.mockResolvedValue(file);
+  client.update.mockResolvedValue(undefined);
+  client.delete.mockResolvedValue(undefined);
+
+  return { file, client };
+};
+
+const applySoClientMocks = (soClient: jest.Mocked<SavedObjectsClientContract>): void => {
+  const scriptSoEntryMock = generateSavedObjectScriptEntryMock();
+
+  soClient.create.mockResolvedValue(scriptSoEntryMock);
+  soClient.get.mockResolvedValue(scriptSoEntryMock);
+  soClient.update.mockResolvedValue(scriptSoEntryMock);
+  soClient.find.mockResolvedValue({
+    page: 0,
+    per_page: 0,
+    total: 0,
+    saved_objects: [{ ...scriptSoEntryMock, score: 1 }],
+  });
+};
+
 export const ScriptsLibraryMock = Object.freeze({
   getMockedClient: getScriptsLibraryClientMock,
   generateScriptEntry: generateScriptEntryMock,
   generateCreateScriptBody: generateCreateScriptBodyMock,
+  createFilesPluginClient: createFilesPluginClientMock,
+  applyMocksToSoClient: applySoClientMocks,
 });

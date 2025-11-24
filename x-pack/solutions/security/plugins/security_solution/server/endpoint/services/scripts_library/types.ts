@@ -9,6 +9,8 @@ import type { Readable } from 'stream';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
 import type { EndpointScript } from '../../../../common/endpoint/types';
 
+export type { ScriptsLibrarySavedObjectAttributes } from '../../lib/scripts_library';
+
 export interface ScriptsLibraryClientInterface {
   create: (script: CreateScriptRequestBody) => Promise<EndpointScript>;
   /**

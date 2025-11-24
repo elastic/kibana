@@ -17,7 +17,6 @@ import { v4 as uuidV4 } from 'uuid';
 import assert from 'assert';
 import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import type { HapiReadableStream } from '../../../types';
-import type { ScriptsLibrarySavedObjectAttributes } from '../../lib/scripts_library';
 import {
   SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME,
   SCRIPTS_LIBRARY_FILE_METADATA_INDEX_NAME,
@@ -27,7 +26,11 @@ import { ScriptLibraryError } from './common';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
 import type { EndpointScript } from '../../../../common/endpoint/types';
-import type { ScriptDownloadResponse, ScriptsLibraryClientInterface } from './types';
+import type {
+  ScriptDownloadResponse,
+  ScriptsLibraryClientInterface,
+  ScriptsLibrarySavedObjectAttributes,
+} from './types';
 import { wrapErrorIfNeeded } from '../../utils';
 import { stringify } from '../../utils/stringify';
 
@@ -35,7 +38,7 @@ export interface ScriptsLibraryClientOptions {
   spaceId: string;
   username: string;
   endpointService: EndpointAppContextService;
-  // FIXME:PT remove this once we have updatd the privileges for kibana_system account
+  // FIXME:PT remove this once we have updated the privileges for kibana_system account
   esClient?: ElasticsearchClient;
 }
 
