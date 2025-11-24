@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { useOnechatAgents } from '../../hooks/agents/use_agents';
-import { useHasActiveConversation } from '../../hooks/use_conversation';
-import { useConversationContext } from '../../context/conversation/conversation_context';
+import { useOnechatAgents } from '../../../hooks/agents/use_agents';
+import { useHasActiveConversation } from '../../../hooks/use_conversation';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AgentSelectDropdown } from './agent_select_dropdown';
 
 interface ConversationAgentSelectorProps {
