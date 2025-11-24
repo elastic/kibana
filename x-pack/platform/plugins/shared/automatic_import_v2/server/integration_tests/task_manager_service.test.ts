@@ -159,6 +159,7 @@ describe('TaskManagerService Integration Tests', () => {
 
       const integrationData = {
         integration_id: 'test-int-123',
+        data_stream_count: 1,
         created_by: mockUser.username,
         status: TASK_STATUSES.pending,
         metadata: {
@@ -201,7 +202,7 @@ describe('TaskManagerService Integration Tests', () => {
         metadata: {
           sample_count: 0,
           created_at: new Date().toISOString(),
-          version: '0.0.0',
+          version: '1.0.0',
           input_type: INPUT_TYPES.filestream,
         },
         result: {},
@@ -215,13 +216,13 @@ describe('TaskManagerService Integration Tests', () => {
       expect(dataStreamSavedObject.id).toBe('test-ds-456');
       expect(dataStreamSavedObject.attributes?.job_info?.job_id).toBe(scheduledTask.taskId);
       expect(dataStreamSavedObject.attributes?.job_info?.status).toBe(TASK_STATUSES.pending);
-      expect(dataStreamSavedObject.attributes?.metadata?.version).toBe('0.0.0');
+      expect(dataStreamSavedObject.attributes?.metadata?.version).toBe('1.0.0');
 
       const task = await taskManagerService.getTaskStatus(scheduledTask.taskId);
 
       expect(task.task_status).toBe(TASK_STATUSES.pending);
 
-      const currentVersion = dataStreamSavedObject.attributes.metadata?.version || '0.0.0';
+      const currentVersion = dataStreamSavedObject.attributes.metadata?.version || '1.0.0';
       const completedDataStreamData = {
         integration_id: dataStreamSavedObject.attributes.integration_id,
         data_stream_id: dataStreamSavedObject.attributes.data_stream_id,
@@ -247,7 +248,7 @@ describe('TaskManagerService Integration Tests', () => {
       );
 
       expect(completedDataStream.attributes?.job_info?.status).toBe(TASK_STATUSES.completed);
-      expect(completedDataStream.attributes?.metadata?.version).toBe('0.0.1'); // Version bumped once (from 0.0.0 to 0.0.1)
+      expect(completedDataStream.attributes?.metadata?.version).toBe('1.0.1'); // Version bumped once (from 1.0.0 to 1.0.1)
 
       // Verify we can retrieve both saved objects with their final state
       const finalIntegration = await savedObjectService.getIntegration(integrationSavedObject.id);
@@ -288,6 +289,7 @@ describe('TaskManagerService Integration Tests', () => {
           // Create integration
           const integrationData = {
             integration_id: integrationId,
+            data_stream_count: 1,
             created_by: mockUser.username,
             status: TASK_STATUSES.pending,
             metadata: {
@@ -324,7 +326,7 @@ describe('TaskManagerService Integration Tests', () => {
             metadata: {
               sample_count: 0,
               created_at: new Date().toISOString(),
-              version: '0.0.0',
+              version: '1.0.0',
               input_type: INPUT_TYPES.filestream,
             },
             result: {},

@@ -12,6 +12,7 @@ import { MAX_ID_LENGTH, MAX_VERSION_LENGTH, MIN_VERSION_LENGTH } from './constan
 
 export const integrationSchemaV1 = schema.object({
   integration_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
+  data_stream_count: schema.maybe(schema.number()),
   created_by: schema.string({ minLength: 1 }),
   status: schema.oneOf(
     Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]

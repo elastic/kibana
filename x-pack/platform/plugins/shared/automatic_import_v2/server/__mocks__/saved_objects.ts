@@ -18,13 +18,14 @@ import {
 
 export const mockIntegrationData: IntegrationAttributes = {
   integration_id: 'test-integration-id',
+  data_stream_count: 2,
   created_by: 'test-user',
   status: TASK_STATUSES.pending,
   metadata: {
     title: 'Test Integration',
     description: 'A test integration',
     created_at: '2024-01-01T00:00:00.000Z',
-    version: '0.0.0',
+    version: '1.0.0',
   },
 };
 
@@ -39,7 +40,7 @@ export const mockDataStreamData: DataStreamAttributes = {
   },
   metadata: {
     sample_count: 100,
-    version: '0.0.0',
+    version: '1.0.0',
     created_at: '2024-01-01T00:00:00.000Z',
   },
   result: {
