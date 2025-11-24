@@ -5,13 +5,13 @@ info:
 paths:
   /api/endpoint/action/scripts_library:
     post:
-      summary: Create a new script entry by uploading a script file
+      summary: Create script
       operationId: EndpointScriptLibraryCreateScript
       description: Create a new script entry by uploading a script file
       x-codegen-enabled: false
+#      x-labels: []
 #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-#      x-labels: [ ess, serverless ]
-      x-labels: []
+      x-labels: [ ess, serverless ]
       requestBody:
         required: true
         content:
@@ -67,13 +67,8 @@ components:
             Used only for when the uploaded script is an archive (ex. zip file).
             This property defines the relative path to the file included in the archive that should be executed
             once its contents are extracted. The path should be relative to the root of the archive.
-          example: |
-            script.zip contains:
-            /bin/script.sh
-            /lib/lib.h
-            /readme.txt
+          example: ./bin/script.sh
 
-            executable should be defined as: ./bin/script.sh
 
 
 

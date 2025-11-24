@@ -18,8 +18,10 @@ components:
         id:
           type: string
           format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440000
         name:
           type: string
+          example: Collect host data
         platform:
           type: array
           items:
@@ -29,9 +31,11 @@ components:
         downloadUri:
           type: string
           description: URI to download the script file. Note that this is the relative path and does not include the space (if applicable)
+          example: /api/endpoint/action/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
         description:
           type: string
           description: Description of the script and its purpose/functionality
+          example: Collects host data for investigation
         instructions:
           type: string
           description: Instructions for using the script, including details around its supported input arguments
@@ -44,16 +48,19 @@ components:
             are extracted. Applicable only for scripts uploaded as an archive (ex. zip file).
         createdBy:
           type: string
+          example: elastic
         createAt:
           type: string
           format: date-time
         updatedBy:
           type: string
+          example: admin
         updatedAt:
           type: string
           format: date-time
         version:
           type: string
+
 
     ScriptsApiResponse:
       type: object
