@@ -9,7 +9,7 @@
 
 import type { OTLPExportConfig } from '@kbn/tracing-config';
 import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-http';
-import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
+import { OTLPTraceExporter as OTLPTraceExporterGRPC } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { diag } from '@opentelemetry/api';
 
@@ -19,7 +19,7 @@ export class OTLPSpanProcessor extends tracing.BatchSpanProcessor {
 
     const exporter =
       protocol === 'grpc'
-        ? new OTLPTraceExporterProto({
+        ? new OTLPTraceExporterGRPC({
             url: config.url,
             headers: config.headers,
           })
