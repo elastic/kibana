@@ -11,7 +11,7 @@ import { generateEsql } from '@kbn/onechat-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { getSpaceIdFromRequest } from '../helpers';
-import { securityTool } from '../constants';
+import { ESSENTIAL_ALERT_FIELDS, securityTool } from '../constants';
 
 const alertsIndexSearchSchema = z.object({
   query: z
@@ -21,20 +21,9 @@ const alertsIndexSearchSchema = z.object({
     ),
 });
 
-export const SECURITY_ALERTS_INDEX_SEARCH_TOOL_ID = securityTool('alerts-index-search');
+export const SECURITY_ALERTS_INDEX_SEARCH_TOOL_ID = securityTool('alerts_index_search');
 
-const KEEP_FIELDS = [
-  '@timestamp',
-  'host.name',
-  'user.name',
-  'kibana.alert.rule.name',
-  'kibana.alert.severity',
-  'kibana.alert.risk_score',
-  'source.ip',
-  'destination.ip',
-  'event.category',
-  'message',
-].join(', ');
+const KEEP_FIELDS = ESSENTIAL_ALERT_FIELDS.join(', ');
 
 const ADDITIONAL_INSTRUCTIONS = `When querying security alert indices, ALWAYS use the KEEP command to filter fields and reduce response size. Include these essential fields: ${KEEP_FIELDS}. Limit results to 50 alerts. Example: FROM .alerts-security.alerts-* | KEEP ${KEEP_FIELDS} | ...`;
 
@@ -44,10 +33,7 @@ export const alertsIndexSearchTool = (): BuiltinToolDefinition<typeof alertsInde
     type: ToolType.builtin,
     description: `Search and analyze security alerts from the alerts index. Use this tool to find related alerts by entities like host names, user names, IP addresses, file hashes, or other alert fields. Automatically filters to essential fields and limits results to 50 alerts.`,
     schema: alertsIndexSearchSchema,
-    handler: async (
-      { query: nlQuery },
-      { request, esClient, modelProvider, logger, events }
-    ) => {
+    handler: async ({ query: nlQuery }, { request, esClient, modelProvider, logger, events }) => {
       const spaceId = getSpaceIdFromRequest(request);
       const searchIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
@@ -129,4 +115,3 @@ export const alertsIndexSearchTool = (): BuiltinToolDefinition<typeof alertsInde
     tags: ['security', 'alerts', 'search'],
   };
 };
-

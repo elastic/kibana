@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
-import { securityTool } from '../constants';
+import { securityTool } from './constants';
 
 const securityLabsSearchSchema = z.object({
   query: z
@@ -20,7 +20,7 @@ const securityLabsSearchSchema = z.object({
     ),
 });
 
-export const SECURITY_LABS_SEARCH_TOOL_ID = securityTool('security-labs-search');
+export const SECURITY_LABS_SEARCH_TOOL_ID = securityTool('security_labs_search');
 
 const SECURITY_LABS_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-base-default';
 
@@ -47,7 +47,6 @@ export const securityLabsSearchTool = (): BuiltinToolDefinition<
           logger,
           events,
         });
-        console.log('SL ==>', results);
 
         return { results };
       } catch (error) {

@@ -151,7 +151,7 @@ import {
   alertsTool,
   alertsIndexSearchTool,
   evaluateAlertTool,
-  riskScoreSearchTool,
+  entityRiskScoreTool,
   attackDiscoverySearchTool,
   securityLabsSearchTool,
 } from './agent_builder/tools';
@@ -637,7 +637,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.onechat.tools.register(alertsTool());
         plugins.onechat.tools.register(alertsIndexSearchTool());
         plugins.onechat.tools.register(evaluateAlertTool());
-        plugins.onechat.tools.register(riskScoreSearchTool());
+        plugins.onechat.tools.register(entityRiskScoreTool());
         plugins.onechat.tools.register(attackDiscoverySearchTool());
         plugins.onechat.tools.register(securityLabsSearchTool());
       } catch (error) {

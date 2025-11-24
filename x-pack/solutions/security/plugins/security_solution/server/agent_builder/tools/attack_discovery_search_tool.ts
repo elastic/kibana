@@ -9,8 +9,8 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils';
-import { getSpaceIdFromRequest } from '../helpers';
-import { securityTool } from '../constants';
+import { getSpaceIdFromRequest } from './helpers';
+import { securityTool } from './constants';
 
 const attackDiscoverySearchSchema = z.object({
   alertIds: z

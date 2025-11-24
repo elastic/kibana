@@ -11,7 +11,7 @@ import { generateEsql } from '@kbn/onechat-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { getSpaceIdFromRequest } from '../helpers';
-import { securityTool } from '../constants';
+import { ESSENTIAL_ALERT_FIELDS, securityTool } from '../constants';
 
 const alertsSchema = z.object({
   query: z
@@ -27,18 +27,7 @@ const alertsSchema = z.object({
 
 export const SECURITY_ALERTS_TOOL_ID = securityTool('alerts');
 
-const KEEP_FIELDS = [
-  '@timestamp',
-  'host.name',
-  'user.name',
-  'kibana.alert.rule.name',
-  'kibana.alert.severity',
-  'kibana.alert.risk_score',
-  'source.ip',
-  'destination.ip',
-  'event.category',
-  'message',
-].join(', ');
+const KEEP_FIELDS = ESSENTIAL_ALERT_FIELDS.join(', ');
 
 const ADDITIONAL_INSTRUCTIONS = `When querying security alert indices, ALWAYS use the KEEP command to filter fields and reduce response size. Include these essential fields: ${KEEP_FIELDS}. Example: FROM .alerts-security.alerts-* | KEEP ${KEEP_FIELDS} | ...`;
 

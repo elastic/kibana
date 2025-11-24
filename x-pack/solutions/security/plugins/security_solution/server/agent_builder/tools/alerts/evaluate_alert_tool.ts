@@ -17,7 +17,7 @@ import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assist
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { getRiskIndex } from '../../../../common/search_strategy/security_solution/risk_score/common';
 import { getSpaceIdFromRequest } from '../helpers';
-import { securityTool } from '../constants';
+import { ESSENTIAL_ALERT_FIELDS, securityTool } from '../constants';
 
 const evaluateAlertSchema = z.object({
   alertData: z
@@ -27,22 +27,10 @@ const evaluateAlertSchema = z.object({
     ),
 });
 
-export const EVALUATE_ALERT_TOOL_ID = securityTool('evaluate-alert');
+export const EVALUATE_ALERT_TOOL_ID = securityTool('evaluate_alert');
 
 // Essential fields to keep when querying alerts to minimize token usage
-const KEEP_FIELDS = [
-  '_id',
-  '@timestamp',
-  'host.name',
-  'user.name',
-  'kibana.alert.rule.name',
-  'kibana.alert.severity',
-  'kibana.alert.risk_score',
-  'source.ip',
-  'destination.ip',
-  'event.category',
-  'message',
-].join(', ');
+const KEEP_FIELDS = ESSENTIAL_ALERT_FIELDS.join(', ');
 
 const ENTITY_EXTRACTION_PROMPT = `Extract security entities from the following alert data. Return a JSON object with the following structure:
 {

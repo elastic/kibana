@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-// export { createAlertAttachmentType } from './alert';
-export { createAlertAttachmentType } from './core-alert';
+export { createAlertAttachmentType } from './alert';
+// export { createAlertAttachmentType } from './core-alert';
