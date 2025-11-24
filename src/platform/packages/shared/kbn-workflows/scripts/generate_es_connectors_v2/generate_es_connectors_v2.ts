@@ -220,6 +220,7 @@ function generateMethodsAndPatterns(endpoint: SpecificationTypes.Endpoint): {
   patterns: string[];
 } {
   const methods = new Set(endpoint.urls.flatMap((url) => url.methods as HttpMethod[]));
-  const patterns = endpoint.urls.map((url) => url.path);
+  // removing leading slash if present
+  const patterns = endpoint.urls.map((url) => url.path.replace(/^\//, ''));
   return { methods: Array.from(methods), patterns };
 }
