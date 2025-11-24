@@ -8,44 +8,19 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import { executeEsql } from '@kbn/onechat-genai-utils';
 import { getSpaceIdFromRequest } from '../helpers';
 import { securityTool } from '../constants';
 
 const attackDiscoverySearchSchema = z.object({
-  query: z
-    .string()
+  alertIds: z
+    .array(z.string())
     .describe(
-      'A natural language query expressing the search request for attack discoveries. Use this to find attack discoveries that include specific alert IDs in the kibana.alert.attack_discovery.alert_ids field. Include fields like kibana.alert.attack_discovery.title, kibana.alert.attack_discovery.summary_markdown, and kibana.alert.attack_discovery.alert_ids.'
+      'An array of alert IDs to search for in attack discoveries. The tool will find attack discoveries where kibana.alert.attack_discovery.alert_ids contains any of the provided alert IDs.'
     ),
 });
 
-export const SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID = securityTool('attack-discovery-search');
-
-/**
- * Extracts alert IDs from a natural language query.
- * Looks for patterns like "alert ID 'xxx'", "alert ID xxx", or quoted UUIDs.
- */
-const extractAlertIds = (query: string): string[] => {
-  const alertIds: string[] = [];
-
-  // Pattern 1: "alert ID 'xxx'" or "alert ID \"xxx\""
-  const quotedPattern = /alert\s+id[:\s]+['"]([^'"]+)['"]/gi;
-  let match;
-  while ((match = quotedPattern.exec(query)) !== null) {
-    alertIds.push(match[1]);
-  }
-
-  // Pattern 2: UUID pattern (8-4-4-4-12 hex digits)
-  const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
-  const uuidMatches = query.match(uuidPattern);
-  if (uuidMatches) {
-    alertIds.push(...uuidMatches);
-  }
-
-  return [...new Set(alertIds)]; // Remove duplicates
-};
+export const SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID = securityTool('attack_discovery_search');
 
 export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
   typeof attackDiscoverySearchSchema
@@ -53,40 +28,33 @@ export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
   return {
     id: SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
     type: ToolType.builtin,
-    description: `Search and analyze attack discoveries. Use this tool to find attack discoveries related to specific alerts by searching for alert IDs in the kibana.alert.attack_discovery.alert_ids field. Automatically queries both scheduled and ad-hoc attack discovery indices for the current space. Limits results to 5 attack discoveries.`,
+    description: `Search and analyze attack discoveries. Use this tool to find attack discoveries related to specific alerts by providing alert IDs. The tool searches the kibana.alert.attack_discovery.alert_ids field. Automatically queries both scheduled and ad-hoc attack discovery indices for the current space. Limits results to 5 attack discoveries.`,
     schema: attackDiscoverySearchSchema,
-    handler: async ({ query: nlQuery }, { request, esClient, logger }) => {
+    handler: async ({ alertIds }, { request, esClient, logger }) => {
       const spaceId = getSpaceIdFromRequest(request);
 
-      logger.debug(`attack-discovery-search tool called with query: ${nlQuery}`);
+      logger.debug(
+        `attack-discovery-search tool called with alertIds: ${JSON.stringify(alertIds)}`
+      );
 
       try {
-        // Extract alert IDs from the natural language query
-        const alertIds = extractAlertIds(nlQuery);
-
         // Build date filter for last 7 days
         const now = new Date();
         const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         const dateFilter = `@timestamp >= "${sevenDaysAgo.toISOString()}" AND @timestamp <= "${now.toISOString()}"`;
 
-        // Build WHERE clause
-        let whereClause = dateFilter;
-        if (alertIds.length > 0) {
-          // Search for alert IDs in the array field
-          const alertIdConditions = alertIds
-            .map((id) => `"${id}" IN kibana.alert.attack_discovery.alert_ids`)
-            .join(' OR ');
-          whereClause = `${dateFilter} AND (${alertIdConditions})`;
-        }
+        // Build alert IDs filter using MV_CONTAINS with OR conditions
+        const alertIdsFilter = alertIds
+          .map((alertId) => `MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"${alertId}")`)
+          .join(' OR ');
 
-        // Build ES|QL query
-        const esqlQuery = [
-          `FROM ${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}*,.adhoc.${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}* METADATA _id`,
-          `| WHERE ${whereClause}`,
-          `| KEEP _id, kibana.alert.attack_discovery.title, kibana.alert.attack_discovery.summary_markdown, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp`,
-          `| SORT @timestamp DESC`,
-          `| LIMIT 5`,
-        ].join('\n');
+        const whereClause = `${dateFilter} AND (${alertIdsFilter})`;
+
+        const esqlQuery = `FROM .alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}* METADATA _id
+        | WHERE ${whereClause}
+        | KEEP _id, kibana.alert.attack_discovery.title, kibana.alert.severity, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp
+        | SORT @timestamp DESC
+        | LIMIT 100`;
 
         logger.debug(`Executing ES|QL query: ${esqlQuery}`);
 
@@ -94,7 +62,6 @@ export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
           query: esqlQuery,
           esClient: esClient.asCurrentUser,
         });
-        console.log('ATT ==>', esqlResponse);
 
         const results = [
           {
