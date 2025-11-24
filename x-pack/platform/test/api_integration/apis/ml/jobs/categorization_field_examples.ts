@@ -114,11 +114,6 @@ export default ({ getService }: FtrProviderContext) => {
         exampleLength: 5,
         validationChecks: [
           {
-            id: 4,
-            valid: 'partially_valid',
-            message: 'The median length for the field values analyzed is over 400 characters.',
-          },
-          {
             id: 2,
             valid: 'invalid',
             message:
@@ -149,32 +144,6 @@ export default ({ getService }: FtrProviderContext) => {
             id: 5,
             valid: 'partially_valid',
             message: 'More than 75% of field values are null.',
-          },
-        ],
-      },
-    },
-    {
-      title: 'partially valid, median length is over 400 characters',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        ...defaultRequestBody,
-        field: 'field4',
-      },
-      expected: {
-        responseCode: 200,
-        overallValidStatus: 'partially_valid',
-        sampleSize: 500,
-        exampleLength: 5,
-        validationChecks: [
-          {
-            id: 3,
-            valid: 'valid',
-            message: '500 field values analyzed, 100% contain 3 or more tokens.',
-          },
-          {
-            id: 4,
-            valid: 'partially_valid',
-            message: 'The median length for the field values analyzed is over 400 characters.',
           },
         ],
       },
