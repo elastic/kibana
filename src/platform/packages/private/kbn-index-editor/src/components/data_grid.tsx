@@ -290,6 +290,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           display: flex;
           justify-content: center;
         }
+        [data-test-subj='unifiedDataTable_actionsColumnHeaderIcon'] {
+          display: none;
+        }
 
         .euiDataGridRowCell__content > div,
         .unifiedDataTable__cellValue {

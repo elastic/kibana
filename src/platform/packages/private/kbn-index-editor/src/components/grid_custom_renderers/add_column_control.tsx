@@ -8,8 +8,13 @@
  */
 import React from 'react';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { IndexUpdateService } from '../../index_update_service';
+
+const addColumnText = i18n.translate('indexEditor.dataGrid.addColumn', {
+  defaultMessage: 'Add Column',
+});
 
 export const getAddColumnControl = (
   indexUpdateService: IndexUpdateService
@@ -17,14 +22,16 @@ export const getAddColumnControl = (
   id: 'add-column',
   width: 40,
   headerCellRender: () => (
-    <EuiButtonIcon
-      color="text"
-      display="base"
-      iconType="plus"
-      size="xs"
-      aria-label="Add Column"
-      onClick={() => indexUpdateService.addNewColumn()}
-    />
+    <EuiToolTip content={addColumnText} disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="text"
+        display="base"
+        iconType="plus"
+        size="xs"
+        aria-label={addColumnText}
+        onClick={() => indexUpdateService.addNewColumn()}
+      />
+    </EuiToolTip>
   ),
   headerCellProps: {
     className: 'dataGrid__addColumnHeader',

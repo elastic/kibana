@@ -10,8 +10,13 @@
 import type { RefObject } from 'react';
 import React from 'react';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { EuiButtonIcon, type EuiDataGridRefProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, type EuiDataGridRefProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { IndexUpdateService } from '../../index_update_service';
+
+const addRowText = i18n.translate('indexEditor.dataGrid.addRow', {
+  defaultMessage: 'Add Row',
+});
 
 export const getAddRowControl = (
   indexUpdateService: IndexUpdateService,
@@ -35,15 +40,16 @@ export const getAddRowControl = (
 
     return (
       <div className="dataGrid__addRowAction">
-        <EuiButtonIcon
-          color="text"
-          display="base"
-          iconType="plus"
-          size="xs"
-          aria-label="Add Row"
-          onClick={onAddRow}
-          css={{ margin: '0px 4px' }}
-        />
+        <EuiToolTip content={addRowText} disableScreenReaderOutput>
+          <EuiButtonIcon
+            color="text"
+            display="base"
+            iconType="plus"
+            size="xs"
+            aria-label={addRowText}
+            onClick={onAddRow}
+          />
+        </EuiToolTip>
       </div>
     );
   },
