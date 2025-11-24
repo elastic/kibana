@@ -1276,7 +1276,7 @@
     "diff": "^8.0.2",
     "dom-to-image-more": "^3.6.0",
     "dompurify": "^3.3.0",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.2.3",
     "elastic-apm-node": "^4.13.0",
     "email-addresses": "^5.0.0",
     "eventsource-parser": "^3.0.0",
