@@ -30,3 +30,5 @@ yaml-language-server
 @opentelemetry/exporter-metrics-otlp-proto
 @opentelemetry/instrumentation-hapi
 @babel/plugin-transform-class-static-block
+dompurify
+magic-bytes.js
