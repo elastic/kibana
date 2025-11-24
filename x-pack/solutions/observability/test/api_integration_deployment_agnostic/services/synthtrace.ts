@@ -31,6 +31,20 @@ export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProvider
 
       return logsEsClient;
     },
+    createSyntheticsEsClient() {
+      const { syntheticsEsClient } = clientManager.getClients({
+        clients: ['syntheticsEsClient'],
+      });
+
+      return syntheticsEsClient;
+    },
+    createInfraSynthtraceEsClient() {
+      const { infraEsClient } = clientManager.getClients({
+        clients: ['infraEsClient'],
+      });
+
+      return infraEsClient;
+    },
     async createApmSynthtraceEsClient() {
       const { apmEsClient } = clientManager.getClients({
         clients: ['apmEsClient'],
