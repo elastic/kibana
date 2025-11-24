@@ -23,16 +23,6 @@ jest.mock('../epm/packages/get');
 
 jest.mock('../agent_policy');
 
-jest.mock('../app_context', () => ({
-  ...jest.requireActual('../app_context'),
-  cloudConnectorService: {
-    create: jest.fn(),
-    delete: jest.fn(),
-    getById: jest.fn(),
-    update: jest.fn(),
-  },
-}));
-
 describe('AgentlessPoliciesService', () => {
   describe('createAgentlessPolicy', () => {
     let packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;

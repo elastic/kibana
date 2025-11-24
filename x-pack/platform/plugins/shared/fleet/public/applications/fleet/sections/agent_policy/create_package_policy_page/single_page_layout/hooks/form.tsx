@@ -204,6 +204,7 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
     function formatPackage(pkg: NewPackagePolicy['package']) {
       return omit(pkg, 'title');
     }
+
     const result = await sendCreateAgentlessPolicy(
       {
         package: formatPackage(pkgPolicy.package),
