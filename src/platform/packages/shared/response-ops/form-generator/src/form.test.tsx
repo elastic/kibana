@@ -22,9 +22,10 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 interface TestFormWrapperProps {
   schema: z.ZodObject<z.ZodRawShape>;
   onSubmit?: (data: { data: unknown }) => void;
+  formConfig?: { disabled?: boolean };
 }
 
-const TestFormWrapper = ({ schema, onSubmit }: TestFormWrapperProps) => {
+const TestFormWrapper = ({ schema, onSubmit, formConfig }: TestFormWrapperProps) => {
   const { form } = useForm({
     onSubmit: async (data, isValid) => {
       if (isValid && onSubmit) {
@@ -35,7 +36,7 @@ const TestFormWrapper = ({ schema, onSubmit }: TestFormWrapperProps) => {
 
   return (
     <Form form={form}>
-      {generateFormFields({ schema })}
+      {generateFormFields({ schema, formConfig })}
       <EuiButton onClick={form.submit} isLoading={form.isSubmitting}>
         Submit
       </EuiButton>
@@ -200,7 +201,7 @@ describe('Form', () => {
     expect(() => {
       render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"No widget found for schema type: object. Please specify a widget in the schema metadata."`
+      `"No widget found for schema type: ZodObject. Please specify a widget in the schema metadata."`
     );
 
     consoleError.mockRestore();
@@ -219,7 +220,7 @@ describe('Form', () => {
     expect(() => {
       render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Widget \\"fakeWidget\\" specified in string metadata is not registered in the widget registry."`
+      `"Widget \\"fakeWidget\\" specified in ZodString metadata is not registered in the widget registry."`
     );
 
     consoleError.mockRestore();
@@ -563,5 +564,203 @@ describe('Authentication Form Integration Tests', () => {
     expect(await screen.findByText('Password cannot be empty')).toBeInTheDocument();
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  describe('Form Config - disabled', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe('disabled: true makes all fields disabled', () => {
+      it('makes all fields in discriminated union read-only', () => {
+        const schema = z.object({
+          authType: z
+            .discriminatedUnion('type', [
+              z
+                .object({
+                  type: z.literal('basic'),
+                  username: z.string().meta({
+                    widget: 'text',
+                    label: 'Username',
+                  }),
+                  password: z.string().meta({
+                    widget: 'password',
+                    label: 'Password',
+                  }),
+                })
+                .meta({
+                  label: 'Basic Auth',
+                }),
+            ])
+            .meta({
+              widget: 'formFieldset',
+              label: 'Authentication',
+            }),
+        });
+
+        render(
+          <TestFormWrapper
+            schema={schema}
+            formConfig={{ disabled: true }}
+            onSubmit={mockOnSubmit}
+          />,
+          { wrapper }
+        );
+
+        const usernameInput = screen.getByTestId(
+          'generator-field-authType-username'
+        ) as HTMLInputElement;
+        const passwordInput = screen.getByTestId(
+          'generator-field-authType-password'
+        ) as HTMLInputElement;
+
+        expect(usernameInput).toBeDisabled();
+        expect(passwordInput).toBeDisabled();
+      });
+
+      it('makes multiple fields read-only', () => {
+        const schema = z.object({
+          username: z.string().meta({
+            widget: 'text',
+            label: 'Username',
+          }),
+          email: z.string().meta({
+            widget: 'text',
+            label: 'Email',
+          }),
+          role: z.enum(['admin', 'user']).meta({
+            widget: 'select',
+            label: 'Role',
+          }),
+        });
+
+        render(
+          <TestFormWrapper
+            schema={schema}
+            formConfig={{ disabled: true }}
+            onSubmit={mockOnSubmit}
+          />,
+          { wrapper }
+        );
+
+        const usernameInput = screen.getByLabelText('Username', {
+          selector: 'input',
+        }) as HTMLInputElement;
+        const emailInput = screen.getByLabelText('Email', {
+          selector: 'input',
+        }) as HTMLInputElement;
+        const roleSelect = screen.getByRole('combobox') as HTMLSelectElement;
+
+        expect(usernameInput).toBeDisabled();
+        expect(emailInput).toBeDisabled();
+        expect(roleSelect).toBeDisabled();
+      });
+    });
+
+    describe('field-level disabled overrides form-level disabled', () => {
+      it('field disabled: true overrides form disabled: false', () => {
+        const schema = z.object({
+          username: z.string().meta({
+            widget: 'text',
+            label: 'Username',
+            disabled: true,
+          }),
+          email: z.string().meta({
+            widget: 'text',
+            label: 'Email',
+          }),
+        });
+
+        render(
+          <TestFormWrapper
+            schema={schema}
+            formConfig={{ disabled: false }}
+            onSubmit={mockOnSubmit}
+          />,
+          { wrapper }
+        );
+
+        const usernameInput = screen.getByTestId('generator-field-username') as HTMLInputElement;
+        const emailInput = screen.getByTestId('generator-field-email') as HTMLInputElement;
+        expect(usernameInput).toBeDisabled();
+        expect(emailInput).toBeEnabled();
+      });
+
+      it('form disabled: true applies when field has no disabled set', () => {
+        const schema = z.object({
+          username: z.string().meta({
+            widget: 'text',
+            label: 'Username',
+          }),
+          email: z.string().meta({
+            widget: 'text',
+            label: 'Email',
+            disabled: true,
+          }),
+        });
+
+        render(
+          <TestFormWrapper
+            schema={schema}
+            formConfig={{ disabled: true }}
+            onSubmit={mockOnSubmit}
+          />,
+          { wrapper }
+        );
+
+        const usernameInput = screen.getByTestId('generator-field-username') as HTMLInputElement;
+        const emailInput = screen.getByTestId('generator-field-email') as HTMLInputElement;
+
+        expect(usernameInput).toBeDisabled();
+        expect(emailInput).toBeDisabled();
+      });
+
+      it('field-level disabled works in discriminated union', () => {
+        const schema = z.object({
+          authType: z
+            .discriminatedUnion('type', [
+              z
+                .object({
+                  type: z.literal('basic'),
+                  username: z.string().meta({
+                    widget: 'text',
+                    label: 'Username',
+                    disabled: true,
+                  }),
+                  password: z.string().meta({
+                    widget: 'password',
+                    label: 'Password',
+                  }),
+                })
+                .meta({
+                  label: 'Basic Auth',
+                }),
+            ])
+            .meta({
+              widget: 'formFieldset',
+              label: 'Authentication',
+            }),
+        });
+
+        render(
+          <TestFormWrapper
+            schema={schema}
+            formConfig={{ disabled: false }}
+            onSubmit={mockOnSubmit}
+          />,
+          { wrapper }
+        );
+
+        const usernameInput = screen.getByTestId(
+          'generator-field-authType-username'
+        ) as HTMLInputElement;
+        const passwordInput = screen.getByTestId(
+          'generator-field-authType-password'
+        ) as HTMLInputElement;
+
+        expect(usernameInput).toBeDisabled();
+        expect(passwordInput).toBeEnabled();
+      });
+    });
   });
 });

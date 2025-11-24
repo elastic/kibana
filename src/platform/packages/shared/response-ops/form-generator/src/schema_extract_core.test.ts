@@ -155,32 +155,32 @@ describe('extractSchemaCore', () => {
     });
   });
 
-  describe('ZodReadonly unwrapping and readOnly meta addition', () => {
-    it('should unwrap ZodReadonly and add readOnly metadata', () => {
+  describe('ZodReadonly unwrapping and disabled meta addition', () => {
+    it('should unwrap ZodReadonly and add disabled metadata', () => {
       const schema = z.string().readonly();
       const result = extractSchemaCore(schema);
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       const meta = getMeta(result.schema);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
 
-    it('should unwrap ZodReadonly with number schema and add readOnly metadata', () => {
+    it('should unwrap ZodReadonly with number schema and add disabled metadata', () => {
       const schema = z.number().readonly();
       const result = extractSchemaCore(schema);
 
       expect(result.schema).toBeInstanceOf(z.ZodNumber);
       const meta = getMeta(result.schema);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
 
-    it('should unwrap ZodReadonly with object schema and add readOnly metadata', () => {
+    it('should unwrap ZodReadonly with object schema and add disabled metadata', () => {
       const schema = z.object({ name: z.string() }).readonly();
       const result = extractSchemaCore(schema);
 
       expect(result.schema).toBeInstanceOf(z.ZodObject);
       const meta = getMeta(result.schema);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
   });
 
@@ -224,7 +224,7 @@ describe('extractSchemaCore', () => {
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
       const meta = getMeta(result.schema);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
 
     it('should unwrap z.optional(z.readonly(...))', () => {
@@ -233,7 +233,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       const meta = getMeta(result.schema);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
 
     it('should unwrap z.catch(z.default(...))', () => {
@@ -251,7 +251,7 @@ describe('extractSchemaCore', () => {
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
       const meta = getMeta(result.schema);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
 
     it('should unwrap multiple optional wrappers', () => {
@@ -270,7 +270,7 @@ describe('extractSchemaCore', () => {
       expect(result.schema).toBeInstanceOf(z.ZodNumber);
       expect(result.defaultValue).toBe(42);
       const meta = getMeta(result.schema);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
   });
 
@@ -385,17 +385,17 @@ describe('extractSchemaCore', () => {
   });
 
   describe('order of operations when multiple wrappers exist', () => {
-    it('should add readOnly metadata when readonly wrapper is encountered', () => {
+    it('should add disabled metadata when readonly wrapper is encountered', () => {
       const schema = z.string().default('value').readonly().optional();
       const result = extractSchemaCore(schema);
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('value');
       const meta = getMeta(result.schema);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
 
-    it.only('should handle literal inside wrapped schema correctly', () => {
+    it('should handle literal inside wrapped schema correctly', () => {
       const schema = z.literal('discriminator-value').optional();
       const result = extractSchemaCore(schema);
 
@@ -407,12 +407,12 @@ describe('extractSchemaCore', () => {
       const schema1 = z.string().readonly().optional();
       const result = extractSchemaCore(schema1);
       const meta1 = getMeta(result.schema);
-      expect(meta1.readOnly).toBe(true);
+      expect(meta1.disabled).toBe(true);
 
       const schema2 = z.string().optional().readonly();
       const result2 = extractSchemaCore(schema2);
       const meta2 = getMeta(result2.schema);
-      expect(meta2.readOnly).toBe(true);
+      expect(meta2.disabled).toBe(true);
     });
 
     it('should not lose default value when readonly is in the chain', () => {
@@ -432,7 +432,7 @@ describe('extractSchemaCore', () => {
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe('my-type');
       const meta = getMeta(result.schema);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
   });
 

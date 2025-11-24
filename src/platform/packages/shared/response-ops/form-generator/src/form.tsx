@@ -11,7 +11,7 @@ import type { z } from '@kbn/zod/v4';
 import { getFieldsFromSchema, renderField } from './field_builder';
 
 export interface FormConfig {
-  readOnly?: boolean;
+  disabled?: boolean;
   // Indicated wheter we are editing an existing record or creating a new one
   isEdit?: boolean;
 }
@@ -28,7 +28,7 @@ export interface GenerateFormFieldsParams<TSchema extends z.ZodObject<z.ZodRawSh
  * @param params - Configuration for field generation
  * @param params.schema - Zod object schema defining the form structure
  * @param params.formConfig - Optional form configuration
- * @param params.formConfig.readOnly - Whether the form is read-only
+ * @param params.formConfig.disabled - Whether the form fields are disabled
  * @param params.formConfig.isEdit - Whether we are editing an existing record or creating a new one
  * @returns Array of React elements representing the form fields
  *

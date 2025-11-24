@@ -130,7 +130,7 @@ export const renderField = ({ field }: RenderFieldProps) => {
           helpText: meta.helpText,
           fullWidth: true,
           euiFieldProps: {
-            readOnly: formConfig.readOnly || meta.readOnly,
+            disabled: formConfig.disabled || meta.disabled,
             placeholder: meta.placeholder,
             ['data-test-subj']: `generator-field-${path.replace(/\./g, '-')}`,
           },

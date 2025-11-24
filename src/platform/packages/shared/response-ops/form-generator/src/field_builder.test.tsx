@@ -321,24 +321,24 @@ describe('Field Builder', () => {
       expect(input).toBeDefined();
     });
 
-    it('should pass formConfig readOnly to widget', () => {
-      const readOnlyConfig: FormConfig = { readOnly: true };
+    it('should pass formConfig disabled to widget', () => {
+      const disabledConfig: FormConfig = { disabled: true };
       const schema = z.string();
       addMeta(schema, { label: 'Test Field' });
       const path = 'testField';
 
-      const field = getFieldFromSchema({ schema, path, formConfig: readOnlyConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig: disabledConfig });
       const element = renderField({ field });
 
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
       const input = screen.getByTestId('generator-field-testField') as HTMLInputElement;
-      expect(input.readOnly).toBe(true);
+      expect(input).toBeDisabled();
     });
 
-    it('should pass schema meta readOnly to widget', () => {
+    it('should pass schema meta disabled to widget', () => {
       const schema = z.string();
-      addMeta(schema, { label: 'Test Field', readOnly: true });
+      addMeta(schema, { label: 'Test Field', disabled: true });
       const path = 'testField';
 
       const field = getFieldFromSchema({ schema, path, formConfig });
@@ -347,7 +347,7 @@ describe('Field Builder', () => {
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
       const input = screen.getByTestId('generator-field-testField') as HTMLInputElement;
-      expect(input.readOnly).toBe(true);
+      expect(input).toBeDisabled();
     });
 
     it('should render helpText when provided in meta', () => {

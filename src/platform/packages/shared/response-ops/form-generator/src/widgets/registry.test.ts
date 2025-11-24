@@ -55,12 +55,12 @@ describe('Widget Registry', () => {
       expect(component).toBe(TextWidget);
     });
 
-    it('should add readOnly metadata to z.literal() schemas', () => {
+    it('should add disabled metadata to z.literal() schemas', () => {
       const schema = z.literal('constant-value');
       getWidgetComponent(schema);
       const meta = getMeta(schema);
 
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
   });
 
@@ -168,41 +168,41 @@ describe('Widget Registry', () => {
     });
   });
 
-  describe('literal schemas readOnly metadata', () => {
-    it('should add readOnly: true metadata to string literal', () => {
+  describe('literal schemas disabled metadata', () => {
+    it('should add disabled: true metadata to string literal', () => {
       const schema = z.literal('fixed-string');
       const component = getWidgetComponent(schema);
       const meta = getMeta(schema);
 
       expect(component).toBe(TextWidget);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
 
-    it('should add readOnly: true metadata to number literal', () => {
+    it('should add disabled: true metadata to number literal', () => {
       const schema = z.literal(123);
       const component = getWidgetComponent(schema);
       const meta = getMeta(schema);
 
       expect(component).toBe(TextWidget);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
 
-    it('should add readOnly: true metadata to boolean literal', () => {
+    it('should add disabled: true metadata to boolean literal', () => {
       const schema = z.literal(true);
       const component = getWidgetComponent(schema);
       const meta = getMeta(schema);
 
       expect(component).toBe(TextWidget);
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
 
-    it('should preserve existing readOnly metadata on literal schemas', () => {
+    it('should preserve existing disabled metadata on literal schemas', () => {
       const schema = z.literal('value');
-      addMeta(schema, { readOnly: true });
+      addMeta(schema, { disabled: true });
       getWidgetComponent(schema);
       const meta = getMeta(schema);
 
-      expect(meta.readOnly).toBe(true);
+      expect(meta.disabled).toBe(true);
     });
   });
 });

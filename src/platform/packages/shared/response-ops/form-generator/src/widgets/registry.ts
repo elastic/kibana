@@ -40,7 +40,7 @@ const getDefaultWidgetForSchema = (schema: z.ZodType) => {
   } else if (schema instanceof z.ZodDiscriminatedUnion) {
     return WidgetType.FormFieldset;
   } else if (schema instanceof z.ZodLiteral) {
-    addMeta(schema, { readOnly: true });
+    addMeta(schema, { disabled: true });
     return WidgetType.Text;
   } else if (schema instanceof z.ZodURL) {
     return WidgetType.Text;

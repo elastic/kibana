@@ -40,7 +40,7 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
   // E.g., if the option is { type: z.literal('basic'), token: z.string() }, then the 'type' field should be hidden
   addMeta(optionSchema.shape[discriminatorKey] as z.ZodType, {
     hidden: true,
-    readOnly: true,
+    disabled: true,
   });
 
   const fields = getFieldsFromSchema({

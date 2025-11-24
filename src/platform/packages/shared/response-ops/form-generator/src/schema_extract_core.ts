@@ -43,7 +43,7 @@ export const extractSchemaCore = (schema: z.ZodType) => {
       // https://github.com/colinhacks/zod/issues/4951
       // This if statement can be removed when we upgrade
       current = current.def.innerType as z.ZodType;
-      addMeta(current, { readOnly: true });
+      addMeta(current, { disabled: true });
       continue;
     }
 

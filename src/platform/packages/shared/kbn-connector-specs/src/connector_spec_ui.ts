@@ -37,7 +37,7 @@ export interface BaseMetadata {
   label?: string;
   placeholder?: string;
   helpText?: string;
-  readOnly?: boolean;
+  disabled?: boolean;
   sensitive?: boolean;
   order?: number;
   hidden?: boolean;

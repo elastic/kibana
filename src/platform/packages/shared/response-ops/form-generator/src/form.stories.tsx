@@ -15,16 +15,16 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import { generateFormFields } from './form';
 
 interface StoryArgs {
-  readOnly?: boolean;
+  disabled?: boolean;
 }
 
 const meta = {
   title: 'Form Field Generator',
   args: {
-    readOnly: false,
+    disabled: false,
   },
   argTypes: {
-    readOnly: {
+    disabled: {
       control: 'boolean',
       description: 'Whether the form fields are in read-only mode',
     },
@@ -42,10 +42,10 @@ const submit = ({ data }: { data: unknown }) => {
 interface FormWrapperProps {
   schema: z.ZodObject<z.ZodRawShape>;
   onSubmit: (data: { data: unknown }) => void;
-  readOnly?: boolean;
+  disabled?: boolean;
 }
 
-const FormWrapper = ({ schema, onSubmit, readOnly = false }: FormWrapperProps) => {
+const FormWrapper = ({ schema, onSubmit, disabled = false }: FormWrapperProps) => {
   const { form } = useForm({
     onSubmit: async (data, isValid) => {
       if (isValid) {
@@ -56,7 +56,7 @@ const FormWrapper = ({ schema, onSubmit, readOnly = false }: FormWrapperProps) =
 
   return (
     <Form form={form}>
-      {generateFormFields({ schema, formConfig: { readOnly } })}
+      {generateFormFields({ schema, formConfig: { disabled } })}
       <EuiButton onClick={form.submit} isLoading={form.isSubmitting}>
         Submit
       </EuiButton>
@@ -67,7 +67,7 @@ const FormWrapper = ({ schema, onSubmit, readOnly = false }: FormWrapperProps) =
 export const WebhookConnector: StoryObj<StoryArgs> = {
   render: (args) => {
     return (
-      <FormWrapper schema={webhookConnectorFormSchema} onSubmit={submit} readOnly={args.readOnly} />
+      <FormWrapper schema={webhookConnectorFormSchema} onSubmit={submit} disabled={args.disabled} />
     );
   },
 };
@@ -75,7 +75,7 @@ export const WebhookConnector: StoryObj<StoryArgs> = {
 export const AbuseIPDBConnector: StoryObj<StoryArgs> = {
   render: (args) => {
     return (
-      <FormWrapper schema={abuseIPDBConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+      <FormWrapper schema={abuseIPDBConnectorSchema} onSubmit={submit} disabled={args.disabled} />
     );
   },
 };
@@ -86,7 +86,7 @@ export const AlienVaultOTXConnector: StoryObj<StoryArgs> = {
       <FormWrapper
         schema={alienVaultOTXConnectorSchema}
         onSubmit={submit}
-        readOnly={args.readOnly}
+        disabled={args.disabled}
       />
     );
   },
@@ -95,7 +95,7 @@ export const AlienVaultOTXConnector: StoryObj<StoryArgs> = {
 export const GreyNoiseConnector: StoryObj<StoryArgs> = {
   render: (args) => {
     return (
-      <FormWrapper schema={GreyNoiseConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+      <FormWrapper schema={GreyNoiseConnectorSchema} onSubmit={submit} disabled={args.disabled} />
     );
   },
 };
@@ -103,7 +103,7 @@ export const GreyNoiseConnector: StoryObj<StoryArgs> = {
 export const ShodanConnector: StoryObj<StoryArgs> = {
   render: (args) => {
     return (
-      <FormWrapper schema={ShodanConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+      <FormWrapper schema={ShodanConnectorSchema} onSubmit={submit} disabled={args.disabled} />
     );
   },
 };
@@ -111,7 +111,7 @@ export const ShodanConnector: StoryObj<StoryArgs> = {
 export const UrlVoidConnector: StoryObj<StoryArgs> = {
   render: (args) => {
     return (
-      <FormWrapper schema={UrlVoidConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+      <FormWrapper schema={UrlVoidConnectorSchema} onSubmit={submit} disabled={args.disabled} />
     );
   },
 };
@@ -119,7 +119,7 @@ export const UrlVoidConnector: StoryObj<StoryArgs> = {
 export const VirusTotalConnector: StoryObj<StoryArgs> = {
   render: (args) => {
     return (
-      <FormWrapper schema={VirusTotalConnectorSchema} onSubmit={submit} readOnly={args.readOnly} />
+      <FormWrapper schema={VirusTotalConnectorSchema} onSubmit={submit} disabled={args.disabled} />
     );
   },
 };
@@ -140,9 +140,14 @@ const webhookConnectorFormSchema = z.object({
       z
         .object({
           authType: z.literal('basic'),
-          username: z.string().min(1, { message: 'Username cannot be empty' }).meta({
-            label: 'Username',
-          }),
+          username: z
+            .string()
+            .min(1, { message: 'Username cannot be empty' })
+            .meta({
+              label: 'Username',
+              disabled: true,
+            })
+            .default('Freddy'),
           password: z.string().min(1, { message: 'Password cannot be empty' }).meta({
             label: 'Password',
             sensitive: true,
@@ -170,9 +175,9 @@ const abuseIPDBConnectorSchema = z.object({
       .object({
         authType: z.literal('api_key_header'),
         Key: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
-          widget: 'password',
           label: 'API Key',
           placeholder: 'Your AbuseIPDB API Key',
+          sensitive: true,
         }),
       })
       .meta({

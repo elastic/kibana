@@ -47,6 +47,7 @@ export const SelectWidget: React.FC<SelectWidgetProps> = ({
         ...fieldProps,
         euiFieldProps: {
           ...fieldProps.euiFieldProps,
+          disabled: formConfig.disabled,
           options,
         },
       }}
