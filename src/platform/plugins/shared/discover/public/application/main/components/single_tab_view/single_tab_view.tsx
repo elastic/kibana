@@ -10,6 +10,7 @@
 import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { TmpControlState } from '../../../../../common/app_locator';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -59,6 +60,7 @@ interface SessionInitializationState {
 
 type InitializeSingleSession = (options?: {
   dataViewSpec?: DataViewSpec | undefined;
+  esqlControls?: TmpControlState[] | undefined;
   defaultUrlState?: DiscoverAppState;
 }) => Promise<SessionInitializationState>;
 
@@ -99,7 +101,7 @@ export const SingleTabView = ({
 
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
   const [initializeTabState, initializeTab] = useAsyncFunction<InitializeSingleSession>(
-    async ({ dataViewSpec, defaultUrlState } = {}) => {
+    async ({ dataViewSpec, esqlControls, defaultUrlState } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,
         services,
@@ -120,6 +122,7 @@ export const SingleTabView = ({
             stateContainer,
             customizationService,
             dataViewSpec,
+            esqlControls,
             defaultUrlState,
           },
         })
@@ -138,6 +141,7 @@ export const SingleTabView = ({
 
       initializeTab({
         dataViewSpec: historyLocationState?.dataViewSpec,
+        esqlControls: historyLocationState?.esqlControls,
         defaultUrlState: historyLocationState?.defaultState,
       });
     }

@@ -17,6 +17,24 @@ import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
+export interface TmpControlState extends SerializableRecord {
+  controlConfig: {
+    availableOptions: string[];
+    controlType: string;
+    esqlQuery: string;
+    selectedOptions: string[];
+    singleSelect: boolean;
+    title: string;
+    variableName: string;
+    variableType: string;
+  };
+  grow: boolean;
+  id: string;
+  order: number;
+  type: string;
+  width: string;
+}
+
 export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set saved search ID.
@@ -121,6 +139,10 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Used when navigating to particular alert results
    */
   isAlertResults?: boolean;
+  /**
+   *
+   */
+  esqlControls?: TmpControlState[];
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -130,6 +152,7 @@ export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
  */
 export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
+  esqlControls?: TmpControlState[];
   isAlertResults?: boolean;
 }
 

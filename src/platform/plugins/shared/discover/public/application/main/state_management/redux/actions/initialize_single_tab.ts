@@ -11,6 +11,9 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { ESQLControlState } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { TmpControlState } from '../../../../../../common/app_locator';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -39,11 +42,13 @@ import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
+import { extractEsqlVariables } from '../utils';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
   dataViewSpec: DataViewSpec | undefined;
+  esqlControls: TmpControlState[] | undefined;
   defaultUrlState: DiscoverAppState | undefined;
 }
 
@@ -57,6 +62,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       stateContainer,
       customizationService,
       dataViewSpec,
+      esqlControls,
       defaultUrlState,
     },
   }) =>
@@ -215,6 +221,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       overrideDataView: dataView,
       services,
     });
+
     const savedSearch = updateSavedSearch({
       savedSearch: persistedTabSavedSearch
         ? copySavedSearch(persistedTabSavedSearch)
@@ -225,6 +232,35 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       globalState: initialGlobalState,
       services,
     });
+
+    const mappedControls = esqlControls?.reduce(
+      (acc, controlState) => ({
+        ...acc,
+        [controlState.id]: {
+          grow: controlState.grow,
+          width: controlState.width as ESQLControlState['width'],
+          singleSelect: controlState.controlConfig.singleSelect,
+          title: controlState.controlConfig.title,
+          variableName: controlState.controlConfig.variableName,
+          variableType: controlState.controlConfig.variableType as ESQLControlState['variableType'],
+          controlType: controlState.controlConfig.controlType as ESQLControlState['controlType'],
+          esqlQuery: controlState.controlConfig.esqlQuery,
+          availableOptions: controlState.controlConfig.availableOptions,
+          selectedOptions: controlState.controlConfig.selectedOptions,
+          type: controlState.type,
+          order: controlState.order,
+        },
+      }),
+      {} as Record<string, ESQLControlState>
+    ) as ControlPanelsState<ESQLControlState>;
+    savedSearch.controlGroupJson = JSON.stringify(mappedControls);
+
+    dispatch(
+      internalStateSlice.actions.setEsqlVariables({
+        tabId,
+        esqlVariables: extractEsqlVariables(mappedControls),
+      })
+    );
 
     // Push the tab's initial search session ID to the URL if one exists,
     // unless it should be overridden by a search session ID already in the URL

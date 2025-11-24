@@ -45,8 +45,8 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
-import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { Ast } from '@kbn/interpreter';
+import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type {
   IndexPatternMap,
   IndexPatternRef,
@@ -477,6 +477,6 @@ export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 
 export interface ESQLVariablesCompatibleDashboardApi {
   esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
-  controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
+  controlGroupApi$: PublishingSubject<Partial<ControlGroupRendererApi> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }

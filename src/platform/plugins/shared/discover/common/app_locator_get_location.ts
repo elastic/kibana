@@ -89,6 +89,7 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
     hideChart,
     sampleSize,
     isAlertResults,
+    esqlControls,
   } = params;
 
   const appState: Partial<DiscoverAppState> = {};
@@ -118,6 +119,7 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
 
   if (dataViewSpec) state.dataViewSpec = dataViewSpec;
   if (isAlertResults) state.isAlertResults = isAlertResults;
+  if (esqlControls) state.esqlControls = esqlControls;
 
   return { appState, globalState, state };
 };
