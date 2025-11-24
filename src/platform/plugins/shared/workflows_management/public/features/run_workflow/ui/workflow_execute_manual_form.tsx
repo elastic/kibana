@@ -16,33 +16,10 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import {
   applyInputDefaults,
   normalizeInputsToJsonSchema,
+  resolveRef,
 } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
-
-// Resolve $ref references within the inputs schema
-function resolveRefInInputs(
-  ref: string,
-  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
-): JSONSchema7 | null {
-  if (!ref.startsWith('#/')) {
-    return null;
-  }
-
-  const path = ref.slice(2).split('/'); // Remove '#/' and split
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let current: any = inputsSchema;
-
-  for (const segment of path) {
-    if (current && typeof current === 'object') {
-      current = current[segment];
-    } else {
-      return null;
-    }
-  }
-
-  return current as JSONSchema7 | null;
-}
 
 // Recursively convert JSON Schema to Zod, resolving $ref along the way
 function convertJsonSchemaToZodWithRefs(
@@ -52,7 +29,7 @@ function convertJsonSchemaToZodWithRefs(
   // Resolve $ref if present
   let schemaToConvert = jsonSchema;
   if (jsonSchema.$ref) {
-    const resolved = resolveRefInInputs(jsonSchema.$ref, inputsSchema);
+    const resolved = resolveRef(jsonSchema.$ref, inputsSchema);
     if (resolved) {
       schemaToConvert = resolved;
     }
@@ -98,18 +75,20 @@ const makeWorkflowInputsValidator = (inputs: WorkflowYaml['inputs']) => {
   for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
     const jsonSchema = propertySchema as JSONSchema7;
 
+    // Resolve $ref to get the actual schema (for default extraction)
+    const resolvedSchema = jsonSchema.$ref
+      ? resolveRef(jsonSchema.$ref, normalizedInputs) || jsonSchema
+      : jsonSchema;
+
     // Convert JSON Schema to Zod schema, resolving $ref if needed
     let zodSchema: z.ZodType = convertJsonSchemaToZodWithRefs(jsonSchema, normalizedInputs);
 
-    // Apply default value if present (after $ref resolution)
-    const resolvedSchema = jsonSchema.$ref
-      ? resolveRefInInputs(jsonSchema.$ref, normalizedInputs) || jsonSchema
-      : jsonSchema;
+    // Apply default from resolved schema if present
     if (resolvedSchema.default !== undefined) {
       zodSchema = zodSchema.default(resolvedSchema.default);
     }
 
-    // Check if this property is required
+    // Make optional if not required and no default
     const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
     if (!isRequired && resolvedSchema.default === undefined) {
       zodSchema = zodSchema.optional();

@@ -252,7 +252,7 @@ function createObjectWithDefaults(
  * @param inputsSchema - The full inputs schema containing definitions
  * @returns The resolved schema, or null if not found
  */
-function resolveRef(
+export function resolveRef(
   ref: string,
   inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
 ): JSONSchema7 | null {

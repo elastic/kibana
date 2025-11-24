@@ -12,36 +12,10 @@ import type { Document } from 'yaml';
 import { isPair, isScalar, visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import { normalizeInputsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/input_conversion';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { YamlValidationResult } from '../model/types';
-
-/**
- * Resolves $ref references within the inputs schema
- */
-function resolveRef(
-  ref: string,
-  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
-): JSONSchema7 | null {
-  if (!ref.startsWith('#/')) {
-    return null;
-  }
-
-  const path = ref.slice(2).split('/'); // Remove '#/' and split
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let current: any = inputsSchema;
-
-  for (const segment of path) {
-    if (current && typeof current === 'object') {
-      current = current[segment];
-    } else {
-      return null;
-    }
-  }
-
-  return current as JSONSchema7 | null;
-}
 
 /**
  * Validates that default values in JSON Schema inputs match their property constraints
@@ -57,18 +31,21 @@ export function validateJsonSchemaDefaults(
     return errors;
   }
 
-  // Try to get inputs from workflowDefinition first, then from YAML document
-  let inputs = workflowDefinition?.inputs;
-  if (!inputs) {
-    try {
-      const yamlJson = yamlDocument.toJSON();
-      if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
-        inputs = (yamlJson as Record<string, unknown>).inputs as WorkflowYaml['inputs'];
+  // Get inputs from workflowDefinition or extract from YAML as fallback
+  const inputs =
+    workflowDefinition?.inputs ??
+    (() => {
+      try {
+        const yamlJson = yamlDocument.toJSON();
+        return (
+          yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson
+            ? (yamlJson as Record<string, unknown>).inputs
+            : undefined
+        ) as WorkflowYaml['inputs'] | undefined;
+      } catch {
+        return undefined;
       }
-    } catch (e) {
-      // Ignore errors when extracting from YAML
-    }
-  }
+    })();
 
   if (!inputs) {
     return errors;
@@ -156,6 +133,7 @@ export function validateJsonSchemaDefaults(
       // For definitions: ['inputs', 'definitions', 'UserSchema', 'properties', 'email', 'default'] -> 'definitions.UserSchema.properties.email'
       let propertyKey: string;
       let propertyName: string;
+      let filteredPath: string[];
 
       if (isInProperties) {
         // Remove 'inputs', 'properties', and 'default' from the path
@@ -166,7 +144,7 @@ export function validateJsonSchemaDefaults(
         const propertyPath = path.slice(2, -1); // ['analyst', 'properties', 'name'] or ['email']
 
         // Filter out 'properties' keys (they're structural, not part of the property name)
-        const filteredPath = propertyPath.filter((segment) => segment !== 'properties');
+        filteredPath = propertyPath.filter((segment) => segment !== 'properties');
         // Match the key format used in buildPropertyMap: 'inputs.properties.analyst.name'
         propertyKey = filteredPath.length > 0 ? `inputs.properties.${filteredPath.join('.')}` : '';
         propertyName = filteredPath[filteredPath.length - 1] as string;
@@ -176,50 +154,19 @@ export function validateJsonSchemaDefaults(
         const definitionName = path[2];
         const propertyPath = path.slice(4, -1); // Remove 'inputs', 'definitions', definitionName, 'properties', and 'default'
         // Filter out 'properties' keys for nested objects in definitions
-        const filteredPath = propertyPath.filter((segment) => segment !== 'properties');
+        filteredPath = propertyPath.filter((segment) => segment !== 'properties');
         propertyKey = `inputs.definitions.${definitionName}.${filteredPath.join('.')}`;
         propertyName = filteredPath[filteredPath.length - 1] || definitionName;
       }
 
       let propertyInfo = propertySchemas.get(propertyKey);
 
-      // If not found, try to find by matching the end of the path
-      // This handles cases where the path extraction might be slightly off
-      if (!propertyInfo && propertyKey.includes('.')) {
-        const pathSegments = propertyKey.split('.');
-        // Try matching from the end: 'analyst.email' -> 'inputs.properties.analyst.email'
-        for (let i = pathSegments.length - 1; i >= 0; i--) {
-          const candidateKey = pathSegments.slice(i).join('.');
-          // Try with and without the 'inputs.properties' prefix
-          const candidates = [`inputs.properties.${candidateKey}`, candidateKey];
-          for (const candidate of candidates) {
-            propertyInfo = propertySchemas.get(candidate);
-            if (propertyInfo) {
-              break;
-            }
-          }
-          if (propertyInfo) {
-            break;
-          }
-        }
-      }
-
-      // Last resort: search all map entries for a property that ends with the same segments
-      // This handles edge cases where path extraction might be completely off
+      // Fallback: try matching by property name if exact path not found
       if (!propertyInfo && filteredPath.length > 0) {
-        const searchKey = filteredPath[filteredPath.length - 1]; // Last segment (e.g., 'email')
         for (const [mapKey, mapValue] of propertySchemas.entries()) {
-          // Check if the key ends with the property name and has the right structure
-          if (mapKey.endsWith(`.${searchKey}`) || mapKey === searchKey) {
-            // Verify this is the right property by checking if the path segments match
-            const keySegments = mapKey.split('.');
-            if (keySegments.length >= filteredPath.length) {
-              const keyEndSegments = keySegments.slice(-filteredPath.length);
-              if (keyEndSegments.join('.') === filteredPath.join('.')) {
-                propertyInfo = mapValue;
-                break;
-              }
-            }
+          if (mapKey.endsWith(`.${propertyName}`) || mapKey === propertyName) {
+            propertyInfo = mapValue;
+            break;
           }
         }
       }
