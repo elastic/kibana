@@ -8415,7 +8415,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:synthetics-param/find",
                 "saved_object:synthetics-param/open_point_in_time",
                 "saved_object:synthetics-param/close_point_in_time",
-                "ui:uptime/canReadParams",
+                "ui:uptime/canReadParamValues",
               ],
               "elastic_managed_locations_enabled": Array [
                 "login:",
