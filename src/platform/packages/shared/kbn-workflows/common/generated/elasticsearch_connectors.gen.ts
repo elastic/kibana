@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
- * Generated at: 2025-11-24T17:35:38.020Z
+ * Generated at: 2025-11-24T18:35:50.433Z
  * Source: elasticsearch-specification repository (582 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -1640,7 +1640,7 @@ import {
 } from './schemas/es_openapi_zod.gen';
 import type { InternalConnectorContract } from '../../types/latest';
 
-import { getZodLooseObjectFromProperty } from '../utils/zod';
+import { getShapeAt } from '../utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 
@@ -1666,11 +1666,11 @@ If the Elasticsearch security features are enabled, the deletion of a specific a
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(async_search_delete_request, 'body'),
-    getZodLooseObjectFromProperty(async_search_delete_request, 'path'),
-    getZodLooseObjectFromProperty(async_search_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(async_search_delete_request, 'body'),
+    ...getShapeAt(async_search_delete_request, 'path'),
+    ...getShapeAt(async_search_delete_request, 'query'),
+  }),
   outputSchema: async_search_delete_response,
 };
 const ASYNC_SEARCH_GET_CONTRACT: InternalConnectorContract = {
@@ -1693,11 +1693,11 @@ If the Elasticsearch security features are enabled, access to the results of a s
     urlParams: ['keep_alive', 'typed_keys', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(async_search_get_request, 'body'),
-    getZodLooseObjectFromProperty(async_search_get_request, 'path'),
-    getZodLooseObjectFromProperty(async_search_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(async_search_get_request, 'body'),
+    ...getShapeAt(async_search_get_request, 'path'),
+    ...getShapeAt(async_search_get_request, 'query'),
+  }),
   outputSchema: async_search_get_response,
 };
 const ASYNC_SEARCH_STATUS_CONTRACT: InternalConnectorContract = {
@@ -1723,11 +1723,11 @@ If the Elasticsearch security features are enabled, the access to the status of 
     urlParams: ['keep_alive'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(async_search_status_request, 'body'),
-    getZodLooseObjectFromProperty(async_search_status_request, 'path'),
-    getZodLooseObjectFromProperty(async_search_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(async_search_status_request, 'body'),
+    ...getShapeAt(async_search_status_request, 'path'),
+    ...getShapeAt(async_search_status_request, 'query'),
+  }),
   outputSchema: async_search_status_response,
 };
 const ASYNC_SEARCH_SUBMIT_CONTRACT: InternalConnectorContract = {
@@ -1832,12 +1832,16 @@ The maximum allowed size for a stored async search response can be set by changi
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(async_search_submit_request, 'body'),
-    getZodLooseObjectFromProperty(async_search_submit_request, 'path'),
-    getZodLooseObjectFromProperty(async_search_submit_request, 'query'),
-    getZodLooseObjectFromProperty(async_search_submit1_request, 'body'),
-    getZodLooseObjectFromProperty(async_search_submit1_request, 'path'),
-    getZodLooseObjectFromProperty(async_search_submit1_request, 'query'),
+    z.object({
+      ...getShapeAt(async_search_submit_request, 'body'),
+      ...getShapeAt(async_search_submit_request, 'path'),
+      ...getShapeAt(async_search_submit_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(async_search_submit1_request, 'body'),
+      ...getShapeAt(async_search_submit1_request, 'path'),
+      ...getShapeAt(async_search_submit1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([async_search_submit_response, async_search_submit1_response]),
 };
@@ -1860,7 +1864,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const AUTOSCALING_GET_AUTOSCALING_CAPACITY_CONTRACT: InternalConnectorContract = {
@@ -1893,7 +1897,7 @@ Do not use this information to make autoscaling decisions.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const AUTOSCALING_GET_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
@@ -1915,7 +1919,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const AUTOSCALING_PUT_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
@@ -1937,7 +1941,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const BULK_CONTRACT: InternalConnectorContract = {
@@ -2083,18 +2087,26 @@ Refer to the linked documentation for step-by-step instructions using the index 
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(bulk_request, 'body'),
-    getZodLooseObjectFromProperty(bulk_request, 'path'),
-    getZodLooseObjectFromProperty(bulk_request, 'query'),
-    getZodLooseObjectFromProperty(bulk1_request, 'body'),
-    getZodLooseObjectFromProperty(bulk1_request, 'path'),
-    getZodLooseObjectFromProperty(bulk1_request, 'query'),
-    getZodLooseObjectFromProperty(bulk2_request, 'body'),
-    getZodLooseObjectFromProperty(bulk2_request, 'path'),
-    getZodLooseObjectFromProperty(bulk2_request, 'query'),
-    getZodLooseObjectFromProperty(bulk3_request, 'body'),
-    getZodLooseObjectFromProperty(bulk3_request, 'path'),
-    getZodLooseObjectFromProperty(bulk3_request, 'query'),
+    z.object({
+      ...getShapeAt(bulk_request, 'body'),
+      ...getShapeAt(bulk_request, 'path'),
+      ...getShapeAt(bulk_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(bulk1_request, 'body'),
+      ...getShapeAt(bulk1_request, 'path'),
+      ...getShapeAt(bulk1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(bulk2_request, 'body'),
+      ...getShapeAt(bulk2_request, 'path'),
+      ...getShapeAt(bulk2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(bulk3_request, 'body'),
+      ...getShapeAt(bulk3_request, 'path'),
+      ...getShapeAt(bulk3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([bulk_response, bulk1_response, bulk2_response, bulk3_response]),
 };
@@ -2115,7 +2127,7 @@ const CAPABILITIES_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const CAT_ALIASES_CONTRACT: InternalConnectorContract = {
@@ -2141,12 +2153,16 @@ IMPORTANT: CAT APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_aliases_request, 'body'),
-    getZodLooseObjectFromProperty(cat_aliases_request, 'path'),
-    getZodLooseObjectFromProperty(cat_aliases_request, 'query'),
-    getZodLooseObjectFromProperty(cat_aliases1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_aliases1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_aliases1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_aliases_request, 'body'),
+      ...getShapeAt(cat_aliases_request, 'path'),
+      ...getShapeAt(cat_aliases_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_aliases1_request, 'body'),
+      ...getShapeAt(cat_aliases1_request, 'path'),
+      ...getShapeAt(cat_aliases1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_aliases_response, cat_aliases1_response]),
 };
@@ -2172,12 +2188,16 @@ IMPORTANT: CAT APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_allocation_request, 'body'),
-    getZodLooseObjectFromProperty(cat_allocation_request, 'path'),
-    getZodLooseObjectFromProperty(cat_allocation_request, 'query'),
-    getZodLooseObjectFromProperty(cat_allocation1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_allocation1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_allocation1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_allocation_request, 'body'),
+      ...getShapeAt(cat_allocation_request, 'path'),
+      ...getShapeAt(cat_allocation_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_allocation1_request, 'body'),
+      ...getShapeAt(cat_allocation1_request, 'path'),
+      ...getShapeAt(cat_allocation1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_allocation_response, cat_allocation1_response]),
 };
@@ -2197,7 +2217,7 @@ const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const CAT_COMPONENT_TEMPLATES_CONTRACT: InternalConnectorContract = {
@@ -2224,12 +2244,16 @@ They are not intended for use by applications. For application consumption, use 
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_component_templates_request, 'body'),
-    getZodLooseObjectFromProperty(cat_component_templates_request, 'path'),
-    getZodLooseObjectFromProperty(cat_component_templates_request, 'query'),
-    getZodLooseObjectFromProperty(cat_component_templates1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_component_templates1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_component_templates1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_component_templates_request, 'body'),
+      ...getShapeAt(cat_component_templates_request, 'path'),
+      ...getShapeAt(cat_component_templates_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_component_templates1_request, 'body'),
+      ...getShapeAt(cat_component_templates1_request, 'path'),
+      ...getShapeAt(cat_component_templates1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_component_templates_response, cat_component_templates1_response]),
 };
@@ -2256,12 +2280,16 @@ They are not intended for use by applications. For application consumption, use 
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_count_request, 'body'),
-    getZodLooseObjectFromProperty(cat_count_request, 'path'),
-    getZodLooseObjectFromProperty(cat_count_request, 'query'),
-    getZodLooseObjectFromProperty(cat_count1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_count1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_count1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_count_request, 'body'),
+      ...getShapeAt(cat_count_request, 'path'),
+      ...getShapeAt(cat_count_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_count1_request, 'body'),
+      ...getShapeAt(cat_count1_request, 'path'),
+      ...getShapeAt(cat_count1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_count_response, cat_count1_response]),
 };
@@ -2288,12 +2316,16 @@ They are not intended for use by applications. For application consumption, use 
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_fielddata_request, 'body'),
-    getZodLooseObjectFromProperty(cat_fielddata_request, 'path'),
-    getZodLooseObjectFromProperty(cat_fielddata_request, 'query'),
-    getZodLooseObjectFromProperty(cat_fielddata1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_fielddata1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_fielddata1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_fielddata_request, 'body'),
+      ...getShapeAt(cat_fielddata_request, 'path'),
+      ...getShapeAt(cat_fielddata_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_fielddata1_request, 'body'),
+      ...getShapeAt(cat_fielddata1_request, 'path'),
+      ...getShapeAt(cat_fielddata1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_fielddata_response, cat_fielddata1_response]),
 };
@@ -2323,11 +2355,11 @@ You also can use the API to track the recovery of a large cluster over a longer 
     urlParams: ['ts', 'h', 's'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_health_request, 'body'),
-    getZodLooseObjectFromProperty(cat_health_request, 'path'),
-    getZodLooseObjectFromProperty(cat_health_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cat_health_request, 'body'),
+    ...getShapeAt(cat_health_request, 'path'),
+    ...getShapeAt(cat_health_request, 'query'),
+  }),
   outputSchema: cat_health_response,
 };
 const CAT_HELP_CONTRACT: InternalConnectorContract = {
@@ -2348,11 +2380,11 @@ Get help for the CAT APIs.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_help_request, 'body'),
-    getZodLooseObjectFromProperty(cat_help_request, 'path'),
-    getZodLooseObjectFromProperty(cat_help_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cat_help_request, 'body'),
+    ...getShapeAt(cat_help_request, 'path'),
+    ...getShapeAt(cat_help_request, 'query'),
+  }),
   outputSchema: cat_help_response,
 };
 const CAT_INDICES_CONTRACT: InternalConnectorContract = {
@@ -2396,12 +2428,16 @@ They are not intended for use by applications. For application consumption, use 
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_indices_request, 'body'),
-    getZodLooseObjectFromProperty(cat_indices_request, 'path'),
-    getZodLooseObjectFromProperty(cat_indices_request, 'query'),
-    getZodLooseObjectFromProperty(cat_indices1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_indices1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_indices1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_indices_request, 'body'),
+      ...getShapeAt(cat_indices_request, 'path'),
+      ...getShapeAt(cat_indices_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_indices1_request, 'body'),
+      ...getShapeAt(cat_indices1_request, 'path'),
+      ...getShapeAt(cat_indices1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_indices_response, cat_indices1_response]),
 };
@@ -2425,11 +2461,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_master_request, 'body'),
-    getZodLooseObjectFromProperty(cat_master_request, 'path'),
-    getZodLooseObjectFromProperty(cat_master_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cat_master_request, 'body'),
+    ...getShapeAt(cat_master_request, 'path'),
+    ...getShapeAt(cat_master_request, 'query'),
+  }),
   outputSchema: cat_master_response,
 };
 const CAT_ML_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -2456,12 +2492,16 @@ application consumption, use the get data frame analytics jobs statistics API.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'query'),
-    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_ml_data_frame_analytics_request, 'body'),
+      ...getShapeAt(cat_ml_data_frame_analytics_request, 'path'),
+      ...getShapeAt(cat_ml_data_frame_analytics_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_ml_data_frame_analytics1_request, 'body'),
+      ...getShapeAt(cat_ml_data_frame_analytics1_request, 'path'),
+      ...getShapeAt(cat_ml_data_frame_analytics1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     cat_ml_data_frame_analytics_response,
@@ -2495,12 +2535,16 @@ application consumption, use the get datafeed statistics API.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_ml_datafeeds_request, 'body'),
-    getZodLooseObjectFromProperty(cat_ml_datafeeds_request, 'path'),
-    getZodLooseObjectFromProperty(cat_ml_datafeeds_request, 'query'),
-    getZodLooseObjectFromProperty(cat_ml_datafeeds1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_ml_datafeeds1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_ml_datafeeds1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_ml_datafeeds_request, 'body'),
+      ...getShapeAt(cat_ml_datafeeds_request, 'path'),
+      ...getShapeAt(cat_ml_datafeeds_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_ml_datafeeds1_request, 'body'),
+      ...getShapeAt(cat_ml_datafeeds1_request, 'path'),
+      ...getShapeAt(cat_ml_datafeeds1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_ml_datafeeds_response, cat_ml_datafeeds1_response]),
 };
@@ -2531,12 +2575,16 @@ application consumption, use the get anomaly detection job statistics API.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_ml_jobs_request, 'body'),
-    getZodLooseObjectFromProperty(cat_ml_jobs_request, 'path'),
-    getZodLooseObjectFromProperty(cat_ml_jobs_request, 'query'),
-    getZodLooseObjectFromProperty(cat_ml_jobs1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_ml_jobs1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_ml_jobs1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_ml_jobs_request, 'body'),
+      ...getShapeAt(cat_ml_jobs_request, 'path'),
+      ...getShapeAt(cat_ml_jobs_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_ml_jobs1_request, 'body'),
+      ...getShapeAt(cat_ml_jobs1_request, 'path'),
+      ...getShapeAt(cat_ml_jobs1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_ml_jobs_response, cat_ml_jobs1_response]),
 };
@@ -2564,12 +2612,16 @@ application consumption, use the get trained models statistics API.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_ml_trained_models_request, 'body'),
-    getZodLooseObjectFromProperty(cat_ml_trained_models_request, 'path'),
-    getZodLooseObjectFromProperty(cat_ml_trained_models_request, 'query'),
-    getZodLooseObjectFromProperty(cat_ml_trained_models1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_ml_trained_models1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_ml_trained_models1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_ml_trained_models_request, 'body'),
+      ...getShapeAt(cat_ml_trained_models_request, 'path'),
+      ...getShapeAt(cat_ml_trained_models_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_ml_trained_models1_request, 'body'),
+      ...getShapeAt(cat_ml_trained_models1_request, 'path'),
+      ...getShapeAt(cat_ml_trained_models1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_ml_trained_models_response, cat_ml_trained_models1_response]),
 };
@@ -2593,11 +2645,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_nodeattrs_request, 'body'),
-    getZodLooseObjectFromProperty(cat_nodeattrs_request, 'path'),
-    getZodLooseObjectFromProperty(cat_nodeattrs_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cat_nodeattrs_request, 'body'),
+    ...getShapeAt(cat_nodeattrs_request, 'path'),
+    ...getShapeAt(cat_nodeattrs_request, 'query'),
+  }),
   outputSchema: cat_nodeattrs_response,
 };
 const CAT_NODES_CONTRACT: InternalConnectorContract = {
@@ -2619,11 +2671,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['full_id', 'include_unloaded_segments', 'h', 's', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_nodes_request, 'body'),
-    getZodLooseObjectFromProperty(cat_nodes_request, 'path'),
-    getZodLooseObjectFromProperty(cat_nodes_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cat_nodes_request, 'body'),
+    ...getShapeAt(cat_nodes_request, 'path'),
+    ...getShapeAt(cat_nodes_request, 'query'),
+  }),
   outputSchema: cat_nodes_response,
 };
 const CAT_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
@@ -2646,11 +2698,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_pending_tasks_request, 'body'),
-    getZodLooseObjectFromProperty(cat_pending_tasks_request, 'path'),
-    getZodLooseObjectFromProperty(cat_pending_tasks_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cat_pending_tasks_request, 'body'),
+    ...getShapeAt(cat_pending_tasks_request, 'path'),
+    ...getShapeAt(cat_pending_tasks_request, 'query'),
+  }),
   outputSchema: cat_pending_tasks_response,
 };
 const CAT_PLUGINS_CONTRACT: InternalConnectorContract = {
@@ -2673,11 +2725,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'include_bootstrap', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_plugins_request, 'body'),
-    getZodLooseObjectFromProperty(cat_plugins_request, 'path'),
-    getZodLooseObjectFromProperty(cat_plugins_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cat_plugins_request, 'body'),
+    ...getShapeAt(cat_plugins_request, 'path'),
+    ...getShapeAt(cat_plugins_request, 'query'),
+  }),
   outputSchema: cat_plugins_response,
 };
 const CAT_RECOVERY_CONTRACT: InternalConnectorContract = {
@@ -2703,12 +2755,16 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_recovery_request, 'body'),
-    getZodLooseObjectFromProperty(cat_recovery_request, 'path'),
-    getZodLooseObjectFromProperty(cat_recovery_request, 'query'),
-    getZodLooseObjectFromProperty(cat_recovery1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_recovery1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_recovery1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_recovery_request, 'body'),
+      ...getShapeAt(cat_recovery_request, 'path'),
+      ...getShapeAt(cat_recovery_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_recovery1_request, 'body'),
+      ...getShapeAt(cat_recovery1_request, 'path'),
+      ...getShapeAt(cat_recovery1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_recovery_response, cat_recovery1_response]),
 };
@@ -2732,11 +2788,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_repositories_request, 'body'),
-    getZodLooseObjectFromProperty(cat_repositories_request, 'path'),
-    getZodLooseObjectFromProperty(cat_repositories_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cat_repositories_request, 'body'),
+    ...getShapeAt(cat_repositories_request, 'path'),
+    ...getShapeAt(cat_repositories_request, 'query'),
+  }),
   outputSchema: cat_repositories_response,
 };
 const CAT_SEGMENTS_CONTRACT: InternalConnectorContract = {
@@ -2771,12 +2827,16 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_segments_request, 'body'),
-    getZodLooseObjectFromProperty(cat_segments_request, 'path'),
-    getZodLooseObjectFromProperty(cat_segments_request, 'query'),
-    getZodLooseObjectFromProperty(cat_segments1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_segments1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_segments1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_segments_request, 'body'),
+      ...getShapeAt(cat_segments_request, 'path'),
+      ...getShapeAt(cat_segments_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_segments1_request, 'body'),
+      ...getShapeAt(cat_segments1_request, 'path'),
+      ...getShapeAt(cat_segments1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_segments_response, cat_segments1_response]),
 };
@@ -2801,12 +2861,16 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_shards_request, 'body'),
-    getZodLooseObjectFromProperty(cat_shards_request, 'path'),
-    getZodLooseObjectFromProperty(cat_shards_request, 'query'),
-    getZodLooseObjectFromProperty(cat_shards1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_shards1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_shards1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_shards_request, 'body'),
+      ...getShapeAt(cat_shards_request, 'path'),
+      ...getShapeAt(cat_shards_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_shards1_request, 'body'),
+      ...getShapeAt(cat_shards1_request, 'path'),
+      ...getShapeAt(cat_shards1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_shards_response, cat_shards1_response]),
 };
@@ -2832,12 +2896,16 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_snapshots_request, 'body'),
-    getZodLooseObjectFromProperty(cat_snapshots_request, 'path'),
-    getZodLooseObjectFromProperty(cat_snapshots_request, 'query'),
-    getZodLooseObjectFromProperty(cat_snapshots1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_snapshots1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_snapshots1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_snapshots_request, 'body'),
+      ...getShapeAt(cat_snapshots_request, 'path'),
+      ...getShapeAt(cat_snapshots_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_snapshots1_request, 'body'),
+      ...getShapeAt(cat_snapshots1_request, 'path'),
+      ...getShapeAt(cat_snapshots1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_snapshots_response, cat_snapshots1_response]),
 };
@@ -2869,11 +2937,11 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_tasks_request, 'body'),
-    getZodLooseObjectFromProperty(cat_tasks_request, 'path'),
-    getZodLooseObjectFromProperty(cat_tasks_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cat_tasks_request, 'body'),
+    ...getShapeAt(cat_tasks_request, 'path'),
+    ...getShapeAt(cat_tasks_request, 'query'),
+  }),
   outputSchema: cat_tasks_response,
 };
 const CAT_TEMPLATES_CONTRACT: InternalConnectorContract = {
@@ -2898,12 +2966,16 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_templates_request, 'body'),
-    getZodLooseObjectFromProperty(cat_templates_request, 'path'),
-    getZodLooseObjectFromProperty(cat_templates_request, 'query'),
-    getZodLooseObjectFromProperty(cat_templates1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_templates1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_templates1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_templates_request, 'body'),
+      ...getShapeAt(cat_templates_request, 'path'),
+      ...getShapeAt(cat_templates_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_templates1_request, 'body'),
+      ...getShapeAt(cat_templates1_request, 'path'),
+      ...getShapeAt(cat_templates1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_templates_response, cat_templates1_response]),
 };
@@ -2929,12 +3001,16 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_thread_pool_request, 'body'),
-    getZodLooseObjectFromProperty(cat_thread_pool_request, 'path'),
-    getZodLooseObjectFromProperty(cat_thread_pool_request, 'query'),
-    getZodLooseObjectFromProperty(cat_thread_pool1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_thread_pool1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_thread_pool1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_thread_pool_request, 'body'),
+      ...getShapeAt(cat_thread_pool_request, 'path'),
+      ...getShapeAt(cat_thread_pool_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_thread_pool1_request, 'body'),
+      ...getShapeAt(cat_thread_pool1_request, 'path'),
+      ...getShapeAt(cat_thread_pool1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_thread_pool_response, cat_thread_pool1_response]),
 };
@@ -2962,12 +3038,16 @@ application consumption, use the get transform statistics API.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cat_transforms_request, 'body'),
-    getZodLooseObjectFromProperty(cat_transforms_request, 'path'),
-    getZodLooseObjectFromProperty(cat_transforms_request, 'query'),
-    getZodLooseObjectFromProperty(cat_transforms1_request, 'body'),
-    getZodLooseObjectFromProperty(cat_transforms1_request, 'path'),
-    getZodLooseObjectFromProperty(cat_transforms1_request, 'query'),
+    z.object({
+      ...getShapeAt(cat_transforms_request, 'body'),
+      ...getShapeAt(cat_transforms_request, 'path'),
+      ...getShapeAt(cat_transforms_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_transforms1_request, 'body'),
+      ...getShapeAt(cat_transforms1_request, 'path'),
+      ...getShapeAt(cat_transforms1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cat_transforms_response, cat_transforms1_response]),
 };
@@ -2990,11 +3070,11 @@ Delete a collection of cross-cluster replication auto-follow patterns.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_delete_auto_follow_pattern_request, 'body'),
+    ...getShapeAt(ccr_delete_auto_follow_pattern_request, 'path'),
+    ...getShapeAt(ccr_delete_auto_follow_pattern_request, 'query'),
+  }),
   outputSchema: ccr_delete_auto_follow_pattern_response,
 };
 const CCR_FOLLOW_CONTRACT: InternalConnectorContract = {
@@ -3030,11 +3110,11 @@ When the API returns, the follower index exists and cross-cluster replication st
       'settings',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_follow_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_follow_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_follow_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_follow_request, 'body'),
+    ...getShapeAt(ccr_follow_request, 'path'),
+    ...getShapeAt(ccr_follow_request, 'query'),
+  }),
   outputSchema: ccr_follow_response,
 };
 const CCR_FOLLOW_INFO_CONTRACT: InternalConnectorContract = {
@@ -3057,11 +3137,11 @@ For example, the results include follower index names, leader index names, repli
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_follow_info_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_follow_info_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_follow_info_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_follow_info_request, 'body'),
+    ...getShapeAt(ccr_follow_info_request, 'path'),
+    ...getShapeAt(ccr_follow_info_request, 'query'),
+  }),
   outputSchema: ccr_follow_info_response,
 };
 const CCR_FOLLOW_STATS_CONTRACT: InternalConnectorContract = {
@@ -3084,11 +3164,11 @@ The API returns shard-level stats about the "following tasks" associated with ea
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_follow_stats_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_follow_stats_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_follow_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_follow_stats_request, 'body'),
+    ...getShapeAt(ccr_follow_stats_request, 'path'),
+    ...getShapeAt(ccr_follow_stats_request, 'query'),
+  }),
   outputSchema: ccr_follow_stats_response,
 };
 const CCR_FORGET_FOLLOWER_CONTRACT: InternalConnectorContract = {
@@ -3124,11 +3204,11 @@ The only purpose of this API is to handle the case of failure to remove the foll
       'leader_remote_cluster',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_forget_follower_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_forget_follower_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_forget_follower_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_forget_follower_request, 'body'),
+    ...getShapeAt(ccr_forget_follower_request, 'path'),
+    ...getShapeAt(ccr_forget_follower_request, 'query'),
+  }),
   outputSchema: ccr_forget_follower_response,
 };
 const CCR_GET_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
@@ -3151,12 +3231,16 @@ Get cross-cluster replication auto-follow patterns.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'query'),
-    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'query'),
+    z.object({
+      ...getShapeAt(ccr_get_auto_follow_pattern_request, 'body'),
+      ...getShapeAt(ccr_get_auto_follow_pattern_request, 'path'),
+      ...getShapeAt(ccr_get_auto_follow_pattern_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ccr_get_auto_follow_pattern1_request, 'body'),
+      ...getShapeAt(ccr_get_auto_follow_pattern1_request, 'path'),
+      ...getShapeAt(ccr_get_auto_follow_pattern1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ccr_get_auto_follow_pattern_response,
@@ -3188,11 +3272,11 @@ Remote indices that were created while the pattern was paused will also be follo
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_pause_auto_follow_pattern_request, 'body'),
+    ...getShapeAt(ccr_pause_auto_follow_pattern_request, 'path'),
+    ...getShapeAt(ccr_pause_auto_follow_pattern_request, 'query'),
+  }),
   outputSchema: ccr_pause_auto_follow_pattern_response,
 };
 const CCR_PAUSE_FOLLOW_CONTRACT: InternalConnectorContract = {
@@ -3217,11 +3301,11 @@ You can pause and resume a follower index to change the configuration of the fol
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_pause_follow_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_pause_follow_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_pause_follow_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_pause_follow_request, 'body'),
+    ...getShapeAt(ccr_pause_follow_request, 'path'),
+    ...getShapeAt(ccr_pause_follow_request, 'query'),
+  }),
   outputSchema: ccr_pause_follow_response,
 };
 const CCR_PUT_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
@@ -3263,11 +3347,11 @@ NOTE: Follower indices that were configured automatically before updating an aut
       'max_write_request_size',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_put_auto_follow_pattern_request, 'body'),
+    ...getShapeAt(ccr_put_auto_follow_pattern_request, 'path'),
+    ...getShapeAt(ccr_put_auto_follow_pattern_request, 'query'),
+  }),
   outputSchema: ccr_put_auto_follow_pattern_response,
 };
 const CCR_RESUME_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
@@ -3291,11 +3375,11 @@ Remote indices created while the pattern was paused will also be followed unless
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_resume_auto_follow_pattern_request, 'body'),
+    ...getShapeAt(ccr_resume_auto_follow_pattern_request, 'path'),
+    ...getShapeAt(ccr_resume_auto_follow_pattern_request, 'query'),
+  }),
   outputSchema: ccr_resume_auto_follow_pattern_response,
 };
 const CCR_RESUME_FOLLOW_CONTRACT: InternalConnectorContract = {
@@ -3330,11 +3414,11 @@ When this API returns, the follower index will resume fetching operations from t
       'read_poll_timeout',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_resume_follow_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_resume_follow_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_resume_follow_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_resume_follow_request, 'body'),
+    ...getShapeAt(ccr_resume_follow_request, 'path'),
+    ...getShapeAt(ccr_resume_follow_request, 'query'),
+  }),
   outputSchema: ccr_resume_follow_response,
 };
 const CCR_STATS_CONTRACT: InternalConnectorContract = {
@@ -3355,11 +3439,11 @@ This API returns stats about auto-following and the same shard-level stats as th
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_stats_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_stats_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_stats_request, 'body'),
+    ...getShapeAt(ccr_stats_request, 'path'),
+    ...getShapeAt(ccr_stats_request, 'query'),
+  }),
   outputSchema: ccr_stats_response,
 };
 const CCR_UNFOLLOW_CONTRACT: InternalConnectorContract = {
@@ -3386,11 +3470,11 @@ The follower index must be paused and closed before you call the unfollow API.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ccr_unfollow_request, 'body'),
-    getZodLooseObjectFromProperty(ccr_unfollow_request, 'path'),
-    getZodLooseObjectFromProperty(ccr_unfollow_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ccr_unfollow_request, 'body'),
+    ...getShapeAt(ccr_unfollow_request, 'path'),
+    ...getShapeAt(ccr_unfollow_request, 'query'),
+  }),
   outputSchema: ccr_unfollow_response,
 };
 const CLEAR_SCROLL_CONTRACT: InternalConnectorContract = {
@@ -3412,12 +3496,16 @@ Clear the search context and results for a scrolling search.
     bodyParams: ['scroll_id'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(clear_scroll_request, 'body'),
-    getZodLooseObjectFromProperty(clear_scroll_request, 'path'),
-    getZodLooseObjectFromProperty(clear_scroll_request, 'query'),
-    getZodLooseObjectFromProperty(clear_scroll1_request, 'body'),
-    getZodLooseObjectFromProperty(clear_scroll1_request, 'path'),
-    getZodLooseObjectFromProperty(clear_scroll1_request, 'query'),
+    z.object({
+      ...getShapeAt(clear_scroll_request, 'body'),
+      ...getShapeAt(clear_scroll_request, 'path'),
+      ...getShapeAt(clear_scroll_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(clear_scroll1_request, 'body'),
+      ...getShapeAt(clear_scroll1_request, 'path'),
+      ...getShapeAt(clear_scroll1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([clear_scroll_response, clear_scroll1_response]),
 };
@@ -3442,11 +3530,11 @@ However, keeping points in time has a cost; close them as soon as they are no lo
     urlParams: [],
     bodyParams: ['id'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(close_point_in_time_request, 'body'),
-    getZodLooseObjectFromProperty(close_point_in_time_request, 'path'),
-    getZodLooseObjectFromProperty(close_point_in_time_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(close_point_in_time_request, 'body'),
+    ...getShapeAt(close_point_in_time_request, 'path'),
+    ...getShapeAt(close_point_in_time_request, 'query'),
+  }),
   outputSchema: close_point_in_time_response,
 };
 const CLUSTER_ALLOCATION_EXPLAIN_CONTRACT: InternalConnectorContract = {
@@ -3481,12 +3569,16 @@ Refer to the linked documentation for examples of how to troubleshoot allocation
     bodyParams: ['index', 'shard', 'primary', 'current_node'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_allocation_explain_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_allocation_explain_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_allocation_explain_request, 'query'),
-    getZodLooseObjectFromProperty(cluster_allocation_explain1_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_allocation_explain1_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_allocation_explain1_request, 'query'),
+    z.object({
+      ...getShapeAt(cluster_allocation_explain_request, 'body'),
+      ...getShapeAt(cluster_allocation_explain_request, 'path'),
+      ...getShapeAt(cluster_allocation_explain_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cluster_allocation_explain1_request, 'body'),
+      ...getShapeAt(cluster_allocation_explain1_request, 'path'),
+      ...getShapeAt(cluster_allocation_explain1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     cluster_allocation_explain_response,
@@ -3511,11 +3603,11 @@ Component templates are building blocks for constructing index templates that sp
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_delete_component_template_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_delete_component_template_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_delete_component_template_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_delete_component_template_request, 'body'),
+    ...getShapeAt(cluster_delete_component_template_request, 'path'),
+    ...getShapeAt(cluster_delete_component_template_request, 'query'),
+  }),
   outputSchema: cluster_delete_component_template_response,
 };
 const CLUSTER_DELETE_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContract = {
@@ -3536,11 +3628,11 @@ Remove master-eligible nodes from the voting configuration exclusion list.
     urlParams: ['master_timeout', 'wait_for_removal'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_delete_voting_config_exclusions_request, 'body'),
+    ...getShapeAt(cluster_delete_voting_config_exclusions_request, 'path'),
+    ...getShapeAt(cluster_delete_voting_config_exclusions_request, 'query'),
+  }),
   outputSchema: cluster_delete_voting_config_exclusions_response,
 };
 const CLUSTER_EXISTS_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
@@ -3561,11 +3653,11 @@ Returns information about whether a particular component template exists.
     urlParams: ['master_timeout', 'local'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_exists_component_template_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_exists_component_template_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_exists_component_template_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_exists_component_template_request, 'body'),
+    ...getShapeAt(cluster_exists_component_template_request, 'path'),
+    ...getShapeAt(cluster_exists_component_template_request, 'query'),
+  }),
   outputSchema: cluster_exists_component_template_response,
 };
 const CLUSTER_GET_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
@@ -3587,12 +3679,16 @@ Get information about component templates.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_get_component_template_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_get_component_template_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_get_component_template_request, 'query'),
-    getZodLooseObjectFromProperty(cluster_get_component_template1_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_get_component_template1_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_get_component_template1_request, 'query'),
+    z.object({
+      ...getShapeAt(cluster_get_component_template_request, 'body'),
+      ...getShapeAt(cluster_get_component_template_request, 'path'),
+      ...getShapeAt(cluster_get_component_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cluster_get_component_template1_request, 'body'),
+      ...getShapeAt(cluster_get_component_template1_request, 'path'),
+      ...getShapeAt(cluster_get_component_template1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     cluster_get_component_template_response,
@@ -3618,11 +3714,11 @@ By default, it returns only settings that have been explicitly defined.
     urlParams: ['flat_settings', 'include_defaults', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_get_settings_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_get_settings_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_get_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_get_settings_request, 'body'),
+    ...getShapeAt(cluster_get_settings_request, 'path'),
+    ...getShapeAt(cluster_get_settings_request, 'query'),
+  }),
   outputSchema: cluster_get_settings_response,
 };
 const CLUSTER_HEALTH_CONTRACT: InternalConnectorContract = {
@@ -3665,12 +3761,16 @@ The cluster status is controlled by the worst index status.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_health_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_health_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_health_request, 'query'),
-    getZodLooseObjectFromProperty(cluster_health1_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_health1_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_health1_request, 'query'),
+    z.object({
+      ...getShapeAt(cluster_health_request, 'body'),
+      ...getShapeAt(cluster_health_request, 'path'),
+      ...getShapeAt(cluster_health_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cluster_health1_request, 'body'),
+      ...getShapeAt(cluster_health1_request, 'path'),
+      ...getShapeAt(cluster_health1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cluster_health_response, cluster_health1_response]),
 };
@@ -3692,11 +3792,11 @@ Returns basic information about the cluster.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_info_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_info_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_info_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_info_request, 'body'),
+    ...getShapeAt(cluster_info_request, 'path'),
+    ...getShapeAt(cluster_info_request, 'query'),
+  }),
   outputSchema: cluster_info_response,
 };
 const CLUSTER_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
@@ -3721,11 +3821,11 @@ However, if a user-initiated task such as a create index command causes a cluste
     urlParams: ['local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_pending_tasks_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_pending_tasks_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_pending_tasks_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_pending_tasks_request, 'body'),
+    ...getShapeAt(cluster_pending_tasks_request, 'path'),
+    ...getShapeAt(cluster_pending_tasks_request, 'query'),
+  }),
   outputSchema: cluster_pending_tasks_response,
 };
 const CLUSTER_POST_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContract = {
@@ -3762,11 +3862,11 @@ They are not required when removing master-ineligible nodes or when removing few
     urlParams: ['node_names', 'node_ids', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_post_voting_config_exclusions_request, 'body'),
+    ...getShapeAt(cluster_post_voting_config_exclusions_request, 'path'),
+    ...getShapeAt(cluster_post_voting_config_exclusions_request, 'query'),
+  }),
   outputSchema: cluster_post_voting_config_exclusions_response,
 };
 const CLUSTER_PUT_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
@@ -3806,12 +3906,16 @@ To be applied, a component template must be included in an index template's \`co
     bodyParams: ['template', 'version', '_meta', 'deprecated'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_put_component_template_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_put_component_template_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_put_component_template_request, 'query'),
-    getZodLooseObjectFromProperty(cluster_put_component_template1_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_put_component_template1_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_put_component_template1_request, 'query'),
+    z.object({
+      ...getShapeAt(cluster_put_component_template_request, 'body'),
+      ...getShapeAt(cluster_put_component_template_request, 'path'),
+      ...getShapeAt(cluster_put_component_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cluster_put_component_template1_request, 'body'),
+      ...getShapeAt(cluster_put_component_template1_request, 'path'),
+      ...getShapeAt(cluster_put_component_template1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     cluster_put_component_template_response,
@@ -3853,11 +3957,11 @@ If a cluster becomes unstable, transient settings can clear unexpectedly, result
     urlParams: ['flat_settings', 'master_timeout', 'timeout'],
     bodyParams: ['persistent', 'transient'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_put_settings_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_put_settings_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_put_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_put_settings_request, 'body'),
+    ...getShapeAt(cluster_put_settings_request, 'path'),
+    ...getShapeAt(cluster_put_settings_request, 'query'),
+  }),
   outputSchema: cluster_put_settings_response,
 };
 const CLUSTER_REMOTE_INFO_CONTRACT: InternalConnectorContract = {
@@ -3886,11 +3990,11 @@ The API returns connection and endpoint information keyed by the configured remo
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_remote_info_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_remote_info_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_remote_info_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_remote_info_request, 'body'),
+    ...getShapeAt(cluster_remote_info_request, 'path'),
+    ...getShapeAt(cluster_remote_info_request, 'query'),
+  }),
   outputSchema: cluster_remote_info_response,
 };
 const CLUSTER_REROUTE_CONTRACT: InternalConnectorContract = {
@@ -3923,11 +4027,11 @@ Once the problem has been corrected, allocation can be manually retried by calli
     urlParams: ['dry_run', 'explain', 'metric', 'retry_failed', 'master_timeout', 'timeout'],
     bodyParams: ['commands'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_reroute_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_reroute_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_reroute_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cluster_reroute_request, 'body'),
+    ...getShapeAt(cluster_reroute_request, 'path'),
+    ...getShapeAt(cluster_reroute_request, 'query'),
+  }),
   outputSchema: cluster_reroute_response,
 };
 const CLUSTER_STATE_CONTRACT: InternalConnectorContract = {
@@ -3975,15 +4079,21 @@ Instead, obtain the information you require using other more stable cluster APIs
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_state_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_state_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_state_request, 'query'),
-    getZodLooseObjectFromProperty(cluster_state1_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_state1_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_state1_request, 'query'),
-    getZodLooseObjectFromProperty(cluster_state2_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_state2_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_state2_request, 'query'),
+    z.object({
+      ...getShapeAt(cluster_state_request, 'body'),
+      ...getShapeAt(cluster_state_request, 'path'),
+      ...getShapeAt(cluster_state_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cluster_state1_request, 'body'),
+      ...getShapeAt(cluster_state1_request, 'path'),
+      ...getShapeAt(cluster_state1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cluster_state2_request, 'body'),
+      ...getShapeAt(cluster_state2_request, 'path'),
+      ...getShapeAt(cluster_state2_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cluster_state_response, cluster_state1_response, cluster_state2_response]),
 };
@@ -4006,12 +4116,16 @@ Get basic index metrics (shard numbers, store size, memory usage) and informatio
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cluster_stats_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_stats_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_stats_request, 'query'),
-    getZodLooseObjectFromProperty(cluster_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(cluster_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(cluster_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(cluster_stats_request, 'body'),
+      ...getShapeAt(cluster_stats_request, 'path'),
+      ...getShapeAt(cluster_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cluster_stats1_request, 'body'),
+      ...getShapeAt(cluster_stats1_request, 'path'),
+      ...getShapeAt(cluster_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([cluster_stats_response, cluster_stats1_response]),
 };
@@ -4034,11 +4148,11 @@ Update the \`last_seen\` field in the connector and set it to the current timest
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_check_in_request, 'body'),
-    getZodLooseObjectFromProperty(connector_check_in_request, 'path'),
-    getZodLooseObjectFromProperty(connector_check_in_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_check_in_request, 'body'),
+    ...getShapeAt(connector_check_in_request, 'path'),
+    ...getShapeAt(connector_check_in_request, 'query'),
+  }),
   outputSchema: connector_check_in_response,
 };
 const CONNECTOR_DELETE_CONTRACT: InternalConnectorContract = {
@@ -4063,11 +4177,11 @@ These need to be removed manually.
     urlParams: ['delete_sync_jobs', 'hard'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_delete_request, 'body'),
-    getZodLooseObjectFromProperty(connector_delete_request, 'path'),
-    getZodLooseObjectFromProperty(connector_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_delete_request, 'body'),
+    ...getShapeAt(connector_delete_request, 'path'),
+    ...getShapeAt(connector_delete_request, 'query'),
+  }),
   outputSchema: connector_delete_response,
 };
 const CONNECTOR_GET_CONTRACT: InternalConnectorContract = {
@@ -4089,11 +4203,11 @@ Get the details about a connector.
     urlParams: ['include_deleted'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_get_request, 'body'),
-    getZodLooseObjectFromProperty(connector_get_request, 'path'),
-    getZodLooseObjectFromProperty(connector_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_get_request, 'body'),
+    ...getShapeAt(connector_get_request, 'path'),
+    ...getShapeAt(connector_get_request, 'query'),
+  }),
   outputSchema: connector_get_response,
 };
 const CONNECTOR_LAST_SYNC_CONTRACT: InternalConnectorContract = {
@@ -4116,7 +4230,7 @@ This action is used for analytics and monitoring.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_LIST_CONTRACT: InternalConnectorContract = {
@@ -4146,11 +4260,11 @@ Get information about all connectors.
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_list_request, 'body'),
-    getZodLooseObjectFromProperty(connector_list_request, 'path'),
-    getZodLooseObjectFromProperty(connector_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_list_request, 'body'),
+    ...getShapeAt(connector_list_request, 'path'),
+    ...getShapeAt(connector_list_request, 'query'),
+  }),
   outputSchema: connector_list_response,
 };
 const CONNECTOR_POST_CONTRACT: InternalConnectorContract = {
@@ -4174,11 +4288,11 @@ Self-managed connectors (Connector clients) are self-managed on your infrastruct
     urlParams: [],
     bodyParams: ['description', 'index_name', 'is_native', 'language', 'name', 'service_type'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_post_request, 'body'),
-    getZodLooseObjectFromProperty(connector_post_request, 'path'),
-    getZodLooseObjectFromProperty(connector_post_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_post_request, 'body'),
+    ...getShapeAt(connector_post_request, 'path'),
+    ...getShapeAt(connector_post_request, 'query'),
+  }),
   outputSchema: connector_post_response,
 };
 const CONNECTOR_PUT_CONTRACT: InternalConnectorContract = {
@@ -4199,12 +4313,16 @@ const CONNECTOR_PUT_CONTRACT: InternalConnectorContract = {
     bodyParams: ['description', 'index_name', 'is_native', 'language', 'name', 'service_type'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_put_request, 'body'),
-    getZodLooseObjectFromProperty(connector_put_request, 'path'),
-    getZodLooseObjectFromProperty(connector_put_request, 'query'),
-    getZodLooseObjectFromProperty(connector_put1_request, 'body'),
-    getZodLooseObjectFromProperty(connector_put1_request, 'path'),
-    getZodLooseObjectFromProperty(connector_put1_request, 'query'),
+    z.object({
+      ...getShapeAt(connector_put_request, 'body'),
+      ...getShapeAt(connector_put_request, 'path'),
+      ...getShapeAt(connector_put_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(connector_put1_request, 'body'),
+      ...getShapeAt(connector_put1_request, 'path'),
+      ...getShapeAt(connector_put1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([connector_put_response, connector_put1_response]),
 };
@@ -4224,7 +4342,7 @@ const CONNECTOR_SECRET_DELETE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_SECRET_GET_CONTRACT: InternalConnectorContract = {
@@ -4243,7 +4361,7 @@ const CONNECTOR_SECRET_GET_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_SECRET_POST_CONTRACT: InternalConnectorContract = {
@@ -4262,7 +4380,7 @@ const CONNECTOR_SECRET_POST_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_SECRET_PUT_CONTRACT: InternalConnectorContract = {
@@ -4281,7 +4399,7 @@ const CONNECTOR_SECRET_PUT_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const CONNECTOR_SYNC_JOB_CANCEL_CONTRACT: InternalConnectorContract = {
@@ -4304,11 +4422,11 @@ The connector service is then responsible for setting the status of connector sy
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_sync_job_cancel_request, 'body'),
-    getZodLooseObjectFromProperty(connector_sync_job_cancel_request, 'path'),
-    getZodLooseObjectFromProperty(connector_sync_job_cancel_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_sync_job_cancel_request, 'body'),
+    ...getShapeAt(connector_sync_job_cancel_request, 'path'),
+    ...getShapeAt(connector_sync_job_cancel_request, 'query'),
+  }),
   outputSchema: connector_sync_job_cancel_response,
 };
 const CONNECTOR_SYNC_JOB_CHECK_IN_CONTRACT: InternalConnectorContract = {
@@ -4332,11 +4450,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_sync_job_check_in_request, 'body'),
-    getZodLooseObjectFromProperty(connector_sync_job_check_in_request, 'path'),
-    getZodLooseObjectFromProperty(connector_sync_job_check_in_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_sync_job_check_in_request, 'body'),
+    ...getShapeAt(connector_sync_job_check_in_request, 'path'),
+    ...getShapeAt(connector_sync_job_check_in_request, 'query'),
+  }),
   outputSchema: connector_sync_job_check_in_response,
 };
 const CONNECTOR_SYNC_JOB_CLAIM_CONTRACT: InternalConnectorContract = {
@@ -4364,11 +4482,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     urlParams: [],
     bodyParams: ['sync_cursor', 'worker_hostname'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_sync_job_claim_request, 'body'),
-    getZodLooseObjectFromProperty(connector_sync_job_claim_request, 'path'),
-    getZodLooseObjectFromProperty(connector_sync_job_claim_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_sync_job_claim_request, 'body'),
+    ...getShapeAt(connector_sync_job_claim_request, 'path'),
+    ...getShapeAt(connector_sync_job_claim_request, 'query'),
+  }),
   outputSchema: connector_sync_job_claim_response,
 };
 const CONNECTOR_SYNC_JOB_DELETE_CONTRACT: InternalConnectorContract = {
@@ -4391,11 +4509,11 @@ This is a destructive action that is not recoverable.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_sync_job_delete_request, 'body'),
-    getZodLooseObjectFromProperty(connector_sync_job_delete_request, 'path'),
-    getZodLooseObjectFromProperty(connector_sync_job_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_sync_job_delete_request, 'body'),
+    ...getShapeAt(connector_sync_job_delete_request, 'path'),
+    ...getShapeAt(connector_sync_job_delete_request, 'query'),
+  }),
   outputSchema: connector_sync_job_delete_response,
 };
 const CONNECTOR_SYNC_JOB_ERROR_CONTRACT: InternalConnectorContract = {
@@ -4419,11 +4537,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     urlParams: [],
     bodyParams: ['error'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_sync_job_error_request, 'body'),
-    getZodLooseObjectFromProperty(connector_sync_job_error_request, 'path'),
-    getZodLooseObjectFromProperty(connector_sync_job_error_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_sync_job_error_request, 'body'),
+    ...getShapeAt(connector_sync_job_error_request, 'path'),
+    ...getShapeAt(connector_sync_job_error_request, 'query'),
+  }),
   outputSchema: connector_sync_job_error_response,
 };
 const CONNECTOR_SYNC_JOB_GET_CONTRACT: InternalConnectorContract = {
@@ -4443,11 +4561,11 @@ const CONNECTOR_SYNC_JOB_GET_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_sync_job_get_request, 'body'),
-    getZodLooseObjectFromProperty(connector_sync_job_get_request, 'path'),
-    getZodLooseObjectFromProperty(connector_sync_job_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_sync_job_get_request, 'body'),
+    ...getShapeAt(connector_sync_job_get_request, 'path'),
+    ...getShapeAt(connector_sync_job_get_request, 'query'),
+  }),
   outputSchema: connector_sync_job_get_response,
 };
 const CONNECTOR_SYNC_JOB_LIST_CONTRACT: InternalConnectorContract = {
@@ -4469,11 +4587,11 @@ Get information about all stored connector sync jobs listed by their creation da
     urlParams: ['from', 'size', 'status', 'connector_id', 'job_type'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_sync_job_list_request, 'body'),
-    getZodLooseObjectFromProperty(connector_sync_job_list_request, 'path'),
-    getZodLooseObjectFromProperty(connector_sync_job_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_sync_job_list_request, 'body'),
+    ...getShapeAt(connector_sync_job_list_request, 'path'),
+    ...getShapeAt(connector_sync_job_list_request, 'query'),
+  }),
   outputSchema: connector_sync_job_list_response,
 };
 const CONNECTOR_SYNC_JOB_POST_CONTRACT: InternalConnectorContract = {
@@ -4495,11 +4613,11 @@ Create a connector sync job document in the internal index and initialize its co
     urlParams: [],
     bodyParams: ['id', 'job_type', 'trigger_method'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_sync_job_post_request, 'body'),
-    getZodLooseObjectFromProperty(connector_sync_job_post_request, 'path'),
-    getZodLooseObjectFromProperty(connector_sync_job_post_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_sync_job_post_request, 'body'),
+    ...getShapeAt(connector_sync_job_post_request, 'path'),
+    ...getShapeAt(connector_sync_job_post_request, 'query'),
+  }),
   outputSchema: connector_sync_job_post_response,
 };
 const CONNECTOR_SYNC_JOB_UPDATE_STATS_CONTRACT: InternalConnectorContract = {
@@ -4532,11 +4650,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
       'total_document_count',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_sync_job_update_stats_request, 'body'),
-    getZodLooseObjectFromProperty(connector_sync_job_update_stats_request, 'path'),
-    getZodLooseObjectFromProperty(connector_sync_job_update_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_sync_job_update_stats_request, 'body'),
+    ...getShapeAt(connector_sync_job_update_stats_request, 'path'),
+    ...getShapeAt(connector_sync_job_update_stats_request, 'query'),
+  }),
   outputSchema: connector_sync_job_update_stats_response,
 };
 const CONNECTOR_UPDATE_ACTIVE_FILTERING_CONTRACT: InternalConnectorContract = {
@@ -4558,11 +4676,11 @@ Activates the valid draft filtering for a connector.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_active_filtering_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_active_filtering_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_active_filtering_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_active_filtering_request, 'body'),
+    ...getShapeAt(connector_update_active_filtering_request, 'path'),
+    ...getShapeAt(connector_update_active_filtering_request, 'query'),
+  }),
   outputSchema: connector_update_active_filtering_response,
 };
 const CONNECTOR_UPDATE_API_KEY_ID_CONTRACT: InternalConnectorContract = {
@@ -4587,11 +4705,11 @@ Self-managed connectors (connector clients) do not use this field.
     urlParams: [],
     bodyParams: ['api_key_id', 'api_key_secret_id'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_api_key_id_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_api_key_id_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_api_key_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_api_key_id_request, 'body'),
+    ...getShapeAt(connector_update_api_key_id_request, 'path'),
+    ...getShapeAt(connector_update_api_key_id_request, 'query'),
+  }),
   outputSchema: connector_update_api_key_id_response,
 };
 const CONNECTOR_UPDATE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
@@ -4613,11 +4731,11 @@ Update the configuration field in the connector document.
     urlParams: [],
     bodyParams: ['configuration', 'values'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_configuration_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_configuration_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_configuration_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_configuration_request, 'body'),
+    ...getShapeAt(connector_update_configuration_request, 'path'),
+    ...getShapeAt(connector_update_configuration_request, 'query'),
+  }),
   outputSchema: connector_update_configuration_response,
 };
 const CONNECTOR_UPDATE_ERROR_CONTRACT: InternalConnectorContract = {
@@ -4641,11 +4759,11 @@ Otherwise, if the error is reset to null, the connector status is updated to con
     urlParams: [],
     bodyParams: ['error'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_error_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_error_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_error_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_error_request, 'body'),
+    ...getShapeAt(connector_update_error_request, 'path'),
+    ...getShapeAt(connector_update_error_request, 'query'),
+  }),
   outputSchema: connector_update_error_response,
 };
 const CONNECTOR_UPDATE_FEATURES_CONTRACT: InternalConnectorContract = {
@@ -4678,11 +4796,11 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     urlParams: [],
     bodyParams: ['features'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_features_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_features_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_features_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_features_request, 'body'),
+    ...getShapeAt(connector_update_features_request, 'path'),
+    ...getShapeAt(connector_update_features_request, 'query'),
+  }),
   outputSchema: connector_update_features_response,
 };
 const CONNECTOR_UPDATE_FILTERING_CONTRACT: InternalConnectorContract = {
@@ -4706,11 +4824,11 @@ The filtering property is used to configure sync rules (both basic and advanced)
     urlParams: [],
     bodyParams: ['filtering', 'rules', 'advanced_snippet'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_filtering_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_filtering_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_filtering_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_filtering_request, 'body'),
+    ...getShapeAt(connector_update_filtering_request, 'path'),
+    ...getShapeAt(connector_update_filtering_request, 'query'),
+  }),
   outputSchema: connector_update_filtering_response,
 };
 const CONNECTOR_UPDATE_FILTERING_VALIDATION_CONTRACT: InternalConnectorContract = {
@@ -4732,11 +4850,11 @@ Update the draft filtering validation info for a connector.
     urlParams: [],
     bodyParams: ['validation'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_filtering_validation_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_filtering_validation_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_filtering_validation_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_filtering_validation_request, 'body'),
+    ...getShapeAt(connector_update_filtering_validation_request, 'path'),
+    ...getShapeAt(connector_update_filtering_validation_request, 'query'),
+  }),
   outputSchema: connector_update_filtering_validation_response,
 };
 const CONNECTOR_UPDATE_INDEX_NAME_CONTRACT: InternalConnectorContract = {
@@ -4758,11 +4876,11 @@ Update the \`index_name\` field of a connector, specifying the index where the d
     urlParams: [],
     bodyParams: ['index_name'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_index_name_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_index_name_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_index_name_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_index_name_request, 'body'),
+    ...getShapeAt(connector_update_index_name_request, 'path'),
+    ...getShapeAt(connector_update_index_name_request, 'query'),
+  }),
   outputSchema: connector_update_index_name_response,
 };
 const CONNECTOR_UPDATE_NAME_CONTRACT: InternalConnectorContract = {
@@ -4782,11 +4900,11 @@ const CONNECTOR_UPDATE_NAME_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['name', 'description'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_name_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_name_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_name_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_name_request, 'body'),
+    ...getShapeAt(connector_update_name_request, 'path'),
+    ...getShapeAt(connector_update_name_request, 'query'),
+  }),
   outputSchema: connector_update_name_response,
 };
 const CONNECTOR_UPDATE_NATIVE_CONTRACT: InternalConnectorContract = {
@@ -4806,11 +4924,11 @@ const CONNECTOR_UPDATE_NATIVE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['is_native'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_native_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_native_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_native_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_native_request, 'body'),
+    ...getShapeAt(connector_update_native_request, 'path'),
+    ...getShapeAt(connector_update_native_request, 'query'),
+  }),
   outputSchema: connector_update_native_response,
 };
 const CONNECTOR_UPDATE_PIPELINE_CONTRACT: InternalConnectorContract = {
@@ -4832,11 +4950,11 @@ When you create a new connector, the configuration of an ingest pipeline is popu
     urlParams: [],
     bodyParams: ['pipeline'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_pipeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_pipeline_request, 'body'),
+    ...getShapeAt(connector_update_pipeline_request, 'path'),
+    ...getShapeAt(connector_update_pipeline_request, 'query'),
+  }),
   outputSchema: connector_update_pipeline_response,
 };
 const CONNECTOR_UPDATE_SCHEDULING_CONTRACT: InternalConnectorContract = {
@@ -4856,11 +4974,11 @@ const CONNECTOR_UPDATE_SCHEDULING_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['scheduling'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_scheduling_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_scheduling_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_scheduling_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_scheduling_request, 'body'),
+    ...getShapeAt(connector_update_scheduling_request, 'path'),
+    ...getShapeAt(connector_update_scheduling_request, 'query'),
+  }),
   outputSchema: connector_update_scheduling_response,
 };
 const CONNECTOR_UPDATE_SERVICE_TYPE_CONTRACT: InternalConnectorContract = {
@@ -4880,11 +4998,11 @@ const CONNECTOR_UPDATE_SERVICE_TYPE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['service_type'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_service_type_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_service_type_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_service_type_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_service_type_request, 'body'),
+    ...getShapeAt(connector_update_service_type_request, 'path'),
+    ...getShapeAt(connector_update_service_type_request, 'query'),
+  }),
   outputSchema: connector_update_service_type_response,
 };
 const CONNECTOR_UPDATE_STATUS_CONTRACT: InternalConnectorContract = {
@@ -4904,11 +5022,11 @@ const CONNECTOR_UPDATE_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['status'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(connector_update_status_request, 'body'),
-    getZodLooseObjectFromProperty(connector_update_status_request, 'path'),
-    getZodLooseObjectFromProperty(connector_update_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(connector_update_status_request, 'body'),
+    ...getShapeAt(connector_update_status_request, 'path'),
+    ...getShapeAt(connector_update_status_request, 'query'),
+  }),
   outputSchema: connector_update_status_response,
 };
 const COUNT_CONTRACT: InternalConnectorContract = {
@@ -4953,18 +5071,26 @@ This means that replicas increase the scalability of the count.
     bodyParams: ['query'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(count_request, 'body'),
-    getZodLooseObjectFromProperty(count_request, 'path'),
-    getZodLooseObjectFromProperty(count_request, 'query'),
-    getZodLooseObjectFromProperty(count1_request, 'body'),
-    getZodLooseObjectFromProperty(count1_request, 'path'),
-    getZodLooseObjectFromProperty(count1_request, 'query'),
-    getZodLooseObjectFromProperty(count2_request, 'body'),
-    getZodLooseObjectFromProperty(count2_request, 'path'),
-    getZodLooseObjectFromProperty(count2_request, 'query'),
-    getZodLooseObjectFromProperty(count3_request, 'body'),
-    getZodLooseObjectFromProperty(count3_request, 'path'),
-    getZodLooseObjectFromProperty(count3_request, 'query'),
+    z.object({
+      ...getShapeAt(count_request, 'body'),
+      ...getShapeAt(count_request, 'path'),
+      ...getShapeAt(count_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(count1_request, 'body'),
+      ...getShapeAt(count1_request, 'path'),
+      ...getShapeAt(count1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(count2_request, 'body'),
+      ...getShapeAt(count2_request, 'path'),
+      ...getShapeAt(count2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(count3_request, 'body'),
+      ...getShapeAt(count3_request, 'path'),
+      ...getShapeAt(count3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([count_response, count1_response, count2_response, count3_response]),
 };
@@ -5067,12 +5193,16 @@ The \`_shards\` section of the API response reveals the number of shard copies o
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_request, 'body'),
-    getZodLooseObjectFromProperty(create_request, 'path'),
-    getZodLooseObjectFromProperty(create_request, 'query'),
-    getZodLooseObjectFromProperty(create1_request, 'body'),
-    getZodLooseObjectFromProperty(create1_request, 'path'),
-    getZodLooseObjectFromProperty(create1_request, 'query'),
+    z.object({
+      ...getShapeAt(create_request, 'body'),
+      ...getShapeAt(create_request, 'path'),
+      ...getShapeAt(create_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(create1_request, 'body'),
+      ...getShapeAt(create1_request, 'path'),
+      ...getShapeAt(create1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([create_response, create1_response]),
 };
@@ -5095,11 +5225,11 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
     urlParams: ['accept_data_loss', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'body'),
-    getZodLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'path'),
-    getZodLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(dangling_indices_delete_dangling_index_request, 'body'),
+    ...getShapeAt(dangling_indices_delete_dangling_index_request, 'path'),
+    ...getShapeAt(dangling_indices_delete_dangling_index_request, 'query'),
+  }),
   outputSchema: dangling_indices_delete_dangling_index_response,
 };
 const DANGLING_INDICES_IMPORT_DANGLING_INDEX_CONTRACT: InternalConnectorContract = {
@@ -5122,11 +5252,11 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
     urlParams: ['accept_data_loss', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'body'),
-    getZodLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'path'),
-    getZodLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(dangling_indices_import_dangling_index_request, 'body'),
+    ...getShapeAt(dangling_indices_import_dangling_index_request, 'path'),
+    ...getShapeAt(dangling_indices_import_dangling_index_request, 'query'),
+  }),
   outputSchema: dangling_indices_import_dangling_index_response,
 };
 const DANGLING_INDICES_LIST_DANGLING_INDICES_CONTRACT: InternalConnectorContract = {
@@ -5151,11 +5281,11 @@ Use this API to list dangling indices, which you can then import or delete.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'body'),
-    getZodLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'path'),
-    getZodLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(dangling_indices_list_dangling_indices_request, 'body'),
+    ...getShapeAt(dangling_indices_list_dangling_indices_request, 'path'),
+    ...getShapeAt(dangling_indices_list_dangling_indices_request, 'query'),
+  }),
   outputSchema: dangling_indices_list_dangling_indices_response,
 };
 const DELETE_CONTRACT: InternalConnectorContract = {
@@ -5221,11 +5351,11 @@ It then gets redirected into the primary shard within that ID group and replicat
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_request, 'body'),
-    getZodLooseObjectFromProperty(delete_request, 'path'),
-    getZodLooseObjectFromProperty(delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_request, 'body'),
+    ...getShapeAt(delete_request, 'path'),
+    ...getShapeAt(delete_request, 'query'),
+  }),
   outputSchema: delete_response,
 };
 const DELETE_BY_QUERY_CONTRACT: InternalConnectorContract = {
@@ -5354,11 +5484,11 @@ The get task status API will continue to list the delete by query task until thi
     ],
     bodyParams: ['max_docs', 'query', 'slice', 'sort'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_by_query_request, 'body'),
-    getZodLooseObjectFromProperty(delete_by_query_request, 'path'),
-    getZodLooseObjectFromProperty(delete_by_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_by_query_request, 'body'),
+    ...getShapeAt(delete_by_query_request, 'path'),
+    ...getShapeAt(delete_by_query_request, 'query'),
+  }),
   outputSchema: delete_by_query_response,
 };
 const DELETE_BY_QUERY_RETHROTTLE_CONTRACT: InternalConnectorContract = {
@@ -5381,11 +5511,11 @@ Rethrottling that speeds up the query takes effect immediately but rethrotting t
     urlParams: ['requests_per_second'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_by_query_rethrottle_request, 'body'),
-    getZodLooseObjectFromProperty(delete_by_query_rethrottle_request, 'path'),
-    getZodLooseObjectFromProperty(delete_by_query_rethrottle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_by_query_rethrottle_request, 'body'),
+    ...getShapeAt(delete_by_query_rethrottle_request, 'path'),
+    ...getShapeAt(delete_by_query_rethrottle_request, 'query'),
+  }),
   outputSchema: delete_by_query_rethrottle_response,
 };
 const DELETE_SCRIPT_CONTRACT: InternalConnectorContract = {
@@ -5406,11 +5536,11 @@ Deletes a stored script or search template.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_script_request, 'body'),
-    getZodLooseObjectFromProperty(delete_script_request, 'path'),
-    getZodLooseObjectFromProperty(delete_script_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_script_request, 'body'),
+    ...getShapeAt(delete_script_request, 'path'),
+    ...getShapeAt(delete_script_request, 'query'),
+  }),
   outputSchema: delete_script_response,
 };
 const ENRICH_DELETE_POLICY_CONTRACT: InternalConnectorContract = {
@@ -5431,11 +5561,11 @@ Deletes an existing enrich policy and its enrich index.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(enrich_delete_policy_request, 'body'),
-    getZodLooseObjectFromProperty(enrich_delete_policy_request, 'path'),
-    getZodLooseObjectFromProperty(enrich_delete_policy_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(enrich_delete_policy_request, 'body'),
+    ...getShapeAt(enrich_delete_policy_request, 'path'),
+    ...getShapeAt(enrich_delete_policy_request, 'query'),
+  }),
   outputSchema: enrich_delete_policy_response,
 };
 const ENRICH_EXECUTE_POLICY_CONTRACT: InternalConnectorContract = {
@@ -5456,11 +5586,11 @@ Create the enrich index for an existing enrich policy.
     urlParams: ['master_timeout', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(enrich_execute_policy_request, 'body'),
-    getZodLooseObjectFromProperty(enrich_execute_policy_request, 'path'),
-    getZodLooseObjectFromProperty(enrich_execute_policy_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(enrich_execute_policy_request, 'body'),
+    ...getShapeAt(enrich_execute_policy_request, 'path'),
+    ...getShapeAt(enrich_execute_policy_request, 'query'),
+  }),
   outputSchema: enrich_execute_policy_response,
 };
 const ENRICH_GET_POLICY_CONTRACT: InternalConnectorContract = {
@@ -5482,12 +5612,16 @@ Returns information about an enrich policy.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(enrich_get_policy_request, 'body'),
-    getZodLooseObjectFromProperty(enrich_get_policy_request, 'path'),
-    getZodLooseObjectFromProperty(enrich_get_policy_request, 'query'),
-    getZodLooseObjectFromProperty(enrich_get_policy1_request, 'body'),
-    getZodLooseObjectFromProperty(enrich_get_policy1_request, 'path'),
-    getZodLooseObjectFromProperty(enrich_get_policy1_request, 'query'),
+    z.object({
+      ...getShapeAt(enrich_get_policy_request, 'body'),
+      ...getShapeAt(enrich_get_policy_request, 'path'),
+      ...getShapeAt(enrich_get_policy_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(enrich_get_policy1_request, 'body'),
+      ...getShapeAt(enrich_get_policy1_request, 'path'),
+      ...getShapeAt(enrich_get_policy1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([enrich_get_policy_response, enrich_get_policy1_response]),
 };
@@ -5509,11 +5643,11 @@ Creates an enrich policy.
     urlParams: ['master_timeout'],
     bodyParams: ['geo_match', 'match', 'range'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(enrich_put_policy_request, 'body'),
-    getZodLooseObjectFromProperty(enrich_put_policy_request, 'path'),
-    getZodLooseObjectFromProperty(enrich_put_policy_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(enrich_put_policy_request, 'body'),
+    ...getShapeAt(enrich_put_policy_request, 'path'),
+    ...getShapeAt(enrich_put_policy_request, 'query'),
+  }),
   outputSchema: enrich_put_policy_response,
 };
 const ENRICH_STATS_CONTRACT: InternalConnectorContract = {
@@ -5534,11 +5668,11 @@ Returns enrich coordinator statistics and information about enrich policies that
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(enrich_stats_request, 'body'),
-    getZodLooseObjectFromProperty(enrich_stats_request, 'path'),
-    getZodLooseObjectFromProperty(enrich_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(enrich_stats_request, 'body'),
+    ...getShapeAt(enrich_stats_request, 'path'),
+    ...getShapeAt(enrich_stats_request, 'query'),
+  }),
   outputSchema: enrich_stats_response,
 };
 const EQL_DELETE_CONTRACT: InternalConnectorContract = {
@@ -5559,11 +5693,11 @@ The API also deletes results for the search.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(eql_delete_request, 'body'),
-    getZodLooseObjectFromProperty(eql_delete_request, 'path'),
-    getZodLooseObjectFromProperty(eql_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(eql_delete_request, 'body'),
+    ...getShapeAt(eql_delete_request, 'path'),
+    ...getShapeAt(eql_delete_request, 'query'),
+  }),
   outputSchema: eql_delete_response,
 };
 const EQL_GET_CONTRACT: InternalConnectorContract = {
@@ -5583,11 +5717,11 @@ Get the current status and available results for an async EQL search or a stored
     urlParams: ['keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(eql_get_request, 'body'),
-    getZodLooseObjectFromProperty(eql_get_request, 'path'),
-    getZodLooseObjectFromProperty(eql_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(eql_get_request, 'body'),
+    ...getShapeAt(eql_get_request, 'path'),
+    ...getShapeAt(eql_get_request, 'query'),
+  }),
   outputSchema: eql_get_response,
 };
 const EQL_GET_STATUS_CONTRACT: InternalConnectorContract = {
@@ -5608,11 +5742,11 @@ Get the current status for an async EQL search or a stored synchronous EQL searc
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(eql_get_status_request, 'body'),
-    getZodLooseObjectFromProperty(eql_get_status_request, 'path'),
-    getZodLooseObjectFromProperty(eql_get_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(eql_get_status_request, 'body'),
+    ...getShapeAt(eql_get_status_request, 'path'),
+    ...getShapeAt(eql_get_status_request, 'query'),
+  }),
   outputSchema: eql_get_status_response,
 };
 const EQL_SEARCH_CONTRACT: InternalConnectorContract = {
@@ -5662,12 +5796,16 @@ EQL assumes each document in a data stream or index corresponds to an event.
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(eql_search_request, 'body'),
-    getZodLooseObjectFromProperty(eql_search_request, 'path'),
-    getZodLooseObjectFromProperty(eql_search_request, 'query'),
-    getZodLooseObjectFromProperty(eql_search1_request, 'body'),
-    getZodLooseObjectFromProperty(eql_search1_request, 'path'),
-    getZodLooseObjectFromProperty(eql_search1_request, 'query'),
+    z.object({
+      ...getShapeAt(eql_search_request, 'body'),
+      ...getShapeAt(eql_search_request, 'path'),
+      ...getShapeAt(eql_search_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(eql_search1_request, 'body'),
+      ...getShapeAt(eql_search1_request, 'path'),
+      ...getShapeAt(eql_search1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([eql_search_response, eql_search1_response]),
 };
@@ -5704,11 +5842,11 @@ The API accepts the same parameters and request body as the synchronous query AP
       'keep_on_completion',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(esql_async_query_request, 'body'),
-    getZodLooseObjectFromProperty(esql_async_query_request, 'path'),
-    getZodLooseObjectFromProperty(esql_async_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(esql_async_query_request, 'body'),
+    ...getShapeAt(esql_async_query_request, 'path'),
+    ...getShapeAt(esql_async_query_request, 'query'),
+  }),
   outputSchema: esql_async_query_response,
 };
 const ESQL_ASYNC_QUERY_DELETE_CONTRACT: InternalConnectorContract = {
@@ -5735,11 +5873,11 @@ If the Elasticsearch security features are enabled, only the following users can
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(esql_async_query_delete_request, 'body'),
-    getZodLooseObjectFromProperty(esql_async_query_delete_request, 'path'),
-    getZodLooseObjectFromProperty(esql_async_query_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(esql_async_query_delete_request, 'body'),
+    ...getShapeAt(esql_async_query_delete_request, 'path'),
+    ...getShapeAt(esql_async_query_delete_request, 'query'),
+  }),
   outputSchema: esql_async_query_delete_response,
 };
 const ESQL_ASYNC_QUERY_GET_CONTRACT: InternalConnectorContract = {
@@ -5761,11 +5899,11 @@ If the Elasticsearch security features are enabled, only the user who first subm
     urlParams: ['drop_null_columns', 'format', 'keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(esql_async_query_get_request, 'body'),
-    getZodLooseObjectFromProperty(esql_async_query_get_request, 'path'),
-    getZodLooseObjectFromProperty(esql_async_query_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(esql_async_query_get_request, 'body'),
+    ...getShapeAt(esql_async_query_get_request, 'path'),
+    ...getShapeAt(esql_async_query_get_request, 'query'),
+  }),
   outputSchema: esql_async_query_get_response,
 };
 const ESQL_ASYNC_QUERY_STOP_CONTRACT: InternalConnectorContract = {
@@ -5788,11 +5926,11 @@ If the Elasticsearch security features are enabled, only the user who first subm
     urlParams: ['drop_null_columns'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(esql_async_query_stop_request, 'body'),
-    getZodLooseObjectFromProperty(esql_async_query_stop_request, 'path'),
-    getZodLooseObjectFromProperty(esql_async_query_stop_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(esql_async_query_stop_request, 'body'),
+    ...getShapeAt(esql_async_query_stop_request, 'path'),
+    ...getShapeAt(esql_async_query_stop_request, 'query'),
+  }),
   outputSchema: esql_async_query_stop_response,
 };
 const ESQL_GET_QUERY_CONTRACT: InternalConnectorContract = {
@@ -5813,11 +5951,11 @@ Returns an object extended information about a running ES|QL query.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(esql_get_query_request, 'body'),
-    getZodLooseObjectFromProperty(esql_get_query_request, 'path'),
-    getZodLooseObjectFromProperty(esql_get_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(esql_get_query_request, 'body'),
+    ...getShapeAt(esql_get_query_request, 'path'),
+    ...getShapeAt(esql_get_query_request, 'query'),
+  }),
   outputSchema: esql_get_query_response,
 };
 const ESQL_LIST_QUERIES_CONTRACT: InternalConnectorContract = {
@@ -5838,11 +5976,11 @@ Returns an object containing IDs and other information about the running ES|QL q
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(esql_list_queries_request, 'body'),
-    getZodLooseObjectFromProperty(esql_list_queries_request, 'path'),
-    getZodLooseObjectFromProperty(esql_list_queries_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(esql_list_queries_request, 'body'),
+    ...getShapeAt(esql_list_queries_request, 'path'),
+    ...getShapeAt(esql_list_queries_request, 'query'),
+  }),
   outputSchema: esql_list_queries_response,
 };
 const ESQL_QUERY_CONTRACT: InternalConnectorContract = {
@@ -5872,11 +6010,11 @@ Get search results for an ES|QL (Elasticsearch query language) query.
       'include_execution_metadata',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(esql_query_request, 'body'),
-    getZodLooseObjectFromProperty(esql_query_request, 'path'),
-    getZodLooseObjectFromProperty(esql_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(esql_query_request, 'body'),
+    ...getShapeAt(esql_query_request, 'path'),
+    ...getShapeAt(esql_query_request, 'query'),
+  }),
   outputSchema: esql_query_response,
 };
 const EXISTS_CONTRACT: InternalConnectorContract = {
@@ -5924,11 +6062,11 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(exists_request, 'body'),
-    getZodLooseObjectFromProperty(exists_request, 'path'),
-    getZodLooseObjectFromProperty(exists_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(exists_request, 'body'),
+    ...getShapeAt(exists_request, 'path'),
+    ...getShapeAt(exists_request, 'query'),
+  }),
   outputSchema: exists_response,
 };
 const EXISTS_SOURCE_CONTRACT: InternalConnectorContract = {
@@ -5966,11 +6104,11 @@ A document's source is not available if it is disabled in the mapping.
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(exists_source_request, 'body'),
-    getZodLooseObjectFromProperty(exists_source_request, 'path'),
-    getZodLooseObjectFromProperty(exists_source_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(exists_source_request, 'body'),
+    ...getShapeAt(exists_source_request, 'path'),
+    ...getShapeAt(exists_source_request, 'query'),
+  }),
   outputSchema: exists_source_response,
 };
 const EXPLAIN_CONTRACT: InternalConnectorContract = {
@@ -6005,12 +6143,16 @@ It computes a score explanation for a query and a specific document.
     bodyParams: ['query'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(explain_request, 'body'),
-    getZodLooseObjectFromProperty(explain_request, 'path'),
-    getZodLooseObjectFromProperty(explain_request, 'query'),
-    getZodLooseObjectFromProperty(explain1_request, 'body'),
-    getZodLooseObjectFromProperty(explain1_request, 'path'),
-    getZodLooseObjectFromProperty(explain1_request, 'query'),
+    z.object({
+      ...getShapeAt(explain_request, 'body'),
+      ...getShapeAt(explain_request, 'path'),
+      ...getShapeAt(explain_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(explain1_request, 'body'),
+      ...getShapeAt(explain1_request, 'path'),
+      ...getShapeAt(explain1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([explain_response, explain1_response]),
 };
@@ -6040,11 +6182,11 @@ In order for a feature state to be listed in this API and recognized as a valid 
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(features_get_features_request, 'body'),
-    getZodLooseObjectFromProperty(features_get_features_request, 'path'),
-    getZodLooseObjectFromProperty(features_get_features_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(features_get_features_request, 'body'),
+    ...getShapeAt(features_get_features_request, 'path'),
+    ...getShapeAt(features_get_features_request, 'query'),
+  }),
   outputSchema: features_get_features_response,
 };
 const FEATURES_RESET_FEATURES_CONTRACT: InternalConnectorContract = {
@@ -6080,11 +6222,11 @@ IMPORTANT: The features installed on the node you submit this request to are the
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(features_reset_features_request, 'body'),
-    getZodLooseObjectFromProperty(features_reset_features_request, 'path'),
-    getZodLooseObjectFromProperty(features_reset_features_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(features_reset_features_request, 'body'),
+    ...getShapeAt(features_reset_features_request, 'path'),
+    ...getShapeAt(features_reset_features_request, 'query'),
+  }),
   outputSchema: features_reset_features_response,
 };
 const FIELD_CAPS_CONTRACT: InternalConnectorContract = {
@@ -6119,18 +6261,26 @@ For example, a runtime field with a type of keyword is returned the same as any 
     bodyParams: ['fields', 'index_filter', 'runtime_mappings'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(field_caps_request, 'body'),
-    getZodLooseObjectFromProperty(field_caps_request, 'path'),
-    getZodLooseObjectFromProperty(field_caps_request, 'query'),
-    getZodLooseObjectFromProperty(field_caps1_request, 'body'),
-    getZodLooseObjectFromProperty(field_caps1_request, 'path'),
-    getZodLooseObjectFromProperty(field_caps1_request, 'query'),
-    getZodLooseObjectFromProperty(field_caps2_request, 'body'),
-    getZodLooseObjectFromProperty(field_caps2_request, 'path'),
-    getZodLooseObjectFromProperty(field_caps2_request, 'query'),
-    getZodLooseObjectFromProperty(field_caps3_request, 'body'),
-    getZodLooseObjectFromProperty(field_caps3_request, 'path'),
-    getZodLooseObjectFromProperty(field_caps3_request, 'query'),
+    z.object({
+      ...getShapeAt(field_caps_request, 'body'),
+      ...getShapeAt(field_caps_request, 'path'),
+      ...getShapeAt(field_caps_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(field_caps1_request, 'body'),
+      ...getShapeAt(field_caps1_request, 'path'),
+      ...getShapeAt(field_caps1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(field_caps2_request, 'body'),
+      ...getShapeAt(field_caps2_request, 'path'),
+      ...getShapeAt(field_caps2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(field_caps3_request, 'body'),
+      ...getShapeAt(field_caps3_request, 'path'),
+      ...getShapeAt(field_caps3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     field_caps_response,
@@ -6155,7 +6305,7 @@ const FLEET_DELETE_SECRET_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const FLEET_GET_SECRET_CONTRACT: InternalConnectorContract = {
@@ -6174,7 +6324,7 @@ const FLEET_GET_SECRET_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const FLEET_GLOBAL_CHECKPOINTS_CONTRACT: InternalConnectorContract = {
@@ -6196,11 +6346,11 @@ This API is designed for internal use by the Fleet server project.
     urlParams: ['wait_for_advance', 'wait_for_index', 'checkpoints', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(fleet_global_checkpoints_request, 'body'),
-    getZodLooseObjectFromProperty(fleet_global_checkpoints_request, 'path'),
-    getZodLooseObjectFromProperty(fleet_global_checkpoints_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(fleet_global_checkpoints_request, 'body'),
+    ...getShapeAt(fleet_global_checkpoints_request, 'path'),
+    ...getShapeAt(fleet_global_checkpoints_request, 'query'),
+  }),
   outputSchema: fleet_global_checkpoints_response,
 };
 const FLEET_MSEARCH_CONTRACT: InternalConnectorContract = {
@@ -6238,18 +6388,26 @@ However, similar to the Fleet search API, it supports the \`wait_for_checkpoints
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(fleet_msearch_request, 'body'),
-    getZodLooseObjectFromProperty(fleet_msearch_request, 'path'),
-    getZodLooseObjectFromProperty(fleet_msearch_request, 'query'),
-    getZodLooseObjectFromProperty(fleet_msearch1_request, 'body'),
-    getZodLooseObjectFromProperty(fleet_msearch1_request, 'path'),
-    getZodLooseObjectFromProperty(fleet_msearch1_request, 'query'),
-    getZodLooseObjectFromProperty(fleet_msearch2_request, 'body'),
-    getZodLooseObjectFromProperty(fleet_msearch2_request, 'path'),
-    getZodLooseObjectFromProperty(fleet_msearch2_request, 'query'),
-    getZodLooseObjectFromProperty(fleet_msearch3_request, 'body'),
-    getZodLooseObjectFromProperty(fleet_msearch3_request, 'path'),
-    getZodLooseObjectFromProperty(fleet_msearch3_request, 'query'),
+    z.object({
+      ...getShapeAt(fleet_msearch_request, 'body'),
+      ...getShapeAt(fleet_msearch_request, 'path'),
+      ...getShapeAt(fleet_msearch_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(fleet_msearch1_request, 'body'),
+      ...getShapeAt(fleet_msearch1_request, 'path'),
+      ...getShapeAt(fleet_msearch1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(fleet_msearch2_request, 'body'),
+      ...getShapeAt(fleet_msearch2_request, 'path'),
+      ...getShapeAt(fleet_msearch2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(fleet_msearch3_request, 'body'),
+      ...getShapeAt(fleet_msearch3_request, 'path'),
+      ...getShapeAt(fleet_msearch3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     fleet_msearch_response,
@@ -6274,7 +6432,7 @@ const FLEET_POST_SECRET_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const FLEET_SEARCH_CONTRACT: InternalConnectorContract = {
@@ -6373,12 +6531,16 @@ after the provided checkpoint has been processed and is visible for searches ins
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(fleet_search_request, 'body'),
-    getZodLooseObjectFromProperty(fleet_search_request, 'path'),
-    getZodLooseObjectFromProperty(fleet_search_request, 'query'),
-    getZodLooseObjectFromProperty(fleet_search1_request, 'body'),
-    getZodLooseObjectFromProperty(fleet_search1_request, 'path'),
-    getZodLooseObjectFromProperty(fleet_search1_request, 'query'),
+    z.object({
+      ...getShapeAt(fleet_search_request, 'body'),
+      ...getShapeAt(fleet_search_request, 'path'),
+      ...getShapeAt(fleet_search_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(fleet_search1_request, 'body'),
+      ...getShapeAt(fleet_search1_request, 'path'),
+      ...getShapeAt(fleet_search1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([fleet_search_response, fleet_search1_response]),
 };
@@ -6467,11 +6629,11 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_request, 'body'),
-    getZodLooseObjectFromProperty(get_request, 'path'),
-    getZodLooseObjectFromProperty(get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_request, 'body'),
+    ...getShapeAt(get_request, 'path'),
+    ...getShapeAt(get_request, 'query'),
+  }),
   outputSchema: get_response,
 };
 const GET_SCRIPT_CONTRACT: InternalConnectorContract = {
@@ -6491,11 +6653,11 @@ Retrieves a stored script or search template.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_script_request, 'body'),
-    getZodLooseObjectFromProperty(get_script_request, 'path'),
-    getZodLooseObjectFromProperty(get_script_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_script_request, 'body'),
+    ...getShapeAt(get_script_request, 'path'),
+    ...getShapeAt(get_script_request, 'query'),
+  }),
   outputSchema: get_script_response,
 };
 const GET_SCRIPT_CONTEXT_CONTRACT: InternalConnectorContract = {
@@ -6517,11 +6679,11 @@ Get a list of supported script contexts and their methods.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_script_context_request, 'body'),
-    getZodLooseObjectFromProperty(get_script_context_request, 'path'),
-    getZodLooseObjectFromProperty(get_script_context_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_script_context_request, 'body'),
+    ...getShapeAt(get_script_context_request, 'path'),
+    ...getShapeAt(get_script_context_request, 'query'),
+  }),
   outputSchema: get_script_context_response,
 };
 const GET_SCRIPT_LANGUAGES_CONTRACT: InternalConnectorContract = {
@@ -6543,11 +6705,11 @@ Get a list of available script types, languages, and contexts.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_script_languages_request, 'body'),
-    getZodLooseObjectFromProperty(get_script_languages_request, 'path'),
-    getZodLooseObjectFromProperty(get_script_languages_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_script_languages_request, 'body'),
+    ...getShapeAt(get_script_languages_request, 'path'),
+    ...getShapeAt(get_script_languages_request, 'query'),
+  }),
   outputSchema: get_script_languages_response,
 };
 const GET_SOURCE_CONTRACT: InternalConnectorContract = {
@@ -6589,11 +6751,11 @@ GET my-index-000001/_source/1/?_source_includes=*.id&_source_excludes=entities
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_source_request, 'body'),
-    getZodLooseObjectFromProperty(get_source_request, 'path'),
-    getZodLooseObjectFromProperty(get_source_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_source_request, 'body'),
+    ...getShapeAt(get_source_request, 'path'),
+    ...getShapeAt(get_source_request, 'query'),
+  }),
   outputSchema: get_source_response,
 };
 const GRAPH_EXPLORE_CONTRACT: InternalConnectorContract = {
@@ -6618,12 +6780,16 @@ You can exclude vertices that have already been returned.
     bodyParams: ['connections', 'controls', 'query', 'vertices'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(graph_explore_request, 'body'),
-    getZodLooseObjectFromProperty(graph_explore_request, 'path'),
-    getZodLooseObjectFromProperty(graph_explore_request, 'query'),
-    getZodLooseObjectFromProperty(graph_explore1_request, 'body'),
-    getZodLooseObjectFromProperty(graph_explore1_request, 'path'),
-    getZodLooseObjectFromProperty(graph_explore1_request, 'query'),
+    z.object({
+      ...getShapeAt(graph_explore_request, 'body'),
+      ...getShapeAt(graph_explore_request, 'path'),
+      ...getShapeAt(graph_explore_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(graph_explore1_request, 'body'),
+      ...getShapeAt(graph_explore1_request, 'path'),
+      ...getShapeAt(graph_explore1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([graph_explore_response, graph_explore1_response]),
 };
@@ -6662,12 +6828,16 @@ When setting up automated polling of the API for health status, set verbose to f
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(health_report_request, 'body'),
-    getZodLooseObjectFromProperty(health_report_request, 'path'),
-    getZodLooseObjectFromProperty(health_report_request, 'query'),
-    getZodLooseObjectFromProperty(health_report1_request, 'body'),
-    getZodLooseObjectFromProperty(health_report1_request, 'path'),
-    getZodLooseObjectFromProperty(health_report1_request, 'query'),
+    z.object({
+      ...getShapeAt(health_report_request, 'body'),
+      ...getShapeAt(health_report_request, 'path'),
+      ...getShapeAt(health_report_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(health_report1_request, 'body'),
+      ...getShapeAt(health_report1_request, 'path'),
+      ...getShapeAt(health_report1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([health_report_response, health_report1_response]),
 };
@@ -6689,11 +6859,11 @@ You cannot delete policies that are currently in use. If the policy is being use
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_delete_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_delete_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_delete_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_delete_lifecycle_request, 'body'),
+    ...getShapeAt(ilm_delete_lifecycle_request, 'path'),
+    ...getShapeAt(ilm_delete_lifecycle_request, 'query'),
+  }),
   outputSchema: ilm_delete_lifecycle_response,
 };
 const ILM_EXPLAIN_LIFECYCLE_CONTRACT: InternalConnectorContract = {
@@ -6717,11 +6887,11 @@ The response indicates when the index entered each lifecycle state, provides the
     urlParams: ['only_errors', 'only_managed', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_explain_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_explain_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_explain_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_explain_lifecycle_request, 'body'),
+    ...getShapeAt(ilm_explain_lifecycle_request, 'path'),
+    ...getShapeAt(ilm_explain_lifecycle_request, 'query'),
+  }),
   outputSchema: ilm_explain_lifecycle_response,
 };
 const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
@@ -6742,12 +6912,16 @@ const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_get_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_get_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_get_lifecycle_request, 'query'),
-    getZodLooseObjectFromProperty(ilm_get_lifecycle1_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_get_lifecycle1_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_get_lifecycle1_request, 'query'),
+    z.object({
+      ...getShapeAt(ilm_get_lifecycle_request, 'body'),
+      ...getShapeAt(ilm_get_lifecycle_request, 'path'),
+      ...getShapeAt(ilm_get_lifecycle_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ilm_get_lifecycle1_request, 'body'),
+      ...getShapeAt(ilm_get_lifecycle1_request, 'path'),
+      ...getShapeAt(ilm_get_lifecycle1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ilm_get_lifecycle_response, ilm_get_lifecycle1_response]),
 };
@@ -6770,11 +6944,11 @@ Get the current index lifecycle management status.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_get_status_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_get_status_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_get_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_get_status_request, 'body'),
+    ...getShapeAt(ilm_get_status_request, 'path'),
+    ...getShapeAt(ilm_get_status_request, 'query'),
+  }),
   outputSchema: ilm_get_status_response,
 };
 const ILM_MIGRATE_TO_DATA_TIERS_CONTRACT: InternalConnectorContract = {
@@ -6807,11 +6981,11 @@ Use the stop ILM and get ILM status APIs to wait until the reported operation mo
     urlParams: ['dry_run', 'master_timeout'],
     bodyParams: ['legacy_template_to_delete', 'node_attribute'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_migrate_to_data_tiers_request, 'body'),
+    ...getShapeAt(ilm_migrate_to_data_tiers_request, 'path'),
+    ...getShapeAt(ilm_migrate_to_data_tiers_request, 'query'),
+  }),
   outputSchema: ilm_migrate_to_data_tiers_response,
 };
 const ILM_MOVE_TO_STEP_CONTRACT: InternalConnectorContract = {
@@ -6844,11 +7018,11 @@ An index cannot move to a step that is not part of its policy.
     urlParams: [],
     bodyParams: ['current_step', 'next_step'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_move_to_step_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_move_to_step_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_move_to_step_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_move_to_step_request, 'body'),
+    ...getShapeAt(ilm_move_to_step_request, 'path'),
+    ...getShapeAt(ilm_move_to_step_request, 'query'),
+  }),
   outputSchema: ilm_move_to_step_response,
 };
 const ILM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
@@ -6871,11 +7045,11 @@ NOTE: Only the latest version of the policy is stored, you cannot revert to prev
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['policy'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_put_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_put_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_put_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_put_lifecycle_request, 'body'),
+    ...getShapeAt(ilm_put_lifecycle_request, 'path'),
+    ...getShapeAt(ilm_put_lifecycle_request, 'query'),
+  }),
   outputSchema: ilm_put_lifecycle_response,
 };
 const ILM_REMOVE_POLICY_CONTRACT: InternalConnectorContract = {
@@ -6897,11 +7071,11 @@ It also stops managing the indices.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_remove_policy_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_remove_policy_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_remove_policy_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_remove_policy_request, 'body'),
+    ...getShapeAt(ilm_remove_policy_request, 'path'),
+    ...getShapeAt(ilm_remove_policy_request, 'query'),
+  }),
   outputSchema: ilm_remove_policy_response,
 };
 const ILM_RETRY_CONTRACT: InternalConnectorContract = {
@@ -6923,11 +7097,11 @@ Use the explain lifecycle state API to determine whether an index is in the ERRO
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_retry_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_retry_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_retry_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_retry_request, 'body'),
+    ...getShapeAt(ilm_retry_request, 'path'),
+    ...getShapeAt(ilm_retry_request, 'query'),
+  }),
   outputSchema: ilm_retry_response,
 };
 const ILM_START_CONTRACT: InternalConnectorContract = {
@@ -6949,11 +7123,11 @@ Restarting ILM is necessary only when it has been stopped using the stop ILM API
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_start_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_start_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_start_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_start_request, 'body'),
+    ...getShapeAt(ilm_start_request, 'path'),
+    ...getShapeAt(ilm_start_request, 'query'),
+  }),
   outputSchema: ilm_start_response,
 };
 const ILM_STOP_CONTRACT: InternalConnectorContract = {
@@ -6977,11 +7151,11 @@ Use the get ILM status API to check whether ILM is running.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ilm_stop_request, 'body'),
-    getZodLooseObjectFromProperty(ilm_stop_request, 'path'),
-    getZodLooseObjectFromProperty(ilm_stop_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ilm_stop_request, 'body'),
+    ...getShapeAt(ilm_stop_request, 'path'),
+    ...getShapeAt(ilm_stop_request, 'query'),
+  }),
   outputSchema: ilm_stop_response,
 };
 const INDEX_CONTRACT: InternalConnectorContract = {
@@ -7133,15 +7307,21 @@ Even the simple case of updating the Elasticsearch index using data from a datab
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(index_request, 'body'),
-    getZodLooseObjectFromProperty(index_request, 'path'),
-    getZodLooseObjectFromProperty(index_request, 'query'),
-    getZodLooseObjectFromProperty(index1_request, 'body'),
-    getZodLooseObjectFromProperty(index1_request, 'path'),
-    getZodLooseObjectFromProperty(index1_request, 'query'),
-    getZodLooseObjectFromProperty(index2_request, 'body'),
-    getZodLooseObjectFromProperty(index2_request, 'path'),
-    getZodLooseObjectFromProperty(index2_request, 'query'),
+    z.object({
+      ...getShapeAt(index_request, 'body'),
+      ...getShapeAt(index_request, 'path'),
+      ...getShapeAt(index_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(index1_request, 'body'),
+      ...getShapeAt(index1_request, 'path'),
+      ...getShapeAt(index1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(index2_request, 'body'),
+      ...getShapeAt(index2_request, 'path'),
+      ...getShapeAt(index2_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([index_response, index1_response, index2_response]),
 };
@@ -7171,11 +7351,11 @@ Index blocks limit the operations allowed on an index by blocking specific opera
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_add_block_request, 'body'),
-    getZodLooseObjectFromProperty(indices_add_block_request, 'path'),
-    getZodLooseObjectFromProperty(indices_add_block_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_add_block_request, 'body'),
+    ...getShapeAt(indices_add_block_request, 'path'),
+    ...getShapeAt(indices_add_block_request, 'query'),
+  }),
   outputSchema: indices_add_block_response,
 };
 const INDICES_ANALYZE_CONTRACT: InternalConnectorContract = {
@@ -7212,18 +7392,26 @@ The \`_analyze\` endpoint without a specified index will always use \`10000\` as
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_analyze_request, 'body'),
-    getZodLooseObjectFromProperty(indices_analyze_request, 'path'),
-    getZodLooseObjectFromProperty(indices_analyze_request, 'query'),
-    getZodLooseObjectFromProperty(indices_analyze1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_analyze1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_analyze1_request, 'query'),
-    getZodLooseObjectFromProperty(indices_analyze2_request, 'body'),
-    getZodLooseObjectFromProperty(indices_analyze2_request, 'path'),
-    getZodLooseObjectFromProperty(indices_analyze2_request, 'query'),
-    getZodLooseObjectFromProperty(indices_analyze3_request, 'body'),
-    getZodLooseObjectFromProperty(indices_analyze3_request, 'path'),
-    getZodLooseObjectFromProperty(indices_analyze3_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_analyze_request, 'body'),
+      ...getShapeAt(indices_analyze_request, 'path'),
+      ...getShapeAt(indices_analyze_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_analyze1_request, 'body'),
+      ...getShapeAt(indices_analyze1_request, 'path'),
+      ...getShapeAt(indices_analyze1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_analyze2_request, 'body'),
+      ...getShapeAt(indices_analyze2_request, 'path'),
+      ...getShapeAt(indices_analyze2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_analyze3_request, 'body'),
+      ...getShapeAt(indices_analyze3_request, 'path'),
+      ...getShapeAt(indices_analyze3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_analyze_response,
@@ -7251,11 +7439,11 @@ Cancel a migration reindex attempt for a data stream or index.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'body'),
-    getZodLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'path'),
-    getZodLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_cancel_migrate_reindex_request, 'body'),
+    ...getShapeAt(indices_cancel_migrate_reindex_request, 'path'),
+    ...getShapeAt(indices_cancel_migrate_reindex_request, 'query'),
+  }),
   outputSchema: indices_cancel_migrate_reindex_response,
 };
 const INDICES_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
@@ -7291,12 +7479,16 @@ To clear the cache only of specific fields, use the \`fields\` parameter.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_clear_cache_request, 'body'),
-    getZodLooseObjectFromProperty(indices_clear_cache_request, 'path'),
-    getZodLooseObjectFromProperty(indices_clear_cache_request, 'query'),
-    getZodLooseObjectFromProperty(indices_clear_cache1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_clear_cache1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_clear_cache1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_clear_cache_request, 'body'),
+      ...getShapeAt(indices_clear_cache_request, 'path'),
+      ...getShapeAt(indices_clear_cache_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_clear_cache1_request, 'body'),
+      ...getShapeAt(indices_clear_cache1_request, 'path'),
+      ...getShapeAt(indices_clear_cache1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_clear_cache_response, indices_clear_cache1_response]),
 };
@@ -7362,12 +7554,16 @@ Because the clone operation creates a new index to clone the shards to, the wait
     bodyParams: ['aliases', 'settings'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_clone_request, 'body'),
-    getZodLooseObjectFromProperty(indices_clone_request, 'path'),
-    getZodLooseObjectFromProperty(indices_clone_request, 'query'),
-    getZodLooseObjectFromProperty(indices_clone1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_clone1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_clone1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_clone_request, 'body'),
+      ...getShapeAt(indices_clone_request, 'path'),
+      ...getShapeAt(indices_clone_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_clone1_request, 'body'),
+      ...getShapeAt(indices_clone1_request, 'path'),
+      ...getShapeAt(indices_clone1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_clone_response, indices_clone1_response]),
 };
@@ -7412,11 +7608,11 @@ Closing indices can be turned off with the cluster settings API by setting \`clu
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_close_request, 'body'),
-    getZodLooseObjectFromProperty(indices_close_request, 'path'),
-    getZodLooseObjectFromProperty(indices_close_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_close_request, 'body'),
+    ...getShapeAt(indices_close_request, 'path'),
+    ...getShapeAt(indices_close_request, 'query'),
+  }),
   outputSchema: indices_close_response,
 };
 const INDICES_CREATE_CONTRACT: InternalConnectorContract = {
@@ -7455,11 +7651,11 @@ Note that changing this setting will also affect the \`wait_for_active_shards\` 
     urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
     bodyParams: ['aliases', 'mappings', 'settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_create_request, 'body'),
-    getZodLooseObjectFromProperty(indices_create_request, 'path'),
-    getZodLooseObjectFromProperty(indices_create_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_create_request, 'body'),
+    ...getShapeAt(indices_create_request, 'path'),
+    ...getShapeAt(indices_create_request, 'query'),
+  }),
   outputSchema: indices_create_response,
 };
 const INDICES_CREATE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
@@ -7481,11 +7677,11 @@ You must have a matching index template with data stream enabled.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_create_data_stream_request, 'body'),
-    getZodLooseObjectFromProperty(indices_create_data_stream_request, 'path'),
-    getZodLooseObjectFromProperty(indices_create_data_stream_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_create_data_stream_request, 'body'),
+    ...getShapeAt(indices_create_data_stream_request, 'path'),
+    ...getShapeAt(indices_create_data_stream_request, 'query'),
+  }),
   outputSchema: indices_create_data_stream_response,
 };
 const INDICES_CREATE_FROM_CONTRACT: InternalConnectorContract = {
@@ -7508,12 +7704,16 @@ Copy the mappings and settings from the source index to a destination index whil
     bodyParams: ['mappings_override', 'settings_override', 'remove_index_blocks'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_create_from_request, 'body'),
-    getZodLooseObjectFromProperty(indices_create_from_request, 'path'),
-    getZodLooseObjectFromProperty(indices_create_from_request, 'query'),
-    getZodLooseObjectFromProperty(indices_create_from1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_create_from1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_create_from1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_create_from_request, 'body'),
+      ...getShapeAt(indices_create_from_request, 'path'),
+      ...getShapeAt(indices_create_from_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_create_from1_request, 'body'),
+      ...getShapeAt(indices_create_from1_request, 'path'),
+      ...getShapeAt(indices_create_from1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_create_from_response, indices_create_from1_response]),
 };
@@ -7537,12 +7737,16 @@ Get statistics for one or more data streams.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_data_streams_stats_request, 'body'),
-    getZodLooseObjectFromProperty(indices_data_streams_stats_request, 'path'),
-    getZodLooseObjectFromProperty(indices_data_streams_stats_request, 'query'),
-    getZodLooseObjectFromProperty(indices_data_streams_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_data_streams_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_data_streams_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_data_streams_stats_request, 'body'),
+      ...getShapeAt(indices_data_streams_stats_request, 'path'),
+      ...getShapeAt(indices_data_streams_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_data_streams_stats1_request, 'body'),
+      ...getShapeAt(indices_data_streams_stats1_request, 'path'),
+      ...getShapeAt(indices_data_streams_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_data_streams_stats_response,
@@ -7578,11 +7782,11 @@ You can then use the delete index API to delete the previous write index.
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_delete_request, 'body'),
-    getZodLooseObjectFromProperty(indices_delete_request, 'path'),
-    getZodLooseObjectFromProperty(indices_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_delete_request, 'body'),
+    ...getShapeAt(indices_delete_request, 'path'),
+    ...getShapeAt(indices_delete_request, 'query'),
+  }),
   outputSchema: indices_delete_response,
 };
 const INDICES_DELETE_ALIAS_CONTRACT: InternalConnectorContract = {
@@ -7604,12 +7808,16 @@ Removes a data stream or index from an alias.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_delete_alias_request, 'body'),
-    getZodLooseObjectFromProperty(indices_delete_alias_request, 'path'),
-    getZodLooseObjectFromProperty(indices_delete_alias_request, 'query'),
-    getZodLooseObjectFromProperty(indices_delete_alias1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_delete_alias1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_delete_alias1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_delete_alias_request, 'body'),
+      ...getShapeAt(indices_delete_alias_request, 'path'),
+      ...getShapeAt(indices_delete_alias_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_delete_alias1_request, 'body'),
+      ...getShapeAt(indices_delete_alias1_request, 'path'),
+      ...getShapeAt(indices_delete_alias1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_delete_alias_response, indices_delete_alias1_response]),
 };
@@ -7631,11 +7839,11 @@ Removes the data stream lifecycle from a data stream, rendering it not managed b
     urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_delete_data_lifecycle_request, 'body'),
+    ...getShapeAt(indices_delete_data_lifecycle_request, 'path'),
+    ...getShapeAt(indices_delete_data_lifecycle_request, 'query'),
+  }),
   outputSchema: indices_delete_data_lifecycle_response,
 };
 const INDICES_DELETE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
@@ -7656,11 +7864,11 @@ Deletes one or more data streams and their backing indices.
     urlParams: ['master_timeout', 'expand_wildcards'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_delete_data_stream_request, 'body'),
-    getZodLooseObjectFromProperty(indices_delete_data_stream_request, 'path'),
-    getZodLooseObjectFromProperty(indices_delete_data_stream_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_delete_data_stream_request, 'body'),
+    ...getShapeAt(indices_delete_data_stream_request, 'path'),
+    ...getShapeAt(indices_delete_data_stream_request, 'query'),
+  }),
   outputSchema: indices_delete_data_stream_response,
 };
 const INDICES_DELETE_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
@@ -7681,11 +7889,11 @@ Removes the data stream options from a data stream.
     urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_delete_data_stream_options_request, 'body'),
-    getZodLooseObjectFromProperty(indices_delete_data_stream_options_request, 'path'),
-    getZodLooseObjectFromProperty(indices_delete_data_stream_options_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_delete_data_stream_options_request, 'body'),
+    ...getShapeAt(indices_delete_data_stream_options_request, 'path'),
+    ...getShapeAt(indices_delete_data_stream_options_request, 'query'),
+  }),
   outputSchema: indices_delete_data_stream_options_response,
 };
 const INDICES_DELETE_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
@@ -7708,11 +7916,11 @@ existing templates.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_delete_index_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_delete_index_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_delete_index_template_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_delete_index_template_request, 'body'),
+    ...getShapeAt(indices_delete_index_template_request, 'path'),
+    ...getShapeAt(indices_delete_index_template_request, 'query'),
+  }),
   outputSchema: indices_delete_index_template_response,
 };
 const INDICES_DELETE_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
@@ -7732,7 +7940,7 @@ Delete the sampling configuration for the specified index.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_DELETE_TEMPLATE_CONTRACT: InternalConnectorContract = {
@@ -7753,11 +7961,11 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_delete_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_delete_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_delete_template_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_delete_template_request, 'body'),
+    ...getShapeAt(indices_delete_template_request, 'path'),
+    ...getShapeAt(indices_delete_template_request, 'query'),
+  }),
   outputSchema: indices_delete_template_response,
 };
 const INDICES_DISK_USAGE_CONTRACT: InternalConnectorContract = {
@@ -7792,11 +8000,11 @@ For usage examples see the External documentation or refer to [Analyze the index
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_disk_usage_request, 'body'),
-    getZodLooseObjectFromProperty(indices_disk_usage_request, 'path'),
-    getZodLooseObjectFromProperty(indices_disk_usage_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_disk_usage_request, 'body'),
+    ...getShapeAt(indices_disk_usage_request, 'path'),
+    ...getShapeAt(indices_disk_usage_request, 'query'),
+  }),
   outputSchema: indices_disk_usage_response,
 };
 const INDICES_DOWNSAMPLE_CONTRACT: InternalConnectorContract = {
@@ -7828,11 +8036,11 @@ The source index must be read-only (\`index.blocks.write: true\`).
     urlParams: [],
     bodyParams: ['fixed_interval', 'sampling_method'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_downsample_request, 'body'),
-    getZodLooseObjectFromProperty(indices_downsample_request, 'path'),
-    getZodLooseObjectFromProperty(indices_downsample_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_downsample_request, 'body'),
+    ...getShapeAt(indices_downsample_request, 'path'),
+    ...getShapeAt(indices_downsample_request, 'query'),
+  }),
   outputSchema: indices_downsample_response,
 };
 const INDICES_EXISTS_CONTRACT: InternalConnectorContract = {
@@ -7860,11 +8068,11 @@ Check if one or more indices, index aliases, or data streams exist.
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_exists_request, 'body'),
-    getZodLooseObjectFromProperty(indices_exists_request, 'path'),
-    getZodLooseObjectFromProperty(indices_exists_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_exists_request, 'body'),
+    ...getShapeAt(indices_exists_request, 'path'),
+    ...getShapeAt(indices_exists_request, 'query'),
+  }),
   outputSchema: indices_exists_response,
 };
 const INDICES_EXISTS_ALIAS_CONTRACT: InternalConnectorContract = {
@@ -7887,12 +8095,16 @@ Check if one or more data stream or index aliases exist.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_exists_alias_request, 'body'),
-    getZodLooseObjectFromProperty(indices_exists_alias_request, 'path'),
-    getZodLooseObjectFromProperty(indices_exists_alias_request, 'query'),
-    getZodLooseObjectFromProperty(indices_exists_alias1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_exists_alias1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_exists_alias1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_exists_alias_request, 'body'),
+      ...getShapeAt(indices_exists_alias_request, 'path'),
+      ...getShapeAt(indices_exists_alias_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_exists_alias1_request, 'body'),
+      ...getShapeAt(indices_exists_alias1_request, 'path'),
+      ...getShapeAt(indices_exists_alias1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_exists_alias_response, indices_exists_alias1_response]),
 };
@@ -7915,11 +8127,11 @@ Check whether index templates exist.
     urlParams: ['local', 'flat_settings', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_exists_index_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_exists_index_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_exists_index_template_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_exists_index_template_request, 'body'),
+    ...getShapeAt(indices_exists_index_template_request, 'path'),
+    ...getShapeAt(indices_exists_index_template_request, 'query'),
+  }),
   outputSchema: indices_exists_index_template_response,
 };
 const INDICES_EXISTS_TEMPLATE_CONTRACT: InternalConnectorContract = {
@@ -7943,11 +8155,11 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     urlParams: ['flat_settings', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_exists_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_exists_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_exists_template_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_exists_template_request, 'body'),
+    ...getShapeAt(indices_exists_template_request, 'path'),
+    ...getShapeAt(indices_exists_template_request, 'query'),
+  }),
   outputSchema: indices_exists_template_response,
 };
 const INDICES_EXPLAIN_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
@@ -7968,11 +8180,11 @@ Get information about an index or data stream's current data stream lifecycle st
     urlParams: ['include_defaults', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_explain_data_lifecycle_request, 'body'),
+    ...getShapeAt(indices_explain_data_lifecycle_request, 'path'),
+    ...getShapeAt(indices_explain_data_lifecycle_request, 'query'),
+  }),
   outputSchema: indices_explain_data_lifecycle_response,
 };
 const INDICES_FIELD_USAGE_STATS_CONTRACT: InternalConnectorContract = {
@@ -7998,11 +8210,11 @@ A given request will increment each count by a maximum value of 1, even if the r
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'fields'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_field_usage_stats_request, 'body'),
-    getZodLooseObjectFromProperty(indices_field_usage_stats_request, 'path'),
-    getZodLooseObjectFromProperty(indices_field_usage_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_field_usage_stats_request, 'body'),
+    ...getShapeAt(indices_field_usage_stats_request, 'path'),
+    ...getShapeAt(indices_field_usage_stats_request, 'query'),
+  }),
   outputSchema: indices_field_usage_stats_response,
 };
 const INDICES_FLUSH_CONTRACT: InternalConnectorContract = {
@@ -8039,18 +8251,26 @@ If you call the flush API after indexing some documents then a successful respon
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_flush_request, 'body'),
-    getZodLooseObjectFromProperty(indices_flush_request, 'path'),
-    getZodLooseObjectFromProperty(indices_flush_request, 'query'),
-    getZodLooseObjectFromProperty(indices_flush1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_flush1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_flush1_request, 'query'),
-    getZodLooseObjectFromProperty(indices_flush2_request, 'body'),
-    getZodLooseObjectFromProperty(indices_flush2_request, 'path'),
-    getZodLooseObjectFromProperty(indices_flush2_request, 'query'),
-    getZodLooseObjectFromProperty(indices_flush3_request, 'body'),
-    getZodLooseObjectFromProperty(indices_flush3_request, 'path'),
-    getZodLooseObjectFromProperty(indices_flush3_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_flush_request, 'body'),
+      ...getShapeAt(indices_flush_request, 'path'),
+      ...getShapeAt(indices_flush_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_flush1_request, 'body'),
+      ...getShapeAt(indices_flush1_request, 'path'),
+      ...getShapeAt(indices_flush1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_flush2_request, 'body'),
+      ...getShapeAt(indices_flush2_request, 'path'),
+      ...getShapeAt(indices_flush2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_flush3_request, 'body'),
+      ...getShapeAt(indices_flush3_request, 'path'),
+      ...getShapeAt(indices_flush3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_flush_response,
@@ -8137,12 +8357,16 @@ POST /.ds-my-data-stream-2099.03.07-000001/_forcemerge?max_num_segments=1
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_forcemerge_request, 'body'),
-    getZodLooseObjectFromProperty(indices_forcemerge_request, 'path'),
-    getZodLooseObjectFromProperty(indices_forcemerge_request, 'query'),
-    getZodLooseObjectFromProperty(indices_forcemerge1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_forcemerge1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_forcemerge1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_forcemerge_request, 'body'),
+      ...getShapeAt(indices_forcemerge_request, 'path'),
+      ...getShapeAt(indices_forcemerge_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_forcemerge1_request, 'body'),
+      ...getShapeAt(indices_forcemerge1_request, 'path'),
+      ...getShapeAt(indices_forcemerge1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_forcemerge_response, indices_forcemerge1_response]),
 };
@@ -8174,11 +8398,11 @@ stream’s backing indices.
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_get_request, 'body'),
+    ...getShapeAt(indices_get_request, 'path'),
+    ...getShapeAt(indices_get_request, 'query'),
+  }),
   outputSchema: indices_get_response,
 };
 const INDICES_GET_ALIAS_CONTRACT: InternalConnectorContract = {
@@ -8200,18 +8424,26 @@ Retrieves information for one or more data stream or index aliases.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_alias_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_alias_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_alias_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_alias1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_alias1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_alias1_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_alias2_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_alias2_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_alias2_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_alias3_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_alias3_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_alias3_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_get_alias_request, 'body'),
+      ...getShapeAt(indices_get_alias_request, 'path'),
+      ...getShapeAt(indices_get_alias_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_alias1_request, 'body'),
+      ...getShapeAt(indices_get_alias1_request, 'path'),
+      ...getShapeAt(indices_get_alias1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_alias2_request, 'body'),
+      ...getShapeAt(indices_get_alias2_request, 'path'),
+      ...getShapeAt(indices_get_alias2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_alias3_request, 'body'),
+      ...getShapeAt(indices_get_alias3_request, 'path'),
+      ...getShapeAt(indices_get_alias3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_get_alias_response,
@@ -8237,7 +8469,7 @@ Get the sampling configurations for all indices.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_GET_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
@@ -8259,11 +8491,11 @@ Get the data stream lifecycle configuration of one or more data streams.
     urlParams: ['expand_wildcards', 'include_defaults', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_data_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_data_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_data_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_get_data_lifecycle_request, 'body'),
+    ...getShapeAt(indices_get_data_lifecycle_request, 'path'),
+    ...getShapeAt(indices_get_data_lifecycle_request, 'query'),
+  }),
   outputSchema: indices_get_data_lifecycle_response,
 };
 const INDICES_GET_DATA_LIFECYCLE_STATS_CONTRACT: InternalConnectorContract = {
@@ -8284,11 +8516,11 @@ Get statistics about the data streams that are managed by a data stream lifecycl
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_get_data_lifecycle_stats_request, 'body'),
+    ...getShapeAt(indices_get_data_lifecycle_stats_request, 'path'),
+    ...getShapeAt(indices_get_data_lifecycle_stats_request, 'query'),
+  }),
   outputSchema: indices_get_data_lifecycle_stats_response,
 };
 const INDICES_GET_DATA_STREAM_CONTRACT: InternalConnectorContract = {
@@ -8311,12 +8543,16 @@ Get information about one or more data streams.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_data_stream_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_data_stream_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_data_stream_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_data_stream1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_data_stream1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_data_stream1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_get_data_stream_request, 'body'),
+      ...getShapeAt(indices_get_data_stream_request, 'path'),
+      ...getShapeAt(indices_get_data_stream_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_data_stream1_request, 'body'),
+      ...getShapeAt(indices_get_data_stream1_request, 'path'),
+      ...getShapeAt(indices_get_data_stream1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_get_data_stream_response, indices_get_data_stream1_response]),
 };
@@ -8339,11 +8575,11 @@ Get mapping information for one or more data streams.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_get_data_stream_mappings_request, 'body'),
+    ...getShapeAt(indices_get_data_stream_mappings_request, 'path'),
+    ...getShapeAt(indices_get_data_stream_mappings_request, 'query'),
+  }),
   outputSchema: indices_get_data_stream_mappings_response,
 };
 const INDICES_GET_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
@@ -8365,11 +8601,11 @@ Get the data stream options configuration of one or more data streams.
     urlParams: ['expand_wildcards', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_data_stream_options_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_data_stream_options_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_data_stream_options_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_get_data_stream_options_request, 'body'),
+    ...getShapeAt(indices_get_data_stream_options_request, 'path'),
+    ...getShapeAt(indices_get_data_stream_options_request, 'query'),
+  }),
   outputSchema: indices_get_data_stream_options_response,
 };
 const INDICES_GET_DATA_STREAM_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -8391,11 +8627,11 @@ Get setting information for one or more data streams.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_data_stream_settings_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_data_stream_settings_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_data_stream_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_get_data_stream_settings_request, 'body'),
+    ...getShapeAt(indices_get_data_stream_settings_request, 'path'),
+    ...getShapeAt(indices_get_data_stream_settings_request, 'query'),
+  }),
   outputSchema: indices_get_data_stream_settings_response,
 };
 const INDICES_GET_FIELD_MAPPING_CONTRACT: InternalConnectorContract = {
@@ -8420,12 +8656,16 @@ This API is useful if you don't need a complete mapping or if an index mapping c
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_field_mapping_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_field_mapping_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_field_mapping_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_field_mapping1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_field_mapping1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_field_mapping1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_get_field_mapping_request, 'body'),
+      ...getShapeAt(indices_get_field_mapping_request, 'path'),
+      ...getShapeAt(indices_get_field_mapping_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_field_mapping1_request, 'body'),
+      ...getShapeAt(indices_get_field_mapping1_request, 'path'),
+      ...getShapeAt(indices_get_field_mapping1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_get_field_mapping_response, indices_get_field_mapping1_response]),
 };
@@ -8448,12 +8688,16 @@ Get information about one or more index templates.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_index_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_index_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_index_template_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_index_template1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_index_template1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_index_template1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_get_index_template_request, 'body'),
+      ...getShapeAt(indices_get_index_template_request, 'path'),
+      ...getShapeAt(indices_get_index_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_index_template1_request, 'body'),
+      ...getShapeAt(indices_get_index_template1_request, 'path'),
+      ...getShapeAt(indices_get_index_template1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_get_index_template_response,
@@ -8485,12 +8729,16 @@ For data streams, the API retrieves mappings for the stream’s backing indices.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_mapping_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_mapping_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_mapping_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_mapping1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_mapping1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_mapping1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_get_mapping_request, 'body'),
+      ...getShapeAt(indices_get_mapping_request, 'path'),
+      ...getShapeAt(indices_get_mapping_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_mapping1_request, 'body'),
+      ...getShapeAt(indices_get_mapping1_request, 'path'),
+      ...getShapeAt(indices_get_mapping1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_get_mapping_response, indices_get_mapping1_response]),
 };
@@ -8512,11 +8760,11 @@ Get the status of a migration reindex attempt for a data stream or index.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_get_migrate_reindex_status_request, 'body'),
+    ...getShapeAt(indices_get_migrate_reindex_status_request, 'path'),
+    ...getShapeAt(indices_get_migrate_reindex_status_request, 'query'),
+  }),
   outputSchema: indices_get_migrate_reindex_status_response,
 };
 const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
@@ -8535,7 +8783,7 @@ const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_GET_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
@@ -8555,7 +8803,7 @@ Get the sampling configuration for the specified index.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_GET_SAMPLE_STATS_CONTRACT: InternalConnectorContract = {
@@ -8574,7 +8822,7 @@ const INDICES_GET_SAMPLE_STATS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -8605,18 +8853,26 @@ For data streams, it returns setting information for the stream's backing indice
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_settings_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_settings_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_settings_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_settings1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_settings1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_settings1_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_settings2_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_settings2_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_settings2_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_settings3_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_settings3_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_settings3_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_get_settings_request, 'body'),
+      ...getShapeAt(indices_get_settings_request, 'path'),
+      ...getShapeAt(indices_get_settings_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_settings1_request, 'body'),
+      ...getShapeAt(indices_get_settings1_request, 'path'),
+      ...getShapeAt(indices_get_settings1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_settings2_request, 'body'),
+      ...getShapeAt(indices_get_settings2_request, 'path'),
+      ...getShapeAt(indices_get_settings2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_settings3_request, 'body'),
+      ...getShapeAt(indices_get_settings3_request, 'path'),
+      ...getShapeAt(indices_get_settings3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_get_settings_response,
@@ -8646,12 +8902,16 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_get_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_template_request, 'query'),
-    getZodLooseObjectFromProperty(indices_get_template1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_get_template1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_get_template1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_get_template_request, 'body'),
+      ...getShapeAt(indices_get_template_request, 'path'),
+      ...getShapeAt(indices_get_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_get_template1_request, 'body'),
+      ...getShapeAt(indices_get_template1_request, 'path'),
+      ...getShapeAt(indices_get_template1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_get_template_response, indices_get_template1_response]),
 };
@@ -8676,11 +8936,11 @@ The persistent task ID is returned immediately and the reindexing work is comple
     urlParams: [],
     bodyParams: ['mode', 'source'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_migrate_reindex_request, 'body'),
-    getZodLooseObjectFromProperty(indices_migrate_reindex_request, 'path'),
-    getZodLooseObjectFromProperty(indices_migrate_reindex_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_migrate_reindex_request, 'body'),
+    ...getShapeAt(indices_migrate_reindex_request, 'path'),
+    ...getShapeAt(indices_migrate_reindex_request, 'query'),
+  }),
   outputSchema: indices_migrate_reindex_response,
 };
 const INDICES_MIGRATE_TO_DATA_STREAM_CONTRACT: InternalConnectorContract = {
@@ -8710,11 +8970,11 @@ The write index for the alias becomes the write index for the stream.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'body'),
-    getZodLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'path'),
-    getZodLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_migrate_to_data_stream_request, 'body'),
+    ...getShapeAt(indices_migrate_to_data_stream_request, 'path'),
+    ...getShapeAt(indices_migrate_to_data_stream_request, 'query'),
+  }),
   outputSchema: indices_migrate_to_data_stream_response,
 };
 const INDICES_MODIFY_DATA_STREAM_CONTRACT: InternalConnectorContract = {
@@ -8735,11 +8995,11 @@ Performs one or more data stream modification actions in a single atomic operati
     urlParams: [],
     bodyParams: ['actions'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_modify_data_stream_request, 'body'),
-    getZodLooseObjectFromProperty(indices_modify_data_stream_request, 'path'),
-    getZodLooseObjectFromProperty(indices_modify_data_stream_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_modify_data_stream_request, 'body'),
+    ...getShapeAt(indices_modify_data_stream_request, 'path'),
+    ...getShapeAt(indices_modify_data_stream_request, 'query'),
+  }),
   outputSchema: indices_modify_data_stream_response,
 };
 const INDICES_OPEN_CONTRACT: InternalConnectorContract = {
@@ -8788,11 +9048,11 @@ Because opening or closing an index allocates its shards, the \`wait_for_active_
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_open_request, 'body'),
-    getZodLooseObjectFromProperty(indices_open_request, 'path'),
-    getZodLooseObjectFromProperty(indices_open_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_open_request, 'body'),
+    ...getShapeAt(indices_open_request, 'path'),
+    ...getShapeAt(indices_open_request, 'query'),
+  }),
   outputSchema: indices_open_response,
 };
 const INDICES_PROMOTE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
@@ -8822,11 +9082,11 @@ This will affect the lifecycle management of the data stream and interfere with 
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_promote_data_stream_request, 'body'),
-    getZodLooseObjectFromProperty(indices_promote_data_stream_request, 'path'),
-    getZodLooseObjectFromProperty(indices_promote_data_stream_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_promote_data_stream_request, 'body'),
+    ...getShapeAt(indices_promote_data_stream_request, 'path'),
+    ...getShapeAt(indices_promote_data_stream_request, 'query'),
+  }),
   outputSchema: indices_promote_data_stream_response,
 };
 const INDICES_PUT_ALIAS_CONTRACT: InternalConnectorContract = {
@@ -8848,18 +9108,26 @@ Adds a data stream or index to an alias.
     bodyParams: ['filter', 'index_routing', 'is_write_index', 'routing', 'search_routing'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_put_alias_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_alias_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_alias_request, 'query'),
-    getZodLooseObjectFromProperty(indices_put_alias1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_alias1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_alias1_request, 'query'),
-    getZodLooseObjectFromProperty(indices_put_alias2_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_alias2_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_alias2_request, 'query'),
-    getZodLooseObjectFromProperty(indices_put_alias3_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_alias3_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_alias3_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_put_alias_request, 'body'),
+      ...getShapeAt(indices_put_alias_request, 'path'),
+      ...getShapeAt(indices_put_alias_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_put_alias1_request, 'body'),
+      ...getShapeAt(indices_put_alias1_request, 'path'),
+      ...getShapeAt(indices_put_alias1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_put_alias2_request, 'body'),
+      ...getShapeAt(indices_put_alias2_request, 'path'),
+      ...getShapeAt(indices_put_alias2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_put_alias3_request, 'body'),
+      ...getShapeAt(indices_put_alias3_request, 'path'),
+      ...getShapeAt(indices_put_alias3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_put_alias_response,
@@ -8886,11 +9154,11 @@ Update the data stream lifecycle of the specified data streams.
     urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: ['data_retention', 'downsampling', 'enabled'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_put_data_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_data_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_data_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_put_data_lifecycle_request, 'body'),
+    ...getShapeAt(indices_put_data_lifecycle_request, 'path'),
+    ...getShapeAt(indices_put_data_lifecycle_request, 'query'),
+  }),
   outputSchema: indices_put_data_lifecycle_response,
 };
 const INDICES_PUT_DATA_STREAM_MAPPINGS_CONTRACT: InternalConnectorContract = {
@@ -8932,11 +9200,11 @@ that are created during rollover after this API is called. No indices are change
       '_data_stream_timestamp',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_put_data_stream_mappings_request, 'body'),
+    ...getShapeAt(indices_put_data_stream_mappings_request, 'path'),
+    ...getShapeAt(indices_put_data_stream_mappings_request, 'query'),
+  }),
   outputSchema: indices_put_data_stream_mappings_response,
 };
 const INDICES_PUT_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
@@ -8957,11 +9225,11 @@ Update the data stream options of the specified data streams.
     urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: ['failure_store'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_put_data_stream_options_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_data_stream_options_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_data_stream_options_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_put_data_stream_options_request, 'body'),
+    ...getShapeAt(indices_put_data_stream_options_request, 'path'),
+    ...getShapeAt(indices_put_data_stream_options_request, 'query'),
+  }),
   outputSchema: indices_put_data_stream_options_response,
 };
 const INDICES_PUT_DATA_STREAM_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -9043,11 +9311,11 @@ backing indices. Otherwise, it will be applied when the data stream is next roll
       'store',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_put_data_stream_settings_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_data_stream_settings_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_data_stream_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_put_data_stream_settings_request, 'body'),
+    ...getShapeAt(indices_put_data_stream_settings_request, 'path'),
+    ...getShapeAt(indices_put_data_stream_settings_request, 'query'),
+  }),
   outputSchema: indices_put_data_stream_settings_response,
 };
 const INDICES_PUT_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
@@ -9106,12 +9374,16 @@ If an entry already exists with the same key, then it is overwritten by the new 
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_put_index_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_index_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_index_template_request, 'query'),
-    getZodLooseObjectFromProperty(indices_put_index_template1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_index_template1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_index_template1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_put_index_template_request, 'body'),
+      ...getShapeAt(indices_put_index_template_request, 'path'),
+      ...getShapeAt(indices_put_index_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_put_index_template1_request, 'body'),
+      ...getShapeAt(indices_put_index_template1_request, 'path'),
+      ...getShapeAt(indices_put_index_template1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_put_index_template_response,
@@ -9167,12 +9439,16 @@ Learn how to use the update mapping API with practical examples in the [Update m
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_put_mapping_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_mapping_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_mapping_request, 'query'),
-    getZodLooseObjectFromProperty(indices_put_mapping1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_mapping1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_mapping1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_put_mapping_request, 'body'),
+      ...getShapeAt(indices_put_mapping_request, 'path'),
+      ...getShapeAt(indices_put_mapping_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_put_mapping1_request, 'body'),
+      ...getShapeAt(indices_put_mapping1_request, 'path'),
+      ...getShapeAt(indices_put_mapping1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_put_mapping_response, indices_put_mapping1_response]),
 };
@@ -9193,7 +9469,7 @@ Create or update the sampling configuration for the specified index.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const INDICES_PUT_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -9334,12 +9610,16 @@ Refer to [updating analyzers on existing indices](https://www.elastic.co/docs/ma
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_put_settings_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_settings_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_settings_request, 'query'),
-    getZodLooseObjectFromProperty(indices_put_settings1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_settings1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_settings1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_put_settings_request, 'body'),
+      ...getShapeAt(indices_put_settings_request, 'path'),
+      ...getShapeAt(indices_put_settings_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_put_settings1_request, 'body'),
+      ...getShapeAt(indices_put_settings1_request, 'path'),
+      ...getShapeAt(indices_put_settings1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_put_settings_response, indices_put_settings1_response]),
 };
@@ -9381,12 +9661,16 @@ NOTE: Multiple matching templates with the same order value will result in a non
     bodyParams: ['aliases', 'index_patterns', 'mappings', 'order', 'settings', 'version'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_put_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_template_request, 'query'),
-    getZodLooseObjectFromProperty(indices_put_template1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_put_template1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_put_template1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_put_template_request, 'body'),
+      ...getShapeAt(indices_put_template_request, 'path'),
+      ...getShapeAt(indices_put_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_put_template1_request, 'body'),
+      ...getShapeAt(indices_put_template1_request, 'path'),
+      ...getShapeAt(indices_put_template1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_put_template_response, indices_put_template1_response]),
 };
@@ -9436,12 +9720,16 @@ This means that if a shard copy completes a recovery and then Elasticsearch relo
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_recovery_request, 'body'),
-    getZodLooseObjectFromProperty(indices_recovery_request, 'path'),
-    getZodLooseObjectFromProperty(indices_recovery_request, 'query'),
-    getZodLooseObjectFromProperty(indices_recovery1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_recovery1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_recovery1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_recovery_request, 'body'),
+      ...getShapeAt(indices_recovery_request, 'path'),
+      ...getShapeAt(indices_recovery_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_recovery1_request, 'body'),
+      ...getShapeAt(indices_recovery1_request, 'path'),
+      ...getShapeAt(indices_recovery1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_recovery_response, indices_recovery1_response]),
 };
@@ -9478,18 +9766,26 @@ This option ensures the indexing operation waits for a periodic refresh before r
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_refresh_request, 'body'),
-    getZodLooseObjectFromProperty(indices_refresh_request, 'path'),
-    getZodLooseObjectFromProperty(indices_refresh_request, 'query'),
-    getZodLooseObjectFromProperty(indices_refresh1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_refresh1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_refresh1_request, 'query'),
-    getZodLooseObjectFromProperty(indices_refresh2_request, 'body'),
-    getZodLooseObjectFromProperty(indices_refresh2_request, 'path'),
-    getZodLooseObjectFromProperty(indices_refresh2_request, 'query'),
-    getZodLooseObjectFromProperty(indices_refresh3_request, 'body'),
-    getZodLooseObjectFromProperty(indices_refresh3_request, 'path'),
-    getZodLooseObjectFromProperty(indices_refresh3_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_refresh_request, 'body'),
+      ...getShapeAt(indices_refresh_request, 'path'),
+      ...getShapeAt(indices_refresh_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_refresh1_request, 'body'),
+      ...getShapeAt(indices_refresh1_request, 'path'),
+      ...getShapeAt(indices_refresh1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_refresh2_request, 'body'),
+      ...getShapeAt(indices_refresh2_request, 'path'),
+      ...getShapeAt(indices_refresh2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_refresh3_request, 'body'),
+      ...getShapeAt(indices_refresh3_request, 'path'),
+      ...getShapeAt(indices_refresh3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_refresh_response,
@@ -9529,12 +9825,16 @@ This ensures the synonym file is updated everywhere in the cluster in case shard
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_reload_search_analyzers_request, 'body'),
-    getZodLooseObjectFromProperty(indices_reload_search_analyzers_request, 'path'),
-    getZodLooseObjectFromProperty(indices_reload_search_analyzers_request, 'query'),
-    getZodLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_reload_search_analyzers_request, 'body'),
+      ...getShapeAt(indices_reload_search_analyzers_request, 'path'),
+      ...getShapeAt(indices_reload_search_analyzers_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_reload_search_analyzers1_request, 'body'),
+      ...getShapeAt(indices_reload_search_analyzers1_request, 'path'),
+      ...getShapeAt(indices_reload_search_analyzers1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_reload_search_analyzers_response,
@@ -9567,11 +9867,11 @@ Index blocks limit the operations allowed on an index by blocking specific opera
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_remove_block_request, 'body'),
-    getZodLooseObjectFromProperty(indices_remove_block_request, 'path'),
-    getZodLooseObjectFromProperty(indices_remove_block_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_remove_block_request, 'body'),
+    ...getShapeAt(indices_remove_block_request, 'path'),
+    ...getShapeAt(indices_remove_block_request, 'query'),
+  }),
   outputSchema: indices_remove_block_response,
 };
 const INDICES_RESOLVE_CLUSTER_CONTRACT: InternalConnectorContract = {
@@ -9643,12 +9943,16 @@ If a connection was (re-)established, this will also cause the \`remote/info\` e
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_resolve_cluster_request, 'body'),
-    getZodLooseObjectFromProperty(indices_resolve_cluster_request, 'path'),
-    getZodLooseObjectFromProperty(indices_resolve_cluster_request, 'query'),
-    getZodLooseObjectFromProperty(indices_resolve_cluster1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_resolve_cluster1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_resolve_cluster1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_resolve_cluster_request, 'body'),
+      ...getShapeAt(indices_resolve_cluster_request, 'path'),
+      ...getShapeAt(indices_resolve_cluster_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_resolve_cluster1_request, 'body'),
+      ...getShapeAt(indices_resolve_cluster1_request, 'path'),
+      ...getShapeAt(indices_resolve_cluster1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_resolve_cluster_response, indices_resolve_cluster1_response]),
 };
@@ -9671,11 +9975,11 @@ Multiple patterns and remote clusters are supported.
     urlParams: ['expand_wildcards', 'ignore_unavailable', 'allow_no_indices', 'mode'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_resolve_index_request, 'body'),
-    getZodLooseObjectFromProperty(indices_resolve_index_request, 'path'),
-    getZodLooseObjectFromProperty(indices_resolve_index_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_resolve_index_request, 'body'),
+    ...getShapeAt(indices_resolve_index_request, 'path'),
+    ...getShapeAt(indices_resolve_index_request, 'query'),
+  }),
   outputSchema: indices_resolve_index_response,
 };
 const INDICES_ROLLOVER_CONTRACT: InternalConnectorContract = {
@@ -9733,12 +10037,16 @@ If you roll over the alias on May 7, 2099, the new index's name is \`my-index-20
     bodyParams: ['aliases', 'conditions', 'mappings', 'settings'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_rollover_request, 'body'),
-    getZodLooseObjectFromProperty(indices_rollover_request, 'path'),
-    getZodLooseObjectFromProperty(indices_rollover_request, 'query'),
-    getZodLooseObjectFromProperty(indices_rollover1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_rollover1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_rollover1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_rollover_request, 'body'),
+      ...getShapeAt(indices_rollover_request, 'path'),
+      ...getShapeAt(indices_rollover_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_rollover1_request, 'body'),
+      ...getShapeAt(indices_rollover1_request, 'path'),
+      ...getShapeAt(indices_rollover1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_rollover_response, indices_rollover1_response]),
 };
@@ -9762,12 +10070,16 @@ For data streams, the API returns information about the stream's backing indices
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_segments_request, 'body'),
-    getZodLooseObjectFromProperty(indices_segments_request, 'path'),
-    getZodLooseObjectFromProperty(indices_segments_request, 'query'),
-    getZodLooseObjectFromProperty(indices_segments1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_segments1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_segments1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_segments_request, 'body'),
+      ...getShapeAt(indices_segments_request, 'path'),
+      ...getShapeAt(indices_segments_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_segments1_request, 'body'),
+      ...getShapeAt(indices_segments1_request, 'path'),
+      ...getShapeAt(indices_segments1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_segments_response, indices_segments1_response]),
 };
@@ -9800,12 +10112,16 @@ By default, the API returns store information only for primary shards that are u
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_shard_stores_request, 'body'),
-    getZodLooseObjectFromProperty(indices_shard_stores_request, 'path'),
-    getZodLooseObjectFromProperty(indices_shard_stores_request, 'query'),
-    getZodLooseObjectFromProperty(indices_shard_stores1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_shard_stores1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_shard_stores1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_shard_stores_request, 'body'),
+      ...getShapeAt(indices_shard_stores_request, 'path'),
+      ...getShapeAt(indices_shard_stores_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_shard_stores1_request, 'body'),
+      ...getShapeAt(indices_shard_stores1_request, 'path'),
+      ...getShapeAt(indices_shard_stores1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_shard_stores_response, indices_shard_stores1_response]),
 };
@@ -9858,12 +10174,16 @@ IMPORTANT: Indices can only be shrunk if they satisfy the following requirements
     bodyParams: ['aliases', 'settings'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_shrink_request, 'body'),
-    getZodLooseObjectFromProperty(indices_shrink_request, 'path'),
-    getZodLooseObjectFromProperty(indices_shrink_request, 'query'),
-    getZodLooseObjectFromProperty(indices_shrink1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_shrink1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_shrink1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_shrink_request, 'body'),
+      ...getShapeAt(indices_shrink_request, 'path'),
+      ...getShapeAt(indices_shrink_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_shrink1_request, 'body'),
+      ...getShapeAt(indices_shrink1_request, 'path'),
+      ...getShapeAt(indices_shrink1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_shrink_response, indices_shrink1_response]),
 };
@@ -9900,11 +10220,11 @@ Get the index configuration that would be applied to the specified index from an
       'modified_date_millis',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_simulate_index_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_simulate_index_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_simulate_index_template_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_simulate_index_template_request, 'body'),
+    ...getShapeAt(indices_simulate_index_template_request, 'path'),
+    ...getShapeAt(indices_simulate_index_template_request, 'query'),
+  }),
   outputSchema: indices_simulate_index_template_response,
 };
 const INDICES_SIMULATE_TEMPLATE_CONTRACT: InternalConnectorContract = {
@@ -9937,12 +10257,16 @@ Get the index configuration that would be applied by a particular index template
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_simulate_template_request, 'body'),
-    getZodLooseObjectFromProperty(indices_simulate_template_request, 'path'),
-    getZodLooseObjectFromProperty(indices_simulate_template_request, 'query'),
-    getZodLooseObjectFromProperty(indices_simulate_template1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_simulate_template1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_simulate_template1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_simulate_template_request, 'body'),
+      ...getShapeAt(indices_simulate_template_request, 'path'),
+      ...getShapeAt(indices_simulate_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_simulate_template1_request, 'body'),
+      ...getShapeAt(indices_simulate_template1_request, 'path'),
+      ...getShapeAt(indices_simulate_template1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_simulate_template_response, indices_simulate_template1_response]),
 };
@@ -9996,12 +10320,16 @@ IMPORTANT: Indices can only be split if they satisfy the following requirements:
     bodyParams: ['aliases', 'settings'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_split_request, 'body'),
-    getZodLooseObjectFromProperty(indices_split_request, 'path'),
-    getZodLooseObjectFromProperty(indices_split_request, 'query'),
-    getZodLooseObjectFromProperty(indices_split1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_split1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_split1_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_split_request, 'body'),
+      ...getShapeAt(indices_split_request, 'path'),
+      ...getShapeAt(indices_split_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_split1_request, 'body'),
+      ...getShapeAt(indices_split1_request, 'path'),
+      ...getShapeAt(indices_split1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([indices_split_response, indices_split1_response]),
 };
@@ -10043,18 +10371,26 @@ Although the shard is no longer part of the node, that node retains any node-lev
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_stats_request, 'body'),
-    getZodLooseObjectFromProperty(indices_stats_request, 'path'),
-    getZodLooseObjectFromProperty(indices_stats_request, 'query'),
-    getZodLooseObjectFromProperty(indices_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_stats1_request, 'query'),
-    getZodLooseObjectFromProperty(indices_stats2_request, 'body'),
-    getZodLooseObjectFromProperty(indices_stats2_request, 'path'),
-    getZodLooseObjectFromProperty(indices_stats2_request, 'query'),
-    getZodLooseObjectFromProperty(indices_stats3_request, 'body'),
-    getZodLooseObjectFromProperty(indices_stats3_request, 'path'),
-    getZodLooseObjectFromProperty(indices_stats3_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_stats_request, 'body'),
+      ...getShapeAt(indices_stats_request, 'path'),
+      ...getShapeAt(indices_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_stats1_request, 'body'),
+      ...getShapeAt(indices_stats1_request, 'path'),
+      ...getShapeAt(indices_stats1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_stats2_request, 'body'),
+      ...getShapeAt(indices_stats2_request, 'path'),
+      ...getShapeAt(indices_stats2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_stats3_request, 'body'),
+      ...getShapeAt(indices_stats3_request, 'path'),
+      ...getShapeAt(indices_stats3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_stats_response,
@@ -10081,11 +10417,11 @@ Adds a data stream or index to an alias.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['actions'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_update_aliases_request, 'body'),
-    getZodLooseObjectFromProperty(indices_update_aliases_request, 'path'),
-    getZodLooseObjectFromProperty(indices_update_aliases_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(indices_update_aliases_request, 'body'),
+    ...getShapeAt(indices_update_aliases_request, 'path'),
+    ...getShapeAt(indices_update_aliases_request, 'query'),
+  }),
   outputSchema: indices_update_aliases_response,
 };
 const INDICES_VALIDATE_QUERY_CONTRACT: InternalConnectorContract = {
@@ -10120,18 +10456,26 @@ Validates a query without running it.
     bodyParams: ['query'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(indices_validate_query_request, 'body'),
-    getZodLooseObjectFromProperty(indices_validate_query_request, 'path'),
-    getZodLooseObjectFromProperty(indices_validate_query_request, 'query'),
-    getZodLooseObjectFromProperty(indices_validate_query1_request, 'body'),
-    getZodLooseObjectFromProperty(indices_validate_query1_request, 'path'),
-    getZodLooseObjectFromProperty(indices_validate_query1_request, 'query'),
-    getZodLooseObjectFromProperty(indices_validate_query2_request, 'body'),
-    getZodLooseObjectFromProperty(indices_validate_query2_request, 'path'),
-    getZodLooseObjectFromProperty(indices_validate_query2_request, 'query'),
-    getZodLooseObjectFromProperty(indices_validate_query3_request, 'body'),
-    getZodLooseObjectFromProperty(indices_validate_query3_request, 'path'),
-    getZodLooseObjectFromProperty(indices_validate_query3_request, 'query'),
+    z.object({
+      ...getShapeAt(indices_validate_query_request, 'body'),
+      ...getShapeAt(indices_validate_query_request, 'path'),
+      ...getShapeAt(indices_validate_query_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_validate_query1_request, 'body'),
+      ...getShapeAt(indices_validate_query1_request, 'path'),
+      ...getShapeAt(indices_validate_query1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_validate_query2_request, 'body'),
+      ...getShapeAt(indices_validate_query2_request, 'path'),
+      ...getShapeAt(indices_validate_query2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(indices_validate_query3_request, 'body'),
+      ...getShapeAt(indices_validate_query3_request, 'path'),
+      ...getShapeAt(indices_validate_query3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     indices_validate_query_response,
@@ -10175,11 +10519,11 @@ If you use the \`openai\`, \`hugging_face\` or the \`elastic\` service, use the 
       'top_p',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_chat_completion_unified_request, 'body'),
-    getZodLooseObjectFromProperty(inference_chat_completion_unified_request, 'path'),
-    getZodLooseObjectFromProperty(inference_chat_completion_unified_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_chat_completion_unified_request, 'body'),
+    ...getShapeAt(inference_chat_completion_unified_request, 'path'),
+    ...getShapeAt(inference_chat_completion_unified_request, 'query'),
+  }),
   outputSchema: inference_chat_completion_unified_response,
 };
 const INFERENCE_COMPLETION_CONTRACT: InternalConnectorContract = {
@@ -10206,11 +10550,11 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
     urlParams: ['timeout'],
     bodyParams: ['input', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_completion_request, 'body'),
-    getZodLooseObjectFromProperty(inference_completion_request, 'path'),
-    getZodLooseObjectFromProperty(inference_completion_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_completion_request, 'body'),
+    ...getShapeAt(inference_completion_request, 'path'),
+    ...getShapeAt(inference_completion_request, 'query'),
+  }),
   outputSchema: inference_completion_response,
 };
 const INFERENCE_DELETE_CONTRACT: InternalConnectorContract = {
@@ -10233,12 +10577,16 @@ This API requires the manage_inference cluster privilege (the built-in \`inferen
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_delete_request, 'body'),
-    getZodLooseObjectFromProperty(inference_delete_request, 'path'),
-    getZodLooseObjectFromProperty(inference_delete_request, 'query'),
-    getZodLooseObjectFromProperty(inference_delete1_request, 'body'),
-    getZodLooseObjectFromProperty(inference_delete1_request, 'path'),
-    getZodLooseObjectFromProperty(inference_delete1_request, 'query'),
+    z.object({
+      ...getShapeAt(inference_delete_request, 'body'),
+      ...getShapeAt(inference_delete_request, 'path'),
+      ...getShapeAt(inference_delete_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(inference_delete1_request, 'body'),
+      ...getShapeAt(inference_delete1_request, 'path'),
+      ...getShapeAt(inference_delete1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([inference_delete_response, inference_delete1_response]),
 };
@@ -10262,15 +10610,21 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_get_request, 'body'),
-    getZodLooseObjectFromProperty(inference_get_request, 'path'),
-    getZodLooseObjectFromProperty(inference_get_request, 'query'),
-    getZodLooseObjectFromProperty(inference_get1_request, 'body'),
-    getZodLooseObjectFromProperty(inference_get1_request, 'path'),
-    getZodLooseObjectFromProperty(inference_get1_request, 'query'),
-    getZodLooseObjectFromProperty(inference_get2_request, 'body'),
-    getZodLooseObjectFromProperty(inference_get2_request, 'path'),
-    getZodLooseObjectFromProperty(inference_get2_request, 'query'),
+    z.object({
+      ...getShapeAt(inference_get_request, 'body'),
+      ...getShapeAt(inference_get_request, 'path'),
+      ...getShapeAt(inference_get_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(inference_get1_request, 'body'),
+      ...getShapeAt(inference_get1_request, 'path'),
+      ...getShapeAt(inference_get1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(inference_get2_request, 'body'),
+      ...getShapeAt(inference_get2_request, 'path'),
+      ...getShapeAt(inference_get2_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([inference_get_response, inference_get1_response, inference_get2_response]),
 };
@@ -10301,12 +10655,16 @@ For details about using this API with a service, such as Amazon Bedrock, Anthrop
     bodyParams: ['query', 'input', 'input_type', 'task_settings'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_inference_request, 'body'),
-    getZodLooseObjectFromProperty(inference_inference_request, 'path'),
-    getZodLooseObjectFromProperty(inference_inference_request, 'query'),
-    getZodLooseObjectFromProperty(inference_inference1_request, 'body'),
-    getZodLooseObjectFromProperty(inference_inference1_request, 'path'),
-    getZodLooseObjectFromProperty(inference_inference1_request, 'query'),
+    z.object({
+      ...getShapeAt(inference_inference_request, 'body'),
+      ...getShapeAt(inference_inference_request, 'path'),
+      ...getShapeAt(inference_inference_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(inference_inference1_request, 'body'),
+      ...getShapeAt(inference_inference1_request, 'path'),
+      ...getShapeAt(inference_inference1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([inference_inference_response, inference_inference1_response]),
 };
@@ -10354,12 +10712,16 @@ The following integrations are available through the inference API. You can find
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_request, 'query'),
-    getZodLooseObjectFromProperty(inference_put1_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put1_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put1_request, 'query'),
+    z.object({
+      ...getShapeAt(inference_put_request, 'body'),
+      ...getShapeAt(inference_put_request, 'path'),
+      ...getShapeAt(inference_put_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(inference_put1_request, 'body'),
+      ...getShapeAt(inference_put1_request, 'path'),
+      ...getShapeAt(inference_put1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([inference_put_response, inference_put1_response]),
 };
@@ -10382,11 +10744,11 @@ Create an inference endpoint to perform an inference task with the \`ai21\` serv
     urlParams: ['timeout'],
     bodyParams: ['service', 'service_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_ai21_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_ai21_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_ai21_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_ai21_request, 'body'),
+    ...getShapeAt(inference_put_ai21_request, 'path'),
+    ...getShapeAt(inference_put_ai21_request, 'query'),
+  }),
   outputSchema: inference_put_ai21_response,
 };
 const INFERENCE_PUT_ALIBABACLOUD_CONTRACT: InternalConnectorContract = {
@@ -10408,11 +10770,11 @@ Create an inference endpoint to perform an inference task with the \`alibabaclou
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_alibabacloud_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_alibabacloud_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_alibabacloud_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_alibabacloud_request, 'body'),
+    ...getShapeAt(inference_put_alibabacloud_request, 'path'),
+    ...getShapeAt(inference_put_alibabacloud_request, 'query'),
+  }),
   outputSchema: inference_put_alibabacloud_response,
 };
 const INFERENCE_PUT_AMAZONBEDROCK_CONTRACT: InternalConnectorContract = {
@@ -10437,11 +10799,11 @@ Create an inference endpoint to perform an inference task with the \`amazonbedro
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_amazonbedrock_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_amazonbedrock_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_amazonbedrock_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_amazonbedrock_request, 'body'),
+    ...getShapeAt(inference_put_amazonbedrock_request, 'path'),
+    ...getShapeAt(inference_put_amazonbedrock_request, 'query'),
+  }),
   outputSchema: inference_put_amazonbedrock_response,
 };
 const INFERENCE_PUT_AMAZONSAGEMAKER_CONTRACT: InternalConnectorContract = {
@@ -10463,11 +10825,11 @@ Create an inference endpoint to perform an inference task with the \`amazon_sage
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_amazonsagemaker_request, 'body'),
+    ...getShapeAt(inference_put_amazonsagemaker_request, 'path'),
+    ...getShapeAt(inference_put_amazonsagemaker_request, 'query'),
+  }),
   outputSchema: inference_put_amazonsagemaker_response,
 };
 const INFERENCE_PUT_ANTHROPIC_CONTRACT: InternalConnectorContract = {
@@ -10489,11 +10851,11 @@ Create an inference endpoint to perform an inference task with the \`anthropic\`
     urlParams: ['timeout'],
     bodyParams: ['service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_anthropic_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_anthropic_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_anthropic_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_anthropic_request, 'body'),
+    ...getShapeAt(inference_put_anthropic_request, 'path'),
+    ...getShapeAt(inference_put_anthropic_request, 'query'),
+  }),
   outputSchema: inference_put_anthropic_response,
 };
 const INFERENCE_PUT_AZUREAISTUDIO_CONTRACT: InternalConnectorContract = {
@@ -10515,11 +10877,11 @@ Create an inference endpoint to perform an inference task with the \`azureaistud
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_azureaistudio_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_azureaistudio_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_azureaistudio_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_azureaistudio_request, 'body'),
+    ...getShapeAt(inference_put_azureaistudio_request, 'path'),
+    ...getShapeAt(inference_put_azureaistudio_request, 'query'),
+  }),
   outputSchema: inference_put_azureaistudio_response,
 };
 const INFERENCE_PUT_AZUREOPENAI_CONTRACT: InternalConnectorContract = {
@@ -10548,11 +10910,11 @@ The list of embeddings models that you can choose from in your deployment can be
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_azureopenai_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_azureopenai_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_azureopenai_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_azureopenai_request, 'body'),
+    ...getShapeAt(inference_put_azureopenai_request, 'path'),
+    ...getShapeAt(inference_put_azureopenai_request, 'query'),
+  }),
   outputSchema: inference_put_azureopenai_response,
 };
 const INFERENCE_PUT_COHERE_CONTRACT: InternalConnectorContract = {
@@ -10574,11 +10936,11 @@ Create an inference endpoint to perform an inference task with the \`cohere\` se
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_cohere_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_cohere_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_cohere_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_cohere_request, 'body'),
+    ...getShapeAt(inference_put_cohere_request, 'path'),
+    ...getShapeAt(inference_put_cohere_request, 'query'),
+  }),
   outputSchema: inference_put_cohere_response,
 };
 const INFERENCE_PUT_CONTEXTUALAI_CONTRACT: InternalConnectorContract = {
@@ -10602,11 +10964,11 @@ To review the available \`rerank\` models, refer to <https://docs.contextual.ai/
     urlParams: ['timeout'],
     bodyParams: ['service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_contextualai_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_contextualai_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_contextualai_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_contextualai_request, 'body'),
+    ...getShapeAt(inference_put_contextualai_request, 'path'),
+    ...getShapeAt(inference_put_contextualai_request, 'query'),
+  }),
   outputSchema: inference_put_contextualai_response,
 };
 const INFERENCE_PUT_CUSTOM_CONTRACT: InternalConnectorContract = {
@@ -10667,11 +11029,11 @@ Pre-defined templates:
     urlParams: [],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_custom_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_custom_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_custom_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_custom_request, 'body'),
+    ...getShapeAt(inference_put_custom_request, 'path'),
+    ...getShapeAt(inference_put_custom_request, 'query'),
+  }),
   outputSchema: inference_put_custom_response,
 };
 const INFERENCE_PUT_DEEPSEEK_CONTRACT: InternalConnectorContract = {
@@ -10693,11 +11055,11 @@ Create an inference endpoint to perform an inference task with the \`deepseek\` 
     urlParams: ['timeout'],
     bodyParams: ['service', 'service_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_deepseek_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_deepseek_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_deepseek_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_deepseek_request, 'body'),
+    ...getShapeAt(inference_put_deepseek_request, 'path'),
+    ...getShapeAt(inference_put_deepseek_request, 'query'),
+  }),
   outputSchema: inference_put_deepseek_response,
 };
 const INFERENCE_PUT_ELASTICSEARCH_CONTRACT: InternalConnectorContract = {
@@ -10732,11 +11094,11 @@ Avoid creating multiple endpoints for the same model unless required, as each en
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_elasticsearch_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_elasticsearch_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_elasticsearch_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_elasticsearch_request, 'body'),
+    ...getShapeAt(inference_put_elasticsearch_request, 'path'),
+    ...getShapeAt(inference_put_elasticsearch_request, 'query'),
+  }),
   outputSchema: inference_put_elasticsearch_response,
 };
 const INFERENCE_PUT_ELSER_CONTRACT: InternalConnectorContract = {
@@ -10772,11 +11134,11 @@ Avoid creating multiple endpoints for the same model unless required, as each en
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_elser_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_elser_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_elser_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_elser_request, 'body'),
+    ...getShapeAt(inference_put_elser_request, 'path'),
+    ...getShapeAt(inference_put_elser_request, 'query'),
+  }),
   outputSchema: inference_put_elser_response,
 };
 const INFERENCE_PUT_GOOGLEAISTUDIO_CONTRACT: InternalConnectorContract = {
@@ -10798,11 +11160,11 @@ Create an inference endpoint to perform an inference task with the \`googleaistu
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_googleaistudio_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_googleaistudio_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_googleaistudio_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_googleaistudio_request, 'body'),
+    ...getShapeAt(inference_put_googleaistudio_request, 'path'),
+    ...getShapeAt(inference_put_googleaistudio_request, 'query'),
+  }),
   outputSchema: inference_put_googleaistudio_response,
 };
 const INFERENCE_PUT_GOOGLEVERTEXAI_CONTRACT: InternalConnectorContract = {
@@ -10824,11 +11186,11 @@ Create an inference endpoint to perform an inference task with the \`googleverte
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_googlevertexai_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_googlevertexai_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_googlevertexai_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_googlevertexai_request, 'body'),
+    ...getShapeAt(inference_put_googlevertexai_request, 'path'),
+    ...getShapeAt(inference_put_googlevertexai_request, 'query'),
+  }),
   outputSchema: inference_put_googlevertexai_response,
 };
 const INFERENCE_PUT_HUGGING_FACE_CONTRACT: InternalConnectorContract = {
@@ -10885,11 +11247,11 @@ Tested models for \`rerank\` task:
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_hugging_face_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_hugging_face_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_hugging_face_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_hugging_face_request, 'body'),
+    ...getShapeAt(inference_put_hugging_face_request, 'path'),
+    ...getShapeAt(inference_put_hugging_face_request, 'query'),
+  }),
   outputSchema: inference_put_hugging_face_response,
 };
 const INFERENCE_PUT_JINAAI_CONTRACT: InternalConnectorContract = {
@@ -10914,11 +11276,11 @@ To review the available \`text_embedding\` models, refer to the <https://jina.ai
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_jinaai_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_jinaai_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_jinaai_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_jinaai_request, 'body'),
+    ...getShapeAt(inference_put_jinaai_request, 'path'),
+    ...getShapeAt(inference_put_jinaai_request, 'query'),
+  }),
   outputSchema: inference_put_jinaai_response,
 };
 const INFERENCE_PUT_LLAMA_CONTRACT: InternalConnectorContract = {
@@ -10940,11 +11302,11 @@ Create an inference endpoint to perform an inference task with the \`llama\` ser
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_llama_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_llama_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_llama_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_llama_request, 'body'),
+    ...getShapeAt(inference_put_llama_request, 'path'),
+    ...getShapeAt(inference_put_llama_request, 'query'),
+  }),
   outputSchema: inference_put_llama_response,
 };
 const INFERENCE_PUT_MISTRAL_CONTRACT: InternalConnectorContract = {
@@ -10966,11 +11328,11 @@ Create an inference endpoint to perform an inference task with the \`mistral\` s
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_mistral_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_mistral_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_mistral_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_mistral_request, 'body'),
+    ...getShapeAt(inference_put_mistral_request, 'path'),
+    ...getShapeAt(inference_put_mistral_request, 'query'),
+  }),
   outputSchema: inference_put_mistral_response,
 };
 const INFERENCE_PUT_OPENAI_CONTRACT: InternalConnectorContract = {
@@ -10992,11 +11354,11 @@ Create an inference endpoint to perform an inference task with the \`openai\` se
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_openai_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_openai_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_openai_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_openai_request, 'body'),
+    ...getShapeAt(inference_put_openai_request, 'path'),
+    ...getShapeAt(inference_put_openai_request, 'query'),
+  }),
   outputSchema: inference_put_openai_response,
 };
 const INFERENCE_PUT_VOYAGEAI_CONTRACT: InternalConnectorContract = {
@@ -11020,11 +11382,11 @@ Avoid creating multiple endpoints for the same model unless required, as each en
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_voyageai_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_voyageai_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_voyageai_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_voyageai_request, 'body'),
+    ...getShapeAt(inference_put_voyageai_request, 'path'),
+    ...getShapeAt(inference_put_voyageai_request, 'query'),
+  }),
   outputSchema: inference_put_voyageai_response,
 };
 const INFERENCE_PUT_WATSONX_CONTRACT: InternalConnectorContract = {
@@ -11048,11 +11410,11 @@ You can provision one through the IBM catalog, the Cloud Databases CLI plug-in, 
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_put_watsonx_request, 'body'),
-    getZodLooseObjectFromProperty(inference_put_watsonx_request, 'path'),
-    getZodLooseObjectFromProperty(inference_put_watsonx_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_watsonx_request, 'body'),
+    ...getShapeAt(inference_put_watsonx_request, 'path'),
+    ...getShapeAt(inference_put_watsonx_request, 'query'),
+  }),
   outputSchema: inference_put_watsonx_response,
 };
 const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
@@ -11072,11 +11434,11 @@ const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
     urlParams: ['timeout'],
     bodyParams: ['query', 'input', 'return_documents', 'top_n', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_rerank_request, 'body'),
-    getZodLooseObjectFromProperty(inference_rerank_request, 'path'),
-    getZodLooseObjectFromProperty(inference_rerank_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_rerank_request, 'body'),
+    ...getShapeAt(inference_rerank_request, 'path'),
+    ...getShapeAt(inference_rerank_request, 'query'),
+  }),
   outputSchema: inference_rerank_response,
 };
 const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
@@ -11096,11 +11458,11 @@ const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
     urlParams: ['timeout'],
     bodyParams: ['input', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_sparse_embedding_request, 'body'),
-    getZodLooseObjectFromProperty(inference_sparse_embedding_request, 'path'),
-    getZodLooseObjectFromProperty(inference_sparse_embedding_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_sparse_embedding_request, 'body'),
+    ...getShapeAt(inference_sparse_embedding_request, 'path'),
+    ...getShapeAt(inference_sparse_embedding_request, 'query'),
+  }),
   outputSchema: inference_sparse_embedding_response,
 };
 const INFERENCE_STREAM_COMPLETION_CONTRACT: InternalConnectorContract = {
@@ -11127,11 +11489,11 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
     urlParams: ['timeout'],
     bodyParams: ['input', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_stream_completion_request, 'body'),
-    getZodLooseObjectFromProperty(inference_stream_completion_request, 'path'),
-    getZodLooseObjectFromProperty(inference_stream_completion_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_stream_completion_request, 'body'),
+    ...getShapeAt(inference_stream_completion_request, 'path'),
+    ...getShapeAt(inference_stream_completion_request, 'query'),
+  }),
   outputSchema: inference_stream_completion_response,
 };
 const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
@@ -11151,11 +11513,11 @@ const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
     urlParams: ['timeout'],
     bodyParams: ['input', 'input_type', 'task_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_text_embedding_request, 'body'),
-    getZodLooseObjectFromProperty(inference_text_embedding_request, 'path'),
-    getZodLooseObjectFromProperty(inference_text_embedding_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(inference_text_embedding_request, 'body'),
+    ...getShapeAt(inference_text_embedding_request, 'path'),
+    ...getShapeAt(inference_text_embedding_request, 'query'),
+  }),
   outputSchema: inference_text_embedding_response,
 };
 const INFERENCE_UPDATE_CONTRACT: InternalConnectorContract = {
@@ -11182,12 +11544,16 @@ However, if you do not plan to use the inference APIs to use these models or if 
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(inference_update_request, 'body'),
-    getZodLooseObjectFromProperty(inference_update_request, 'path'),
-    getZodLooseObjectFromProperty(inference_update_request, 'query'),
-    getZodLooseObjectFromProperty(inference_update1_request, 'body'),
-    getZodLooseObjectFromProperty(inference_update1_request, 'path'),
-    getZodLooseObjectFromProperty(inference_update1_request, 'query'),
+    z.object({
+      ...getShapeAt(inference_update_request, 'body'),
+      ...getShapeAt(inference_update_request, 'path'),
+      ...getShapeAt(inference_update_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(inference_update1_request, 'body'),
+      ...getShapeAt(inference_update1_request, 'path'),
+      ...getShapeAt(inference_update1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([inference_update_response, inference_update1_response]),
 };
@@ -11209,11 +11575,11 @@ Get basic build, version, and cluster information.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(info_request, 'body'),
-    getZodLooseObjectFromProperty(info_request, 'path'),
-    getZodLooseObjectFromProperty(info_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(info_request, 'body'),
+    ...getShapeAt(info_request, 'path'),
+    ...getShapeAt(info_request, 'query'),
+  }),
   outputSchema: info_response,
 };
 const INGEST_DELETE_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
@@ -11235,11 +11601,11 @@ Delete one or more IP geolocation database configurations.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_delete_geoip_database_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_delete_geoip_database_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_delete_geoip_database_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ingest_delete_geoip_database_request, 'body'),
+    ...getShapeAt(ingest_delete_geoip_database_request, 'path'),
+    ...getShapeAt(ingest_delete_geoip_database_request, 'query'),
+  }),
   outputSchema: ingest_delete_geoip_database_response,
 };
 const INGEST_DELETE_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
@@ -11259,11 +11625,11 @@ const INGEST_DELETE_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ingest_delete_ip_location_database_request, 'body'),
+    ...getShapeAt(ingest_delete_ip_location_database_request, 'path'),
+    ...getShapeAt(ingest_delete_ip_location_database_request, 'query'),
+  }),
   outputSchema: ingest_delete_ip_location_database_response,
 };
 const INGEST_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
@@ -11284,11 +11650,11 @@ Delete one or more ingest pipelines.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_delete_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_delete_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_delete_pipeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ingest_delete_pipeline_request, 'body'),
+    ...getShapeAt(ingest_delete_pipeline_request, 'path'),
+    ...getShapeAt(ingest_delete_pipeline_request, 'query'),
+  }),
   outputSchema: ingest_delete_pipeline_response,
 };
 const INGEST_GEO_IP_STATS_CONTRACT: InternalConnectorContract = {
@@ -11308,11 +11674,11 @@ Get download statistics for GeoIP2 databases that are used with the GeoIP proces
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_geo_ip_stats_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_geo_ip_stats_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_geo_ip_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ingest_geo_ip_stats_request, 'body'),
+    ...getShapeAt(ingest_geo_ip_stats_request, 'path'),
+    ...getShapeAt(ingest_geo_ip_stats_request, 'query'),
+  }),
   outputSchema: ingest_geo_ip_stats_response,
 };
 const INGEST_GET_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
@@ -11335,12 +11701,16 @@ Get information about one or more IP geolocation database configurations.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_get_geoip_database_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_get_geoip_database_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_get_geoip_database_request, 'query'),
-    getZodLooseObjectFromProperty(ingest_get_geoip_database1_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_get_geoip_database1_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_get_geoip_database1_request, 'query'),
+    z.object({
+      ...getShapeAt(ingest_get_geoip_database_request, 'body'),
+      ...getShapeAt(ingest_get_geoip_database_request, 'path'),
+      ...getShapeAt(ingest_get_geoip_database_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ingest_get_geoip_database1_request, 'body'),
+      ...getShapeAt(ingest_get_geoip_database1_request, 'path'),
+      ...getShapeAt(ingest_get_geoip_database1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ingest_get_geoip_database_response, ingest_get_geoip_database1_response]),
 };
@@ -11362,12 +11732,16 @@ const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_get_ip_location_database_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_get_ip_location_database_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_get_ip_location_database_request, 'query'),
-    getZodLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'query'),
+    z.object({
+      ...getShapeAt(ingest_get_ip_location_database_request, 'body'),
+      ...getShapeAt(ingest_get_ip_location_database_request, 'path'),
+      ...getShapeAt(ingest_get_ip_location_database_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ingest_get_ip_location_database1_request, 'body'),
+      ...getShapeAt(ingest_get_ip_location_database1_request, 'path'),
+      ...getShapeAt(ingest_get_ip_location_database1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ingest_get_ip_location_database_response,
@@ -11395,12 +11769,16 @@ This API returns a local reference of the pipeline.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_get_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_get_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_get_pipeline_request, 'query'),
-    getZodLooseObjectFromProperty(ingest_get_pipeline1_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_get_pipeline1_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_get_pipeline1_request, 'query'),
+    z.object({
+      ...getShapeAt(ingest_get_pipeline_request, 'body'),
+      ...getShapeAt(ingest_get_pipeline_request, 'path'),
+      ...getShapeAt(ingest_get_pipeline_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ingest_get_pipeline1_request, 'body'),
+      ...getShapeAt(ingest_get_pipeline1_request, 'path'),
+      ...getShapeAt(ingest_get_pipeline1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ingest_get_pipeline_response, ingest_get_pipeline1_response]),
 };
@@ -11423,11 +11801,11 @@ A grok pattern is like a regular expression that supports aliased expressions th
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_processor_grok_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_processor_grok_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_processor_grok_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ingest_processor_grok_request, 'body'),
+    ...getShapeAt(ingest_processor_grok_request, 'path'),
+    ...getShapeAt(ingest_processor_grok_request, 'query'),
+  }),
   outputSchema: ingest_processor_grok_response,
 };
 const INGEST_PUT_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
@@ -11449,11 +11827,11 @@ Refer to the create or update IP geolocation database configuration API.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['name', 'maxmind'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_put_geoip_database_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_put_geoip_database_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_put_geoip_database_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ingest_put_geoip_database_request, 'body'),
+    ...getShapeAt(ingest_put_geoip_database_request, 'path'),
+    ...getShapeAt(ingest_put_geoip_database_request, 'query'),
+  }),
   outputSchema: ingest_put_geoip_database_response,
 };
 const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
@@ -11473,11 +11851,11 @@ const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_put_ip_location_database_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_put_ip_location_database_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_put_ip_location_database_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ingest_put_ip_location_database_request, 'body'),
+    ...getShapeAt(ingest_put_ip_location_database_request, 'path'),
+    ...getShapeAt(ingest_put_ip_location_database_request, 'query'),
+  }),
   outputSchema: ingest_put_ip_location_database_response,
 };
 const INGEST_PUT_PIPELINE_CONTRACT: InternalConnectorContract = {
@@ -11505,11 +11883,11 @@ Changes made using this API take effect immediately.
       'field_access_pattern',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_put_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_put_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_put_pipeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ingest_put_pipeline_request, 'body'),
+    ...getShapeAt(ingest_put_pipeline_request, 'path'),
+    ...getShapeAt(ingest_put_pipeline_request, 'query'),
+  }),
   outputSchema: ingest_put_pipeline_response,
 };
 const INGEST_SIMULATE_CONTRACT: InternalConnectorContract = {
@@ -11533,18 +11911,26 @@ You can either specify an existing pipeline to use with the provided documents o
     bodyParams: ['docs', 'pipeline'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ingest_simulate_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_simulate_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_simulate_request, 'query'),
-    getZodLooseObjectFromProperty(ingest_simulate1_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_simulate1_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_simulate1_request, 'query'),
-    getZodLooseObjectFromProperty(ingest_simulate2_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_simulate2_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_simulate2_request, 'query'),
-    getZodLooseObjectFromProperty(ingest_simulate3_request, 'body'),
-    getZodLooseObjectFromProperty(ingest_simulate3_request, 'path'),
-    getZodLooseObjectFromProperty(ingest_simulate3_request, 'query'),
+    z.object({
+      ...getShapeAt(ingest_simulate_request, 'body'),
+      ...getShapeAt(ingest_simulate_request, 'path'),
+      ...getShapeAt(ingest_simulate_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ingest_simulate1_request, 'body'),
+      ...getShapeAt(ingest_simulate1_request, 'path'),
+      ...getShapeAt(ingest_simulate1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ingest_simulate2_request, 'body'),
+      ...getShapeAt(ingest_simulate2_request, 'path'),
+      ...getShapeAt(ingest_simulate2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ingest_simulate3_request, 'body'),
+      ...getShapeAt(ingest_simulate3_request, 'path'),
+      ...getShapeAt(ingest_simulate3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ingest_simulate_response,
@@ -11569,7 +11955,7 @@ const KNN_SEARCH_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const LICENSE_DELETE_CONTRACT: InternalConnectorContract = {
@@ -11593,11 +11979,11 @@ If the operator privileges feature is enabled, only operator users can use this 
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(license_delete_request, 'body'),
-    getZodLooseObjectFromProperty(license_delete_request, 'path'),
-    getZodLooseObjectFromProperty(license_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(license_delete_request, 'body'),
+    ...getShapeAt(license_delete_request, 'path'),
+    ...getShapeAt(license_delete_request, 'query'),
+  }),
   outputSchema: license_delete_response,
 };
 const LICENSE_GET_CONTRACT: InternalConnectorContract = {
@@ -11623,11 +12009,11 @@ Get information about your Elastic license including its type, its status, when 
     urlParams: ['accept_enterprise', 'local'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(license_get_request, 'body'),
-    getZodLooseObjectFromProperty(license_get_request, 'path'),
-    getZodLooseObjectFromProperty(license_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(license_get_request, 'body'),
+    ...getShapeAt(license_get_request, 'path'),
+    ...getShapeAt(license_get_request, 'query'),
+  }),
   outputSchema: license_get_response,
 };
 const LICENSE_GET_BASIC_STATUS_CONTRACT: InternalConnectorContract = {
@@ -11647,11 +12033,11 @@ const LICENSE_GET_BASIC_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(license_get_basic_status_request, 'body'),
-    getZodLooseObjectFromProperty(license_get_basic_status_request, 'path'),
-    getZodLooseObjectFromProperty(license_get_basic_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(license_get_basic_status_request, 'body'),
+    ...getShapeAt(license_get_basic_status_request, 'path'),
+    ...getShapeAt(license_get_basic_status_request, 'query'),
+  }),
   outputSchema: license_get_basic_status_response,
 };
 const LICENSE_GET_TRIAL_STATUS_CONTRACT: InternalConnectorContract = {
@@ -11671,11 +12057,11 @@ const LICENSE_GET_TRIAL_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(license_get_trial_status_request, 'body'),
-    getZodLooseObjectFromProperty(license_get_trial_status_request, 'path'),
-    getZodLooseObjectFromProperty(license_get_trial_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(license_get_trial_status_request, 'body'),
+    ...getShapeAt(license_get_trial_status_request, 'path'),
+    ...getShapeAt(license_get_trial_status_request, 'query'),
+  }),
   outputSchema: license_get_trial_status_response,
 };
 const LICENSE_POST_CONTRACT: InternalConnectorContract = {
@@ -11704,12 +12090,16 @@ If the operator privileges feature is enabled, only operator users can use this 
     bodyParams: ['license', 'licenses'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(license_post_request, 'body'),
-    getZodLooseObjectFromProperty(license_post_request, 'path'),
-    getZodLooseObjectFromProperty(license_post_request, 'query'),
-    getZodLooseObjectFromProperty(license_post1_request, 'body'),
-    getZodLooseObjectFromProperty(license_post1_request, 'path'),
-    getZodLooseObjectFromProperty(license_post1_request, 'query'),
+    z.object({
+      ...getShapeAt(license_post_request, 'body'),
+      ...getShapeAt(license_post_request, 'path'),
+      ...getShapeAt(license_post_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(license_post1_request, 'body'),
+      ...getShapeAt(license_post1_request, 'path'),
+      ...getShapeAt(license_post1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([license_post_response, license_post1_response]),
 };
@@ -11739,11 +12129,11 @@ To check the status of your basic license, use the get basic license API.
     urlParams: ['acknowledge', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(license_post_start_basic_request, 'body'),
-    getZodLooseObjectFromProperty(license_post_start_basic_request, 'path'),
-    getZodLooseObjectFromProperty(license_post_start_basic_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(license_post_start_basic_request, 'body'),
+    ...getShapeAt(license_post_start_basic_request, 'path'),
+    ...getShapeAt(license_post_start_basic_request, 'query'),
+  }),
   outputSchema: license_post_start_basic_response,
 };
 const LICENSE_POST_START_TRIAL_CONTRACT: InternalConnectorContract = {
@@ -11769,11 +12159,11 @@ To check the status of your trial, use the get trial status API.
     urlParams: ['acknowledge', 'type', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(license_post_start_trial_request, 'body'),
-    getZodLooseObjectFromProperty(license_post_start_trial_request, 'path'),
-    getZodLooseObjectFromProperty(license_post_start_trial_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(license_post_start_trial_request, 'body'),
+    ...getShapeAt(license_post_start_trial_request, 'path'),
+    ...getShapeAt(license_post_start_trial_request, 'query'),
+  }),
   outputSchema: license_post_start_trial_response,
 };
 const LOGSTASH_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
@@ -11795,11 +12185,11 @@ If the request succeeds, you receive an empty response with an appropriate statu
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(logstash_delete_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(logstash_delete_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(logstash_delete_pipeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(logstash_delete_pipeline_request, 'body'),
+    ...getShapeAt(logstash_delete_pipeline_request, 'path'),
+    ...getShapeAt(logstash_delete_pipeline_request, 'query'),
+  }),
   outputSchema: logstash_delete_pipeline_response,
 };
 const LOGSTASH_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
@@ -11821,12 +12211,16 @@ Get pipelines that are used for Logstash Central Management.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(logstash_get_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(logstash_get_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(logstash_get_pipeline_request, 'query'),
-    getZodLooseObjectFromProperty(logstash_get_pipeline1_request, 'body'),
-    getZodLooseObjectFromProperty(logstash_get_pipeline1_request, 'path'),
-    getZodLooseObjectFromProperty(logstash_get_pipeline1_request, 'query'),
+    z.object({
+      ...getShapeAt(logstash_get_pipeline_request, 'body'),
+      ...getShapeAt(logstash_get_pipeline_request, 'path'),
+      ...getShapeAt(logstash_get_pipeline_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(logstash_get_pipeline1_request, 'body'),
+      ...getShapeAt(logstash_get_pipeline1_request, 'path'),
+      ...getShapeAt(logstash_get_pipeline1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([logstash_get_pipeline_response, logstash_get_pipeline1_response]),
 };
@@ -11857,11 +12251,11 @@ If the specified pipeline exists, it is replaced.
       'username',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(logstash_put_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(logstash_put_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(logstash_put_pipeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(logstash_put_pipeline_request, 'body'),
+    ...getShapeAt(logstash_put_pipeline_request, 'path'),
+    ...getShapeAt(logstash_put_pipeline_request, 'query'),
+  }),
   outputSchema: logstash_put_pipeline_response,
 };
 const MGET_CONTRACT: InternalConnectorContract = {
@@ -11906,18 +12300,26 @@ You can include the \`stored_fields\` query parameter in the request URI to spec
     bodyParams: ['docs', 'ids'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(mget_request, 'body'),
-    getZodLooseObjectFromProperty(mget_request, 'path'),
-    getZodLooseObjectFromProperty(mget_request, 'query'),
-    getZodLooseObjectFromProperty(mget1_request, 'body'),
-    getZodLooseObjectFromProperty(mget1_request, 'path'),
-    getZodLooseObjectFromProperty(mget1_request, 'query'),
-    getZodLooseObjectFromProperty(mget2_request, 'body'),
-    getZodLooseObjectFromProperty(mget2_request, 'path'),
-    getZodLooseObjectFromProperty(mget2_request, 'query'),
-    getZodLooseObjectFromProperty(mget3_request, 'body'),
-    getZodLooseObjectFromProperty(mget3_request, 'path'),
-    getZodLooseObjectFromProperty(mget3_request, 'query'),
+    z.object({
+      ...getShapeAt(mget_request, 'body'),
+      ...getShapeAt(mget_request, 'path'),
+      ...getShapeAt(mget_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(mget1_request, 'body'),
+      ...getShapeAt(mget1_request, 'path'),
+      ...getShapeAt(mget1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(mget2_request, 'body'),
+      ...getShapeAt(mget2_request, 'path'),
+      ...getShapeAt(mget2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(mget3_request, 'body'),
+      ...getShapeAt(mget3_request, 'path'),
+      ...getShapeAt(mget3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([mget_response, mget1_response, mget2_response, mget3_response]),
 };
@@ -11943,12 +12345,16 @@ You are strongly recommended to use the Upgrade Assistant.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(migration_deprecations_request, 'body'),
-    getZodLooseObjectFromProperty(migration_deprecations_request, 'path'),
-    getZodLooseObjectFromProperty(migration_deprecations_request, 'query'),
-    getZodLooseObjectFromProperty(migration_deprecations1_request, 'body'),
-    getZodLooseObjectFromProperty(migration_deprecations1_request, 'path'),
-    getZodLooseObjectFromProperty(migration_deprecations1_request, 'query'),
+    z.object({
+      ...getShapeAt(migration_deprecations_request, 'body'),
+      ...getShapeAt(migration_deprecations_request, 'path'),
+      ...getShapeAt(migration_deprecations_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(migration_deprecations1_request, 'body'),
+      ...getShapeAt(migration_deprecations1_request, 'path'),
+      ...getShapeAt(migration_deprecations1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([migration_deprecations_response, migration_deprecations1_response]),
 };
@@ -11974,11 +12380,11 @@ You are strongly recommended to use the Upgrade Assistant.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'body'),
-    getZodLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'path'),
-    getZodLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(migration_get_feature_upgrade_status_request, 'body'),
+    ...getShapeAt(migration_get_feature_upgrade_status_request, 'path'),
+    ...getShapeAt(migration_get_feature_upgrade_status_request, 'query'),
+  }),
   outputSchema: migration_get_feature_upgrade_status_response,
 };
 const MIGRATION_POST_FEATURE_UPGRADE_CONTRACT: InternalConnectorContract = {
@@ -12004,11 +12410,11 @@ TIP: The API is designed for indirect use by the Upgrade Assistant. We strongly 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(migration_post_feature_upgrade_request, 'body'),
-    getZodLooseObjectFromProperty(migration_post_feature_upgrade_request, 'path'),
-    getZodLooseObjectFromProperty(migration_post_feature_upgrade_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(migration_post_feature_upgrade_request, 'body'),
+    ...getShapeAt(migration_post_feature_upgrade_request, 'path'),
+    ...getShapeAt(migration_post_feature_upgrade_request, 'query'),
+  }),
   outputSchema: migration_post_feature_upgrade_response,
 };
 const ML_CLEAR_TRAINED_MODEL_DEPLOYMENT_CACHE_CONTRACT: InternalConnectorContract = {
@@ -12033,11 +12439,11 @@ Calling this API clears the caches without restarting the deployment.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'body'),
-    getZodLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'path'),
-    getZodLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_clear_trained_model_deployment_cache_request, 'body'),
+    ...getShapeAt(ml_clear_trained_model_deployment_cache_request, 'path'),
+    ...getShapeAt(ml_clear_trained_model_deployment_cache_request, 'query'),
+  }),
   outputSchema: ml_clear_trained_model_deployment_cache_response,
 };
 const ML_CLOSE_JOB_CONTRACT: InternalConnectorContract = {
@@ -12062,11 +12468,11 @@ When a datafeed that has a specified end date stops, it automatically closes its
     urlParams: ['allow_no_match', 'force', 'timeout'],
     bodyParams: ['allow_no_match', 'force', 'timeout'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_close_job_request, 'body'),
-    getZodLooseObjectFromProperty(ml_close_job_request, 'path'),
-    getZodLooseObjectFromProperty(ml_close_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_close_job_request, 'body'),
+    ...getShapeAt(ml_close_job_request, 'path'),
+    ...getShapeAt(ml_close_job_request, 'query'),
+  }),
   outputSchema: ml_close_job_response,
 };
 const ML_DELETE_CALENDAR_CONTRACT: InternalConnectorContract = {
@@ -12088,11 +12494,11 @@ Remove all scheduled events from a calendar, then delete it.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_calendar_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_calendar_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_calendar_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_calendar_request, 'body'),
+    ...getShapeAt(ml_delete_calendar_request, 'path'),
+    ...getShapeAt(ml_delete_calendar_request, 'query'),
+  }),
   outputSchema: ml_delete_calendar_response,
 };
 const ML_DELETE_CALENDAR_EVENT_CONTRACT: InternalConnectorContract = {
@@ -12112,11 +12518,11 @@ const ML_DELETE_CALENDAR_EVENT_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_calendar_event_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_calendar_event_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_calendar_event_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_calendar_event_request, 'body'),
+    ...getShapeAt(ml_delete_calendar_event_request, 'path'),
+    ...getShapeAt(ml_delete_calendar_event_request, 'query'),
+  }),
   outputSchema: ml_delete_calendar_event_response,
 };
 const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
@@ -12136,11 +12542,11 @@ const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_calendar_job_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_calendar_job_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_calendar_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_calendar_job_request, 'body'),
+    ...getShapeAt(ml_delete_calendar_job_request, 'path'),
+    ...getShapeAt(ml_delete_calendar_job_request, 'query'),
+  }),
   outputSchema: ml_delete_calendar_job_response,
 };
 const ML_DELETE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -12160,11 +12566,11 @@ const ML_DELETE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_data_frame_analytics_request, 'body'),
+    ...getShapeAt(ml_delete_data_frame_analytics_request, 'path'),
+    ...getShapeAt(ml_delete_data_frame_analytics_request, 'query'),
+  }),
   outputSchema: ml_delete_data_frame_analytics_response,
 };
 const ML_DELETE_DATAFEED_CONTRACT: InternalConnectorContract = {
@@ -12184,11 +12590,11 @@ const ML_DELETE_DATAFEED_CONTRACT: InternalConnectorContract = {
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_datafeed_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_datafeed_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_datafeed_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_datafeed_request, 'body'),
+    ...getShapeAt(ml_delete_datafeed_request, 'path'),
+    ...getShapeAt(ml_delete_datafeed_request, 'query'),
+  }),
   outputSchema: ml_delete_datafeed_response,
 };
 const ML_DELETE_EXPIRED_DATA_CONTRACT: InternalConnectorContract = {
@@ -12218,12 +12624,16 @@ jobs by using \`_all\`, by specifying \`*\` as the \`<job_id>\`, or by omitting 
     bodyParams: ['requests_per_second', 'timeout'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_expired_data_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_expired_data_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_expired_data_request, 'query'),
-    getZodLooseObjectFromProperty(ml_delete_expired_data1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_expired_data1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_expired_data1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_delete_expired_data_request, 'body'),
+      ...getShapeAt(ml_delete_expired_data_request, 'path'),
+      ...getShapeAt(ml_delete_expired_data_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_delete_expired_data1_request, 'body'),
+      ...getShapeAt(ml_delete_expired_data1_request, 'path'),
+      ...getShapeAt(ml_delete_expired_data1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_delete_expired_data_response, ml_delete_expired_data1_response]),
 };
@@ -12247,11 +12657,11 @@ filter. You must update or delete the job before you can delete the filter.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_filter_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_filter_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_filter_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_filter_request, 'body'),
+    ...getShapeAt(ml_delete_filter_request, 'path'),
+    ...getShapeAt(ml_delete_filter_request, 'query'),
+  }),
   outputSchema: ml_delete_filter_response,
 };
 const ML_DELETE_FORECAST_CONTRACT: InternalConnectorContract = {
@@ -12280,12 +12690,16 @@ forecasts before they expire.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_forecast_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_forecast_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_forecast_request, 'query'),
-    getZodLooseObjectFromProperty(ml_delete_forecast1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_forecast1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_forecast1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_delete_forecast_request, 'body'),
+      ...getShapeAt(ml_delete_forecast_request, 'path'),
+      ...getShapeAt(ml_delete_forecast_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_delete_forecast1_request, 'body'),
+      ...getShapeAt(ml_delete_forecast1_request, 'path'),
+      ...getShapeAt(ml_delete_forecast1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_delete_forecast_response, ml_delete_forecast1_response]),
 };
@@ -12313,11 +12727,11 @@ delete job request.
     urlParams: ['force', 'delete_user_annotations', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_job_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_job_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_job_request, 'body'),
+    ...getShapeAt(ml_delete_job_request, 'path'),
+    ...getShapeAt(ml_delete_job_request, 'query'),
+  }),
   outputSchema: ml_delete_job_response,
 };
 const ML_DELETE_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
@@ -12341,11 +12755,11 @@ the \`model_snapshot_id\` in the results from the get jobs API.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_model_snapshot_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_model_snapshot_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_model_snapshot_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_model_snapshot_request, 'body'),
+    ...getShapeAt(ml_delete_model_snapshot_request, 'path'),
+    ...getShapeAt(ml_delete_model_snapshot_request, 'query'),
+  }),
   outputSchema: ml_delete_model_snapshot_response,
 };
 const ML_DELETE_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
@@ -12367,11 +12781,11 @@ The request deletes a trained inference model that is not referenced by an inges
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_trained_model_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_trained_model_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_trained_model_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_trained_model_request, 'body'),
+    ...getShapeAt(ml_delete_trained_model_request, 'path'),
+    ...getShapeAt(ml_delete_trained_model_request, 'query'),
+  }),
   outputSchema: ml_delete_trained_model_response,
 };
 const ML_DELETE_TRAINED_MODEL_ALIAS_CONTRACT: InternalConnectorContract = {
@@ -12395,11 +12809,11 @@ by the \`model_id\`, this API returns an error.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'body'),
-    getZodLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'path'),
-    getZodLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_delete_trained_model_alias_request, 'body'),
+    ...getShapeAt(ml_delete_trained_model_alias_request, 'path'),
+    ...getShapeAt(ml_delete_trained_model_alias_request, 'query'),
+  }),
   outputSchema: ml_delete_trained_model_alias_response,
 };
 const ML_ESTIMATE_MODEL_MEMORY_CONTRACT: InternalConnectorContract = {
@@ -12423,11 +12837,11 @@ estimates for the fields it references.
     urlParams: [],
     bodyParams: ['analysis_config', 'max_bucket_cardinality', 'overall_cardinality'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_estimate_model_memory_request, 'body'),
-    getZodLooseObjectFromProperty(ml_estimate_model_memory_request, 'path'),
-    getZodLooseObjectFromProperty(ml_estimate_model_memory_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_estimate_model_memory_request, 'body'),
+    ...getShapeAt(ml_estimate_model_memory_request, 'path'),
+    ...getShapeAt(ml_estimate_model_memory_request, 'query'),
+  }),
   outputSchema: ml_estimate_model_memory_response,
 };
 const ML_EVALUATE_DATA_FRAME_CONTRACT: InternalConnectorContract = {
@@ -12452,11 +12866,11 @@ field and an analytics result field to be present.
     urlParams: [],
     bodyParams: ['evaluation', 'index', 'query'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_evaluate_data_frame_request, 'body'),
-    getZodLooseObjectFromProperty(ml_evaluate_data_frame_request, 'path'),
-    getZodLooseObjectFromProperty(ml_evaluate_data_frame_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_evaluate_data_frame_request, 'body'),
+    ...getShapeAt(ml_evaluate_data_frame_request, 'path'),
+    ...getShapeAt(ml_evaluate_data_frame_request, 'query'),
+  }),
   outputSchema: ml_evaluate_data_frame_response,
 };
 const ML_EXPLAIN_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -12493,18 +12907,26 @@ If you have object fields or fields that are excluded via source filtering, they
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'query'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'query'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'body'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'path'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'query'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'body'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'path'),
-    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_explain_data_frame_analytics_request, 'body'),
+      ...getShapeAt(ml_explain_data_frame_analytics_request, 'path'),
+      ...getShapeAt(ml_explain_data_frame_analytics_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_explain_data_frame_analytics1_request, 'body'),
+      ...getShapeAt(ml_explain_data_frame_analytics1_request, 'path'),
+      ...getShapeAt(ml_explain_data_frame_analytics1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_explain_data_frame_analytics2_request, 'body'),
+      ...getShapeAt(ml_explain_data_frame_analytics2_request, 'path'),
+      ...getShapeAt(ml_explain_data_frame_analytics2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_explain_data_frame_analytics3_request, 'body'),
+      ...getShapeAt(ml_explain_data_frame_analytics3_request, 'path'),
+      ...getShapeAt(ml_explain_data_frame_analytics3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_explain_data_frame_analytics_response,
@@ -12538,11 +12960,11 @@ analyzing further data.
     urlParams: ['advance_time', 'calc_interim', 'end', 'skip_time', 'start'],
     bodyParams: ['advance_time', 'calc_interim', 'end', 'skip_time', 'start'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_flush_job_request, 'body'),
-    getZodLooseObjectFromProperty(ml_flush_job_request, 'path'),
-    getZodLooseObjectFromProperty(ml_flush_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_flush_job_request, 'body'),
+    ...getShapeAt(ml_flush_job_request, 'path'),
+    ...getShapeAt(ml_flush_job_request, 'query'),
+  }),
   outputSchema: ml_flush_job_response,
 };
 const ML_FORECAST_CONTRACT: InternalConnectorContract = {
@@ -12567,11 +12989,11 @@ based on historical data.
     urlParams: ['duration', 'expires_in', 'max_model_memory'],
     bodyParams: ['duration', 'expires_in', 'max_model_memory'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_forecast_request, 'body'),
-    getZodLooseObjectFromProperty(ml_forecast_request, 'path'),
-    getZodLooseObjectFromProperty(ml_forecast_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_forecast_request, 'body'),
+    ...getShapeAt(ml_forecast_request, 'path'),
+    ...getShapeAt(ml_forecast_request, 'query'),
+  }),
   outputSchema: ml_forecast_response,
 };
 const ML_GET_BUCKETS_CONTRACT: InternalConnectorContract = {
@@ -12615,18 +13037,26 @@ The API presents a chronological view of the records, grouped by bucket.
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_buckets_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_buckets_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_buckets_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_buckets1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_buckets1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_buckets1_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_buckets2_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_buckets2_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_buckets2_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_buckets3_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_buckets3_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_buckets3_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_buckets_request, 'body'),
+      ...getShapeAt(ml_get_buckets_request, 'path'),
+      ...getShapeAt(ml_get_buckets_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_buckets1_request, 'body'),
+      ...getShapeAt(ml_get_buckets1_request, 'path'),
+      ...getShapeAt(ml_get_buckets1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_buckets2_request, 'body'),
+      ...getShapeAt(ml_get_buckets2_request, 'path'),
+      ...getShapeAt(ml_get_buckets2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_buckets3_request, 'body'),
+      ...getShapeAt(ml_get_buckets3_request, 'path'),
+      ...getShapeAt(ml_get_buckets3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_get_buckets_response,
@@ -12652,11 +13082,11 @@ const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
     urlParams: ['end', 'from', 'job_id', 'size', 'start'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_calendar_events_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_calendar_events_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_calendar_events_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_get_calendar_events_request, 'body'),
+    ...getShapeAt(ml_get_calendar_events_request, 'path'),
+    ...getShapeAt(ml_get_calendar_events_request, 'query'),
+  }),
   outputSchema: ml_get_calendar_events_response,
 };
 const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
@@ -12677,18 +13107,26 @@ const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
     bodyParams: ['page'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_calendars_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_calendars_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_calendars_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_calendars1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_calendars1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_calendars1_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_calendars2_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_calendars2_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_calendars2_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_calendars3_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_calendars3_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_calendars3_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_calendars_request, 'body'),
+      ...getShapeAt(ml_get_calendars_request, 'path'),
+      ...getShapeAt(ml_get_calendars_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_calendars1_request, 'body'),
+      ...getShapeAt(ml_get_calendars1_request, 'path'),
+      ...getShapeAt(ml_get_calendars1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_calendars2_request, 'body'),
+      ...getShapeAt(ml_get_calendars2_request, 'path'),
+      ...getShapeAt(ml_get_calendars2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_calendars3_request, 'body'),
+      ...getShapeAt(ml_get_calendars3_request, 'path'),
+      ...getShapeAt(ml_get_calendars3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_get_calendars_response,
@@ -12718,18 +13156,26 @@ const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
     bodyParams: ['page'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_categories_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_categories_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_categories_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_categories1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_categories1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_categories1_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_categories2_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_categories2_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_categories2_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_categories3_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_categories3_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_categories3_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_categories_request, 'body'),
+      ...getShapeAt(ml_get_categories_request, 'path'),
+      ...getShapeAt(ml_get_categories_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_categories1_request, 'body'),
+      ...getShapeAt(ml_get_categories1_request, 'path'),
+      ...getShapeAt(ml_get_categories1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_categories2_request, 'body'),
+      ...getShapeAt(ml_get_categories2_request, 'path'),
+      ...getShapeAt(ml_get_categories2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_categories3_request, 'body'),
+      ...getShapeAt(ml_get_categories3_request, 'path'),
+      ...getShapeAt(ml_get_categories3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_get_categories_response,
@@ -12759,12 +13205,16 @@ wildcard expression.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_data_frame_analytics_request, 'body'),
+      ...getShapeAt(ml_get_data_frame_analytics_request, 'path'),
+      ...getShapeAt(ml_get_data_frame_analytics_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_data_frame_analytics1_request, 'body'),
+      ...getShapeAt(ml_get_data_frame_analytics1_request, 'path'),
+      ...getShapeAt(ml_get_data_frame_analytics1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_get_data_frame_analytics_response,
@@ -12789,12 +13239,16 @@ const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_data_frame_analytics_stats_request, 'body'),
+      ...getShapeAt(ml_get_data_frame_analytics_stats_request, 'path'),
+      ...getShapeAt(ml_get_data_frame_analytics_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_data_frame_analytics_stats1_request, 'body'),
+      ...getShapeAt(ml_get_data_frame_analytics_stats1_request, 'path'),
+      ...getShapeAt(ml_get_data_frame_analytics_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_get_data_frame_analytics_stats_response,
@@ -12825,12 +13279,16 @@ This API returns a maximum of 10,000 datafeeds.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_datafeed_stats_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_datafeed_stats_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_datafeed_stats_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_datafeed_stats_request, 'body'),
+      ...getShapeAt(ml_get_datafeed_stats_request, 'path'),
+      ...getShapeAt(ml_get_datafeed_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_datafeed_stats1_request, 'body'),
+      ...getShapeAt(ml_get_datafeed_stats1_request, 'path'),
+      ...getShapeAt(ml_get_datafeed_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_datafeed_stats_response, ml_get_datafeed_stats1_response]),
 };
@@ -12857,12 +13315,16 @@ This API returns a maximum of 10,000 datafeeds.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_datafeeds_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_datafeeds_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_datafeeds_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_datafeeds1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_datafeeds1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_datafeeds1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_datafeeds_request, 'body'),
+      ...getShapeAt(ml_get_datafeeds_request, 'path'),
+      ...getShapeAt(ml_get_datafeeds_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_datafeeds1_request, 'body'),
+      ...getShapeAt(ml_get_datafeeds1_request, 'path'),
+      ...getShapeAt(ml_get_datafeeds1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_datafeeds_response, ml_get_datafeeds1_response]),
 };
@@ -12885,12 +13347,16 @@ You can get a single filter or all filters.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_filters_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_filters_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_filters_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_filters1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_filters1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_filters1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_filters_request, 'body'),
+      ...getShapeAt(ml_get_filters_request, 'path'),
+      ...getShapeAt(ml_get_filters_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_filters1_request, 'body'),
+      ...getShapeAt(ml_get_filters1_request, 'path'),
+      ...getShapeAt(ml_get_filters1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_filters_response, ml_get_filters1_response]),
 };
@@ -12924,12 +13390,16 @@ the anomalies. Influencer results are available only if an
     bodyParams: ['page'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_influencers_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_influencers_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_influencers_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_influencers1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_influencers1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_influencers1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_influencers_request, 'body'),
+      ...getShapeAt(ml_get_influencers_request, 'path'),
+      ...getShapeAt(ml_get_influencers_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_influencers1_request, 'body'),
+      ...getShapeAt(ml_get_influencers1_request, 'path'),
+      ...getShapeAt(ml_get_influencers1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_influencers_response, ml_get_influencers1_response]),
 };
@@ -12951,12 +13421,16 @@ const ML_GET_JOB_STATS_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_job_stats_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_job_stats_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_job_stats_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_job_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_job_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_job_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_job_stats_request, 'body'),
+      ...getShapeAt(ml_get_job_stats_request, 'path'),
+      ...getShapeAt(ml_get_job_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_job_stats1_request, 'body'),
+      ...getShapeAt(ml_get_job_stats1_request, 'path'),
+      ...getShapeAt(ml_get_job_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_job_stats_response, ml_get_job_stats1_response]),
 };
@@ -12982,12 +13456,16 @@ expression. You can get information for all anomaly detection jobs by using
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_jobs_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_jobs_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_jobs_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_jobs1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_jobs1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_jobs1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_jobs_request, 'body'),
+      ...getShapeAt(ml_get_jobs_request, 'path'),
+      ...getShapeAt(ml_get_jobs_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_jobs1_request, 'body'),
+      ...getShapeAt(ml_get_jobs1_request, 'path'),
+      ...getShapeAt(ml_get_jobs1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_jobs_response, ml_get_jobs1_response]),
 };
@@ -13011,12 +13489,16 @@ on each node, both within the JVM heap, and natively, outside of the JVM.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_memory_stats_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_memory_stats_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_memory_stats_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_memory_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_memory_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_memory_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_memory_stats_request, 'body'),
+      ...getShapeAt(ml_get_memory_stats_request, 'path'),
+      ...getShapeAt(ml_get_memory_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_memory_stats1_request, 'body'),
+      ...getShapeAt(ml_get_memory_stats1_request, 'path'),
+      ...getShapeAt(ml_get_memory_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_memory_stats_response, ml_get_memory_stats1_response]),
 };
@@ -13037,11 +13519,11 @@ const ML_GET_MODEL_SNAPSHOT_UPGRADE_STATS_CONTRACT: InternalConnectorContract = 
     urlParams: ['allow_no_match'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_get_model_snapshot_upgrade_stats_request, 'body'),
+    ...getShapeAt(ml_get_model_snapshot_upgrade_stats_request, 'path'),
+    ...getShapeAt(ml_get_model_snapshot_upgrade_stats_request, 'query'),
+  }),
   outputSchema: ml_get_model_snapshot_upgrade_stats_response,
 };
 const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
@@ -13065,18 +13547,26 @@ const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
     bodyParams: ['desc', 'end', 'page', 'sort', 'start'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_model_snapshots_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots1_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots2_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots2_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots2_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots3_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots3_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_model_snapshots3_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_model_snapshots_request, 'body'),
+      ...getShapeAt(ml_get_model_snapshots_request, 'path'),
+      ...getShapeAt(ml_get_model_snapshots_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_model_snapshots1_request, 'body'),
+      ...getShapeAt(ml_get_model_snapshots1_request, 'path'),
+      ...getShapeAt(ml_get_model_snapshots1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_model_snapshots2_request, 'body'),
+      ...getShapeAt(ml_get_model_snapshots2_request, 'path'),
+      ...getShapeAt(ml_get_model_snapshots2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_model_snapshots3_request, 'body'),
+      ...getShapeAt(ml_get_model_snapshots3_request, 'path'),
+      ...getShapeAt(ml_get_model_snapshots3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_get_model_snapshots_response,
@@ -13137,12 +13627,16 @@ jobs' largest bucket span.
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_overall_buckets_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_overall_buckets_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_overall_buckets_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_overall_buckets1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_overall_buckets1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_overall_buckets1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_overall_buckets_request, 'body'),
+      ...getShapeAt(ml_get_overall_buckets_request, 'path'),
+      ...getShapeAt(ml_get_overall_buckets_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_overall_buckets1_request, 'body'),
+      ...getShapeAt(ml_get_overall_buckets1_request, 'path'),
+      ...getShapeAt(ml_get_overall_buckets1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_overall_buckets_response, ml_get_overall_buckets1_response]),
 };
@@ -13174,12 +13668,16 @@ number of detectors.
     bodyParams: ['desc', 'end', 'exclude_interim', 'page', 'record_score', 'sort', 'start'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_records_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_records_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_records_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_records1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_records1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_records1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_records_request, 'body'),
+      ...getShapeAt(ml_get_records_request, 'path'),
+      ...getShapeAt(ml_get_records_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_records1_request, 'body'),
+      ...getShapeAt(ml_get_records1_request, 'path'),
+      ...getShapeAt(ml_get_records1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_records_response, ml_get_records1_response]),
 };
@@ -13209,12 +13707,16 @@ const ML_GET_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_trained_models_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_trained_models_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_trained_models_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_trained_models1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_trained_models1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_trained_models1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_trained_models_request, 'body'),
+      ...getShapeAt(ml_get_trained_models_request, 'path'),
+      ...getShapeAt(ml_get_trained_models_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_trained_models1_request, 'body'),
+      ...getShapeAt(ml_get_trained_models1_request, 'path'),
+      ...getShapeAt(ml_get_trained_models1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([ml_get_trained_models_response, ml_get_trained_models1_response]),
 };
@@ -13238,12 +13740,16 @@ models in a single API request by using a comma-separated list of model IDs or a
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_get_trained_models_stats_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_trained_models_stats_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_trained_models_stats_request, 'query'),
-    getZodLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_get_trained_models_stats_request, 'body'),
+      ...getShapeAt(ml_get_trained_models_stats_request, 'path'),
+      ...getShapeAt(ml_get_trained_models_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_get_trained_models_stats1_request, 'body'),
+      ...getShapeAt(ml_get_trained_models_stats1_request, 'path'),
+      ...getShapeAt(ml_get_trained_models_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_get_trained_models_stats_response,
@@ -13267,11 +13773,11 @@ const ML_INFER_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
     urlParams: ['timeout'],
     bodyParams: ['docs', 'inference_config'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_infer_trained_model_request, 'body'),
-    getZodLooseObjectFromProperty(ml_infer_trained_model_request, 'path'),
-    getZodLooseObjectFromProperty(ml_infer_trained_model_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_infer_trained_model_request, 'body'),
+    ...getShapeAt(ml_infer_trained_model_request, 'path'),
+    ...getShapeAt(ml_infer_trained_model_request, 'query'),
+  }),
   outputSchema: ml_infer_trained_model_response,
 };
 const ML_INFO_CONTRACT: InternalConnectorContract = {
@@ -13297,11 +13803,11 @@ cluster configuration.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_info_request, 'body'),
-    getZodLooseObjectFromProperty(ml_info_request, 'path'),
-    getZodLooseObjectFromProperty(ml_info_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_info_request, 'body'),
+    ...getShapeAt(ml_info_request, 'path'),
+    ...getShapeAt(ml_info_request, 'query'),
+  }),
   outputSchema: ml_info_response,
 };
 const ML_OPEN_JOB_CONTRACT: InternalConnectorContract = {
@@ -13328,11 +13834,11 @@ new data is received.
     urlParams: ['timeout'],
     bodyParams: ['timeout'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_open_job_request, 'body'),
-    getZodLooseObjectFromProperty(ml_open_job_request, 'path'),
-    getZodLooseObjectFromProperty(ml_open_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_open_job_request, 'body'),
+    ...getShapeAt(ml_open_job_request, 'path'),
+    ...getShapeAt(ml_open_job_request, 'query'),
+  }),
   outputSchema: ml_open_job_response,
 };
 const ML_POST_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
@@ -13352,11 +13858,11 @@ const ML_POST_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['events'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_post_calendar_events_request, 'body'),
-    getZodLooseObjectFromProperty(ml_post_calendar_events_request, 'path'),
-    getZodLooseObjectFromProperty(ml_post_calendar_events_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_post_calendar_events_request, 'body'),
+    ...getShapeAt(ml_post_calendar_events_request, 'path'),
+    ...getShapeAt(ml_post_calendar_events_request, 'query'),
+  }),
   outputSchema: ml_post_calendar_events_response,
 };
 const ML_POST_DATA_CONTRACT: InternalConnectorContract = {
@@ -13379,11 +13885,11 @@ It is not currently possible to post data to multiple jobs using wildcards or a 
     urlParams: ['reset_end', 'reset_start'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_post_data_request, 'body'),
-    getZodLooseObjectFromProperty(ml_post_data_request, 'path'),
-    getZodLooseObjectFromProperty(ml_post_data_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_post_data_request, 'body'),
+    ...getShapeAt(ml_post_data_request, 'path'),
+    ...getShapeAt(ml_post_data_request, 'query'),
+  }),
   outputSchema: ml_post_data_response,
 };
 const ML_PREVIEW_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -13405,18 +13911,26 @@ Preview the extracted features used by a data frame analytics config.
     bodyParams: ['config'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'query'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'query'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'body'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'path'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'query'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'body'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'path'),
-    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_preview_data_frame_analytics_request, 'body'),
+      ...getShapeAt(ml_preview_data_frame_analytics_request, 'path'),
+      ...getShapeAt(ml_preview_data_frame_analytics_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_preview_data_frame_analytics1_request, 'body'),
+      ...getShapeAt(ml_preview_data_frame_analytics1_request, 'path'),
+      ...getShapeAt(ml_preview_data_frame_analytics1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_preview_data_frame_analytics2_request, 'body'),
+      ...getShapeAt(ml_preview_data_frame_analytics2_request, 'path'),
+      ...getShapeAt(ml_preview_data_frame_analytics2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_preview_data_frame_analytics3_request, 'body'),
+      ...getShapeAt(ml_preview_data_frame_analytics3_request, 'path'),
+      ...getShapeAt(ml_preview_data_frame_analytics3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_preview_data_frame_analytics_response,
@@ -13451,18 +13965,26 @@ You can also use secondary authorization headers to supply the credentials.
     bodyParams: ['datafeed_config', 'job_config'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_preview_datafeed_request, 'body'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed_request, 'path'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed_request, 'query'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed1_request, 'body'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed1_request, 'path'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed1_request, 'query'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed2_request, 'body'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed2_request, 'path'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed2_request, 'query'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed3_request, 'body'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed3_request, 'path'),
-    getZodLooseObjectFromProperty(ml_preview_datafeed3_request, 'query'),
+    z.object({
+      ...getShapeAt(ml_preview_datafeed_request, 'body'),
+      ...getShapeAt(ml_preview_datafeed_request, 'path'),
+      ...getShapeAt(ml_preview_datafeed_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_preview_datafeed1_request, 'body'),
+      ...getShapeAt(ml_preview_datafeed1_request, 'path'),
+      ...getShapeAt(ml_preview_datafeed1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_preview_datafeed2_request, 'body'),
+      ...getShapeAt(ml_preview_datafeed2_request, 'path'),
+      ...getShapeAt(ml_preview_datafeed2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(ml_preview_datafeed3_request, 'body'),
+      ...getShapeAt(ml_preview_datafeed3_request, 'path'),
+      ...getShapeAt(ml_preview_datafeed3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     ml_preview_datafeed_response,
@@ -13488,11 +14010,11 @@ const ML_PUT_CALENDAR_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['job_ids', 'description'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_calendar_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_calendar_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_calendar_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_calendar_request, 'body'),
+    ...getShapeAt(ml_put_calendar_request, 'path'),
+    ...getShapeAt(ml_put_calendar_request, 'query'),
+  }),
   outputSchema: ml_put_calendar_response,
 };
 const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
@@ -13512,11 +14034,11 @@ const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_calendar_job_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_calendar_job_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_calendar_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_calendar_job_request, 'body'),
+    ...getShapeAt(ml_put_calendar_job_request, 'path'),
+    ...getShapeAt(ml_put_calendar_job_request, 'query'),
+  }),
   outputSchema: ml_put_calendar_job_response,
 };
 const ML_PUT_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -13555,11 +14077,11 @@ If you supply only a subset of the regression or classification parameters, hype
       'version',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_data_frame_analytics_request, 'body'),
+    ...getShapeAt(ml_put_data_frame_analytics_request, 'path'),
+    ...getShapeAt(ml_put_data_frame_analytics_request, 'query'),
+  }),
   outputSchema: ml_put_data_frame_analytics_response,
 };
 const ML_PUT_DATAFEED_CONTRACT: InternalConnectorContract = {
@@ -13605,11 +14127,11 @@ directly to the \`.ml-config\` index. Do not give users \`write\` privileges on 
       'headers',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_datafeed_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_datafeed_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_datafeed_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_datafeed_request, 'body'),
+    ...getShapeAt(ml_put_datafeed_request, 'path'),
+    ...getShapeAt(ml_put_datafeed_request, 'query'),
+  }),
   outputSchema: ml_put_datafeed_response,
 };
 const ML_PUT_FILTER_CONTRACT: InternalConnectorContract = {
@@ -13631,11 +14153,11 @@ Specifically, filters are referenced in the \`custom_rules\` property of detecto
     urlParams: [],
     bodyParams: ['description', 'items'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_filter_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_filter_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_filter_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_filter_request, 'body'),
+    ...getShapeAt(ml_put_filter_request, 'path'),
+    ...getShapeAt(ml_put_filter_request, 'query'),
+  }),
   outputSchema: ml_put_filter_response,
 };
 const ML_PUT_JOB_CONTRACT: InternalConnectorContract = {
@@ -13674,11 +14196,11 @@ If you include a \`datafeed_config\` but do not provide a query, the datafeed us
       'results_retention_days',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_job_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_job_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_job_request, 'body'),
+    ...getShapeAt(ml_put_job_request, 'path'),
+    ...getShapeAt(ml_put_job_request, 'query'),
+  }),
   outputSchema: ml_put_job_response,
 };
 const ML_PUT_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
@@ -13711,11 +14233,11 @@ Enable you to supply a trained model that is not created by data frame analytics
       'prefix_strings',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_trained_model_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_trained_model_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_trained_model_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_trained_model_request, 'body'),
+    ...getShapeAt(ml_put_trained_model_request, 'path'),
+    ...getShapeAt(ml_put_trained_model_request, 'query'),
+  }),
   outputSchema: ml_put_trained_model_response,
 };
 const ML_PUT_TRAINED_MODEL_ALIAS_CONTRACT: InternalConnectorContract = {
@@ -13751,11 +14273,11 @@ returns a warning.
     urlParams: ['reassign'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_trained_model_alias_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_trained_model_alias_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_trained_model_alias_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_trained_model_alias_request, 'body'),
+    ...getShapeAt(ml_put_trained_model_alias_request, 'path'),
+    ...getShapeAt(ml_put_trained_model_alias_request, 'query'),
+  }),
   outputSchema: ml_put_trained_model_alias_response,
 };
 const ML_PUT_TRAINED_MODEL_DEFINITION_PART_CONTRACT: InternalConnectorContract = {
@@ -13775,11 +14297,11 @@ const ML_PUT_TRAINED_MODEL_DEFINITION_PART_CONTRACT: InternalConnectorContract =
     urlParams: [],
     bodyParams: ['definition', 'total_definition_length', 'total_parts'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_trained_model_definition_part_request, 'body'),
+    ...getShapeAt(ml_put_trained_model_definition_part_request, 'path'),
+    ...getShapeAt(ml_put_trained_model_definition_part_request, 'query'),
+  }),
   outputSchema: ml_put_trained_model_definition_part_response,
 };
 const ML_PUT_TRAINED_MODEL_VOCABULARY_CONTRACT: InternalConnectorContract = {
@@ -13801,11 +14323,11 @@ The vocabulary is stored in the index as described in \`inference_config.*.vocab
     urlParams: [],
     bodyParams: ['vocabulary', 'merges', 'scores'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'body'),
-    getZodLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'path'),
-    getZodLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_put_trained_model_vocabulary_request, 'body'),
+    ...getShapeAt(ml_put_trained_model_vocabulary_request, 'path'),
+    ...getShapeAt(ml_put_trained_model_vocabulary_request, 'query'),
+  }),
   outputSchema: ml_put_trained_model_vocabulary_response,
 };
 const ML_RESET_JOB_CONTRACT: InternalConnectorContract = {
@@ -13829,11 +14351,11 @@ comma separated list.
     urlParams: ['wait_for_completion', 'delete_user_annotations'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_reset_job_request, 'body'),
-    getZodLooseObjectFromProperty(ml_reset_job_request, 'path'),
-    getZodLooseObjectFromProperty(ml_reset_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_reset_job_request, 'body'),
+    ...getShapeAt(ml_reset_job_request, 'path'),
+    ...getShapeAt(ml_reset_job_request, 'query'),
+  }),
   outputSchema: ml_reset_job_response,
 };
 const ML_REVERT_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
@@ -13860,11 +14382,11 @@ snapshot after Black Friday or a critical system failure.
     urlParams: ['delete_intervening_results'],
     bodyParams: ['delete_intervening_results'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_revert_model_snapshot_request, 'body'),
-    getZodLooseObjectFromProperty(ml_revert_model_snapshot_request, 'path'),
-    getZodLooseObjectFromProperty(ml_revert_model_snapshot_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_revert_model_snapshot_request, 'body'),
+    ...getShapeAt(ml_revert_model_snapshot_request, 'path'),
+    ...getShapeAt(ml_revert_model_snapshot_request, 'query'),
+  }),
   outputSchema: ml_revert_model_snapshot_response,
 };
 const ML_SET_UPGRADE_MODE_CONTRACT: InternalConnectorContract = {
@@ -13896,11 +14418,11 @@ machine learning info API.
     urlParams: ['enabled', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_set_upgrade_mode_request, 'body'),
-    getZodLooseObjectFromProperty(ml_set_upgrade_mode_request, 'path'),
-    getZodLooseObjectFromProperty(ml_set_upgrade_mode_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_set_upgrade_mode_request, 'body'),
+    ...getShapeAt(ml_set_upgrade_mode_request, 'path'),
+    ...getShapeAt(ml_set_upgrade_mode_request, 'query'),
+  }),
   outputSchema: ml_set_upgrade_mode_response,
 };
 const ML_START_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -13931,11 +14453,11 @@ the destination index in advance with custom settings and mappings.
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_start_data_frame_analytics_request, 'body'),
+    ...getShapeAt(ml_start_data_frame_analytics_request, 'path'),
+    ...getShapeAt(ml_start_data_frame_analytics_request, 'query'),
+  }),
   outputSchema: ml_start_data_frame_analytics_response,
 };
 const ML_START_DATAFEED_CONTRACT: InternalConnectorContract = {
@@ -13967,11 +14489,11 @@ authorization headers when you created or updated the datafeed, those credential
     urlParams: ['end', 'start', 'timeout'],
     bodyParams: ['end', 'start', 'timeout'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_start_datafeed_request, 'body'),
-    getZodLooseObjectFromProperty(ml_start_datafeed_request, 'path'),
-    getZodLooseObjectFromProperty(ml_start_datafeed_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_start_datafeed_request, 'body'),
+    ...getShapeAt(ml_start_datafeed_request, 'path'),
+    ...getShapeAt(ml_start_datafeed_request, 'query'),
+  }),
   outputSchema: ml_start_datafeed_response,
 };
 const ML_START_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
@@ -14001,11 +14523,11 @@ It allocates the model to every machine learning node.
     ],
     bodyParams: ['adaptive_allocations'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'body'),
-    getZodLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'path'),
-    getZodLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_start_trained_model_deployment_request, 'body'),
+    ...getShapeAt(ml_start_trained_model_deployment_request, 'path'),
+    ...getShapeAt(ml_start_trained_model_deployment_request, 'query'),
+  }),
   outputSchema: ml_start_trained_model_deployment_response,
 };
 const ML_STOP_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -14027,11 +14549,11 @@ throughout its lifecycle.
     urlParams: ['allow_no_match', 'force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_stop_data_frame_analytics_request, 'body'),
+    ...getShapeAt(ml_stop_data_frame_analytics_request, 'path'),
+    ...getShapeAt(ml_stop_data_frame_analytics_request, 'query'),
+  }),
   outputSchema: ml_stop_data_frame_analytics_response,
 };
 const ML_STOP_DATAFEED_CONTRACT: InternalConnectorContract = {
@@ -14053,11 +14575,11 @@ multiple times throughout its lifecycle.
     urlParams: ['allow_no_match', 'force', 'timeout'],
     bodyParams: ['allow_no_match', 'force', 'timeout'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_stop_datafeed_request, 'body'),
-    getZodLooseObjectFromProperty(ml_stop_datafeed_request, 'path'),
-    getZodLooseObjectFromProperty(ml_stop_datafeed_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_stop_datafeed_request, 'body'),
+    ...getShapeAt(ml_stop_datafeed_request, 'path'),
+    ...getShapeAt(ml_stop_datafeed_request, 'query'),
+  }),
   outputSchema: ml_stop_datafeed_response,
 };
 const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
@@ -14077,11 +14599,11 @@ const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
     urlParams: ['allow_no_match', 'force'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'body'),
-    getZodLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'path'),
-    getZodLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_stop_trained_model_deployment_request, 'body'),
+    ...getShapeAt(ml_stop_trained_model_deployment_request, 'path'),
+    ...getShapeAt(ml_stop_trained_model_deployment_request, 'query'),
+  }),
   outputSchema: ml_stop_trained_model_deployment_response,
 };
 const ML_UPDATE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -14101,11 +14623,11 @@ const ML_UPDATE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['description', 'model_memory_limit', 'max_num_threads', 'allow_lazy_start'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_update_data_frame_analytics_request, 'body'),
+    ...getShapeAt(ml_update_data_frame_analytics_request, 'path'),
+    ...getShapeAt(ml_update_data_frame_analytics_request, 'query'),
+  }),
   outputSchema: ml_update_data_frame_analytics_response,
 };
 const ML_UPDATE_DATAFEED_CONTRACT: InternalConnectorContract = {
@@ -14143,11 +14665,11 @@ those credentials are used instead.
       'scroll_size',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_update_datafeed_request, 'body'),
-    getZodLooseObjectFromProperty(ml_update_datafeed_request, 'path'),
-    getZodLooseObjectFromProperty(ml_update_datafeed_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_update_datafeed_request, 'body'),
+    ...getShapeAt(ml_update_datafeed_request, 'path'),
+    ...getShapeAt(ml_update_datafeed_request, 'query'),
+  }),
   outputSchema: ml_update_datafeed_response,
 };
 const ML_UPDATE_FILTER_CONTRACT: InternalConnectorContract = {
@@ -14168,11 +14690,11 @@ Updates the description of a filter, adds items, or removes items from the list.
     urlParams: [],
     bodyParams: ['add_items', 'description', 'remove_items'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_update_filter_request, 'body'),
-    getZodLooseObjectFromProperty(ml_update_filter_request, 'path'),
-    getZodLooseObjectFromProperty(ml_update_filter_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_update_filter_request, 'body'),
+    ...getShapeAt(ml_update_filter_request, 'path'),
+    ...getShapeAt(ml_update_filter_request, 'query'),
+  }),
   outputSchema: ml_update_filter_response,
 };
 const ML_UPDATE_JOB_CONTRACT: InternalConnectorContract = {
@@ -14209,11 +14731,11 @@ Updates certain properties of an anomaly detection job.
       'per_partition_categorization',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_update_job_request, 'body'),
-    getZodLooseObjectFromProperty(ml_update_job_request, 'path'),
-    getZodLooseObjectFromProperty(ml_update_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_update_job_request, 'body'),
+    ...getShapeAt(ml_update_job_request, 'path'),
+    ...getShapeAt(ml_update_job_request, 'query'),
+  }),
   outputSchema: ml_update_job_response,
 };
 const ML_UPDATE_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
@@ -14234,11 +14756,11 @@ Updates certain properties of a snapshot.
     urlParams: [],
     bodyParams: ['description', 'retain'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_update_model_snapshot_request, 'body'),
-    getZodLooseObjectFromProperty(ml_update_model_snapshot_request, 'path'),
-    getZodLooseObjectFromProperty(ml_update_model_snapshot_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_update_model_snapshot_request, 'body'),
+    ...getShapeAt(ml_update_model_snapshot_request, 'path'),
+    ...getShapeAt(ml_update_model_snapshot_request, 'query'),
+  }),
   outputSchema: ml_update_model_snapshot_response,
 };
 const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
@@ -14258,11 +14780,11 @@ const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
     urlParams: ['number_of_allocations'],
     bodyParams: ['number_of_allocations', 'adaptive_allocations'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'body'),
-    getZodLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'path'),
-    getZodLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_update_trained_model_deployment_request, 'body'),
+    ...getShapeAt(ml_update_trained_model_deployment_request, 'path'),
+    ...getShapeAt(ml_update_trained_model_deployment_request, 'query'),
+  }),
   outputSchema: ml_update_trained_model_deployment_response,
 };
 const ML_UPGRADE_JOB_SNAPSHOT_CONTRACT: InternalConnectorContract = {
@@ -14291,11 +14813,11 @@ job.
     urlParams: ['wait_for_completion', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'body'),
-    getZodLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'path'),
-    getZodLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_upgrade_job_snapshot_request, 'body'),
+    ...getShapeAt(ml_upgrade_job_snapshot_request, 'path'),
+    ...getShapeAt(ml_upgrade_job_snapshot_request, 'query'),
+  }),
   outputSchema: ml_upgrade_job_snapshot_response,
 };
 const ML_VALIDATE_CONTRACT: InternalConnectorContract = {
@@ -14314,7 +14836,7 @@ const ML_VALIDATE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const ML_VALIDATE_DETECTOR_CONTRACT: InternalConnectorContract = {
@@ -14333,7 +14855,7 @@ const ML_VALIDATE_DETECTOR_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const MONITORING_BULK_CONTRACT: InternalConnectorContract = {
@@ -14353,7 +14875,7 @@ This API is used by the monitoring features to send monitoring data.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const MSEARCH_CONTRACT: InternalConnectorContract = {
@@ -14404,18 +14926,26 @@ When sending requests to this endpoint the \`Content-Type\` header should be set
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(msearch_request, 'body'),
-    getZodLooseObjectFromProperty(msearch_request, 'path'),
-    getZodLooseObjectFromProperty(msearch_request, 'query'),
-    getZodLooseObjectFromProperty(msearch1_request, 'body'),
-    getZodLooseObjectFromProperty(msearch1_request, 'path'),
-    getZodLooseObjectFromProperty(msearch1_request, 'query'),
-    getZodLooseObjectFromProperty(msearch2_request, 'body'),
-    getZodLooseObjectFromProperty(msearch2_request, 'path'),
-    getZodLooseObjectFromProperty(msearch2_request, 'query'),
-    getZodLooseObjectFromProperty(msearch3_request, 'body'),
-    getZodLooseObjectFromProperty(msearch3_request, 'path'),
-    getZodLooseObjectFromProperty(msearch3_request, 'query'),
+    z.object({
+      ...getShapeAt(msearch_request, 'body'),
+      ...getShapeAt(msearch_request, 'path'),
+      ...getShapeAt(msearch_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(msearch1_request, 'body'),
+      ...getShapeAt(msearch1_request, 'path'),
+      ...getShapeAt(msearch1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(msearch2_request, 'body'),
+      ...getShapeAt(msearch2_request, 'path'),
+      ...getShapeAt(msearch2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(msearch3_request, 'body'),
+      ...getShapeAt(msearch3_request, 'path'),
+      ...getShapeAt(msearch3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     msearch_response,
@@ -14462,18 +14992,26 @@ For example:
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(msearch_template_request, 'body'),
-    getZodLooseObjectFromProperty(msearch_template_request, 'path'),
-    getZodLooseObjectFromProperty(msearch_template_request, 'query'),
-    getZodLooseObjectFromProperty(msearch_template1_request, 'body'),
-    getZodLooseObjectFromProperty(msearch_template1_request, 'path'),
-    getZodLooseObjectFromProperty(msearch_template1_request, 'query'),
-    getZodLooseObjectFromProperty(msearch_template2_request, 'body'),
-    getZodLooseObjectFromProperty(msearch_template2_request, 'path'),
-    getZodLooseObjectFromProperty(msearch_template2_request, 'query'),
-    getZodLooseObjectFromProperty(msearch_template3_request, 'body'),
-    getZodLooseObjectFromProperty(msearch_template3_request, 'path'),
-    getZodLooseObjectFromProperty(msearch_template3_request, 'query'),
+    z.object({
+      ...getShapeAt(msearch_template_request, 'body'),
+      ...getShapeAt(msearch_template_request, 'path'),
+      ...getShapeAt(msearch_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(msearch_template1_request, 'body'),
+      ...getShapeAt(msearch_template1_request, 'path'),
+      ...getShapeAt(msearch_template1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(msearch_template2_request, 'body'),
+      ...getShapeAt(msearch_template2_request, 'path'),
+      ...getShapeAt(msearch_template2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(msearch_template3_request, 'body'),
+      ...getShapeAt(msearch_template3_request, 'path'),
+      ...getShapeAt(msearch_template3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     msearch_template_response,
@@ -14524,18 +15062,26 @@ The mapping used is determined by the specified \`_index\`.
     bodyParams: ['docs', 'ids'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(mtermvectors_request, 'body'),
-    getZodLooseObjectFromProperty(mtermvectors_request, 'path'),
-    getZodLooseObjectFromProperty(mtermvectors_request, 'query'),
-    getZodLooseObjectFromProperty(mtermvectors1_request, 'body'),
-    getZodLooseObjectFromProperty(mtermvectors1_request, 'path'),
-    getZodLooseObjectFromProperty(mtermvectors1_request, 'query'),
-    getZodLooseObjectFromProperty(mtermvectors2_request, 'body'),
-    getZodLooseObjectFromProperty(mtermvectors2_request, 'path'),
-    getZodLooseObjectFromProperty(mtermvectors2_request, 'query'),
-    getZodLooseObjectFromProperty(mtermvectors3_request, 'body'),
-    getZodLooseObjectFromProperty(mtermvectors3_request, 'path'),
-    getZodLooseObjectFromProperty(mtermvectors3_request, 'query'),
+    z.object({
+      ...getShapeAt(mtermvectors_request, 'body'),
+      ...getShapeAt(mtermvectors_request, 'path'),
+      ...getShapeAt(mtermvectors_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(mtermvectors1_request, 'body'),
+      ...getShapeAt(mtermvectors1_request, 'path'),
+      ...getShapeAt(mtermvectors1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(mtermvectors2_request, 'body'),
+      ...getShapeAt(mtermvectors2_request, 'path'),
+      ...getShapeAt(mtermvectors2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(mtermvectors3_request, 'body'),
+      ...getShapeAt(mtermvectors3_request, 'path'),
+      ...getShapeAt(mtermvectors3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     mtermvectors_response,
@@ -14562,11 +15108,11 @@ Clear the archived repositories metering information in the cluster.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(nodes_clear_repositories_metering_archive_request, 'body'),
+    ...getShapeAt(nodes_clear_repositories_metering_archive_request, 'path'),
+    ...getShapeAt(nodes_clear_repositories_metering_archive_request, 'query'),
+  }),
   outputSchema: nodes_clear_repositories_metering_archive_response,
 };
 const NODES_GET_REPOSITORIES_METERING_INFO_CONTRACT: InternalConnectorContract = {
@@ -14589,11 +15135,11 @@ Additionally, the information exposed by this API is volatile, meaning that it w
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(nodes_get_repositories_metering_info_request, 'body'),
+    ...getShapeAt(nodes_get_repositories_metering_info_request, 'path'),
+    ...getShapeAt(nodes_get_repositories_metering_info_request, 'query'),
+  }),
   outputSchema: nodes_get_repositories_metering_info_response,
 };
 const NODES_HOT_THREADS_CONTRACT: InternalConnectorContract = {
@@ -14624,12 +15170,16 @@ The output is plain text with a breakdown of the top hot threads for each node.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(nodes_hot_threads_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_hot_threads_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_hot_threads_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_hot_threads1_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_hot_threads1_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_hot_threads1_request, 'query'),
+    z.object({
+      ...getShapeAt(nodes_hot_threads_request, 'body'),
+      ...getShapeAt(nodes_hot_threads_request, 'path'),
+      ...getShapeAt(nodes_hot_threads_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_hot_threads1_request, 'body'),
+      ...getShapeAt(nodes_hot_threads1_request, 'path'),
+      ...getShapeAt(nodes_hot_threads1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([nodes_hot_threads_response, nodes_hot_threads1_response]),
 };
@@ -14652,18 +15202,26 @@ By default, the API returns all attributes and core settings for cluster nodes.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(nodes_info_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_info_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_info_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_info1_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_info1_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_info1_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_info2_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_info2_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_info2_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_info3_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_info3_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_info3_request, 'query'),
+    z.object({
+      ...getShapeAt(nodes_info_request, 'body'),
+      ...getShapeAt(nodes_info_request, 'path'),
+      ...getShapeAt(nodes_info_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_info1_request, 'body'),
+      ...getShapeAt(nodes_info1_request, 'path'),
+      ...getShapeAt(nodes_info1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_info2_request, 'body'),
+      ...getShapeAt(nodes_info2_request, 'path'),
+      ...getShapeAt(nodes_info2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_info3_request, 'body'),
+      ...getShapeAt(nodes_info3_request, 'path'),
+      ...getShapeAt(nodes_info3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     nodes_info_response,
@@ -14698,12 +15256,16 @@ Alternatively, you can reload the secure settings on each node by locally access
     bodyParams: ['secure_settings_password'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(nodes_reload_secure_settings_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_reload_secure_settings_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_reload_secure_settings_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'query'),
+    z.object({
+      ...getShapeAt(nodes_reload_secure_settings_request, 'body'),
+      ...getShapeAt(nodes_reload_secure_settings_request, 'path'),
+      ...getShapeAt(nodes_reload_secure_settings_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_reload_secure_settings1_request, 'body'),
+      ...getShapeAt(nodes_reload_secure_settings1_request, 'path'),
+      ...getShapeAt(nodes_reload_secure_settings1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     nodes_reload_secure_settings_response,
@@ -14747,24 +15309,36 @@ By default, all stats are returned. You can limit the returned information by us
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(nodes_stats_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_stats_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_stats_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_stats1_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_stats2_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_stats2_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_stats2_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_stats3_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_stats3_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_stats3_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_stats4_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_stats4_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_stats4_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_stats5_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_stats5_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_stats5_request, 'query'),
+    z.object({
+      ...getShapeAt(nodes_stats_request, 'body'),
+      ...getShapeAt(nodes_stats_request, 'path'),
+      ...getShapeAt(nodes_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_stats1_request, 'body'),
+      ...getShapeAt(nodes_stats1_request, 'path'),
+      ...getShapeAt(nodes_stats1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_stats2_request, 'body'),
+      ...getShapeAt(nodes_stats2_request, 'path'),
+      ...getShapeAt(nodes_stats2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_stats3_request, 'body'),
+      ...getShapeAt(nodes_stats3_request, 'path'),
+      ...getShapeAt(nodes_stats3_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_stats4_request, 'body'),
+      ...getShapeAt(nodes_stats4_request, 'path'),
+      ...getShapeAt(nodes_stats4_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_stats5_request, 'body'),
+      ...getShapeAt(nodes_stats5_request, 'path'),
+      ...getShapeAt(nodes_stats5_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     nodes_stats_response,
@@ -14798,18 +15372,26 @@ const NODES_USAGE_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(nodes_usage_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_usage_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_usage_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_usage1_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_usage1_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_usage1_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_usage2_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_usage2_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_usage2_request, 'query'),
-    getZodLooseObjectFromProperty(nodes_usage3_request, 'body'),
-    getZodLooseObjectFromProperty(nodes_usage3_request, 'path'),
-    getZodLooseObjectFromProperty(nodes_usage3_request, 'query'),
+    z.object({
+      ...getShapeAt(nodes_usage_request, 'body'),
+      ...getShapeAt(nodes_usage_request, 'path'),
+      ...getShapeAt(nodes_usage_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_usage1_request, 'body'),
+      ...getShapeAt(nodes_usage1_request, 'path'),
+      ...getShapeAt(nodes_usage1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_usage2_request, 'body'),
+      ...getShapeAt(nodes_usage2_request, 'path'),
+      ...getShapeAt(nodes_usage2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(nodes_usage3_request, 'body'),
+      ...getShapeAt(nodes_usage3_request, 'path'),
+      ...getShapeAt(nodes_usage3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     nodes_usage_response,
@@ -14879,11 +15461,11 @@ You can check how many point-in-times (that is, search contexts) are open with t
     ],
     bodyParams: ['index_filter'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(open_point_in_time_request, 'body'),
-    getZodLooseObjectFromProperty(open_point_in_time_request, 'path'),
-    getZodLooseObjectFromProperty(open_point_in_time_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(open_point_in_time_request, 'body'),
+    ...getShapeAt(open_point_in_time_request, 'path'),
+    ...getShapeAt(open_point_in_time_request, 'query'),
+  }),
   outputSchema: open_point_in_time_response,
 };
 const PING_CONTRACT: InternalConnectorContract = {
@@ -14903,11 +15485,11 @@ Get information about whether the cluster is running.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ping_request, 'body'),
-    getZodLooseObjectFromProperty(ping_request, 'path'),
-    getZodLooseObjectFromProperty(ping_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ping_request, 'body'),
+    ...getShapeAt(ping_request, 'path'),
+    ...getShapeAt(ping_request, 'query'),
+  }),
   outputSchema: ping_response,
 };
 const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
@@ -14926,7 +15508,7 @@ const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
@@ -14945,7 +15527,7 @@ const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const PROFILING_STATUS_CONTRACT: InternalConnectorContract = {
@@ -14964,7 +15546,7 @@ const PROFILING_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
@@ -14983,7 +15565,7 @@ const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const PROJECT_TAGS_CONTRACT: InternalConnectorContract = {
@@ -15004,7 +15586,7 @@ Get the tags that are defined for the project.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const PUT_SCRIPT_CONTRACT: InternalConnectorContract = {
@@ -15025,18 +15607,26 @@ Creates or updates a stored script or search template.
     bodyParams: ['script'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_script_request, 'body'),
-    getZodLooseObjectFromProperty(put_script_request, 'path'),
-    getZodLooseObjectFromProperty(put_script_request, 'query'),
-    getZodLooseObjectFromProperty(put_script1_request, 'body'),
-    getZodLooseObjectFromProperty(put_script1_request, 'path'),
-    getZodLooseObjectFromProperty(put_script1_request, 'query'),
-    getZodLooseObjectFromProperty(put_script2_request, 'body'),
-    getZodLooseObjectFromProperty(put_script2_request, 'path'),
-    getZodLooseObjectFromProperty(put_script2_request, 'query'),
-    getZodLooseObjectFromProperty(put_script3_request, 'body'),
-    getZodLooseObjectFromProperty(put_script3_request, 'path'),
-    getZodLooseObjectFromProperty(put_script3_request, 'query'),
+    z.object({
+      ...getShapeAt(put_script_request, 'body'),
+      ...getShapeAt(put_script_request, 'path'),
+      ...getShapeAt(put_script_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(put_script1_request, 'body'),
+      ...getShapeAt(put_script1_request, 'path'),
+      ...getShapeAt(put_script1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(put_script2_request, 'body'),
+      ...getShapeAt(put_script2_request, 'path'),
+      ...getShapeAt(put_script2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(put_script3_request, 'body'),
+      ...getShapeAt(put_script3_request, 'path'),
+      ...getShapeAt(put_script3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     put_script_response,
@@ -15064,11 +15654,11 @@ This is a destructive action that is only recoverable by re-adding the same rule
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(query_rules_delete_rule_request, 'body'),
-    getZodLooseObjectFromProperty(query_rules_delete_rule_request, 'path'),
-    getZodLooseObjectFromProperty(query_rules_delete_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(query_rules_delete_rule_request, 'body'),
+    ...getShapeAt(query_rules_delete_rule_request, 'path'),
+    ...getShapeAt(query_rules_delete_rule_request, 'query'),
+  }),
   outputSchema: query_rules_delete_rule_response,
 };
 const QUERY_RULES_DELETE_RULESET_CONTRACT: InternalConnectorContract = {
@@ -15090,11 +15680,11 @@ This is a destructive action that is not recoverable.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(query_rules_delete_ruleset_request, 'body'),
-    getZodLooseObjectFromProperty(query_rules_delete_ruleset_request, 'path'),
-    getZodLooseObjectFromProperty(query_rules_delete_ruleset_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(query_rules_delete_ruleset_request, 'body'),
+    ...getShapeAt(query_rules_delete_ruleset_request, 'path'),
+    ...getShapeAt(query_rules_delete_ruleset_request, 'query'),
+  }),
   outputSchema: query_rules_delete_ruleset_response,
 };
 const QUERY_RULES_GET_RULE_CONTRACT: InternalConnectorContract = {
@@ -15115,11 +15705,11 @@ Get details about a query rule within a query ruleset.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(query_rules_get_rule_request, 'body'),
-    getZodLooseObjectFromProperty(query_rules_get_rule_request, 'path'),
-    getZodLooseObjectFromProperty(query_rules_get_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(query_rules_get_rule_request, 'body'),
+    ...getShapeAt(query_rules_get_rule_request, 'path'),
+    ...getShapeAt(query_rules_get_rule_request, 'query'),
+  }),
   outputSchema: query_rules_get_rule_response,
 };
 const QUERY_RULES_GET_RULESET_CONTRACT: InternalConnectorContract = {
@@ -15140,11 +15730,11 @@ Get details about a query ruleset.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(query_rules_get_ruleset_request, 'body'),
-    getZodLooseObjectFromProperty(query_rules_get_ruleset_request, 'path'),
-    getZodLooseObjectFromProperty(query_rules_get_ruleset_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(query_rules_get_ruleset_request, 'body'),
+    ...getShapeAt(query_rules_get_ruleset_request, 'path'),
+    ...getShapeAt(query_rules_get_ruleset_request, 'query'),
+  }),
   outputSchema: query_rules_get_ruleset_response,
 };
 const QUERY_RULES_LIST_RULESETS_CONTRACT: InternalConnectorContract = {
@@ -15165,11 +15755,11 @@ Get summarized information about the query rulesets.
     urlParams: ['from', 'size'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(query_rules_list_rulesets_request, 'body'),
-    getZodLooseObjectFromProperty(query_rules_list_rulesets_request, 'path'),
-    getZodLooseObjectFromProperty(query_rules_list_rulesets_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(query_rules_list_rulesets_request, 'body'),
+    ...getShapeAt(query_rules_list_rulesets_request, 'path'),
+    ...getShapeAt(query_rules_list_rulesets_request, 'query'),
+  }),
   outputSchema: query_rules_list_rulesets_response,
 };
 const QUERY_RULES_PUT_RULE_CONTRACT: InternalConnectorContract = {
@@ -15195,11 +15785,11 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
     urlParams: [],
     bodyParams: ['type', 'criteria', 'actions', 'priority'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(query_rules_put_rule_request, 'body'),
-    getZodLooseObjectFromProperty(query_rules_put_rule_request, 'path'),
-    getZodLooseObjectFromProperty(query_rules_put_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(query_rules_put_rule_request, 'body'),
+    ...getShapeAt(query_rules_put_rule_request, 'path'),
+    ...getShapeAt(query_rules_put_rule_request, 'query'),
+  }),
   outputSchema: query_rules_put_rule_response,
 };
 const QUERY_RULES_PUT_RULESET_CONTRACT: InternalConnectorContract = {
@@ -15226,11 +15816,11 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
     urlParams: [],
     bodyParams: ['rules'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(query_rules_put_ruleset_request, 'body'),
-    getZodLooseObjectFromProperty(query_rules_put_ruleset_request, 'path'),
-    getZodLooseObjectFromProperty(query_rules_put_ruleset_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(query_rules_put_ruleset_request, 'body'),
+    ...getShapeAt(query_rules_put_ruleset_request, 'path'),
+    ...getShapeAt(query_rules_put_ruleset_request, 'query'),
+  }),
   outputSchema: query_rules_put_ruleset_response,
 };
 const QUERY_RULES_TEST_CONTRACT: InternalConnectorContract = {
@@ -15251,11 +15841,11 @@ Evaluate match criteria against a query ruleset to identify the rules that would
     urlParams: [],
     bodyParams: ['match_criteria'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(query_rules_test_request, 'body'),
-    getZodLooseObjectFromProperty(query_rules_test_request, 'path'),
-    getZodLooseObjectFromProperty(query_rules_test_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(query_rules_test_request, 'body'),
+    ...getShapeAt(query_rules_test_request, 'path'),
+    ...getShapeAt(query_rules_test_request, 'query'),
+  }),
   outputSchema: query_rules_test_response,
 };
 const RANK_EVAL_CONTRACT: InternalConnectorContract = {
@@ -15277,18 +15867,26 @@ Evaluate the quality of ranked search results over a set of typical search queri
     bodyParams: ['requests', 'metric'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rank_eval_request, 'body'),
-    getZodLooseObjectFromProperty(rank_eval_request, 'path'),
-    getZodLooseObjectFromProperty(rank_eval_request, 'query'),
-    getZodLooseObjectFromProperty(rank_eval1_request, 'body'),
-    getZodLooseObjectFromProperty(rank_eval1_request, 'path'),
-    getZodLooseObjectFromProperty(rank_eval1_request, 'query'),
-    getZodLooseObjectFromProperty(rank_eval2_request, 'body'),
-    getZodLooseObjectFromProperty(rank_eval2_request, 'path'),
-    getZodLooseObjectFromProperty(rank_eval2_request, 'query'),
-    getZodLooseObjectFromProperty(rank_eval3_request, 'body'),
-    getZodLooseObjectFromProperty(rank_eval3_request, 'path'),
-    getZodLooseObjectFromProperty(rank_eval3_request, 'query'),
+    z.object({
+      ...getShapeAt(rank_eval_request, 'body'),
+      ...getShapeAt(rank_eval_request, 'path'),
+      ...getShapeAt(rank_eval_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(rank_eval1_request, 'body'),
+      ...getShapeAt(rank_eval1_request, 'path'),
+      ...getShapeAt(rank_eval1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(rank_eval2_request, 'body'),
+      ...getShapeAt(rank_eval2_request, 'path'),
+      ...getShapeAt(rank_eval2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(rank_eval3_request, 'body'),
+      ...getShapeAt(rank_eval3_request, 'path'),
+      ...getShapeAt(rank_eval3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     rank_eval_response,
@@ -15370,11 +15968,11 @@ Refer to the linked documentation for examples of how to reindex documents.
     ],
     bodyParams: ['conflicts', 'dest', 'max_docs', 'script', 'source'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(reindex_request, 'body'),
-    getZodLooseObjectFromProperty(reindex_request, 'path'),
-    getZodLooseObjectFromProperty(reindex_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(reindex_request, 'body'),
+    ...getShapeAt(reindex_request, 'path'),
+    ...getShapeAt(reindex_request, 'query'),
+  }),
   outputSchema: reindex_response,
 };
 const REINDEX_RETHROTTLE_CONTRACT: InternalConnectorContract = {
@@ -15404,11 +16002,11 @@ This behavior prevents scroll timeouts.
     urlParams: ['requests_per_second'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(reindex_rethrottle_request, 'body'),
-    getZodLooseObjectFromProperty(reindex_rethrottle_request, 'path'),
-    getZodLooseObjectFromProperty(reindex_rethrottle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(reindex_rethrottle_request, 'body'),
+    ...getShapeAt(reindex_rethrottle_request, 'path'),
+    ...getShapeAt(reindex_rethrottle_request, 'query'),
+  }),
   outputSchema: reindex_rethrottle_response,
 };
 const RENDER_SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
@@ -15431,18 +16029,26 @@ Render a search template as a search request body.
     bodyParams: ['id', 'file', 'params', 'source'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(render_search_template_request, 'body'),
-    getZodLooseObjectFromProperty(render_search_template_request, 'path'),
-    getZodLooseObjectFromProperty(render_search_template_request, 'query'),
-    getZodLooseObjectFromProperty(render_search_template1_request, 'body'),
-    getZodLooseObjectFromProperty(render_search_template1_request, 'path'),
-    getZodLooseObjectFromProperty(render_search_template1_request, 'query'),
-    getZodLooseObjectFromProperty(render_search_template2_request, 'body'),
-    getZodLooseObjectFromProperty(render_search_template2_request, 'path'),
-    getZodLooseObjectFromProperty(render_search_template2_request, 'query'),
-    getZodLooseObjectFromProperty(render_search_template3_request, 'body'),
-    getZodLooseObjectFromProperty(render_search_template3_request, 'path'),
-    getZodLooseObjectFromProperty(render_search_template3_request, 'query'),
+    z.object({
+      ...getShapeAt(render_search_template_request, 'body'),
+      ...getShapeAt(render_search_template_request, 'path'),
+      ...getShapeAt(render_search_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(render_search_template1_request, 'body'),
+      ...getShapeAt(render_search_template1_request, 'path'),
+      ...getShapeAt(render_search_template1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(render_search_template2_request, 'body'),
+      ...getShapeAt(render_search_template2_request, 'path'),
+      ...getShapeAt(render_search_template2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(render_search_template3_request, 'body'),
+      ...getShapeAt(render_search_template3_request, 'path'),
+      ...getShapeAt(render_search_template3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     render_search_template_response,
@@ -15491,11 +16097,11 @@ POST my_rollup_index/_delete_by_query
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rollup_delete_job_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_delete_job_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_delete_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(rollup_delete_job_request, 'body'),
+    ...getShapeAt(rollup_delete_job_request, 'path'),
+    ...getShapeAt(rollup_delete_job_request, 'query'),
+  }),
   outputSchema: rollup_delete_job_response,
 };
 const ROLLUP_GET_JOBS_CONTRACT: InternalConnectorContract = {
@@ -15521,12 +16127,16 @@ For details about a historical rollup job, the rollup capabilities API may be mo
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rollup_get_jobs_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_get_jobs_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_get_jobs_request, 'query'),
-    getZodLooseObjectFromProperty(rollup_get_jobs1_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_get_jobs1_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_get_jobs1_request, 'query'),
+    z.object({
+      ...getShapeAt(rollup_get_jobs_request, 'body'),
+      ...getShapeAt(rollup_get_jobs_request, 'path'),
+      ...getShapeAt(rollup_get_jobs_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(rollup_get_jobs1_request, 'body'),
+      ...getShapeAt(rollup_get_jobs1_request, 'path'),
+      ...getShapeAt(rollup_get_jobs1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([rollup_get_jobs_response, rollup_get_jobs1_response]),
 };
@@ -15556,12 +16166,16 @@ This API enables you to inspect an index and determine:
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rollup_get_rollup_caps_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_get_rollup_caps_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_get_rollup_caps_request, 'query'),
-    getZodLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'query'),
+    z.object({
+      ...getShapeAt(rollup_get_rollup_caps_request, 'body'),
+      ...getShapeAt(rollup_get_rollup_caps_request, 'path'),
+      ...getShapeAt(rollup_get_rollup_caps_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(rollup_get_rollup_caps1_request, 'body'),
+      ...getShapeAt(rollup_get_rollup_caps1_request, 'path'),
+      ...getShapeAt(rollup_get_rollup_caps1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([rollup_get_rollup_caps_response, rollup_get_rollup_caps1_response]),
 };
@@ -15587,11 +16201,11 @@ A single rollup index may store the data for multiple rollup jobs and may have a
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(rollup_get_rollup_index_caps_request, 'body'),
+    ...getShapeAt(rollup_get_rollup_index_caps_request, 'path'),
+    ...getShapeAt(rollup_get_rollup_index_caps_request, 'query'),
+  }),
   outputSchema: rollup_get_rollup_index_caps_response,
 };
 const ROLLUP_PUT_JOB_CONTRACT: InternalConnectorContract = {
@@ -15628,11 +16242,11 @@ Jobs are created in a \`STOPPED\` state. You can start them with the start rollu
       'headers',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rollup_put_job_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_put_job_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_put_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(rollup_put_job_request, 'body'),
+    ...getShapeAt(rollup_put_job_request, 'path'),
+    ...getShapeAt(rollup_put_job_request, 'query'),
+  }),
   outputSchema: rollup_put_job_response,
 };
 const ROLLUP_ROLLUP_SEARCH_CONTRACT: InternalConnectorContract = {
@@ -15663,12 +16277,16 @@ For more detailed examples of using the rollup search API, including querying ro
     bodyParams: ['aggregations', 'query', 'size'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rollup_rollup_search_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_rollup_search_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_rollup_search_request, 'query'),
-    getZodLooseObjectFromProperty(rollup_rollup_search1_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_rollup_search1_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_rollup_search1_request, 'query'),
+    z.object({
+      ...getShapeAt(rollup_rollup_search_request, 'body'),
+      ...getShapeAt(rollup_rollup_search_request, 'path'),
+      ...getShapeAt(rollup_rollup_search_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(rollup_rollup_search1_request, 'body'),
+      ...getShapeAt(rollup_rollup_search1_request, 'path'),
+      ...getShapeAt(rollup_rollup_search1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([rollup_rollup_search_response, rollup_rollup_search1_response]),
 };
@@ -15691,11 +16309,11 @@ If you try to start a job that is already started, nothing happens.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rollup_start_job_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_start_job_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_start_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(rollup_start_job_request, 'body'),
+    ...getShapeAt(rollup_start_job_request, 'path'),
+    ...getShapeAt(rollup_start_job_request, 'query'),
+  }),
   outputSchema: rollup_start_job_response,
 };
 const ROLLUP_STOP_JOB_CONTRACT: InternalConnectorContract = {
@@ -15726,11 +16344,11 @@ If the specified time elapses without the job moving to STOPPED, a timeout excep
     urlParams: ['timeout', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rollup_stop_job_request, 'body'),
-    getZodLooseObjectFromProperty(rollup_stop_job_request, 'path'),
-    getZodLooseObjectFromProperty(rollup_stop_job_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(rollup_stop_job_request, 'body'),
+    ...getShapeAt(rollup_stop_job_request, 'path'),
+    ...getShapeAt(rollup_stop_job_request, 'query'),
+  }),
   outputSchema: rollup_stop_job_response,
 };
 const SCRIPTS_PAINLESS_EXECUTE_CONTRACT: InternalConnectorContract = {
@@ -15759,12 +16377,16 @@ Each context requires a script, but additional parameters depend on the context 
     bodyParams: ['context', 'context_setup', 'script'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(scripts_painless_execute_request, 'body'),
-    getZodLooseObjectFromProperty(scripts_painless_execute_request, 'path'),
-    getZodLooseObjectFromProperty(scripts_painless_execute_request, 'query'),
-    getZodLooseObjectFromProperty(scripts_painless_execute1_request, 'body'),
-    getZodLooseObjectFromProperty(scripts_painless_execute1_request, 'path'),
-    getZodLooseObjectFromProperty(scripts_painless_execute1_request, 'query'),
+    z.object({
+      ...getShapeAt(scripts_painless_execute_request, 'body'),
+      ...getShapeAt(scripts_painless_execute_request, 'path'),
+      ...getShapeAt(scripts_painless_execute_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(scripts_painless_execute1_request, 'body'),
+      ...getShapeAt(scripts_painless_execute1_request, 'path'),
+      ...getShapeAt(scripts_painless_execute1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([scripts_painless_execute_response, scripts_painless_execute1_response]),
 };
@@ -15798,18 +16420,26 @@ IMPORTANT: Results from a scrolling search reflect the state of the index at the
     bodyParams: ['scroll', 'scroll_id'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(scroll_request, 'body'),
-    getZodLooseObjectFromProperty(scroll_request, 'path'),
-    getZodLooseObjectFromProperty(scroll_request, 'query'),
-    getZodLooseObjectFromProperty(scroll1_request, 'body'),
-    getZodLooseObjectFromProperty(scroll1_request, 'path'),
-    getZodLooseObjectFromProperty(scroll1_request, 'query'),
-    getZodLooseObjectFromProperty(scroll2_request, 'body'),
-    getZodLooseObjectFromProperty(scroll2_request, 'path'),
-    getZodLooseObjectFromProperty(scroll2_request, 'query'),
-    getZodLooseObjectFromProperty(scroll3_request, 'body'),
-    getZodLooseObjectFromProperty(scroll3_request, 'path'),
-    getZodLooseObjectFromProperty(scroll3_request, 'query'),
+    z.object({
+      ...getShapeAt(scroll_request, 'body'),
+      ...getShapeAt(scroll_request, 'path'),
+      ...getShapeAt(scroll_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(scroll1_request, 'body'),
+      ...getShapeAt(scroll1_request, 'path'),
+      ...getShapeAt(scroll1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(scroll2_request, 'body'),
+      ...getShapeAt(scroll2_request, 'path'),
+      ...getShapeAt(scroll2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(scroll3_request, 'body'),
+      ...getShapeAt(scroll3_request, 'path'),
+      ...getShapeAt(scroll3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([scroll_response, scroll1_response, scroll2_response, scroll3_response]),
 };
@@ -15929,18 +16559,26 @@ This situation can occur because the splitting criterion is based on Lucene docu
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_request, 'body'),
-    getZodLooseObjectFromProperty(search_request, 'path'),
-    getZodLooseObjectFromProperty(search_request, 'query'),
-    getZodLooseObjectFromProperty(search1_request, 'body'),
-    getZodLooseObjectFromProperty(search1_request, 'path'),
-    getZodLooseObjectFromProperty(search1_request, 'query'),
-    getZodLooseObjectFromProperty(search2_request, 'body'),
-    getZodLooseObjectFromProperty(search2_request, 'path'),
-    getZodLooseObjectFromProperty(search2_request, 'query'),
-    getZodLooseObjectFromProperty(search3_request, 'body'),
-    getZodLooseObjectFromProperty(search3_request, 'path'),
-    getZodLooseObjectFromProperty(search3_request, 'query'),
+    z.object({
+      ...getShapeAt(search_request, 'body'),
+      ...getShapeAt(search_request, 'path'),
+      ...getShapeAt(search_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search1_request, 'body'),
+      ...getShapeAt(search1_request, 'path'),
+      ...getShapeAt(search1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search2_request, 'body'),
+      ...getShapeAt(search2_request, 'path'),
+      ...getShapeAt(search2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search3_request, 'body'),
+      ...getShapeAt(search3_request, 'path'),
+      ...getShapeAt(search3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([search_response, search1_response, search2_response, search3_response]),
 };
@@ -15963,11 +16601,11 @@ Remove a search application and its associated alias. Indices attached to the se
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_application_delete_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_delete_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_application_delete_request, 'body'),
+    ...getShapeAt(search_application_delete_request, 'path'),
+    ...getShapeAt(search_application_delete_request, 'query'),
+  }),
   outputSchema: search_application_delete_response,
 };
 const SEARCH_APPLICATION_DELETE_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -15988,11 +16626,11 @@ The associated data stream is also deleted.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_application_delete_behavioral_analytics_request, 'body'),
+    ...getShapeAt(search_application_delete_behavioral_analytics_request, 'path'),
+    ...getShapeAt(search_application_delete_behavioral_analytics_request, 'query'),
+  }),
   outputSchema: search_application_delete_behavioral_analytics_response,
 };
 const SEARCH_APPLICATION_GET_CONTRACT: InternalConnectorContract = {
@@ -16012,11 +16650,11 @@ const SEARCH_APPLICATION_GET_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_application_get_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_get_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_application_get_request, 'body'),
+    ...getShapeAt(search_application_get_request, 'path'),
+    ...getShapeAt(search_application_get_request, 'query'),
+  }),
   outputSchema: search_application_get_response,
 };
 const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -16037,12 +16675,16 @@ const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'query'),
-    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'query'),
+    z.object({
+      ...getShapeAt(search_application_get_behavioral_analytics_request, 'body'),
+      ...getShapeAt(search_application_get_behavioral_analytics_request, 'path'),
+      ...getShapeAt(search_application_get_behavioral_analytics_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search_application_get_behavioral_analytics1_request, 'body'),
+      ...getShapeAt(search_application_get_behavioral_analytics1_request, 'path'),
+      ...getShapeAt(search_application_get_behavioral_analytics1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     search_application_get_behavioral_analytics_response,
@@ -16067,11 +16709,11 @@ Get information about search applications.
     urlParams: ['q', 'from', 'size'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_application_list_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_list_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_application_list_request, 'body'),
+    ...getShapeAt(search_application_list_request, 'path'),
+    ...getShapeAt(search_application_list_request, 'query'),
+  }),
   outputSchema: search_application_list_response,
 };
 const SEARCH_APPLICATION_POST_BEHAVIORAL_ANALYTICS_EVENT_CONTRACT: InternalConnectorContract = {
@@ -16091,20 +16733,11 @@ const SEARCH_APPLICATION_POST_BEHAVIORAL_ANALYTICS_EVENT_CONTRACT: InternalConne
     urlParams: ['debug'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(
-      search_application_post_behavioral_analytics_event_request,
-      'body'
-    ),
-    getZodLooseObjectFromProperty(
-      search_application_post_behavioral_analytics_event_request,
-      'path'
-    ),
-    getZodLooseObjectFromProperty(
-      search_application_post_behavioral_analytics_event_request,
-      'query'
-    ),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_application_post_behavioral_analytics_event_request, 'body'),
+    ...getShapeAt(search_application_post_behavioral_analytics_event_request, 'path'),
+    ...getShapeAt(search_application_post_behavioral_analytics_event_request, 'query'),
+  }),
   outputSchema: search_application_post_behavioral_analytics_event_response,
 };
 const SEARCH_APPLICATION_PUT_CONTRACT: InternalConnectorContract = {
@@ -16124,11 +16757,11 @@ const SEARCH_APPLICATION_PUT_CONTRACT: InternalConnectorContract = {
     urlParams: ['create'],
     bodyParams: ['indices', 'analytics_collection_name', 'template'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_application_put_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_put_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_put_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_application_put_request, 'body'),
+    ...getShapeAt(search_application_put_request, 'path'),
+    ...getShapeAt(search_application_put_request, 'query'),
+  }),
   outputSchema: search_application_put_response,
 };
 const SEARCH_APPLICATION_PUT_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {
@@ -16148,11 +16781,11 @@ const SEARCH_APPLICATION_PUT_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_application_put_behavioral_analytics_request, 'body'),
+    ...getShapeAt(search_application_put_behavioral_analytics_request, 'path'),
+    ...getShapeAt(search_application_put_behavioral_analytics_request, 'query'),
+  }),
   outputSchema: search_application_put_behavioral_analytics_response,
 };
 const SEARCH_APPLICATION_RENDER_QUERY_CONTRACT: InternalConnectorContract = {
@@ -16177,11 +16810,11 @@ You must have \`read\` privileges on the backing alias of the search application
     urlParams: [],
     bodyParams: ['params'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_application_render_query_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_render_query_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_render_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_application_render_query_request, 'body'),
+    ...getShapeAt(search_application_render_query_request, 'path'),
+    ...getShapeAt(search_application_render_query_request, 'query'),
+  }),
   outputSchema: search_application_render_query_response,
 };
 const SEARCH_APPLICATION_SEARCH_CONTRACT: InternalConnectorContract = {
@@ -16204,12 +16837,16 @@ Unspecified template parameters are assigned their default values if applicable.
     bodyParams: ['params'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_application_search_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_search_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_search_request, 'query'),
-    getZodLooseObjectFromProperty(search_application_search1_request, 'body'),
-    getZodLooseObjectFromProperty(search_application_search1_request, 'path'),
-    getZodLooseObjectFromProperty(search_application_search1_request, 'query'),
+    z.object({
+      ...getShapeAt(search_application_search_request, 'body'),
+      ...getShapeAt(search_application_search_request, 'path'),
+      ...getShapeAt(search_application_search_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search_application_search1_request, 'body'),
+      ...getShapeAt(search_application_search1_request, 'path'),
+      ...getShapeAt(search_application_search1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([search_application_search_response, search_application_search1_response]),
 };
@@ -16342,12 +16979,16 @@ Learn how to use the vector tile search API with practical examples in the [Vect
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_mvt_request, 'body'),
-    getZodLooseObjectFromProperty(search_mvt_request, 'path'),
-    getZodLooseObjectFromProperty(search_mvt_request, 'query'),
-    getZodLooseObjectFromProperty(search_mvt1_request, 'body'),
-    getZodLooseObjectFromProperty(search_mvt1_request, 'path'),
-    getZodLooseObjectFromProperty(search_mvt1_request, 'query'),
+    z.object({
+      ...getShapeAt(search_mvt_request, 'body'),
+      ...getShapeAt(search_mvt_request, 'path'),
+      ...getShapeAt(search_mvt_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search_mvt1_request, 'body'),
+      ...getShapeAt(search_mvt1_request, 'path'),
+      ...getShapeAt(search_mvt1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([search_mvt_response, search_mvt1_response]),
 };
@@ -16383,18 +17024,26 @@ If the Elasticsearch security features are enabled, you must have the \`view_ind
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_shards_request, 'body'),
-    getZodLooseObjectFromProperty(search_shards_request, 'path'),
-    getZodLooseObjectFromProperty(search_shards_request, 'query'),
-    getZodLooseObjectFromProperty(search_shards1_request, 'body'),
-    getZodLooseObjectFromProperty(search_shards1_request, 'path'),
-    getZodLooseObjectFromProperty(search_shards1_request, 'query'),
-    getZodLooseObjectFromProperty(search_shards2_request, 'body'),
-    getZodLooseObjectFromProperty(search_shards2_request, 'path'),
-    getZodLooseObjectFromProperty(search_shards2_request, 'query'),
-    getZodLooseObjectFromProperty(search_shards3_request, 'body'),
-    getZodLooseObjectFromProperty(search_shards3_request, 'path'),
-    getZodLooseObjectFromProperty(search_shards3_request, 'query'),
+    z.object({
+      ...getShapeAt(search_shards_request, 'body'),
+      ...getShapeAt(search_shards_request, 'path'),
+      ...getShapeAt(search_shards_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search_shards1_request, 'body'),
+      ...getShapeAt(search_shards1_request, 'path'),
+      ...getShapeAt(search_shards1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search_shards2_request, 'body'),
+      ...getShapeAt(search_shards2_request, 'path'),
+      ...getShapeAt(search_shards2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search_shards3_request, 'body'),
+      ...getShapeAt(search_shards3_request, 'path'),
+      ...getShapeAt(search_shards3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     search_shards_response,
@@ -16435,18 +17084,26 @@ const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
     bodyParams: ['explain', 'id', 'params', 'profile', 'source'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_template_request, 'body'),
-    getZodLooseObjectFromProperty(search_template_request, 'path'),
-    getZodLooseObjectFromProperty(search_template_request, 'query'),
-    getZodLooseObjectFromProperty(search_template1_request, 'body'),
-    getZodLooseObjectFromProperty(search_template1_request, 'path'),
-    getZodLooseObjectFromProperty(search_template1_request, 'query'),
-    getZodLooseObjectFromProperty(search_template2_request, 'body'),
-    getZodLooseObjectFromProperty(search_template2_request, 'path'),
-    getZodLooseObjectFromProperty(search_template2_request, 'query'),
-    getZodLooseObjectFromProperty(search_template3_request, 'body'),
-    getZodLooseObjectFromProperty(search_template3_request, 'path'),
-    getZodLooseObjectFromProperty(search_template3_request, 'query'),
+    z.object({
+      ...getShapeAt(search_template_request, 'body'),
+      ...getShapeAt(search_template_request, 'path'),
+      ...getShapeAt(search_template_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search_template1_request, 'body'),
+      ...getShapeAt(search_template1_request, 'path'),
+      ...getShapeAt(search_template1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search_template2_request, 'body'),
+      ...getShapeAt(search_template2_request, 'path'),
+      ...getShapeAt(search_template2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(search_template3_request, 'body'),
+      ...getShapeAt(search_template3_request, 'path'),
+      ...getShapeAt(search_template3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     search_template_response,
@@ -16474,12 +17131,16 @@ Get statistics about the shared cache for partially mounted indices.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'body'),
-    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'path'),
-    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'query'),
-    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(searchable_snapshots_cache_stats_request, 'body'),
+      ...getShapeAt(searchable_snapshots_cache_stats_request, 'path'),
+      ...getShapeAt(searchable_snapshots_cache_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(searchable_snapshots_cache_stats1_request, 'body'),
+      ...getShapeAt(searchable_snapshots_cache_stats1_request, 'path'),
+      ...getShapeAt(searchable_snapshots_cache_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     searchable_snapshots_cache_stats_response,
@@ -16505,12 +17166,16 @@ Clear indices and data streams from the shared cache for partially mounted indic
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'body'),
-    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'path'),
-    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'query'),
-    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'body'),
-    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'path'),
-    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'query'),
+    z.object({
+      ...getShapeAt(searchable_snapshots_clear_cache_request, 'body'),
+      ...getShapeAt(searchable_snapshots_clear_cache_request, 'path'),
+      ...getShapeAt(searchable_snapshots_clear_cache_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(searchable_snapshots_clear_cache1_request, 'body'),
+      ...getShapeAt(searchable_snapshots_clear_cache1_request, 'path'),
+      ...getShapeAt(searchable_snapshots_clear_cache1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     searchable_snapshots_clear_cache_response,
@@ -16537,11 +17202,11 @@ Manually mounting ILM-managed snapshots can interfere with ILM processes.
     urlParams: ['master_timeout', 'wait_for_completion', 'storage'],
     bodyParams: ['index', 'renamed_index', 'index_settings', 'ignore_index_settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(searchable_snapshots_mount_request, 'body'),
-    getZodLooseObjectFromProperty(searchable_snapshots_mount_request, 'path'),
-    getZodLooseObjectFromProperty(searchable_snapshots_mount_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(searchable_snapshots_mount_request, 'body'),
+    ...getShapeAt(searchable_snapshots_mount_request, 'path'),
+    ...getShapeAt(searchable_snapshots_mount_request, 'query'),
+  }),
   outputSchema: searchable_snapshots_mount_response,
 };
 const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
@@ -16562,12 +17227,16 @@ const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(searchable_snapshots_stats_request, 'body'),
-    getZodLooseObjectFromProperty(searchable_snapshots_stats_request, 'path'),
-    getZodLooseObjectFromProperty(searchable_snapshots_stats_request, 'query'),
-    getZodLooseObjectFromProperty(searchable_snapshots_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(searchable_snapshots_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(searchable_snapshots_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(searchable_snapshots_stats_request, 'body'),
+      ...getShapeAt(searchable_snapshots_stats_request, 'path'),
+      ...getShapeAt(searchable_snapshots_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(searchable_snapshots_stats1_request, 'body'),
+      ...getShapeAt(searchable_snapshots_stats1_request, 'path'),
+      ...getShapeAt(searchable_snapshots_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     searchable_snapshots_stats_response,
@@ -16604,11 +17273,11 @@ Any updates do not change existing content for either the \`labels\` or \`data\`
     urlParams: [],
     bodyParams: ['access_token', 'grant_type', 'password', 'username'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_activate_user_profile_request, 'body'),
-    getZodLooseObjectFromProperty(security_activate_user_profile_request, 'path'),
-    getZodLooseObjectFromProperty(security_activate_user_profile_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_activate_user_profile_request, 'body'),
+    ...getShapeAt(security_activate_user_profile_request, 'path'),
+    ...getShapeAt(security_activate_user_profile_request, 'query'),
+  }),
   outputSchema: security_activate_user_profile_response,
 };
 const SECURITY_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
@@ -16633,11 +17302,11 @@ If the user cannot be authenticated, this API returns a 401 status code.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_authenticate_request, 'body'),
-    getZodLooseObjectFromProperty(security_authenticate_request, 'path'),
-    getZodLooseObjectFromProperty(security_authenticate_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_authenticate_request, 'body'),
+    ...getShapeAt(security_authenticate_request, 'path'),
+    ...getShapeAt(security_authenticate_request, 'query'),
+  }),
   outputSchema: security_authenticate_response,
 };
 const SECURITY_BULK_DELETE_ROLE_CONTRACT: InternalConnectorContract = {
@@ -16660,11 +17329,11 @@ The bulk delete roles API cannot delete roles that are defined in roles files.
     urlParams: ['refresh'],
     bodyParams: ['names'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_bulk_delete_role_request, 'body'),
-    getZodLooseObjectFromProperty(security_bulk_delete_role_request, 'path'),
-    getZodLooseObjectFromProperty(security_bulk_delete_role_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_bulk_delete_role_request, 'body'),
+    ...getShapeAt(security_bulk_delete_role_request, 'path'),
+    ...getShapeAt(security_bulk_delete_role_request, 'query'),
+  }),
   outputSchema: security_bulk_delete_role_response,
 };
 const SECURITY_BULK_PUT_ROLE_CONTRACT: InternalConnectorContract = {
@@ -16687,11 +17356,11 @@ The bulk create or update roles API cannot update roles that are defined in role
     urlParams: ['refresh'],
     bodyParams: ['roles'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_bulk_put_role_request, 'body'),
-    getZodLooseObjectFromProperty(security_bulk_put_role_request, 'path'),
-    getZodLooseObjectFromProperty(security_bulk_put_role_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_bulk_put_role_request, 'body'),
+    ...getShapeAt(security_bulk_put_role_request, 'path'),
+    ...getShapeAt(security_bulk_put_role_request, 'query'),
+  }),
   outputSchema: security_bulk_put_role_response,
 };
 const SECURITY_BULK_UPDATE_API_KEYS_CONTRACT: InternalConnectorContract = {
@@ -16726,11 +17395,11 @@ A successful request returns a JSON structure that contains the IDs of all updat
     urlParams: [],
     bodyParams: ['expiration', 'ids', 'metadata', 'role_descriptors'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_bulk_update_api_keys_request, 'body'),
-    getZodLooseObjectFromProperty(security_bulk_update_api_keys_request, 'path'),
-    getZodLooseObjectFromProperty(security_bulk_update_api_keys_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_bulk_update_api_keys_request, 'body'),
+    ...getShapeAt(security_bulk_update_api_keys_request, 'path'),
+    ...getShapeAt(security_bulk_update_api_keys_request, 'query'),
+  }),
   outputSchema: security_bulk_update_api_keys_response,
 };
 const SECURITY_CHANGE_PASSWORD_CONTRACT: InternalConnectorContract = {
@@ -16753,18 +17422,26 @@ Change the passwords of users in the native realm and built-in users.
     bodyParams: ['password', 'password_hash'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_change_password_request, 'body'),
-    getZodLooseObjectFromProperty(security_change_password_request, 'path'),
-    getZodLooseObjectFromProperty(security_change_password_request, 'query'),
-    getZodLooseObjectFromProperty(security_change_password1_request, 'body'),
-    getZodLooseObjectFromProperty(security_change_password1_request, 'path'),
-    getZodLooseObjectFromProperty(security_change_password1_request, 'query'),
-    getZodLooseObjectFromProperty(security_change_password2_request, 'body'),
-    getZodLooseObjectFromProperty(security_change_password2_request, 'path'),
-    getZodLooseObjectFromProperty(security_change_password2_request, 'query'),
-    getZodLooseObjectFromProperty(security_change_password3_request, 'body'),
-    getZodLooseObjectFromProperty(security_change_password3_request, 'path'),
-    getZodLooseObjectFromProperty(security_change_password3_request, 'query'),
+    z.object({
+      ...getShapeAt(security_change_password_request, 'body'),
+      ...getShapeAt(security_change_password_request, 'path'),
+      ...getShapeAt(security_change_password_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_change_password1_request, 'body'),
+      ...getShapeAt(security_change_password1_request, 'path'),
+      ...getShapeAt(security_change_password1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_change_password2_request, 'body'),
+      ...getShapeAt(security_change_password2_request, 'path'),
+      ...getShapeAt(security_change_password2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_change_password3_request, 'body'),
+      ...getShapeAt(security_change_password3_request, 'path'),
+      ...getShapeAt(security_change_password3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_change_password_response,
@@ -16793,11 +17470,11 @@ The cache is also automatically cleared on state changes of the security index.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_clear_api_key_cache_request, 'body'),
-    getZodLooseObjectFromProperty(security_clear_api_key_cache_request, 'path'),
-    getZodLooseObjectFromProperty(security_clear_api_key_cache_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_clear_api_key_cache_request, 'body'),
+    ...getShapeAt(security_clear_api_key_cache_request, 'path'),
+    ...getShapeAt(security_clear_api_key_cache_request, 'query'),
+  }),
   outputSchema: security_clear_api_key_cache_response,
 };
 const SECURITY_CLEAR_CACHED_PRIVILEGES_CONTRACT: InternalConnectorContract = {
@@ -16820,11 +17497,11 @@ The cache is also automatically cleared for applications that have their privile
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_clear_cached_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(security_clear_cached_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(security_clear_cached_privileges_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_clear_cached_privileges_request, 'body'),
+    ...getShapeAt(security_clear_cached_privileges_request, 'path'),
+    ...getShapeAt(security_clear_cached_privileges_request, 'query'),
+  }),
   outputSchema: security_clear_cached_privileges_response,
 };
 const SECURITY_CLEAR_CACHED_REALMS_CONTRACT: InternalConnectorContract = {
@@ -16851,11 +17528,11 @@ For more information, refer to the documentation about controlling the user cach
     urlParams: ['usernames'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_clear_cached_realms_request, 'body'),
-    getZodLooseObjectFromProperty(security_clear_cached_realms_request, 'path'),
-    getZodLooseObjectFromProperty(security_clear_cached_realms_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_clear_cached_realms_request, 'body'),
+    ...getShapeAt(security_clear_cached_realms_request, 'path'),
+    ...getShapeAt(security_clear_cached_realms_request, 'query'),
+  }),
   outputSchema: security_clear_cached_realms_response,
 };
 const SECURITY_CLEAR_CACHED_ROLES_CONTRACT: InternalConnectorContract = {
@@ -16877,11 +17554,11 @@ Evict roles from the native role cache.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_clear_cached_roles_request, 'body'),
-    getZodLooseObjectFromProperty(security_clear_cached_roles_request, 'path'),
-    getZodLooseObjectFromProperty(security_clear_cached_roles_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_clear_cached_roles_request, 'body'),
+    ...getShapeAt(security_clear_cached_roles_request, 'path'),
+    ...getShapeAt(security_clear_cached_roles_request, 'query'),
+  }),
   outputSchema: security_clear_cached_roles_response,
 };
 const SECURITY_CLEAR_CACHED_SERVICE_TOKENS_CONTRACT: InternalConnectorContract = {
@@ -16908,11 +17585,11 @@ The cache for tokens backed by the \`service_tokens\` file is cleared automatica
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'body'),
-    getZodLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'path'),
-    getZodLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_clear_cached_service_tokens_request, 'body'),
+    ...getShapeAt(security_clear_cached_service_tokens_request, 'path'),
+    ...getShapeAt(security_clear_cached_service_tokens_request, 'query'),
+  }),
   outputSchema: security_clear_cached_service_tokens_response,
 };
 const SECURITY_CREATE_API_KEY_CONTRACT: InternalConnectorContract = {
@@ -16946,12 +17623,16 @@ To configure or turn off the API key service, refer to API key service setting d
     bodyParams: ['expiration', 'name', 'role_descriptors', 'metadata'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_create_api_key_request, 'body'),
-    getZodLooseObjectFromProperty(security_create_api_key_request, 'path'),
-    getZodLooseObjectFromProperty(security_create_api_key_request, 'query'),
-    getZodLooseObjectFromProperty(security_create_api_key1_request, 'body'),
-    getZodLooseObjectFromProperty(security_create_api_key1_request, 'path'),
-    getZodLooseObjectFromProperty(security_create_api_key1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_create_api_key_request, 'body'),
+      ...getShapeAt(security_create_api_key_request, 'path'),
+      ...getShapeAt(security_create_api_key_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_create_api_key1_request, 'body'),
+      ...getShapeAt(security_create_api_key1_request, 'path'),
+      ...getShapeAt(security_create_api_key1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_create_api_key_response, security_create_api_key1_response]),
 };
@@ -16988,11 +17669,11 @@ Attempting to update them with the update REST API key API or the bulk update RE
     urlParams: [],
     bodyParams: ['access', 'expiration', 'metadata', 'name', 'certificate_identity'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'body'),
-    getZodLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'path'),
-    getZodLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_create_cross_cluster_api_key_request, 'body'),
+    ...getShapeAt(security_create_cross_cluster_api_key_request, 'path'),
+    ...getShapeAt(security_create_cross_cluster_api_key_request, 'query'),
+  }),
   outputSchema: security_create_cross_cluster_api_key_response,
 };
 const SECURITY_CREATE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {
@@ -17021,15 +17702,21 @@ You must actively delete them if they are no longer needed.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_create_service_token_request, 'body'),
-    getZodLooseObjectFromProperty(security_create_service_token_request, 'path'),
-    getZodLooseObjectFromProperty(security_create_service_token_request, 'query'),
-    getZodLooseObjectFromProperty(security_create_service_token1_request, 'body'),
-    getZodLooseObjectFromProperty(security_create_service_token1_request, 'path'),
-    getZodLooseObjectFromProperty(security_create_service_token1_request, 'query'),
-    getZodLooseObjectFromProperty(security_create_service_token2_request, 'body'),
-    getZodLooseObjectFromProperty(security_create_service_token2_request, 'path'),
-    getZodLooseObjectFromProperty(security_create_service_token2_request, 'query'),
+    z.object({
+      ...getShapeAt(security_create_service_token_request, 'body'),
+      ...getShapeAt(security_create_service_token_request, 'path'),
+      ...getShapeAt(security_create_service_token_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_create_service_token1_request, 'body'),
+      ...getShapeAt(security_create_service_token1_request, 'path'),
+      ...getShapeAt(security_create_service_token1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_create_service_token2_request, 'body'),
+      ...getShapeAt(security_create_service_token2_request, 'path'),
+      ...getShapeAt(security_create_service_token2_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_create_service_token_response,
@@ -17064,11 +17751,11 @@ The proxy is trusted to have performed the TLS authentication and this API trans
     urlParams: [],
     bodyParams: ['x509_certificate_chain'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_delegate_pki_request, 'body'),
-    getZodLooseObjectFromProperty(security_delegate_pki_request, 'path'),
-    getZodLooseObjectFromProperty(security_delegate_pki_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_delegate_pki_request, 'body'),
+    ...getShapeAt(security_delegate_pki_request, 'path'),
+    ...getShapeAt(security_delegate_pki_request, 'query'),
+  }),
   outputSchema: security_delegate_pki_response,
 };
 const SECURITY_DELETE_PRIVILEGES_CONTRACT: InternalConnectorContract = {
@@ -17093,11 +17780,11 @@ To use this API, you must have one of the following privileges:
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_delete_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(security_delete_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(security_delete_privileges_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_delete_privileges_request, 'body'),
+    ...getShapeAt(security_delete_privileges_request, 'path'),
+    ...getShapeAt(security_delete_privileges_request, 'query'),
+  }),
   outputSchema: security_delete_privileges_response,
 };
 const SECURITY_DELETE_ROLE_CONTRACT: InternalConnectorContract = {
@@ -17121,11 +17808,11 @@ The delete roles API cannot remove roles that are defined in roles files.
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_delete_role_request, 'body'),
-    getZodLooseObjectFromProperty(security_delete_role_request, 'path'),
-    getZodLooseObjectFromProperty(security_delete_role_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_delete_role_request, 'body'),
+    ...getShapeAt(security_delete_role_request, 'path'),
+    ...getShapeAt(security_delete_role_request, 'query'),
+  }),
   outputSchema: security_delete_role_response,
 };
 const SECURITY_DELETE_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
@@ -17149,11 +17836,11 @@ The delete role mappings API cannot remove role mappings that are defined in rol
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_delete_role_mapping_request, 'body'),
-    getZodLooseObjectFromProperty(security_delete_role_mapping_request, 'path'),
-    getZodLooseObjectFromProperty(security_delete_role_mapping_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_delete_role_mapping_request, 'body'),
+    ...getShapeAt(security_delete_role_mapping_request, 'path'),
+    ...getShapeAt(security_delete_role_mapping_request, 'query'),
+  }),
   outputSchema: security_delete_role_mapping_response,
 };
 const SECURITY_DELETE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {
@@ -17175,11 +17862,11 @@ Delete service account tokens for a service in a specified namespace.
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_delete_service_token_request, 'body'),
-    getZodLooseObjectFromProperty(security_delete_service_token_request, 'path'),
-    getZodLooseObjectFromProperty(security_delete_service_token_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_delete_service_token_request, 'body'),
+    ...getShapeAt(security_delete_service_token_request, 'path'),
+    ...getShapeAt(security_delete_service_token_request, 'query'),
+  }),
   outputSchema: security_delete_service_token_response,
 };
 const SECURITY_DELETE_USER_CONTRACT: InternalConnectorContract = {
@@ -17201,11 +17888,11 @@ Delete users from the native realm.
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_delete_user_request, 'body'),
-    getZodLooseObjectFromProperty(security_delete_user_request, 'path'),
-    getZodLooseObjectFromProperty(security_delete_user_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_delete_user_request, 'body'),
+    ...getShapeAt(security_delete_user_request, 'path'),
+    ...getShapeAt(security_delete_user_request, 'query'),
+  }),
   outputSchema: security_delete_user_response,
 };
 const SECURITY_DISABLE_USER_CONTRACT: InternalConnectorContract = {
@@ -17230,12 +17917,16 @@ You can use this API to revoke a user's access to Elasticsearch.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_disable_user_request, 'body'),
-    getZodLooseObjectFromProperty(security_disable_user_request, 'path'),
-    getZodLooseObjectFromProperty(security_disable_user_request, 'query'),
-    getZodLooseObjectFromProperty(security_disable_user1_request, 'body'),
-    getZodLooseObjectFromProperty(security_disable_user1_request, 'path'),
-    getZodLooseObjectFromProperty(security_disable_user1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_disable_user_request, 'body'),
+      ...getShapeAt(security_disable_user_request, 'path'),
+      ...getShapeAt(security_disable_user_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_disable_user1_request, 'body'),
+      ...getShapeAt(security_disable_user1_request, 'path'),
+      ...getShapeAt(security_disable_user1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_disable_user_response, security_disable_user1_response]),
 };
@@ -17266,12 +17957,16 @@ To re-enable a disabled user profile, use the enable user profile API .
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_disable_user_profile_request, 'body'),
-    getZodLooseObjectFromProperty(security_disable_user_profile_request, 'path'),
-    getZodLooseObjectFromProperty(security_disable_user_profile_request, 'query'),
-    getZodLooseObjectFromProperty(security_disable_user_profile1_request, 'body'),
-    getZodLooseObjectFromProperty(security_disable_user_profile1_request, 'path'),
-    getZodLooseObjectFromProperty(security_disable_user_profile1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_disable_user_profile_request, 'body'),
+      ...getShapeAt(security_disable_user_profile_request, 'path'),
+      ...getShapeAt(security_disable_user_profile_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_disable_user_profile1_request, 'body'),
+      ...getShapeAt(security_disable_user_profile1_request, 'path'),
+      ...getShapeAt(security_disable_user_profile1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_disable_user_profile_response,
@@ -17299,12 +17994,16 @@ By default, when you create users, they are enabled.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_enable_user_request, 'body'),
-    getZodLooseObjectFromProperty(security_enable_user_request, 'path'),
-    getZodLooseObjectFromProperty(security_enable_user_request, 'query'),
-    getZodLooseObjectFromProperty(security_enable_user1_request, 'body'),
-    getZodLooseObjectFromProperty(security_enable_user1_request, 'path'),
-    getZodLooseObjectFromProperty(security_enable_user1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_enable_user_request, 'body'),
+      ...getShapeAt(security_enable_user_request, 'path'),
+      ...getShapeAt(security_enable_user_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_enable_user1_request, 'body'),
+      ...getShapeAt(security_enable_user1_request, 'path'),
+      ...getShapeAt(security_enable_user1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_enable_user_response, security_enable_user1_response]),
 };
@@ -17335,12 +18034,16 @@ If you later disable the user profile, you can use the enable user profile API t
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_enable_user_profile_request, 'body'),
-    getZodLooseObjectFromProperty(security_enable_user_profile_request, 'path'),
-    getZodLooseObjectFromProperty(security_enable_user_profile_request, 'query'),
-    getZodLooseObjectFromProperty(security_enable_user_profile1_request, 'body'),
-    getZodLooseObjectFromProperty(security_enable_user_profile1_request, 'path'),
-    getZodLooseObjectFromProperty(security_enable_user_profile1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_enable_user_profile_request, 'body'),
+      ...getShapeAt(security_enable_user_profile_request, 'path'),
+      ...getShapeAt(security_enable_user_profile_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_enable_user_profile1_request, 'body'),
+      ...getShapeAt(security_enable_user_profile1_request, 'path'),
+      ...getShapeAt(security_enable_user_profile1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_enable_user_profile_response,
@@ -17369,11 +18072,11 @@ Kibana uses this API internally to configure itself for communications with an E
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_enroll_kibana_request, 'body'),
-    getZodLooseObjectFromProperty(security_enroll_kibana_request, 'path'),
-    getZodLooseObjectFromProperty(security_enroll_kibana_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_enroll_kibana_request, 'body'),
+    ...getShapeAt(security_enroll_kibana_request, 'path'),
+    ...getShapeAt(security_enroll_kibana_request, 'query'),
+  }),
   outputSchema: security_enroll_kibana_response,
 };
 const SECURITY_ENROLL_NODE_CONTRACT: InternalConnectorContract = {
@@ -17398,11 +18101,11 @@ The response contains key and certificate material that allows the caller to gen
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_enroll_node_request, 'body'),
-    getZodLooseObjectFromProperty(security_enroll_node_request, 'path'),
-    getZodLooseObjectFromProperty(security_enroll_node_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_enroll_node_request, 'body'),
+    ...getShapeAt(security_enroll_node_request, 'path'),
+    ...getShapeAt(security_enroll_node_request, 'query'),
+  }),
   outputSchema: security_enroll_node_response,
 };
 const SECURITY_GET_API_KEY_CONTRACT: InternalConnectorContract = {
@@ -17435,11 +18138,11 @@ If you have \`read_security\`, \`manage_api_key\` or greater privileges (includi
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_api_key_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_api_key_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_api_key_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_get_api_key_request, 'body'),
+    ...getShapeAt(security_get_api_key_request, 'path'),
+    ...getShapeAt(security_get_api_key_request, 'query'),
+  }),
   outputSchema: security_get_api_key_response,
 };
 const SECURITY_GET_BUILTIN_PRIVILEGES_CONTRACT: InternalConnectorContract = {
@@ -17461,11 +18164,11 @@ Get the list of cluster privileges and index privileges that are available in th
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_builtin_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_builtin_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_builtin_privileges_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_get_builtin_privileges_request, 'body'),
+    ...getShapeAt(security_get_builtin_privileges_request, 'path'),
+    ...getShapeAt(security_get_builtin_privileges_request, 'query'),
+  }),
   outputSchema: security_get_builtin_privileges_response,
 };
 const SECURITY_GET_PRIVILEGES_CONTRACT: InternalConnectorContract = {
@@ -17495,15 +18198,21 @@ To use this API, you must have one of the following privileges:
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_privileges_request, 'query'),
-    getZodLooseObjectFromProperty(security_get_privileges1_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_privileges1_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_privileges1_request, 'query'),
-    getZodLooseObjectFromProperty(security_get_privileges2_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_privileges2_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_privileges2_request, 'query'),
+    z.object({
+      ...getShapeAt(security_get_privileges_request, 'body'),
+      ...getShapeAt(security_get_privileges_request, 'path'),
+      ...getShapeAt(security_get_privileges_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_get_privileges1_request, 'body'),
+      ...getShapeAt(security_get_privileges1_request, 'path'),
+      ...getShapeAt(security_get_privileges1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_get_privileges2_request, 'body'),
+      ...getShapeAt(security_get_privileges2_request, 'path'),
+      ...getShapeAt(security_get_privileges2_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_get_privileges_response,
@@ -17533,12 +18242,16 @@ The get roles API cannot retrieve roles that are defined in roles files.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_role_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_role_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_role_request, 'query'),
-    getZodLooseObjectFromProperty(security_get_role1_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_role1_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_role1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_get_role_request, 'body'),
+      ...getShapeAt(security_get_role_request, 'path'),
+      ...getShapeAt(security_get_role_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_get_role1_request, 'body'),
+      ...getShapeAt(security_get_role1_request, 'path'),
+      ...getShapeAt(security_get_role1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_get_role_response, security_get_role1_response]),
 };
@@ -17564,12 +18277,16 @@ The get role mappings API cannot retrieve role mappings that are defined in role
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_role_mapping_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_role_mapping_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_role_mapping_request, 'query'),
-    getZodLooseObjectFromProperty(security_get_role_mapping1_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_role_mapping1_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_role_mapping1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_get_role_mapping_request, 'body'),
+      ...getShapeAt(security_get_role_mapping_request, 'path'),
+      ...getShapeAt(security_get_role_mapping_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_get_role_mapping1_request, 'body'),
+      ...getShapeAt(security_get_role_mapping1_request, 'path'),
+      ...getShapeAt(security_get_role_mapping1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_get_role_mapping_response, security_get_role_mapping1_response]),
 };
@@ -17599,15 +18316,21 @@ NOTE: Currently, only the \`elastic/fleet-server\` service account is available.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_service_accounts_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_service_accounts_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_service_accounts_request, 'query'),
-    getZodLooseObjectFromProperty(security_get_service_accounts1_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_service_accounts1_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_service_accounts1_request, 'query'),
-    getZodLooseObjectFromProperty(security_get_service_accounts2_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_service_accounts2_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_service_accounts2_request, 'query'),
+    z.object({
+      ...getShapeAt(security_get_service_accounts_request, 'body'),
+      ...getShapeAt(security_get_service_accounts_request, 'path'),
+      ...getShapeAt(security_get_service_accounts_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_get_service_accounts1_request, 'body'),
+      ...getShapeAt(security_get_service_accounts1_request, 'path'),
+      ...getShapeAt(security_get_service_accounts1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_get_service_accounts2_request, 'body'),
+      ...getShapeAt(security_get_service_accounts2_request, 'path'),
+      ...getShapeAt(security_get_service_accounts2_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_get_service_accounts_response,
@@ -17639,11 +18362,11 @@ Tokens with the same name from different nodes are assumed to be the same token 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_service_credentials_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_service_credentials_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_service_credentials_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_get_service_credentials_request, 'body'),
+    ...getShapeAt(security_get_service_credentials_request, 'path'),
+    ...getShapeAt(security_get_service_credentials_request, 'query'),
+  }),
   outputSchema: security_get_service_credentials_response,
 };
 const SECURITY_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -17670,11 +18393,11 @@ This includes:
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_settings_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_settings_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_get_settings_request, 'body'),
+    ...getShapeAt(security_get_settings_request, 'path'),
+    ...getShapeAt(security_get_settings_request, 'query'),
+  }),
   outputSchema: security_get_settings_response,
 };
 const SECURITY_GET_STATS_CONTRACT: InternalConnectorContract = {
@@ -17696,11 +18419,11 @@ Gather security usage statistics from all node(s) within the cluster.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_stats_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_stats_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_get_stats_request, 'body'),
+    ...getShapeAt(security_get_stats_request, 'path'),
+    ...getShapeAt(security_get_stats_request, 'query'),
+  }),
   outputSchema: security_get_stats_response,
 };
 const SECURITY_GET_TOKEN_CONTRACT: InternalConnectorContract = {
@@ -17733,11 +18456,11 @@ If you want to invalidate a token immediately, you can do so by using the invali
     urlParams: [],
     bodyParams: ['grant_type', 'scope', 'password', 'kerberos_ticket', 'refresh_token', 'username'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_token_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_token_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_token_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_get_token_request, 'body'),
+    ...getShapeAt(security_get_token_request, 'path'),
+    ...getShapeAt(security_get_token_request, 'query'),
+  }),
   outputSchema: security_get_token_response,
 };
 const SECURITY_GET_USER_CONTRACT: InternalConnectorContract = {
@@ -17760,12 +18483,16 @@ Get information about users in the native realm and built-in users.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_user_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_user_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_user_request, 'query'),
-    getZodLooseObjectFromProperty(security_get_user1_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_user1_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_user1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_get_user_request, 'body'),
+      ...getShapeAt(security_get_user_request, 'path'),
+      ...getShapeAt(security_get_user_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_get_user1_request, 'body'),
+      ...getShapeAt(security_get_user1_request, 'path'),
+      ...getShapeAt(security_get_user1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_get_user_response, security_get_user1_response]),
 };
@@ -17791,11 +18518,11 @@ To check whether a user has a specific list of privileges, use the has privilege
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_user_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_user_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_user_privileges_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_get_user_privileges_request, 'body'),
+    ...getShapeAt(security_get_user_privileges_request, 'path'),
+    ...getShapeAt(security_get_user_privileges_request, 'query'),
+  }),
   outputSchema: security_get_user_privileges_response,
 };
 const SECURITY_GET_USER_PROFILE_CONTRACT: InternalConnectorContract = {
@@ -17821,11 +18548,11 @@ Elastic reserves the right to change or remove this feature in future releases w
     urlParams: ['data'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_get_user_profile_request, 'body'),
-    getZodLooseObjectFromProperty(security_get_user_profile_request, 'path'),
-    getZodLooseObjectFromProperty(security_get_user_profile_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_get_user_profile_request, 'body'),
+    ...getShapeAt(security_get_user_profile_request, 'path'),
+    ...getShapeAt(security_get_user_profile_request, 'query'),
+  }),
   outputSchema: security_get_user_profile_response,
 };
 const SECURITY_GRANT_API_KEY_CONTRACT: InternalConnectorContract = {
@@ -17866,11 +18593,11 @@ By default, API keys never expire. You can specify expiration information when y
     urlParams: ['refresh'],
     bodyParams: ['api_key', 'grant_type', 'access_token', 'username', 'password', 'run_as'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_grant_api_key_request, 'body'),
-    getZodLooseObjectFromProperty(security_grant_api_key_request, 'path'),
-    getZodLooseObjectFromProperty(security_grant_api_key_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_grant_api_key_request, 'body'),
+    ...getShapeAt(security_grant_api_key_request, 'path'),
+    ...getShapeAt(security_grant_api_key_request, 'query'),
+  }),
   outputSchema: security_grant_api_key_response,
 };
 const SECURITY_HAS_PRIVILEGES_CONTRACT: InternalConnectorContract = {
@@ -17895,18 +18622,26 @@ To check the privileges of other users, you must use the run as feature.
     bodyParams: ['application', 'cluster', 'index'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_has_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(security_has_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(security_has_privileges_request, 'query'),
-    getZodLooseObjectFromProperty(security_has_privileges1_request, 'body'),
-    getZodLooseObjectFromProperty(security_has_privileges1_request, 'path'),
-    getZodLooseObjectFromProperty(security_has_privileges1_request, 'query'),
-    getZodLooseObjectFromProperty(security_has_privileges2_request, 'body'),
-    getZodLooseObjectFromProperty(security_has_privileges2_request, 'path'),
-    getZodLooseObjectFromProperty(security_has_privileges2_request, 'query'),
-    getZodLooseObjectFromProperty(security_has_privileges3_request, 'body'),
-    getZodLooseObjectFromProperty(security_has_privileges3_request, 'path'),
-    getZodLooseObjectFromProperty(security_has_privileges3_request, 'query'),
+    z.object({
+      ...getShapeAt(security_has_privileges_request, 'body'),
+      ...getShapeAt(security_has_privileges_request, 'path'),
+      ...getShapeAt(security_has_privileges_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_has_privileges1_request, 'body'),
+      ...getShapeAt(security_has_privileges1_request, 'path'),
+      ...getShapeAt(security_has_privileges1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_has_privileges2_request, 'body'),
+      ...getShapeAt(security_has_privileges2_request, 'path'),
+      ...getShapeAt(security_has_privileges2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_has_privileges3_request, 'body'),
+      ...getShapeAt(security_has_privileges3_request, 'path'),
+      ...getShapeAt(security_has_privileges3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_has_privileges_response,
@@ -17938,12 +18673,16 @@ Elastic reserves the right to change or remove this feature in future releases w
     bodyParams: ['uids', 'privileges'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_has_privileges_user_profile_request, 'body'),
-    getZodLooseObjectFromProperty(security_has_privileges_user_profile_request, 'path'),
-    getZodLooseObjectFromProperty(security_has_privileges_user_profile_request, 'query'),
-    getZodLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'body'),
-    getZodLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'path'),
-    getZodLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_has_privileges_user_profile_request, 'body'),
+      ...getShapeAt(security_has_privileges_user_profile_request, 'path'),
+      ...getShapeAt(security_has_privileges_user_profile_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_has_privileges_user_profile1_request, 'body'),
+      ...getShapeAt(security_has_privileges_user_profile1_request, 'path'),
+      ...getShapeAt(security_has_privileges_user_profile1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_has_privileges_user_profile_response,
@@ -17980,11 +18719,11 @@ In addition, with the \`manage_own_api_key\` privilege, an invalidation request 
     urlParams: [],
     bodyParams: ['id', 'ids', 'name', 'owner', 'realm_name', 'username'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_invalidate_api_key_request, 'body'),
-    getZodLooseObjectFromProperty(security_invalidate_api_key_request, 'path'),
-    getZodLooseObjectFromProperty(security_invalidate_api_key_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_invalidate_api_key_request, 'body'),
+    ...getShapeAt(security_invalidate_api_key_request, 'path'),
+    ...getShapeAt(security_invalidate_api_key_request, 'query'),
+  }),
   outputSchema: security_invalidate_api_key_response,
 };
 const SECURITY_INVALIDATE_TOKEN_CONTRACT: InternalConnectorContract = {
@@ -18016,11 +18755,11 @@ If none of these two are specified, then \`realm_name\` and/or \`username\` need
     urlParams: [],
     bodyParams: ['token', 'refresh_token', 'realm_name', 'username'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_invalidate_token_request, 'body'),
-    getZodLooseObjectFromProperty(security_invalidate_token_request, 'path'),
-    getZodLooseObjectFromProperty(security_invalidate_token_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_invalidate_token_request, 'body'),
+    ...getShapeAt(security_invalidate_token_request, 'path'),
+    ...getShapeAt(security_invalidate_token_request, 'query'),
+  }),
   outputSchema: security_invalidate_token_response,
 };
 const SECURITY_OIDC_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
@@ -18045,11 +18784,11 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
     urlParams: [],
     bodyParams: ['nonce', 'realm', 'redirect_uri', 'state'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_oidc_authenticate_request, 'body'),
-    getZodLooseObjectFromProperty(security_oidc_authenticate_request, 'path'),
-    getZodLooseObjectFromProperty(security_oidc_authenticate_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_oidc_authenticate_request, 'body'),
+    ...getShapeAt(security_oidc_authenticate_request, 'path'),
+    ...getShapeAt(security_oidc_authenticate_request, 'query'),
+  }),
   outputSchema: security_oidc_authenticate_response,
 };
 const SECURITY_OIDC_LOGOUT_CONTRACT: InternalConnectorContract = {
@@ -18076,11 +18815,11 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
     urlParams: [],
     bodyParams: ['token', 'refresh_token'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_oidc_logout_request, 'body'),
-    getZodLooseObjectFromProperty(security_oidc_logout_request, 'path'),
-    getZodLooseObjectFromProperty(security_oidc_logout_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_oidc_logout_request, 'body'),
+    ...getShapeAt(security_oidc_logout_request, 'path'),
+    ...getShapeAt(security_oidc_logout_request, 'query'),
+  }),
   outputSchema: security_oidc_logout_response,
 };
 const SECURITY_OIDC_PREPARE_AUTHENTICATION_CONTRACT: InternalConnectorContract = {
@@ -18107,11 +18846,11 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
     urlParams: [],
     bodyParams: ['iss', 'login_hint', 'nonce', 'realm', 'state'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'body'),
-    getZodLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'path'),
-    getZodLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_oidc_prepare_authentication_request, 'body'),
+    ...getShapeAt(security_oidc_prepare_authentication_request, 'path'),
+    ...getShapeAt(security_oidc_prepare_authentication_request, 'query'),
+  }),
   outputSchema: security_oidc_prepare_authentication_response,
 };
 const SECURITY_PUT_PRIVILEGES_CONTRACT: InternalConnectorContract = {
@@ -18150,12 +18889,16 @@ Action names can contain any number of printable ASCII characters and must conta
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_put_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(security_put_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(security_put_privileges_request, 'query'),
-    getZodLooseObjectFromProperty(security_put_privileges1_request, 'body'),
-    getZodLooseObjectFromProperty(security_put_privileges1_request, 'path'),
-    getZodLooseObjectFromProperty(security_put_privileges1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_put_privileges_request, 'body'),
+      ...getShapeAt(security_put_privileges_request, 'path'),
+      ...getShapeAt(security_put_privileges_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_put_privileges1_request, 'body'),
+      ...getShapeAt(security_put_privileges1_request, 'path'),
+      ...getShapeAt(security_put_privileges1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_put_privileges_response, security_put_privileges1_response]),
 };
@@ -18192,12 +18935,16 @@ File-based role management is not available in Elastic Serverless.
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_put_role_request, 'body'),
-    getZodLooseObjectFromProperty(security_put_role_request, 'path'),
-    getZodLooseObjectFromProperty(security_put_role_request, 'query'),
-    getZodLooseObjectFromProperty(security_put_role1_request, 'body'),
-    getZodLooseObjectFromProperty(security_put_role1_request, 'path'),
-    getZodLooseObjectFromProperty(security_put_role1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_put_role_request, 'body'),
+      ...getShapeAt(security_put_role_request, 'path'),
+      ...getShapeAt(security_put_role_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_put_role1_request, 'body'),
+      ...getShapeAt(security_put_role1_request, 'path'),
+      ...getShapeAt(security_put_role1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_put_role_response, security_put_role1_response]),
 };
@@ -18244,12 +18991,16 @@ If the format of the template is set to "json" then the template is expected to 
     bodyParams: ['enabled', 'metadata', 'roles', 'role_templates', 'rules', 'run_as'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_put_role_mapping_request, 'body'),
-    getZodLooseObjectFromProperty(security_put_role_mapping_request, 'path'),
-    getZodLooseObjectFromProperty(security_put_role_mapping_request, 'query'),
-    getZodLooseObjectFromProperty(security_put_role_mapping1_request, 'body'),
-    getZodLooseObjectFromProperty(security_put_role_mapping1_request, 'path'),
-    getZodLooseObjectFromProperty(security_put_role_mapping1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_put_role_mapping_request, 'body'),
+      ...getShapeAt(security_put_role_mapping_request, 'path'),
+      ...getShapeAt(security_put_role_mapping_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_put_role_mapping1_request, 'body'),
+      ...getShapeAt(security_put_role_mapping1_request, 'path'),
+      ...getShapeAt(security_put_role_mapping1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_put_role_mapping_response, security_put_role_mapping1_response]),
 };
@@ -18284,12 +19035,16 @@ To change a user's password without updating any other fields, use the change pa
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_put_user_request, 'body'),
-    getZodLooseObjectFromProperty(security_put_user_request, 'path'),
-    getZodLooseObjectFromProperty(security_put_user_request, 'query'),
-    getZodLooseObjectFromProperty(security_put_user1_request, 'body'),
-    getZodLooseObjectFromProperty(security_put_user1_request, 'path'),
-    getZodLooseObjectFromProperty(security_put_user1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_put_user_request, 'body'),
+      ...getShapeAt(security_put_user_request, 'path'),
+      ...getShapeAt(security_put_user_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_put_user1_request, 'body'),
+      ...getShapeAt(security_put_user1_request, 'path'),
+      ...getShapeAt(security_put_user1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_put_user_response, security_put_user1_response]),
 };
@@ -18319,12 +19074,16 @@ Refer to the linked documentation for examples of how to find API keys:
     bodyParams: ['aggregations', 'query', 'from', 'sort', 'size', 'search_after'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_query_api_keys_request, 'body'),
-    getZodLooseObjectFromProperty(security_query_api_keys_request, 'path'),
-    getZodLooseObjectFromProperty(security_query_api_keys_request, 'query'),
-    getZodLooseObjectFromProperty(security_query_api_keys1_request, 'body'),
-    getZodLooseObjectFromProperty(security_query_api_keys1_request, 'path'),
-    getZodLooseObjectFromProperty(security_query_api_keys1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_query_api_keys_request, 'body'),
+      ...getShapeAt(security_query_api_keys_request, 'path'),
+      ...getShapeAt(security_query_api_keys_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_query_api_keys1_request, 'body'),
+      ...getShapeAt(security_query_api_keys1_request, 'path'),
+      ...getShapeAt(security_query_api_keys1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_query_api_keys_response, security_query_api_keys1_response]),
 };
@@ -18352,12 +19111,16 @@ Also, the results can be paginated and sorted.
     bodyParams: ['query', 'from', 'sort', 'size', 'search_after'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_query_role_request, 'body'),
-    getZodLooseObjectFromProperty(security_query_role_request, 'path'),
-    getZodLooseObjectFromProperty(security_query_role_request, 'query'),
-    getZodLooseObjectFromProperty(security_query_role1_request, 'body'),
-    getZodLooseObjectFromProperty(security_query_role1_request, 'path'),
-    getZodLooseObjectFromProperty(security_query_role1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_query_role_request, 'body'),
+      ...getShapeAt(security_query_role_request, 'path'),
+      ...getShapeAt(security_query_role_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_query_role1_request, 'body'),
+      ...getShapeAt(security_query_role1_request, 'path'),
+      ...getShapeAt(security_query_role1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_query_role_response, security_query_role1_response]),
 };
@@ -18385,12 +19148,16 @@ This API is only for native users.
     bodyParams: ['query', 'from', 'sort', 'size', 'search_after'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_query_user_request, 'body'),
-    getZodLooseObjectFromProperty(security_query_user_request, 'path'),
-    getZodLooseObjectFromProperty(security_query_user_request, 'query'),
-    getZodLooseObjectFromProperty(security_query_user1_request, 'body'),
-    getZodLooseObjectFromProperty(security_query_user1_request, 'path'),
-    getZodLooseObjectFromProperty(security_query_user1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_query_user_request, 'body'),
+      ...getShapeAt(security_query_user_request, 'path'),
+      ...getShapeAt(security_query_user_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_query_user1_request, 'body'),
+      ...getShapeAt(security_query_user1_request, 'path'),
+      ...getShapeAt(security_query_user1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([security_query_user_response, security_query_user1_response]),
 };
@@ -18426,11 +19193,11 @@ This API endpoint essentially exchanges SAML responses that indicate successful 
     urlParams: [],
     bodyParams: ['content', 'ids', 'realm'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_saml_authenticate_request, 'body'),
-    getZodLooseObjectFromProperty(security_saml_authenticate_request, 'path'),
-    getZodLooseObjectFromProperty(security_saml_authenticate_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_saml_authenticate_request, 'body'),
+    ...getShapeAt(security_saml_authenticate_request, 'path'),
+    ...getShapeAt(security_saml_authenticate_request, 'query'),
+  }),
   outputSchema: security_saml_authenticate_response,
 };
 const SECURITY_SAML_COMPLETE_LOGOUT_CONTRACT: InternalConnectorContract = {
@@ -18461,11 +19228,11 @@ The caller of this API must prepare the request accordingly so that this API can
     urlParams: [],
     bodyParams: ['realm', 'ids', 'query_string', 'content'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_saml_complete_logout_request, 'body'),
-    getZodLooseObjectFromProperty(security_saml_complete_logout_request, 'path'),
-    getZodLooseObjectFromProperty(security_saml_complete_logout_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_saml_complete_logout_request, 'body'),
+    ...getShapeAt(security_saml_complete_logout_request, 'path'),
+    ...getShapeAt(security_saml_complete_logout_request, 'query'),
+  }),
   outputSchema: security_saml_complete_logout_response,
 };
 const SECURITY_SAML_INVALIDATE_CONTRACT: InternalConnectorContract = {
@@ -18495,11 +19262,11 @@ Thus the user can be redirected back to their IdP.
     urlParams: [],
     bodyParams: ['acs', 'query_string', 'realm'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_saml_invalidate_request, 'body'),
-    getZodLooseObjectFromProperty(security_saml_invalidate_request, 'path'),
-    getZodLooseObjectFromProperty(security_saml_invalidate_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_saml_invalidate_request, 'body'),
+    ...getShapeAt(security_saml_invalidate_request, 'path'),
+    ...getShapeAt(security_saml_invalidate_request, 'query'),
+  }),
   outputSchema: security_saml_invalidate_response,
 };
 const SECURITY_SAML_LOGOUT_CONTRACT: InternalConnectorContract = {
@@ -18527,11 +19294,11 @@ If the SAML realm in Elasticsearch is configured accordingly and the SAML IdP su
     urlParams: [],
     bodyParams: ['token', 'refresh_token'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_saml_logout_request, 'body'),
-    getZodLooseObjectFromProperty(security_saml_logout_request, 'path'),
-    getZodLooseObjectFromProperty(security_saml_logout_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_saml_logout_request, 'body'),
+    ...getShapeAt(security_saml_logout_request, 'path'),
+    ...getShapeAt(security_saml_logout_request, 'query'),
+  }),
   outputSchema: security_saml_logout_response,
 };
 const SECURITY_SAML_PREPARE_AUTHENTICATION_CONTRACT: InternalConnectorContract = {
@@ -18564,11 +19331,11 @@ The caller of this API needs to store this identifier as it needs to be used in 
     urlParams: [],
     bodyParams: ['acs', 'realm', 'relay_state'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_saml_prepare_authentication_request, 'body'),
-    getZodLooseObjectFromProperty(security_saml_prepare_authentication_request, 'path'),
-    getZodLooseObjectFromProperty(security_saml_prepare_authentication_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_saml_prepare_authentication_request, 'body'),
+    ...getShapeAt(security_saml_prepare_authentication_request, 'path'),
+    ...getShapeAt(security_saml_prepare_authentication_request, 'query'),
+  }),
   outputSchema: security_saml_prepare_authentication_response,
 };
 const SECURITY_SAML_SERVICE_PROVIDER_METADATA_CONTRACT: InternalConnectorContract = {
@@ -18593,11 +19360,11 @@ This API generates Service Provider metadata based on the configuration of a SAM
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'body'),
-    getZodLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'path'),
-    getZodLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_saml_service_provider_metadata_request, 'body'),
+    ...getShapeAt(security_saml_service_provider_metadata_request, 'path'),
+    ...getShapeAt(security_saml_service_provider_metadata_request, 'query'),
+  }),
   outputSchema: security_saml_service_provider_metadata_response,
 };
 const SECURITY_SUGGEST_USER_PROFILES_CONTRACT: InternalConnectorContract = {
@@ -18624,12 +19391,16 @@ Elastic reserves the right to change or remove this feature in future releases w
     bodyParams: ['name', 'size', 'data', 'hint'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_suggest_user_profiles_request, 'body'),
-    getZodLooseObjectFromProperty(security_suggest_user_profiles_request, 'path'),
-    getZodLooseObjectFromProperty(security_suggest_user_profiles_request, 'query'),
-    getZodLooseObjectFromProperty(security_suggest_user_profiles1_request, 'body'),
-    getZodLooseObjectFromProperty(security_suggest_user_profiles1_request, 'path'),
-    getZodLooseObjectFromProperty(security_suggest_user_profiles1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_suggest_user_profiles_request, 'body'),
+      ...getShapeAt(security_suggest_user_profiles_request, 'path'),
+      ...getShapeAt(security_suggest_user_profiles_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_suggest_user_profiles1_request, 'body'),
+      ...getShapeAt(security_suggest_user_profiles1_request, 'path'),
+      ...getShapeAt(security_suggest_user_profiles1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_suggest_user_profiles_response,
@@ -18672,11 +19443,11 @@ This change can occur if the owner user's permissions have changed since the API
     urlParams: [],
     bodyParams: ['role_descriptors', 'metadata', 'expiration'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_update_api_key_request, 'body'),
-    getZodLooseObjectFromProperty(security_update_api_key_request, 'path'),
-    getZodLooseObjectFromProperty(security_update_api_key_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_update_api_key_request, 'body'),
+    ...getShapeAt(security_update_api_key_request, 'path'),
+    ...getShapeAt(security_update_api_key_request, 'query'),
+  }),
   outputSchema: security_update_api_key_response,
 };
 const SECURITY_UPDATE_CROSS_CLUSTER_API_KEY_CONTRACT: InternalConnectorContract = {
@@ -18714,11 +19485,11 @@ To learn more about how to use this API, refer to the [Update cross cluter API k
     urlParams: [],
     bodyParams: ['access', 'expiration', 'metadata', 'certificate_identity'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'body'),
-    getZodLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'path'),
-    getZodLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_update_cross_cluster_api_key_request, 'body'),
+    ...getShapeAt(security_update_cross_cluster_api_key_request, 'path'),
+    ...getShapeAt(security_update_cross_cluster_api_key_request, 'query'),
+  }),
   outputSchema: security_update_cross_cluster_api_key_response,
 };
 const SECURITY_UPDATE_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -18745,11 +19516,11 @@ This API does not yet support configuring the settings for indices before they a
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['security', 'security-profile', 'security-tokens'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_update_settings_request, 'body'),
-    getZodLooseObjectFromProperty(security_update_settings_request, 'path'),
-    getZodLooseObjectFromProperty(security_update_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(security_update_settings_request, 'body'),
+    ...getShapeAt(security_update_settings_request, 'path'),
+    ...getShapeAt(security_update_settings_request, 'query'),
+  }),
   outputSchema: security_update_settings_response,
 };
 const SECURITY_UPDATE_USER_PROFILE_DATA_CONTRACT: InternalConnectorContract = {
@@ -18787,12 +19558,16 @@ The \`update_profile_data\` global privilege grants privileges for updating only
     bodyParams: ['labels', 'data'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(security_update_user_profile_data_request, 'body'),
-    getZodLooseObjectFromProperty(security_update_user_profile_data_request, 'path'),
-    getZodLooseObjectFromProperty(security_update_user_profile_data_request, 'query'),
-    getZodLooseObjectFromProperty(security_update_user_profile_data1_request, 'body'),
-    getZodLooseObjectFromProperty(security_update_user_profile_data1_request, 'path'),
-    getZodLooseObjectFromProperty(security_update_user_profile_data1_request, 'query'),
+    z.object({
+      ...getShapeAt(security_update_user_profile_data_request, 'body'),
+      ...getShapeAt(security_update_user_profile_data_request, 'path'),
+      ...getShapeAt(security_update_user_profile_data_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_update_user_profile_data1_request, 'body'),
+      ...getShapeAt(security_update_user_profile_data1_request, 'path'),
+      ...getShapeAt(security_update_user_profile_data1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     security_update_user_profile_data_response,
@@ -18824,7 +19599,7 @@ If the operator privileges feature is enabled, you must be an operator to use th
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const SHUTDOWN_GET_NODE_CONTRACT: InternalConnectorContract = {
@@ -18851,7 +19626,7 @@ If the operator privileges feature is enabled, you must be an operator to use th
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const SHUTDOWN_PUT_NODE_CONTRACT: InternalConnectorContract = {
@@ -18886,7 +19661,7 @@ Monitor the node shutdown status to determine when it is safe to stop Elasticsea
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const SIMULATE_INGEST_CONTRACT: InternalConnectorContract = {
@@ -18929,18 +19704,26 @@ These will be used in place of the pipeline definitions that are already in the 
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(simulate_ingest_request, 'body'),
-    getZodLooseObjectFromProperty(simulate_ingest_request, 'path'),
-    getZodLooseObjectFromProperty(simulate_ingest_request, 'query'),
-    getZodLooseObjectFromProperty(simulate_ingest1_request, 'body'),
-    getZodLooseObjectFromProperty(simulate_ingest1_request, 'path'),
-    getZodLooseObjectFromProperty(simulate_ingest1_request, 'query'),
-    getZodLooseObjectFromProperty(simulate_ingest2_request, 'body'),
-    getZodLooseObjectFromProperty(simulate_ingest2_request, 'path'),
-    getZodLooseObjectFromProperty(simulate_ingest2_request, 'query'),
-    getZodLooseObjectFromProperty(simulate_ingest3_request, 'body'),
-    getZodLooseObjectFromProperty(simulate_ingest3_request, 'path'),
-    getZodLooseObjectFromProperty(simulate_ingest3_request, 'query'),
+    z.object({
+      ...getShapeAt(simulate_ingest_request, 'body'),
+      ...getShapeAt(simulate_ingest_request, 'path'),
+      ...getShapeAt(simulate_ingest_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(simulate_ingest1_request, 'body'),
+      ...getShapeAt(simulate_ingest1_request, 'path'),
+      ...getShapeAt(simulate_ingest1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(simulate_ingest2_request, 'body'),
+      ...getShapeAt(simulate_ingest2_request, 'path'),
+      ...getShapeAt(simulate_ingest2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(simulate_ingest3_request, 'body'),
+      ...getShapeAt(simulate_ingest3_request, 'path'),
+      ...getShapeAt(simulate_ingest3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     simulate_ingest_response,
@@ -18968,11 +19751,11 @@ This operation prevents any future snapshots from being taken but does not cance
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(slm_delete_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(slm_delete_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(slm_delete_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(slm_delete_lifecycle_request, 'body'),
+    ...getShapeAt(slm_delete_lifecycle_request, 'path'),
+    ...getShapeAt(slm_delete_lifecycle_request, 'query'),
+  }),
   outputSchema: slm_delete_lifecycle_response,
 };
 const SLM_EXECUTE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
@@ -18994,11 +19777,11 @@ The snapshot policy is normally applied according to its schedule, but you might
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(slm_execute_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(slm_execute_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(slm_execute_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(slm_execute_lifecycle_request, 'body'),
+    ...getShapeAt(slm_execute_lifecycle_request, 'path'),
+    ...getShapeAt(slm_execute_lifecycle_request, 'query'),
+  }),
   outputSchema: slm_execute_lifecycle_response,
 };
 const SLM_EXECUTE_RETENTION_CONTRACT: InternalConnectorContract = {
@@ -19020,11 +19803,11 @@ The retention policy is normally applied according to its schedule.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(slm_execute_retention_request, 'body'),
-    getZodLooseObjectFromProperty(slm_execute_retention_request, 'path'),
-    getZodLooseObjectFromProperty(slm_execute_retention_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(slm_execute_retention_request, 'body'),
+    ...getShapeAt(slm_execute_retention_request, 'path'),
+    ...getShapeAt(slm_execute_retention_request, 'query'),
+  }),
   outputSchema: slm_execute_retention_response,
 };
 const SLM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
@@ -19046,12 +19829,16 @@ Get snapshot lifecycle policy definitions and information about the latest snaps
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(slm_get_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(slm_get_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(slm_get_lifecycle_request, 'query'),
-    getZodLooseObjectFromProperty(slm_get_lifecycle1_request, 'body'),
-    getZodLooseObjectFromProperty(slm_get_lifecycle1_request, 'path'),
-    getZodLooseObjectFromProperty(slm_get_lifecycle1_request, 'query'),
+    z.object({
+      ...getShapeAt(slm_get_lifecycle_request, 'body'),
+      ...getShapeAt(slm_get_lifecycle_request, 'path'),
+      ...getShapeAt(slm_get_lifecycle_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(slm_get_lifecycle1_request, 'body'),
+      ...getShapeAt(slm_get_lifecycle1_request, 'path'),
+      ...getShapeAt(slm_get_lifecycle1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([slm_get_lifecycle_response, slm_get_lifecycle1_response]),
 };
@@ -19073,11 +19860,11 @@ Get global and policy-level statistics about actions taken by snapshot lifecycle
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(slm_get_stats_request, 'body'),
-    getZodLooseObjectFromProperty(slm_get_stats_request, 'path'),
-    getZodLooseObjectFromProperty(slm_get_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(slm_get_stats_request, 'body'),
+    ...getShapeAt(slm_get_stats_request, 'path'),
+    ...getShapeAt(slm_get_stats_request, 'query'),
+  }),
   outputSchema: slm_get_stats_response,
 };
 const SLM_GET_STATUS_CONTRACT: InternalConnectorContract = {
@@ -19097,11 +19884,11 @@ const SLM_GET_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(slm_get_status_request, 'body'),
-    getZodLooseObjectFromProperty(slm_get_status_request, 'path'),
-    getZodLooseObjectFromProperty(slm_get_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(slm_get_status_request, 'body'),
+    ...getShapeAt(slm_get_status_request, 'path'),
+    ...getShapeAt(slm_get_status_request, 'query'),
+  }),
   outputSchema: slm_get_status_response,
 };
 const SLM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
@@ -19124,11 +19911,11 @@ Only the latest version of a policy is stored.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['config', 'name', 'repository', 'retention', 'schedule'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(slm_put_lifecycle_request, 'body'),
-    getZodLooseObjectFromProperty(slm_put_lifecycle_request, 'path'),
-    getZodLooseObjectFromProperty(slm_put_lifecycle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(slm_put_lifecycle_request, 'body'),
+    ...getShapeAt(slm_put_lifecycle_request, 'path'),
+    ...getShapeAt(slm_put_lifecycle_request, 'query'),
+  }),
   outputSchema: slm_put_lifecycle_response,
 };
 const SLM_START_CONTRACT: InternalConnectorContract = {
@@ -19149,11 +19936,11 @@ Manually starting SLM is necessary only if it has been stopped using the stop SL
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(slm_start_request, 'body'),
-    getZodLooseObjectFromProperty(slm_start_request, 'path'),
-    getZodLooseObjectFromProperty(slm_start_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(slm_start_request, 'body'),
+    ...getShapeAt(slm_start_request, 'path'),
+    ...getShapeAt(slm_start_request, 'query'),
+  }),
   outputSchema: slm_start_response,
 };
 const SLM_STOP_CONTRACT: InternalConnectorContract = {
@@ -19179,11 +19966,11 @@ Use the get snapshot lifecycle management status API to see if SLM is running.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(slm_stop_request, 'body'),
-    getZodLooseObjectFromProperty(slm_stop_request, 'path'),
-    getZodLooseObjectFromProperty(slm_stop_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(slm_stop_request, 'body'),
+    ...getShapeAt(slm_stop_request, 'path'),
+    ...getShapeAt(slm_stop_request, 'query'),
+  }),
   outputSchema: slm_stop_response,
 };
 const SNAPSHOT_CLEANUP_REPOSITORY_CONTRACT: InternalConnectorContract = {
@@ -19204,11 +19991,11 @@ Trigger the review of the contents of a snapshot repository and delete any stale
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_cleanup_repository_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_cleanup_repository_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_cleanup_repository_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(snapshot_cleanup_repository_request, 'body'),
+    ...getShapeAt(snapshot_cleanup_repository_request, 'path'),
+    ...getShapeAt(snapshot_cleanup_repository_request, 'query'),
+  }),
   outputSchema: snapshot_cleanup_repository_response,
 };
 const SNAPSHOT_CLONE_CONTRACT: InternalConnectorContract = {
@@ -19229,11 +20016,11 @@ Clone part of all of a snapshot into another snapshot in the same repository.
     urlParams: ['master_timeout'],
     bodyParams: ['indices'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_clone_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_clone_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_clone_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(snapshot_clone_request, 'body'),
+    ...getShapeAt(snapshot_clone_request, 'path'),
+    ...getShapeAt(snapshot_clone_request, 'query'),
+  }),
   outputSchema: snapshot_clone_response,
 };
 const SNAPSHOT_CREATE_CONTRACT: InternalConnectorContract = {
@@ -19263,12 +20050,16 @@ Take a snapshot of a cluster or of data streams and indices.
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_create_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_create_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_create_request, 'query'),
-    getZodLooseObjectFromProperty(snapshot_create1_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_create1_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_create1_request, 'query'),
+    z.object({
+      ...getShapeAt(snapshot_create_request, 'body'),
+      ...getShapeAt(snapshot_create_request, 'path'),
+      ...getShapeAt(snapshot_create_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(snapshot_create1_request, 'body'),
+      ...getShapeAt(snapshot_create1_request, 'path'),
+      ...getShapeAt(snapshot_create1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([snapshot_create_response, snapshot_create1_response]),
 };
@@ -19296,12 +20087,16 @@ If both parameters are specified, only the query parameter is used.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_create_repository_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_create_repository_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_create_repository_request, 'query'),
-    getZodLooseObjectFromProperty(snapshot_create_repository1_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_create_repository1_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_create_repository1_request, 'query'),
+    z.object({
+      ...getShapeAt(snapshot_create_repository_request, 'body'),
+      ...getShapeAt(snapshot_create_repository_request, 'path'),
+      ...getShapeAt(snapshot_create_repository_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(snapshot_create_repository1_request, 'body'),
+      ...getShapeAt(snapshot_create_repository1_request, 'path'),
+      ...getShapeAt(snapshot_create_repository1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     snapshot_create_repository_response,
@@ -19325,11 +20120,11 @@ const SNAPSHOT_DELETE_CONTRACT: InternalConnectorContract = {
     urlParams: ['master_timeout', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_delete_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_delete_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(snapshot_delete_request, 'body'),
+    ...getShapeAt(snapshot_delete_request, 'path'),
+    ...getShapeAt(snapshot_delete_request, 'query'),
+  }),
   outputSchema: snapshot_delete_response,
 };
 const SNAPSHOT_DELETE_REPOSITORY_CONTRACT: InternalConnectorContract = {
@@ -19351,11 +20146,11 @@ The snapshots themselves are left untouched and in place.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_delete_repository_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_delete_repository_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_delete_repository_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(snapshot_delete_repository_request, 'body'),
+    ...getShapeAt(snapshot_delete_repository_request, 'path'),
+    ...getShapeAt(snapshot_delete_repository_request, 'query'),
+  }),
   outputSchema: snapshot_delete_repository_response,
 };
 const SNAPSHOT_GET_CONTRACT: InternalConnectorContract = {
@@ -19394,11 +20189,11 @@ Snapshots concurrently created may be seen during an iteration.
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_get_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_get_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(snapshot_get_request, 'body'),
+    ...getShapeAt(snapshot_get_request, 'path'),
+    ...getShapeAt(snapshot_get_request, 'query'),
+  }),
   outputSchema: snapshot_get_response,
 };
 const SNAPSHOT_GET_REPOSITORY_CONTRACT: InternalConnectorContract = {
@@ -19419,12 +20214,16 @@ const SNAPSHOT_GET_REPOSITORY_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_get_repository_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_get_repository_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_get_repository_request, 'query'),
-    getZodLooseObjectFromProperty(snapshot_get_repository1_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_get_repository1_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_get_repository1_request, 'query'),
+    z.object({
+      ...getShapeAt(snapshot_get_repository_request, 'body'),
+      ...getShapeAt(snapshot_get_repository_request, 'path'),
+      ...getShapeAt(snapshot_get_repository_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(snapshot_get_repository1_request, 'body'),
+      ...getShapeAt(snapshot_get_repository1_request, 'path'),
+      ...getShapeAt(snapshot_get_repository1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([snapshot_get_repository_response, snapshot_get_repository1_response]),
 };
@@ -19561,11 +20360,11 @@ Some operations also verify the behavior on small blobs with sizes other than 8 
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_repository_analyze_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_repository_analyze_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_repository_analyze_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(snapshot_repository_analyze_request, 'body'),
+    ...getShapeAt(snapshot_repository_analyze_request, 'path'),
+    ...getShapeAt(snapshot_repository_analyze_request, 'query'),
+  }),
   outputSchema: snapshot_repository_analyze_response,
 };
 const SNAPSHOT_REPOSITORY_VERIFY_INTEGRITY_CONTRACT: InternalConnectorContract = {
@@ -19629,11 +20428,11 @@ The response body format is therefore not considered stable and may be different
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(snapshot_repository_verify_integrity_request, 'body'),
+    ...getShapeAt(snapshot_repository_verify_integrity_request, 'path'),
+    ...getShapeAt(snapshot_repository_verify_integrity_request, 'query'),
+  }),
   outputSchema: snapshot_repository_verify_integrity_response,
 };
 const SNAPSHOT_RESTORE_CONTRACT: InternalConnectorContract = {
@@ -19681,11 +20480,11 @@ If your snapshot contains data from App Search or Workplace Search, you must res
       'rename_replacement',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_restore_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_restore_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_restore_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(snapshot_restore_request, 'body'),
+    ...getShapeAt(snapshot_restore_request, 'path'),
+    ...getShapeAt(snapshot_restore_request, 'query'),
+  }),
   outputSchema: snapshot_restore_response,
 };
 const SNAPSHOT_STATUS_CONTRACT: InternalConnectorContract = {
@@ -19731,15 +20530,21 @@ These requests can also tax machine resources and, when using cloud storage, inc
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_status_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_status_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_status_request, 'query'),
-    getZodLooseObjectFromProperty(snapshot_status1_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_status1_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_status1_request, 'query'),
-    getZodLooseObjectFromProperty(snapshot_status2_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_status2_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_status2_request, 'query'),
+    z.object({
+      ...getShapeAt(snapshot_status_request, 'body'),
+      ...getShapeAt(snapshot_status_request, 'path'),
+      ...getShapeAt(snapshot_status_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(snapshot_status1_request, 'body'),
+      ...getShapeAt(snapshot_status1_request, 'path'),
+      ...getShapeAt(snapshot_status1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(snapshot_status2_request, 'body'),
+      ...getShapeAt(snapshot_status2_request, 'path'),
+      ...getShapeAt(snapshot_status2_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     snapshot_status_response,
@@ -19765,11 +20570,11 @@ Check for common misconfigurations in a snapshot repository.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(snapshot_verify_repository_request, 'body'),
-    getZodLooseObjectFromProperty(snapshot_verify_repository_request, 'path'),
-    getZodLooseObjectFromProperty(snapshot_verify_repository_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(snapshot_verify_repository_request, 'body'),
+    ...getShapeAt(snapshot_verify_repository_request, 'path'),
+    ...getShapeAt(snapshot_verify_repository_request, 'query'),
+  }),
   outputSchema: snapshot_verify_repository_response,
 };
 const SQL_CLEAR_CURSOR_CONTRACT: InternalConnectorContract = {
@@ -19789,11 +20594,11 @@ const SQL_CLEAR_CURSOR_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['cursor'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(sql_clear_cursor_request, 'body'),
-    getZodLooseObjectFromProperty(sql_clear_cursor_request, 'path'),
-    getZodLooseObjectFromProperty(sql_clear_cursor_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(sql_clear_cursor_request, 'body'),
+    ...getShapeAt(sql_clear_cursor_request, 'path'),
+    ...getShapeAt(sql_clear_cursor_request, 'query'),
+  }),
   outputSchema: sql_clear_cursor_response,
 };
 const SQL_DELETE_ASYNC_CONTRACT: InternalConnectorContract = {
@@ -19820,11 +20625,11 @@ If the Elasticsearch security features are enabled, only the following users can
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(sql_delete_async_request, 'body'),
-    getZodLooseObjectFromProperty(sql_delete_async_request, 'path'),
-    getZodLooseObjectFromProperty(sql_delete_async_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(sql_delete_async_request, 'body'),
+    ...getShapeAt(sql_delete_async_request, 'path'),
+    ...getShapeAt(sql_delete_async_request, 'query'),
+  }),
   outputSchema: sql_delete_async_response,
 };
 const SQL_GET_ASYNC_CONTRACT: InternalConnectorContract = {
@@ -19847,11 +20652,11 @@ If the Elasticsearch security features are enabled, only the user who first subm
     urlParams: ['delimiter', 'format', 'keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(sql_get_async_request, 'body'),
-    getZodLooseObjectFromProperty(sql_get_async_request, 'path'),
-    getZodLooseObjectFromProperty(sql_get_async_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(sql_get_async_request, 'body'),
+    ...getShapeAt(sql_get_async_request, 'path'),
+    ...getShapeAt(sql_get_async_request, 'query'),
+  }),
   outputSchema: sql_get_async_response,
 };
 const SQL_GET_ASYNC_STATUS_CONTRACT: InternalConnectorContract = {
@@ -19872,11 +20677,11 @@ Get the current status of an async SQL search or a stored synchronous SQL search
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(sql_get_async_status_request, 'body'),
-    getZodLooseObjectFromProperty(sql_get_async_status_request, 'path'),
-    getZodLooseObjectFromProperty(sql_get_async_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(sql_get_async_status_request, 'body'),
+    ...getShapeAt(sql_get_async_status_request, 'path'),
+    ...getShapeAt(sql_get_async_status_request, 'query'),
+  }),
   outputSchema: sql_get_async_status_response,
 };
 const SQL_QUERY_CONTRACT: InternalConnectorContract = {
@@ -19915,12 +20720,16 @@ Run an SQL request.
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(sql_query_request, 'body'),
-    getZodLooseObjectFromProperty(sql_query_request, 'path'),
-    getZodLooseObjectFromProperty(sql_query_request, 'query'),
-    getZodLooseObjectFromProperty(sql_query1_request, 'body'),
-    getZodLooseObjectFromProperty(sql_query1_request, 'path'),
-    getZodLooseObjectFromProperty(sql_query1_request, 'query'),
+    z.object({
+      ...getShapeAt(sql_query_request, 'body'),
+      ...getShapeAt(sql_query_request, 'path'),
+      ...getShapeAt(sql_query_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(sql_query1_request, 'body'),
+      ...getShapeAt(sql_query1_request, 'path'),
+      ...getShapeAt(sql_query1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([sql_query_response, sql_query1_response]),
 };
@@ -19944,12 +20753,16 @@ It accepts the same request body parameters as the SQL search API, excluding \`c
     bodyParams: ['fetch_size', 'filter', 'query', 'time_zone'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(sql_translate_request, 'body'),
-    getZodLooseObjectFromProperty(sql_translate_request, 'path'),
-    getZodLooseObjectFromProperty(sql_translate_request, 'query'),
-    getZodLooseObjectFromProperty(sql_translate1_request, 'body'),
-    getZodLooseObjectFromProperty(sql_translate1_request, 'path'),
-    getZodLooseObjectFromProperty(sql_translate1_request, 'query'),
+    z.object({
+      ...getShapeAt(sql_translate_request, 'body'),
+      ...getShapeAt(sql_translate_request, 'path'),
+      ...getShapeAt(sql_translate_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(sql_translate1_request, 'body'),
+      ...getShapeAt(sql_translate1_request, 'path'),
+      ...getShapeAt(sql_translate1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([sql_translate_response, sql_translate1_response]),
 };
@@ -19986,11 +20799,11 @@ If Elasticsearch is configured to use a keystore or truststore, the API output i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ssl_certificates_request, 'body'),
-    getZodLooseObjectFromProperty(ssl_certificates_request, 'path'),
-    getZodLooseObjectFromProperty(ssl_certificates_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ssl_certificates_request, 'body'),
+    ...getShapeAt(ssl_certificates_request, 'path'),
+    ...getShapeAt(ssl_certificates_request, 'query'),
+  }),
   outputSchema: ssl_certificates_response,
 };
 const STREAMS_LOGS_DISABLE_CONTRACT: InternalConnectorContract = {
@@ -20011,7 +20824,7 @@ Turn off the logs stream feature for this cluster.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const STREAMS_LOGS_ENABLE_CONTRACT: InternalConnectorContract = {
@@ -20036,7 +20849,7 @@ If those indices or data streams exist, a \`409 - Conflict\` response and error 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const STREAMS_STATUS_CONTRACT: InternalConnectorContract = {
@@ -20057,7 +20870,7 @@ Get the current status for all types of streams.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const SYNONYMS_DELETE_SYNONYM_CONTRACT: InternalConnectorContract = {
@@ -20094,11 +20907,11 @@ When the synonyms set is not used in analyzers, you will be able to delete it.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(synonyms_delete_synonym_request, 'body'),
-    getZodLooseObjectFromProperty(synonyms_delete_synonym_request, 'path'),
-    getZodLooseObjectFromProperty(synonyms_delete_synonym_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(synonyms_delete_synonym_request, 'body'),
+    ...getShapeAt(synonyms_delete_synonym_request, 'path'),
+    ...getShapeAt(synonyms_delete_synonym_request, 'query'),
+  }),
   outputSchema: synonyms_delete_synonym_response,
 };
 const SYNONYMS_DELETE_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
@@ -20119,11 +20932,11 @@ Delete a synonym rule from a synonym set.
     urlParams: ['refresh'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'body'),
-    getZodLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'path'),
-    getZodLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(synonyms_delete_synonym_rule_request, 'body'),
+    ...getShapeAt(synonyms_delete_synonym_rule_request, 'path'),
+    ...getShapeAt(synonyms_delete_synonym_rule_request, 'query'),
+  }),
   outputSchema: synonyms_delete_synonym_rule_response,
 };
 const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
@@ -20143,11 +20956,11 @@ const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
     urlParams: ['from', 'size'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(synonyms_get_synonym_request, 'body'),
-    getZodLooseObjectFromProperty(synonyms_get_synonym_request, 'path'),
-    getZodLooseObjectFromProperty(synonyms_get_synonym_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(synonyms_get_synonym_request, 'body'),
+    ...getShapeAt(synonyms_get_synonym_request, 'path'),
+    ...getShapeAt(synonyms_get_synonym_request, 'query'),
+  }),
   outputSchema: synonyms_get_synonym_response,
 };
 const SYNONYMS_GET_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
@@ -20168,11 +20981,11 @@ Get a synonym rule from a synonym set.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'body'),
-    getZodLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'path'),
-    getZodLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(synonyms_get_synonym_rule_request, 'body'),
+    ...getShapeAt(synonyms_get_synonym_rule_request, 'path'),
+    ...getShapeAt(synonyms_get_synonym_rule_request, 'query'),
+  }),
   outputSchema: synonyms_get_synonym_rule_response,
 };
 const SYNONYMS_GET_SYNONYMS_SETS_CONTRACT: InternalConnectorContract = {
@@ -20193,11 +21006,11 @@ Get a summary of all defined synonym sets.
     urlParams: ['from', 'size'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'body'),
-    getZodLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'path'),
-    getZodLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(synonyms_get_synonyms_sets_request, 'body'),
+    ...getShapeAt(synonyms_get_synonyms_sets_request, 'path'),
+    ...getShapeAt(synonyms_get_synonyms_sets_request, 'query'),
+  }),
   outputSchema: synonyms_get_synonyms_sets_response,
 };
 const SYNONYMS_PUT_SYNONYM_CONTRACT: InternalConnectorContract = {
@@ -20224,11 +21037,11 @@ For practical examples of how to create or update a synonyms set, refer to the E
     urlParams: ['refresh'],
     bodyParams: ['synonyms_set'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(synonyms_put_synonym_request, 'body'),
-    getZodLooseObjectFromProperty(synonyms_put_synonym_request, 'path'),
-    getZodLooseObjectFromProperty(synonyms_put_synonym_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(synonyms_put_synonym_request, 'body'),
+    ...getShapeAt(synonyms_put_synonym_request, 'path'),
+    ...getShapeAt(synonyms_put_synonym_request, 'query'),
+  }),
   outputSchema: synonyms_put_synonym_response,
 };
 const SYNONYMS_PUT_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
@@ -20253,11 +21066,11 @@ When you update a synonym rule, all analyzers using the synonyms set will be rel
     urlParams: ['refresh'],
     bodyParams: ['synonyms'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'body'),
-    getZodLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'path'),
-    getZodLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(synonyms_put_synonym_rule_request, 'body'),
+    ...getShapeAt(synonyms_put_synonym_rule_request, 'path'),
+    ...getShapeAt(synonyms_put_synonym_rule_request, 'query'),
+  }),
   outputSchema: synonyms_put_synonym_rule_response,
 };
 const TASKS_CANCEL_CONTRACT: InternalConnectorContract = {
@@ -20288,12 +21101,16 @@ You can also use the node hot threads API to obtain detailed information about t
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(tasks_cancel_request, 'body'),
-    getZodLooseObjectFromProperty(tasks_cancel_request, 'path'),
-    getZodLooseObjectFromProperty(tasks_cancel_request, 'query'),
-    getZodLooseObjectFromProperty(tasks_cancel1_request, 'body'),
-    getZodLooseObjectFromProperty(tasks_cancel1_request, 'path'),
-    getZodLooseObjectFromProperty(tasks_cancel1_request, 'query'),
+    z.object({
+      ...getShapeAt(tasks_cancel_request, 'body'),
+      ...getShapeAt(tasks_cancel_request, 'path'),
+      ...getShapeAt(tasks_cancel_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(tasks_cancel1_request, 'body'),
+      ...getShapeAt(tasks_cancel1_request, 'path'),
+      ...getShapeAt(tasks_cancel1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([tasks_cancel_response, tasks_cancel1_response]),
 };
@@ -20319,11 +21136,11 @@ If the task identifier is not found, a 404 response code indicates that there ar
     urlParams: ['timeout', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(tasks_get_request, 'body'),
-    getZodLooseObjectFromProperty(tasks_get_request, 'path'),
-    getZodLooseObjectFromProperty(tasks_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(tasks_get_request, 'body'),
+    ...getShapeAt(tasks_get_request, 'path'),
+    ...getShapeAt(tasks_get_request, 'query'),
+  }),
   outputSchema: tasks_get_response,
 };
 const TASKS_LIST_CONTRACT: InternalConnectorContract = {
@@ -20408,11 +21225,11 @@ The \`X-Opaque-Id\` in the children \`headers\` is the child task of the task th
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(tasks_list_request, 'body'),
-    getZodLooseObjectFromProperty(tasks_list_request, 'path'),
-    getZodLooseObjectFromProperty(tasks_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(tasks_list_request, 'body'),
+    ...getShapeAt(tasks_list_request, 'path'),
+    ...getShapeAt(tasks_list_request, 'query'),
+  }),
   outputSchema: tasks_list_response,
 };
 const TERMS_ENUM_CONTRACT: InternalConnectorContract = {
@@ -20446,12 +21263,16 @@ This API is designed for low-latency look-ups used in auto-complete scenarios.
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(terms_enum_request, 'body'),
-    getZodLooseObjectFromProperty(terms_enum_request, 'path'),
-    getZodLooseObjectFromProperty(terms_enum_request, 'query'),
-    getZodLooseObjectFromProperty(terms_enum1_request, 'body'),
-    getZodLooseObjectFromProperty(terms_enum1_request, 'path'),
-    getZodLooseObjectFromProperty(terms_enum1_request, 'query'),
+    z.object({
+      ...getShapeAt(terms_enum_request, 'body'),
+      ...getShapeAt(terms_enum_request, 'path'),
+      ...getShapeAt(terms_enum_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(terms_enum1_request, 'body'),
+      ...getShapeAt(terms_enum1_request, 'path'),
+      ...getShapeAt(terms_enum1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([terms_enum_response, terms_enum1_response]),
 };
@@ -20539,18 +21360,26 @@ Refer to the linked documentation for detailed examples of how to use this API.
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(termvectors_request, 'body'),
-    getZodLooseObjectFromProperty(termvectors_request, 'path'),
-    getZodLooseObjectFromProperty(termvectors_request, 'query'),
-    getZodLooseObjectFromProperty(termvectors1_request, 'body'),
-    getZodLooseObjectFromProperty(termvectors1_request, 'path'),
-    getZodLooseObjectFromProperty(termvectors1_request, 'query'),
-    getZodLooseObjectFromProperty(termvectors2_request, 'body'),
-    getZodLooseObjectFromProperty(termvectors2_request, 'path'),
-    getZodLooseObjectFromProperty(termvectors2_request, 'query'),
-    getZodLooseObjectFromProperty(termvectors3_request, 'body'),
-    getZodLooseObjectFromProperty(termvectors3_request, 'path'),
-    getZodLooseObjectFromProperty(termvectors3_request, 'query'),
+    z.object({
+      ...getShapeAt(termvectors_request, 'body'),
+      ...getShapeAt(termvectors_request, 'path'),
+      ...getShapeAt(termvectors_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(termvectors1_request, 'body'),
+      ...getShapeAt(termvectors1_request, 'path'),
+      ...getShapeAt(termvectors1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(termvectors2_request, 'body'),
+      ...getShapeAt(termvectors2_request, 'path'),
+      ...getShapeAt(termvectors2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(termvectors3_request, 'body'),
+      ...getShapeAt(termvectors3_request, 'path'),
+      ...getShapeAt(termvectors3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     termvectors_response,
@@ -20607,11 +21436,11 @@ It helps determine why the returned structure was chosen.
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(text_structure_find_field_structure_request, 'body'),
-    getZodLooseObjectFromProperty(text_structure_find_field_structure_request, 'path'),
-    getZodLooseObjectFromProperty(text_structure_find_field_structure_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(text_structure_find_field_structure_request, 'body'),
+    ...getShapeAt(text_structure_find_field_structure_request, 'path'),
+    ...getShapeAt(text_structure_find_field_structure_request, 'query'),
+  }),
   outputSchema: text_structure_find_field_structure_response,
 };
 const TEXT_STRUCTURE_FIND_MESSAGE_STRUCTURE_CONTRACT: InternalConnectorContract = {
@@ -20662,12 +21491,16 @@ It helps determine why the returned structure was chosen.
     bodyParams: ['messages'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(text_structure_find_message_structure_request, 'body'),
-    getZodLooseObjectFromProperty(text_structure_find_message_structure_request, 'path'),
-    getZodLooseObjectFromProperty(text_structure_find_message_structure_request, 'query'),
-    getZodLooseObjectFromProperty(text_structure_find_message_structure1_request, 'body'),
-    getZodLooseObjectFromProperty(text_structure_find_message_structure1_request, 'path'),
-    getZodLooseObjectFromProperty(text_structure_find_message_structure1_request, 'query'),
+    z.object({
+      ...getShapeAt(text_structure_find_message_structure_request, 'body'),
+      ...getShapeAt(text_structure_find_message_structure_request, 'path'),
+      ...getShapeAt(text_structure_find_message_structure_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(text_structure_find_message_structure1_request, 'body'),
+      ...getShapeAt(text_structure_find_message_structure1_request, 'path'),
+      ...getShapeAt(text_structure_find_message_structure1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     text_structure_find_message_structure_response,
@@ -20723,11 +21556,11 @@ However, you can optionally override some of the decisions about the text struct
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(text_structure_find_structure_request, 'body'),
-    getZodLooseObjectFromProperty(text_structure_find_structure_request, 'path'),
-    getZodLooseObjectFromProperty(text_structure_find_structure_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(text_structure_find_structure_request, 'body'),
+    ...getShapeAt(text_structure_find_structure_request, 'path'),
+    ...getShapeAt(text_structure_find_structure_request, 'query'),
+  }),
   outputSchema: text_structure_find_structure_response,
 };
 const TEXT_STRUCTURE_TEST_GROK_PATTERN_CONTRACT: InternalConnectorContract = {
@@ -20750,12 +21583,16 @@ The API indicates whether the lines match the pattern together with the offsets 
     bodyParams: ['grok_pattern', 'text'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'body'),
-    getZodLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'path'),
-    getZodLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'query'),
-    getZodLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'body'),
-    getZodLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'path'),
-    getZodLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'query'),
+    z.object({
+      ...getShapeAt(text_structure_test_grok_pattern_request, 'body'),
+      ...getShapeAt(text_structure_test_grok_pattern_request, 'path'),
+      ...getShapeAt(text_structure_test_grok_pattern_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(text_structure_test_grok_pattern1_request, 'body'),
+      ...getShapeAt(text_structure_test_grok_pattern1_request, 'path'),
+      ...getShapeAt(text_structure_test_grok_pattern1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     text_structure_test_grok_pattern_response,
@@ -20779,11 +21616,11 @@ const TRANSFORM_DELETE_TRANSFORM_CONTRACT: InternalConnectorContract = {
     urlParams: ['force', 'delete_dest_index', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_delete_transform_request, 'body'),
-    getZodLooseObjectFromProperty(transform_delete_transform_request, 'path'),
-    getZodLooseObjectFromProperty(transform_delete_transform_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_delete_transform_request, 'body'),
+    ...getShapeAt(transform_delete_transform_request, 'path'),
+    ...getShapeAt(transform_delete_transform_request, 'query'),
+  }),
   outputSchema: transform_delete_transform_response,
 };
 const TRANSFORM_GET_NODE_STATS_CONTRACT: InternalConnectorContract = {
@@ -20803,7 +21640,7 @@ const TRANSFORM_GET_NODE_STATS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.optional(z.object({})),
   outputSchema: z.optional(z.looseObject({})),
 };
 const TRANSFORM_GET_TRANSFORM_CONTRACT: InternalConnectorContract = {
@@ -20825,12 +21662,16 @@ Get configuration information for transforms.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_get_transform_request, 'body'),
-    getZodLooseObjectFromProperty(transform_get_transform_request, 'path'),
-    getZodLooseObjectFromProperty(transform_get_transform_request, 'query'),
-    getZodLooseObjectFromProperty(transform_get_transform1_request, 'body'),
-    getZodLooseObjectFromProperty(transform_get_transform1_request, 'path'),
-    getZodLooseObjectFromProperty(transform_get_transform1_request, 'query'),
+    z.object({
+      ...getShapeAt(transform_get_transform_request, 'body'),
+      ...getShapeAt(transform_get_transform_request, 'path'),
+      ...getShapeAt(transform_get_transform_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(transform_get_transform1_request, 'body'),
+      ...getShapeAt(transform_get_transform1_request, 'path'),
+      ...getShapeAt(transform_get_transform1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([transform_get_transform_response, transform_get_transform1_response]),
 };
@@ -20853,11 +21694,11 @@ Get usage information for transforms.
     urlParams: ['allow_no_match', 'from', 'size', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_get_transform_stats_request, 'body'),
-    getZodLooseObjectFromProperty(transform_get_transform_stats_request, 'path'),
-    getZodLooseObjectFromProperty(transform_get_transform_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_get_transform_stats_request, 'body'),
+    ...getShapeAt(transform_get_transform_stats_request, 'path'),
+    ...getShapeAt(transform_get_transform_stats_request, 'query'),
+  }),
   outputSchema: transform_get_transform_stats_response,
 };
 const TRANSFORM_PREVIEW_TRANSFORM_CONTRACT: InternalConnectorContract = {
@@ -20893,18 +21734,26 @@ types of the source index and the transform aggregations.
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_preview_transform_request, 'body'),
-    getZodLooseObjectFromProperty(transform_preview_transform_request, 'path'),
-    getZodLooseObjectFromProperty(transform_preview_transform_request, 'query'),
-    getZodLooseObjectFromProperty(transform_preview_transform1_request, 'body'),
-    getZodLooseObjectFromProperty(transform_preview_transform1_request, 'path'),
-    getZodLooseObjectFromProperty(transform_preview_transform1_request, 'query'),
-    getZodLooseObjectFromProperty(transform_preview_transform2_request, 'body'),
-    getZodLooseObjectFromProperty(transform_preview_transform2_request, 'path'),
-    getZodLooseObjectFromProperty(transform_preview_transform2_request, 'query'),
-    getZodLooseObjectFromProperty(transform_preview_transform3_request, 'body'),
-    getZodLooseObjectFromProperty(transform_preview_transform3_request, 'path'),
-    getZodLooseObjectFromProperty(transform_preview_transform3_request, 'query'),
+    z.object({
+      ...getShapeAt(transform_preview_transform_request, 'body'),
+      ...getShapeAt(transform_preview_transform_request, 'path'),
+      ...getShapeAt(transform_preview_transform_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(transform_preview_transform1_request, 'body'),
+      ...getShapeAt(transform_preview_transform1_request, 'path'),
+      ...getShapeAt(transform_preview_transform1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(transform_preview_transform2_request, 'body'),
+      ...getShapeAt(transform_preview_transform2_request, 'path'),
+      ...getShapeAt(transform_preview_transform2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(transform_preview_transform3_request, 'body'),
+      ...getShapeAt(transform_preview_transform3_request, 'path'),
+      ...getShapeAt(transform_preview_transform3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     transform_preview_transform_response,
@@ -20962,11 +21811,11 @@ give users any privileges on \`.data-frame-internal*\` indices.
       'sync',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_put_transform_request, 'body'),
-    getZodLooseObjectFromProperty(transform_put_transform_request, 'path'),
-    getZodLooseObjectFromProperty(transform_put_transform_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_put_transform_request, 'body'),
+    ...getShapeAt(transform_put_transform_request, 'path'),
+    ...getShapeAt(transform_put_transform_request, 'query'),
+  }),
   outputSchema: transform_put_transform_response,
 };
 const TRANSFORM_RESET_TRANSFORM_CONTRACT: InternalConnectorContract = {
@@ -20989,11 +21838,11 @@ If the destination index was created by the transform, it is deleted.
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_reset_transform_request, 'body'),
-    getZodLooseObjectFromProperty(transform_reset_transform_request, 'path'),
-    getZodLooseObjectFromProperty(transform_reset_transform_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_reset_transform_request, 'body'),
+    ...getShapeAt(transform_reset_transform_request, 'path'),
+    ...getShapeAt(transform_reset_transform_request, 'query'),
+  }),
   outputSchema: transform_reset_transform_response,
 };
 const TRANSFORM_SCHEDULE_NOW_TRANSFORM_CONTRACT: InternalConnectorContract = {
@@ -21019,11 +21868,11 @@ is called again in the meantime.
     urlParams: ['timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_schedule_now_transform_request, 'body'),
-    getZodLooseObjectFromProperty(transform_schedule_now_transform_request, 'path'),
-    getZodLooseObjectFromProperty(transform_schedule_now_transform_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_schedule_now_transform_request, 'body'),
+    ...getShapeAt(transform_schedule_now_transform_request, 'path'),
+    ...getShapeAt(transform_schedule_now_transform_request, 'query'),
+  }),
   outputSchema: transform_schedule_now_transform_response,
 };
 const TRANSFORM_SET_UPGRADE_MODE_CONTRACT: InternalConnectorContract = {
@@ -21055,11 +21904,11 @@ transform info API.
     urlParams: ['enabled', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_set_upgrade_mode_request, 'body'),
-    getZodLooseObjectFromProperty(transform_set_upgrade_mode_request, 'path'),
-    getZodLooseObjectFromProperty(transform_set_upgrade_mode_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_set_upgrade_mode_request, 'body'),
+    ...getShapeAt(transform_set_upgrade_mode_request, 'path'),
+    ...getShapeAt(transform_set_upgrade_mode_request, 'query'),
+  }),
   outputSchema: transform_set_upgrade_mode_response,
 };
 const TRANSFORM_START_TRANSFORM_CONTRACT: InternalConnectorContract = {
@@ -21094,11 +21943,11 @@ destination indices, the transform fails when it attempts unauthorized operation
     urlParams: ['timeout', 'from'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_start_transform_request, 'body'),
-    getZodLooseObjectFromProperty(transform_start_transform_request, 'path'),
-    getZodLooseObjectFromProperty(transform_start_transform_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_start_transform_request, 'body'),
+    ...getShapeAt(transform_start_transform_request, 'path'),
+    ...getShapeAt(transform_start_transform_request, 'query'),
+  }),
   outputSchema: transform_start_transform_response,
 };
 const TRANSFORM_STOP_TRANSFORM_CONTRACT: InternalConnectorContract = {
@@ -21119,11 +21968,11 @@ Stops one or more transforms.
     urlParams: ['allow_no_match', 'force', 'timeout', 'wait_for_checkpoint', 'wait_for_completion'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_stop_transform_request, 'body'),
-    getZodLooseObjectFromProperty(transform_stop_transform_request, 'path'),
-    getZodLooseObjectFromProperty(transform_stop_transform_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_stop_transform_request, 'body'),
+    ...getShapeAt(transform_stop_transform_request, 'path'),
+    ...getShapeAt(transform_stop_transform_request, 'query'),
+  }),
   outputSchema: transform_stop_transform_response,
 };
 const TRANSFORM_UPDATE_TRANSFORM_CONTRACT: InternalConnectorContract = {
@@ -21159,11 +22008,11 @@ time of update and runs with those privileges.
       'retention_policy',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_update_transform_request, 'body'),
-    getZodLooseObjectFromProperty(transform_update_transform_request, 'path'),
-    getZodLooseObjectFromProperty(transform_update_transform_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_update_transform_request, 'body'),
+    ...getShapeAt(transform_update_transform_request, 'path'),
+    ...getShapeAt(transform_update_transform_request, 'query'),
+  }),
   outputSchema: transform_update_transform_response,
 };
 const TRANSFORM_UPGRADE_TRANSFORMS_CONTRACT: InternalConnectorContract = {
@@ -21197,11 +22046,11 @@ You may want to perform a recent cluster backup prior to the upgrade.
     urlParams: ['dry_run', 'timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(transform_upgrade_transforms_request, 'body'),
-    getZodLooseObjectFromProperty(transform_upgrade_transforms_request, 'path'),
-    getZodLooseObjectFromProperty(transform_upgrade_transforms_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(transform_upgrade_transforms_request, 'body'),
+    ...getShapeAt(transform_upgrade_transforms_request, 'path'),
+    ...getShapeAt(transform_upgrade_transforms_request, 'query'),
+  }),
   outputSchema: transform_upgrade_transforms_response,
 };
 const UPDATE_CONTRACT: InternalConnectorContract = {
@@ -21261,11 +22110,11 @@ For usage examples such as partial updates, upserts, and scripted updates, see t
       'upsert',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_request, 'body'),
-    getZodLooseObjectFromProperty(update_request, 'path'),
-    getZodLooseObjectFromProperty(update_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_request, 'body'),
+    ...getShapeAt(update_request, 'path'),
+    ...getShapeAt(update_request, 'query'),
+  }),
   outputSchema: update_response,
 };
 const UPDATE_BY_QUERY_CONTRACT: InternalConnectorContract = {
@@ -21409,11 +22258,11 @@ Refer to the linked documentation for examples of how to update documents using 
     ],
     bodyParams: ['max_docs', 'query', 'script', 'slice', 'conflicts'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_by_query_request, 'body'),
-    getZodLooseObjectFromProperty(update_by_query_request, 'path'),
-    getZodLooseObjectFromProperty(update_by_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_by_query_request, 'body'),
+    ...getShapeAt(update_by_query_request, 'path'),
+    ...getShapeAt(update_by_query_request, 'query'),
+  }),
   outputSchema: update_by_query_response,
 };
 const UPDATE_BY_QUERY_RETHROTTLE_CONTRACT: InternalConnectorContract = {
@@ -21436,11 +22285,11 @@ Rethrottling that speeds up the query takes effect immediately but rethrotting t
     urlParams: ['requests_per_second'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_by_query_rethrottle_request, 'body'),
-    getZodLooseObjectFromProperty(update_by_query_rethrottle_request, 'path'),
-    getZodLooseObjectFromProperty(update_by_query_rethrottle_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_by_query_rethrottle_request, 'body'),
+    ...getShapeAt(update_by_query_rethrottle_request, 'path'),
+    ...getShapeAt(update_by_query_rethrottle_request, 'query'),
+  }),
   outputSchema: update_by_query_rethrottle_response,
 };
 const WATCHER_ACK_WATCH_CONTRACT: InternalConnectorContract = {
@@ -21471,18 +22320,26 @@ To demonstrate how throttling works in practice and how it can be configured for
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_ack_watch_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_ack_watch_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_ack_watch_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_ack_watch1_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_ack_watch1_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_ack_watch1_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_ack_watch2_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_ack_watch2_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_ack_watch2_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_ack_watch3_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_ack_watch3_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_ack_watch3_request, 'query'),
+    z.object({
+      ...getShapeAt(watcher_ack_watch_request, 'body'),
+      ...getShapeAt(watcher_ack_watch_request, 'path'),
+      ...getShapeAt(watcher_ack_watch_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_ack_watch1_request, 'body'),
+      ...getShapeAt(watcher_ack_watch1_request, 'path'),
+      ...getShapeAt(watcher_ack_watch1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_ack_watch2_request, 'body'),
+      ...getShapeAt(watcher_ack_watch2_request, 'path'),
+      ...getShapeAt(watcher_ack_watch2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_ack_watch3_request, 'body'),
+      ...getShapeAt(watcher_ack_watch3_request, 'path'),
+      ...getShapeAt(watcher_ack_watch3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     watcher_ack_watch_response,
@@ -21510,12 +22367,16 @@ A watch can be either active or inactive.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_activate_watch_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_activate_watch_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_activate_watch_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_activate_watch1_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_activate_watch1_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_activate_watch1_request, 'query'),
+    z.object({
+      ...getShapeAt(watcher_activate_watch_request, 'body'),
+      ...getShapeAt(watcher_activate_watch_request, 'path'),
+      ...getShapeAt(watcher_activate_watch_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_activate_watch1_request, 'body'),
+      ...getShapeAt(watcher_activate_watch1_request, 'path'),
+      ...getShapeAt(watcher_activate_watch1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([watcher_activate_watch_response, watcher_activate_watch1_response]),
 };
@@ -21538,12 +22399,16 @@ A watch can be either active or inactive.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_deactivate_watch_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_deactivate_watch_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_deactivate_watch_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_deactivate_watch1_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_deactivate_watch1_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_deactivate_watch1_request, 'query'),
+    z.object({
+      ...getShapeAt(watcher_deactivate_watch_request, 'body'),
+      ...getShapeAt(watcher_deactivate_watch_request, 'path'),
+      ...getShapeAt(watcher_deactivate_watch_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_deactivate_watch1_request, 'body'),
+      ...getShapeAt(watcher_deactivate_watch1_request, 'path'),
+      ...getShapeAt(watcher_deactivate_watch1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([watcher_deactivate_watch_response, watcher_deactivate_watch1_response]),
 };
@@ -21571,11 +22436,11 @@ When Elasticsearch security features are enabled, make sure no write privileges 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_delete_watch_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_delete_watch_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_delete_watch_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(watcher_delete_watch_request, 'body'),
+    ...getShapeAt(watcher_delete_watch_request, 'path'),
+    ...getShapeAt(watcher_delete_watch_request, 'query'),
+  }),
   outputSchema: watcher_delete_watch_response,
 };
 const WATCHER_EXECUTE_WATCH_CONTRACT: InternalConnectorContract = {
@@ -21618,18 +22483,26 @@ Refer to the external documentation for examples of watch execution requests, in
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_execute_watch_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_execute_watch_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_execute_watch_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_execute_watch1_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_execute_watch1_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_execute_watch1_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_execute_watch2_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_execute_watch2_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_execute_watch2_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_execute_watch3_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_execute_watch3_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_execute_watch3_request, 'query'),
+    z.object({
+      ...getShapeAt(watcher_execute_watch_request, 'body'),
+      ...getShapeAt(watcher_execute_watch_request, 'path'),
+      ...getShapeAt(watcher_execute_watch_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_execute_watch1_request, 'body'),
+      ...getShapeAt(watcher_execute_watch1_request, 'path'),
+      ...getShapeAt(watcher_execute_watch1_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_execute_watch2_request, 'body'),
+      ...getShapeAt(watcher_execute_watch2_request, 'path'),
+      ...getShapeAt(watcher_execute_watch2_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_execute_watch3_request, 'body'),
+      ...getShapeAt(watcher_execute_watch3_request, 'path'),
+      ...getShapeAt(watcher_execute_watch3_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([
     watcher_execute_watch_response,
@@ -21657,11 +22530,11 @@ Only a subset of settings are shown, for example \`index.auto_expand_replicas\` 
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_get_settings_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_get_settings_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_get_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(watcher_get_settings_request, 'body'),
+    ...getShapeAt(watcher_get_settings_request, 'path'),
+    ...getShapeAt(watcher_get_settings_request, 'query'),
+  }),
   outputSchema: watcher_get_settings_response,
 };
 const WATCHER_GET_WATCH_CONTRACT: InternalConnectorContract = {
@@ -21681,11 +22554,11 @@ const WATCHER_GET_WATCH_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_get_watch_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_get_watch_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_get_watch_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(watcher_get_watch_request, 'body'),
+    ...getShapeAt(watcher_get_watch_request, 'path'),
+    ...getShapeAt(watcher_get_watch_request, 'query'),
+  }),
   outputSchema: watcher_get_watch_response,
 };
 const WATCHER_PUT_WATCH_CONTRACT: InternalConnectorContract = {
@@ -21726,12 +22599,16 @@ If the user is able to read index \`a\`, but not index \`b\`, the same will appl
     ],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_put_watch_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_put_watch_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_put_watch_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_put_watch1_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_put_watch1_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_put_watch1_request, 'query'),
+    z.object({
+      ...getShapeAt(watcher_put_watch_request, 'body'),
+      ...getShapeAt(watcher_put_watch_request, 'path'),
+      ...getShapeAt(watcher_put_watch_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_put_watch1_request, 'body'),
+      ...getShapeAt(watcher_put_watch1_request, 'path'),
+      ...getShapeAt(watcher_put_watch1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([watcher_put_watch_response, watcher_put_watch1_response]),
 };
@@ -21756,12 +22633,16 @@ Note that only the \`_id\` and \`metadata.*\` fields are queryable or sortable.
     bodyParams: ['from', 'size', 'query', 'sort', 'search_after'],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_query_watches_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_query_watches_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_query_watches_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_query_watches1_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_query_watches1_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_query_watches1_request, 'query'),
+    z.object({
+      ...getShapeAt(watcher_query_watches_request, 'body'),
+      ...getShapeAt(watcher_query_watches_request, 'path'),
+      ...getShapeAt(watcher_query_watches_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_query_watches1_request, 'body'),
+      ...getShapeAt(watcher_query_watches1_request, 'path'),
+      ...getShapeAt(watcher_query_watches1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([watcher_query_watches_response, watcher_query_watches1_response]),
 };
@@ -21783,11 +22664,11 @@ Start the Watcher service if it is not already running.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_start_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_start_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_start_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(watcher_start_request, 'body'),
+    ...getShapeAt(watcher_start_request, 'path'),
+    ...getShapeAt(watcher_start_request, 'query'),
+  }),
   outputSchema: watcher_start_response,
 };
 const WATCHER_STATS_CONTRACT: InternalConnectorContract = {
@@ -21810,12 +22691,16 @@ You retrieve more metrics by using the metric parameter.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_stats_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_stats_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_stats_request, 'query'),
-    getZodLooseObjectFromProperty(watcher_stats1_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_stats1_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_stats1_request, 'query'),
+    z.object({
+      ...getShapeAt(watcher_stats_request, 'body'),
+      ...getShapeAt(watcher_stats_request, 'path'),
+      ...getShapeAt(watcher_stats_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(watcher_stats1_request, 'body'),
+      ...getShapeAt(watcher_stats1_request, 'path'),
+      ...getShapeAt(watcher_stats1_request, 'query'),
+    }),
   ]),
   outputSchema: z.union([watcher_stats_response, watcher_stats1_response]),
 };
@@ -21837,11 +22722,11 @@ Stop the Watcher service if it is running.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_stop_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_stop_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_stop_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(watcher_stop_request, 'body'),
+    ...getShapeAt(watcher_stop_request, 'path'),
+    ...getShapeAt(watcher_stop_request, 'query'),
+  }),
   outputSchema: watcher_stop_response,
 };
 const WATCHER_UPDATE_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -21867,11 +22752,11 @@ Watcher shards must always be in the \`data_content\` tier.
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['index.auto_expand_replicas', 'index.number_of_replicas'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(watcher_update_settings_request, 'body'),
-    getZodLooseObjectFromProperty(watcher_update_settings_request, 'path'),
-    getZodLooseObjectFromProperty(watcher_update_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(watcher_update_settings_request, 'body'),
+    ...getShapeAt(watcher_update_settings_request, 'path'),
+    ...getShapeAt(watcher_update_settings_request, 'query'),
+  }),
   outputSchema: watcher_update_settings_response,
 };
 const XPACK_INFO_CONTRACT: InternalConnectorContract = {
@@ -21895,11 +22780,11 @@ The information provided by the API includes:
     urlParams: ['categories', 'accept_enterprise', 'human'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(xpack_info_request, 'body'),
-    getZodLooseObjectFromProperty(xpack_info_request, 'path'),
-    getZodLooseObjectFromProperty(xpack_info_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(xpack_info_request, 'body'),
+    ...getShapeAt(xpack_info_request, 'path'),
+    ...getShapeAt(xpack_info_request, 'query'),
+  }),
   outputSchema: xpack_info_response,
 };
 const XPACK_USAGE_CONTRACT: InternalConnectorContract = {
@@ -21920,11 +22805,11 @@ The API also provides some usage statistics.
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(xpack_usage_request, 'body'),
-    getZodLooseObjectFromProperty(xpack_usage_request, 'path'),
-    getZodLooseObjectFromProperty(xpack_usage_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(xpack_usage_request, 'body'),
+    ...getShapeAt(xpack_usage_request, 'path'),
+    ...getShapeAt(xpack_usage_request, 'query'),
+  }),
   outputSchema: xpack_usage_response,
 };
 

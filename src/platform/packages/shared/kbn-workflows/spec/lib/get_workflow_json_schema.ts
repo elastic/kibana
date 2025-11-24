@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { JSONSchema } from '@kbn/zod/v4/core';
+import { getOrResolveObject } from '../../common/utils';
 
 export function getWorkflowJsonSchema(zodSchema: z.ZodType): JSONSchema.JSONSchema | null {
   try {
@@ -17,13 +18,20 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): JSONSchema.JSONSche
       unrepresentable: 'any', // do not throw an error for unrepresentable types
       reused: 'ref', // using ref reduces the size of the schema 4x
       override: (ctx) => {
-        // Remove fields, which has default or optional from 'required' array because we validating user input not the result of safeParse. e.g. 'version' shouldn't be required
-        // we'd love to use 'io:input' but it results in memory leak
+        // Adjust the 'required' array on object schemas because we validating user input not the result of safeParse.
+        // we'd love to use 'io:input' but it results in memory leak currently
         if (ctx.jsonSchema.required && ctx.jsonSchema.required.length > 0) {
           const newRequired = ctx.jsonSchema.required.filter((field) => {
-            const fieldSchema = ctx.jsonSchema.properties?.[field] as
-              | JSONSchema.JSONSchema
-              | undefined;
+            const fieldObject = ctx.jsonSchema.properties?.[field];
+            if (!fieldObject) {
+              // field is not defined in the schema, weird, skipping
+              return false;
+            }
+            const fieldSchema = getOrResolveObject(
+              fieldObject as JSONSchema.JSONSchema,
+              ctx.jsonSchema
+            );
+            // filter out from 'required' array, if field has default or optional
             return fieldSchema && !('default' in fieldSchema) && !('optional' in fieldSchema);
           });
           ctx.jsonSchema.required = newRequired.length > 0 ? newRequired : undefined;

@@ -11,7 +11,7 @@ import type { ContractMeta } from './types';
 
 // Utils used in the generated code, should be imported relative to @kbn/workflows/common/generated/
 export const StaticImports = `
-import { getShape, getZodLooseObjectFromProperty, getZodObjectFromProperty } from '../utils/zod';
+import { getShapeAt, getZodLooseObjectFromProperty, getZodObjectFromProperty } from '../utils/zod';
 `;
 
 export function generateContractBlock(contract: ContractMeta): string {
@@ -38,7 +38,31 @@ export function generateContractBlock(contract: ContractMeta): string {
 // TODO: unwrap and combine the shapes at the build time instead of at the runtime
 // Union is important because if we use object we override parameters from "body", "path", "query" with the same name with the latest one
 export function generateParamsSchemaString(operationIds: string[]): string {
-  return generateParamsSchemaStringUnion(operationIds);
+  return generateParamsSchemaSpreadUnion(operationIds);
+}
+
+function generateParamsSchemaSpreadUnion(operationIds: string[]): string {
+  if (operationIds.length === 0) {
+    return 'z.optional(z.object({}))';
+  }
+
+  if (operationIds.length === 1) {
+    return `z.object({
+      ...getShapeAt(${getRequestSchemaName(operationIds[0])}, 'body'),
+      ...getShapeAt(${getRequestSchemaName(operationIds[0])}, 'path'),
+      ...getShapeAt(${getRequestSchemaName(operationIds[0])}, 'query'),
+    })`;
+  }
+
+  return `z.union([${operationIds
+    .map(
+      (operationId) => `z.object({
+      ...getShapeAt(${getRequestSchemaName(operationId)}, 'body'),
+      ...getShapeAt(${getRequestSchemaName(operationId)}, 'path'),
+      ...getShapeAt(${getRequestSchemaName(operationId)}, 'query'),
+    })`
+    )
+    .join(', ')}])`;
 }
 
 function generateParamsSchemaStringUnion(operationIds: string[]): string {
