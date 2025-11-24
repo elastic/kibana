@@ -27,9 +27,9 @@ import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { getRule } from '../get/get_rule';
+import { getRule } from '../../../rule/methods/get/get_rule';
 
-jest.mock('../get/get_rule');
+jest.mock('../../../rule/methods/get/get_rule');
 
 const mockedGetRule = getRule as jest.MockedFunction<typeof getRule>;
 
