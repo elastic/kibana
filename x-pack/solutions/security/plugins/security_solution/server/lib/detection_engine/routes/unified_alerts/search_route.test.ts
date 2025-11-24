@@ -133,7 +133,7 @@ describe('search for unified alerts', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
-    test('allows when aggs present', async () => {
+    test('allows when aggregates are present', async () => {
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
