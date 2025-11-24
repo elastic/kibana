@@ -103,6 +103,7 @@ describe('saved_searches_utils', () => {
             "history": Array [],
             "id": "data_source1",
             "inheritOptions": Object {},
+            "lastBuiltQuery": undefined,
             "overwriteDataViewType": undefined,
             "parent": undefined,
             "requestStartHandlers": Array [],
