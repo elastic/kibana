@@ -40,6 +40,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Dataset quality table', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/243760
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
@@ -238,10 +241,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.existOrFail(editFailureStoreModal);
 
-        const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
         await testSubjects.click(enableFailureStoreToggle);
-        expect(await saveModalButton.isEnabled()).to.be(true);
-        await testSubjects.click(failureStoreModalSaveButton);
+        await testSubjects.clickWhenNotDisabled(failureStoreModalSaveButton);
         await testSubjects.missingOrFail(editFailureStoreModal);
 
         const updatedLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);

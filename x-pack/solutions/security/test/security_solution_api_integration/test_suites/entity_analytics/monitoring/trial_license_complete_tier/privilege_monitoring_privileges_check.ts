@@ -24,6 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
 
   // Failing: See https://github.com/elastic/kibana/issues/243722
+  // Failing: See https://github.com/elastic/kibana/issues/243721
   describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     describe('privileges checks', () => {
       before(async () => {
