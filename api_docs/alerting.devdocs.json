@@ -511,6 +511,40 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.AlertingAuthorization.bulkEnsureAuthorized",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkEnsureAuthorized",
+            "description": [],
+            "signature": [
+              "({ ruleTypeIdConsumersPairs, operation, entity, additionalPrivileges, }: ",
+              "BulkEnsureAuthorizedOpts",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.bulkEnsureAuthorized.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    ruleTypeIdConsumersPairs,\n    operation,\n    entity,\n    additionalPrivileges = [],\n  }",
+                "description": [],
+                "signature": [
+                  "BulkEnsureAuthorizedOpts"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.AlertingAuthorization.getFindAuthorizationFilter",
             "type": "Function",
             "tags": [],
@@ -4942,7 +4976,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>(params?: Readonly<{ options?: Readonly<{ page?: number | undefined; filter?: string | Record<string, any> | undefined; search?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; hasReference?: Readonly<{} & { id: string; type: string; }> | Readonly<{} & { id: string; type: string; }>[] | undefined; fields?: string[] | undefined; ruleTypeIds?: string[] | undefined; consumers?: string[] | undefined; } & {}> | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; } & {}> | undefined) => Promise<",
+          " = never>(params?: Readonly<{ options?: Readonly<{ search?: string | undefined; page?: number | undefined; filter?: string | Record<string, any> | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; hasReference?: Readonly<{} & { id: string; type: string; }> | Readonly<{} & { id: string; type: string; }>[] | undefined; fields?: string[] | undefined; ruleTypeIds?: string[] | undefined; consumers?: string[] | undefined; } & {}> | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; } & {}> | undefined) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -12022,7 +12056,7 @@
         "signature": [
           "Pick<",
           "AggregateOptions",
-          ", \"filter\" | \"search\"> & { after?: ",
+          ", \"search\" | \"filter\"> & { after?: ",
           "AggregationsCompositeAggregateKey",
           " | undefined; maxTags?: number | undefined; }"
         ],
