@@ -33,13 +33,9 @@ interface ListItem {
 
 export const OverviewCardView = ({
   monitorsSortedByStatus,
-  maxItem,
-  setMaxItem,
   setFlyoutConfigCallback,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
-  maxItem: number;
-  setMaxItem: (maxItem: number) => void;
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
   const {
@@ -49,8 +45,19 @@ export const OverviewCardView = ({
   const trendData = useSelector(selectOverviewTrends);
   const { view } = useSelector(selectOverviewState);
   const [rowCount, setRowCount] = useState(5);
+  const [maxItem, setMaxItem] = useState(1);
+  const [visibleIndices, setVisibleIndices] = useState<{
+    visibleStartIndex: number;
+    visibleEndIndex: number;
+  } | null>(null);
 
-  useOverviewTrendsRequests(monitorsSortedByStatus, maxItem, rowCount);
+  const monitorsToFetchTrendsFor = visibleIndices
+    ? monitorsSortedByStatus.slice(
+        visibleIndices.visibleStartIndex,
+        Math.max(visibleIndices.visibleEndIndex * rowCount, MIN_BATCH_SIZE)
+      )
+    : [];
+  useOverviewTrendsRequests(monitorsToFetchTrendsFor);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -97,7 +104,13 @@ export const OverviewCardView = ({
                         // pad computed height to avoid clipping last row's drop shadow
                         height={listHeight + 16}
                         width={width}
-                        onItemsRendered={onItemsRendered}
+                        onItemsRendered={(props) => {
+                          setVisibleIndices({
+                            visibleStartIndex: props.visibleStartIndex,
+                            visibleEndIndex: props.visibleStopIndex,
+                          });
+                          onItemsRendered(props);
+                        }}
                         itemSize={ITEM_HEIGHT}
                         itemCount={listItems.length}
                         itemData={listItems}

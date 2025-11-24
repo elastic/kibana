@@ -11,20 +11,13 @@ import type { OverviewStatusMetaData } from '../../../../../../common/runtime_ty
 import type { TrendRequest } from '../../../../../../common/types';
 import { selectOverviewTrends, trendStatsBatch } from '../../../state';
 
-export const useOverviewTrendsRequests = (
-  monitorsSortedByStatus: OverviewStatusMetaData[],
-  maxItem: number,
-  rowCount: number
-) => {
+export const useOverviewTrendsRequests = (monitorsToFetchTrendsFor: OverviewStatusMetaData[]) => {
   const dispatch = useDispatch();
 
   const trendData = useSelector(selectOverviewTrends);
 
   useEffect(() => {
-    // We add 1 to maxItem to fetch one extra row so the scrolling looks smooth
-    const visibleMonitors = monitorsSortedByStatus.slice(0, (maxItem + 1) * rowCount);
-
-    const trendRequests = visibleMonitors.reduce((acc, item) => {
+    const trendRequests = monitorsToFetchTrendsFor.reduce((acc, item) => {
       if (trendData[item.configId + item.locationId] === undefined) {
         acc.push({
           configId: item.configId,
@@ -35,5 +28,5 @@ export const useOverviewTrendsRequests = (
       return acc;
     }, [] as TrendRequest[]);
     if (trendRequests.length) dispatch(trendStatsBatch.get(trendRequests));
-  }, [dispatch, maxItem, monitorsSortedByStatus, rowCount, trendData]);
+  }, [dispatch, monitorsToFetchTrendsFor, trendData]);
 };

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
@@ -39,7 +39,6 @@ export const OverviewGrid = memo(
       scopeStatusByLocation: true,
     });
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
-    const [maxItem, setMaxItem] = useState(0);
 
     const setFlyoutConfigCallback = useCallback(
       (params: FlyoutParamProps) => dispatch(setFlyoutConfig(params)),
@@ -102,8 +101,6 @@ export const OverviewGrid = memo(
         {view === 'cardView' ? (
           <OverviewCardView
             monitorsSortedByStatus={monitorsSortedByStatus}
-            maxItem={maxItem}
-            setMaxItem={setMaxItem}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
           />
         ) : view === 'compactView' ? (
