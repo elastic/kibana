@@ -24,7 +24,7 @@ import {
   THREAT_HUNTING_PRIORITIES_TAG,
 } from '../../../../lib/entity_prioritization/graphs/default_entity_prioritization_graph/constants';
 import { getLlmType } from '../../../utils';
-import { getThreatHuntingPrioritiesPrompts } from '../../../../lib/entity_prioritization/graphs/default_entity_prioritization_graph/prompts';
+import type { CombinedPrompts } from '../../../../lib/entity_prioritization/graphs/default_entity_prioritization_graph';
 import type { ThreatHuntingPrioritiesGraphState } from '../../../../lib/entity_prioritization/graphs/default_entity_prioritization_graph/state';
 import type { ThreatHuntingPriority } from '../../../../lib/entity_prioritization/state';
 import type { EntityDetailsHighlightsService } from '../../../../lib/entity_prioritization/graphs/default_entity_prioritization_graph/nodes/enrich_entities/types';
@@ -103,7 +103,9 @@ export const invokeThreatHuntingPrioritiesGraph = async ({
     throw new Error('LLM is required for threat hunting priorities');
   }
 
-  const prompts = await getThreatHuntingPrioritiesPrompts();
+  // For PoC, prompts are hardcoded in nodes with fallback defaults
+  // TODO: If moving to production, implement centralized prompt fetching
+  const prompts: CombinedPrompts = {};
 
   const graph = getDefaultThreatHuntingPrioritiesGraph({
     end,

@@ -9,7 +9,7 @@ import type { Replacements } from '@kbn/elastic-assistant-common';
 import { Annotation } from '@langchain/langgraph';
 
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
-import type { ThreatHuntingPrioritiesPrompts } from '../prompts';
+import type { CombinedPrompts } from '..';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,
@@ -44,7 +44,6 @@ export interface ThreatHuntingPriority {
   };
 }
 
-// TODO: Define CandidateEntity type
 export interface CandidateEntity {
   entityId: string;
   entityType: 'user' | 'host';
@@ -59,7 +58,7 @@ export interface CandidateEntity {
 export interface Options {
   end?: string;
   filter?: Record<string, unknown> | null;
-  prompts: ThreatHuntingPrioritiesPrompts;
+  prompts: CombinedPrompts;
   start?: string;
 }
 
@@ -71,7 +70,7 @@ export const getDefaultGraphAnnotation = ({ end, filter, prompts, start }: Optio
     }),
     prompt: Annotation<string>({
       reducer: (x: string, y?: string) => y ?? x,
-      default: () => prompts.default,
+      default: () => prompts.default || '',
     }),
     candidateEntities: Annotation<CandidateEntity[]>({
       reducer: (x: CandidateEntity[], y?: CandidateEntity[]) => y ?? x,
@@ -98,7 +97,7 @@ export const getDefaultGraphAnnotation = ({ end, filter, prompts, start }: Optio
     }),
     continuePrompt: Annotation<string, string>({
       reducer: (x: string, y?: string) => y ?? x,
-      default: () => prompts.continue,
+      default: () => prompts.continue || '',
     }),
     end: Annotation<DateMath | undefined>({
       reducer: (x?: DateMath, y?: DateMath) => y ?? x,
@@ -126,7 +125,7 @@ export const getDefaultGraphAnnotation = ({ end, filter, prompts, start }: Optio
     }),
     refinePrompt: Annotation<string>({
       reducer: (x: string, y?: string) => y ?? x,
-      default: () => prompts.refine,
+      default: () => prompts.refine || '',
     }),
     maxGenerationAttempts: Annotation<number>({
       reducer: (x: number, y?: number) => y ?? x,

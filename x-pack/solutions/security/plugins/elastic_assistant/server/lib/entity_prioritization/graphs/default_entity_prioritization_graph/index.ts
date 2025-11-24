@@ -17,8 +17,19 @@ import { getEnrichEntitiesNode } from './nodes/enrich_entities';
 import type { EntityDetailsHighlightsService } from './nodes/enrich_entities/types';
 import { getGeneratePrioritiesNode } from './nodes/generate_priorities';
 import { getEnrichOrEndEdge } from './edges';
-import type { CombinedPrompts } from './prompts';
 import { getDefaultGraphAnnotation } from './state';
+
+// Prompt type for threat hunting priorities
+// For PoC, prompts are hardcoded in nodes with fallback defaults
+export type CombinedPrompts = Partial<{
+  default: string;
+  refine: string;
+  continue: string;
+  selectCandidates: string;
+  finalizePriorities: string;
+  summary: string;
+  priority: string;
+}>;
 
 export interface GetDefaultThreatHuntingPrioritiesGraphParams {
   alertsIndexPattern?: string;

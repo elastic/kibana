@@ -12,7 +12,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 import type { ThreatHuntingPrioritiesGraphState } from '../../../../state';
 import { getThreatHuntingPrioritiesGenerationSchema } from '../../schemas';
-import type { CombinedPrompts } from '../../prompts';
+import type { CombinedPrompts } from '../../index';
 import { extractJson } from '../../../../../langchain/output_chunking/nodes/helpers/extract_json';
 
 /**

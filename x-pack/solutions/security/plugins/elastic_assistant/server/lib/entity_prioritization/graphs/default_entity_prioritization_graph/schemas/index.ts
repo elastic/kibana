@@ -7,9 +7,8 @@
 
 import { z } from '@kbn/zod';
 
-import type { GenerationPrompts } from '../prompts';
+import type { CombinedPrompts } from '..';
 
-// TODO: Define schema for LLM to select candidates
 export const getSelectCandidatesSchema = () =>
   z.object({
     selectedEntityIds: z
@@ -17,8 +16,7 @@ export const getSelectCandidatesSchema = () =>
       .describe('Array of entity IDs that should be enriched for further analysis'),
   });
 
-// TODO: Define schema for LLM to generate final priorities
-export const getThreatHuntingPrioritiesGenerationSchema = (prompts: GenerationPrompts) =>
+export const getThreatHuntingPrioritiesGenerationSchema = (prompts: CombinedPrompts) =>
   z.object({
     priorities: z
       .array(
@@ -40,11 +38,15 @@ export const getThreatHuntingPrioritiesGenerationSchema = (prompts: GenerationPr
                 type: z.enum(['user', 'host']).describe('The type of entity'),
                 idField: z
                   .string()
-                  .describe('The field name that identifies this entity (e.g., "host.name", "user.name")'),
+                  .describe(
+                    'The field name that identifies this entity (e.g., "host.name", "user.name")'
+                  ),
                 idValue: z.string().describe('The actual entity identifier value'),
               })
             )
-            .describe('Array of entities associated with this priority (can include multiple entities)'),
+            .describe(
+              'Array of entities associated with this priority (can include multiple entities)'
+            ),
           tags: z
             .array(z.string())
             .describe(
@@ -64,4 +66,3 @@ export const getThreatHuntingPrioritiesGenerationSchema = (prompts: GenerationPr
       )
       .describe('Array of prioritized threat hunting priorities'),
   });
-

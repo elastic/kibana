@@ -13,7 +13,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 import type { ThreatHuntingPrioritiesGraphState, CandidateEntity } from '../../../../state';
 import { getSelectCandidatesSchema } from '../../schemas';
-import type { CombinedPrompts } from '../../prompts';
+import type { CombinedPrompts } from '../..';
 import { extractJson } from '../../../../../langchain/output_chunking/nodes/helpers/extract_json';
 
 const MAX_SELECTED_CANDIDATES = 10;
@@ -57,12 +57,12 @@ const formatCandidateEntities = (
         details.push(`Baseline Risk Score: ${entity.baseline}`);
       }
 
-      // Include spike value if available
+      // Include spike value if available (this is the new/current score)
       if (entity.spike !== undefined) {
-        details.push(`Spike: +${entity.spike}`);
+        details.push(`Spike: ${entity.spike}`);
       }
 
-      // Include current risk score (baseline + spike or new score)
+      // Include current risk score (same as spike value)
       if (entity.riskScore !== undefined) {
         details.push(`Current Risk Score: ${entity.riskScore}`);
       }
@@ -123,10 +123,10 @@ export const getFindAndSelectCandidatesNode = ({
               candidateEntities.push({
                 entityId: spike.identifier,
                 entityType,
-                riskScore: spike.baseline + spike.spike, // Current score = baseline + spike
+                riskScore: spike.spike, // Current score is the spike value (new score)
                 riskScoreSpike: true,
                 spike: spike.spike, // Store the spike value
-                baseline: spike.baseline, // Store the baseline value
+                baseline: spike.baseline, // Store the baseline value (past score)
               });
             }
           }
@@ -249,9 +249,9 @@ ${formatInstructions}`;
 
         logger?.debug(
           () =>
-            `Selected ${selectedCandidateIds.length} candidates for enrichment: ${selectedCandidateIds.join(
-              ', '
-            )}`
+            `Selected ${
+              selectedCandidateIds.length
+            } candidates for enrichment: ${selectedCandidateIds.join(', ')}`
         );
       } catch (error) {
         logger?.error(() => `Error selecting candidates: ${error}`);
@@ -260,7 +260,8 @@ ${formatInstructions}`;
           .slice(0, MAX_SELECTED_CANDIDATES)
           .map((entity) => entity.entityId);
         logger?.warn(
-          () => `Falling back to selecting first ${selectedCandidateIds.length} candidates due to error`
+          () =>
+            `Falling back to selecting first ${selectedCandidateIds.length} candidates due to error`
         );
       }
     }
@@ -274,4 +275,3 @@ ${formatInstructions}`;
 
   return findAndSelectCandidates;
 };
-
