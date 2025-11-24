@@ -9,10 +9,14 @@ import type { TypeOf } from '@kbn/config-schema';
 import type {
   gapAutoFillSchedulerBodySchemaV1,
   gapAutoFillSchedulerResponseSchemaV1,
+  gapAutoFillSchedulerUpdateBodySchemaV1,
   getGapAutoFillSchedulerParamsSchemaV1,
 } from '..';
 
 export type GapAutoFillSchedulerRequestBody = TypeOf<typeof gapAutoFillSchedulerBodySchemaV1>;
+export type UpdateGapAutoFillSchedulerRequestBody = TypeOf<
+  typeof gapAutoFillSchedulerUpdateBodySchemaV1
+>;
 export type GapAutoFillSchedulerResponseBody = TypeOf<typeof gapAutoFillSchedulerResponseSchemaV1>;
 export type GetGapAutoFillSchedulerParams = TypeOf<typeof getGapAutoFillSchedulerParamsSchemaV1>;
 export interface GapAutoFillSchedulerResponse {

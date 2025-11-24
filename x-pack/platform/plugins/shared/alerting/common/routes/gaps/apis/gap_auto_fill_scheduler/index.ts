@@ -7,6 +7,7 @@
 
 export {
   gapAutoFillSchedulerBodySchema,
+  gapAutoFillSchedulerUpdateBodySchema,
   gapAutoFillSchedulerResponseSchema,
   getGapAutoFillSchedulerParamsSchema,
 } from './schemas/latest';
@@ -14,12 +15,14 @@ export type {
   GapAutoFillSchedulerRequestBody,
   GapAutoFillSchedulerResponseBody,
   GapAutoFillSchedulerResponse,
+  UpdateGapAutoFillSchedulerRequestBody,
   UpdateGapAutoFillSchedulerResponse,
   GetGapAutoFillSchedulerParams,
 } from './types/latest';
 
 export {
   gapAutoFillSchedulerBodySchema as gapAutoFillSchedulerBodySchemaV1,
+  gapAutoFillSchedulerUpdateBodySchema as gapAutoFillSchedulerUpdateBodySchemaV1,
   gapAutoFillSchedulerResponseSchema as gapAutoFillSchedulerResponseSchemaV1,
   getGapAutoFillSchedulerParamsSchema as getGapAutoFillSchedulerParamsSchemaV1,
 } from './schemas/v1';
@@ -27,6 +30,7 @@ export type {
   GapAutoFillSchedulerRequestBody as GapAutoFillSchedulerRequestBodyV1,
   GapAutoFillSchedulerResponseBody as GapAutoFillSchedulerResponseBodyV1,
   GapAutoFillSchedulerResponse as GapAutoFillSchedulerResponseV1,
+  UpdateGapAutoFillSchedulerRequestBody as UpdateGapAutoFillSchedulerRequestBodyV1,
   UpdateGapAutoFillSchedulerResponse as UpdateGapAutoFillSchedulerResponseV1,
   GetGapAutoFillSchedulerParams as GetGapAutoFillSchedulerParamsV1,
 } from './types/v1';

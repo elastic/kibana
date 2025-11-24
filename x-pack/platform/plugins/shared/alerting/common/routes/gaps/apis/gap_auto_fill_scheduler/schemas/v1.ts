@@ -11,6 +11,31 @@ import { parseDuration } from '../../../../../parse_duration';
 
 const { maxBackfills, numRetries, minScheduleIntervalInMs } = gapAutoFillSchedulerLimits;
 
+const validateGapFillRange = (gapFillRange: string) => {
+  const parsed = dateMath.parse(gapFillRange);
+  if (!parsed || !parsed.isValid()) {
+    return 'gap_fill_range is invalid';
+  }
+};
+
+const validateScheduleInterval = (schedule: { interval: string }) => {
+  try {
+    const intervalMs = parseDuration(schedule.interval);
+    if (intervalMs < minScheduleIntervalInMs) {
+      return 'schedule.interval must be at least 1 minute';
+    }
+  } catch (error) {
+    return `schedule.interval is invalid: ${(error as Error).message}`;
+  }
+};
+
+const validateGapAutoFillSchedulerPayload = (
+  gapFillRange: string,
+  schedule: { interval: string }
+) => {
+  return validateGapFillRange(gapFillRange) ?? validateScheduleInterval(schedule);
+};
+
 export const getGapAutoFillSchedulerParamsSchema = schema.object({
   id: schema.string(),
 });
@@ -26,7 +51,7 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
     schedule: schema.object({
       interval: schema.string(),
     }),
-    scope: schema.maybe(schema.arrayOf(schema.string())),
+    scope: schema.arrayOf(schema.string()),
     rule_types: schema.arrayOf(
       schema.object({
         type: schema.string(),
@@ -36,19 +61,32 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
   },
   {
     validate({ gap_fill_range: gapFillRange, schedule }) {
-      const parsed = dateMath.parse(gapFillRange);
-      if (!parsed || !parsed.isValid()) {
-        return 'gap_fill_range is invalid';
-      }
+      return validateGapAutoFillSchedulerPayload(gapFillRange, schedule);
+    },
+  }
+);
 
-      try {
-        const intervalMs = parseDuration(schedule.interval);
-        if (intervalMs < minScheduleIntervalInMs) {
-          return 'schedule.interval must be at least 1 minute';
-        }
-      } catch (error) {
-        return `schedule.interval is invalid: ${(error as Error).message}`;
-      }
+export const gapAutoFillSchedulerUpdateBodySchema = schema.object(
+  {
+    name: schema.string(),
+    enabled: schema.boolean(),
+    gap_fill_range: schema.string(),
+    max_backfills: schema.number({ min: 1, max: 5000 }),
+    num_retries: schema.number({ min: 1 }),
+    schedule: schema.object({
+      interval: schema.string(),
+    }),
+    scope: schema.arrayOf(schema.string()),
+    rule_types: schema.arrayOf(
+      schema.object({
+        type: schema.string(),
+        consumer: schema.string(),
+      })
+    ),
+  },
+  {
+    validate(payload) {
+      return validateGapAutoFillSchedulerPayload(payload.gap_fill_range, payload.schedule);
     },
   }
 );

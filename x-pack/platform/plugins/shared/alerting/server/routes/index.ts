@@ -93,6 +93,7 @@ import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
 import { createAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route';
 import { getAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/get/get_auto_fill_scheduler_route';
+import { updateAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route';
 import { deleteAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 import type { AlertingPluginsStart } from '../plugin';
@@ -201,6 +202,7 @@ export function defineRoutes(opts: RouteOptions) {
   if (alertingConfig?.gapAutoFillScheduler?.enabled) {
     createAutoFillSchedulerRoute(router, licenseState);
     getAutoFillSchedulerRoute(router, licenseState);
+    updateAutoFillSchedulerRoute(router, licenseState);
     deleteAutoFillSchedulerRoute(router, licenseState);
   }
 
