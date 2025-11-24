@@ -1247,6 +1247,14 @@
       }
     }
   },
+  "entity-store-esql-execution-time": {
+    "dynamic": false,
+    "properties": {
+      "lastExecutionTimeISO": {
+        "type": "date"
+      }
+    }
+  },
   "epm-packages": {
     "dynamic": false,
     "properties": {

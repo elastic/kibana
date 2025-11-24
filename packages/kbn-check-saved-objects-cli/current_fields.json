@@ -372,6 +372,9 @@
     "timestampField",
     "type"
   ],
+  "entity-store-esql-execution-time": [
+    "lastExecutionTimeISO"
+  ],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",
