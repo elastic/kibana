@@ -57,7 +57,6 @@ export const buildkite: BuildkiteMetadata =
         branch: process.env.BUILDKITE_BRANCH,
         commit: process.env.BUILDKITE_COMMIT,
         job_id: process.env.BUILDKITE_JOB_ID,
-        message: process.env.BUILDKITE_MESSAGE,
         build: {
           id: process.env.BUILDKITE_BUILD_ID,
           number: process.env.BUILDKITE_BUILD_NUMBER,
