@@ -10,4 +10,4 @@
 export { isValidUTCDate, formatTime, getPlaywrightGrepTag, execPromise } from './runner_utils';
 export { resolveSelector, type SelectorInput } from './locator_helper';
 export { keyTo } from './a11y_utils';
-export { checkA11y } from './axe';
+export { checkA11y, type A11yViolation } from './axe';

@@ -8,6 +8,7 @@
  */
 
 import type { Page } from '@playwright/test';
+import type { A11yViolation } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 
 /**
@@ -42,7 +43,9 @@ export type ScoutPage = Page & {
   keyTo: (selector: string, key: string, maxElementsToTraverse?: number) => Promise<void>;
 
   // @todo
-  checkA11y: () => Promise<void>;
+  checkA11y: () => Promise<{
+    violations: A11yViolation[];
+  }>;
 
   /**
    * Types text into an input field character by character with a specified delay between each character.

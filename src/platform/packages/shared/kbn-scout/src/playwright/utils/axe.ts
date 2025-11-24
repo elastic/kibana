@@ -24,6 +24,7 @@ export interface A11yViolation {
     target: string[];
     failureSummary?: string;
   }>;
+  url?: string;
 }
 
 export interface RunA11yScanOptions {
@@ -82,18 +83,13 @@ export const runA11yScan = async (
 /**
  * Assert helper usable inside tests.
  */
-export const checkA11y = async (page: Page, kbnUrl?: KibanaUrl): Promise<void> => {
+export const checkA11y = async (page: Page, kbnUrl?: KibanaUrl) => {
   const { violations } = await runA11yScan(page);
 
-  if (violations.length) {
-    const formatted = violations
-      .map(
-        (v) =>
-          `${v.id} (${v.impact}): ${v.helpUrl}\n Url: ${kbnUrl?.toString()} Nodes:\n${v.nodes
-            .map((n) => `    ${n.target.join(', ')} -> ${n.html}`)
-            .join('\n')}`
-      )
-      .join('\n\n');
-    throw new Error(`Accessibility violations:\n${formatted}`);
-  }
+  return {
+    violations: violations.map((v) => ({
+      ...v,
+      url: kbnUrl?.toString(),
+    })),
+  };
 };
