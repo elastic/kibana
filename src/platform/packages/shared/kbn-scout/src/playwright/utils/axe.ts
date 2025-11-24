@@ -44,36 +44,39 @@ export const runA11yScan = async (
   { exclude = [], impactLevels, timeoutMs = 10000 }: RunA11yScanOptions = {}
 ): Promise<RunA11yScanResult> => {
   const builder = new AxeBuilder({ page });
-
   builder.options(AXE_OPTIONS);
 
   for (const selector of exclude) {
     builder.exclude(selector);
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const analysisPromise = builder.analyze();
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-  try {
-    const axeResults = await builder.analyze();
-    let violations = axeResults.violations as A11yViolation[];
-
-    if (impactLevels && impactLevels.length) {
-      const allowed = new Set(impactLevels);
-      violations = violations.filter(
-        (v) => v.impact && allowed.has(v.impact as (typeof impactLevels)[number])
+  const result = await Promise.race([
+    analysisPromise,
+    new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(
+        () => reject(new Error(`Axe accessibility scan timed out after ${timeoutMs}ms`)),
+        timeoutMs
       );
-    }
+    }),
+  ]);
 
-    return { violations };
-  } catch (err) {
-    if ((err as Error).name === 'AbortError') {
-      throw new Error(`Axe accessibility scan timed out after ${timeoutMs}ms`);
-    }
-    throw err;
-  } finally {
-    clearTimeout(timeout);
+  if (timeoutId) {
+    clearTimeout(timeoutId);
   }
+
+  let violations = (result.violations as A11yViolation[]) || [];
+
+  if (impactLevels && impactLevels.length) {
+    const allowed = new Set(impactLevels);
+    violations = violations.filter(
+      (v) => v.impact && allowed.has(v.impact as (typeof impactLevels)[number])
+    );
+  }
+
+  return { violations };
 };
 
 /**
