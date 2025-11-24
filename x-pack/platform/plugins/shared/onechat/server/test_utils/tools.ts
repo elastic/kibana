@@ -45,7 +45,7 @@ export const createToolRegistryMock = (): ToolRegistryMock => {
 
 export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   return {
-    getToolDefinitions: jest.fn(),
+    getToolDefinitions: jest.fn().mockImplementation(() => []),
     getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
   };
 };

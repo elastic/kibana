@@ -37,6 +37,8 @@ describe('prepareConversation', () => {
     };
   };
 
+  const textRepresentation = (value: string): AttachmentRepresentation => ({ type: 'text', value });
+
   beforeEach(() => {
     mockAttachmentsService = {
       getTypeDefinition: jest.fn(),
@@ -84,6 +86,7 @@ describe('prepareConversation', () => {
       });
 
       expect(result).toEqual({
+        attachments: [],
         attachmentTypes: [],
         nextInput: {
           message: 'Hello',
@@ -119,10 +122,7 @@ describe('prepareConversation', () => {
         data: { content: 'test content' },
       };
 
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted text',
-      };
+      const mockRepresentation = textRepresentation('formatted text');
 
       mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
 
@@ -138,13 +138,7 @@ describe('prepareConversation', () => {
       });
 
       expect(result.nextInput.attachments).toHaveLength(1);
-      expect(result.nextInput.attachments[0]).toEqual({
-        attachment: {
-          ...attachment,
-          id: 'generated-id-1',
-        },
-        representation: mockRepresentation,
-      });
+      expect(result.nextInput.attachments[0].attachment.id).toEqual('generated-id-1');
 
       expect(mockGetToolResultId).toHaveBeenCalledTimes(1);
       expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(2);
@@ -157,10 +151,7 @@ describe('prepareConversation', () => {
         data: { content: 'test content' },
       };
 
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted text',
-      };
+      const mockRepresentation = textRepresentation('formatted text');
 
       mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
 
@@ -175,13 +166,7 @@ describe('prepareConversation', () => {
         attachmentsService: mockAttachmentsService,
       });
 
-      expect(result.nextInput.attachments[0]).toEqual({
-        attachment: {
-          ...attachment,
-          id: 'existing-id',
-        },
-        representation: mockRepresentation,
-      });
+      expect(result.nextInput.attachments[0].attachment.id).toEqual('existing-id');
 
       expect(mockGetToolResultId).not.toHaveBeenCalled();
       expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(2);
@@ -205,20 +190,9 @@ describe('prepareConversation', () => {
         hidden: true,
       };
 
-      const mockRepresentation1: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted 1',
-      };
-
-      const mockRepresentation2: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted 2',
-      };
-
-      const mockRepresentation3: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted 3',
-      };
+      const mockRepresentation1 = textRepresentation('formatted 1');
+      const mockRepresentation2 = textRepresentation('formatted 2');
+      const mockRepresentation3 = textRepresentation('formatted 3');
 
       const getRepresentation = jest
         .fn()
@@ -253,14 +227,17 @@ describe('prepareConversation', () => {
       expect(result.nextInput.attachments[0]).toEqual({
         attachment: { ...attachment1, id: 'generated-id-1' },
         representation: mockRepresentation1,
+        tools: [],
       });
       expect(result.nextInput.attachments[1]).toEqual({
         attachment: { ...attachment2, id: 'existing-id' },
         representation: mockRepresentation2,
+        tools: [],
       });
       expect(result.nextInput.attachments[2]).toEqual({
         attachment: { ...attachment3, id: 'generated-id-2' },
         representation: mockRepresentation3,
+        tools: [],
       });
 
       expect(mockGetToolResultId).toHaveBeenCalledTimes(2);
@@ -273,10 +250,7 @@ describe('prepareConversation', () => {
         hidden: true,
       };
 
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted',
-      };
+      const mockRepresentation = textRepresentation('formatted');
 
       mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
 
@@ -337,10 +311,7 @@ describe('prepareConversation', () => {
         data: { content: 'previous content' },
       };
 
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted previous',
-      };
+      const mockRepresentation = textRepresentation('formatted previous');
 
       mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
 
@@ -371,16 +342,14 @@ describe('prepareConversation', () => {
           id: 'prev-attachment-id',
         },
         representation: mockRepresentation,
+        tools: [],
       });
 
       expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(2);
     });
 
     it('should process multiple previous rounds', async () => {
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted',
-      };
+      const mockRepresentation = textRepresentation('formatted');
 
       mockAttachmentsService.getTypeDefinition.mockReturnValue(mockDefinition(mockRepresentation));
 
