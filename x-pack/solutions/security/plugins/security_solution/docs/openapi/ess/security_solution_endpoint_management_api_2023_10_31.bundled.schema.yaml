@@ -480,6 +480,26 @@ paths:
       summary: Scan a file or directory
       tags:
         - Security Endpoint Management API
+  /api/endpoint/action/scripts_library:
+    post:
+      description: Create a new script entry by uploading a script file
+      operationId: EndpointScriptLibraryCreateScript
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScriptsApiResponse'
+          description: Action request was successfully created
+      summary: Create script
+      tags:
+        - Security Endpoint Management API
   /api/endpoint/action/state:
     get:
       description: >-
@@ -955,6 +975,47 @@ components:
       description: Optional comment
       example: This is a comment
       type: string
+    CreateScriptRouteRequestBody:
+      type: object
+      properties:
+        description:
+          description: Description of the script and its purpose/functionality
+          type: string
+        example:
+          description: Example usage of the script
+          type: string
+        executable:
+          description: >
+            Used only for when the uploaded script is an archive (ex. zip file).
+            This property defines the relative path to the file included in the
+            archive that should be executed once its contents are extracted. The
+            path should be relative to the root of the archive.
+          example: ./bin/script.sh
+          type: string
+        file:
+          description: The script file upload
+          format: binary
+          type: object
+        instructions:
+          description: >-
+            Instructions for using the script, including details around its
+            supported input arguments
+          type: string
+        name:
+          description: Name of the script
+          type: string
+        platform:
+          description: Platforms supported by the the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptPlatform'
+          type: array
+        requiresInput:
+          description: Whether the script requires input arguments
+          type: boolean
+      required:
+        - name
+        - platform
+        - file
     DownloadUri:
       type: object
       properties:
@@ -1069,6 +1130,67 @@ components:
               revision: 2
       type: object
       properties: {}
+    EndpointScript:
+      type: object
+      properties:
+        createAt:
+          format: date-time
+          type: string
+        createdBy:
+          example: elastic
+          type: string
+        description:
+          description: Description of the script and its purpose/functionality
+          example: Collects host data for investigation
+          type: string
+        downloadUri:
+          description: >-
+            URI to download the script file. Note that this is the relative path
+            and does not include the space (if applicable)
+          example: >-
+            /api/endpoint/action/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          type: string
+        example:
+          type: string
+        executable:
+          description: >
+            The relative path to the file included in the archive that should be
+            executed once its contents are extracted. Applicable only for
+            scripts uploaded as an archive (ex. zip file).
+          type: string
+        id:
+          example: 123e4567-e89b-12d3-a456-426655440000
+          format: uuid
+          type: string
+        instructions:
+          description: >-
+            Instructions for using the script, including details around its
+            supported input arguments
+          type: string
+        name:
+          example: Collect host data
+          type: string
+        platform:
+          items:
+            $ref: '#/components/schemas/EndpointScriptPlatform'
+          type: array
+        requiresInput:
+          type: boolean
+        updatedAt:
+          format: date-time
+          type: string
+        updatedBy:
+          example: admin
+          type: string
+        version:
+          type: string
+    EndpointScriptPlatform:
+      enum:
+        - linux
+        - macos
+        - windows
+        - null
+      type: string
     Execute:
       allOf:
         - $ref: '#/components/schemas/ResponseActionDetails'
@@ -2302,6 +2424,11 @@ components:
           wasSuccessful: false
       type: object
       properties: {}
+    ScriptsApiResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/EndpointScript'
     SentinelOneRunScriptParameters:
       description: >-
         Parameters for Run Script response action against SentinelOne agent
