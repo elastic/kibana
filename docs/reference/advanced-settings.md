@@ -473,8 +473,6 @@ $$$observability-enable-diagnostic-mode$$$`observability:enableDiagnosticMode` {
 $$$observability-streams-enable-significant-events$$$`observability:streamsEnableSignificantEvents` {applies_to}`stack: preview` {applies_to}`observability: preview`
 :   Enable streams significant events. `false` by default.
 
-$$$observability-streams-enable-group-streams$$$`observability:streamsEnableGroupStreams` {applies_to}`stack: preview` {applies_to}`observability: ga`
-:   Enable group streams functionality.
 
 
 ### Reporting [kibana-reporting-settings]
