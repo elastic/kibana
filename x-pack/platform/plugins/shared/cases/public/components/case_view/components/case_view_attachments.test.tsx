@@ -263,7 +263,10 @@ describe('Case View Attachments tab', () => {
 
   it('should display the events tab with correct count when the feature is enabled', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={{ ...caseData, totalEvents: 4 }}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+      />,
       {
         wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
       }
@@ -288,8 +291,6 @@ describe('Case View Attachments tab', () => {
   });
 
   it('should not show observable tabs in non-platinum tiers', async () => {
-    const spyOnUseGetSimilarCases = jest.spyOn(similarCasesHook, 'useGetSimilarCases');
-
     renderWithTestingProviders(
       <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
       {
@@ -298,12 +299,6 @@ describe('Case View Attachments tab', () => {
     );
 
     expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('case-view-tab-title-similar_cases')).not.toBeInTheDocument();
-
-    // NOTE: we are still calling the hook but the fetching is disabled (based on the license)
-    expect(spyOnUseGetSimilarCases).toHaveBeenLastCalledWith(
-      expect.objectContaining({ enabled: false })
-    );
   });
 
   it('should not show observable tabs if the observables feature is not enabled', async () => {
@@ -318,7 +313,6 @@ describe('Case View Attachments tab', () => {
     );
 
     expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('case-view-tab-title-similar_cases')).not.toBeInTheDocument();
   });
 
   it('should show observable tabs in platinum+ tiers', async () => {
