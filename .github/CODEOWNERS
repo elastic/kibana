@@ -2390,6 +2390,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/serverless/functional/test_suites/management/disabled_uis.ts @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/management/ingest_pipelines.ts @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/management/landing_page.ts @elastic/kibana-management
+/x-pack/platform/test/serverless/functional/test_suites/management/index_management/ @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/dev_tools/ @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/grok_debugger/ @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/management/ @elastic/kibana-management
