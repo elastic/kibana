@@ -10,7 +10,7 @@
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
-import { isEqualState } from '../../discover_app_state_container';
+import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
   type InternalStateThunkActionCreator,

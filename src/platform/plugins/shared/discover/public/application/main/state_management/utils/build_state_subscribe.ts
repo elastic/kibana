@@ -19,7 +19,7 @@ import type { DiscoverSavedSearchContainer } from '../discover_saved_search_cont
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { DiscoverAppState } from '../redux';
-import { isEqualState } from '../discover_app_state_container';
+import { isEqualState } from './state_comparators';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';

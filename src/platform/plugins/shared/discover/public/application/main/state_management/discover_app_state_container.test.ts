@@ -12,7 +12,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { isEqualState } from './discover_app_state_container';
+import { isEqualState } from './utils/state_comparators';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
 import { omit } from 'lodash';
