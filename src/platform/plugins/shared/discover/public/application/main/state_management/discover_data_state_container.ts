@@ -105,7 +105,12 @@ export interface DiscoverDataStateContainer {
   /**
    * Emits when the chart should be fetched
    */
-  fetchChart$: Observable<DiscoverLatestFetchDetails>;
+  fetchChart$: Observable<DiscoverLatestFetchDetails | null>;
+
+  /**
+   * Resets the fetchChart$ observable by emitting null
+   */
+  resetFetchChart$: () => void;
   /**
    * Used to disable the next fetch that would otherwise be triggered by a URL state change
    */
@@ -170,7 +175,7 @@ export function getDataStateContainer({
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails>(1);
+  const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
 
   /**
@@ -458,12 +463,17 @@ export function getDataStateContainer({
     return abortController;
   };
 
+  const resetFetchChart$ = () => {
+    fetchChart$.next(null);
+  };
+
   return {
     fetch: fetchQuery,
     fetchMore,
     data$: dataSubjects,
     refetch$,
     fetchChart$,
+    resetFetchChart$,
     disableNextFetchOnStateChange$,
     subscribe,
     reset,

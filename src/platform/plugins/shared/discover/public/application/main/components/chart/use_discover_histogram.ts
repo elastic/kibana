@@ -299,13 +299,17 @@ export const useDiscoverHistogram = (
     }
 
     const subscription = stateContainer.dataState.fetchChart$.subscribe((latestFetchDetails) => {
-      triggerUnifiedHistogramFetch.current(latestFetchDetails);
+      if (latestFetchDetails) {
+        triggerUnifiedHistogramFetch.current(latestFetchDetails);
+      }
     });
 
     return () => {
       subscription.unsubscribe();
+      // Reset fetchChart$ to avoid emitting stale values when re-mounting the component
+      stateContainer.dataState.resetFetchChart$();
     };
-  }, [stateContainer.dataState.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
+  }, [stateContainer.dataState, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
 
   useEffect(() => {
     const previousFetchParams = previousFetchParamsRef.current;
