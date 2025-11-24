@@ -178,7 +178,7 @@ describe('Test discover app state container', () => {
     expect(getCurrentTab().appState.dataSource?.type).toBe('esql');
   });
 
-  describe('initAndSync', () => {
+  describe('initializeAndSync', () => {
     it('should call setResetDefaultProfileState correctly with no initial state', () => {
       const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
