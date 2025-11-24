@@ -69,32 +69,30 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
     <>
       {allowExistingIndices === true ? (
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <span>
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.fileUpload.indexSelection.label', {
-                  defaultMessage: 'Select index creation method',
-                })}
-                isFullWidth={true}
-                isDisabled={false}
-                options={[
-                  {
-                    id: UPLOAD_TYPE.NEW,
-                    label: i18n.translate('xpack.fileUpload.indexSelection.newLabel', {
-                      defaultMessage: 'New index',
-                    }),
-                  },
-                  {
-                    id: UPLOAD_TYPE.EXISTING,
-                    label: i18n.translate('xpack.fileUpload.existingIndexSelection.label', {
-                      defaultMessage: 'Existing index',
-                    }),
-                  },
-                ]}
-                idSelected={indexCreateMode}
-                onChange={(id) => setIndexCreateModeWrapper(id as UPLOAD_TYPE)}
-              />
-            </span>
+          <EuiFlexItem>
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.fileUpload.indexSelection.label', {
+                defaultMessage: 'Select index creation method',
+              })}
+              isFullWidth={true}
+              isDisabled={false}
+              options={[
+                {
+                  id: UPLOAD_TYPE.NEW,
+                  label: i18n.translate('xpack.fileUpload.indexSelection.newLabel', {
+                    defaultMessage: 'New index',
+                  }),
+                },
+                {
+                  id: UPLOAD_TYPE.EXISTING,
+                  label: i18n.translate('xpack.fileUpload.existingIndexSelection.label', {
+                    defaultMessage: 'Existing index',
+                  }),
+                },
+              ]}
+              idSelected={indexCreateMode}
+              onChange={(id) => setIndexCreateModeWrapper(id as UPLOAD_TYPE)}
+            />
 
             <EuiSpacer size="m" />
 
