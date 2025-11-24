@@ -107,7 +107,7 @@ export const LanguageSelectorModal = ({
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="console.requestPanel.contextMenu.languageSelectorModalTitle"
-            defaultMessage="Language clients"
+            defaultMessage="Programming language options"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
