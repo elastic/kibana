@@ -169,28 +169,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-      describe('linking a dashboard to multiple streams', () => {
-        before(async () => {
-          // Reload dashboards since previous test unloaded them
-          await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
+    describe('linking a dashboard to multiple streams', () => {
+      before(async () => {
+        // Reload dashboards since previous test unloaded them
+        await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
 
-          // Create one additional stream to test with
-          await putStream(apiClient, 'logs.child', {
-            dashboards: [],
-            rules: [],
-            queries: [],
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: { steps: [] },
-                settings: {},
-                wired: {
-                  routing: [],
-                  fields: {},
-                },
-                failure_store: { inherit: {} },
+        // Create one additional stream to test with
+        await putStream(apiClient, 'logs.child', {
+          dashboards: [],
+          rules: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: {
+                routing: [],
+                fields: {},
               },
+              failure_store: { inherit: {} },
             },
           },
         });
