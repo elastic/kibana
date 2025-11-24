@@ -8,7 +8,7 @@
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { FindGapsByIdParams } from './types';
+import type { FindGapsByIdParams } from '../../application/gaps/types';
 import type { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
 

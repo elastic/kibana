@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
 import { Global, css } from '@emotion/react';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { getESQLQueryColumns, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
@@ -48,10 +48,11 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
-import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types';
+import { QuerySource, ControlTriggerSource } from '@kbn/esql-types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
+import { QuickSearchVisor } from './editor_visor';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
@@ -91,6 +92,7 @@ const triggerControl = async (
   variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
+  triggerSource: ControlTriggerSource,
   esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ControlsContext['onSaveControl'],
   onCancelControl?: ControlsContext['onCancelControl']
@@ -99,6 +101,7 @@ const triggerControl = async (
     queryString,
     variableType,
     cursorPosition: position,
+    triggerSource,
     esqlVariables,
     onSaveControl,
     onCancelControl,
@@ -133,6 +136,7 @@ const ESQLEditorInternal = function ESQLEditor({
   dataErrorsControl,
   formLabel,
   mergeExternalMessages,
+  hideQuickSearch,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -193,6 +197,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+  const [isVisorOpen, setIsVisorOpen] = useState(false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -205,6 +210,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
+      setIsVisorOpen(false);
     },
     [onTextLangQueryChange]
   );
@@ -242,6 +248,21 @@ const ESQLEditorInternal = function ESQLEditor({
       onTextLangQuerySubmit,
       telemetryService,
     ]
+  );
+
+  const onUpdateAndSubmitQuery = useCallback(
+    (newQuery: string, querySource: QuerySource) => {
+      // notify telemetry that a query has been submitted from the history panel
+      if (querySource === QuerySource.HISTORY || querySource === QuerySource.STARRED) {
+        telemetryService.trackQueryHistoryClicked(querySource === QuerySource.STARRED);
+      }
+      // update the query first
+      onQueryUpdate(newQuery);
+      setTimeout(() => {
+        onQuerySubmit(querySource);
+      }, 0);
+    },
+    [onQuerySubmit, onQueryUpdate, telemetryService]
   );
 
   const onCommentLine = useCallback(() => {
@@ -357,12 +378,21 @@ const ESQLEditorInternal = function ESQLEditor({
 
   controlCommands.forEach(({ command, variableType }) => {
     monaco.editor.registerCommand(command, async (...args) => {
+      const [, { triggerSource }] = args;
+      const prefilled = triggerSource !== ControlTriggerSource.QUESTION_MARK;
+      telemetryService.trackEsqlControlFlyoutOpened(
+        prefilled,
+        variableType,
+        triggerSource,
+        fixedQuery
+      );
       const position = editor1.current?.getPosition();
       await triggerControl(
         fixedQuery,
         variableType,
         position,
         uiActions,
+        triggerSource,
         esqlVariables,
         controlsContext?.onSaveControl,
         controlsContext?.onCancelControl
@@ -374,6 +404,12 @@ const ESQLEditorInternal = function ESQLEditor({
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
     () => onQuerySubmit(QuerySource.MANUAL)
+  );
+
+  editor1.current?.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+    () => setIsVisorOpen(!isVisorOpen)
   );
 
   const styles = esqlEditorStyles(
@@ -511,9 +547,20 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const canCreateLookupIndex = useCanCreateLookupIndex();
 
+  // Extract source command and build minimal query with cluster prefixes
+  const minimalQuery = useMemo(() => {
+    const prefix = code.match(/\b(FROM|TS)\b/i)?.[1]?.toUpperCase();
+    const indexPattern = getIndexPatternFromESQLQuery(code);
+
+    return prefix && indexPattern ? `${prefix} ${indexPattern}` : '';
+  }, [code]);
+
+  const minimalQueryRef = useRef(minimalQuery);
+  minimalQueryRef.current = minimalQuery;
+
   const getJoinIndices = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
     async (cacheOptions) => {
-      const remoteClusters = getRemoteClustersFromESQLQuery(code);
+      const remoteClusters = getRemoteClustersFromESQLQuery(minimalQueryRef.current);
       let result: IndicesAutocompleteResult = { indices: [] };
       if (kibana.services?.esql?.getJoinIndicesAutocomplete) {
         result = await kibana.services.esql.getJoinIndicesAutocomplete.call(
@@ -523,15 +570,15 @@ const ESQLEditorInternal = function ESQLEditor({
       }
       return result;
     },
-    [code, kibana?.services?.esql?.getJoinIndicesAutocomplete]
+    [kibana?.services?.esql?.getJoinIndicesAutocomplete]
   );
 
   const telemetryCallbacks = useMemo<ESQLTelemetryCallbacks>(
     () => ({
       onDecorationHoverShown: (hoverMessage: string) =>
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
-      onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
-        telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
+      onSuggestionsWithCustomCommandShown: (commands) =>
+        telemetryService.trackSuggestionsWithCustomCommandShown(commands),
     }),
     [telemetryService]
   );
@@ -547,7 +594,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        clearCacheWhenOld(dataSourcesCache, fixedQuery);
+        clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
         const getLicense = kibana.services?.esql?.getLicense;
         const sources = await memoizedSources(core, getLicense).result;
         return sources;
@@ -652,7 +699,6 @@ const ESQLEditorInternal = function ESQLEditor({
     favoritesClient,
     kibana.services?.esql,
     dataSourcesCache,
-    fixedQuery,
     memoizedSources,
     core,
     esqlFieldsCache,
@@ -1178,6 +1224,17 @@ const ESQLEditorInternal = function ESQLEditor({
           }
         />
       )}
+      {!hideQuickSearch && (
+        <QuickSearchVisor
+          query={code}
+          isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
+          isVisible={isVisorOpen}
+          onClose={() => setIsVisorOpen(false)}
+          onUpdateAndSubmitQuery={(newQuery) =>
+            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
+          }
+        />
+      )}
       <EditorFooter
         lines={editorModel.current?.getLineCount() || 1}
         styles={{
@@ -1186,7 +1243,7 @@ const ESQLEditorInternal = function ESQLEditor({
         }}
         code={code}
         onErrorClick={onErrorClick}
-        runQuery={onQuerySubmit}
+        onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
         updateQuery={onQueryUpdate}
         detectedTimestamp={detectedTimestamp}
         hideRunQueryText={hideRunQueryText}
@@ -1204,7 +1261,8 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
-        telemetryService={telemetryService}
+        toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
+        hideQuickSearch={hideQuickSearch}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

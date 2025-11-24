@@ -14,8 +14,8 @@ import type {
   FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview,
   FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
 } from '@kbn/cloud-security-posture';
-import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
 import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
+import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -89,6 +89,10 @@ import { AttackDetailsRightPanelKey } from './attack_details/constants/panel_key
 import type { AttackDetailsProps } from './attack_details/types';
 import { AttackDetailsProvider } from './attack_details/context';
 import { AttackDetailsPanel } from './attack_details';
+import type { IOCDetailsProps } from './ioc_details/types';
+import { IOCDetailsProvider } from './ioc_details/context';
+import { IOCPanel } from './ioc_details';
+import { IOCRightPanelKey } from './ioc_details/constants/panel_keys';
 
 const GraphGroupedNodePreviewPanel = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -258,7 +262,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: AttackDetailsRightPanelKey,
     component: (props) => (
       <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
-        <AttackDetailsPanel />
+        <AttackDetailsPanel path={props.path as AttackDetailsProps['path']} />
       </AttackDetailsProvider>
     ),
   },
@@ -284,6 +288,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <FindingsVulnerabilityPanel
         {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsPreview).params}
       />
+    ),
+  },
+  {
+    key: IOCRightPanelKey,
+    component: (props) => (
+      <IOCDetailsProvider {...(props as IOCDetailsProps).params}>
+        <IOCPanel path={props.path as IOCDetailsProps['path']} />
+      </IOCDetailsProvider>
     ),
   },
 ];
