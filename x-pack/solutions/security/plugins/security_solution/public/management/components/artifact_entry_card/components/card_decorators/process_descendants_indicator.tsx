@@ -24,20 +24,22 @@ export const ProcessDescendantsIndicator = memo<ArtifactEntryCardDecoratorProps>
       TRUSTED_PROCESS_DESCENDANTS_TAG
     );
 
-    if (labels && (isEventFiltersProcessDescendantsEnabled || isTrustedAppsProcessDescendantsEnabled)) {
+    if (
+      labels &&
+      (isEventFiltersProcessDescendantsEnabled || isTrustedAppsProcessDescendantsEnabled)
+    ) {
       return (
         <>
           <EuiText {...commonProps} data-test-subj={getTestId('processDescendantsIndication')}>
             <code>
               <strong>
-              {labels.title}
-              {' '}
-                  <ProcessDescendantsIconTip
-                    tooltipText={labels.tooltipText}
-                    versionInfo={labels.versionInfo}
-                    indicateExtraEntry
-                    data-test-subj={getTestId('processDescendantsIndicationTooltip')}
-                  />
+                {labels.title}{' '}
+                <ProcessDescendantsIconTip
+                  tooltipText={labels.tooltipText}
+                  versionInfo={labels.versionInfo}
+                  indicateExtraEntry
+                  data-test-subj={getTestId('processDescendantsIndicationTooltip')}
+                />
               </strong>
             </code>
           </EuiText>

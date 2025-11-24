@@ -21,7 +21,7 @@ import { SEARCHABLE_FIELDS } from '../constants';
 import { TrustedAppsArtifactsDocsLink } from './components/artifacts_docs_link';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ProcessDescendantsIndicator } from '../../../components/artifact_entry_card/components/card_decorators/process_descendants_indicator';
-import { ArtifactEntryCardDecoratorProps } from '../../../components/artifact_entry_card/artifact_entry_card';
+import type { ArtifactEntryCardDecoratorProps } from '../../../components/artifact_entry_card/artifact_entry_card';
 import { TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS } from './translations';
 
 const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
@@ -118,9 +118,17 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
 };
 
-const TrustedAppCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item, 'data-test-subj': dataTestSubj }) => {
-  return <ProcessDescendantsIndicator item={item} data-test-subj={dataTestSubj} labels={TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS} />;
-});
+const TrustedAppCardDecorator = memo<ArtifactEntryCardDecoratorProps>(
+  ({ item, 'data-test-subj': dataTestSubj }) => {
+    return (
+      <ProcessDescendantsIndicator
+        item={item}
+        data-test-subj={dataTestSubj}
+        labels={TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS}
+      />
+    );
+  }
+);
 TrustedAppCardDecorator.displayName = 'TrustedAppCardDecorator';
 
 export const TrustedAppsList = memo(() => {
@@ -143,7 +151,9 @@ export const TrustedAppsList = memo(() => {
       allowCardDeleteAction={canWriteTrustedApplications}
       allowCardEditAction={canWriteTrustedApplications}
       allowCardCreateAction={canWriteTrustedApplications}
-      CardDecorator={isProcessDescendantsFeatureForTrustedAppsEnabled ? TrustedAppCardDecorator : undefined}
+      CardDecorator={
+        isProcessDescendantsFeatureForTrustedAppsEnabled ? TrustedAppCardDecorator : undefined
+      }
     />
   );
 });

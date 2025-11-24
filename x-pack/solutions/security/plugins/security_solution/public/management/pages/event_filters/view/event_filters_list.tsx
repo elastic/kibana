@@ -19,7 +19,7 @@ import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { ProcessDescendantsIndicator } from '../../../components/artifact_entry_card/components/card_decorators/process_descendants_indicator';
-import { ArtifactEntryCardDecoratorProps } from '../../../components/artifact_entry_card/artifact_entry_card';
+import type { ArtifactEntryCardDecoratorProps } from '../../../components/artifact_entry_card/artifact_entry_card';
 import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from './translations';
 
 export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
@@ -142,11 +142,18 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
 };
 
-const EventFiltersCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item, 'data-test-subj': dataTestSubj }) => {
-  return <ProcessDescendantsIndicator item={item} data-test-subj={dataTestSubj} labels={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS} />;
-});
+const EventFiltersCardDecorator = memo<ArtifactEntryCardDecoratorProps>(
+  ({ item, 'data-test-subj': dataTestSubj }) => {
+    return (
+      <ProcessDescendantsIndicator
+        item={item}
+        data-test-subj={dataTestSubj}
+        labels={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS}
+      />
+    );
+  }
+);
 EventFiltersCardDecorator.displayName = 'EventFiltersCardDecorator';
-
 
 export const EventFiltersList = memo(() => {
   const { canWriteEventFilters } = useUserPrivileges().endpointPrivileges;

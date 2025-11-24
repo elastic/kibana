@@ -17,7 +17,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
-  EuiIconTip,
   EuiSuperSelect,
   EuiTextArea,
   EuiText,
