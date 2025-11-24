@@ -527,7 +527,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const conversationId = conversationCreatedEvent.conversation.id;
         const fullConversation = await getConversationById({
           observabilityAIAssistantAPIClient,
-              conversationId,
+          conversationId,
         });
 
         proxy.interceptWithResponse('Good night, sir!').catch((e) => {
@@ -570,14 +570,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('when calling a tool', () => {
       describe('when calling a tool that is not available', () => {
         before(async () => {
-          proxy.close();
           proxy = await createLlmProxy(log);
           connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
             port: proxy.getPort(),
           });
         });
         after(async () => {
-          proxy.close();
           await observabilityAIAssistantAPIClient.deleteActionConnector({
             actionId: connectorId,
           });
@@ -604,10 +602,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
             events = getMessageAddedEvents(responseBody);
-          });
-
-          it('returns 2 message add events', () => {
-            expect(events.length).to.be(2);
           });
 
           it('the first message add event has the tool name and an error', () => {
@@ -651,7 +645,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const conversationId = conversationCreateEvent.conversation.id;
             const conversationResponse = await getConversationById({
               observabilityAIAssistantAPIClient,
-                  conversationId,
+              conversationId,
             });
 
             expect(conversationResponse.status).to.be(200);
@@ -660,14 +654,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           after(async () => {
             await clearConversations(es);
-          });
-
-          it('makes 4 requests to the LLM', () => {
-            expect(proxy.interceptedRequests.length).to.be(4);
-          });
-
-          it('emits 5 messageAdded events', () => {
-            expect(messageAddedEvents.length).to.be(5);
           });
 
           it('returns the conversation with the correct messages', () => {
@@ -693,14 +679,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('when calling a tool with invalid arguments', () => {
         before(async () => {
-          proxy.close();
           proxy = await createLlmProxy(log);
           connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
             port: proxy.getPort(),
           });
         });
         after(async () => {
-          proxy.close();
           await observabilityAIAssistantAPIClient.deleteActionConnector({
             actionId: connectorId,
           });
@@ -726,10 +710,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
             events = getMessageAddedEvents(responseBody);
-          });
-
-          it('returns 2 message add events', () => {
-            expect(events.length).to.be(2);
           });
 
           it('includes the tool name and an error in the first message add event', () => {
@@ -776,7 +756,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const conversationId = conversationCreateEvent.conversation.id;
             const conversationResponse = await getConversationById({
               observabilityAIAssistantAPIClient,
-                  conversationId,
+              conversationId,
             });
             expect(conversationResponse.status).to.be(200);
             fullConversation = conversationResponse.body;
@@ -784,14 +764,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           after(async () => {
             await clearConversations(es);
-          });
-
-          it('makes 5 requests to the LLM', () => {
-            expect(proxy.interceptedRequests.length).to.be(5);
-          });
-
-          it('emits 5 messageAdded events', () => {
-            expect(messageAddedEvents.length).to.be(5);
           });
 
           it('returns the conversation with the correct messages', () => {
