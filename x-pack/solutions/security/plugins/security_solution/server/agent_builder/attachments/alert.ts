@@ -9,9 +9,7 @@ import type { AlertAttachmentData } from '@kbn/onechat-common/attachments';
 import { AttachmentType, alertAttachmentDataSchema } from '@kbn/onechat-common/attachments';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { platformCoreTools } from '@kbn/onechat-common';
 import {
-  SECURITY_ALERTS_INDEX_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
@@ -41,15 +39,11 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    getTools: () => {
-      const tools = [
-        SECURITY_ALERTS_INDEX_SEARCH_TOOL_ID,
-        SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
-        SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
-        SECURITY_LABS_SEARCH_TOOL_ID,
-      ];
-      return tools;
-    },
+    getTools: () => [
+      SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+      SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+      SECURITY_LABS_SEARCH_TOOL_ID,
+    ],
     getAgentDescription: () => {
       const description = `You have access to security alert data. To provide a comprehensive analysis, you MUST gather enriched context by querying for related information.
 
@@ -57,29 +51,31 @@ SECURITY ALERT DATA:
 {alertData}
 
 ---
-user.risk.calculated_level
 MANDATORY WORKFLOW - Complete in order:
 
 1. Extract alert id: kibana.alert.uuid or _id
-2. Extract entities:host.name, host.ip, host.os.name, host.os.version, user.name, user.domain, source.ip, destination.ip, file.hash.sha256
-3. Extract MITRE fields: kibana.alert.rule.threat.tactic.id, kibana.alert.rule.threat.technique.id, threat.tactic.id
-4. Query RISK SCORES for entities:
+2. Extract rule name: kibana.alert.rule.name
+3. Extract entities: host.name, host.ip, host.os.name, host.os.version, user.name, user.domain, source.ip, destination.ip, file.hash.sha256
+4. Extract MITRE fields: kibana.alert.rule.threat.tactic.id, kibana.alert.rule.threat.technique.id, threat.tactic.id
+5. Query RISK SCORES for entities:
    Tool: ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)}
    Parameters: { identifierType: "host.name", identifier: "MyHostName" }
 
-5. Query ATTACK DISCOVERIES for the extracted alert id:
+6. Query ATTACK DISCOVERIES for the extracted alert id:
    Tool: ${sanitizeToolId(SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID)}
    Parameters: { alertIds: ["[alert ID]"] }
 
-6. Query SECURITY LABS:
+7. Query SECURITY LABS:
    Tool: ${sanitizeToolId(SECURITY_LABS_SEARCH_TOOL_ID)}
    Parameters: { query: "Find Security Labs articles about [MITRE technique or rule name]" }
 
-7. Query PRODUCT DOCUMENTATION:
-   Tool: ${sanitizeToolId(platformCoreTools.productDocumentation)}
-   Parameters: { query: "Find alert triage steps", product: "security" }
-
-CRITICAL: You MUST call all 4 tools (steps 4-7) before responding. Do not skip any step.`;
+CRITICAL: You MUST call all 3 tools (steps 5-7) before responding. Do not skip any step.`;
+      // TODO add this once product doc tool available
+      // 8. Query PRODUCT DOCUMENTATION:
+      //   Tool: ${sanitizeToolId(platformCoreTools.productDocumentation)}
+      // Parameters: { query: "Find alert triage steps", product: "security" }
+      //
+      // CRITICAL: You MUST call all 4 tools (steps 5-8) before responding. Do not skip any step.`;
       return description;
     },
   };
