@@ -54,6 +54,7 @@ export class SyntheticsParamsApiService {
 
   /**
    * Get or create RoleCredentials from role config
+   * Always sets the custom role to ensure correct role definition in Kibana
    */
   private async getAuthCredentials(
     auth: AuthType
@@ -61,8 +62,10 @@ export class SyntheticsParamsApiService {
     if (this.isKibanaRoleDescriptors(auth)) {
       const roleKey = JSON.stringify(auth);
 
+      // Always set the role to ensure the definition matches the cached credentials
+      await this.samlAuth.setCustomRole(auth);
+
       if (!this.customRoleCredentials.has(roleKey)) {
-        await this.samlAuth.setCustomRole(auth);
         const credentials = await this.samlAuth.createM2mApiKeyWithCustomRoleScope();
         this.customRoleCredentials.set(roleKey, credentials);
       }
