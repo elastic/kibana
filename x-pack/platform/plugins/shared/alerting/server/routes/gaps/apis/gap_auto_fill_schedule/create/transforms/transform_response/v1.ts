@@ -18,6 +18,8 @@ export const transformResponse = (
   gap_fill_range: result.gapFillRange,
   max_backfills: result.maxBackfills,
   num_retries: result.numRetries,
+  rule_types: result.ruleTypes,
+  scope: result.scope,
   created_by: result.createdBy,
   updated_by: result.updatedBy,
   created_at: result.createdAt,

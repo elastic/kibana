@@ -21,7 +21,7 @@ export const createGapAutoFillSchedulerSchema = schema.object({
     interval: schema.string(),
   }),
   request: schema.any(),
-  scope: schema.maybe(schema.arrayOf(schema.string())),
+  scope: schema.arrayOf(schema.string()),
   ruleTypes: schema.arrayOf(
     schema.object({
       type: schema.string(),

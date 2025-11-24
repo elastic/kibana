@@ -16,10 +16,12 @@ export interface GapAutoFillSchedulerResponse {
   enabled: boolean;
   schedule: { interval: string };
   gapFillRange: string;
+  ruleTypes: Array<{ type: string; consumer: string }>;
+  scope: string[];
   maxBackfills: number;
   numRetries: number;
-  createdBy?: string;
-  updatedBy?: string;
+  createdBy: string | null;
+  updatedBy: string | null;
   createdAt: string;
   updatedAt: string;
 }

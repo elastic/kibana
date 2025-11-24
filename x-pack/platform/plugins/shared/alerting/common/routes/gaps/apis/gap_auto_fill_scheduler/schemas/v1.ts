@@ -22,7 +22,7 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
     schedule: schema.object({
       interval: schema.string(),
     }),
-    scope: schema.maybe(schema.arrayOf(schema.string())),
+    scope: schema.arrayOf(schema.string()),
     rule_types: schema.arrayOf(
       schema.object({
         type: schema.string(),
@@ -56,11 +56,18 @@ export const gapAutoFillSchedulerResponseSchema = schema.object({
   schedule: schema.object({
     interval: schema.string(),
   }),
+  rule_types: schema.arrayOf(
+    schema.object({
+      type: schema.string(),
+      consumer: schema.string(),
+    })
+  ),
   gap_fill_range: schema.string(),
   max_backfills: schema.number(),
   num_retries: schema.number(),
-  created_by: schema.maybe(schema.string()),
-  updated_by: schema.maybe(schema.string()),
+  scope: schema.arrayOf(schema.string()),
+  created_by: schema.nullable(schema.string()),
+  updated_by: schema.nullable(schema.string()),
   created_at: schema.string(),
   updated_at: schema.string(),
 });

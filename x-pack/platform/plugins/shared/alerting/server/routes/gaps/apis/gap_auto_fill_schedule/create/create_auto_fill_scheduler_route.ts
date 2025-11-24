@@ -10,8 +10,8 @@ import { gapAutoFillSchedulerBodySchemaV1 } from '../../../../../../common/route
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { INTERNAL_ALERTING_GAPS_API_PATH } from '../../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
+import { INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH } from '../../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 export const createAutoFillSchedulerRoute = (
@@ -20,7 +20,7 @@ export const createAutoFillSchedulerRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_ALERTING_GAPS_API_PATH}/auto_fill_scheduler`,
+      path: INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
