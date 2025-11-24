@@ -149,7 +149,7 @@ describe('Converter Helpers', () => {
         inherited_fields: {},
         effective_failure_store: {
           disabled: {},
-          from: '',
+          from: 'logs',
         },
         ...emptyAssets,
       };
