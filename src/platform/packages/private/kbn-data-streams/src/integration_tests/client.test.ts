@@ -96,8 +96,6 @@ describe('DataStreamClient', () => {
       });
     });
 
-    // it('searches (basic)', async () => {});
-
     // TODO: Add more thorough tests, for ex. for search runtime mappings
   });
 
