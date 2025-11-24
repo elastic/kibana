@@ -8,7 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ConversationRightActions } from './conversation_actions_right/conversation_actions_right';
+import { ConversationRightActions } from './conversation_actions_right';
 import { ConversationLeftActions } from './conversation_actions_left';
 import { ConversationTitle } from './conversation_title';
 
@@ -25,7 +25,7 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   ariaLabelledBy,
 }) => {
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <ConversationLeftActions />
       </EuiFlexItem>

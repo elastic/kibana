@@ -128,6 +128,7 @@ export class ReportingPublicPlugin
             rendering: start.rendering,
             uiSettings: start.uiSettings,
             chrome: start.chrome,
+            userProfile: start.userProfile,
           },
           ...rest,
         ];

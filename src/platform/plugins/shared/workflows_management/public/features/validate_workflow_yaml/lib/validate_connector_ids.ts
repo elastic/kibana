@@ -35,7 +35,11 @@ export function validateConnectorIds(
     ];
   }
 
-  for (const connectorIdItem of connectorIdItems) {
+  const notReferenceConnectorIds = connectorIdItems.filter(
+    (item) => !item.key?.startsWith('${{') || !item.key.endsWith('}}')
+  );
+
+  for (const connectorIdItem of notReferenceConnectorIds) {
     const connectorType = dynamicConnectorTypes[connectorIdItem.connectorType];
     const displayName = connectorType?.displayName ?? connectorIdItem.connectorType;
     const instances = getConnectorInstancesForType(

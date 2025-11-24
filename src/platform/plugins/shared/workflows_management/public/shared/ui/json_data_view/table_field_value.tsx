@@ -101,7 +101,7 @@ IgnoreWarning.displayName = 'IgnoreWarning';
 
 interface TableFieldValueProps {
   field: string;
-  formattedValue: string;
+  formattedValue: string | React.ReactElement;
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
   isDetails?: boolean; // true when inside EuiDataGrid cell popover
@@ -194,10 +194,9 @@ export const TableFieldValue = ({
             ]}
             id={valueElementId}
             data-test-subj={valueElementId}
-            // Value returned from formatFieldValue is always sanitized
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: formattedValue }}
-          />
+          >
+            {formattedValue}
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

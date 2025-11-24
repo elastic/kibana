@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
-import { waitFor } from '../../../config/services/detections_response';
+import { waitFor } from '@kbn/detections-response-ftr-services';
 
 /**
  * Waits for the given index to contain documents
