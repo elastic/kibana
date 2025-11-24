@@ -94,6 +94,7 @@ describe('WorkflowTaskManager', () => {
       expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
       expect(mockTaskManager.schedule).toHaveBeenCalledWith(
         {
+          id: 'mocked-uuid',
           taskType: 'workflow:resume',
           params: {
             workflowRunId: 'test-execution-id',
