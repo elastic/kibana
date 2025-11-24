@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { FieldSelect } from './field_select';
 
@@ -40,9 +40,8 @@ describe('FieldSelect', () => {
 
     const keywordOption = screen.getByRole('option', { name: 'Keyword' });
     await user.click(keywordOption);
-    await waitFor(() => {
-      expect(mockOnTypeChange).toHaveBeenCalledWith('keyword');
-    });
+
+    expect(mockOnTypeChange).toHaveBeenCalledWith('keyword');
   });
 
   it('should call onTypeChange with null when selection is cleared', async () => {
@@ -52,8 +51,6 @@ describe('FieldSelect', () => {
     const clearButton = screen.getByTestId('comboBoxClearButton');
     await user.click(clearButton);
 
-    await waitFor(() => {
-      expect(mockOnTypeChange).toHaveBeenCalledWith(null);
-    });
+    expect(mockOnTypeChange).toHaveBeenCalledWith(null);
   });
 });
