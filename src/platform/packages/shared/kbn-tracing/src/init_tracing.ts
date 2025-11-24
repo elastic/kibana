@@ -8,7 +8,11 @@
  */
 import type { resources } from '@elastic/opentelemetry-node/sdk';
 import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
-import { LangfuseSpanProcessor, PhoenixSpanProcessor } from '@kbn/inference-tracing';
+import {
+  LangfuseSpanProcessor,
+  PhoenixSpanProcessor,
+  OTLPSpanProcessor,
+} from '@kbn/inference-tracing';
 import { fromExternalVariant } from '@kbn/std';
 import type { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
@@ -65,6 +69,14 @@ export function initTracing({
 
       case 'phoenix':
         LateBindingSpanProcessor.get().register(new PhoenixSpanProcessor(variant.value));
+        break;
+
+      case 'grpc':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'grpc'));
+        break;
+
+      case 'http':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'http'));
         break;
     }
   });
