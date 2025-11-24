@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,11 +19,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   organizationId,
   connectedAt,
 }) => {
-  const formattedDate = new Date(connectedAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = moment(connectedAt).format('LL');
 
   return (
     <>

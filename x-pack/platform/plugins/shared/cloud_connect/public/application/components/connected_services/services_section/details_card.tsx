@@ -241,24 +241,14 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
           <EuiSpacer size="s" />
           <EuiText size="s">
-            {learnMoreUrl ? (
-              <FormattedMessage
-                id="xpack.cloudConnect.connectedServices.service.description"
-                defaultMessage="{description} {learnMore}"
-                values={{
-                  description,
-                  learnMore: (
-                    <EuiLink href={learnMoreUrl} target="_blank" external>
-                      <FormattedMessage
-                        id="xpack.cloudConnect.connectedServices.service.learnMore"
-                        defaultMessage="Learn more"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            ) : (
-              description
+            {description}{' '}
+            {learnMoreUrl && (
+              <EuiLink href={learnMoreUrl} target="_blank" external>
+                <FormattedMessage
+                  id="xpack.cloudConnect.connectedServices.service.learnMore"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
             )}
           </EuiText>
         </EuiFlexItem>
