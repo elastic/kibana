@@ -141,7 +141,7 @@ export const getNavigationTreeDefinition = ({
           footer: [
             {
               icon: 'launch',
-              id: 'getting_started',
+              id: 'search_getting_started',
               link: 'searchGettingStarted',
             },
             {
