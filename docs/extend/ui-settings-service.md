@@ -12,7 +12,7 @@ The UI settings service is available both server and client side.
 
 ## Overview [_overview]
 
-UI settings are configurable from the Advanced Settings page in Management and control the behavior of {{kib}}. uiSettings are stored in a config saved object and, as such, conform to the same conditions as other [Saved Objects](/extend/saved-objects-service.md).
+UI settings are configurable from the Advanced Settings page in Management and control the behavior of {{kib}}. uiSettings are stored in a config saved object and, as such, conform to the same conditions as other [Saved Objects](/extend/saved-objects.md).
 
 There are several ways to configure an advanced setting:
 
@@ -179,6 +179,3 @@ export const migrations = {
 Plugins can leverage the optional deprecation parameter on registration for handling deprecation notices and renames. The deprecation warnings are rendered in the Advanced Settings UI and should also be added to the [Configure Kibana](/reference/configuration-reference/general-settings.md) guide.
 
 ::::
-
-
-
