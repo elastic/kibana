@@ -27,15 +27,17 @@ import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, isEqual } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { memoize } from 'lodash';
-import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
+import type { EditLookupIndexContentContext } from '../types';
 import { type KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
 import { getAddRowControl } from './grid_custom_renderers/add_row_control';
+import { getCustomToolbar } from './grid_custom_renderers/custom_toolbar';
+import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -46,6 +48,7 @@ interface ESQLDataGridProps {
   initialRowHeight?: number;
   controlColumnIds?: string[];
   totalHits?: number;
+  onOpenIndexInDiscover: EditLookupIndexContentContext['onOpenIndexInDiscover'];
 }
 
 const DEFAULT_INITIAL_ROW_HEIGHT = 1;
@@ -53,6 +56,7 @@ const DEFAULT_ROWS_PER_PAGE = 100;
 const ROWS_PER_PAGE_OPTIONS = [50, 100, 250, 500];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
+  const { euiTheme } = useEuiTheme();
   const { rows } = props;
 
   const {
@@ -232,75 +236,79 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     ];
   }, [indexUpdateService]);
 
+  const customToolbar = useMemo(() => {
+    return getCustomToolbar({
+      rowsCount: rows.filter((row) => !row.id.startsWith(ROW_PLACEHOLDER_PREFIX)).length,
+      onOpenIndexInDiscover: props.onOpenIndexInDiscover,
+    });
+  }, [props.onOpenIndexInDiscover, rows]);
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
-      <EuiFlexItem grow={false}>
-        <RowColumnCreator dataTableRef={dataTableRef} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
-        <UnifiedDataTable
-          ref={dataTableRef}
-          customGridColumnsConfiguration={customGridColumnsConfiguration}
-          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-          columns={renderedColumns}
-          rows={rows}
-          columnsMeta={columnsMeta}
-          services={services}
-          enableInTableSearch
-          externalCustomRenderers={externalCustomRenderers}
-          renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
-          isPlainRecord
-          isSortEnabled={false} // Sort is temporarily disabled, see https://github.com/elastic/kibana/issues/235070
-          showMultiFields={false}
-          showColumnTokens
-          showTimeCol
-          enableComparisonMode={false}
-          isPaginationEnabled
-          showKeyboardShortcuts
-          totalHits={props.totalHits}
-          rowsPerPageState={rowsPerPage}
-          rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-          sampleSizeState={10000}
-          canDragAndDropColumns
-          loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
-          dataView={props.dataView}
-          onSetColumns={setActiveColumns}
-          onUpdateRowsPerPage={setRowsPerPage}
-          onSort={onSort}
-          sort={sortOrder}
-          ariaLabelledBy="lookupIndexDataGrid"
-          maxDocFieldsDisplayed={100}
-          showFullScreenButton={false}
-          configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
-          controlColumnIds={props.controlColumnIds}
-          customBulkActions={bulkActions}
-          css={css`
-            .euiDataGridRowCell__content > div,
-            .unifiedDataTable__cellValue {
-              height: 100%;
-              width: 100%;
-              display: block;
-            }
-            .unifiedDataTable__headerCell {
-              align-items: center !important;
-            }
-            .euiDataGridHeaderCell {
-              align-items: center;
-              display: flex;
-            }
+    <UnifiedDataTable
+      ref={dataTableRef}
+      customGridColumnsConfiguration={customGridColumnsConfiguration}
+      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+      columns={renderedColumns}
+      rows={rows}
+      columnsMeta={columnsMeta}
+      services={services}
+      enableInTableSearch={false}
+      showKeyboardShortcuts={false}
+      externalCustomRenderers={externalCustomRenderers}
+      renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
+      isPlainRecord
+      isSortEnabled={false} // Sort is temporarily disabled, see https://github.com/elastic/kibana/issues/235070
+      showMultiFields={false}
+      showColumnTokens
+      showTimeCol
+      enableComparisonMode={false}
+      isPaginationEnabled
+      totalHits={props.totalHits}
+      rowsPerPageState={rowsPerPage}
+      rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+      sampleSizeState={10000}
+      canDragAndDropColumns
+      loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
+      dataView={props.dataView}
+      onSetColumns={setActiveColumns}
+      onUpdateRowsPerPage={setRowsPerPage}
+      onSort={onSort}
+      sort={sortOrder}
+      ariaLabelledBy="lookupIndexDataGrid"
+      maxDocFieldsDisplayed={100}
+      showFullScreenButton={false}
+      configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
+      controlColumnIds={props.controlColumnIds}
+      customBulkActions={bulkActions}
+      rowLineHeightOverride={euiTheme.size.xl}
+      renderCustomToolbar={customToolbar}
+      css={css`
+        height: '100%';
 
-            .dataGrid__addRowAction {
-              opacity: 0;
-            }
+        .euiDataGridRowCell__content > div,
+        .unifiedDataTable__cellValue {
+          height: 100%;
+          width: 100%;
+          display: block;
+        }
+        .unifiedDataTable__headerCell {
+          align-items: center !important;
+        }
+        .euiDataGridHeaderCell {
+          align-items: center;
+          display: flex;
+        }
 
-            .euiDataGridRow:hover .dataGrid__addRowAction,
-            .euiDataGridRow:focus-within .dataGrid__addRowAction {
-              opacity: 1;
-            }
-          `}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        .dataGrid__addRowAction {
+          opacity: 0;
+        }
+
+        .euiDataGridRow:hover .dataGrid__addRowAction,
+        .euiDataGridRow:focus-within .dataGrid__addRowAction {
+          opacity: 1;
+        }
+      `}
+    />
   );
 };
 

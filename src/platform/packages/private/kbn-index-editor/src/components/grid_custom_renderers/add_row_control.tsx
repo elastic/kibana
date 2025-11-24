@@ -10,7 +10,7 @@
 import type { RowControlComponent, RowControlRowProps } from '@kbn/discover-utils';
 import type { RefObject } from 'react';
 import React, { useCallback } from 'react';
-import { EuiButtonIcon, type EuiDataGridRefProps } from '@elastic/eui';
+import { type EuiDataGridRefProps } from '@elastic/eui';
 import type { IndexUpdateService } from '../../index_update_service';
 
 export const getAddRowControl =
@@ -29,22 +29,23 @@ export const getAddRowControl =
     }, [props.rowIndex]);
 
     return (
-      <div className="dataGrid__addRowAction" css={{ position: 'relative', top: -2 }}>
-        {/* <Control
+      <div className="dataGrid__addRowAction">
+        <Control
           color="text"
           iconType="plus"
           label="Add row"
           tooltipContent="Add row"
-          onClick={({ rowIndex }) => onAddRow(rowIndex + 1)}
-        /> */}
-        <EuiButtonIcon
+          onClick={() => onAddRow()}
+        />
+        {/* <EuiButtonIcon
           color="text"
           display="base"
           iconType="plus"
-          size="xxs"
+          size="xs"
           aria-label="Add Row"
           onClick={() => onAddRow()}
-        />
+          css={{ margin: '0px 4px' }}
+        /> */}
       </div>
     );
   };

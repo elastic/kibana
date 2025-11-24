@@ -8,18 +8,10 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSearchBar,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSearchBar } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FilePicker } from './file_picker';
+import { i18n } from '@kbn/i18n';
 import type { EditLookupIndexContentContext, KibanaContextExtra } from '../types';
 
 export const QueryBar = ({
@@ -106,11 +98,7 @@ export const QueryBar = ({
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <FilePicker />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-        <EuiButton
+        <EuiButtonIcon
           size="s"
           color="text"
           isDisabled={!isIndexCreated || !esqlDiscoverQuery}
@@ -118,14 +106,11 @@ export const QueryBar = ({
           href={discoverLink || undefined}
           target="_blank"
           iconType="discoverApp"
-        >
-          <EuiText size="xs">
-            <FormattedMessage
-              id="esqlDataGrid.openInDiscoverLabel"
-              defaultMessage="Open in Discover"
-            />
-          </EuiText>
-        </EuiButton>
+          aria-label={i18n.translate('esqlDataGrid.openInDiscoverAriaLabel', {
+            defaultMessage: 'Open in Discover',
+          })}
+          data-test-subj="indexEditorOpenInDiscoverButton"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

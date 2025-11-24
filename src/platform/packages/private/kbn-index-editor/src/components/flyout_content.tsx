@@ -32,7 +32,6 @@ import { i18n } from '@kbn/i18n';
 import { ErrorCallout } from './error_callout';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
-import { QueryBar } from './query_bar';
 import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
@@ -128,28 +127,22 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             css={css`
               .euiFlyoutBody__overflowContent {
                 height: 100%;
+                padding-top: 0;
               }
             `}
           >
             <FileDropzone noResults={noResults}>
               {dataView ? (
-                <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
-                  <EuiFlexItem grow={false}>
-                    <QueryBar onOpenIndexInDiscover={props.onOpenIndexInDiscover} />
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
-                    {dataViewColumns ? (
-                      <DataGridLazy
-                        {...props}
-                        dataView={dataView}
-                        columns={dataViewColumns}
-                        rows={rows}
-                        totalHits={totalHits}
-                      />
-                    ) : null}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                dataViewColumns ? (
+                  <DataGridLazy
+                    {...props}
+                    dataView={dataView}
+                    columns={dataViewColumns}
+                    rows={rows}
+                    totalHits={totalHits}
+                    onOpenIndexInDiscover={props.onOpenIndexInDiscover}
+                  />
+                ) : null
               ) : (
                 <EuiSkeletonText />
               )}
