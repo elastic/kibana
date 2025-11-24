@@ -7,6 +7,18 @@
 
 import { expect, type Locator, type ScoutPage } from '@kbn/scout';
 
+/**
+ * Wait for an element to be visible and enabled (not disabled)
+ */
+async function waitForElementToBeEnabled(page: ScoutPage, testSubj: string): Promise<void> {
+  const element = page.getByTestId(testSubj);
+  await element.waitFor({ state: 'visible' });
+  await page.waitForFunction((selector) => {
+    const el = document.querySelector(`[data-test-subj="${selector}"]`);
+    return el && !el.hasAttribute('disabled');
+  }, testSubj);
+}
+
 // Test IDs constants for retention UI elements
 export const RETENTION_TEST_IDS = {
   // Buttons and controls
@@ -349,9 +361,16 @@ export async function setFailureStoreRetention(
   unit: 'd' | 'h' | 'm' | 's' = 'd'
 ): Promise<void> {
   await page.getByTestId('streamFailureStoreEditRetention').click();
-  // Disable inherit failure store
-  await page.getByTestId('inheritFailureStoreSwitch').click();
-  // Update the retention period
+
+  // Check if inherit mode is currently ON and turn it OFF if needed
+  const inheritSwitch = page.getByTestId('inheritFailureStoreSwitch');
+  const isInheritOn = await inheritSwitch.getAttribute('aria-checked');
+  if (isInheritOn === 'true') {
+    await inheritSwitch.click();
+  }
+
+  // Now select custom period type - wait for it to be enabled
+  await waitForElementToBeEnabled(page, 'custom');
   await page.getByTestId('custom').click();
   const dialog = page.getByRole('dialog');
   const field = dialog.getByTestId('selectFailureStorePeriodValue');
@@ -375,6 +394,9 @@ export async function toggleFailureStore(page: ScoutPage, enabled: boolean): Pro
   } else {
     await page.getByTestId('streamFailureStoreEditRetention').click();
   }
+
+  // Wait for toggle to be enabled after modal opens
+  await waitForElementToBeEnabled(page, 'enableFailureStoreToggle');
   await page.getByTestId('enableFailureStoreToggle').click();
   await page.getByTestId('failureStoreModalSaveButton').click();
 }
