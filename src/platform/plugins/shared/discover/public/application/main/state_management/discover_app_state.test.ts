@@ -16,7 +16,7 @@ import { isEqualState } from './utils/state_comparators';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
 import { omit } from 'lodash';
-import type { InternalStateStore, TabState } from './redux';
+import type { DiscoverAppState, InternalStateStore, TabState } from './redux';
 import {
   createInternalStateStore,
   createRuntimeStateManager,
@@ -98,8 +98,8 @@ describe('Test discover app state', () => {
   });
 
   describe('isEqualState', () => {
-    const initialState = {
-      index: 'the-index',
+    const initialState: DiscoverAppState = {
+      dataSource: createDataViewDataSource({ dataViewId: 'the-index' }),
       columns: ['the-column'],
       sort: [],
       query: { query: 'the-query', language: 'kuery' },
@@ -122,9 +122,9 @@ describe('Test discover app state', () => {
 
     test('handles the special filter change case correctly ', () => {
       // this is some sort of legacy behavior, especially for the filter case
-      const previousState = { initialState, filters: [{ index: 'test', meta: {} }] };
+      const previousState = { ...initialState, filters: [{ index: 'test', meta: {} }] };
       const nextState = {
-        initialState,
+        ...initialState,
         filters: [{ index: 'test', meta: {}, $$hashKey: 'hi' }],
       };
       expect(isEqualState(previousState, nextState)).toBeTruthy();
@@ -132,7 +132,7 @@ describe('Test discover app state', () => {
 
     test('returns true if the states are not equal', () => {
       const changedParams = [
-        { index: 'the-new-index' },
+        { dataSource: createDataViewDataSource({ dataViewId: 'the-new-index' }) },
         { columns: ['newColumns'] },
         { sort: [['column', 'desc']] },
         { query: { query: 'ok computer', language: 'pirate-english' } },

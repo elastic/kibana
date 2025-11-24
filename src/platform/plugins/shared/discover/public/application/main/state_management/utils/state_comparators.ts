@@ -9,7 +9,7 @@
 import type { Filter, FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '@kbn/es-query';
 import { omit, isEqual } from 'lodash';
-import type { DiscoverAppState } from '../redux';
+import type { DiscoverAppState, TabStateGlobalState } from '../redux';
 
 /**
  * Helper function to compare 2 different filter states
@@ -32,10 +32,10 @@ export function isEqualFilters(
  * works differently
  */
 
-export function isEqualState(
-  stateA: DiscoverAppState,
-  stateB: DiscoverAppState,
-  exclude: Array<keyof DiscoverAppState> = []
+export function isEqualState<TState extends DiscoverAppState | TabStateGlobalState>(
+  stateA: TState,
+  stateB: TState,
+  exclude: Array<keyof TState> = []
 ) {
   if (!stateA && !stateB) {
     return true;
