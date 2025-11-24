@@ -48,7 +48,7 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
 
   return (
     <EuiThemeProvider
-      colorMode={isInverted ? 'inverse' : undefined}
+      colorMode={isInverted ? 'dark' : undefined}
       wrapperProps={{ cloneElement: true }}
     >
       <EuiBetaBadge
