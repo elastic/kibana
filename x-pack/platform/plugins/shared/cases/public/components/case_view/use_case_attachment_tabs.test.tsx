@@ -14,6 +14,12 @@ import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import React from 'react';
 
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+
+const platinumLicense = licensingMock.createLicense({
+  license: { type: 'platinum' },
+});
+
 import { useCaseObservables } from './use_case_observables';
 
 jest.mock('./use_case_observables', () => ({
@@ -55,6 +61,37 @@ describe('useCaseAttachmentTabs()', () => {
       Array [
         "alerts",
         "files",
+      ]
+    `);
+  });
+
+  it('returns attachment tabs based on enable features an license', async () => {
+    const { result } = renderHook(
+      () => {
+        return useCaseAttachmentTabs({ caseData, activeTab: CASE_VIEW_PAGE_TABS.ALERTS });
+      },
+      {
+        wrapper: ({ children }) => (
+          <TestProviders
+            features={{
+              alerts: { enabled: true },
+              events: { enabled: true },
+              observables: { enabled: true },
+            }}
+            license={platinumLicense}
+          >
+            {children}
+          </TestProviders>
+        ),
+      }
+    );
+
+    expect(result.current.map((tab) => tab.id)).toMatchInlineSnapshot(`
+      Array [
+        "alerts",
+        "events",
+        "files",
+        "observables",
       ]
     `);
   });
