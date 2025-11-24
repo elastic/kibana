@@ -189,6 +189,10 @@ export const allowedExperimentalValues = Object.freeze({
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: false,
+  /**
+   * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
+   */
+  agentBuilderEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

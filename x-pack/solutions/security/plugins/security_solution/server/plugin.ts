@@ -619,7 +619,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Note: This requires onechat to be added as an optional plugin dependency
     // Note: The alert attachment type may already be registered by onechat's built-in types.
     // If so, we'll skip registration and use the built-in version.
-    if (plugins.onechat) {
+    if (plugins.onechat && config.experimentalFeatures.agentBuilderEnabled) {
       try {
         // Register attachment type
         plugins.onechat.attachments.registerType(createAlertAttachmentType());

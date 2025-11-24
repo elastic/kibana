@@ -365,7 +365,7 @@ Returns case details (id, title, description, status, severity, tags, assignees,
           allCases.push(...searchResult.cases);
 
           // Check if we should continue fetching
-          if (searchResult.cases.length < searchParams.perPage) {
+          if (searchResult.cases.length < (searchParams.perPage ?? 100)) {
             hasMorePages = false;
           }
 
