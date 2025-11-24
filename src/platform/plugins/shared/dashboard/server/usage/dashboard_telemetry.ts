@@ -18,8 +18,36 @@ import type {
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
 
-type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
-export type DashboardCollectorData = DeepWriteable<LatestTaskStateSchema['telemetry']>;
+// TODO: Merge with LatestTaskStateSchema. Requires a refactor of collectPanelsByType() because
+// LatestTaskStateSchema doesn't allow mutations (uses ReadOnly<..>).
+export interface DashboardCollectorData {
+  panels: {
+    total: number;
+    by_reference: number;
+    by_value: number;
+    by_type: {
+      [key: string]: {
+        total: number;
+        by_reference: number;
+        by_value: number;
+        details: {
+          [key: string]: number;
+        };
+      };
+    };
+  };
+  controls: {
+    total: number;
+    by_type: {
+      [key: string]: {
+        total: number;
+      };
+    };
+  };
+  sections: {
+    total: number;
+  };
+}
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
   panels: {
