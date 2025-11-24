@@ -110,7 +110,7 @@ describe('Dashboard link component', () => {
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
       filters: [],
-      timeRange: {
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
@@ -177,7 +177,7 @@ describe('Dashboard link component', () => {
 
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
-      timeRange: { from: 'now-7d', to: 'now' },
+      time_range: { from: 'now-7d', to: 'now' },
       filters: initialFilters,
       query: initialQuery,
     });
@@ -250,7 +250,7 @@ describe('Dashboard link component', () => {
 
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
-      timeRange: { from: 'now-7d', to: 'now' },
+      time_range: { from: 'now-7d', to: 'now' },
       filters: [],
     });
   });
