@@ -82,6 +82,7 @@
     "@kbn/presentation-util",
     "@kbn/licensing-types",
     "@kbn/unified-data-table",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": [
     "target/**/*",
