@@ -17,6 +17,7 @@ import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { cloudConnectedFeature } from './features';
 import { registerRoutes } from './routes';
 import {
@@ -33,6 +34,7 @@ export interface CloudConnectedPluginStart {}
 interface CloudConnectedSetupDeps {
   features: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  cloud?: CloudSetup;
 }
 
 interface CloudConnectedStartDeps {
@@ -59,6 +61,13 @@ export class CloudConnectedPlugin
     plugins: CloudConnectedSetupDeps
   ): CloudConnectedPluginSetup {
     this.logger.debug('cloudConnected: Setup');
+
+    // Skip plugin registration if running on Elastic Cloud.
+    // This plugin is only for self-managed clusters connecting to Cloud services
+    if (plugins.cloud?.isCloudEnabled) {
+      this.logger.debug('cloudConnected: Skipping setup - running on Elastic Cloud');
+      return {};
+    }
 
     // Register the feature with privileges
     plugins.features.registerKibanaFeature(cloudConnectedFeature);

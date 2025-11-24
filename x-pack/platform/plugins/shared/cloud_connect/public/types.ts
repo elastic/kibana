@@ -7,6 +7,7 @@
 
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 // Plugin types
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -17,6 +18,7 @@ export interface CloudConnectedPluginStart {}
 
 export interface CloudConnectedSetupDeps {
   management: ManagementSetup;
+  cloud?: CloudSetup;
 }
 
 // Application types

@@ -26,7 +26,13 @@ export class CloudConnectedPlugin
 {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): CloudConnectedPluginSetup {
+  public setup(core: CoreSetup, plugins: CloudConnectedSetupDeps): CloudConnectedPluginSetup {
+    // Skip plugin registration if running on Elastic Cloud.
+    // This plugin is only for self-managed clusters connecting to Cloud services
+    if (plugins.cloud?.isCloudEnabled) {
+      return {};
+    }
+
     // Register the app in the management section
     core.application.register({
       id: 'cloud_connect',

@@ -19,6 +19,9 @@
       "features",
       "encryptedSavedObjects"
     ],
+    "optionalPlugins": [
+      "cloud"
+    ],
     "requiredBundles": [
       "esUiShared"
     ]
