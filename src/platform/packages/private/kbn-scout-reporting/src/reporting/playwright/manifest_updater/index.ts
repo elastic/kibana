@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHash, randomBytes } from 'node:crypto';
-
-export function generateTestRunId() {
-  return randomBytes(8).toString('hex');
-}
-
-export function computeTestID(testFilePath: string, testTitle: string) {
-  return [testFilePath, testTitle]
-    .map((input) => createHash('sha256').update(input).digest('hex').slice(0, 15))
-    .join('-');
-}
+import { ScoutManifestUpdater } from './playwright_reporter';
+// eslint-disable-next-line import/no-default-export
+export default ScoutManifestUpdater;

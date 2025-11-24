@@ -13,18 +13,41 @@ import { REPO_ROOT } from '@kbn/repo-info';
 export const SCOUT_OUTPUT_ROOT = path.resolve(REPO_ROOT, '.scout');
 
 // Servers
+
 export const SCOUT_SERVERS_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'servers');
 
 // Reporting
+
 export const SCOUT_REPORT_OUTPUT_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'reports');
 export const SCOUT_TEST_CONFIG_STATS_PATH = path.resolve(
   SCOUT_OUTPUT_ROOT,
   'test_config_stats.json'
 );
 
-// Scout playwright configs
+// Scout definitions
+
 export const SCOUT_PLAYWRIGHT_CONFIGS_PATH = path.resolve(
   SCOUT_OUTPUT_ROOT,
   'test_configs',
   'scout_playwright_configs.json'
+);
+
+export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB =
+  '{src/platform,x-pack/**}/{plugins,packages}/**/test/scout';
+
+export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
+  `(?:src|x-pack)` +
+    `\/(?:(platform)|solutions\/(\\w+))` + // 1: platform, 2: solution
+    `\/(plugins|packages)` + // 3: plugin or package
+    `\/?(shared|private|)` + // 4: artifact visibility
+    `\/([\\w|-]*)` + // 5: plugin/package name
+    `\/test\/scout(?:_([^\\/]*))?` // 6: custom target config set name
+);
+export const SCOUT_CONFIG_PATH_GLOB =
+  TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB + '/{ui,api}/{,*.}playwright.config.ts';
+
+export const SCOUT_CONFIG_PATH_REGEX = new RegExp(
+  TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX.source +
+    `\/(api|ui)` + // 7: Scout test category
+    `\/(\\w*)\\.?playwright.config.ts` // 8: Scout config type
 );

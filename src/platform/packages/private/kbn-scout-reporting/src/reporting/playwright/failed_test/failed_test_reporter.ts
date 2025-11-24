@@ -26,11 +26,11 @@ import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
 import {
+  computeTestID,
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
   getRunTarget,
-  getTestIDForTitle,
   parseStdout,
   stripFilePath,
   stripRunCommand,
@@ -115,10 +115,11 @@ export class ScoutFailedTestReporter implements Reporter {
       return;
     }
 
+    const testTitle = test.titlePath().slice(3).join(' ');
     const testFailure: TestFailure = {
-      id: getTestIDForTitle(test.titlePath().join(' ')),
+      id: computeTestID(path.relative(REPO_ROOT, test.location.file), testTitle),
       suite: test.parent.title,
-      title: test.title,
+      title: testTitle,
       target: this.target,
       command: this.command,
       location: stripFilePath(test.location.file),
