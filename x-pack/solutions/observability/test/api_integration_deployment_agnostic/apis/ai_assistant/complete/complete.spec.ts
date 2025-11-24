@@ -34,6 +34,7 @@ import {
   invokeChatCompleteWithFunctionRequest,
   getMessageAddedEvents,
   chatComplete,
+  getConversationById,
 } from '../utils/conversation';
 
 interface NonStreamingChatResponse {
@@ -524,13 +525,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body as Readable);
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-          params: {
-            path: {
+        const fullConversation = await getConversationById({
+          observabilityAIAssistantAPIClient,
               conversationId,
-            },
-          },
         });
 
         proxy.interceptWithResponse('Good night, sir!').catch((e) => {
@@ -652,14 +649,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
             const conversationId = conversationCreateEvent.conversation.id;
-            const conversationResponse = await observabilityAIAssistantAPIClient.editor({
-              endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-              params: {
-                path: {
+            const conversationResponse = await getConversationById({
+              observabilityAIAssistantAPIClient,
                   conversationId,
-                },
-              },
             });
+
             expect(conversationResponse.status).to.be(200);
             fullConversation = conversationResponse.body;
           });
@@ -680,9 +674,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             expect(fullConversation.messages.length).to.be(6);
             // user prompt
             expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
-            // context function call
+            // context tool call
             expect(fullConversation.messages[1].message.function_call?.name).to.be('context');
-            // context function response
+            // context tool response
             expect(fullConversation.messages[2].message.name).to.be('context');
             // unknown tool call
             expect(fullConversation.messages[3].message.function_call?.name).to.be('unknown_tool');
@@ -780,13 +774,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
             const conversationId = conversationCreateEvent.conversation.id;
-            const conversationResponse = await observabilityAIAssistantAPIClient.editor({
-              endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-              params: {
-                path: {
+            const conversationResponse = await getConversationById({
+              observabilityAIAssistantAPIClient,
                   conversationId,
-                },
-              },
             });
             expect(conversationResponse.status).to.be(200);
             fullConversation = conversationResponse.body;
@@ -808,13 +798,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             expect(fullConversation.messages.length).to.be(6);
             // user prompt
             expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
-            // context function call
+            // context tool call
             expect(fullConversation.messages[1].message.function_call?.name).to.be('context');
-            // context function response
+            // context tool response
             expect(fullConversation.messages[2].message.name).to.be('context');
-            // kibana function call
+            // kibana tool call
             expect(fullConversation.messages[3].message.function_call?.name).to.be('kibana');
-            // kibana function response with error message
+            // kibana tool response with error message
             expect(fullConversation.messages[4].message.name).to.contain('kibana');
             expect(fullConversation.messages[4].message.content).to.contain(
               'Tool call arguments for kibana were invalid'

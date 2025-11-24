@@ -227,3 +227,24 @@ export async function createConversation({
 
   return response;
 }
+
+export async function getConversationById({
+  observabilityAIAssistantAPIClient,
+  user = 'editor',
+  conversationId,
+}: {
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
+  user?: 'admin' | 'editor' | 'viewer';
+  conversationId: string;
+}) {
+  const response = await observabilityAIAssistantAPIClient[user]({
+    endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+    params: {
+      path: {
+        conversationId,
+      },
+    },
+  });
+
+  return response;
+}
