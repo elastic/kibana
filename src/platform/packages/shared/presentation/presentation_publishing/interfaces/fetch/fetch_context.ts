@@ -42,7 +42,7 @@ export function isReloadTimeFetchContextEqual(
   );
 }
 
-export const isProjectRoutingEqualForFetch = (
+const isProjectRoutingEqualForFetch = (
   currentProjectRouting: ProjectRouting,
   lastProjectRouting: ProjectRouting
 ) => {

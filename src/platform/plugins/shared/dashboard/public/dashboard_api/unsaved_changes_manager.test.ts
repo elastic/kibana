@@ -89,6 +89,7 @@ const setBackupStateMock = jest.fn();
 describe('unsavedChangesManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setBackupStateMock.mockReset();
 
     layoutUnsavedChanges$.next({});
 
@@ -177,6 +178,74 @@ describe('unsavedChangesManager', () => {
           ],
         });
       });
+    });
+  });
+
+  describe('projectRouting changes', () => {
+    it('should detect projectRouting changes as unsaved changes', (done) => {
+      const projectRoutingChanges$ = new BehaviorSubject<
+        Partial<Pick<DashboardState, 'projectRouting'>>
+      >({});
+      const customProjectRoutingManagerMock = {
+        internalApi: {
+          startComparing$: () => projectRoutingChanges$,
+        },
+      } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
+
+      const unsavedChangesManager = initializeUnsavedChangesManager({
+        viewMode$,
+        controlGroupManager: controlGroupManagerMock,
+        lastSavedState: getSampleDashboardState(),
+        layoutManager: layoutManagerMock,
+        savedObjectId$,
+        settingsManager: settingsManagerMock,
+        unifiedSearchManager: unifiedSearchManagerMock,
+        projectRoutingManager: customProjectRoutingManagerMock,
+        getReferences,
+      });
+
+      unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
+        expect(hasChanges).toBe(true);
+        done();
+      });
+
+      // Simulate projectRouting change
+      projectRoutingChanges$.next({ projectRouting: '_alias:_origin' });
+    });
+
+    it('should have unsaved changes when projectRouting is different from saved value', (done) => {
+      const lastSavedState = {
+        ...getSampleDashboardState(),
+        projectRouting: '_alias:_origin',
+      };
+      const projectRoutingChanges$ = new BehaviorSubject<
+        Partial<Pick<DashboardState, 'projectRouting'>>
+      >({});
+      const customProjectRoutingManagerMock = {
+        internalApi: {
+          startComparing$: () => projectRoutingChanges$,
+        },
+      } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
+
+      const unsavedChangesManager = initializeUnsavedChangesManager({
+        viewMode$,
+        controlGroupManager: controlGroupManagerMock,
+        lastSavedState,
+        layoutManager: layoutManagerMock,
+        savedObjectId$,
+        settingsManager: settingsManagerMock,
+        unifiedSearchManager: unifiedSearchManagerMock,
+        projectRoutingManager: customProjectRoutingManagerMock,
+        getReferences,
+      });
+
+      unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
+        expect(hasChanges).toBe(true);
+        done();
+      });
+
+      // Change to different value
+      projectRoutingChanges$.next({ projectRouting: 'ALL' });
     });
   });
 });

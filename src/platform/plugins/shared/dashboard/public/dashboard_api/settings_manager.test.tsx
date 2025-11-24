@@ -116,17 +116,6 @@ describe('initializeSettingsManager', () => {
       expect(settings.projectRoutingRestore).toBe(false);
     });
 
-    test('Should set projectRoutingRestore to true when projectRouting is null', () => {
-      const state: DashboardState = {
-        ...getSampleDashboardState(),
-        projectRouting: null,
-      };
-      const settingsManager = initializeSettingsManager(state);
-      const settings = settingsManager.api.getSettings();
-
-      expect(settings.projectRoutingRestore).toBe(true);
-    });
-
     test('Should set projectRoutingRestore to true when projectRouting is a string', () => {
       const state: DashboardState = {
         ...getSampleDashboardState(),

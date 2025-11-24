@@ -1125,6 +1125,28 @@ describe('SearchSource', () => {
       const { searchSourceJSON } = searchSource.serialize();
       expect(JSON.parse(searchSourceJSON).projectRouting).toBe('_alias:_origin');
     });
+
+    test('should include project_routing in ES request body when projectRouting is set to _alias:_origin', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const request = searchSource.getSearchRequestBody();
+      expect(request.project_routing).toBe('_alias:_origin');
+    });
+
+    test('should not include project_routing in ES request body when projectRouting is set to ALL (sanitized)', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', 'ALL');
+      const request = searchSource.getSearchRequestBody();
+      // 'ALL' gets sanitized to undefined since it means "search all projects" which is the default
+      expect(request.project_routing).toBeUndefined();
+    });
+
+    test('should not include project_routing in ES request body when projectRouting is undefined', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', undefined);
+      const request = searchSource.getSearchRequestBody();
+      expect(request.project_routing).toBeUndefined();
+    });
   });
 
   describe('fetch$', () => {

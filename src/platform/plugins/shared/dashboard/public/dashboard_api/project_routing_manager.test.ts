@@ -12,7 +12,46 @@ import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
 import { initializeProjectRoutingManager } from './project_routing_manager';
 
+jest.mock('../services/kibana_services', () => {
+  let projectRoutingSubject: any;
+
+  return {
+    cpsService: {
+      cpsManager: {
+        // Return undefined so comparator falls back to projectRouting$.value
+        getProjectRouting: jest.fn(() => undefined),
+        setProjectRouting: jest.fn((value) => {
+          // Update the BehaviorSubject when setProjectRouting is called
+          if (!projectRoutingSubject) {
+            projectRoutingSubject = new (require('rxjs').BehaviorSubject)(value);
+          } else {
+            projectRoutingSubject.next(value);
+          }
+        }),
+        getDefaultProjectRouting: jest.fn(() => undefined),
+        getProjectRouting$: jest.fn(() => {
+          // Return the existing BehaviorSubject (created by setProjectRouting)
+          // or create a new one if it doesn't exist
+          if (!projectRoutingSubject) {
+            projectRoutingSubject = new (require('rxjs').BehaviorSubject)(undefined);
+          }
+          return projectRoutingSubject;
+        }),
+      },
+    },
+    __resetProjectRouting: () => {
+      projectRoutingSubject = undefined;
+    },
+  };
+});
+
 describe('projectRouting', () => {
+  beforeEach(() => {
+    // Reset the project routing subject before each test
+    const mock = require('../services/kibana_services');
+    mock.__resetProjectRouting();
+  });
+
   test('Should update projectRouting via setProjectRouting', () => {
     const projectRoutingRestore$ = new BehaviorSubject<boolean>(true);
     const projectRoutingManager = initializeProjectRoutingManager(
@@ -21,13 +60,13 @@ describe('projectRouting', () => {
     );
 
     // initializes with undefined projectRouting by default
-    expect(projectRoutingManager.api.projectRouting$.value).toBeUndefined();
+    expect(projectRoutingManager!.api.projectRouting$.value).toBeUndefined();
 
-    projectRoutingManager.api.setProjectRouting('_alias:_origin');
-    expect(projectRoutingManager.api.projectRouting$.value).toBe('_alias:_origin');
+    projectRoutingManager!.api.setProjectRouting('_alias:_origin');
+    expect(projectRoutingManager!.api.projectRouting$.value).toBe('_alias:_origin');
 
-    projectRoutingManager.api.setProjectRouting(undefined);
-    expect(projectRoutingManager.api.projectRouting$.value).toBeUndefined();
+    projectRoutingManager!.api.setProjectRouting(undefined);
+    expect(projectRoutingManager!.api.projectRouting$.value).toBeUndefined();
   });
 
   test('Should detect projectRouting change from _alias:_origin to ALL when projectRoutingRestore is true', (done) => {
@@ -42,9 +81,9 @@ describe('projectRouting', () => {
     );
 
     // initializes with _alias:_origin projectRouting if set in last saved state
-    expect(projectRoutingManager.api.projectRouting$.value).toBe('_alias:_origin');
+    expect(projectRoutingManager!.api.projectRouting$.value).toBe('_alias:_origin');
 
-    projectRoutingManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+    projectRoutingManager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
       // When projectRoutingRestore is true, changing to 'ALL' is detected
       expect(changes).toMatchInlineSnapshot(`
         Object {
@@ -54,7 +93,7 @@ describe('projectRouting', () => {
       done();
     });
 
-    projectRoutingManager.api.setProjectRouting('ALL');
+    projectRoutingManager!.api.setProjectRouting('ALL');
   });
 
   test('Should detect change when setting projectRouting to ALL from undefined', (done) => {
@@ -65,7 +104,7 @@ describe('projectRouting', () => {
       projectRoutingRestore$
     );
 
-    projectRoutingManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+    projectRoutingManager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
       // When projectRoutingRestore is true, setting to 'ALL' should be detected as a change
       expect(changes).toMatchInlineSnapshot(`
         Object {
@@ -76,7 +115,7 @@ describe('projectRouting', () => {
     });
 
     // Setting to 'ALL' when projectRoutingRestore is true should be detected
-    projectRoutingManager.api.setProjectRouting('ALL');
+    projectRoutingManager!.api.setProjectRouting('ALL');
   });
 
   test('Should restore projectRouting in reset', () => {
@@ -91,12 +130,12 @@ describe('projectRouting', () => {
     );
 
     // Change projectRouting
-    projectRoutingManager.api.setProjectRouting(undefined);
-    expect(projectRoutingManager.api.projectRouting$.value).toBeUndefined();
+    projectRoutingManager!.api.setProjectRouting(undefined);
+    expect(projectRoutingManager!.api.projectRouting$.value).toBeUndefined();
 
     // Reset to last saved state
-    projectRoutingManager.internalApi.reset(lastSavedState$.value);
-    expect(projectRoutingManager.api.projectRouting$.value).toBe('_alias:_origin');
+    projectRoutingManager!.internalApi.reset(lastSavedState$.value);
+    expect(projectRoutingManager!.api.projectRouting$.value).toBe('_alias:_origin');
   });
 
   test('Should NOT detect projectRouting changes when projectRoutingRestore is false', (done) => {
@@ -110,14 +149,14 @@ describe('projectRouting', () => {
       projectRoutingRestore$
     );
 
-    projectRoutingManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+    projectRoutingManager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
       // Should not detect changes when projectRoutingRestore is false
       expect(changes).toMatchInlineSnapshot(`Object {}`);
       done();
     });
 
     // Change projectRouting - should not be detected as a change
-    projectRoutingManager.api.setProjectRouting('_alias:_new');
+    projectRoutingManager!.api.setProjectRouting('_alias:_new');
   });
 
   test('Should not include projectRouting in getState when projectRoutingRestore is false', () => {
@@ -127,8 +166,8 @@ describe('projectRouting', () => {
       projectRoutingRestore$
     );
 
-    projectRoutingManager.api.setProjectRouting('_alias:_origin');
-    const state = projectRoutingManager.internalApi.getState();
+    projectRoutingManager!.api.setProjectRouting('_alias:_origin');
+    const state = projectRoutingManager!.internalApi.getState();
 
     // projectRouting should not be included when projectRoutingRestore is false
     expect(state.projectRouting).toBeUndefined();
@@ -141,8 +180,8 @@ describe('projectRouting', () => {
       projectRoutingRestore$
     );
 
-    projectRoutingManager.api.setProjectRouting('_alias:_origin');
-    const state = projectRoutingManager.internalApi.getState();
+    projectRoutingManager!.api.setProjectRouting('_alias:_origin');
+    const state = projectRoutingManager!.internalApi.getState();
 
     // projectRouting should be included when projectRoutingRestore is true
     expect(state.projectRouting).toBe('_alias:_origin');
@@ -156,8 +195,8 @@ describe('projectRouting', () => {
     );
 
     // Set projectRouting to 'ALL'
-    projectRoutingManager.api.setProjectRouting('ALL');
-    const state = projectRoutingManager.internalApi.getState();
+    projectRoutingManager!.api.setProjectRouting('ALL');
+    const state = projectRoutingManager!.internalApi.getState();
 
     // projectRouting should be saved as 'ALL' when projectRoutingRestore is true
     expect(state.projectRouting).toBe('ALL');
@@ -175,9 +214,9 @@ describe('projectRouting', () => {
     );
 
     // Should initialize with 'ALL' from saved state
-    expect(projectRoutingManager.api.projectRouting$.value).toBe('ALL');
+    expect(projectRoutingManager!.api.projectRouting$.value).toBe('ALL');
 
-    const state = projectRoutingManager.internalApi.getState();
+    const state = projectRoutingManager!.internalApi.getState();
     // getState should return 'ALL' when projectRouting is 'ALL'
     expect(state.projectRouting).toBe('ALL');
   });
@@ -193,13 +232,32 @@ describe('projectRouting', () => {
       projectRoutingRestore$
     );
 
-    projectRoutingManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+    projectRoutingManager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
       // When projectRouting is set to the same value as saved, no change detected
       expect(changes).toMatchInlineSnapshot(`Object {}`);
       done();
     });
 
     // Set to same value as saved state - should not detect a change
-    projectRoutingManager.api.setProjectRouting('ALL');
+    projectRoutingManager!.api.setProjectRouting('ALL');
+  });
+
+  test('Should return undefined when CPS is not enabled', () => {
+    // Mock cpsService as disabled (no cpsManager)
+    const mockCpsService = require('../services/kibana_services');
+    const originalCpsService = mockCpsService.cpsService;
+    mockCpsService.cpsService = {};
+
+    const projectRoutingRestore$ = new BehaviorSubject<boolean>(true);
+    const projectRoutingManager = initializeProjectRoutingManager(
+      getSampleDashboardState(),
+      projectRoutingRestore$
+    );
+
+    // Should return undefined when CPS is not enabled
+    expect(projectRoutingManager).toBeUndefined();
+
+    // Restore original mock
+    mockCpsService.cpsService = originalCpsService;
   });
 });

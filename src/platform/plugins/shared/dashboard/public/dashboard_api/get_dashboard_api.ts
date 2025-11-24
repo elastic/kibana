@@ -133,7 +133,7 @@ export function getDashboardApi({
   function getState() {
     const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
-    const projectRoutingState = projectRoutingManager.internalApi.getState();
+    const projectRoutingState = projectRoutingManager?.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
@@ -161,8 +161,8 @@ export function getDashboardApi({
     ...settingsManager.api,
     ...trackPanel,
     ...unifiedSearchManager.api,
-    ...projectRoutingManager.api,
     ...unsavedChangesManager.api,
+    ...projectRoutingManager?.api,
     ...trackOverlayApi,
     ...initializeTrackContentfulRender(),
     ...controlGroupManager.api,
@@ -284,9 +284,9 @@ export function getDashboardApi({
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
-      projectRoutingManager.cleanup();
       unsavedChangesManager.cleanup();
       layoutManager.cleanup();
+      projectRoutingManager?.cleanup();
     },
   };
 }

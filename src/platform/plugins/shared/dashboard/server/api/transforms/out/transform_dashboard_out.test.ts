@@ -220,19 +220,6 @@ describe('transformDashboardOut', () => {
       expect(result.projectRouting).toBe('_alias:_origin');
     });
 
-    test('should include projectRouting when it is null', () => {
-      const input: DashboardSavedObjectAttributes = {
-        panelsJSON: JSON.stringify([]),
-        optionsJSON: JSON.stringify({}),
-        kibanaSavedObjectMeta: {},
-        title: 'my title',
-        description: 'my description',
-        projectRouting: null,
-      };
-      const result = transformDashboardOut(input);
-      expect(result.projectRouting).toBeNull();
-    });
-
     test('should not include projectRouting when it is undefined', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),

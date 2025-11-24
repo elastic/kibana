@@ -21,6 +21,10 @@ export function initializeProjectRoutingManager(
   initialState: DashboardState,
   projectRoutingRestore$: PublishingSubject<boolean>
 ) {
+  if (!cpsService?.cpsManager) {
+    return;
+  }
+
   const projectRouting$ = new BehaviorSubject<ProjectRouting>(initialState.projectRouting);
 
   function setProjectRouting(projectRouting: ProjectRouting) {
@@ -29,12 +33,8 @@ export function initializeProjectRoutingManager(
     }
   }
 
-  // Set projectRouting in CPS: use saved value if exists (and not null), otherwise use default
-  // This ensures the picker shows the correct value on dashboard load
-  if (cpsService?.cpsManager) {
-    const routingValue = initialState.projectRouting ?? cpsService.cpsManager.getDefaultProjectRouting();
-    cpsService.cpsManager.setProjectRouting(routingValue);
-  }
+  // pass the initial state to CPS manager from dashboard state or just reset to default on dashboard init
+  cpsService.cpsManager.setProjectRouting(initialState.projectRouting ?? cpsService.cpsManager.getDefaultProjectRouting());
 
   // Subscribe to CPS's projectRouting$ to sync changes from the project picker
   const cpsProjectRoutingSubscription: Subscription | undefined = cpsService?.cpsManager
@@ -47,7 +47,7 @@ export function initializeProjectRoutingManager(
     projectRouting: (_a, _b, lastSavedState, _latestState) => {
       if (!projectRoutingRestore$.value) return true;
       const savedValue = lastSavedState?.projectRouting;
-      // Read from CPS if available, otherwise use internal state
+
       const currentValue = cpsService?.cpsManager?.getProjectRouting() ?? projectRouting$.value;
       return savedValue === currentValue;
     },
@@ -60,9 +60,8 @@ export function initializeProjectRoutingManager(
     }
 
     // Read from CPS if available, otherwise use internal state
-    const currentValue = cpsService?.cpsManager?.getProjectRouting() ?? projectRouting$.value;
     return {
-      projectRouting: currentValue,
+      projectRouting: cpsService?.cpsManager?.getProjectRouting() ?? projectRouting$.value,
     };
   };
 
@@ -79,7 +78,6 @@ export function initializeProjectRoutingManager(
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) => {
             const diff = diffComparators(comparators, lastSavedState, latestState);
-            // Normalize the diff values using getState() to ensure undefined becomes null when projectRoutingRestore is true
             if ('projectRouting' in diff) {
               return getState();
             }
@@ -93,7 +91,7 @@ export function initializeProjectRoutingManager(
         const routingValue =
           lastSavedState.projectRouting ?? cpsService?.cpsManager?.getDefaultProjectRouting();
         setProjectRouting(routingValue);
-        // Also update CPS manager so picker reflects the reset value
+        // Update CPS manager so picker reflects the reset value
         if (cpsService?.cpsManager) {
           cpsService.cpsManager.setProjectRouting(routingValue);
         }

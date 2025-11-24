@@ -134,10 +134,7 @@ export async function canSkipSourceUpdate({
 
   const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextRequestMeta.sourceMeta);
 
-  const updateDueToProjectRouting = !_.isEqual(
-    prevMeta.projectRouting,
-    nextRequestMeta.projectRouting
-  );
+  const updateDueToProjectRouting = prevMeta.projectRouting !== nextRequestMeta.projectRouting;
 
   return (
     !updateDueToApplyGlobalTime &&

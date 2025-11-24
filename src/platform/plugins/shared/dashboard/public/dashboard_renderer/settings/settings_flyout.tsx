@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { savedObjectsTaggingService } from '../../services/kibana_services';
+import { cpsService, savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSettings } from '../../dashboard_api/settings_manager';
 import { checkForDuplicateDashboardTitle } from '../../dashboard_client';
 
@@ -220,28 +220,30 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               }
             />
           </EuiFormRow>
-          <EuiFormRow
-            helpText={
-              <FormattedMessage
-                id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
-                defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
-              />
-            }
-          >
-            <EuiSwitch
-              data-test-subj="storeProjectRoutingWithDashboard"
-              checked={localSettings.projectRoutingRestore}
-              onChange={(event) =>
-                updateDashboardSetting({ projectRoutingRestore: event.target.checked })
-              }
-              label={
+          {cpsService?.cpsManager && (
+            <EuiFormRow
+              helpText={
                 <FormattedMessage
-                  id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowLabel"
-                  defaultMessage="Store project routing with dashboard"
+                  id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
+                  defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
                 />
               }
-            />
-          </EuiFormRow>
+            >
+              <EuiSwitch
+                data-test-subj="storeProjectRoutingWithDashboard"
+                checked={localSettings.projectRoutingRestore}
+                onChange={(event) =>
+                  updateDashboardSetting({ projectRoutingRestore: event.target.checked })
+                }
+                label={
+                  <FormattedMessage
+                    id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowLabel"
+                    defaultMessage="Store project routing with dashboard"
+                  />
+                }
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate(

@@ -14,7 +14,11 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DashboardSaveOptions, SaveDashboardReturn } from './types';
-import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
+import {
+  coreServices,
+  cpsService,
+  savedObjectsTaggingService,
+} from '../../services/kibana_services';
 import type { DashboardState } from '../../../common';
 import { SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../utils/extract_title_and_count';
@@ -140,7 +144,7 @@ export async function openSaveModal({
             timeRestore={timeRestore}
             projectRoutingRestore={projectRoutingRestore}
             showStoreTimeOnSave={!lastSavedId}
-            showStoreProjectRoutingOnSave={!lastSavedId}
+            showStoreProjectRoutingOnSave={!lastSavedId && Boolean(cpsService?.cpsManager)}
             description={description ?? ''}
             showCopyOnSave={false}
             onSave={onSaveAttempt}
