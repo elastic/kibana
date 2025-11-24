@@ -11,9 +11,11 @@ import type { CaseUI } from '../../../../common';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { CaseViewAttachments } from './case_view_attachments';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
+import userEvent from '@testing-library/user-event';
+import { useCaseViewNavigation } from '../../../common/navigation';
 
 jest.mock('../../../containers/api');
 
@@ -23,8 +25,10 @@ jest.mock('@kbn/response-ops-alerts-table', () => ({
   AlertsTable: jest.fn(() => <div data-test-subj="alerts-table" />),
 }));
 jest.mock('../../../containers/use_get_case_file_stats');
+jest.mock('../../../common/navigation/hooks');
 
 const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -107,81 +111,97 @@ describe('Case View Attachments tab', () => {
 
     expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
   });
+
+  it('shows the alerts tab with the correct count', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={{ ...caseData, totalAlerts: 3 }}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+      />,
+      {
+        wrapperProps: { license: basicLicense },
+      }
+    );
+
+    const badge = await screen.findByTestId('case-view-alerts-stats-badge');
+
+    expect(badge).toHaveTextContent('3');
+  });
+
+  it('the alerts tab count has a different color if the tab is not active', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={{ ...caseData, totalAlerts: 3 }}
+        activeTab={CASE_VIEW_PAGE_TABS.FILES}
+      />,
+      {
+        wrapperProps: { license: basicLicense },
+      }
+    );
+
+    expect(
+      (await screen.findByTestId('case-view-alerts-stats-badge')).getAttribute('class')
+    ).not.toMatch(/accent/);
+  });
+
+  it('navigates to the alerts tab when the alerts tab is clicked', async () => {
+    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+    renderWithTestingProviders(
+      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      {
+        wrapperProps: { license: basicLicense },
+      }
+    );
+
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
+
+    await waitFor(() => {
+      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+        detailName: caseData.id,
+        tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+      });
+    });
+  });
+
+  it('navigates to the files tab when the files tab is clicked', async () => {
+    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+    renderWithTestingProviders(
+      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      {
+        wrapperProps: { license: basicLicense },
+      }
+    );
+
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
+
+    await waitFor(() => {
+      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+        detailName: caseData.id,
+        tabId: CASE_VIEW_PAGE_TABS.FILES,
+      });
+    });
+  });
+
+  it('navigates to the events tab when the events tab is clicked', async () => {
+    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+    renderWithTestingProviders(
+      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      {
+        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
+      }
+    );
+
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-events'));
+
+    await waitFor(() => {
+      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+        detailName: caseData.id,
+        tabId: CASE_VIEW_PAGE_TABS.EVENTS,
+      });
+    });
+  });
 });
 
-//
-// it('shows the alerts tab with the correct count', async () => {
-//   renderWithTestingProviders(
-//     <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
-//     {
-//       wrapperProps: { license: basicLicense },
-//     }
-//   );
-//
-//   const badge = await screen.findByTestId('case-view-alerts-stats-badge');
-//
-//   expect(badge).toHaveTextContent('3');
-// });
-//
-// it('the alerts tab count has a different color if the tab is not active', async () => {
-//   renderWithTestingProviders(
-//     <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
-//     {
-//       wrapperProps: { license: basicLicense },
-//     }
-//   );
-//
-//   expect(
-//     (await screen.findByTestId('case-view-alerts-stats-badge')).getAttribute('class')
-//   ).not.toMatch(/accent/);
-// });
-// it('navigates to the alerts tab when the alerts tab is clicked', async () => {
-//   const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-//   renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
-//     wrapperProps: { license: basicLicense },
-//   });
-//
-//   await userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
-//
-//   await waitFor(() => {
-//     expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-//       detailName: caseData.id,
-//       tabId: CASE_VIEW_PAGE_TABS.ALERTS,
-//     });
-//   });
-// });
-//
-// it('navigates to the files tab when the files tab is clicked', async () => {
-//   const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-//   renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
-//     wrapperProps: { license: basicLicense },
-//   });
-//
-//   await userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
-//
-//   await waitFor(() => {
-//     expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-//       detailName: caseData.id,
-//       tabId: CASE_VIEW_PAGE_TABS.FILES,
-//     });
-//   });
-// });
-//
-// it('navigates to the events tab when the events tab is clicked', async () => {
-//   const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-//   renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
-//     wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
-//   });
-//
-//   await userEvent.click(await screen.findByTestId('case-view-tab-title-events'));
-//
-//   await waitFor(() => {
-//     expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-//       detailName: caseData.id,
-//       tabId: CASE_VIEW_PAGE_TABS.EVENTS,
-//     });
-//   });
-// });
 // it('should display the alerts tab when the feature is enabled', async () => {
 //   renderWithTestingProviders(
 //     <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
