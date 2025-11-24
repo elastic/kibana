@@ -10,6 +10,7 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangWhereBlockWithUIAttributes,
 } from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
 import type { ProcessorResources, StepContext, StepEvent, StepInput } from './types';
 
 export type StepActorRef = ActorRefFrom<typeof stepMachine>;
@@ -52,6 +53,31 @@ export const stepMachine = setup({
             ...params.step,
             customIdentifier: context.step.customIdentifier,
           },
+        };
+      }
+    ),
+    changeDescription: assign(
+      (
+        { context },
+        params: {
+          description?: string;
+        }
+      ) => {
+        const trimmedDescription = params.description?.trim();
+        const nextStep = { ...context.step };
+
+        if (isActionBlock(nextStep)) {
+          if (!trimmedDescription) {
+            delete nextStep.description;
+          } else {
+            nextStep.description = trimmedDescription;
+          }
+        }
+
+        return {
+          step: nextStep,
+          previousStep: context.step,
+          isUpdated: true,
         };
       }
     ),
@@ -114,6 +140,12 @@ export const stepMachine = setup({
             { type: 'forwardChangeEventToParent' },
           ],
         },
+        'step.changeDescription': {
+          actions: [
+            { type: 'changeDescription', params: ({ event }) => event },
+            { type: 'forwardChangeEventToParent' },
+          ],
+        },
       },
     },
     configured: {
@@ -125,6 +157,12 @@ export const stepMachine = setup({
             'step.edit': {
               target: 'editing',
               actions: [{ type: 'forwardEventToParent' }],
+            },
+            'step.changeDescription': {
+              actions: [
+                { type: 'changeDescription', params: ({ event }) => event },
+                { type: 'forwardChangeEventToParent' },
+              ],
             },
             'step.delete': '#deleted',
           },
@@ -148,6 +186,12 @@ export const stepMachine = setup({
             'step.changeCondition': {
               actions: [
                 { type: 'changeCondition', params: ({ event }) => event },
+                { type: 'forwardChangeEventToParent' },
+              ],
+            },
+            'step.changeDescription': {
+              actions: [
+                { type: 'changeDescription', params: ({ event }) => event },
                 { type: 'forwardChangeEventToParent' },
               ],
             },

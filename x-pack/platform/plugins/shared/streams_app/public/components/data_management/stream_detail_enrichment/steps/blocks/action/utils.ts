@@ -10,6 +10,10 @@ import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streaml
 
 export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttributes) => {
   if ('action' in step) {
+    if (step.description) {
+      return step.description;
+    }
+
     if (step.action === 'grok') {
       return step.patterns.join(' • ');
     } else if (step.action === 'dissect') {

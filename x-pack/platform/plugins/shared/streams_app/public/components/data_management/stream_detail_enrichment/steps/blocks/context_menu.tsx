@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useSelector } from '@xstate5/react';
-import { isWhereBlock } from '@kbn/streamlang';
+import { isActionBlock, isWhereBlock } from '@kbn/streamlang';
 import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';
 import {
   useStreamEnrichmentEvents,
@@ -25,6 +25,7 @@ import {
 import { deleteProcessorPromptOptions } from './action/prompt_options';
 import { deleteConditionPromptOptions } from './where/prompt_options';
 import { collectDescendantIds } from '../../state_management/stream_enrichment_state_machine/utils';
+import { EditStepDescriptionModal } from './action/edit_step_description_modal';
 import type { StepConfigurationProps } from '../steps_list';
 
 const moveUpItemText = i18n.translate(
@@ -62,10 +63,34 @@ const deleteItemText = i18n.translate(
   }
 );
 
+const addDescriptionItemText = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.addDescriptionButtonText',
+  {
+    defaultMessage: 'Add description',
+  }
+);
+
+const editDescriptionItemText = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.editDescriptionButtonText',
+  {
+    defaultMessage: 'Edit description',
+  }
+);
+
+const removeDescriptionItemText = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.removeDescriptionButtonText',
+  {
+    defaultMessage: 'Remove description',
+  }
+);
+
 type StepContextMenuProps = Pick<
   StepConfigurationProps,
   'stepRef' | 'stepUnderEdit' | 'isFirstStepInLevel' | 'isLastStepInLevel'
 >;
+
+const isNonNull = <T,>(value: T | null | undefined | false): value is T =>
+  value !== null && value !== undefined && value !== false;
 
 export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   stepRef,
@@ -92,8 +117,13 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const isWhere = isWhereBlock(step);
+  const hasCustomDescription =
+    isActionBlock(step) &&
+    typeof step.description === 'string' &&
+    step.description.trim().length > 0;
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
+  const [isEditDescriptionModalOpen, toggleEditDescriptionModal] = useToggle(false);
 
   const menuPopoverId = useGeneratedHtmlId({
     prefix: 'stepContextMenuPopover',
@@ -154,6 +184,36 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     >
       {moveDownItemText}
     </EuiContextMenuItem>,
+    ...(!isWhere
+      ? [
+        <EuiContextMenuItem
+          data-test-subj="stepContextMenuEditDescriptionItem"
+          key="editDescription"
+          icon="editorComment"
+          disabled={!canEdit}
+          onClick={() => {
+            togglePopover(false);
+            toggleEditDescriptionModal(true);
+          }}
+        >
+          {hasCustomDescription ? editDescriptionItemText : addDescriptionItemText}
+        </EuiContextMenuItem>,
+        hasCustomDescription && (
+          <EuiContextMenuItem
+            data-test-subj="stepContextMenuRemoveDescriptionItem"
+            key="removeDescription"
+            icon="minusInCircle"
+            disabled={!canEdit}
+            onClick={() => {
+              togglePopover(false);
+              stepRef.send({ type: 'step.changeDescription', description: '' });
+            }}
+          >
+            {removeDescriptionItemText}
+          </EuiContextMenuItem>
+        ),
+      ].filter(isNonNull)
+      : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"
       key="editItem"
@@ -213,14 +273,27 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   );
 
   return (
-    <EuiPopover
-      id={menuPopoverId}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => togglePopover(false)}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel size="s" items={items} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        id={menuPopoverId}
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={() => togglePopover(false)}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel size="s" items={items} />
+      </EuiPopover>
+      {isEditDescriptionModalOpen && !isWhere && isActionBlock(step) && (
+        <EditStepDescriptionModal
+          step={step}
+          mode={hasCustomDescription ? 'edit' : 'add'}
+          onCancel={() => toggleEditDescriptionModal(false)}
+          onSave={(description) => {
+            toggleEditDescriptionModal(false);
+            stepRef.send({ type: 'step.changeDescription', description });
+          }}
+        />
+      )}
+    </>
   );
 };
