@@ -14,7 +14,7 @@ import { findGapsById } from '../../../../lib/rule_gaps/find_gaps_by_id';
 import type { FillGapByIdParams } from './types';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { getRule } from '../get/get_rule';
+import { getRule } from '../../../rule/methods/get/get_rule';
 import type { SanitizedRuleWithLegacyId } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillInitiator } from '../../../../../common/constants';
