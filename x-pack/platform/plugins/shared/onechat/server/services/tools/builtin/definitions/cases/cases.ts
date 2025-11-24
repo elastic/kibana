@@ -11,8 +11,9 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { CoreSetup } from '@kbn/core/server';
-import type { OnechatStartDependencies, OnechatPluginStart } from '../../../types';
+import type { OnechatStartDependencies, OnechatPluginStart } from '../../../../../types';
 import { parseCasesQuery } from './parse_query';
+import { getCaseUrl } from '../../../../../utils/case_urls';
 
 const casesSchema = z.object({
   owner: z
@@ -104,23 +105,14 @@ export const casesTool = (
   return {
     id: platformCoreTools.cases,
     type: ToolType.builtin,
-    description: `Retrieves cases from Elastic Security, Observability, or Stack Management based on a natural language query.
+    description: `Retrieves cases from Elastic Security, Observability, or Stack Management.
 
-The 'query' parameter should be a natural language description of which cases to retrieve. Examples:
-- "cases updated in the last week"
-- "cases from November 2nd"
-- "cases updated between January 1st and January 15th"
-- "recent cases"
-- "cases with alert ID abc-123-def"
-- "find cases containing alert xyz"
+Query examples: "cases updated in the last week", "cases from November 2nd", "cases with alert ID abc-123-def", "recent cases"
+Optional 'owner' filters by: "cases" (Stack Management), "observability", or "securitySolution" (Elastic Security).
+If query mentions an alert ID, finds all cases containing that alert. Otherwise searches by date ranges.
+Returns case details (id, title, description, status, severity, tags, assignees, observables, alerts/comments). Each case includes 'markdown_link' field with pre-formatted clickable link: [Case Title](url).
 
-The optional 'owner' parameter filters cases by owner: "cases" (Stack Management/General Cases), "observability" (Observability), or "securitySolution" (Elastic Security). If not provided, returns all cases the user has access to.
-
-If the query mentions a specific alert ID, the tool will find all cases that contain that alert. Otherwise, it will search for cases based on date ranges or other criteria.
-
-Returns cases with detailed information including id, title, description, status, severity, tags, assignees, observables, total alerts/comments, and recent comments. Each case includes a URL for direct access.
-
-**IMPORTANT**: When presenting case results to the user, provide a short paragraph summary (2-3 sentences) describing the key details of each case, then include a clickable link to the case using the provided URL.`,
+**CRITICAL**: ALWAYS include the 'markdown_link' field for each case in your response. Format: brief summary (2-3 sentences) + markdown link. Example: "Security investigation case. Status: open. [View Case](url)"`,
     schema: casesSchema,
     handler: async ({ owner, query }, { request, logger, modelProvider }) => {
       try {
@@ -251,25 +243,23 @@ Returns cases with detailed information including id, title, description, status
             );
 
             // Get core services for generating case URLs
-            const [, pluginsStart] = await coreSetup.getStartServices();
+            const [coreStart, pluginsStart] = await coreSetup.getStartServices();
             const spacesPlugin = pluginsStart.spaces;
 
             // Format cases data with rich details, including URLs
             const casesData = casesWithComments.map(
               ({ case: caseItem, comments, totalComments }) => {
-                // Generate case URL based on owner
-                const spaceId = spacesPlugin?.spacesService.getSpaceId(request) ?? 'default';
-
-                // Determine app route based on owner
-                let appRoute = '/app/management/insightsAndAlerting'; // default for 'cases' owner
-                if (caseItem.owner === 'securitySolution') {
-                  appRoute = '/app/security';
-                } else if (caseItem.owner === 'observability') {
-                  appRoute = '/app/observability';
+                // Generate case URL using utility function
+                const caseUrl =
+                  getCaseUrl(request, coreStart, spacesPlugin, caseItem.id, caseItem.owner) || null;
+                if (!caseUrl) {
+                  logger.warn(
+                    `[Cases Tool] Failed to generate URL for case ${caseItem.id} with owner ${caseItem.owner}`
+                  );
                 }
 
-                const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
-                const caseUrl = `${spacePath}${appRoute}/cases/${caseItem.id}`;
+                // Format markdown link
+                const markdownLink = caseUrl ? `[${caseItem.title}](${caseUrl})` : caseItem.title;
 
                 return {
                   id: caseItem.id,
@@ -293,7 +283,10 @@ Returns cases with detailed information including id, title, description, status
                   updated_by: getUsername(caseItem.updatedBy || caseItem.updated_by),
                   updated_at: caseItem.updated_at || caseItem.created_at || null,
                   comments_summary: comments,
+                  // URL field - ALWAYS include this link when presenting case results to the user
                   url: caseUrl,
+                  // Markdown-formatted link ready to use: [Case Title](url)
+                  markdown_link: markdownLink,
                 };
               }
             );
@@ -426,24 +419,22 @@ Returns cases with detailed information including id, title, description, status
         );
 
         // Get core services for generating case URLs
-        const [, pluginsStart] = await coreSetup.getStartServices();
+        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
         const spacesPlugin = pluginsStart.spaces;
 
         // Format cases data with rich details, including URLs
         const casesData = casesWithComments.map(({ case: caseItem, comments, totalComments }) => {
-          // Generate case URL based on owner
-          const spaceId = spacesPlugin?.spacesService.getSpaceId(request) ?? 'default';
-
-          // Determine app route based on owner
-          let appRoute = '/app/management/insightsAndAlerting'; // default for 'cases' owner
-          if (caseItem.owner === 'securitySolution') {
-            appRoute = '/app/security';
-          } else if (caseItem.owner === 'observability') {
-            appRoute = '/app/observability';
+          // Generate case URL using utility function
+          const caseUrl =
+            getCaseUrl(request, coreStart, spacesPlugin, caseItem.id, caseItem.owner) || null;
+          if (!caseUrl) {
+            logger.warn(
+              `[Cases Tool] Failed to generate URL for case ${caseItem.id} with owner ${caseItem.owner}`
+            );
           }
 
-          const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
-          const caseUrl = `${spacePath}${appRoute}/cases/${caseItem.id}`;
+          // Format markdown link
+          const markdownLink = caseUrl ? `[${caseItem.title}](${caseUrl})` : caseItem.title;
 
           return {
             id: caseItem.id,
@@ -466,7 +457,10 @@ Returns cases with detailed information including id, title, description, status
             updated_by: getUsername(caseItem.updatedBy || caseItem.updated_by),
             updated_at: caseItem.updated_at || caseItem.created_at || null,
             comments_summary: comments,
+            // URL field - ALWAYS include this link when presenting case results to the user
             url: caseUrl,
+            // Markdown-formatted link ready to use: [Case Title](url)
+            markdown_link: markdownLink,
           };
         });
 
