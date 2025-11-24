@@ -40,6 +40,7 @@ describe('prepareConversation', () => {
   beforeEach(() => {
     mockAttachmentsService = {
       getTypeDefinition: jest.fn(),
+      convertAttachmentTool: jest.fn(),
     };
 
     mockGetToolResultId.mockReset();
