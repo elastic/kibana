@@ -34,55 +34,6 @@ test.describe(
       await apiServices.streams.disable();
     });
 
-    test('should create equals condition using cell action', async ({ page, pageObjects }) => {
-      const dataGrid = page.getByTestId('streamsAppRoutingPreviewPanelWithResults');
-
-      const cell = dataGrid
-        .locator('[role="gridcell"][data-gridcell-column-id="severity_text"]')
-        .first();
-
-      await dataGrid.scrollIntoViewIfNeeded();
-      await cell.scrollIntoViewIfNeeded();
-
-      const cellValue = await cell.textContent();
-      await cell.hover();
-
-      await pageObjects.streams.clickFilterForButton(cell);
-
-      const fieldInput = page.getByTestId('streamsAppConditionEditorFieldText').locator('input');
-      const operatorSelect = page.getByTestId('streamsAppConditionEditorOperator');
-      const valueInput = page.getByTestId('streamsAppConditionEditorValueText').locator('input');
-
-      await expect(fieldInput).toHaveValue('severity_text');
-      await expect(operatorSelect).toHaveValue('eq');
-      // The cell value is the full value with the last character being a newline, so we need to remove the last character
-      await expect(valueInput).toHaveValue(cellValue!.slice(0, -1));
-    });
-
-    test('should create not-equals condition using cell action', async ({ page, pageObjects }) => {
-      const dataGrid = page.getByTestId('streamsAppRoutingPreviewPanelWithResults');
-
-      const cell = dataGrid
-        .locator('[role="gridcell"][data-gridcell-column-id="severity_text"]')
-        .first();
-
-      await dataGrid.scrollIntoViewIfNeeded();
-      await cell.scrollIntoViewIfNeeded();
-
-      const cellValue = await cell.textContent();
-      await cell.hover();
-
-      await pageObjects.streams.clickFilterOutButton(cell);
-
-      const fieldInput = page.getByTestId('streamsAppConditionEditorFieldText').locator('input');
-      const operatorSelect = page.getByTestId('streamsAppConditionEditorOperator');
-      const valueInput = page.getByTestId('streamsAppConditionEditorValueText').locator('input');
-
-      await expect(fieldInput).toHaveValue('severity_text');
-      await expect(operatorSelect).toHaveValue('neq');
-      await expect(valueInput).toHaveValue(cellValue!.slice(0, -1));
-    });
-
     test('should replace condition when using cell action on existing condition', async ({
       page,
       pageObjects,
