@@ -11,8 +11,8 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authori
 
 import type { RulesClientContext } from '../../../../rules_client';
 import { findGaps as _findGaps } from '../../../../lib/rule_gaps/find_gaps';
-import type { FindGapsParams } from '../../../../lib/rule_gaps/types';
-import { getRule } from '../get/get_rule';
+import type { FindGapsParams } from '../../types';
+import { getRule } from '../../../rule/methods/get/get_rule';
 import type { SanitizedRuleWithLegacyId } from '../../../../types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
