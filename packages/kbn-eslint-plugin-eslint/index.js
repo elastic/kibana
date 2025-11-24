@@ -20,5 +20,6 @@ module.exports = {
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),
     no_unsafe_console: require('./rules/no_unsafe_console'),
     no_unsafe_js_yaml: require('./rules/no_unsafe_js_yaml'),
+    require_kbn_fs: require('./rules/require_kbn_fs'),
   },
 };
