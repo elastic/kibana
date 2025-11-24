@@ -129,6 +129,12 @@ export const navigationItems = {
               href: '/analytics/traffic',
               isExternal: true, // opens in new tab and shows an "external resource" icon
             },
+            {
+              id: 'conversion-report',
+              label: 'Conversion report',
+              href: '/analytics/conversion',
+              badgeType: 'new', // for new items
+            },
           ],
         },
       ],
