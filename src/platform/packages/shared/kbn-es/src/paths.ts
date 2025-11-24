@@ -65,6 +65,11 @@ export const SERVERLESS_UIAM_ENTRYPOINT_PATH = resolve(
   './serverless_resources/run_java_with_custom_ca.sh'
 );
 
+export const SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH = resolve(
+  __dirname,
+  './serverless_resources/uiam_cosmosdb.pfx'
+);
+
 export const SERVERLESS_RESOURCES_PATHS = [
   SERVERLESS_OPERATOR_USERS_PATH,
   SERVERLESS_ROLE_MAPPING_PATH,

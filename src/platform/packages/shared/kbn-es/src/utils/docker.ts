@@ -36,7 +36,7 @@ import {
   MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
 } from '@kbn/mock-idp-utils';
 
-import { runUiamContainers, UIAM_CONTAINERS } from './docker_uiam';
+import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
@@ -507,10 +507,7 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
   }
 }
 
-export async function detectRunningNodes(
-  log: ToolingLog,
-  options: ServerlessOptions | DockerOptions
-) {
+export async function detectRunningNodes(log: ToolingLog, options: BaseOptions) {
   const namesCmd = SERVERLESS_NODES.concat(UIAM_CONTAINERS).reduce<string[]>((acc, { name }) => {
     acc.push('--filter', `name=${name}`);
 
@@ -537,13 +534,7 @@ export async function detectRunningNodes(
 /**
  * Common setup for Docker and Serverless containers
  */
-async function setupDocker({
-  log,
-  options,
-}: {
-  log: ToolingLog;
-  options: ServerlessOptions | DockerOptions;
-}) {
+async function setupDocker({ log, options }: { log: ToolingLog; options: BaseOptions }) {
   await verifyDockerInstalled(log);
   await detectRunningNodes(log, options);
   await cleanUpDanglingContainers(log);
@@ -892,38 +883,32 @@ function getESClient(clientOptions: ClientOptions): Client {
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
   await setupDocker({ log, options });
 
-  const image = getServerlessImage({ image: options.image, tag: options.tag });
-  await setupDockerImage({ log, image });
-
-  const uimaNodeNames = [];
-  if (options.uiam) {
-    for (const { image: uiamImage } of UIAM_CONTAINERS) {
-      await setupDockerImage({ log, image: uiamImage });
-    }
-
-    uimaNodeNames.push(...(await runUiamContainers(log)));
-  }
+  const esServerlessImage = getServerlessImage({ image: options.image, tag: options.tag });
+  await Promise.all([
+    setupDockerImage({ log, image: esServerlessImage }),
+    ...(options.uiam ? UIAM_CONTAINERS.map(({ image }) => setupDockerImage({ log, image })) : []),
+  ]);
 
   const volumeCmd = await setupServerlessVolumes(log, options);
   const portCmd = resolvePort(options);
 
   // This is where nodes are started
-  const nodeNames = (
-    await Promise.all(
-      SERVERLESS_NODES.map(async (node, i) => {
-        await runServerlessEsNode(log, {
-          ...node,
-          image,
-          params: node.params.concat(
-            resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
-            i === 0 ? portCmd : [],
-            volumeCmd
-          ),
-        });
-        return node.name;
-      })
+  const nodeNames = await Promise.all(
+    SERVERLESS_NODES.map(async (node, i) => {
+      await runServerlessEsNode(log, {
+        ...node,
+        image: esServerlessImage,
+        params: node.params.concat(
+          resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
+          i === 0 ? portCmd : [],
+          volumeCmd
+        ),
+      });
+      return node.name;
+    }).concat(
+      options.uiam ? UIAM_CONTAINERS.map((container) => runUiamContainer(log, container)) : []
     )
-  ).concat(uimaNodeNames);
+  );
 
   log.success(`Serverless ES cluster running.
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
@@ -936,6 +921,10 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   if (!options.skipTeardown) {
     // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
     process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
+  }
+
+  if (options.uiam) {
+    await initializeUiamContainers(log);
   }
 
   const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
@@ -1028,7 +1017,6 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
       .map((image) => `--filter ancestor=${image}`)
       .join(' ')} --quiet`
   );
-
   // Filter empty strings
   const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
 

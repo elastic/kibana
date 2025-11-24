@@ -17,8 +17,8 @@ export const MOCK_IDP_UIAM_SHARED_SECRET = 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB
 export const MOCK_IDP_UIAM_ORGANIZATION_ID = '1234567890';
 export const MOCK_IDP_UIAM_PROJECT_ID = 'abcde1234567890';
 
-export const MOCK_IDP_UIAM_SERVICE_INTERNAL_URL = 'http://uiam-cosmosdb:8090';
-export const MOCK_IDP_UIAM_SERVICE_URL = 'http://localhost:8090';
+export const MOCK_IDP_UIAM_SERVICE_INTERNAL_URL = 'http://uiam:8080';
+export const MOCK_IDP_UIAM_SERVICE_URL = 'http://localhost:8080';
 
 export const MOCK_IDP_REALM_NAME = 'cloud-saml-kibana';
 export const MOCK_IDP_REALM_TYPE = 'saml';

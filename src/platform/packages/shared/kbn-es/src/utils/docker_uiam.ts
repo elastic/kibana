@@ -14,18 +14,28 @@ import execa from 'execa';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Agent } from 'undici';
 import { createHmac } from 'crypto';
-import { SERVERLESS_UIAM_ENTRYPOINT_PATH } from '../paths';
+import type { ArrayElement } from '@kbn/utility-types';
+import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH } from '../paths';
 
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'mcr.microsoft.com';
 const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/cosmosdb/linux/azure-cosmos-emulator`;
-const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG = 'vnext-preview';
-const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:${COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG}`;
+
+// We're pinning to a specific SHA256 tag to avoid unexpected breakages from image updates.
+// This tag has been verified to work with UIAM as of 2025-11-25.
+// To update this tag, please do the following:
+// 1. Pull the latest version of the tag
+//   $ docker pull mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
+// 2. Get the digest
+//   $ docker inspect --format='{{index .RepoDigests 0}}' mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
+const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG =
+  '2062ea5f8dc4416381014dae9bb66059ac2ac29912f2ca6f47bd1b4f360d7445';
+export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}@sha256:${COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG}`;
 
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
 const UIAM_DOCKER_REPO = `${UIAM_DOCKER_REGISTRY}/cloud-ci/uiam`;
 // Taken from GitOps version file for UIAM service (dev env, services/uiam/versions.yaml)
-const UIAM_DOCKER_LATEST_VERIFIED_TAG = 'git-fb324ba1e88f';
-const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_REPO}:${UIAM_DOCKER_LATEST_VERIFIED_TAG}`;
+const UIAM_DOCKER_LATEST_VERIFIED_TAG = 'git-fd2a53b8cf9f';
+export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_REPO}:${UIAM_DOCKER_LATEST_VERIFIED_TAG}`;
 
 const UIAM_COSMOS_DB_NAME = 'uiam-db';
 const UIAM_COSMOS_DB_VERSION = '2018-12-31';
@@ -38,7 +48,7 @@ const UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION = 'token-invalidation';
 const MAX_HEALTHCHECK_RETRIES = 15;
 
 const ENV_DEFAULTS = {
-  UIAM_API_PORT: '8090',
+  UIAM_API_PORT: '8080',
   UIAM_COSMOS_DB_GATEWAY_PORT: '8081',
   UIAM_COSMOS_DB_UI_PORT: '8082',
   UIAM_LOGGING_LEVEL: 'INFO',
@@ -71,17 +81,22 @@ export const UIAM_CONTAINERS = [
       '--net',
       'elastic',
 
+      '--volume',
+      `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
+
       '-p',
       `127.0.0.1:${env.UIAM_COSMOS_DB_GATEWAY_PORT}:8081`, // Cosmos DB gateway
       '-p',
       `127.0.0.1:${env.UIAM_COSMOS_DB_UI_PORT}:1234`, // Cosmos DB emulator UI
-      '-p',
-      `127.0.0.1:${env.UIAM_API_PORT}:8090`, // UIAM API port
 
       '--env',
       'AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1',
       '--env',
       'AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=false',
+      '--env',
+      'GATEWAY_PUBLIC_ENDPOINT=uiam-cosmosdb',
+      '--env',
+      'CERT_PATH=/scripts/certs/uiam_cosmosdb.pfx',
       '--env',
       'LOG_LEVEL=error',
 
@@ -95,16 +110,20 @@ export const UIAM_CONTAINERS = [
     image: process.env.UIAM_DOCKER_IMAGE || UIAM_DEFAULT_IMAGE,
     params: [
       '--net',
-      'container:uiam-cosmosdb',
+      'elastic',
 
       '--volume',
       `${SERVERLESS_UIAM_ENTRYPOINT_PATH}:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z`,
 
+      '--volume',
+      `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/tmp/uiam_cosmosdb.pfx:z`,
+
+      '-p',
+      `127.0.0.1:${env.UIAM_API_PORT}:8080`, // UIAM API port
+
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
 
-      '--env',
-      'quarkus.http.port=8090',
       '--env',
       'quarkus.http.ssl.certificate.key-store-provider=JKS',
       '--env',
@@ -130,7 +149,7 @@ export const UIAM_CONTAINERS = [
       '--env',
       `uiam.cosmos.account.access_key=${UIAM_COSMOS_DB_ACCESS_KEY}`,
       '--env',
-      `uiam.cosmos.account.endpoint=https://127.0.0.1:${env.UIAM_COSMOS_DB_GATEWAY_PORT}`,
+      `uiam.cosmos.account.endpoint=https://uiam-cosmosdb:${env.UIAM_COSMOS_DB_GATEWAY_PORT}`,
       '--env',
       `uiam.cosmos.container.apikey=${UIAM_COSMOS_DB_COLLECTION_API_KEYS}`,
       '--env',
@@ -149,81 +168,80 @@ export const UIAM_CONTAINERS = [
       `uiam.tokens.jwt.signing.secret=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
 
       '--health-cmd',
-      'timeout 1 bash -c "</dev/tcp/localhost/8090"',
+      'timeout 1 bash -c "</dev/tcp/localhost/8080"',
     ],
     cmdParams: [],
   },
 ];
 
 /**
- * Run all necessary UIAM containers.
+ * Run a single UIAM-related container.
  */
-export async function runUiamContainers(log: ToolingLog) {
-  for (const container of UIAM_CONTAINERS) {
-    const dockerCommand = SHARED_DOCKER_PARAMS.concat(
-      container.params,
-      ['--name', container.name],
-      container.image,
-      container.cmdParams
-    );
-    log.info(chalk.bold(`Running "${container.name}" container…`));
-    log.indent(4, () => log.info(chalk.dim(`docker ${dockerCommand.join(' ')}`)));
+export async function runUiamContainer(
+  log: ToolingLog,
+  container: ArrayElement<typeof UIAM_CONTAINERS>
+) {
+  const dockerCommand = SHARED_DOCKER_PARAMS.concat(
+    container.params,
+    ['--name', container.name],
+    container.image,
+    container.cmdParams
+  );
+  log.info(chalk.bold(`Running "${container.name}" container…`));
+  log.indent(4, () => log.info(chalk.dim(`docker ${dockerCommand.join(' ')}`)));
 
-    const { stdout: containerId } = await execa('docker', dockerCommand);
+  const { stdout: containerId } = await execa('docker', dockerCommand);
 
-    let isHealthy = false;
-    let healthcheckRetries = 0;
-    while (!isHealthy) {
-      let currentStatus;
-      try {
-        const { stdout: statusRaw } = await execa('docker', [
-          'inspect',
-          '-f',
-          '{{.State.Health.Status}}',
-          container.name,
-        ]);
+  let isHealthy = false;
+  let healthcheckRetries = 0;
+  while (!isHealthy) {
+    let currentStatus;
+    try {
+      const { stdout: statusRaw } = await execa('docker', [
+        'inspect',
+        '-f',
+        '{{.State.Health.Status}}',
+        container.name,
+      ]);
 
-        currentStatus = statusRaw.trim();
-        if (currentStatus === 'healthy') {
-          isHealthy = true;
-          break;
-        }
-      } catch (err) {
-        currentStatus = `error: ${err}`;
+      currentStatus = statusRaw.trim();
+      if (currentStatus === 'healthy') {
+        isHealthy = true;
+        break;
       }
-
-      log.info(chalk.bold(`Waiting for "${container.name}" container (${currentStatus})…`));
-      await setTimeoutAsync(1000);
-
-      healthcheckRetries++;
-      if (healthcheckRetries >= MAX_HEALTHCHECK_RETRIES) {
-        throw new Error(
-          `The "${
-            container.name
-          }" container failed to start within the expected time. Last known status: ${currentStatus}. Check the logs with ${chalk.bold(
-            `docker logs -f ${container.name}`
-          )}`
-        );
-      }
+    } catch (err) {
+      currentStatus = `error: ${err}`;
     }
 
-    log.indent(4, () =>
-      log.info(`The "${container.name}" container is up and ready.
+    log.info(chalk.bold(`Waiting for "${container.name}" container (${currentStatus})…`));
+    await setTimeoutAsync(1000);
+
+    healthcheckRetries++;
+    if (healthcheckRetries >= MAX_HEALTHCHECK_RETRIES) {
+      throw new Error(
+        `The "${
+          container.name
+        }" container failed to start within the expected time. Last known status: ${currentStatus}. Check the logs with ${chalk.bold(
+          `docker logs -f ${container.name}`
+        )}`
+      );
+    }
+  }
+
+  log.indent(4, () =>
+    log.info(`The "${container.name}" container is up and ready.
   Container Name: ${container.name}
   Container Id:   ${containerId}
 
   View logs:            ${chalk.bold(`docker logs -f ${container.name}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${container.name} /bin/bash`)}
 `)
-    );
-  }
+  );
 
-  await initializeCosmosDb(log);
-
-  return UIAM_CONTAINERS.map(({ name }) => name);
+  return container.name;
 }
 
-async function initializeCosmosDb(log: ToolingLog) {
+export async function initializeUiamContainers(log: ToolingLog) {
   const COSMOS_DB_ENDPOINT = `https://127.0.0.1:${env.UIAM_COSMOS_DB_GATEWAY_PORT}`;
 
   const fetchDispatcher = new Agent({ connect: { rejectUnauthorized: false } });
@@ -272,9 +290,9 @@ async function initializeCosmosDb(log: ToolingLog) {
       dispatcher: fetchDispatcher,
     });
 
-    if (dbRes.status === 201) {
+    if (collectionRes.status === 201) {
       log.info(chalk.green(`✓ Collection (${collection}) created successfully`));
-    } else if (dbRes.status === 409) {
+    } else if (collectionRes.status === 409) {
       log.info(chalk.yellow(`✓ Collection (${collection}) already exists`));
     } else {
       throw new Error(

@@ -13,6 +13,7 @@ import Fsp from 'fs/promises';
 import { basename } from 'path';
 
 import type { ServerlessOptions, ServerlessProjectType } from './docker';
+import * as dockerUiam from './docker_uiam';
 import {
   DOCKER_IMG,
   detectRunningNodes,
@@ -61,6 +62,17 @@ jest.mock('./wait_until_cluster_ready', () => ({
 jest.mock('./wait_for_security_index', () => ({
   waitForSecurityIndex: jest.fn(),
 }));
+
+jest.mock('./docker_uiam', () => {
+  const originalModule = jest.requireActual('./docker_uiam');
+  return {
+    ...originalModule,
+    runUiamContainer: jest
+      .fn()
+      .mockImplementation((_, container) => Promise.resolve(container.name)),
+    initializeUiamContainers: jest.fn(),
+  };
+});
 
 jest.mock('@kbn/mock-idp-utils');
 
@@ -345,7 +357,7 @@ describe('detectRunningNodes()', () => {
     );
 
     await expect(detectRunningNodes(log, {})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ES has already been started, pass --kill to automatically stop the nodes on startup."`
+      `"ES has already been started, pass --kill to automatically stop the containers on startup."`
     );
   });
 });
@@ -612,7 +624,7 @@ describe('resolveEsArgs()', () => {
         "--env",
         "serverless.universal_iam_service.enabled=true",
         "--env",
-        "serverless.universal_iam_service.url=http://uiam-cosmosdb-gateway:8080",
+        "serverless.universal_iam_service.url=http://uiam:8080",
         "--env",
         "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
@@ -791,6 +803,17 @@ describe('runServerlessEsNode()', () => {
 });
 
 describe('runServerlessCluster()', () => {
+  let runUiamContainerMock: jest.MockedFunction<typeof dockerUiam.runUiamContainer>;
+  let initializeUiamContainersMock: jest.MockedFunction<typeof dockerUiam.initializeUiamContainers>;
+  beforeEach(() => {
+    runUiamContainerMock = dockerUiam.runUiamContainer as jest.MockedFunction<
+      typeof dockerUiam.runUiamContainer
+    >;
+    initializeUiamContainersMock = dockerUiam.initializeUiamContainers as jest.MockedFunction<
+      typeof dockerUiam.initializeUiamContainers
+    >;
+  });
+
   test('should start 3 serverless nodes', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
@@ -802,13 +825,48 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (3)
+    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(12);
+    expect(execa.mock.calls).toHaveLength(14);
+
+    // UIAM containers should not be started when `--uiam` is not passed
+    expect(runUiamContainerMock).not.toHaveBeenCalled();
+    expect(initializeUiamContainersMock).not.toHaveBeenCalled();
+  });
+
+  test('should start 3 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true });
+
+    // docker version (1)
+    // docker ps (1)
+    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
+    // docker network create (1)
+    // docker pull (3 = 1 for ES nodes, 2 for UIAM containers)
+    // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
+    // docker run (3)
+    // docker logs (1)
+    expect(execa.mock.calls).toHaveLength(17);
+
+    expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
+    expect(runUiamContainerMock).toHaveBeenCalledWith(
+      expect.anything(),
+      dockerUiam.UIAM_CONTAINERS[0]
+    );
+    expect(runUiamContainerMock).toHaveBeenCalledWith(
+      expect.anything(),
+      dockerUiam.UIAM_CONTAINERS[1]
+    );
+    expect(initializeUiamContainersMock).toHaveBeenCalledTimes(1);
   });
 
   test(`should wait for serverless nodes to return 'green' status`, async () => {
@@ -901,9 +959,24 @@ describe('teardownServerlessClusterSync()', () => {
 
     expect(execa.commandSync.mock.calls).toHaveLength(2);
     expect(execa.commandSync.mock.calls[0][0]).toEqual(
-      expect.stringContaining(ES_SERVERLESS_DEFAULT_IMAGE)
+      `docker ps --filter status=running --filter ancestor=${ES_SERVERLESS_DEFAULT_IMAGE} --quiet`
     );
     expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
+  });
+
+  test('should kill running serverless nodes and UIAM containers when in UIAM mode', () => {
+    const containers = ['es01', 'es02', 'es03', 'uiam-cosmosdb', 'uiam'];
+    execa.commandSync.mockImplementation(() => ({
+      stdout: containers.join('\n'),
+    }));
+
+    teardownServerlessClusterSync(log, { ...defaultOptions, uiam: true });
+
+    expect(execa.commandSync.mock.calls).toHaveLength(2);
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(
+      `docker ps --filter status=running --filter ancestor=${ES_SERVERLESS_DEFAULT_IMAGE} --filter ancestor=${dockerUiam.COSMOS_DB_EMULATOR_DEFAULT_IMAGE} --filter ancestor=${dockerUiam.UIAM_DEFAULT_IMAGE} --quiet`
+    );
+    expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${containers.join(' ')}`);
   });
 
   test('should not kill if no serverless nodes', () => {
@@ -944,12 +1017,12 @@ describe('runDockerContainer()', () => {
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // docker version (1)
     // docker ps (1)
-    // docker container rm (3)
+    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(9);
+    expect(execa.mock.calls).toHaveLength(11);
   });
 });
 
