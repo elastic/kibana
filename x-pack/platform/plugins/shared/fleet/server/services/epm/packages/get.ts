@@ -71,6 +71,10 @@ import { auditLoggingService } from '../../audit_logging';
 import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
+import type {
+  PackageAssetReference,
+  RegistryPolicyTemplate,
+} from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
 import {
@@ -749,18 +753,20 @@ export async function getInstalledPackageWithAssets(options: {
   if (!installation) {
     return;
   }
-  const assetsReference =
-    (typeof options.assetsFilter !== 'undefined'
-      ? installation.package_assets?.filter(({ path }) =>
-          typeof path !== 'undefined' ? options.assetsFilter!(path) : true
-        )
-      : installation.package_assets) ?? [];
 
   const esPackage = await getEsPackage(
     installation.name,
     installation.version,
-    assetsReference,
-    options.savedObjectsClient
+    installation.package_assets ?? [],
+    options.savedObjectsClient,
+    {
+      shouldFetchBuffer: (reference: PackageAssetReference) => {
+        if (typeof options.assetsFilter === 'undefined' || typeof reference.path === 'undefined') {
+          return true;
+        }
+        return options.assetsFilter(reference.path);
+      },
+    }
   );
 
   if (!esPackage) {
