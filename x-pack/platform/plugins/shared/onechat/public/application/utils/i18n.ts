@@ -260,4 +260,15 @@ export const labels = {
       defaultMessage: 'Agent Builder',
     }),
   },
+  navigationAbort: {
+    title: i18n.translate('xpack.onechat.navigationAbort.title', {
+      defaultMessage: 'Abort chat request?',
+    }),
+    message: i18n.translate('xpack.onechat.navigationAbort.message', {
+      defaultMessage: 'A chat request is in progress. Do you want to navigate away and abort it?',
+    }),
+    confirmButton: i18n.translate('xpack.onechat.navigationAbort.confirmButton', {
+      defaultMessage: 'Yes, abort',
+    }),
+  },
 };
