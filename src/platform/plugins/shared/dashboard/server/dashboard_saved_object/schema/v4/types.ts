@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Latest model version for dashboard saved objects is v4
-export {
-  dashboardAttributesSchema as dashboardSavedObjectSchema,
-  type DashboardAttributes as DashboardSavedObjectAttributes,
-  type GridData,
-  type SavedDashboardPanel,
-  type SavedDashboardSection,
-} from './v4';
+import type { TypeOf } from '@kbn/config-schema';
+import type { dashboardAttributesSchema } from './v4';
+
+export type { GridData, SavedDashboardPanel, SavedDashboardSection } from '../v3';
+
+export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
