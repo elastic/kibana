@@ -24,6 +24,7 @@ describe('Converter Helpers', () => {
             processing: { steps: [] },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
       };
@@ -43,6 +44,7 @@ describe('Converter Helpers', () => {
             processing: { steps: [] },
             settings: {},
             wired: { fields: {}, routing: [] },
+            failure_store: { inherit: {} },
           },
         },
       };
@@ -83,6 +85,7 @@ describe('Converter Helpers', () => {
             processing: { steps: [], updated_at: new Date().toISOString() },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         effective_lifecycle: {
@@ -98,6 +101,9 @@ describe('Converter Helpers', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+        },
+        effective_failure_store: {
+          disabled: {},
         },
         data_stream_exists: true,
         ...emptyAssets,
@@ -122,6 +128,7 @@ describe('Converter Helpers', () => {
               fields: {},
               routing: [],
             },
+            failure_store: { inherit: {} },
           },
         },
         privileges: {
@@ -140,6 +147,10 @@ describe('Converter Helpers', () => {
         },
         effective_settings: {},
         inherited_fields: {},
+        effective_failure_store: {
+          disabled: {},
+          from: '',
+        },
         ...emptyAssets,
       };
 

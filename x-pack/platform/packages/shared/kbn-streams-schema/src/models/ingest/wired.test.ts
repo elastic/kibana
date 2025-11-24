@@ -267,6 +267,7 @@ describe('WiredStream', () => {
           fields: {},
           routing: [],
         },
+        failure_store: { inherit: {} },
       },
     ] satisfies WiredIngestUpsertRequest[])('is valid', (val) => {
       expect(WiredIngestUpsertRequest.is(val)).toBe(true);

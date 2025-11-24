@@ -47,8 +47,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
-            failure_store: { inherit: {} },
           },
         };
         await putStream(apiClient, 'logs.test', body, 200);
@@ -70,6 +70,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -93,8 +94,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
-            failure_store: { inherit: {} },
           },
         };
         await putStream(apiClient, 'logs.updated_at', body, 200);
@@ -119,6 +120,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -160,6 +162,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -193,6 +196,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               fields: {},
               routing: [],
             },
+            failure_store: { inherit: {} },
           },
         },
       };
@@ -234,6 +238,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               fields: {},
               routing: [],
             },
+            failure_store: { inherit: {} },
           },
         },
       };

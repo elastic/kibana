@@ -245,6 +245,7 @@ describe('ClassicStream', () => {
         processing: { steps: [] },
         settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     ] satisfies ClassicIngestUpsertRequest[])('is valid', (val) => {
       expect(ClassicIngestUpsertRequest.is(val)).toBe(true);
