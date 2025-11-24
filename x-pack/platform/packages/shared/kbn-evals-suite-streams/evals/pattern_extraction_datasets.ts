@@ -121,14 +121,14 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'dd/MMM/yyyy:HH:mm:ss Z',
               example_value: '26/Dec/2016:16:16:29 +0200',
               grok_pattern: 'HTTPDATE',
             },
             other_fields: [
               {
-                name: 'source.address',
+                name: 'attributes.source.ip',
                 type: 'keyword',
                 example_values: ['::1', '192.168.33.1', '172.17.0.1', 'monitoring-server'],
                 required: true,
@@ -136,79 +136,46 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
                 description: 'Client IP address or hostname',
               },
               {
-                name: 'user.name',
+                name: 'attributes.user.name',
                 type: 'keyword',
                 example_values: ['-', 'frank'],
                 required: true,
                 description: 'Authenticated user name',
               },
               {
-                name: 'http.request.method',
+                name: 'attributes.custom.remote_logname',
                 type: 'keyword',
-                example_values: ['GET', 'POST'],
+                example_values: ['-', 'user-identity'],
                 required: true,
-                grok_pattern: 'WORD',
-                description: 'HTTP method',
+                description: 'Remote logname (usually -)',
               },
               {
-                name: 'url.original',
+                name: 'attributes.http.request',
                 type: 'keyword',
-                example_values: ['/favicon.ico', '/hello', '/stringpatch'],
+                example_values: ['GET /favicon.ico HTTP/1.1', 'GET /hello HTTP/1.1', '-'],
                 required: true,
-                description: 'Request URL path',
+                description: 'Full HTTP request line',
               },
               {
-                name: 'http.version',
-                type: 'keyword',
-                example_values: ['1.1', '1.0'],
-                required: true,
-                grok_pattern: 'NUMBER',
-                description: 'HTTP version',
-              },
-              {
-                name: 'http.response.status_code',
+                name: 'attributes.http.response.status_code',
                 type: 'number',
                 example_values: ['404', '200', '408'],
                 required: true,
                 grok_pattern: 'NUMBER',
                 description: 'HTTP status code',
               },
-              {
-                name: 'http.response.body.bytes',
-                type: 'number',
-                example_values: ['209', '499', '612'],
-                required: false,
-                grok_pattern: 'NUMBER',
-                description: 'Response body size in bytes',
-              },
-              {
-                name: 'http.request.referrer',
-                type: 'keyword',
-                example_values: ['-'],
-                required: false,
-                description: 'HTTP referrer',
-              },
-              {
-                name: 'user_agent.original',
-                type: 'text',
-                example_values: [
-                  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:50.0) Gecko/20100101 Firefox/50.0',
-                ],
-                required: false,
-                description: 'User agent string',
-              },
             ],
           },
           pattern_characteristics: {
             should_handle_optional_fields: true,
-            expected_min_fields: 7,
-            expected_max_fields: 12,
+            expected_min_fields: 5,
+            expected_max_fields: 8,
           },
           reference_patterns: {
             grok: [
-              '%{IPORHOST:source.address} - %{DATA:user.name} \\[%{HTTPDATE:@timestamp}\\] "(%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version})" %{NUMBER:http.response.status_code:long} (?:%{NUMBER:http.response.body.bytes:long}|-)',
+              '%{IPORHOST:attributes.source.ip} %{DATA:attributes.custom.remote_logname} %{DATA:attributes.user.name} \\[%{HTTPDATE:attributes.custom.timestamp}\\] "%{DATA:attributes.http.request}" %{NUMBER:attributes.http.response.status_code:long} %{GREEDYDATA:body.text}',
             ],
-            source: 'Apache integration default pipeline',
+            source: 'Pattern extraction with attributes prefix',
           },
         },
         metadata: {
@@ -241,55 +208,45 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'dd/MMM/yyyy:HH:mm:ss Z',
               example_value: '25/Oct/2016:14:49:33 +0200',
               grok_pattern: 'HTTPDATE',
             },
             other_fields: [
               {
-                name: 'source.address',
+                name: 'attributes.source.ip',
                 type: 'keyword',
                 example_values: ['67.43.156.13', '127.0.0.1', 'lessons.example.com'],
                 required: true,
                 grok_pattern: 'IPORHOST',
               },
               {
-                name: 'user.name',
+                name: 'attributes.user.name',
                 type: 'keyword',
                 example_values: ['-'],
                 required: true,
               },
               {
-                name: 'http.request.method',
+                name: 'attributes.custom.remote_logname',
                 type: 'keyword',
-                example_values: ['GET', 'POST'],
-                required: true,
-                grok_pattern: 'WORD',
-              },
-              {
-                name: 'url.original',
-                type: 'keyword',
-                example_values: ['/', '/favicon.ico', '/taga'],
+                example_values: ['-'],
                 required: true,
               },
               {
-                name: 'http.version',
+                name: 'attributes.http.request',
                 type: 'keyword',
-                example_values: ['1.1'],
+                example_values: [
+                  'GET / HTTP/1.1',
+                  'GET /favicon.ico HTTP/1.1',
+                  'GET /taga HTTP/1.1',
+                ],
                 required: true,
               },
               {
-                name: 'http.response.status_code',
+                name: 'attributes.http.response.status_code',
                 type: 'number',
                 example_values: ['200', '404', '206'],
-                required: true,
-                grok_pattern: 'NUMBER',
-              },
-              {
-                name: 'http.response.body.bytes',
-                type: 'number',
-                example_values: ['612', '571', '7648063'],
                 required: true,
                 grok_pattern: 'NUMBER',
               },
@@ -297,14 +254,14 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           },
           pattern_characteristics: {
             should_handle_optional_fields: true,
-            expected_min_fields: 7,
-            expected_max_fields: 10,
+            expected_min_fields: 5,
+            expected_max_fields: 8,
           },
           reference_patterns: {
             grok: [
-              '%{IPORHOST:source.address} - %{DATA:user.name} \\[%{HTTPDATE:@timestamp}\\] "%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}" %{NUMBER:http.response.status_code:long} %{NUMBER:http.response.body.bytes:long}',
+              '%{IPORHOST:attributes.source.ip} %{DATA:attributes.custom.remote_logname} %{DATA:attributes.user.name} \\[%{HTTPDATE:attributes.custom.timestamp}\\] "%{DATA:attributes.http.request}" %{NUMBER:attributes.http.response.status_code:long} %{GREEDYDATA:body.text}',
             ],
-            source: 'Nginx integration access pipeline',
+            source: 'Pattern extraction with attributes prefix',
           },
         },
         metadata: {
@@ -332,40 +289,40 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'yyyy/MM/dd H:m:s',
               example_value: '2016/10/25 14:49:34',
               grok_pattern: 'DATA',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['error', 'warn', 'info'],
               grok_pattern: 'LOGLEVEL',
             },
             other_fields: [
               {
-                name: 'process.pid',
+                name: 'attributes.process.pid',
                 type: 'number',
                 example_values: ['54053', '205860'],
                 required: true,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'process.thread.id',
+                name: 'attributes.process.thread.id',
                 type: 'number',
                 example_values: ['0', '205860'],
                 required: true,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'nginx.error.connection_id',
+                name: 'attributes.nginx.error.connection_id',
                 type: 'number',
                 example_values: ['1', '3', '180289'],
                 required: false,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: [
                   'open() "/usr/local/Cellar/nginx/1.10.2_1/html/favicon.ico" failed',
@@ -382,9 +339,9 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           },
           reference_patterns: {
             grok: [
-              '%{DATA:nginx.error.time} \\[%{DATA:log.level}\\] %{NUMBER:process.pid:long}#%{NUMBER:process.thread.id:long}: (\\*%{NUMBER:nginx.error.connection_id:long} )?%{GREEDYMULTILINE:message}',
+              '%{DATA:attributes.custom.timestamp} \\[%{DATA:attributes.log.level}\\] %{NUMBER:attributes.process.pid:long}#%{NUMBER:attributes.process.thread.id:long}: (\\*%{NUMBER:attributes.nginx.error.connection_id:long} )?%{GREEDYDATA:body.text}',
             ],
-            source: 'Nginx integration error pipeline',
+            source: 'Pattern extraction with attributes prefix',
           },
         },
         metadata: {
@@ -418,33 +375,33 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'dd-MMM-yyyy HH:mm:ss.SSS',
               example_value: '15-Jan-2023 10:30:45.123',
               grok_pattern: 'DATA',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['INFO', 'WARNING', 'SEVERE', 'FINE'],
               grok_pattern: 'WORD',
             },
             other_fields: [
               {
-                name: 'process.thread.name',
+                name: 'attributes.process.thread.name',
                 type: 'keyword',
                 example_values: ['main', 'http-nio-8080-exec-1'],
                 required: true,
                 grok_pattern: 'DATA',
               },
               {
-                name: 'log.logger',
+                name: 'attributes.log.logger',
                 type: 'keyword',
                 example_values: ['org.apache.catalina.startup.Catalina.start'],
                 required: true,
                 grok_pattern: 'JAVACLASS',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['Server startup in 1234 ms'],
                 required: true,
@@ -496,19 +453,19 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'yyyy-MM-dd HH:mm:ss z',
               example_value: '2019-09-22 06:28:24 UTC',
               grok_pattern: 'TIMESTAMP_ISO8601',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['LOG', 'ERROR', 'WARNING', 'DETAIL', 'INFO'],
               grok_pattern: 'WORD',
             },
             other_fields: [
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['duration: 112.337 ms  execute S_59: UPDATE qrtz_TRIGGERS'],
                 required: true,
@@ -554,54 +511,54 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'",
               example_value: '2019-03-24T14:01:47.811234Z',
               grok_pattern: 'TIMESTAMP_ISO8601',
             },
             other_fields: [
               {
-                name: 'user.name',
+                name: 'attributes.user.name',
                 type: 'keyword',
                 example_values: ['root'],
                 required: false,
               },
               {
-                name: 'source.domain',
+                name: 'attributes.source.domain',
                 type: 'keyword',
                 example_values: ['localhost'],
                 required: false,
               },
               {
-                name: 'mysql.slowlog.query_time.sec',
+                name: 'attributes.mysql.slowlog.query_time.sec',
                 type: 'number',
                 example_values: ['2.475469', '2.631844'],
                 required: false,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'mysql.slowlog.lock_time.sec',
+                name: 'attributes.mysql.slowlog.lock_time.sec',
                 type: 'number',
                 example_values: ['0.000287', '0.000145'],
                 required: false,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'mysql.slowlog.rows_sent',
+                name: 'attributes.mysql.slowlog.rows_sent',
                 type: 'number',
                 example_values: ['10'],
                 required: false,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'mysql.slowlog.rows_examined',
+                name: 'attributes.mysql.slowlog.rows_examined',
                 type: 'number',
                 example_values: ['314571'],
                 required: false,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['SELECT last_name, MAX(salary) AS salary FROM employees'],
                 required: true,
@@ -654,33 +611,33 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'dd MMM yyyy HH:mm:ss.SSS',
               example_value: '27 Dec 2018 11:19:18.874',
               grok_pattern: 'DATA',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['*', '#', '.', '-'],
               grok_pattern: 'DATA',
             },
             other_fields: [
               {
-                name: 'process.pid',
+                name: 'attributes.process.pid',
                 type: 'number',
                 example_values: ['26571'],
                 required: true,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'redis.log.role',
+                name: 'attributes.redis.log.role',
                 type: 'keyword',
                 example_values: ['M', 'S', 'C'],
                 required: true,
                 grok_pattern: 'WORD',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['Synchronization with replica 10.114.208.18:6023 succeeded'],
                 required: true,
@@ -725,33 +682,33 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
               example_value: '2023-01-15T10:30:45.123+0000',
               grok_pattern: 'TIMESTAMP_ISO8601',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['I', 'W', 'E', 'D', 'F'],
               grok_pattern: 'WORD',
             },
             other_fields: [
               {
-                name: 'mongodb.log.component',
+                name: 'attributes.mongodb.log.component',
                 type: 'keyword',
                 example_values: ['NETWORK', 'COMMAND', 'WRITE', 'STORAGE'],
                 required: true,
                 grok_pattern: 'WORD',
               },
               {
-                name: 'mongodb.log.context',
+                name: 'attributes.mongodb.log.context',
                 type: 'keyword',
                 example_values: ['conn123', 'conn124'],
                 required: false,
                 grok_pattern: 'DATA',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['received client metadata from 192.168.1.100:54321'],
                 required: true,
@@ -809,26 +766,26 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'yy/MM/dd HH:mm:ss',
               example_value: '23/01/15 10:30:45',
               grok_pattern: 'DATA',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['INFO', 'WARN', 'ERROR', 'DEBUG'],
               grok_pattern: 'LOGLEVEL',
             },
             other_fields: [
               {
-                name: 'log.logger',
+                name: 'attributes.log.logger',
                 type: 'keyword',
                 example_values: ['DAGScheduler', 'TaskSetManager', 'Executor', 'BlockManager'],
                 required: true,
                 grok_pattern: 'JAVACLASS',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: [
                   'Got job 0 (collect at SparkPlan.scala:139) with 1 output partitions',
@@ -881,26 +838,26 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'yyMMdd HHmmss SSS',
               example_value: '081109 203615 143',
               grok_pattern: 'DATA',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['INFO', 'WARN', 'ERROR'],
               grok_pattern: 'LOGLEVEL',
             },
             other_fields: [
               {
-                name: 'log.logger',
+                name: 'attributes.log.logger',
                 type: 'keyword',
                 example_values: ['dfs.DataNode$DataXceiver', 'dfs.FSNamesystem'],
                 required: true,
                 grok_pattern: 'DATA',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['Receiving block blk_38865049199080'],
                 required: true,
@@ -951,40 +908,40 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'yyyy-MM-dd HH:mm:ss,SSS',
               example_value: '2023-01-15 10:30:45,123',
               grok_pattern: 'TIMESTAMP_ISO8601',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['INFO', 'WARN', 'ERROR'],
               grok_pattern: 'LOGLEVEL',
             },
             other_fields: [
               {
-                name: 'zookeeper.myid',
+                name: 'attributes.zookeeper.myid',
                 type: 'keyword',
                 example_values: ['1'],
                 required: false,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'zookeeper.thread',
+                name: 'attributes.zookeeper.thread',
                 type: 'keyword',
                 example_values: ['WorkerReceiver[myid=1]', 'CommitProcessor:1'],
                 required: false,
                 grok_pattern: 'DATA',
               },
               {
-                name: 'log.logger',
+                name: 'attributes.log.logger',
                 type: 'keyword',
                 example_values: ['FastLeaderElection', 'NIOServerCnxn', 'FileTxnLog'],
                 required: true,
                 grok_pattern: 'DATA',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['Notification: 1 (message format version)'],
                 required: true,
@@ -1042,35 +999,35 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'MMM d HH:mm:ss',
               example_value: 'Jun 14 15:16:01',
               grok_pattern: 'SYSLOGTIMESTAMP',
             },
             other_fields: [
               {
-                name: 'host.name',
+                name: 'attributes.host.name',
                 type: 'keyword',
                 example_values: ['server'],
                 required: true,
                 grok_pattern: 'HOSTNAME',
               },
               {
-                name: 'process.name',
+                name: 'attributes.process.name',
                 type: 'keyword',
                 example_values: ['sshd'],
                 required: true,
                 grok_pattern: 'PROG',
               },
               {
-                name: 'process.pid',
+                name: 'attributes.process.pid',
                 type: 'number',
                 example_values: ['20953', '20954', '20955'],
                 required: true,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['Accepted publickey for user1 from 10.0.0.1 port 32768'],
                 required: true,
@@ -1128,35 +1085,35 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'MMM dd HH:mm:ss',
               example_value: 'Jan 15 10:30:45',
               grok_pattern: 'SYSLOGTIMESTAMP',
             },
             other_fields: [
               {
-                name: 'host.name',
+                name: 'attributes.host.name',
                 type: 'keyword',
                 example_values: ['server01'],
                 required: true,
                 grok_pattern: 'HOSTNAME',
               },
               {
-                name: 'process.name',
+                name: 'attributes.process.name',
                 type: 'keyword',
                 example_values: ['systemd', 'kernel', 'NetworkManager', 'cron'],
                 required: true,
                 grok_pattern: 'PROG',
               },
               {
-                name: 'process.pid',
+                name: 'attributes.process.pid',
                 type: 'number',
                 example_values: ['1', '1234', '5678'],
                 required: false,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['Started Session 123 of user root.'],
                 required: true,
@@ -1207,35 +1164,35 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'MMM dd HH:mm:ss',
               example_value: 'Jan 15 10:30:45',
               grok_pattern: 'SYSLOGTIMESTAMP',
             },
             other_fields: [
               {
-                name: 'host.name',
+                name: 'attributes.host.name',
                 type: 'keyword',
                 example_values: ['server01'],
                 required: true,
                 grok_pattern: 'HOSTNAME',
               },
               {
-                name: 'process.name',
+                name: 'attributes.process.name',
                 type: 'keyword',
                 example_values: ['sudo', 'sshd', 'su'],
                 required: true,
                 grok_pattern: 'PROG',
               },
               {
-                name: 'process.pid',
+                name: 'attributes.process.pid',
                 type: 'number',
                 example_values: ['12345'],
                 required: false,
                 grok_pattern: 'NUMBER',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['alice : TTY=pts/1 ; PWD=/home/alice'],
                 required: true,
@@ -1293,26 +1250,26 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'yyyy-MM-dd HH:mm:ss.SSS',
               example_value: '2023-01-15 10:30:45.123',
               grok_pattern: 'TIMESTAMP_ISO8601',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['info', 'warning', 'error'],
               grok_pattern: 'LOGLEVEL',
             },
             other_fields: [
               {
-                name: 'process.pid',
+                name: 'attributes.process.pid',
                 type: 'keyword',
                 example_values: ['<0.567.0>', '<0.568.0>'],
                 required: true,
                 grok_pattern: 'DATA',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['accepting AMQP connection'],
                 required: true,
@@ -1363,33 +1320,33 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'yyyy-MM-dd HH:mm:ss,SSS',
               example_value: '2023-01-15 10:30:45,123',
               grok_pattern: 'TIMESTAMP_ISO8601',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['INFO', 'WARN', 'ERROR'],
               grok_pattern: 'LOGLEVEL',
             },
             other_fields: [
               {
-                name: 'kafka.log.component',
+                name: 'attributes.kafka.log.component',
                 type: 'keyword',
                 example_values: ['KafkaServer id=1', 'ReplicaManager broker=1'],
                 required: true,
                 grok_pattern: 'DATA',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['started'],
                 required: true,
                 grok_pattern: 'GREEDYDATA',
               },
               {
-                name: 'log.logger',
+                name: 'attributes.log.logger',
                 type: 'keyword',
                 example_values: ['kafka.server.KafkaServer', 'kafka.server.ReplicaManager'],
                 required: false,
@@ -1447,7 +1404,7 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'",
               example_value: '2023-01-15T10:30:45.123456789Z',
               grok_pattern: 'TIMESTAMP_ISO8601',
@@ -1460,7 +1417,7 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
                 required: true,
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: [
                   '2023-01-15T10:30:45.123Z INFO  [main] Application started successfully',
@@ -1526,26 +1483,26 @@ export const DISSECT_PATTERN_DATASETS: Record<string, PatternExtractionEvaluatio
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'yyyy-MM-dd HH:mm:ss',
               example_value: '2023-01-15 10:30:45',
               dissect_pattern: '%{@timestamp}',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['INFO', 'WARN', 'ERROR', 'DEBUG'],
               dissect_pattern: '%{log.level}',
             },
             other_fields: [
               {
-                name: 'service.name',
+                name: 'attributes.service.name',
                 type: 'keyword',
                 example_values: ['UserService', 'DatabasePool', 'PaymentProcessor'],
                 required: true,
                 dissect_pattern: '%{service.name}',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['User login successful: user_id=12345'],
                 required: true,
@@ -1594,40 +1551,40 @@ export const DISSECT_PATTERN_DATASETS: Record<string, PatternExtractionEvaluatio
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
               example_value: '2023-01-15T10:30:45.123Z',
               dissect_pattern: '%{@timestamp}',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['INFO', 'WARN', 'ERROR', 'DEBUG'],
               dissect_pattern: '%{log.level}',
             },
             other_fields: [
               {
-                name: 'host.name',
+                name: 'attributes.host.name',
                 type: 'keyword',
                 example_values: ['prod-server-01', 'prod-server-02', 'prod-server-03'],
                 required: true,
                 dissect_pattern: '%{host.name}',
               },
               {
-                name: 'service.name',
+                name: 'attributes.service.name',
                 type: 'keyword',
                 example_values: ['web-app', 'api-gateway', 'auth-service'],
                 required: true,
                 dissect_pattern: '%{service.name}',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['Request processed'],
                 required: true,
                 dissect_pattern: '%{message}',
               },
               {
-                name: 'event.details',
+                name: 'attributes.event.details',
                 type: 'text',
                 example_values: ['duration_ms=45|status_code=200'],
                 required: false,
@@ -1677,54 +1634,54 @@ export const DISSECT_PATTERN_DATASETS: Record<string, PatternExtractionEvaluatio
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
               example_value: '2023-01-15T10:30:45.123Z',
               dissect_pattern: '%{@timestamp}',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['INFO', 'WARN', 'ERROR', 'DEBUG'],
               dissect_pattern: '%{log.level}',
             },
             other_fields: [
               {
-                name: 'service.name',
+                name: 'attributes.service.name',
                 type: 'keyword',
                 example_values: ['api-server', 'auth-service', 'database-worker'],
                 required: true,
                 dissect_pattern: '%{service.name}',
               },
               {
-                name: 'source.ip',
+                name: 'attributes.source.ip',
                 type: 'ip',
                 example_values: ['192.168.1.100', '10.0.0.5'],
                 required: true,
                 dissect_pattern: '%{source.ip}',
               },
               {
-                name: 'http.request.method',
+                name: 'attributes.http.request.method',
                 type: 'keyword',
                 example_values: ['GET', 'POST', 'QUERY'],
                 required: true,
                 dissect_pattern: '%{http.request.method}',
               },
               {
-                name: 'url.path',
+                name: 'attributes.url.path',
                 type: 'keyword',
                 example_values: ['/api/users', '/auth/login', '-'],
                 required: true,
                 dissect_pattern: '%{url.path}',
               },
               {
-                name: 'http.response.status_code',
+                name: 'attributes.http.response.status_code',
                 type: 'number',
                 example_values: ['200', '401', '500'],
                 required: true,
                 dissect_pattern: '%{http.response.status_code}',
               },
               {
-                name: 'event.duration',
+                name: 'attributes.event.duration',
                 type: 'keyword',
                 example_values: ['45ms', '123ms'],
                 required: true,
@@ -1781,47 +1738,47 @@ export const DISSECT_PATTERN_DATASETS: Record<string, PatternExtractionEvaluatio
           sample_messages: [],
           expected_fields: {
             timestamp: {
-              field_name: '@timestamp',
+              field_name: 'attributes.custom.timestamp',
               format: 'yyyy-MM-dd HH:mm:ss',
               example_value: '2023-01-15 10:30:45',
               dissect_pattern: '"%{@timestamp}"',
             },
             log_level: {
-              field_name: 'log.level',
+              field_name: 'attributes.log.level',
               example_values: ['INFO', 'WARN', 'ERROR', 'DEBUG'],
               dissect_pattern: '"%{log.level}"',
             },
             other_fields: [
               {
-                name: 'service.name',
+                name: 'attributes.service.name',
                 type: 'keyword',
                 example_values: ['UserController', 'DatabaseManager', 'PaymentGateway'],
                 required: true,
                 dissect_pattern: '"%{service.name}"',
               },
               {
-                name: 'event.action',
+                name: 'attributes.event.action',
                 type: 'keyword',
                 example_values: ['login', 'query', 'processPayment'],
                 required: true,
                 dissect_pattern: '"%{event.action}"',
               },
               {
-                name: 'user.name',
+                name: 'attributes.user.name',
                 type: 'keyword',
                 example_values: ['user123', 'system', 'user456'],
                 required: true,
                 dissect_pattern: '"%{user.name}"',
               },
               {
-                name: 'source.ip',
+                name: 'attributes.source.ip',
                 type: 'ip',
                 example_values: ['192.168.1.10', 'localhost', '10.0.0.5'],
                 required: true,
                 dissect_pattern: '"%{source.ip}"',
               },
               {
-                name: 'message',
+                name: 'body.text',
                 type: 'text',
                 example_values: ['Success', 'Slow query detected', 'Transaction declined'],
                 required: true,

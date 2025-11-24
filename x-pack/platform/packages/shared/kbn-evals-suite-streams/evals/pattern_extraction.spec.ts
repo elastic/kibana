@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { extractGrokPatternDangerouslySlow } from '@kbn/grok-heuristics';
-import { extractDissectPattern, serializeAST } from '@kbn/dissect-heuristics';
+import {
+  extractGrokPatternDangerouslySlow,
+  getReviewFields as getGrokReviewFields,
+  getGrokProcessor,
+  getGrokPattern,
+} from '@kbn/grok-heuristics';
+import {
+  extractDissectPattern,
+  serializeAST,
+  getReviewFields as getDissectReviewFields,
+  getDissectProcessorWithReview,
+} from '@kbn/dissect-heuristics';
+import type { KbnClient } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
 import {
   GROK_PATTERN_DATASETS,
@@ -18,67 +29,49 @@ import {
   type ParsedLog,
   type PatternQualityMetrics,
 } from './pattern_extraction_metrics';
-import { extractGrokFieldNames, extractDissectFieldNames } from './pattern_extraction_helpers';
+
+/**
+ * Pattern extraction quality evaluation
+ *
+ * Tests the quality of Grok and Dissect pattern generation using real log samples
+ * and comprehensive quality metrics.
+ *
+ * @tags @ess
+ */
 
 evaluate.describe.configure({ timeout: 300_000 });
 
 evaluate.describe('Pattern extraction quality evaluation', () => {
-  /**
-   * Convert Grok pattern nodes to a pattern string.
-   */
-  function grokNodesToPattern(nodes: any[]): string {
-    return nodes.reduce((acc, node) => {
-      if ('id' in node) {
-        // NamedFieldNode
-        return acc + `%{${node.component}:${node.id}}`;
-      } else {
-        // LiteralValueNode
-        return acc + node.pattern;
-      }
-    }, '');
-  }
+  evaluate.beforeEach(async ({ apiServices }) => {
+    await apiServices.streams.enable();
+  });
 
-  /**
-   * Simple mock parser that extracts fields based on pattern structure.
-   * This is a placeholder until actual Grok/Dissect parsing is integrated.
-   */
-  function parseLogsWithPattern(
-    messages: string[],
-    pattern: string,
-    patternType: 'grok' | 'dissect'
-  ): ParsedLog[] {
-    const fieldNames =
-      patternType === 'grok' ? extractGrokFieldNames(pattern) : extractDissectFieldNames(pattern);
-
-    // For now, return parsed=true with empty fields
-    // In production, this would use actual Grok/Dissect parsing
-    return messages.map((message) => ({
-      parsed: true,
-      fields: fieldNames.reduce((acc, field) => {
-        acc[field] = ''; // Placeholder - would contain actual extracted values
-        return acc;
-      }, {} as Record<string, string>),
-      originalMessage: message,
-    }));
-  }
+  evaluate.afterEach(async ({ apiServices }) => {
+    await apiServices.streams.disable();
+  });
 
   /**
    * Run pattern extraction evaluation for a single example.
    *
    * This function:
-   * 1. Takes sample log messages as input
-   * 2. Generates a pattern using heuristics (@kbn/grok-heuristics or @kbn/dissect-heuristics)
-   * 3. Parses all sample messages with the generated pattern
-   * 4. Calculates quality metrics by comparing parsed results to expected fields
-   * 5. Returns metrics for Phoenix tracking
+   * 1. Generates initial pattern using heuristics
+   * 2. Gets review fields from the pattern
+   * 3. Calls suggestions API to get LLM-improved pattern
+   * 4. Builds processor using getGrokProcessor/getDissectProcessorWithReview
+   * 5. Simulates processing with the processor
+   * 6. Calculates quality metrics by comparing results to expected fields
    */
   async function runPatternExtractionExperiment(
     example: PatternExtractionEvaluationExample,
-    patternType: 'grok' | 'dissect'
+    patternType: 'grok' | 'dissect',
+    kbnClient: KbnClient,
+    connector: any,
+    fetch: any
   ): Promise<{
     input: typeof example.input;
     output: {
-      generatedPattern: string;
+      heuristicPattern: string;
+      suggestedProcessor: any;
       parsedLogs: ParsedLog[];
       metrics: PatternQualityMetrics;
     };
@@ -87,28 +80,149 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
   }> {
     const { input, output: expected, metadata } = example;
 
-    let generatedPattern: string;
+    let heuristicPattern: string;
+    let reviewFields: any;
+    let patternNodes: any;
+    let dissectResult: any;
 
-    try {
-      if (patternType === 'grok') {
-        // Generate Grok pattern using heuristics
-        const nodes = extractGrokPatternDangerouslySlow(input.sample_messages);
-        generatedPattern = grokNodesToPattern(nodes);
-      } else {
-        // Generate Dissect pattern using heuristics
-        const result = extractDissectPattern(input.sample_messages);
-        generatedPattern = serializeAST(result.ast);
-      }
-    } catch (error) {
-      // If pattern generation fails, use reference pattern or empty string
-      generatedPattern =
-        patternType === 'grok'
-          ? expected.reference_patterns?.grok?.[0] || ''
-          : expected.reference_patterns?.dissect || '';
+    if (patternType === 'grok') {
+      // Generate Grok pattern using heuristics
+      patternNodes = extractGrokPatternDangerouslySlow(input.sample_messages);
+      heuristicPattern = getGrokPattern(patternNodes);
+      reviewFields = getGrokReviewFields(patternNodes, 10);
+    } else {
+      // Generate Dissect pattern using heuristics
+      dissectResult = extractDissectPattern(input.sample_messages);
+      heuristicPattern = serializeAST(dissectResult.ast);
+      reviewFields = getDissectReviewFields(dissectResult, 10);
     }
 
-    // Parse logs with generated pattern
-    const parsedLogs = parseLogsWithPattern(input.sample_messages, generatedPattern, patternType);
+    // Get LLM suggestions and build processor
+    let processor: any = null;
+    let suggestedPattern = heuristicPattern;
+
+    try {
+      const suggestionResponse = await kbnClient.request({
+        method: 'POST',
+        path: `/internal/streams/logs/processing/_suggestions/${patternType}`,
+        body: {
+          connector_id: connector.id,
+          sample_messages: input.sample_messages.slice(0, 10),
+          review_fields: reviewFields,
+        },
+      });
+      const responseLines = (suggestionResponse.data as string).split('\n');
+      const dataLines = responseLines.filter((line: string) => line.startsWith('data: '));
+      const lastDataLine = dataLines[dataLines.length - 1];
+      const suggestionData = lastDataLine ? JSON.parse(lastDataLine.slice(6)) : null;
+
+      if (patternType === 'grok') {
+        // Build Grok processor with LLM suggestions
+        if (suggestionData?.grokProcessor) {
+          processor = getGrokProcessor(patternNodes, suggestionData.grokProcessor);
+          if (processor?.patterns?.[0]) {
+            suggestedPattern = processor.patterns[0];
+          }
+        }
+      } else {
+        // Build Dissect processor with LLM suggestions
+        if (suggestionData?.dissectProcessor) {
+          processor = getDissectProcessorWithReview(
+            dissectResult,
+            suggestionData.dissectProcessor,
+            input.field_to_parse
+          );
+          if (processor?.pattern) {
+            suggestedPattern = processor.pattern;
+          }
+        }
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error getting suggestions:', error);
+      // If suggestions fail, use heuristic pattern
+      suggestedPattern = heuristicPattern;
+    }
+
+    // Build processing steps
+    const steps =
+      patternType === 'grok'
+        ? [
+            {
+              action: 'grok',
+              customIdentifier: 'eval-grok',
+              from: input.field_to_parse,
+              patterns: processor?.patterns || [suggestedPattern],
+              pattern_definitions: processor?.pattern_definitions || {},
+            },
+          ]
+        : [
+            {
+              action: 'dissect',
+              customIdentifier: 'eval-dissect',
+              from: input.field_to_parse,
+              pattern: processor?.pattern || suggestedPattern,
+              append_separator: processor?.processor?.dissect?.append_separator,
+            },
+          ];
+
+    const documents = input.sample_messages.map((msg) => ({
+      [input.field_to_parse]: msg,
+      'stream.name': 'logs',
+      '@timestamp': '2025-01-01',
+    }));
+
+    let parsedLogs: ParsedLog[];
+    try {
+      const simulateResponse = await kbnClient.request({
+        method: 'POST',
+        path: `/internal/streams/logs/processing/_simulate`,
+        body: {
+          documents,
+          processing: { steps },
+        },
+      });
+
+      // The simulation response has structure: { documents: SimulationDocReport[], ... }
+      // Each SimulationDocReport has: { status, value: FlattenRecord, detected_fields, errors }
+      const simulationResult = simulateResponse.data as {
+        documents: Array<{
+          status: 'parsed' | 'partially_parsed' | 'skipped' | 'failed';
+          value: Record<string, any>;
+          detected_fields: Array<{ processor_id: string; name: string }>;
+          errors: any[];
+        }>;
+      };
+
+      parsedLogs = simulationResult.documents.map((docReport, idx: number) => {
+        const fields: Record<string, string> = {};
+        // Extract fields from the 'value' property, excluding the original field and metadata
+        for (const [key, value] of Object.entries(docReport.value)) {
+          if (
+            key !== input.field_to_parse &&
+            key !== 'stream.name' &&
+            key !== '@timestamp' &&
+            typeof value === 'string'
+          ) {
+            fields[key] = value;
+          }
+        }
+        return {
+          parsed: docReport.status === 'parsed',
+          fields,
+          originalMessage: input.sample_messages[idx],
+        };
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error simulating processing:', error);
+      // If simulation fails, mark all as unparsed
+      parsedLogs = input.sample_messages.map((msg) => ({
+        parsed: false,
+        fields: {},
+        originalMessage: msg,
+      }));
+    }
 
     // Calculate quality metrics
     const metrics = calculateOverallQuality(parsedLogs, expected);
@@ -116,7 +230,8 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     return {
       input,
       output: {
-        generatedPattern,
+        heuristicPattern,
+        suggestedProcessor: processor,
         parsedLogs,
         metrics,
       },
@@ -130,7 +245,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
    *
    * Scores are based on the weighted quality metrics:
    * - Parse rate: 25% (must parse successfully)
-   * - Timestamp accuracy: 20% (critical for time-series analysis)
+   * - Timestamp accuracy: 20% (timestamp field extracted)
    * - Log level accuracy: 15% (important for filtering)
    * - Field quality: 30% (most important for usefulness)
    * - Field count penalty: 10% (prevents over/under extraction)
@@ -139,7 +254,12 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     name: 'pattern_quality',
     kind: 'LLM' as const,
     evaluate: async ({ output }: { output: any }) => {
-      const metrics: PatternQualityMetrics = output.metrics;
+      // The output is the full result from runPatternExtractionExperiment
+      const metrics: PatternQualityMetrics = output?.output?.metrics || output?.metrics;
+
+      if (!metrics) {
+        throw new Error('No metrics found in output');
+      }
 
       return {
         score: metrics.overallQuality,
@@ -222,13 +342,61 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     return parts.join('. ');
   }
 
+  /**
+   * Create LLM-based evaluator for pattern quality assessment.
+   *
+   * Uses the LLM to judge whether the extracted fields are meaningful and accurate
+   * compared to the expected fields and original log messages.
+   */
+  function createLlmPatternEvaluator(evaluators: any) {
+    return {
+      name: 'llm_pattern_quality',
+      kind: 'LLM' as const,
+      evaluate: async ({ input, output, expected }: any) => {
+        const parsedLogs = output?.output?.parsedLogs || output?.parsedLogs || [];
+        const expectedFields = expected?.expected_fields || {};
+        const sampleMessages = input?.sample_messages || [];
+
+        // Create a summary of what was extracted
+        const extractionSummary = parsedLogs.slice(0, 3).map((log: ParsedLog, idx: number) => {
+          return {
+            originalMessage: log.originalMessage,
+            parsed: log.parsed,
+            extractedFields: log.fields,
+          };
+        });
+
+        const criteria = [
+          'The extracted field names are semantically meaningful and follow the attributes.* naming convention',
+          'The extracted field values accurately represent the information from the log messages',
+          'Important information like timestamps, log levels, and key identifiers are extracted',
+          'The extraction avoids over-extraction (too many unnecessary fields) or under-extraction (missing important fields)',
+          'Field values are clean and properly formatted (not just raw capture groups)',
+        ];
+
+        const result = await evaluators.criteria(criteria).evaluate({
+          input: {
+            sample_messages: sampleMessages.slice(0, 3),
+            expected_fields: expectedFields,
+          },
+          output: {
+            extraction_summary: extractionSummary,
+            pattern: output?.output?.suggestedProcessor || output?.suggestedProcessor,
+          },
+        });
+
+        return result;
+      },
+    };
+  }
+
   // Test Grok pattern datasets
   Object.entries(GROK_PATTERN_DATASETS).forEach(([categoryKey, dataset]) => {
-    evaluate.describe(`Grok patterns: ${dataset.name}`, () => {
+    evaluate.describe(`Grok patterns: ${dataset.name}`, { tag: '@ess' }, () => {
       dataset.examples.forEach((example, index) => {
         evaluate(
           `Example ${index + 1}: ${example.input.stream_name}`,
-          async ({ phoenixClient }) => {
+          async ({ phoenixClient, kbnClient, connector, fetch, evaluators }) => {
             await phoenixClient.runExperiment(
               {
                 dataset: {
@@ -243,10 +411,16 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
                   ],
                 },
                 task: async () => {
-                  return await runPatternExtractionExperiment(example, 'grok');
+                  return await runPatternExtractionExperiment(
+                    example,
+                    'grok',
+                    kbnClient,
+                    connector,
+                    fetch
+                  );
                 },
               },
-              [patternQualityEvaluator]
+              [patternQualityEvaluator, createLlmPatternEvaluator(evaluators)]
             );
           }
         );
@@ -256,11 +430,11 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
 
   // Test Dissect pattern datasets
   Object.entries(DISSECT_PATTERN_DATASETS).forEach(([categoryKey, dataset]) => {
-    evaluate.describe(`Dissect patterns: ${dataset.name}`, () => {
+    evaluate.describe(`Dissect patterns: ${dataset.name}`, { tag: '@ess' }, () => {
       dataset.examples.forEach((example, index) => {
         evaluate(
           `Example ${index + 1}: ${example.input.stream_name}`,
-          async ({ phoenixClient }) => {
+          async ({ phoenixClient, kbnClient, connector, fetch, evaluators }) => {
             await phoenixClient.runExperiment(
               {
                 dataset: {
@@ -275,10 +449,16 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
                   ],
                 },
                 task: async () => {
-                  return await runPatternExtractionExperiment(example, 'dissect');
+                  return await runPatternExtractionExperiment(
+                    example,
+                    'dissect',
+                    kbnClient,
+                    connector,
+                    fetch
+                  );
                 },
               },
-              [patternQualityEvaluator]
+              [patternQualityEvaluator, createLlmPatternEvaluator(evaluators)]
             );
           }
         );
@@ -287,92 +467,115 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
   });
 
   // Summary test that reports aggregate metrics
-  evaluate('Pattern extraction aggregate metrics', async ({ phoenixClient }) => {
-    const grokResults: PatternQualityMetrics[] = [];
-    const dissectResults: PatternQualityMetrics[] = [];
+  evaluate(
+    'Pattern extraction aggregate metrics',
+    { tag: '@ess' },
+    async ({ phoenixClient, kbnClient, connector, fetch }) => {
+      const grokResults: PatternQualityMetrics[] = [];
+      const dissectResults: PatternQualityMetrics[] = [];
 
-    // Run all Grok examples
-    for (const [_, dataset] of Object.entries(GROK_PATTERN_DATASETS)) {
-      for (const example of dataset.examples) {
-        const result = await runPatternExtractionExperiment(example, 'grok');
-        grokResults.push(result.output.metrics);
+      // Run all Grok examples
+      for (const [_, dataset] of Object.entries(GROK_PATTERN_DATASETS)) {
+        for (const example of dataset.examples) {
+          const result = await runPatternExtractionExperiment(
+            example,
+            'grok',
+            kbnClient,
+            connector,
+            fetch
+          );
+          grokResults.push(result.output.metrics);
+        }
       }
-    }
 
-    // Run all Dissect examples
-    for (const [_, dataset] of Object.entries(DISSECT_PATTERN_DATASETS)) {
-      for (const example of dataset.examples) {
-        const result = await runPatternExtractionExperiment(example, 'dissect');
-        dissectResults.push(result.output.metrics);
+      // Run all Dissect examples
+      for (const [_, dataset] of Object.entries(DISSECT_PATTERN_DATASETS)) {
+        for (const example of dataset.examples) {
+          const result = await runPatternExtractionExperiment(
+            example,
+            'dissect',
+            kbnClient,
+            connector,
+            fetch
+          );
+          dissectResults.push(result.output.metrics);
+        }
       }
-    }
 
-    // Calculate aggregate statistics
-    const aggregateGrok = calculateAggregateMetrics(grokResults);
-    const aggregateDissect = calculateAggregateMetrics(dissectResults);
-    const aggregateAll = calculateAggregateMetrics([...grokResults, ...dissectResults]);
+      // Calculate aggregate statistics
+      const aggregateGrok = calculateAggregateMetrics(grokResults);
+      const aggregateDissect = calculateAggregateMetrics(dissectResults);
+      const aggregateAll = calculateAggregateMetrics([...grokResults, ...dissectResults]);
 
-    await phoenixClient.runExperiment(
-      {
-        dataset: {
-          name: 'Pattern Extraction Aggregate Metrics',
-          description: 'Summary of all pattern extraction evaluations',
-          examples: [
-            {
-              input: {
-                totalExamples: grokResults.length + dissectResults.length,
-                grokExamples: grokResults.length,
-                dissectExamples: dissectResults.length,
-              },
-              output: {
-                aggregate: {
-                  all: aggregateAll,
-                  grok: aggregateGrok,
-                  dissect: aggregateDissect,
+      await phoenixClient.runExperiment(
+        {
+          dataset: {
+            name: 'Pattern Extraction Aggregate Metrics',
+            description: 'Summary of all pattern extraction evaluations',
+            examples: [
+              {
+                input: {
+                  totalExamples: grokResults.length + dissectResults.length,
+                  grokExamples: grokResults.length,
+                  dissectExamples: dissectResults.length,
+                },
+                output: {
+                  aggregate: {
+                    all: aggregateAll,
+                    grok: aggregateGrok,
+                    dissect: aggregateDissect,
+                  },
+                },
+                metadata: {
+                  difficulty: 'aggregate',
+                  notes: 'Summary of all pattern extraction evaluations',
                 },
               },
-              metadata: {
-                difficulty: 'aggregate',
-                notes: 'Summary of all pattern extraction evaluations',
-              },
-            },
-          ],
-        },
-        task: async ({ input, output, metadata }) => {
-          return {
-            input,
-            output,
-            expected: {
-              description: 'Aggregate metrics across all pattern extraction examples',
-            },
-            metadata,
-          };
-        },
-      },
-      [
-        {
-          name: 'aggregate_quality',
-          kind: 'LLM' as const,
-          evaluate: async ({ output }: { output: any }) => {
-            const allMetrics = output.aggregate.all;
+            ],
+          },
+          task: async ({ input, output, metadata }) => {
             return {
-              score: allMetrics.mean.overallQuality,
-              details: {
-                grok: output.aggregate.grok,
-                dissect: output.aggregate.dissect,
-                all: allMetrics,
+              input,
+              output,
+              expected: {
+                description: 'Aggregate metrics across all pattern extraction examples',
               },
-              reasoning: `Average quality across all examples: ${(
-                allMetrics.mean.overallQuality * 100
-              ).toFixed(1)}%. Grok: ${(output.aggregate.grok.mean.overallQuality * 100).toFixed(
-                1
-              )}%, Dissect: ${(output.aggregate.dissect.mean.overallQuality * 100).toFixed(1)}%`,
+              metadata,
             };
           },
         },
-      ]
-    );
-  });
+        [
+          {
+            name: 'aggregate_quality',
+            kind: 'LLM' as const,
+            evaluate: async ({ output }: { output: any }) => {
+              // Handle both direct output and nested output structure
+              const aggregateData = output?.output?.aggregate || output?.aggregate;
+
+              if (!aggregateData) {
+                throw new Error('No aggregate data found in output');
+              }
+
+              const allMetrics = aggregateData.all;
+              return {
+                score: allMetrics.mean.overallQuality,
+                details: {
+                  grok: aggregateData.grok,
+                  dissect: aggregateData.dissect,
+                  all: allMetrics,
+                },
+                reasoning: `Average quality across all examples: ${(
+                  allMetrics.mean.overallQuality * 100
+                ).toFixed(1)}%. Grok: ${(aggregateData.grok.mean.overallQuality * 100).toFixed(
+                  1
+                )}%, Dissect: ${(aggregateData.dissect.mean.overallQuality * 100).toFixed(1)}%`,
+              };
+            },
+          },
+        ]
+      );
+    }
+  );
 
   /**
    * Calculate aggregate statistics for a set of quality metrics.

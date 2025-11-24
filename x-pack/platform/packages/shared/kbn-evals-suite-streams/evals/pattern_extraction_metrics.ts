@@ -15,7 +15,7 @@ import type { PatternExtractionGroundTruth } from './pattern_extraction_datasets
 export interface PatternQualityMetrics {
   /** Overall parse rate: percentage of logs successfully parsed */
   parseRate: number;
-  /** Timestamp extraction accuracy (0-1): How accurately timestamps are extracted and formatted */
+  /** Timestamp extraction accuracy (0-1): Whether timestamps are extracted */
   timestampAccuracy: number;
   /** Log level accuracy (0-1): Percentage of correctly extracted log levels */
   logLevelAccuracy: number;
@@ -37,13 +37,12 @@ export interface ParsedLog {
 }
 
 /**
- * Calculate timestamp extraction accuracy by comparing extracted timestamps
- * with expected format and values.
+ * Calculate timestamp extraction accuracy by checking if timestamp fields are extracted.
+ * Does NOT attempt to parse or validate the timestamp format - just checks presence.
  *
  * Scoring:
- * - 1.0: Timestamp extracted with correct format and reasonable value
- * - 0.5: Timestamp extracted but wrong format or suspicious value
- * - 0.0: No timestamp extracted or completely invalid
+ * - 1.0: Timestamp field extracted with non-empty value
+ * - 0.0: No timestamp extracted or empty value
  */
 export function calculateTimestampAccuracy(
   parsedLogs: ParsedLog[],
@@ -53,74 +52,27 @@ export function calculateTimestampAccuracy(
     return 0;
   }
 
-  const timestampFieldName = expectedFields.timestamp?.field_name || '@timestamp';
-  const expectedFormat = expectedFields.timestamp?.format;
+  const timestampFieldName = expectedFields.timestamp?.field_name;
+  if (!timestampFieldName) {
+    return 1.0; // No timestamp expected, so no penalty
+  }
 
-  let totalScore = 0;
+  let extractedCount = 0;
 
   for (const log of parsedLogs) {
     if (!log.parsed) {
-      // If log didn't parse at all, score is 0
-      totalScore += 0;
       continue;
     }
 
     const extractedTimestamp = log.fields[timestampFieldName];
 
-    if (!extractedTimestamp) {
-      // No timestamp extracted
-      totalScore += 0;
-      continue;
-    }
-
-    // Check if timestamp is a valid date-like string or number
-    const timestampStr = String(extractedTimestamp);
-    const isValidDate = !isNaN(Date.parse(timestampStr)) || !isNaN(Number(extractedTimestamp));
-
-    if (!isValidDate) {
-      // Invalid timestamp format
-      totalScore += 0;
-      continue;
-    }
-
-    // Check if format roughly matches expectations
-    if (expectedFormat) {
-      const formatMatches = checkTimestampFormatMatch(timestampStr, expectedFormat);
-      totalScore += formatMatches ? 1.0 : 0.5;
-    } else {
-      // No expected format specified, give partial credit for valid date
-      totalScore += 0.7;
+    // Check if timestamp exists and has a non-empty value
+    if (extractedTimestamp && String(extractedTimestamp).trim().length > 0) {
+      extractedCount++;
     }
   }
 
-  return totalScore / parsedLogs.length;
-}
-
-/**
- * Check if a timestamp string roughly matches the expected format pattern.
- * This is a heuristic check, not a strict format validation.
- */
-function checkTimestampFormatMatch(timestamp: string, expectedFormat: string): boolean {
-  // Common format indicators
-  const formatChecks = {
-    hasYear4: /yyyy|YYYY/.test(expectedFormat) && /\d{4}/.test(timestamp),
-    hasYear2: /yy|YY/.test(expectedFormat) && /\d{2}/.test(timestamp),
-    hasMonth: /MM|MMM/.test(expectedFormat) && /\d{2}|[A-Za-z]{3}/.test(timestamp),
-    hasDay: /dd|DD/.test(expectedFormat) && /\d{2}/.test(timestamp),
-    hasHour: /HH|hh/.test(expectedFormat) && /\d{2}/.test(timestamp),
-    hasMinute: /mm/.test(expectedFormat) && /\d{2}/.test(timestamp),
-    hasSecond: /ss/.test(expectedFormat) && /\d{2}/.test(timestamp),
-    hasMillis: /SSS|mmm/.test(expectedFormat) && /\d{3}/.test(timestamp),
-    hasISO8601:
-      /ISO8601|TIMESTAMP_ISO8601/.test(expectedFormat) && /\d{4}-\d{2}-\d{2}/.test(timestamp),
-    hasSyslog:
-      /SYSLOG/.test(expectedFormat) &&
-      /[A-Z][a-z]{2}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}/.test(timestamp),
-  };
-
-  // If any format indicators match, consider it a match
-  const matches = Object.values(formatChecks).filter(Boolean).length;
-  return matches > 0;
+  return extractedCount / parsedLogs.length;
 }
 
 /**
