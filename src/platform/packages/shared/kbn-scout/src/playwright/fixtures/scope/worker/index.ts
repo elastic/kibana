@@ -44,3 +44,6 @@ export type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from './ap
 
 export { defaultRolesFixture } from './default_roles';
 export type { DefaultRolesFixture } from './default_roles';
+
+export { userProfilesFixture } from './user_profiles';
+export type { UserProfilesFixture } from './user_profiles';

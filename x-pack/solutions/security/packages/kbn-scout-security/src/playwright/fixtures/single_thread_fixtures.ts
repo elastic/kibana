@@ -12,7 +12,12 @@ import type {
   SecurityTestFixtures,
   SecurityWorkerFixtures,
 } from './types';
-import { getDetectionRuleApiService } from './worker';
+import {
+  getDetectionRuleApiService,
+  getAssistantCleanupService,
+  getBrowserScopedAssistantService,
+  getConnectorsApiService,
+} from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
 const securityFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
@@ -34,15 +39,25 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         apiServices,
         kbnClient,
         log,
+        esClient,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityWorkerFixtures['kbnClient'];
         log: SecurityWorkerFixtures['log'];
+        esClient: SecurityWorkerFixtures['esClient'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
       extendedApiServices.detectionRule = getDetectionRuleApiService({
+        kbnClient,
+        log,
+        esClient,
+      });
+      extendedApiServices.assistant = getAssistantCleanupService({
+        esClient,
+      });
+      extendedApiServices.connectors = getConnectorsApiService({
         kbnClient,
         log,
       });
@@ -51,4 +66,15 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
     },
     { scope: 'worker' },
   ],
+  browserScopedApis: async (
+    {
+      page,
+      config,
+    }: { page: SecurityTestFixtures['page']; config: SecurityWorkerFixtures['config'] },
+    use
+  ) => {
+    await use({
+      assistant: getBrowserScopedAssistantService({ page, kbnUrl: config.hosts.kibana }),
+    });
+  },
 });

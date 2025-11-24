@@ -14,7 +14,25 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
   let ruleName: string;
   spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
     ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
-    await apiServices.detectionRule.createCustomQueryRule({ ...CUSTOM_QUERY_RULE, name: ruleName });
+
+    // Generate test data FIRST before creating the rule
+    // This allows the rule to immediately match the already-indexed document
+    await apiServices.detectionRule.indexTestDocument('logs-test', {
+      'event.category': 'security',
+      'event.type': 'alert',
+      message: 'Test security event for detection rule',
+      'host.name': 'test-host',
+      'user.name': 'test-user',
+    });
+
+    // Create the rule with a more recent 'from' time to catch new data
+    const ruleWithRecentFromTime = {
+      ...CUSTOM_QUERY_RULE,
+      name: ruleName,
+      from: 'now-1m', // Look for data from the last minute
+    };
+    await apiServices.detectionRule.createCustomQueryRule(ruleWithRecentFromTime);
+
     await browserAuth.loginAsPlatformEngineer();
   });
 
@@ -28,7 +46,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     const urlBeforeAlertDetails = page.url();
     expect(urlBeforeAlertDetails).not.toContain(RIGHT);
 
-    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
     await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
     const urlAfterAlertDetails = page.url();
@@ -38,7 +56,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     await expect(headerTitle).toHaveText(ruleName);
 
     await page.reload();
-    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
     const urlAfterReload = page.url();
     expect(urlAfterReload).toContain(RIGHT);

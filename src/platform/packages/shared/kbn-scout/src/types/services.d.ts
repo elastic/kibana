@@ -11,6 +11,7 @@ export type {
   EsClient,
   KbnClient,
   KibanaUrl,
+  PathOptions,
   SamlSessionManager,
   ScoutLogger,
   KibanaRole,

@@ -10,3 +10,7 @@ export type { RoleDescriptorsFixture } from './roles_descriptors';
 
 export { getDetectionRuleApiService } from './apis';
 export type { DetectionRuleApiService } from './apis';
+export { getAssistantCleanupService, getBrowserScopedAssistantService } from './apis';
+export type { AssistantApiService, AssistantCleanupService } from './apis';
+export { getConnectorsApiService } from './apis';
+export type { ConnectorsApiService } from './apis';

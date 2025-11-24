@@ -26,6 +26,7 @@ export {
   browserAuthFixture,
   apiServicesFixture,
   synthtraceFixture,
+  userProfilesFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from './src/playwright';
@@ -57,6 +58,7 @@ export type {
   BrowserAuthFixture,
   SamlAuth,
   SynthtraceFixture,
+  UserProfilesFixture,
 } from './src/playwright';
 
 // Service & configuration types
@@ -69,6 +71,7 @@ export type {
   ScoutTestConfig,
   KibanaRole,
   ElasticsearchRoleDescriptor,
+  PathOptions,
 } from './src/types';
 
 // Authentication types

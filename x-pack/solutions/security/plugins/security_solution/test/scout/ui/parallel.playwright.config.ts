@@ -9,6 +9,6 @@ import { createPlaywrightConfig } from '@kbn/scout-security';
 
 // eslint-disable-next-line import/no-default-export
 export default createPlaywrightConfig({
-  testDir: './parallel_tests/',
-  workers: 2,
+  testDir: './tests',
+  workers: 1,
 });

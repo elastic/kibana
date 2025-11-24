@@ -2466,6 +2466,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/plugins/security_solution/public/assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
+/x-pack/solutions/security/test/scout/ui/tests/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/integration-experience
 /x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
@@ -2517,6 +2518,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_playwright @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/scout/ui/playwright.config.ts @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/scout/ui/parallel.playwright.config.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @patrykkopycinski @maximpn @banderror
 
 ## Security Solution sub teams - Cloud Security Posture
@@ -2640,6 +2643,8 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/urls @elastic/security-threat-hunting-investigations
 
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/scout/ui/tests/alert_details_url_sync.spec.ts @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/scout/ui/tests/security_navigation.spec.ts @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/sourcerer/sourcerer_timeline.cy.ts @elastic/security-threat-hunting-investigations

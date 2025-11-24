@@ -47,6 +47,9 @@ export interface BrowserAuthFixture {
  * The "browserAuth" fixture simplifies the process of logging into Kibana with
  * different roles during tests. It uses the "samlAuth" fixture to create an authentication session
  * for the specified role and the "context" fixture to update the cookie with the role-scoped session.
+ *
+ * Note: User profiles can be activated at the worker level via the optional userProfiles fixture.
+ * For SAML authentication, profiles are auto-populated by Kibana on first authenticated request.
  */
 export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: BrowserAuthFixture }>({
   browserAuth: async ({ log, context, samlAuth, config, kbnUrl, esClient }, use) => {
