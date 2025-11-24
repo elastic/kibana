@@ -4173,6 +4173,10 @@
                 "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
@@ -6146,7 +6150,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -6319,6 +6323,10 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_summary.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/bulk_update_tags.ts"
               },
               {
                 "plugin": "inference",
@@ -6850,6 +6858,10 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/server/init_routes.ts"
               },
               {
@@ -7027,6 +7039,18 @@
               {
                 "plugin": "@kbn/search-api-keys-server",
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "@kbn/workplaceai-api-keys-server",
+                "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "@kbn/workplaceai-api-keys-server",
+                "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
                 "plugin": "esql",
@@ -7522,18 +7546,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
               },
               {
@@ -7923,6 +7935,22 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -14543,7 +14571,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
+                "path": "src/platform/plugins/shared/dashboard/server/api/read/register_read_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -15470,6 +15498,14 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/routes/policies/policies.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/routes/status/status.ts"
+              },
+              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.ts"
               },
@@ -15672,6 +15708,14 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/routes/policies/policies.test.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/routes/status/status.test.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
@@ -17784,6 +17828,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/delete.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/delete.ts"
               },
               {
                 "plugin": "securitySolution",
