@@ -36,7 +36,8 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
             ? euiTheme.colors.backgroundBasePlain
             : euiTheme.colors.lightestShade};
           transition: background ${euiTheme.animation.fast};
-          margin: ${`${euiTheme.size.xs} ${euiTheme.size.xs} 0 ${euiTheme.size.s}`};
+          margin: ${euiTheme.size.xs};
+          margin-bottom: 0;
           padding-bottom: ${euiTheme.size.xs};
 
           ${isSelected
