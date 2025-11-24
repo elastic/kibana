@@ -13,6 +13,10 @@ if [ -z "$CHANGED_PLUGINS" ] || [ "$CHANGED_PLUGINS" == "[]" ]; then
   exit 0
 fi
 
+# Restore TypeScript build cache
+echo "--- Restore TypeScript build cache"
+node scripts/type_check --restore-only
+
 # Parse the JSON array and build docs for each changed plugin/package
 PLUGIN_COUNT=$(echo "$CHANGED_PLUGINS" | jq 'length')
 echo "Changed plugins/packages: $CHANGED_PLUGINS"
@@ -26,9 +30,6 @@ echo "$CHANGED_PLUGINS" | jq -r '.[]' | while read -r PLUGIN_ID; do
   fi
 done
 
-# Restore TypeScript build cache
-echo "--- Restore TypeScript build cache"
-node scripts/type_check --restore-only
 
 echo "--- Build API Docs"
 node --max-old-space-size=24000 scripts/build_api_docs
