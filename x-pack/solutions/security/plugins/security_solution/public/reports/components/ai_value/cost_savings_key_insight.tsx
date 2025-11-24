@@ -72,10 +72,11 @@ const CostSavingsKeyInsightLoader: React.FC<Props> = ({ isLoading, lensResponse 
   useEffect(() => {
     if (!lensResponse) setInsightResult('');
   }, [lensResponse]);
-  useEffect(
-    () => if (insightResult.length) setInsightForExportContext?.(insightResult),
-    [setInsightForExportContext, insightResult]
-  );
+  useEffect(() => {
+    if (insightResult.length) {
+      setInsightForExportContext?.(insightResult);
+    }
+  }, [setInsightForExportContext, insightResult]);
   return <CostSavingsKeyInsightView insight={insightResult} isLoading={isLoading} />;
 };
 
