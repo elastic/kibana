@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
+import { BasicPrettyPrinter } from '@kbn/esql-ast';
 import type {
   ESQLColumnData,
   ESQLFieldWithMetadata,
@@ -25,7 +25,7 @@ export const NOT_SUGGESTED_TYPES = ['unsupported'];
 export class QueryColumns {
   private static readonly cache = new Map<string, ESQLColumnData[]>();
   // Adding a max size to the cache to prevent unbounded memory growth
-  private static readonly MAX_CACHE_SIZE = 200;
+  private static readonly MAX_CACHE_SIZE = 100;
 
   /**
    * Retrieves from cache the columns for a given query, ignoring case.
@@ -63,17 +63,12 @@ export class QueryColumns {
     QueryColumns.cache.set(normalizedKey, value);
   }
 
-  // once computed, the columns for the query will be cached here
-  private readonly fullQueryCacheKey: string;
-
   constructor(
     private readonly query: ESQLAstQueryExpression,
     private readonly originalQueryText: string,
     private readonly resourceRetriever?: ESQLCallbacks,
     private readonly options?: { invalidateColumnsCache?: boolean }
-  ) {
-    this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query, { skipHeader: true });
-  }
+  ) {}
 
   /**
    * Returns columns for this query, filtered by type and optionally ignoring some names.
@@ -83,10 +78,9 @@ export class QueryColumns {
     ignored: string[] = []
   ): Promise<ESQLColumnData[]> {
     const types = Array.isArray(expectedType) ? expectedType : [expectedType];
-    await this.buildCache();
-    const cachedFields = QueryColumns.fromCache(this.fullQueryCacheKey);
+    const fields = await this.getColumnsForQuery(this.query, this.getFields, this.getPolicies);
     return (
-      cachedFields?.filter(({ name, type }) => {
+      fields?.filter(({ name, type }) => {
         const ts = Array.isArray(type) ? type : [type];
         return (
           !ignored.includes(name) &&
@@ -108,14 +102,11 @@ export class QueryColumns {
    * Internal method to get columns as map.
    */
   private async getColumnsAsMap(): Promise<Map<string, ESQLColumnData>> {
-    await this.buildCache();
-    const cachedFields = QueryColumns.fromCache(this.fullQueryCacheKey);
+    const fields = await this.getColumnsForQuery(this.query, this.getFields, this.getPolicies);
     const result = new Map<string, ESQLColumnData>();
-    if (cachedFields) {
-      for (let i = 0; i < cachedFields.length; i++) {
-        const field = cachedFields[i];
-        result.set(field.name, field);
-      }
+    for (let i = 0; i < fields.length; i++) {
+      const field = fields[i];
+      result.set(field.name, field);
     }
     return result;
   }
@@ -140,48 +131,16 @@ export class QueryColumns {
   };
 
   /**
-   * Ensures the cache is populated for all subqueries of this query context.
-   */
-  private async buildCache() {
-    if (!this.fullQueryCacheKey) return;
-
-    // Avoid creating intermediate array - process subqueries directly
-    for (let i = 0; i < this.query.commands.length; i++) {
-      const subquery = Builder.expression.query(this.query.commands.slice(0, i + 1));
-      await this.cacheColumnsForQuery(subquery, this.getFields, this.getPolicies);
-    }
-  }
-
-  /**
-   * Caches the columns for a given query if not already cached.
+   * Returns the fields for a given query.
    * @param query
    * @param fetchFields
    * @param getPolicies
    */
-  async cacheColumnsForQuery(
+  private async getColumnsForQuery(
     query: ESQLAstQueryExpression,
     fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
     getPolicies: () => Promise<Map<string, ESQLPolicy>>
   ) {
-    let cacheKey: string;
-    try {
-      cacheKey = BasicPrettyPrinter.print(query);
-    } catch {
-      // for some syntactically incorrect queries
-      // the printer will throw. They're incorrect
-      // anyways, so just move on — ANTLR errors will
-      // be reported.
-      return;
-    }
-
-    if (!this.options?.invalidateColumnsCache) {
-      const existsInCache = Boolean(QueryColumns.fromCache(cacheKey));
-      if (existsInCache) {
-        // this is already in the cache
-        return;
-      }
-    }
-
     const queryBeforeCurrentCommand = BasicPrettyPrinter.print({
       ...query,
       commands: query.commands.slice(0, -1),
@@ -197,7 +156,7 @@ export class QueryColumns {
       this.originalQueryText
     );
 
-    QueryColumns.setCache(cacheKey, availableFields);
+    return availableFields;
   }
 }
 
