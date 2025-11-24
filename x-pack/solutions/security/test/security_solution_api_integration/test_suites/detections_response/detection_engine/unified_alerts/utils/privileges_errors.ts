@@ -16,3 +16,22 @@ export const getMissingSecurityKibanaPrivilegesError = ({
     statusCode: 403,
   };
 };
+
+export const getMissingReadIndexPrivilegesError = ({
+  username,
+  roles,
+}: {
+  username: string;
+  roles: string[];
+}) => {
+  return {
+    message: `security_exception: action [indices:data/read/search] is unauthorized for user [${username}] with effective roles [${roles}], this action is granted by the index privileges [read,all]`,
+    status_code: 403,
+  };
+};
+
+export const getServerlessMissingReadIndexPrivilegesErrorPattern = () => {
+  return new RegExp(
+    '^security_exception: action \\[indices:data/read/search\\] is unauthorized for API key id \\[.+?\\] of user \\[.+?\\], this action is granted by the index privileges \\[read,all\\]$'
+  );
+};

@@ -14,3 +14,27 @@ export const getSimpleQuery = () => {
     },
   };
 };
+
+export const getSimpleDetectionAlertsQuery = () => {
+  return {
+    query: {
+      bool: {
+        must_not: {
+          exists: {
+            field: 'kibana.alert.attack_discovery.alert_ids',
+          },
+        },
+      },
+    },
+  };
+};
+
+export const getSimpleAttackAlertsQuery = () => {
+  return {
+    query: {
+      exists: {
+        field: 'kibana.alert.attack_discovery.alert_ids',
+      },
+    },
+  };
+};

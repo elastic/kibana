@@ -18,8 +18,18 @@ import {
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { getSimpleQuery } from '../../utils/queries';
-import { noKibanaPrivileges, securitySolutionOnlyAll } from '../../utils/auth/roles';
-import { getMissingSecurityKibanaPrivilegesError } from '../../utils/privileges_errors';
+import {
+  noKibanaPrivileges,
+  securitySolutionAllNoAttackIndices,
+  securitySolutionAllNoDetectionIndices,
+  securitySolutionAllNoIndices,
+  securitySolutionOnlyAll,
+} from '../../utils/auth/roles';
+import {
+  getMissingSecurityKibanaPrivilegesError,
+  getServerlessMissingReadIndexPrivilegesErrorPattern,
+} from '../../utils/privileges_errors';
+import { expectedAttackAlerts, expectedDetectionAlerts } from '../../mocks';
 
 export default ({ getService }: FtrProviderContext) => {
   const utils = getService('securitySolutionUtils');
@@ -39,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
       ];
 
       roles.forEach((role) => {
-        it(`should create a new schedule in a non-default space with the role "${role}"`, async () => {
+        it(`should return all alerts with the role "${role}"`, async () => {
           const testAgent = await utils.createSuperTest(role);
 
           const { body } = await testAgent
@@ -50,40 +60,94 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getSimpleQuery())
             .expect(200);
           expect(body.hits.total.value).toEqual(6);
+          expect(body.hits.hits).toEqual([...expectedDetectionAlerts, ...expectedAttackAlerts]);
         });
       });
     });
 
     describe('RBAC', () => {
-      it('should return all alerts with security solution privileges', async () => {
-        const testAgent = await utils.createSuperTestWithCustomRole(securitySolutionOnlyAll);
+      describe('Kibana privileges', () => {
+        it('should return all alerts with security solution privileges', async () => {
+          const testAgent = await utils.createSuperTestWithCustomRole(securitySolutionOnlyAll);
 
-        const { body } = await testAgent
-          .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
-          .set('kbn-xsrf', 'true')
-          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .send(getSimpleQuery())
-          .expect(200);
-        expect(body.hits.total.value).toEqual(6);
+          const { body } = await testAgent
+            .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
+            .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .send(getSimpleQuery())
+            .expect(200);
+          expect(body.hits.total.value).toEqual(6);
+          expect(body.hits.hits).toEqual([...expectedDetectionAlerts, ...expectedAttackAlerts]);
+        });
+
+        it('should not return alerts without security kibana privileges', async () => {
+          const testAgent = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
+
+          const { body } = await testAgent
+            .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
+            .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .send(getSimpleQuery())
+            .expect(403);
+
+          expect(body).toEqual(
+            getMissingSecurityKibanaPrivilegesError({
+              routeDetails: `POST ${DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL}`,
+            })
+          );
+        });
       });
 
-      it('should not return alerts without security kibana privileges', async () => {
-        const testAgent = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
+      describe('Elasticsearch privileges', () => {
+        it('should not return alerts without index privileges', async () => {
+          const testAgent = await utils.createSuperTestWithCustomRole(securitySolutionAllNoIndices);
 
-        const { body } = await testAgent
-          .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
-          .set('kbn-xsrf', 'true')
-          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .send(getSimpleQuery())
-          .expect(403);
+          const { body } = await testAgent
+            .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
+            .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .send(getSimpleQuery())
+            .expect(403);
 
-        expect(body).toEqual(
-          getMissingSecurityKibanaPrivilegesError({
-            routeDetails: `POST ${DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL}`,
-          })
-        );
+          expect(body.message).toMatch(getServerlessMissingReadIndexPrivilegesErrorPattern());
+        });
+
+        it('should return only attack alerts without detection alerts index privileges', async () => {
+          const testAgent = await utils.createSuperTestWithCustomRole(
+            securitySolutionAllNoDetectionIndices
+          );
+
+          const { body } = await testAgent
+            .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
+            .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .send(getSimpleQuery())
+            .expect(200);
+
+          expect(body.hits.total.value).toEqual(3);
+          expect(body.hits.hits).toEqual([...expectedAttackAlerts]);
+        });
+
+        it('should return only detection alerts without attack alerts index privileges', async () => {
+          const testAgent = await utils.createSuperTestWithCustomRole(
+            securitySolutionAllNoAttackIndices
+          );
+
+          const { body } = await testAgent
+            .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
+            .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .send(getSimpleQuery())
+            .expect(200);
+
+          expect(body.hits.total.value).toEqual(3);
+          expect(body.hits.hits).toEqual([...expectedDetectionAlerts]);
+        });
       });
     });
   });

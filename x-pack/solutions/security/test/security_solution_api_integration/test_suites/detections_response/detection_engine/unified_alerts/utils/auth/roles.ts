@@ -53,6 +53,67 @@ export const securitySolutionOnlyAll: Role = {
   },
 };
 
+export const securitySolutionAllNoIndices: Role = {
+  name: 'sec_only_all_spaces_no_indices',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          [SECURITY_FEATURE_ID]: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionAllNoDetectionIndices: Role = {
+  name: 'sec_only_all_spaces_no_detection_indices',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['.alerts-security.attack.discovery.alerts-default'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          [SECURITY_FEATURE_ID]: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionAllNoAttackIndices: Role = {
+  name: 'sec_only_all_spaces_no_attack_indices',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['.alerts-security.alerts-default'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          [SECURITY_FEATURE_ID]: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const attackDiscoveryOnlyAll: Role = {
   name: 'attack_discovery_only_all_spaces',
   privileges: {
@@ -107,6 +168,9 @@ export const securitySolutionAndAttackDiscoveryAll: Role = {
 export const allRoles = [
   noKibanaPrivileges,
   securitySolutionOnlyAll,
+  securitySolutionAllNoIndices,
+  securitySolutionAllNoDetectionIndices,
+  securitySolutionAllNoAttackIndices,
   attackDiscoveryOnlyAll,
   securitySolutionAndAttackDiscoveryAll,
 ];

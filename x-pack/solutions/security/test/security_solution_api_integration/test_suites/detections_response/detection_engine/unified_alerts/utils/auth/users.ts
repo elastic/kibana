@@ -7,6 +7,9 @@
 
 import {
   securitySolutionOnlyAll,
+  securitySolutionAllNoIndices,
+  securitySolutionAllNoDetectionIndices,
+  securitySolutionAllNoAttackIndices,
   attackDiscoveryOnlyAll,
   securitySolutionAndAttackDiscoveryAll,
   noKibanaPrivileges as noKibanaPrivilegesRole,
@@ -31,6 +34,24 @@ export const secOnly: User = {
   roles: [securitySolutionOnlyAll.name],
 };
 
+export const secOnlyNoIndices: User = {
+  username: 'sec_only_all_spaces_no_indices',
+  password: 'sec_only_all_spaces_no_indices',
+  roles: [securitySolutionAllNoIndices.name],
+};
+
+export const secOnlyNoDetectionIndices: User = {
+  username: 'sec_only_all_spaces_no_detection_indices',
+  password: 'sec_only_all_spaces_no_detection_indices',
+  roles: [securitySolutionAllNoDetectionIndices.name],
+};
+
+export const secOnlyNoAttackIndices: User = {
+  username: 'sec_only_all_spaces_no_attack_indices',
+  password: 'sec_only_all_spaces_no_attack_indices',
+  roles: [securitySolutionAllNoAttackIndices.name],
+};
+
 export const attackDiscoveryOnly: User = {
   username: 'attack_discovery_only_all_spaces',
   password: 'attack_discovery_only_all_spaces',
@@ -47,6 +68,9 @@ export const allUsers = [
   superUser,
   noKibanaPrivileges,
   secOnly,
+  secOnlyNoIndices,
+  secOnlyNoDetectionIndices,
+  secOnlyNoAttackIndices,
   attackDiscoveryOnly,
   secAndAttackDiscoveryOnly,
 ];
