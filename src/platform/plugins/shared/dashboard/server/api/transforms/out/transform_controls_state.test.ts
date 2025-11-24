@@ -64,15 +64,17 @@ describe('control_state', () => {
     it('should transform controls explicit input', () => {
       const controlsArray = transformControlObjectToArray(mockControls);
       const result = transformControlProperties(controlsArray);
-      expect(result).toHaveProperty('0.foo', 'bar');
+
+      expect(result).toHaveProperty('0.config.foo', 'bar');
       expect(result).not.toHaveProperty('0.explicitInput');
 
-      expect(result).toHaveProperty('1.bizz', 'buzz');
+      expect(result).toHaveProperty('1.config.bizz', 'buzz');
       expect(result).not.toHaveProperty('1.explicitInput');
 
-      expect(result).toHaveProperty('2.boo', 'bear');
+      expect(result).toHaveProperty('2.config.boo', 'bear');
       expect(result).not.toHaveProperty('2.explicitInput');
       expect(result).not.toHaveProperty('2.unsupportedProperty');
+      expect(result).not.toHaveProperty('2.config.unsupportedProperty');
     });
   });
 
@@ -82,22 +84,28 @@ describe('control_state', () => {
       const result = transformControlsState(serializedControlState, []);
       expect(result).toEqual([
         {
-          id: 'control1',
+          uid: 'control1',
           type: OPTIONS_LIST_CONTROL,
           width: DEFAULT_CONTROL_WIDTH,
-          foo: 'bar',
+          config: {
+            foo: 'bar',
+          },
         },
         {
-          id: 'control2',
+          uid: 'control2',
           type: RANGE_SLIDER_CONTROL,
           width: 'small',
-          bizz: 'buzz',
+          config: {
+            bizz: 'buzz',
+          },
         },
         {
-          id: 'control3',
+          uid: 'control3',
           type: ESQL_CONTROL,
           grow: true,
-          boo: 'bear',
+          config: {
+            boo: 'bear',
+          },
         },
       ]);
     });
