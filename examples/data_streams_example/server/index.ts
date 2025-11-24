@@ -46,28 +46,31 @@ export const plugin = (ctx: PluginInitializerContext) => {
       dataStreams.registerDataStream(dataStream);
     },
     start({ dataStreams }: CoreStart) {
-      const client = dataStreams.getClient<typeof dataStreamMappings, DataStreamDocument>(
-        dataStream.name
-      );
-
-      const document: DataStreamDocument = {
-        '@timestamp': +new Date(),
-        name: 'John Doe',
-        description: 'This is a test document for my data stream.',
-        age: 30,
-        unMappedField: 'Unmapped field but exists in the document _source',
+      const initializeClient = async () => {
+        return await dataStreams.initializeClient<typeof dataStreamMappings, DataStreamDocument>(
+          dataStream.name
+        );
       };
-
-      void client
-        .index({
-          document,
-        })
-        .then((result) => {
-          ctx.logger.get('data-streams-example').info(JSON.stringify(result, null, 2));
-        });
-
       return {
+        createSpecialDocument: async () => {
+          const client = await initializeClient();
+          const document: DataStreamDocument = {
+            '@timestamp': +new Date(),
+            name: 'John Doe',
+            description: 'This is a test document for my data stream.',
+            age: 30,
+            unMappedField: 'Unmapped field but exists in the document _source',
+          };
+
+          const result = await client.index({
+            document,
+          });
+
+          ctx.logger.get('data-streams-example').info(JSON.stringify(result, null, 2));
+        },
         getDocument: async (id: string) => {
+          const client = await initializeClient();
+
           const result = await client.search({
             query: {
               term: { description: 'This is a test document for my data stream.' },
