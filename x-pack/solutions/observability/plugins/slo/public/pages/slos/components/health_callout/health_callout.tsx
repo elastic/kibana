@@ -41,7 +41,7 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
     return null;
   }
 
-  const deduplicatedList = uniqBy(problematicSloList, (item) => item.sloId);
+  const deduplicatedList = uniqBy(problematicSloList, (item) => item.id);
 
   return (
     <EuiCallOut
@@ -80,16 +80,11 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
             </span>
             <ul>
               {deduplicatedList.map((result) => (
-                <li key={result.sloId}>
+                <li key={result.id}>
                   <ContentWithInspectCta
                     textSize="xs"
-                    content={result.sloName}
-                    url={paths.sloDetails(
-                      result.sloId,
-                      result.sloInstanceId,
-                      undefined,
-                      'overview'
-                    )}
+                    content={result.name}
+                    url={paths.sloDetails(result.id, result.instanceId, undefined, 'overview')}
                   />
                 </li>
               ))}

@@ -24,13 +24,13 @@ export class GetSLOHealth {
     const definitionById = keyBy(definitions, 'id');
 
     const list = params.list
-      .filter((item) => !!definitionById[item.sloId])
+      .filter((item) => !!definitionById[item.id])
       .map((item) => ({
-        id: item.sloId,
-        instanceId: item.sloInstanceId,
-        revision: definitionById[item.sloId].revision,
-        name: definitionById[item.sloId].name,
-        enabled: definitionById[item.sloId].enabled,
+        id: item.id,
+        instanceId: item.instanceId,
+        revision: definitionById[item.id].revision,
+        name: definitionById[item.id].name,
+        enabled: definitionById[item.id].enabled,
       }));
 
     const results = await computeHealth(list, { scopedClusterClient: this.scopedClusterClient });

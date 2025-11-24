@@ -35,10 +35,10 @@ describe('FindSLODefinitions with Health validation', () => {
     MockedGetSLOHealth.mockImplementation(() => mockGetSLOHealth);
     mockGetSLOHealth.execute.mockResolvedValue([
       {
-        sloId: slo.id,
-        sloInstanceId: 'irrelevant',
-        sloRevision: slo.revision,
-        sloName: slo.name,
+        id: slo.id,
+        instanceId: 'irrelevant',
+        revision: slo.revision,
+        name: slo.name,
         health: {
           overall: 'healthy',
           rollup: { status: 'healthy' },

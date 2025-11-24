@@ -29,10 +29,10 @@ interface Dependencies {
 }
 
 export interface SLOHealth {
-  sloId: string;
-  sloInstanceId: string;
-  sloRevision: number;
-  sloName: string;
+  id: string;
+  instanceId: string;
+  revision: number;
+  name: string;
   health: {
     isProblematic: boolean;
     rollup: TransformHealth;
@@ -46,10 +46,10 @@ export async function computeHealth(list: Item[], deps: Dependencies): Promise<S
     const health = computeItemHealth(transformStatsById, item);
 
     return {
-      sloId: item.id,
-      sloName: item.name,
-      sloInstanceId: item.instanceId ?? ALL_VALUE,
-      sloRevision: item.revision,
+      id: item.id,
+      instanceId: item.instanceId ?? ALL_VALUE,
+      name: item.name,
+      revision: item.revision,
       health,
     };
   });
