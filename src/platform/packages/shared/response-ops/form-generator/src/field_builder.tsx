@@ -12,17 +12,20 @@ import type { z } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 import { getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import { EuiSpacer } from '@elastic/eui';
 import type { FormConfig } from './form';
 import { getWidgetComponent } from './widgets';
 import { extractSchemaCore } from './schema_extract_core';
 
+export type FieldValidationFunc = (
+  ...args: Parameters<ValidationFunc>
+) => ReturnType<ValidationFunc<any>>;
+
 export interface FieldDefinition {
   /* The dot-notated path to the field within the form data */
   path: string;
   /* Validation function for the field */
-  validate: (...args: Parameters<ValidationFunc>) => ReturnType<ValidationFunc<any, ERROR_CODE>>;
+  validate: FieldValidationFunc;
   /* The Zod schema for the field */
   schema: z.ZodType;
   /* Global form configuration */
@@ -50,9 +53,7 @@ export const getFieldFromSchema = ({
     schema,
     formConfig,
     defaultValue,
-    validate: (
-      ...args: Parameters<ValidationFunc>
-    ): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    validate: (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
       const [{ value, path: formPath }] = args;
 
       try {
@@ -68,6 +69,8 @@ export const getFieldFromSchema = ({
         });
 
         if (errors.length > 0) {
+          // Join multiple Zod error messages into a single string
+          // The ValidationFunc type requires message to be a string, not an array
           return { path: formPath, message: errors.join(', ') };
         }
       }

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { z } from '@kbn/zod/v4';
 import type { FormConfig } from '../form';
@@ -35,9 +34,7 @@ export interface BaseWidgetProps<
   fieldConfig: {
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ) => ReturnType<ValidationFunc<any, ERROR_CODE>>;
+        validator: (...args: Parameters<ValidationFunc>) => ReturnType<ValidationFunc<any>>;
       }
     ];
     defaultValue?: z.infer<TSchema>;
