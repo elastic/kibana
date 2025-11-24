@@ -44,6 +44,8 @@ describe('When on the trusted applications page', () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
+    // enable process descendants feature flag
+    mockedContext.setExperimentalFlag({'filterProcessDescendantsForTrustedAppsEnabled': true});
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<TrustedAppsList />));
 

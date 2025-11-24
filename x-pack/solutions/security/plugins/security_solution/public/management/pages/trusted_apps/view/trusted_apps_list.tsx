@@ -118,9 +118,8 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
 };
 
-const TrustedAppCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item }) => {
-
-  return <ProcessDescendantsIndicator item={item} labels={TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS} />;
+const TrustedAppCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item, 'data-test-subj': dataTestSubj }) => {
+  return <ProcessDescendantsIndicator item={item} data-test-subj={dataTestSubj} labels={TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS} />;
 });
 TrustedAppCardDecorator.displayName = 'TrustedAppCardDecorator';
 

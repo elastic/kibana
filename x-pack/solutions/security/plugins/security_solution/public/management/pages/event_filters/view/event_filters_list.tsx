@@ -142,9 +142,8 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
 };
 
-const EventFiltersCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item }) => {
-
-  return <ProcessDescendantsIndicator item={item} labels={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS} />;
+const EventFiltersCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item, 'data-test-subj': dataTestSubj }) => {
+  return <ProcessDescendantsIndicator item={item} data-test-subj={dataTestSubj} labels={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS} />;
 });
 EventFiltersCardDecorator.displayName = 'EventFiltersCardDecorator';
 
