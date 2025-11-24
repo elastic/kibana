@@ -13,6 +13,8 @@ import { schema } from '@kbn/config-schema';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from '../constants';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
+import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
+import { throwOnUnmappedKeys } from '../scope_tooling';
 
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
@@ -31,6 +33,11 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
               meta: { description: 'A unique identifier for the dashboard.' },
             }),
           }),
+          query: schema.maybe(
+            schema.object({
+              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
+            })
+          ),
           body: getUpdateRequestBodySchema(),
         },
         response: {
@@ -42,6 +49,9 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       try {
+        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
+        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body.data);
+
         const result = await update(ctx, req.params.id, req.body);
         return res.ok({ body: result });
       } catch (e) {
