@@ -860,7 +860,7 @@
     },
     "/api/agent_builder/a2a/{agentId}": {
       "post": {
-        "description": "WARNING: This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "> warn\n> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "post-agent-builder-a2a-agentid",
         "parameters": [
           {
@@ -1967,7 +1967,7 @@
     },
     "/api/agent_builder/mcp": {
       "post": {
-        "description": "WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "> warn\n> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "post-agent-builder-mcp",
         "parameters": [],
         "requestBody": {
@@ -2713,10 +2713,10 @@
         "x-state": "Technical Preview; added in 9.2.0"
       }
     },
-    "/api/agent_builder/tools/{id}": {
+    "/api/agent_builder/tools/{toolId}": {
       "delete": {
         "description": "Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
-        "operationId": "delete-agent-builder-tools-id",
+        "operationId": "delete-agent-builder-tools-toolid",
         "parameters": [
           {
             "description": "A required header to protect against CSRF attacks",
@@ -2731,7 +2731,7 @@
           {
             "description": "The unique identifier of the tool to delete.",
             "in": "path",
-            "name": "id",
+            "name": "toolId",
             "required": true,
             "schema": {
               "type": "string"
@@ -2763,12 +2763,12 @@
       },
       "get": {
         "description": "Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
-        "operationId": "get-agent-builder-tools-id",
+        "operationId": "get-agent-builder-tools-toolid",
         "parameters": [
           {
             "description": "The unique identifier of the tool to retrieve.",
             "in": "path",
-            "name": "id",
+            "name": "toolId",
             "required": true,
             "schema": {
               "type": "string"
@@ -2897,9 +2897,7 @@
           "agent builder"
         ],
         "x-state": "Technical Preview; added in 9.2.0"
-      }
-    },
-    "/api/agent_builder/tools/{toolId}": {
+      },
       "put": {
         "description": "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
         "operationId": "put-agent-builder-tools-toolid",
@@ -47451,7 +47449,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
@@ -47524,7 +47523,7 @@
             }
           },
           {
-            "description": "The status of the maintenance window. One of \"running\", \"upcoming\", \"finished\" or \"archived\".",
+            "description": "The status of the maintenance window. One of \"running\", \"upcoming\", \"finished\", \"archived\", or \"disabled\".",
             "in": "query",
             "name": "status",
             "required": false,
@@ -47535,7 +47534,8 @@
                     "running",
                     "finished",
                     "upcoming",
-                    "archived"
+                    "archived",
+                    "disabled"
                   ],
                   "type": "string"
                 },
@@ -47545,7 +47545,8 @@
                       "running",
                       "finished",
                       "upcoming",
-                      "archived"
+                      "archived",
+                      "disabled"
                     ],
                     "type": "string"
                   },
@@ -47714,7 +47715,8 @@
                               "running",
                               "upcoming",
                               "finished",
-                              "archived"
+                              "archived",
+                              "disabled"
                             ],
                             "type": "string"
                           },
@@ -47973,7 +47975,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
@@ -48307,7 +48310,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
@@ -48518,7 +48522,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
@@ -48726,7 +48731,8 @@
                         "running",
                         "upcoming",
                         "finished",
-                        "archived"
+                        "archived",
+                        "disabled"
                       ],
                       "type": "string"
                     },
