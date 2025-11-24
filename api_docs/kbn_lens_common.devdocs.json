@@ -18,7 +18,71 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/lens-common",
+        "id": "def-common.getLensLayerTypeTabDisplayName",
+        "type": "Function",
+        "tags": [],
+        "label": "getLensLayerTypeTabDisplayName",
+        "description": [],
+        "signature": [
+          "(layerType: ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.LensLayerType",
+            "text": "LensLayerType"
+          },
+          " | undefined, count: number | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common/visualizations/layer_type_tab_display_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.getLensLayerTypeTabDisplayName.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/lens-common",
+                "scope": "common",
+                "docId": "kibKbnLensCommonPluginApi",
+                "section": "def-common.LensLayerType",
+                "text": "LensLayerType"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/layer_type_tab_display_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.getLensLayerTypeTabDisplayName.$2",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/layer_type_tab_display_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/lens-common",
@@ -10735,7 +10799,15 @@
               "\nSet the visualization configuration"
             ],
             "signature": [
-              "({ activeId: string | null; state: unknown; } & ",
+              "(",
+              {
+                "pluginId": "@kbn/lens-common",
+                "scope": "common",
+                "docId": "kibKbnLensCommonPluginApi",
+                "section": "def-common.VisualizationState",
+                "text": "VisualizationState"
+              },
+              " & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -14475,7 +14547,14 @@
               "\nSet the visualization configuration"
             ],
             "signature": [
-              "{ activeId: string | null; state: unknown; } & ",
+              {
+                "pluginId": "@kbn/lens-common",
+                "scope": "common",
+                "docId": "kibKbnLensCommonPluginApi",
+                "section": "def-common.VisualizationState",
+                "text": "VisualizationState"
+              },
+              " & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -23496,6 +23575,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "activeId",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.VisualizationState.selectedLayerId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "selectedLayerId",
             "description": [],
             "signature": [
               "string | null"
@@ -35618,6 +35711,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common",
+        "id": "def-common.lensLayerTypeTabDisplayNames",
+        "type": "Object",
+        "tags": [],
+        "label": "lensLayerTypeTabDisplayNames",
+        "description": [],
+        "signature": [
+          "{ readonly data: string; readonly referenceLine: string; readonly annotations: string; readonly metricTrendline: string; readonly unknown: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common/visualizations/layer_type_tab_display_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

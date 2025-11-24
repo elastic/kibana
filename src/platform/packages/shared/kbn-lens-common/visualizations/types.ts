@@ -535,6 +535,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
 export interface VisualizationState {
   activeId: string | null;
+  selectedLayerId: string | null;
   state: unknown;
 }
 
