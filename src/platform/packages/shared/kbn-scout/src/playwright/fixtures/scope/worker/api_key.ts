@@ -138,16 +138,8 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           predefinedRole === 'admin'
             ? {}
             : (() => {
+                samlAuth.session.validateRole(predefinedRole);
                 const roleDescriptor = defaultRoles.availableRoles.get(predefinedRole);
-                if (!roleDescriptor) {
-                  const availableRoles = Array.from(defaultRoles.availableRoles.keys()).join(', ');
-                  const errorMessage = [
-                    `Role '${predefinedRole}' not found in the supported list: ${defaultRoles.rolesFilePath}. Available predefined roles: ${availableRoles}.`,
-                    `Is '${predefinedRole}' a custom test role? → Use getApiKeyForCustomRole() to log in with custom Kibana and Elasticsearch privileges`,
-                    `Is '${predefinedRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${defaultRoles.rolesFilePath} to enable it for testing.`,
-                  ].join('\n\n');
-                  throw new Error(errorMessage);
-                }
                 return { [predefinedRole]: roleDescriptor };
               })();
         return await createApiKeyWithAdminCredentials(predefinedRole, roleDescriptors);
