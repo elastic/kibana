@@ -1,6 +1,6 @@
 # @kbn/react-env
 
-Public hooks for accessing Kibana environment information. The environment context is automatically provided by `@kbn/react-kibana-context-root` at the application root, so no manual provider setup is required.
+Hooks for accessing Kibana environment information. The environment context is automatically provided by `@kbn/react-kibana-context-root` at the application root when app is wrapped in core rendering context (`core.rendering.addContext`).
 
 ## Hooks
 
