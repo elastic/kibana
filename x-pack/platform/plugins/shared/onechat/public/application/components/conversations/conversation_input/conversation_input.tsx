@@ -5,95 +5,19 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  useEuiShadow,
-  useEuiShadowHover,
-} from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
-import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
-import { MessageEditor, useMessageEditor } from './message_editor';
-import { useAgentId } from '../../../hooks/use_conversation';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
-import { ConversationInputActions } from './conversation_input_actions';
-import { useConversationId } from '../../../context/conversation/use_conversation_id';
-
-const INPUT_MIN_HEIGHT = '150px';
-// Non-standard EUI border radius
-const INPUT_BORDER_RADIUS = '6px';
-const useInputBorderStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  return css`
-    border: ${euiTheme.border.thin};
-    border-radius: ${INPUT_BORDER_RADIUS};
-    border-color: ${euiTheme.colors.borderBaseSubdued};
-    &:focus-within[aria-disabled='false'] {
-      border-color: ${euiTheme.colors.primary};
-    }
-  `;
-};
-const useInputShadowStyles = () => {
-  return css`
-    ${useEuiShadow('s')}
-    &:hover {
-      ${useEuiShadowHover('s')}
-    }
-    &:focus-within[aria-disabled='false'] {
-      ${useEuiShadow('xl')}
-      :hover {
-        ${useEuiShadowHover('xl')}
-      }
-    }
-  `;
-};
-
-const containerAriaLabel = i18n.translate('xpack.onechat.conversationInput.container.label', {
-  defaultMessage: 'Message input form',
-});
-
-const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
-  children,
-  isDisabled,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const inputContainerStyles = css`
-    width: 100%;
-    min-height: ${INPUT_MIN_HEIGHT};
-    padding: ${euiTheme.size.base};
-    flex-grow: 0;
-    transition: box-shadow 250ms, border-color 250ms;
-
-    ${useInputBorderStyles()}
-    ${useInputShadowStyles()}
-
-    &[aria-disabled='true'] {
-      background-color: ${euiTheme.colors.backgroundBaseDisabled};
-    }
-  `;
-
-  return (
-    <EuiFlexGroup
-      css={inputContainerStyles}
-      direction="column"
-      gutterSize="s"
-      responsive={false}
-      alignItems="stretch"
-      justifyContent="center"
-      data-test-subj="agentBuilderConversationInputForm"
-      aria-label={containerAriaLabel}
-      aria-disabled={isDisabled}
-    >
-      {children}
-    </EuiFlexGroup>
-  );
-};
+import { useAgentId } from '../../../hooks/use_conversation';
+import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
+import { InputActions } from './input_actions';
+import { InputContainer } from './input_container';
+import { MessageEditor, useMessageEditor } from './message_editor';
 
 interface ConversationInputProps {
   onSubmit?: () => void;
@@ -113,7 +37,7 @@ const enabledPlaceholder = i18n.translate(
   }
 );
 
-const inputContainerStyles = css`
+const editorContainerStyles = css`
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -130,7 +54,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
 
-  const isInputDisabled = !isAgentIdValid && isFetched && !!agentId;
+  const isInputDisabled = !isAgentIdValid && isFetched && Boolean(agentId);
   const isSubmitDisabled = messageEditor.isEmpty || isSendingMessage || !isAgentIdValid;
 
   const placeholder = isInputDisabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
@@ -158,7 +82,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   return (
     <InputContainer isDisabled={isInputDisabled}>
-      <EuiFlexItem css={inputContainerStyles}>
+      <EuiFlexItem css={editorContainerStyles}>
         <MessageEditor
           messageEditor={messageEditor}
           onSubmit={handleSubmit}
@@ -168,7 +92,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
         />
       </EuiFlexItem>
       {!isInputDisabled && (
-        <ConversationInputActions
+        <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
           resetToPendingMessage={() => {

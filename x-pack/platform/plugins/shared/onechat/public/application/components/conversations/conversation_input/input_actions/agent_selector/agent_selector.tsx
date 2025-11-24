@@ -7,18 +7,16 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { useOnechatAgents } from '../../../hooks/agents/use_agents';
-import { useHasActiveConversation } from '../../../hooks/use_conversation';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useOnechatAgents } from '../../../../../hooks/agents/use_agents';
+import { useHasActiveConversation } from '../../../../../hooks/use_conversation';
+import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { AgentSelectDropdown } from './agent_select_dropdown';
 
-interface ConversationAgentSelectorProps {
+interface AgentSelectorProps {
   agentId?: string;
 }
 
-export const ConversationAgentSelector: React.FC<ConversationAgentSelectorProps> = ({
-  agentId,
-}) => {
+export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId }) => {
   const { agents, isLoading: isLoadingAgents } = useOnechatAgents();
   const hasActiveConversation = useHasActiveConversation();
   const { conversationActions } = useConversationContext();

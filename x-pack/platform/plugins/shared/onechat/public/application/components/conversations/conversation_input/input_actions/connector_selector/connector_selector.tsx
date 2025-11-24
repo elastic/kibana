@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -14,9 +14,10 @@ import {
   type ConnectorSelectableComponentProps,
 } from '@kbn/ai-assistant-connector-selector-action';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
-import { useNavigation } from '../../../../hooks/use_navigation';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useDefaultConnector } from '../../../../hooks/chat/use_default_connector';
+import { useSendMessage } from '../../../../../context/send_message/send_message_context';
+import { useNavigation } from '../../../../../hooks/use_navigation';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 
 const connectorSelectorButtonAriaLabel = i18n.translate(
   'xpack.onechat.connectorSelector.selectConnector',
@@ -28,23 +29,20 @@ const noConnectorLabel = i18n.translate('xpack.onechat.connectorSelector.noConne
   defaultMessage: 'No connector',
 });
 
-interface ConnectorSelectorProps {
-  selectedConnectorId?: string;
-  onSelectConnector: (connectorId: string) => void;
-  defaultConnectorId?: string;
-}
-
-export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
-  selectedConnectorId,
-  onSelectConnector,
-  defaultConnectorId,
-}) => {
+export const ConnectorSelector: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const { navigateToManageConnectors } = useNavigation();
   const {
     services: { http, settings },
   } = useKibana();
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  const {
+    connectorSelection: {
+      selectConnector: onSelectConnector,
+      selectedConnector: selectedConnectorId,
+      defaultConnectorId,
+    },
+  } = useSendMessage();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data: aiConnectors, isLoading } = useLoadConnectors({
     http,

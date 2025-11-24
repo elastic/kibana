@@ -7,26 +7,23 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { ConversationAgentSelector } from './conversation_agent_selector';
+import { AgentSelector } from './agent_selector';
 import { ConversationActionButton } from './conversation_action_button';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { ConnectorSelector } from './connector_selector';
 
-interface ConversationInputActionsProps {
+interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   resetToPendingMessage: () => void;
   agentId?: string;
 }
 
-export const ConversationInputActions: React.FC<ConversationInputActionsProps> = ({
+export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
   resetToPendingMessage,
   agentId,
 }) => {
-  const { connectorSelection } = useSendMessage();
-
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup
@@ -36,16 +33,12 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          <ConnectorSelector
-            selectedConnectorId={connectorSelection.selectedConnector}
-            onSelectConnector={connectorSelection.selectConnector}
-            defaultConnectorId={connectorSelection.defaultConnectorId}
-          />
+          <ConnectorSelector />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <ConversationAgentSelector agentId={agentId} />
+              <AgentSelector agentId={agentId} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ConversationActionButton
