@@ -13,6 +13,7 @@ import { CaseViewAttachments } from './case_view_attachments';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { screen } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 
 jest.mock('../../../containers/api');
 
@@ -21,6 +22,9 @@ jest.mock('../../../containers/api');
 jest.mock('@kbn/response-ops-alerts-table', () => ({
   AlertsTable: jest.fn(() => <div data-test-subj="alerts-table" />),
 }));
+jest.mock('../../../containers/use_get_case_file_stats');
+
+const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -32,6 +36,11 @@ const basicLicense = licensingMock.createLicense({
 });
 
 describe('Case View Attachments tab', () => {
+  beforeEach(() => {
+    const data = { total: 3 };
+    useGetCaseFileStatsMock.mockReturnValue({ data });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -71,20 +80,21 @@ describe('Case View Attachments tab', () => {
       'true'
     );
   });
+
+  it('shows the files tab with the correct count', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
+      {
+        wrapperProps: { license: basicLicense },
+      }
+    );
+
+    const badge = await screen.findByTestId('case-view-files-stats-badge');
+
+    expect(badge).toHaveTextContent('3');
+  });
 });
 
-// it('shows the files tab with the correct count', async () => {
-//   renderWithTestingProviders(
-//     <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
-//     {
-//       wrapperProps: { license: basicLicense },
-//     }
-//   );
-//
-//   const badge = await screen.findByTestId('case-view-files-stats-badge');
-//
-//   expect(badge).toHaveTextContent('3');
-// });
 //
 // it('do not show count on the files tab if the call isLoading', async () => {
 //   useGetCaseFileStatsMock.mockReturnValue({ isLoading: true, data });
