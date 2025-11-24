@@ -120,7 +120,7 @@ function getTransformHealth(
 }
 
 function toTransformState(
-  state: string
+  state?: string
 ): 'started' | 'indexing' | 'stopped' | 'stopping' | 'failed' | 'aborting' | 'unavailable' {
   switch (state) {
     case 'started':
