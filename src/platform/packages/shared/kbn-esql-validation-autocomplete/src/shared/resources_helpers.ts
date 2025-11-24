@@ -56,6 +56,7 @@ export class QueryColumns {
     // Remove oldest entry if cache is full
     while (QueryColumns.cache.size >= QueryColumns.MAX_CACHE_SIZE) {
       const oldestKey = QueryColumns.cache.keys().next().value;
+      // @ts-expect-error upgrade typescript v5.9.3
       QueryColumns.cache.delete(oldestKey);
     }
 
