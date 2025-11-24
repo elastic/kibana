@@ -17,6 +17,8 @@ import {
   TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
+import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from '../../../../pages/event_filters/view/translations';
+import { TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS } from '../../../../pages/trusted_apps/view/translations';
 
 describe('ProcessDescendantIndicator', () => {
   let appTestContext: AppContextTestRender;
@@ -57,20 +59,20 @@ describe('ProcessDescendantIndicator', () => {
   });
 
   it('should display indication if Event Filter is for process descendants', () => {
-    render({ item: getProcessDescendantEventFilter() });
+    render({ item: getProcessDescendantEventFilter(), labels: EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS });
 
     expect(renderResult.getByTestId('test-processDescendantsIndication')).toBeInTheDocument();
   });
 
   it('should display indication if Trusted App is for process descendants', () => {
-    render({ item: getProcessDescendantTrustedApp() });
+    render({ item: getProcessDescendantTrustedApp(), labels: TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS });
 
     expect(renderResult.getByTestId('test-processDescendantsIndication')).toBeInTheDocument();
   });
 
   it('should mention additional `event.category is process` entry in tooltip for event filters', async () => {
     const prefix = 'test-processDescendantsIndicationTooltip';
-    render({ item: getProcessDescendantEventFilter() });
+    render({ item: getProcessDescendantEventFilter(), labels: EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS });
 
     expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();
 
