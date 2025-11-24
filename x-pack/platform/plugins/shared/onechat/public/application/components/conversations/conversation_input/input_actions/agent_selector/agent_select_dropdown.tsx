@@ -99,7 +99,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         />
       }
       isOpen={isPopoverOpen}
-      anchorPosition="upRight"
+      anchorPosition="upCenter"
       closePopover={() => setIsPopoverOpen(false)}
     >
       <EuiSelectable

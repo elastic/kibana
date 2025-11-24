@@ -126,7 +126,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="upLeft"
+      anchorPosition="upCenter"
     >
       <ConnectorSelectable
         value={selectedConnectorId}
