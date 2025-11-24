@@ -101,7 +101,7 @@ describe('RetentionCard', () => {
           view_index_metadata: true,
         },
         effective_failure_store: {
-          lifecycle: { enabled: {} },
+          lifecycle: { enabled: { is_default_retention: true } },
           from: 'logs-test',
         },
       };
@@ -143,7 +143,7 @@ describe('RetentionCard', () => {
           view_index_metadata: true,
         },
         effective_failure_store: {
-          lifecycle: { enabled: {} },
+          lifecycle: { enabled: { is_default_retention: true } },
           from: 'logs-test',
         },
       };

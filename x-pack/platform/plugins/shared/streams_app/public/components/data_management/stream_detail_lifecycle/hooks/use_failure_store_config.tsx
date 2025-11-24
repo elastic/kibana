@@ -12,7 +12,6 @@ import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { useFailureStoreDefaultRetention } from './use_failure_store_default_retention';
 
 export function transformFailureStoreConfig(update: {
   failureStoreEnabled?: boolean;
@@ -42,7 +41,12 @@ export function transformFailureStoreConfig(update: {
     'customRetentionPeriod' in update ? update.customRetentionPeriod : undefined;
 
   return {
-    lifecycle: { enabled: { data_retention: customRetentionPeriod } },
+    lifecycle: {
+      enabled: {
+        ...(customRetentionPeriod ? { data_retention: customRetentionPeriod } : {}),
+        is_default_retention: customRetentionPeriod === undefined,
+      },
+    },
   };
 }
 
@@ -54,10 +58,12 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
   const isRootStream = isRoot(definition.stream.name);
 
   const failureStoreEnabled = isEnabledFailureStore(failureStore);
-  const { value: defaultRetentionPeriod, refresh: refreshDefaultRetention } =
-    useFailureStoreDefaultRetention(definition.stream.name);
   const retentionDisabled = isDisabledLifecycleFailureStore(failureStore);
-  const customRetentionPeriod =
+  const isDefaultRetention =
+    failureStoreEnabled &&
+    !retentionDisabled &&
+    failureStore.lifecycle.enabled.is_default_retention;
+  const retentionPeriod =
     failureStoreEnabled && !retentionDisabled
       ? failureStore.lifecycle.enabled.data_retention
       : undefined;
@@ -65,8 +71,8 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
   const canShowInherit = (isWired && !isRootStream) || isClassicStream;
 
   return {
-    defaultRetentionPeriod,
-    customRetentionPeriod,
+    defaultRetentionPeriod: isDefaultRetention ? retentionPeriod : undefined,
+    customRetentionPeriod: !isDefaultRetention && retentionPeriod ? retentionPeriod : undefined,
     failureStoreEnabled,
     inheritOptions: {
       canShowInherit,
@@ -74,6 +80,5 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
       isCurrentlyInherited,
     },
     retentionDisabled,
-    refreshDefaultRetention,
   };
 }

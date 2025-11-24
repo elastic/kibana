@@ -41,7 +41,7 @@ const createMockConfig = (
       isWired: false,
       isCurrentlyInherited: false,
     },
-    refreshDefaultRetention: mockRefresh,
+
     ...config,
   };
   mockUseFailureStoreConfig.mockReturnValue(fullConfig);
@@ -58,7 +58,6 @@ const mockClassicInheritConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: false,
     isCurrentlyInherited: true,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 const mockClassicOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
@@ -71,7 +70,6 @@ const mockClassicOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: false,
     isCurrentlyInherited: false,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 const mockWiredInheritConfig: ReturnType<typeof useFailureStoreConfig> = {
@@ -84,7 +82,6 @@ const mockWiredInheritConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: true,
     isCurrentlyInherited: true,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 const mockWiredOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
@@ -97,7 +94,6 @@ const mockWiredOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: true,
     isCurrentlyInherited: false,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 const mockWiredRootConfig: ReturnType<typeof useFailureStoreConfig> = {
@@ -110,7 +106,6 @@ const mockWiredRootConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: true,
     isCurrentlyInherited: false,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 describe('RetentionCard', () => {

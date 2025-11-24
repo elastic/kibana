@@ -14,7 +14,10 @@ import {
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { findInheritedFailureStore } from '@kbn/streams-schema/src/helpers/lifecycle';
-import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type {
+  DataStreamWithFailureStore,
+  WiredIngestStreamEffectiveFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
@@ -136,6 +139,15 @@ export async function readStream({
     getInheritedFieldsFromAncestors(ancestors)
   );
 
+  const inheritedFailureStore = findInheritedFailureStore(streamDefinition, ancestors);
+
+  const effectiveFailureStore: WiredIngestStreamEffectiveFailureStore = dataStream
+    ? {
+        ...getFailureStore({ dataStream: dataStream as DataStreamWithFailureStore }),
+        from: inheritedFailureStore.from,
+      }
+    : inheritedFailureStore;
+
   const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
     dashboards,
@@ -145,7 +157,7 @@ export async function readStream({
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
-    effective_failure_store: findInheritedFailureStore(streamDefinition, ancestors),
+    effective_failure_store: effectiveFailureStore,
   };
   return body;
 }

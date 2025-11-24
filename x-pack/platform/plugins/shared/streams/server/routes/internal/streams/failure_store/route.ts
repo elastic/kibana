@@ -6,10 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import {
-  getFailureStoreStats,
-  getFailureStoreDefaultRetention,
-} from '../../../../lib/streams/stream_crud';
+import { getFailureStoreStats } from '../../../../lib/streams/stream_crud';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 
@@ -53,41 +50,6 @@ export const getFailureStoreStatsRoute = createServerRoute({
   },
 });
 
-export const getFailureStoreDefaultRetentionRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/failure_store/default_retention',
-  options: {
-    access: 'internal',
-    summary: 'Get failure store default retention',
-    description: 'Gets the default retention period for the failure store',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      name: z.string(),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { scopedClusterClient } = await getScopedClients({
-      request,
-    });
-
-    const { name } = params.path;
-
-    const defaultRetention = await getFailureStoreDefaultRetention({
-      name,
-      scopedClusterClient,
-      isServerless: !!server.isServerless,
-    });
-
-    return { default_retention: defaultRetention };
-  },
-});
-
 export const failureStoreRoutes = {
   ...getFailureStoreStatsRoute,
-  ...getFailureStoreDefaultRetentionRoute,
 };

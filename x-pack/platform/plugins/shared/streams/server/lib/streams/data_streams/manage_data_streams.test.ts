@@ -132,7 +132,7 @@ describe('updateDataStreamsFailureStore', () => {
 
   it('enables failure store with lifecycle data retention', async () => {
     const failureStore: FailureStore = {
-      lifecycle: { enabled: { data_retention: '30d' } },
+      lifecycle: { enabled: { data_retention: '30d', is_default_retention: false } },
     };
 
     await updateDataStreamsFailureStore({
@@ -157,7 +157,7 @@ describe('updateDataStreamsFailureStore', () => {
 
   it('enables failure store without lifecycle data retention', async () => {
     const failureStore: FailureStore = {
-      lifecycle: { enabled: {} },
+      lifecycle: { enabled: { is_default_retention: true } },
     };
 
     await updateDataStreamsFailureStore({
@@ -312,7 +312,7 @@ describe('updateDataStreamsFailureStore', () => {
 
   it('logs and throws error when putDataStreamOptions fails', async () => {
     const failureStore: FailureStore = {
-      lifecycle: { enabled: { data_retention: '30d' } },
+      lifecycle: { enabled: { data_retention: '30d', is_default_retention: false } },
     };
 
     const error = new Error('Elasticsearch error');
