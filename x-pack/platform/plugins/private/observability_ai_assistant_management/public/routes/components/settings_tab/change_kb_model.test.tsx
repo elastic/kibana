@@ -12,6 +12,7 @@ import {
   InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
   ELSER_ON_ML_NODE_INFERENCE_ID,
+  ELSER_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
@@ -111,14 +112,21 @@ const setupMockGetModelOptions = (options = modelOptions) => {
   mockGetModelOptions.mockReturnValue(options);
 };
 
-const renderComponent = (mockKb: UseKnowledgeBaseResult) => {
+const renderComponent = (
+  mockKb: UseKnowledgeBaseResult,
+  {
+    currentIdOverride,
+  }: {
+    currentIdOverride?: string;
+  } = {}
+) => {
   const queryClient = new QueryClient();
 
   render(
     <QueryClientProvider client={queryClient}>
       <ChangeKbModel
         knowledgeBase={mockKb}
-        currentlyDeployedInferenceId={ELSER_ON_ML_NODE_INFERENCE_ID}
+        currentlyDeployedInferenceId={currentIdOverride ?? ELSER_ON_ML_NODE_INFERENCE_ID}
       />
     </QueryClientProvider>
   );
@@ -237,6 +245,45 @@ describe('ChangeKbModel', () => {
         `observabilityAiAssistantKnowledgeBaseModelDropdownOption-${e5SmallTitle}`
       );
       e5Option.click();
+
+      await waitFor(() => {
+        const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
+        expect(button).toBeEnabled();
+      });
+    });
+  });
+
+  describe('when KB was installed with ELSER on ML node and ELSER in EIS later becomes available', () => {
+    it('shows ELSER and enables the Update button by default', async () => {
+      setupMockGetModelOptions([
+        {
+          key: ELSER_IN_EIS_INFERENCE_ID,
+          label: elserTitle,
+          description: elserDescription,
+        },
+        {
+          key: E5_SMALL_INFERENCE_ID,
+          label: e5SmallTitle,
+          description: e5SmallDescription,
+        },
+      ]);
+
+      const mockKb = createMockKnowledgeBase({
+        status: createMockStatus({
+          currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
+          endpoint: {
+            inference_id: ELSER_ON_ML_NODE_INFERENCE_ID,
+            task_type: 'text_embedding',
+            service: 'my-service',
+            service_settings: {},
+          },
+        }),
+      });
+
+      renderComponent(mockKb, { currentIdOverride: ELSER_IN_EIS_INFERENCE_ID });
+
+      const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
+      expect(dropdown).toHaveTextContent(elserTitle);
 
       await waitFor(() => {
         const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
