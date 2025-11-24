@@ -42,6 +42,7 @@ import { useBulkDelete } from '../hooks/use_bulk_delete';
 import { EditScheduledReportFlyout } from './edit_scheduled_report_flyout';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { ViewScheduledReportFlyout } from './view_scheduled_report_flyout';
+import { useBulkEnable } from '../hooks/use_bulk_enable';
 
 interface QueryParams {
   page: number;
@@ -91,6 +92,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
 
   const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable();
   const { mutateAsync: bulkDeleteScheduledReports } = useBulkDelete();
+  const { mutateAsync: bulkEnableScheduledReports } = useBulkEnable();
 
   const sortedList = orderBy(scheduledList?.data || [], ['created_at'], ['desc']);
 
@@ -288,10 +290,28 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
             }
           ),
           'data-test-subj': (item) => `reportDisableSchedule-${item.id}`,
-          enabled: (item) => item.enabled,
+          available: (item) => item.enabled,
           type: 'icon',
           icon: 'cross',
           onClick: (item) => setReportAndOpenDisableModal(item),
+        },
+        {
+          name: i18n.translate('xpack.reporting.schedules.table.enableSchedule.title', {
+            defaultMessage: 'Enable schedule',
+          }),
+          description: i18n.translate(
+            'xpack.reporting.schedules.table.enableSchedule.description',
+            {
+              defaultMessage: 'Enable report schedule',
+            }
+          ),
+          'data-test-subj': (item) => `reportEnableSchedule-${item.id}`,
+          available: (item) => !item.enabled,
+          type: 'icon',
+          icon: 'cross',
+          onClick: (item) => {
+            onEnable(item);
+          },
         },
         {
           name: i18n.translate('xpack.reporting.schedules.table.deleteSchedule.title', {
@@ -365,6 +385,13 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     unSetReportAndCloseDeleteModal();
   }, [selectedReport, unSetReportAndCloseDeleteModal, bulkDeleteScheduledReports]);
 
+  const onEnable = useCallback(
+    (item: ScheduledReportApiJSON) => {
+      bulkEnableScheduledReports({ ids: [item.id] });
+    },
+    [bulkEnableScheduledReports]
+  );
+
   const onCancelDestructiveAction = useCallback(
     () => unSetReportAndCloseDisableModal(),
     [unSetReportAndCloseDisableModal]
@@ -434,8 +461,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
             defaultMessage: 'Disable schedule',
           })}
           message={i18n.translate('xpack.reporting.schedules.table.disableSchedule.modalMessage', {
-            defaultMessage:
-              'Disabling this schedule will stop the generation of future exports. You will not be able to enable this schedule again.',
+            defaultMessage: 'Disabling this schedule will stop the generation of future exports.',
           })}
           onCancel={onCancelDestructiveAction}
           onConfirm={onDisableConfirm}

@@ -328,12 +328,6 @@ export class ScheduledReportsService {
         operation: 'enable',
       });
 
-      console.log('bulk enable 1', {
-        scheduledReportSavedObjectsToUpdate,
-        bulkErrors,
-        enabledScheduledReportIds,
-      });
-
       // nothing to update, return early
       if (scheduledReportSavedObjectsToUpdate.length > 0) {
         const bulkUpdateResult = await this._updateScheduledReportSavedObjectEnabledState({
@@ -366,9 +360,6 @@ export class ScheduledReportsService {
         };
       }
 
-      // it's possible that the scheduled_report saved object was disabled but
-      // task enabling failed so add the list of already enabled IDs
-      // task manager filters out enabled tasks so this will not cause extra load
       taskIdsToEnable = taskIdsToEnable.concat([...enabledScheduledReportIds]);
 
       return this._updateScheduledReportTaskEnabledState({
@@ -642,7 +633,6 @@ export class ScheduledReportsService {
     scheduledReportSavedObjectsToUpdate: Array<SavedObject<ScheduledReportType>>;
     shouldEnable: boolean;
   }): Promise<SavedObjectsBulkUpdateResponse<ScheduledReportType>> {
-    console.log('Updating SO', { shouldEnable });
     return await this.savedObjectsClient.bulkUpdate<ScheduledReportType>(
       scheduledReportSavedObjectsToUpdate.map((so) => ({
         id: so.id,
@@ -670,7 +660,6 @@ export class ScheduledReportsService {
     const username = this._getUsername(user);
     const updatedScheduledReportIds: Set<string> = new Set();
 
-    console.log('log for bulk op', { action, scheduledReportSavedObjects, user });
     for (const so of scheduledReportSavedObjects) {
       if (so.error) {
         errors.push({
@@ -696,11 +685,9 @@ export class ScheduledReportsService {
             error: new Error('Not found.'),
           });
         } else if (operation === 'disable' && so.attributes.enabled === false) {
-          console.log('log function', { so: so.attributes });
           this.logger.debug(`Scheduled report ${so.id} is already disabled`);
           updatedScheduledReportIds.add(so.id);
         } else if (operation === 'enable' && so.attributes.enabled === true) {
-          console.log('log function', { so: so.attributes });
           this.logger.debug(`Scheduled report ${so.id} is already enabled`);
           updatedScheduledReportIds.add(so.id);
         } else {
@@ -729,13 +716,8 @@ export class ScheduledReportsService {
     updatedScheduledReportIds: Set<string>;
   }) {
     const resultFromUpdatingTasks = shouldEnable
-      ? await this.taskManager.bulkEnable(taskIdsToUpdate)
+      ? await this.taskManager.bulkEnable(taskIdsToUpdate, false)
       : await this.taskManager.bulkDisable(taskIdsToUpdate);
-
-    console.log('updating task', {
-      shouldEnable,
-      ...resultFromUpdatingTasks,
-    });
 
     for (const error of resultFromUpdatingTasks.errors) {
       bulkErrors.push({
