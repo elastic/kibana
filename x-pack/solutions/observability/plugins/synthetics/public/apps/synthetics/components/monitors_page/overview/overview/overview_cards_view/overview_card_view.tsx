@@ -22,9 +22,12 @@ import { useOverviewTrendsRequests } from '../../../hooks/use_overview_trends_re
 
 const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
-const MIN_BATCH_SIZE = 20;
-const LIST_THRESHOLD = 12;
 const MIN_CARD_WIDTH = 400;
+
+// Minimum number of rows to fetch in a batch
+const MIN_BATCH_SIZE = 20;
+// When there are less than this number of rows remaining to be scrolled, fetch more
+const LIST_THRESHOLD = 12;
 
 interface ListItem {
   configId: string;
@@ -45,7 +48,6 @@ export const OverviewCardView = ({
   const trendData = useSelector(selectOverviewTrends);
   const { view } = useSelector(selectOverviewState);
   const [rowCount, setRowCount] = useState(5);
-  const [maxItem, setMaxItem] = useState(1);
   const [visibleIndices, setVisibleIndices] = useState<{
     visibleStartIndex: number;
     visibleEndIndex: number;
@@ -53,8 +55,8 @@ export const OverviewCardView = ({
 
   const monitorsToFetchTrendsFor = visibleIndices
     ? monitorsSortedByStatus.slice(
-        visibleIndices.visibleStartIndex,
-        Math.max(visibleIndices.visibleEndIndex * rowCount, MIN_BATCH_SIZE)
+        visibleIndices.visibleStartIndex * rowCount,
+        (visibleIndices.visibleEndIndex + 1) * rowCount
       )
     : [];
   useOverviewTrendsRequests(monitorsToFetchTrendsFor);
@@ -90,7 +92,9 @@ export const OverviewCardView = ({
                     listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
                   }
                   itemCount={listItems.length}
-                  loadMoreItems={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}
+                  loadMoreItems={(start, stop: number) =>
+                    setVisibleIndices({ visibleStartIndex: start, visibleEndIndex: stop })
+                  }
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}
                 >
@@ -104,13 +108,7 @@ export const OverviewCardView = ({
                         // pad computed height to avoid clipping last row's drop shadow
                         height={listHeight + 16}
                         width={width}
-                        onItemsRendered={(props) => {
-                          setVisibleIndices({
-                            visibleStartIndex: props.visibleStartIndex,
-                            visibleEndIndex: props.visibleStopIndex,
-                          });
-                          onItemsRendered(props);
-                        }}
+                        onItemsRendered={onItemsRendered}
                         itemSize={ITEM_HEIGHT}
                         itemCount={listItems.length}
                         itemData={listItems}

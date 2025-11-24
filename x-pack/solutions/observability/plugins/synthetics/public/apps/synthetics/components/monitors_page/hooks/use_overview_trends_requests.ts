@@ -13,7 +13,6 @@ import { selectOverviewTrends, trendStatsBatch } from '../../../state';
 
 export const useOverviewTrendsRequests = (monitorsToFetchTrendsFor: OverviewStatusMetaData[]) => {
   const dispatch = useDispatch();
-
   const trendData = useSelector(selectOverviewTrends);
 
   useEffect(() => {

@@ -65,10 +65,10 @@ describe('useOverviewTrendsRequests', () => {
   };
 
   it('should dispatch action for all visible monitors when trendData is empty', () => {
-    const monitorsSortedByStatus = [mockMonitor1, mockMonitor2, mockMonitor3, mockMonitor4];
+    const monitorsToFetchTrendsFor = [mockMonitor1, mockMonitor2, mockMonitor3, mockMonitor4];
     mockUseSelector.mockReturnValue({});
 
-    renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus, 2, 2), {
+    renderHook(() => useOverviewTrendsRequests(monitorsToFetchTrendsFor), {
       wrapper: createWrapper(),
     });
 
@@ -84,48 +84,16 @@ describe('useOverviewTrendsRequests', () => {
         ]),
       })
     );
-  });
-
-  it('should only request monitors within (maxItem + 1) range', () => {
-    const monitorsSortedByStatus = [
-      mockMonitor1,
-      mockMonitor2,
-
-      mockMonitor3,
-      mockMonitor4,
-
-      mockMonitor1,
-      mockMonitor2,
-    ];
-    mockUseSelector.mockReturnValue({});
-
-    renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus, 1, 2), {
-      wrapper: createWrapper(),
-    });
-
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'batchTrendStats',
-        payload: expect.arrayContaining([
-          { configId: 'monitor-1', locationId: 'us-east', schedule: '3' },
-          { configId: 'monitor-2', locationId: 'us-west', schedule: '5' },
-          { configId: 'monitor-3', locationId: 'eu-central', schedule: '10' },
-          { configId: 'monitor-4', locationId: 'us-east', schedule: '3' },
-        ]),
-      })
-    );
-    expect(mockDispatch.mock.calls[0][0].payload).toHaveLength(4);
   });
 
   it('should not request monitors that already have trendData', () => {
-    const monitorsSortedByStatus = [mockMonitor1, mockMonitor2, mockMonitor3];
+    const monitorsToFetchTrendsFor = [mockMonitor1, mockMonitor2, mockMonitor3];
     const existingTrendData = {
       'monitor-1us-east': { configId: 'monitor-1', locationId: 'us-east', data: [] },
     };
     mockUseSelector.mockReturnValue(existingTrendData);
 
-    renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus, 2, 2), {
+    renderHook(() => useOverviewTrendsRequests(monitorsToFetchTrendsFor), {
       wrapper: createWrapper(),
     });
 
@@ -143,13 +111,13 @@ describe('useOverviewTrendsRequests', () => {
   });
 
   it('should not request monitors that are in loading state', () => {
-    const monitorsSortedByStatus = [mockMonitor1, mockMonitor2, mockMonitor3];
+    const monitorsToFetchTrendsFor = [mockMonitor1, mockMonitor2, mockMonitor3];
     const existingTrendData = {
       'monitor-1us-east': 'loading',
     };
     mockUseSelector.mockReturnValue(existingTrendData);
 
-    renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus, 2, 2), {
+    renderHook(() => useOverviewTrendsRequests(monitorsToFetchTrendsFor), {
       wrapper: createWrapper(),
     });
 
@@ -166,14 +134,14 @@ describe('useOverviewTrendsRequests', () => {
   });
 
   it('should not dispatch action when all visible monitors have trendData', () => {
-    const monitorsSortedByStatus = [mockMonitor1, mockMonitor2];
+    const monitorsToFetchTrendsFor = [mockMonitor1, mockMonitor2];
     const existingTrendData = {
       'monitor-1us-east': { configId: 'monitor-1', locationId: 'us-east', data: [] },
       'monitor-2us-west': { configId: 'monitor-2', locationId: 'us-west', data: [] },
     };
     mockUseSelector.mockReturnValue(existingTrendData);
 
-    renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus, 2, 2), {
+    renderHook(() => useOverviewTrendsRequests(monitorsToFetchTrendsFor), {
       wrapper: createWrapper(),
     });
 
@@ -184,54 +152,10 @@ describe('useOverviewTrendsRequests', () => {
     const monitorsSortedByStatus: OverviewStatusMetaData[] = [];
     mockUseSelector.mockReturnValue({});
 
-    renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus, 0, 2), {
+    renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus), {
       wrapper: createWrapper(),
     });
 
     expect(mockDispatch).not.toHaveBeenCalled();
-  });
-
-  it('should respect rowCount when calculating visible monitors', () => {
-    const monitorsSortedByStatus = [
-      mockMonitor1,
-      mockMonitor2,
-      mockMonitor3,
-
-      mockMonitor4,
-      mockMonitor1,
-      mockMonitor2,
-
-      mockMonitor2,
-      mockMonitor3,
-      mockMonitor4,
-    ];
-    mockUseSelector.mockReturnValue({});
-
-    renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus, 1, 3), {
-      wrapper: createWrapper(),
-    });
-
-    expect(mockDispatch.mock.calls[0][0].payload).toHaveLength(6);
-  });
-
-  it('should handle maxItem of 0 by requesting only one batch', () => {
-    const monitorsSortedByStatus = [mockMonitor1, mockMonitor2];
-    mockUseSelector.mockReturnValue({});
-
-    renderHook(() => useOverviewTrendsRequests(monitorsSortedByStatus, 0, 2), {
-      wrapper: createWrapper(),
-    });
-
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'batchTrendStats',
-        payload: expect.arrayContaining([
-          { configId: 'monitor-1', locationId: 'us-east', schedule: '3' },
-          { configId: 'monitor-2', locationId: 'us-west', schedule: '5' },
-        ]),
-      })
-    );
-    expect(mockDispatch.mock.calls[0][0].payload).toHaveLength(2);
   });
 });
