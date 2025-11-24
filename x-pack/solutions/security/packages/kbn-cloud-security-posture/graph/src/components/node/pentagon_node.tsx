@@ -51,6 +51,8 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
     interactive,
     expandButtonClick,
     nodeClick,
+    ipClickHandler,
+    countryClickHandler,
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
@@ -140,6 +142,8 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
         label={label ? label : id}
         ips={ips}
         countryCodes={countryCodes}
+        onIpClick={ipClickHandler}
+        onCountryClick={countryClickHandler}
       />
     </NodeContainer>
   );

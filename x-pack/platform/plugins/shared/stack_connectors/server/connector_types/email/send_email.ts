@@ -7,6 +7,7 @@
 
 import axios from 'axios';
 // info on nodemailer: https://nodemailer.com/about/
+import type { SentMessageInfo } from 'nodemailer';
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
@@ -23,10 +24,10 @@ import type {
   ProxySettings,
 } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import type { Attachment } from '@kbn/connector-schemas/email';
 import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import type { Attachment } from '.';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -167,6 +168,8 @@ export async function sendEmailWithExchange(
   );
 }
 
+export type SentMessageInfoResult = SentMessageInfo & { message?: unknown };
+
 // send an email using nodemailer
 async function sendEmailWithNodemailer(
   logger: Logger,
@@ -198,7 +201,7 @@ async function sendEmailWithNodemailer(
   const transportConfig = getTransportConfig(configurationUtilities, logger, transport, hasAuth);
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
   connectorUsageCollector.addRequestBodyBytes(undefined, email);
-  const result = await nodemailerTransport.sendMail(email);
+  const result: SentMessageInfoResult = await nodemailerTransport.sendMail(email);
 
   if (service === JSON_TRANSPORT_SERVICE) {
     try {

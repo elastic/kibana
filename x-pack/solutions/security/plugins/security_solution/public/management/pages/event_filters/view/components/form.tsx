@@ -43,14 +43,13 @@ import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
-  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY,
-  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT,
+  PROCESS_DESCENDANT_EXTRA_ENTRY,
+  PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
-import { isFilterProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   eventsIndexPattern,
@@ -80,7 +79,7 @@ import { ExceptionItemComments } from '../../../../../detection_engine/rule_exce
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
-import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -103,16 +102,12 @@ const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   },
 ];
 
-const cleanupEntries = (
-  item: ArtifactFormComponentProps['item']
-): ArtifactFormComponentProps['item']['entries'] => {
-  return item.entries.map(
+const cleanupEntries = (item: ArtifactFormComponentProps['item']) =>
+  item.entries.forEach(
     (e: ArtifactFormComponentProps['item']['entries'][number] & { id?: string }) => {
       delete e.id;
-      return e;
     }
   );
-};
 
 export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
   memo(({ allowSelectOs = true, item: exception, onChange, mode, error: submitError }) => {
@@ -151,12 +146,8 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const { getTagsUpdatedBy } = useGetUpdatedTags(exception);
     const euiTheme = useEuiTheme();
 
-    const isFilterProcessDescendantsFeatureEnabled = useIsExperimentalFeatureEnabled(
-      'filterProcessDescendantsForEventFiltersEnabled'
-    );
-
     const isFilterProcessDescendantsSelected = useMemo(
-      () => isFilterProcessDescendantsEnabled(exception),
+      () => isProcessDescendantsEnabled(exception),
       [exception]
     );
 
@@ -177,9 +168,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         !hasNameError &&
         !hasCommentError &&
         !!exception.entries.length &&
-        (exception.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
-          (e) => e.value !== '' || e.value.length
-        )
+        (exception.entries as ExceptionEntries).some((e) => e.value !== '' || e.value.length)
       );
     }, [hasCommentError, hasNameError, exception.entries]);
 
@@ -220,8 +209,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         ? (exception.entries as ExceptionListItemSchema['entries'])
         : defaultConditionEntry();
 
-      // TODO: `id` gets added to the exception.entries item
-      // Is there a simpler way to this?
       cleanupEntries(ef);
 
       setAreConditionsValid(!!exception.entries.length);
@@ -320,10 +307,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             fullWidth
             valueOfSelected={selectedOs}
             onChange={handleOnOsChange}
+            data-test-subj={getTestId('os-select')}
           />
         </EuiFormRow>
       ),
-      [handleOnOsChange, selectedOs]
+      [getTestId, handleOnOsChange, selectedOs]
     );
 
     // comments and handler
@@ -449,8 +437,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     }, [getTestId, isFilterProcessDescendantsSelected]);
 
     const filterTypeSubsection = useMemo(() => {
-      if (!isFilterProcessDescendantsFeatureEnabled) return null;
-
       return (
         <>
           <EuiButtonGroup
@@ -480,14 +466,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                   defaultMessage="Additional condition added:"
                 />
               </EuiText>
-              <code>{PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT}</code>
+              <code>{PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT}</code>
               <EuiSpacer size="m" />
             </>
           )}
         </>
       );
     }, [
-      isFilterProcessDescendantsFeatureEnabled,
       handleFilterTypeOnChange,
       euiTheme.euiTheme.size.l,
       filterTypeOptions,
@@ -505,8 +490,8 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         if (isCalledWithoutChanges) {
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
 
-          if (isFilterProcessDescendantsFeatureEnabled && isFilterProcessDescendantsSelected) {
-            addedFields.push(PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.field);
+          if (isFilterProcessDescendantsSelected) {
+            addedFields.push(PROCESS_DESCENDANT_EXTRA_ENTRY.field);
           }
 
           setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
@@ -543,13 +528,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         processChanged(updatedItem);
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [
-        exception,
-        hasFormChanged,
-        isFilterProcessDescendantsFeatureEnabled,
-        isFilterProcessDescendantsSelected,
-        processChanged,
-      ]
+      [exception, hasFormChanged, isFilterProcessDescendantsSelected, processChanged]
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>
@@ -669,6 +648,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         <EuiHorizontalRule />
         {criteriaSection}
         {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+        {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
         {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
         {hasDuplicateFields && (
           <>

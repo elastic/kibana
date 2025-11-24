@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
       scheduledReportIds.push(reportId);
 
       // report created by reporting user, reporting user should be able to disable
-      const res = await reportingAPI.disableScheduledReports(
+      const res = await reportingAPI.disableReportSchedules(
         [reportId],
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD
@@ -80,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
       scheduledReportIds.push(reportId);
 
       // report created by manage reporting user, reporting user should not be able to disable
-      const res = await reportingAPI.disableScheduledReports(
+      const res = await reportingAPI.disableReportSchedules(
         [reportId],
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD
@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
       scheduledReportIds.push(report2Id);
 
       // manage reporting user should be able to disable their own report and reporting user report
-      const res = await reportingAPI.disableScheduledReports(
+      const res = await reportingAPI.disableReportSchedules(
         [report1Id, report2Id],
         reportingAPI.MANAGE_REPORTING_USER_USERNAME,
         reportingAPI.MANAGE_REPORTING_USER_PASSWORD

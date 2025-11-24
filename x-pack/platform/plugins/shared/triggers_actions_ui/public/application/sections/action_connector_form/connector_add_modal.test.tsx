@@ -14,6 +14,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -27,16 +28,13 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('connector_add_modal', () => {
   let appMockRenderer: AppMockRenderer;
-  const actionType: ActionType = {
+  const actionType: ActionType = createMockConnectorType({
     id: 'my-action-type',
     name: 'test',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
-    isSystemActionType: false,
-  };
+  });
+
   beforeAll(async () => {
     appMockRenderer = createAppMockRenderer();
     const mockes = coreMock.createSetup();
@@ -88,6 +86,7 @@ describe('connector_add_modal', () => {
       enabled: false,
       enabledInConfig: false,
       enabledInLicense: true,
+      isDeprecated: false,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
@@ -142,6 +141,7 @@ describe('connector_add_modal', () => {
       });
       actionTypeRegistry.get.mockReturnValue(actionTypeModel);
       actionTypeRegistry.has.mockReturnValue(true);
+
       appMockRenderer.render(
         <ConnectorAddModal
           onClose={() => {}}

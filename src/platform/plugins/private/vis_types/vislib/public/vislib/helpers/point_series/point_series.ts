@@ -10,7 +10,7 @@
 import type { Duration } from 'moment';
 
 import type { Dimension, Dimensions } from '@kbn/vis-type-xy-plugin/public';
-import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
+import type { DateHistogramParams, HistogramParams } from '@kbn/chart-expressions-common';
 
 import { getSeries } from './_get_series';
 import { getAspects } from './_get_aspects';

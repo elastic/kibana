@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import type { ESQLPolicy, ISuggestionItem } from '../../types';
 import { getSafeInsertText } from '../../../definitions/utils/autocomplete/helpers';
 
@@ -68,7 +68,10 @@ export enum Position {
   WITH_AFTER_COMPLETE_CLAUSE = 'with_after_complete_clause',
 }
 
-export const getPosition = (innerText: string, command: ESQLCommand): Position | undefined => {
+export const getPosition = (
+  innerText: string,
+  command: ESQLAstAllCommands
+): Position | undefined => {
   if (command.args.length < 2) {
     if (innerText.match(/_[^:\s]*$/)) {
       return Position.MODE;

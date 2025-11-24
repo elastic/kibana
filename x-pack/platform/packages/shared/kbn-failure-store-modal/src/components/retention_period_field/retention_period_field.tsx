@@ -32,7 +32,7 @@ export const RetentionPeriodField: FunctionComponent<{ disabled: boolean }> = ({
           'data-test-subj': `selectFailureStorePeriodValue`,
           min: 1,
           append: (
-            <UseField key={'retentionPeriodUnit'} path={'retentionPeriodUnit'}>
+            <UseField key={'retentionPeriodUnit'} path={'retentionPeriodUnit'} fullWidth>
               {(field) => {
                 const onSelect = (option: string) => {
                   field.setValue(option);

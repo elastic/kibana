@@ -24,8 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         { skipBrowserRefresh: true }
       );
       await dashboard.navigateToApp();
-      await dashboard.gotoDashboardEditMode('filter by map extent dashboard');
-      await header.waitUntilLoadingHasFinished();
+      await dashboard.loadDashboardInEditMode('filter by map extent dashboard');
       await dashboard.waitForRenderComplete();
     });
 

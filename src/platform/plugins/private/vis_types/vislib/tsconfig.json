@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -41,6 +41,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
+    "@kbn/chart-expressions-common",
+    "@kbn/visualizations-common",
   ],
   "exclude": [
     "target/**/*",

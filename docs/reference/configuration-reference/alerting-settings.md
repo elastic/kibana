@@ -151,6 +151,9 @@ $$$action-config-email-domain-allowlist$$$
 
     Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
 
+`xpack.actions.email.maximum_body_length` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3`
+:    The maximum length of an email body in bytes.  Values longer than this length will be truncated.  The default is 25MB, the maximum is 25MB.
+
 `xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
 :    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 
@@ -507,7 +510,8 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 :   The default model to use for requests, which varies by connector:
 
     * For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models.
-       * {applies_to}`serverless: ga` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
+       * {applies_to}`serverless: ga` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
+       * {applies_to}`stack: ga 9.2` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
        * {applies_to}`stack: ga 9.1` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
        * {applies_to}`stack: ga 9.0` Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
     * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. 

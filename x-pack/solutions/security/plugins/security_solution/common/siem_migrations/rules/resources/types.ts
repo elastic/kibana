@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SiemMigrationResourceBase, SiemMigrationResourceData } from '../../model/common.gen';
+import type {
+  SiemMigrationResourceBase,
+  SiemMigrationResourceData,
+  SiemMigrationVendor,
+} from '../../model/common.gen';
 
 import type { OriginalRule } from '../../model/rule_migration.gen';
 
@@ -15,3 +19,13 @@ export interface ResourceIdentifiers {
   fromOriginalRule: (originalRule: OriginalRule) => SiemMigrationResourceBase[];
   fromResource: (resource: SiemMigrationResourceData) => SiemMigrationResourceBase[];
 }
+
+const RESOURCE_IDENT_SUPPORTED_VENDORS = ['splunk'] as const;
+
+export type ResourceSupportedVendor = (typeof RESOURCE_IDENT_SUPPORTED_VENDORS)[number];
+
+export const isResourceSupportedVendor = (
+  vendor: SiemMigrationVendor
+): vendor is ResourceSupportedVendor => {
+  return RESOURCE_IDENT_SUPPORTED_VENDORS.includes(vendor as ResourceSupportedVendor);
+};

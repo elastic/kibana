@@ -54,7 +54,7 @@ describe('retry', () => {
       { retryAttempts: 3, retryDelayMs: 100 }
     );
     // Would expect it to take 200ms but seems like timing inaccuracies
-    // sometimes causes the duration to be measured as 199ms
-    expect(Date.now() - now).toBeGreaterThanOrEqual(199);
+    // sometimes causes the duration to be measured as 198 or 199ms
+    expect(Date.now() - now).toBeGreaterThanOrEqual(195);
   });
 });

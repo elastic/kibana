@@ -80,8 +80,7 @@ export default {
       <div
         style={{
           padding: 40,
-          backgroundColor:
-            globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark' ? '#1D1E24' : '#FFF',
+          backgroundColor: globals.euiTheme === 'borealis.dark' ? '#0B1628' : '#FFF',
         }}
       >
         {storyFn()}

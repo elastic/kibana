@@ -59,6 +59,10 @@ When extending functionality:
 
 **✅ Create solution-specific services** only for Observability-unique functionality
 
+## Tests with custom roles
+
+Follow the [guide on writing tests with custom roles](../../../platform/test/serverless/README.md#testing-with-custom-roles). This includes details for both UI testing and api testing.
+
 ## Test Organization
 
 ### API Integration Tests

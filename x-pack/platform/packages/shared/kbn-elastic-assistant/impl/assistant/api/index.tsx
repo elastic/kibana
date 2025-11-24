@@ -68,7 +68,6 @@ export const fetchConnectorExecuteAction = async ({
   });
 
   const requestBody = {
-    model: apiConfig?.model,
     message,
     subAction: isStream ? 'invokeStream' : 'invokeAI',
     conversationId,

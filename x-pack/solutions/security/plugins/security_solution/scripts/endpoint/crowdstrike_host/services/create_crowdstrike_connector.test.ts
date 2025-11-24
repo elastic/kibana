@@ -10,7 +10,8 @@ import { createToolingLogger } from '../../../../common/endpoint/data_loaders/ut
 import { createCrowdStrikeConnectorIfNeeded } from './create_crowdstrike_connector';
 import * as connectorsServices from '../../common/connectors_services';
 import * as spaces from '../../common/spaces';
-import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import { CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID } from '@kbn/connector-schemas/crowdstrike/constants';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../../common/connectors_services');
 jest.mock('../../common/spaces');
@@ -67,14 +68,11 @@ describe('createCrowdStrikeConnectorIfNeeded', () => {
 
   it('should create new connector if none exists', async () => {
     mockedConnectorsServices.fetchConnectorByType.mockResolvedValue(undefined);
-    const newConnector = {
+    const newConnector = createMockConnector({
       id: 'new-connector',
       actionTypeId: 'crowdstrike',
       name: 'test-connector',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
     mockedConnectorsServices.createConnector.mockResolvedValue(newConnector);
 
     await createCrowdStrikeConnectorIfNeeded({
@@ -100,14 +98,11 @@ describe('createCrowdStrikeConnectorIfNeeded', () => {
 
   it('should use custom name when provided', async () => {
     mockedConnectorsServices.fetchConnectorByType.mockResolvedValue(undefined);
-    const newConnector = {
+    const newConnector = createMockConnector({
       id: 'new-connector',
       actionTypeId: 'crowdstrike',
       name: 'test-connector',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
     mockedConnectorsServices.createConnector.mockResolvedValue(newConnector);
 
     await createCrowdStrikeConnectorIfNeeded({

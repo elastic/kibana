@@ -35,7 +35,7 @@ const mockUseMutationObserver = useMutationObserver as jest.MockedFunction<
 describe('useMetricsGridFullScreen', () => {
   beforeEach(() => {
     mockUseEuiTheme.mockReturnValue({
-      euiTheme: { levels: { header: 1000 } },
+      euiTheme: { levels: { header: 1000 }, colors: { backgroundBasePlain: '#000' } },
       colorMode: 'LIGHT',
       highContrastMode: false,
       modifications: undefined,
@@ -59,7 +59,7 @@ describe('useMetricsGridFullScreen', () => {
   });
 
   it('calls useMutationObserver with correct parameters two times', () => {
-    renderHook(() => useMetricsGridFullScreen());
+    renderHook(() => useMetricsGridFullScreen({ prefix: 'test-metrics-grid-id' }));
 
     expect(mockUseMutationObserver).toHaveBeenCalledTimes(2);
     expect(mockUseMutationObserver).toHaveBeenNthCalledWith(1, null, expect.any(Function), {

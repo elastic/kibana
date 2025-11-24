@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
-import { createToolCallMessage } from '../../../onechat_api_integration/utils/llm_proxy/mocks';
+import { setupAgentDirectAnswer } from '../../../onechat_api_integration/utils/proxy_scenario';
 import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
@@ -59,16 +59,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
       // Now set up the LLM proxy to work correctly for the retry
-      void llmProxy.interceptors.toolChoice({
-        name: 'set_title',
-        response: createToolCallMessage('set_title', { title: MOCKED_TITLE }),
-      });
-
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = messages[messages.length - 1]?.content as string;
-          return lastMessage?.includes(MOCKED_INPUT);
-        },
+      await setupAgentDirectAnswer({
+        proxy: llmProxy,
+        title: MOCKED_TITLE,
         response: MOCKED_RESPONSE,
       });
 
@@ -118,16 +111,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('agentBuilderWelcomePage');
       });
 
-      void llmProxy.interceptors.toolChoice({
-        name: 'set_title',
-        response: createToolCallMessage('set_title', { title: MOCKED_TITLE }),
-      });
-
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = messages[messages.length - 1]?.content as string;
-          return lastMessage?.includes(MOCKED_INPUT);
-        },
+      await setupAgentDirectAnswer({
+        proxy: llmProxy,
+        title: MOCKED_TITLE,
         response: MOCKED_RESPONSE,
       });
 
@@ -208,16 +194,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
       // Now set up interceptors for the new message
-      void llmProxy.interceptors.toolChoice({
-        name: 'set_title',
-        response: createToolCallMessage('set_title', { title: MOCKED_TITLE }),
-      });
-
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = messages[messages.length - 1]?.content as string;
-          return lastMessage?.includes(NEW_INPUT);
-        },
+      await setupAgentDirectAnswer({
+        proxy: llmProxy,
+        title: MOCKED_TITLE,
         response: NEW_RESPONSE,
       });
 

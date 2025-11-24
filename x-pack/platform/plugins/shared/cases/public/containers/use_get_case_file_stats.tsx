@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { Owner } from '../../common/constants/types';
 import type { ServerError } from '../types';

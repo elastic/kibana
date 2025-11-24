@@ -142,9 +142,9 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
 
   describe('and access level is not deny_all', () => {
     it.each<[DeviceControlAccessLevel, string]>([
-      ['audit', 'Allow all'],
+      ['audit', 'Allow read, write and execute'],
       ['read_only', 'Read only'],
-      ['no_execute', 'Block execute'],
+      ['no_execute', 'Read and write'],
     ])('should NOT render when access level is %s (%s)', (accessLevel) => {
       formProps.policy.windows.device_control!.usb_storage = accessLevel;
       formProps.policy.mac.device_control!.usb_storage = accessLevel;

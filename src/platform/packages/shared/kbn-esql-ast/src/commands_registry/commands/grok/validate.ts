@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getMessageFromId } from '../../../definitions/utils/errors';
-import type { ESQLAst, ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLColumn, ESQLAstAllCommands, ESQLMessage } from '../../../types';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
 import type { FieldType } from '../../../definitions/types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks

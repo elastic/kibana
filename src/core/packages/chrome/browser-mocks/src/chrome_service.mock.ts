@@ -22,7 +22,7 @@ const createStartContractMock = () => {
     getHeaderBanner: jest.fn(),
     getProjectAppMenuComponent: jest.fn(),
     getProjectHeaderComponentForGridLayout: jest.fn(),
-    getProjectSideNavV2ComponentForGridLayout: jest.fn(),
+    getProjectSideNavComponentForGridLayout: jest.fn(),
     navLinks: lazyObject({
       getNavLinks$: jest.fn(),
       has: jest.fn(),
@@ -61,8 +61,6 @@ const createStartContractMock = () => {
     sideNav: lazyObject({
       getIsCollapsed$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
       setIsCollapsed: jest.fn(),
-      getPanelSelectedNode$: jest.fn(),
-      setPanelSelectedNode: jest.fn(),
       getIsFeedbackBtnVisible$: jest.fn(),
       setIsFeedbackBtnVisible: jest.fn(),
     }),
@@ -80,13 +78,14 @@ const createStartContractMock = () => {
     setHeaderBanner: jest.fn(),
     hasHeaderBanner$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
     getBodyClasses$: jest.fn().mockReturnValue(new BehaviorSubject([])),
-    getChromeStyle$: jest.fn(),
+    getChromeStyle$: jest.fn().mockReturnValue(new BehaviorSubject('classic')),
     setChromeStyle: jest.fn(),
     getActiveSolutionNavId$: jest.fn(),
     project: lazyObject({
       setHome: jest.fn(),
       setCloudUrls: jest.fn(),
-      setProjectName: jest.fn(),
+      setKibanaName: jest.fn(),
+      setFeedbackUrlParams: jest.fn(),
       initNavigation: jest.fn(),
       setBreadcrumbs: jest.fn(),
       getBreadcrumbs$: jest.fn(),
@@ -96,6 +95,8 @@ const createStartContractMock = () => {
       updateSolutionNavigations: jest.fn(),
       navigationTourManager: {} as any,
     }),
+    setGlobalFooter: jest.fn(),
+    getGlobalFooter$: jest.fn(),
   });
 
   return startContract;

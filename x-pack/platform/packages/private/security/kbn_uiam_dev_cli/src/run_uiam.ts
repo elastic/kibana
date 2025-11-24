@@ -21,7 +21,7 @@ const ENV_DEFAULTS = {
   UIAM_COSMOS_DB_GATEWAY_PORT: '8081',
   UIAM_COSMOS_DB_UI_PORT: '8082',
   // Taken from GitOps version file for UIAM service (dev env, services/uiam/versions.yaml)
-  UIAM_GIT_REVISION: 'git-94c836e9f861',
+  UIAM_GIT_REVISION: 'git-fb324ba1e88f',
   UIAM_LOGGING_LEVEL: 'INFO',
 };
 
@@ -68,6 +68,7 @@ export async function runUiam({ log, signal }: { log: ToolingLog; signal: AbortS
 
 async function createDockerComposeFile({ env }: { env: typeof ENV_DEFAULTS }) {
   const entrypointScriptPath = path.join(__dirname, '..', 'scripts', 'run_java_with_custom_ca.sh');
+  const initScriptPath = path.join(__dirname, '..', 'scripts', 'init_cosmosdb.sh');
   const dockerComposeContent = `
 networks:
  default:
@@ -85,7 +86,7 @@ services:
     environment:
       - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1
       - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=false
-      - LOG_LEVEL=${env.UIAM_LOGGING_LEVEL.toLowerCase()}
+      - LOG_LEVEL=error
     healthcheck:
       test: ["CMD", "curl", "-sk", "https://127.0.0.1:8081/_explorer/healthcheck"]
       interval: 10s
@@ -93,12 +94,25 @@ services:
       retries: 30
       start_period: 20s
 
+  uiam-cosmosdb-init:
+    image: alpine:latest
+    network_mode: "service:uiam-cosmosdb-gateway"
+    depends_on:
+      uiam-cosmosdb-gateway:
+        condition: service_healthy
+    volumes:
+      - ${initScriptPath}:/init_cosmosdb.sh:ro
+    entrypoint: ["/bin/sh", "-c", "apk add --no-cache curl openssl && /bin/sh /init_cosmosdb.sh https://127.0.0.1:${env.UIAM_COSMOS_DB_GATEWAY_PORT}"]
+    restart: "no"
+
   uiam:
     image: docker.elastic.co/cloud-ci/uiam:${env.UIAM_GIT_REVISION}
     network_mode: "service:uiam-cosmosdb-gateway"
     depends_on:
       uiam-cosmosdb-gateway:
         condition: service_healthy
+      uiam-cosmosdb-init:
+        condition: service_completed_successfully
     volumes:
       - ${entrypointScriptPath}:/opt/jboss/container/java/run/run-java-with-custom-ca.sh
     entrypoint: /opt/jboss/container/java/run/run-java-with-custom-ca.sh

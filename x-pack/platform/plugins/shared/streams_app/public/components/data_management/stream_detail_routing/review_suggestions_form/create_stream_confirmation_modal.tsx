@@ -84,7 +84,11 @@ export function CreateStreamConfirmationModal({
             forkStream({
               destination: partition.name,
               where: partition.condition,
-            }).then(() => onSuccess())
+            }).then((result) => {
+              if (result.success) {
+                onSuccess();
+              }
+            })
           }
           fill
         >

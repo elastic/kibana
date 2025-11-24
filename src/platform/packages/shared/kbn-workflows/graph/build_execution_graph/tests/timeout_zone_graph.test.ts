@@ -132,6 +132,55 @@ describe('convertToWorkflowGraph', () => {
         'exitTimeoutZone_workflow_level_timeout',
       ]);
     });
+
+    it('should use default workflow level timeout when not specified explicitly in workflow', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'testAtomicStep1',
+            type: 'slack',
+            connectorId: 'slack',
+            with: {
+              message: 'Hello from atomic step 1',
+            },
+          } as ConnectorStep,
+        ],
+      } as Partial<WorkflowYaml>;
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml, {
+        timeout: '10m',
+      });
+      expect(executionGraph.node('enterTimeoutZone_workflow_level_timeout')).toEqual(
+        expect.objectContaining({
+          timeout: '10m',
+        })
+      );
+    });
+
+    it('should use timeout from explicitly specified timeout in workflow', () => {
+      const workflowDefinition = {
+        settings: {
+          timeout: '5m',
+        },
+        steps: [
+          {
+            name: 'testAtomicStep1',
+            type: 'slack',
+            connectorId: 'slack',
+            with: {
+              message: 'Hello from atomic step 1',
+            },
+          } as ConnectorStep,
+        ],
+      } as Partial<WorkflowYaml>;
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml, {
+        timeout: '10m',
+      });
+      expect(executionGraph.node('enterTimeoutZone_workflow_level_timeout')).toEqual(
+        expect.objectContaining({
+          timeout: '5m',
+        })
+      );
+    });
   });
 
   describe('steps with timeout and step level flow-control', () => {

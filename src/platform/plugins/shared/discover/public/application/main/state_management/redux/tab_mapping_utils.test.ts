@@ -31,7 +31,7 @@ const tab1 = getTabStateMock({
     timeRange: { from: 'now-7d', to: 'now' },
     refreshInterval: { pause: true, value: 500 },
   },
-  initialAppState: { columns: ['column1'] },
+  appState: { columns: ['column1'] },
 });
 const tab2 = getTabStateMock({
   id: '2',
@@ -44,7 +44,7 @@ const tab2 = getTabStateMock({
     timeRange: { from: 'now-15m', to: 'now' },
     refreshInterval: { pause: false, value: 1000 },
   },
-  initialAppState: { columns: ['column2'] },
+  appState: { columns: ['column2'] },
 });
 
 describe('tab mapping utils', () => {
@@ -56,6 +56,28 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "appState": Object {
+            "breakdownField": undefined,
+            "columns": Array [
+              "column2",
+            ],
+            "dataSource": Object {
+              "dataViewId": "test-data-view-2",
+              "type": "dataView",
+            },
+            "density": undefined,
+            "filters": undefined,
+            "grid": Object {},
+            "headerRowHeight": undefined,
+            "hideAggregatedPreview": undefined,
+            "hideChart": false,
+            "query": undefined,
+            "rowHeight": undefined,
+            "rowsPerPage": undefined,
+            "sampleSize": undefined,
+            "sort": Array [],
+            "viewMode": undefined,
+          },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -77,7 +99,40 @@ describe('tab mapping utils', () => {
             },
           },
           "id": "2",
-          "initialAppState": Object {
+          "initialInternalState": Object {
+            "controlGroupJson": undefined,
+            "serializedSearchSource": Object {
+              "index": "test-data-view-2",
+            },
+            "visContext": Object {
+              "bar": "foo",
+            },
+          },
+          "isDataViewLoading": false,
+          "label": "Tab 2",
+          "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
+          "resetDefaultProfileState": Object {
+            "breakdownField": false,
+            "columns": false,
+            "hideChart": false,
+            "resetId": "",
+            "rowHeight": false,
+          },
+          "uiState": Object {},
+        }
+      `);
+      tabState = fromSavedObjectTabToTabState({
+        tab: fromTabStateToSavedObjectTab({ tab: tab2, timeRestore: true, services }),
+        existingTab: tab1,
+      });
+      expect(tabState).toMatchInlineSnapshot(`
+        Object {
+          "appState": Object {
             "breakdownField": undefined,
             "columns": Array [
               "column2",
@@ -99,34 +154,6 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
-          "initialInternalState": Object {
-            "controlGroupJson": undefined,
-            "serializedSearchSource": Object {
-              "index": "test-data-view-2",
-            },
-            "visContext": Object {
-              "bar": "foo",
-            },
-          },
-          "isDataViewLoading": false,
-          "label": "Tab 2",
-          "overriddenVisContextAfterInvalidation": undefined,
-          "resetDefaultProfileState": Object {
-            "breakdownField": false,
-            "columns": false,
-            "hideChart": false,
-            "resetId": "",
-            "rowHeight": false,
-          },
-          "uiState": Object {},
-        }
-      `);
-      tabState = fromSavedObjectTabToTabState({
-        tab: fromTabStateToSavedObjectTab({ tab: tab2, timeRestore: true, services }),
-        existingTab: tab1,
-      });
-      expect(tabState).toMatchInlineSnapshot(`
-        Object {
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -148,28 +175,6 @@ describe('tab mapping utils', () => {
             },
           },
           "id": "2",
-          "initialAppState": Object {
-            "breakdownField": undefined,
-            "columns": Array [
-              "column2",
-            ],
-            "dataSource": Object {
-              "dataViewId": "test-data-view-2",
-              "type": "dataView",
-            },
-            "density": undefined,
-            "filters": undefined,
-            "grid": Object {},
-            "headerRowHeight": undefined,
-            "hideAggregatedPreview": undefined,
-            "hideChart": false,
-            "query": undefined,
-            "rowHeight": undefined,
-            "rowsPerPage": undefined,
-            "sampleSize": undefined,
-            "sort": Array [],
-            "viewMode": undefined,
-          },
           "initialInternalState": Object {
             "controlGroupJson": undefined,
             "serializedSearchSource": Object {
@@ -182,6 +187,11 @@ describe('tab mapping utils', () => {
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,

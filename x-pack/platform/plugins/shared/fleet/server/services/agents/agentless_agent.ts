@@ -10,6 +10,8 @@ import https from 'https';
 import type { ElasticsearchClient, LogMeta, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
+import pRetry, { type FailedAttemptError } from 'p-retry';
+import { pick } from 'lodash';
 
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
@@ -33,9 +35,9 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-  DEFAULT_OUTPUT_ID,
+  ECH_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
-  DEFAULT_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
 } from '../../constants';
 
@@ -70,12 +72,12 @@ class AgentlessAgentService {
     const outputId = isServerless
       ? SERVERLESS_DEFAULT_OUTPUT_ID
       : isCloud
-      ? DEFAULT_OUTPUT_ID
+      ? ECH_AGENTLESS_OUTPUT_ID
       : undefined;
     const fleetServerId = isServerless
       ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
       : isCloud
-      ? DEFAULT_FLEET_SERVER_HOST_ID
+      ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
       : undefined;
 
     return {
@@ -122,8 +124,7 @@ class AgentlessAgentService {
 
     const { fleetUrl, fleetToken } = await this.getFleetUrlAndTokenForAgentlessAgent(
       esClient,
-      agentlessAgentPolicy,
-      soClient
+      agentlessAgentPolicy
     );
 
     logger.debug(
@@ -179,20 +180,33 @@ class AgentlessAgentService {
       `[Agentless API] Creating agentless agent with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios<AgentlessApiDeploymentResponse>(requestConfig).catch(
-      (error: Error | AxiosError) => {
-        this.catchAgentlessApiError(
-          'create',
-          error,
-          logger,
-          agentlessAgentPolicy.id,
-          requestConfig,
-          requestConfigDebugStatus,
-          errorMetadata,
-          traceId
-        );
-      }
-    );
+    const response = await pRetry(() => axios<AgentlessApiDeploymentResponse>(requestConfig), {
+      retries: MAXIMUM_RETRIES,
+      minTimeout: 0,
+      maxTimeout: 100,
+      onFailedAttempt: (error: FailedAttemptError) => {
+        if (!this.isErrorRetryable(error as unknown as AxiosError)) {
+          throw error;
+        }
+        if (error.retriesLeft > 0) {
+          logger.warn(
+            `[Agentless API] Retrying creating agentless agent ${agentlessAgentPolicy.id}`,
+            { error }
+          );
+        }
+      },
+    }).catch((error: Error | AxiosError) => {
+      this.catchAgentlessApiError(
+        'create',
+        error,
+        logger,
+        agentlessAgentPolicy.id,
+        requestConfig,
+        requestConfigDebugStatus,
+        errorMetadata,
+        traceId
+      );
+    });
 
     logger.debug(`[Agentless API] Created an agentless agent ${response}`);
     return response;
@@ -397,8 +411,7 @@ class AgentlessAgentService {
 
   private async getFleetUrlAndTokenForAgentlessAgent(
     esClient: ElasticsearchClient,
-    policy: AgentPolicy,
-    soClient: SavedObjectsClientContract
+    policy: AgentPolicy
   ) {
     const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
       perPage: SO_SEARCH_LIMIT,
@@ -417,7 +430,7 @@ class AgentlessAgentService {
     let defaultFleetHost: FleetServerHost;
 
     try {
-      defaultFleetHost = await fleetServerHostService.get(soClient, policy.fleet_server_host_id);
+      defaultFleetHost = await fleetServerHostService.get(policy.fleet_server_host_id);
     } catch (e) {
       throw new AgentlessAgentConfigError('missing default Fleet server host');
     }
@@ -431,7 +444,15 @@ class AgentlessAgentService {
     return JSON.stringify({
       ...requestConfig,
       data: {
-        ...requestConfig.data,
+        ...pick(
+          requestConfig.data,
+          'policy_id',
+          'fleet_url',
+          'labels',
+          'resources',
+          'cloud_connectors'
+        ),
+        agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',
       },
       httpsAgent: {
@@ -461,7 +482,6 @@ class AgentlessAgentService {
       http: {
         request: {
           id: traceId,
-          body: requestConfig.data,
         },
       },
     };
@@ -547,7 +567,7 @@ class AgentlessAgentService {
   ) {
     logger.error(
       `${logMessage} ${JSON.stringify(response.status)} ${JSON.stringify(
-        response.data
+        pick(response.data ?? {}, 'code', 'error')
       )}} ${requestConfigDebugStatus}`,
       {
         ...errorMetadataWithRequestConfig,
@@ -555,7 +575,6 @@ class AgentlessAgentService {
           ...errorMetadataWithRequestConfig.http,
           response: {
             status_code: response?.status,
-            body: response?.data,
           },
         },
       }
@@ -739,6 +758,13 @@ class AgentlessAgentService {
     };
   }
 
+  private isErrorRetryable = (error: AxiosError): boolean => {
+    const hasRetryableStatusError = this.hasRetryableStatusError(error, RETRYABLE_HTTP_STATUSES);
+    const hasRetryableCodeError = this.hasRetryableCodeError(error, RETRYABLE_SERVER_CODES);
+
+    return hasRetryableStatusError || hasRetryableCodeError;
+  };
+
   private handleErrorsWithRetries = async (
     error: AxiosError,
     requestConfig: AxiosRequestConfig,
@@ -750,10 +776,7 @@ class AgentlessAgentService {
     errorMetadata: any,
     traceId?: string
   ) => {
-    const hasRetryableStatusError = this.hasRetryableStatusError(error, RETRYABLE_HTTP_STATUSES);
-    const hasRetryableCodeError = this.hasRetryableCodeError(error, RETRYABLE_SERVER_CODES);
-
-    if (hasRetryableStatusError || hasRetryableCodeError) {
+    if (this.isErrorRetryable(error)) {
       await this.retry(
         async () => await axios(requestConfig),
         action,

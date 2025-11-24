@@ -18,7 +18,10 @@ export type ESQLAstCommand =
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
   | ESQLAstCompletionCommand
-  | ESQLAstFuseCommand;
+  | ESQLAstFuseCommand
+  | ESQLAstForkCommand;
+
+export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -32,6 +35,7 @@ export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
+  | ESQLParens
   | ESQLColumn
   | ESQLDatePeriodLiteral
   | ESQLTimeDurationLiteral
@@ -139,6 +143,10 @@ export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   fields: ESQLAstField[];
   targetField?: ESQLColumn;
   inferenceId: ESQLLiteral | undefined;
+}
+
+export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
+  args: ESQLForkParens[];
 }
 
 /**
@@ -370,6 +378,22 @@ export interface ESQLSource extends ESQLAstBaseItem {
   selector?: ESQLStringLiteral | undefined;
 }
 
+/**
+ * Represents any expression wrapped in parentheses.
+ *
+ * ```
+ * FROM ( <query> )
+ * ```
+ */
+export interface ESQLParens extends ESQLAstBaseItem {
+  type: 'parens';
+  child: ESQLAstExpression;
+}
+
+export interface ESQLForkParens extends ESQLParens {
+  child: ESQLAstQueryExpression;
+}
+
 export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
 
@@ -586,6 +610,8 @@ export interface ESQLMessage {
   text: string;
   location: ESQLLocation;
   code: string;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
 }
 
 export interface EditorError {

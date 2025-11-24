@@ -47,8 +47,8 @@ describe('Error details', () => {
 
       cy.visitKibana(errorDetailsPageHref);
       cy.contains(`Error group ${errorGroupingKeyShort}`);
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
 
     describe('when error has no occurrences', () => {

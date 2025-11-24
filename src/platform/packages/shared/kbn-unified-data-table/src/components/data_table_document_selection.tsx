@@ -34,6 +34,7 @@ import { DataTableCopyRowsAsText } from './data_table_copy_rows_as_text';
 import { DataTableCopyRowsAsJson } from './data_table_copy_rows_as_json';
 import { useControlColumn } from '../hooks/use_control_column';
 import type { CustomBulkActions } from '../types';
+import { styles as toolbarStyles } from './custom_toolbar/render_custom_toolbar';
 
 export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   const { record, rowIndex } = useControlColumn(props);
@@ -366,12 +367,21 @@ export function DataTableDocumentToolbarBtn({
       gutterSize="none"
       wrap={false}
       className="unifiedDataTableToolbarControlGroup"
+      css={toolbarStyles.controlGroup}
     >
-      <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
+      <EuiFlexItem
+        className="unifiedDataTableToolbarControlButton"
+        css={toolbarStyles.controlButton}
+        grow={false}
+      >
         {selectedRowsMenuButton}
       </EuiFlexItem>
       {shouldSuggestToSelectAll ? (
-        <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
+        <EuiFlexItem
+          className="unifiedDataTableToolbarControlButton"
+          css={toolbarStyles.controlButton}
+          grow={false}
+        >
           <EuiDataGridToolbarControl
             data-test-subj="dscGridSelectAllDocs"
             onClick={() => {

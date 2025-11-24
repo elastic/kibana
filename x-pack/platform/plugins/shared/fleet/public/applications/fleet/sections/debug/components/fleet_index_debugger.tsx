@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,7 +102,7 @@ export const FleetIndexDebugger = () => {
       {indexResult?.error && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut title="Error" color="danger">
+          <EuiCallOut announceOnMount title="Error" color="danger">
             {(indexResult?.error as any)?.error?.reason ?? (
               <FormattedMessage
                 id="xpack.fleet.debug.fleetIndexDebugger.fetchError"

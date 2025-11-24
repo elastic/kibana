@@ -59,23 +59,6 @@ export interface CspClientPluginStartDeps {
   usageCollection?: UsageCollectionStart;
 }
 
-export interface CspBaseEsQuery {
-  query?: {
-    bool: {
-      filter: Array<estypes.QueryDslQueryContainer | undefined> | undefined;
-    };
-  };
-}
-
-export interface UseCspOptions extends CspBaseEsQuery {
-  sort?: Array<{
-    [key: string]: string;
-  }>;
-  enabled: boolean;
-  pageSize: number;
-  ignore_unavailable?: boolean;
-}
-
 export type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 export type LatestFindingsResponse = IKibanaSearchResponse<
   estypes.SearchResponse<CspFinding, FindingsAggs>

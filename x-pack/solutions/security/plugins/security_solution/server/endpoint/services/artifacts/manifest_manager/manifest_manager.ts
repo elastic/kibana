@@ -594,23 +594,19 @@ export class ManifestManager {
   public async getLastComputedManifest(): Promise<Manifest | null> {
     try {
       let manifestSo;
-      if (this.experimentalFeatures.unifiedManifestEnabled) {
-        const unifiedManifestsSo = await this.getAllUnifiedManifestsSO();
-        // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
-        // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
-        // behind for package policy to pick it up.
-        if (unifiedManifestsSo.length === 0) {
-          const legacyManifestSo = await this.getManifestClient().getManifest();
-          const legacySemanticVersion = legacyManifestSo?.attributes?.semanticVersion;
-          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(
-            unifiedManifestsSo,
-            legacySemanticVersion
-          );
-        } else {
-          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
-        }
+      const unifiedManifestsSo = await this.getAllUnifiedManifestsSO();
+      // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
+      // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
+      // behind for package policy to pick it up.
+      if (unifiedManifestsSo.length === 0) {
+        const legacyManifestSo = await this.getManifestClient().getManifest();
+        const legacySemanticVersion = legacyManifestSo?.attributes?.semanticVersion;
+        manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(
+          unifiedManifestsSo,
+          legacySemanticVersion
+        );
       } else {
-        manifestSo = await this.getManifestClient().getManifest();
+        manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
       }
 
       if (manifestSo.version === undefined) {
@@ -686,12 +682,12 @@ export class ManifestManager {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(allPolicyIds),
       this.buildTrustedAppsArtifacts(allPolicyIds),
-      ...(this.experimentalFeatures.trustedDevices
-        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
-        : []),
       this.buildEventFiltersArtifacts(allPolicyIds),
       this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
       this.buildBlocklistArtifacts(allPolicyIds),
+      ...(this.experimentalFeatures.trustedDevices
+        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
+        : []),
     ]);
 
     // Clear cache as the ManifestManager instance is reused on every run.
@@ -742,18 +738,14 @@ export class ManifestManager {
           // SO client is used for the update.
           const updatesBySpace: Record<string, PackagePolicy[]> = {};
 
-          if (this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-            for (const packagePolicy of currentBatch) {
-              const packagePolicySpace = packagePolicy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
+          for (const packagePolicy of currentBatch) {
+            const packagePolicySpace = packagePolicy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
 
-              if (!updatesBySpace[packagePolicySpace]) {
-                updatesBySpace[packagePolicySpace] = [];
-              }
-
-              updatesBySpace[packagePolicySpace].push(packagePolicy);
+            if (!updatesBySpace[packagePolicySpace]) {
+              updatesBySpace[packagePolicySpace] = [];
             }
-          } else {
-            updatesBySpace[DEFAULT_SPACE_ID] = currentBatch;
+
+            updatesBySpace[packagePolicySpace].push(packagePolicy);
           }
 
           const response: Required<
@@ -983,23 +975,7 @@ export class ManifestManager {
   public async commit(manifest: Manifest) {
     const manifestSo = manifest.toSavedObject();
 
-    if (this.experimentalFeatures.unifiedManifestEnabled) {
-      await this.commitUnified(manifestSo);
-    } else {
-      const manifestClient = this.getManifestClient();
-
-      const version = manifest.getSavedObjectVersion();
-
-      if (version == null) {
-        await manifestClient.createManifest(manifestSo);
-      } else {
-        await manifestClient.updateManifest(manifestSo, {
-          version,
-        });
-      }
-
-      this.logger.debug(`Committed manifest ${manifest.getSemanticVersion()}`);
-    }
+    await this.commitUnified(manifestSo);
   }
 
   private fetchAllPolicies(): Promise<AsyncIterable<PackagePolicy[]>> {

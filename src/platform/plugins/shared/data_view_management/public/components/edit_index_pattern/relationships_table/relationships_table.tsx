@@ -9,11 +9,19 @@
 
 import React from 'react';
 import type { HorizontalAlignment, EuiTableDataType } from '@elastic/eui';
-import { EuiInMemoryTable, EuiText, EuiLink } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiText,
+  EuiLink,
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 import type {
   SavedObjectRelation,
@@ -30,6 +38,7 @@ import {
   titleFieldName,
   titleFieldDescription,
   filterTitle,
+  managedBadge,
 } from './i18n';
 
 const canGoInApp = (
@@ -51,6 +60,7 @@ export const RelationshipsTable = ({
   getSavedObjectLabel,
   relationships,
   allowedTypes,
+  savedObjectsTagging,
 }: {
   basePath: CoreStart['http']['basePath'];
   capabilities: CoreStart['application']['capabilities'];
@@ -60,6 +70,7 @@ export const RelationshipsTable = ({
   getSavedObjectLabel: SavedObjectsManagementPluginStart['getSavedObjectLabel'];
   relationships: SavedObjectRelation[];
   allowedTypes: SavedObjectManagementTypeInfo[];
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }) => {
   const columns = [
     {
@@ -96,14 +107,38 @@ export const RelationshipsTable = ({
         const showUrl = canGoInApp(object, capabilities);
         const titleDisplayed = title || getDefaultTitle(object);
 
-        return showUrl ? (
-          <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
-            {titleDisplayed}
-          </EuiLink>
-        ) : (
-          <EuiText size="s" data-test-subj="relationshipsTitle">
-            {titleDisplayed}
-          </EuiText>
+        const TagListComponent = savedObjectsTagging?.ui.components.TagList;
+
+        const isManaged = object.managed === true;
+        const hasTags = object.references?.some((ref) => ref.type === 'tag') === true;
+
+        const showTags = !!TagListComponent && hasTags;
+        const showBadges = isManaged || showTags;
+
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {showUrl ? (
+              <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
+                {titleDisplayed}
+              </EuiLink>
+            ) : (
+              <EuiText size="s" data-test-subj="relationshipsTitle">
+                {titleDisplayed}
+              </EuiText>
+            )}
+            {showBadges && (
+              <EuiBadgeGroup>
+                {isManaged && (
+                  <EuiBadge color="hollow" data-test-subj="managedBadge">
+                    {managedBadge}
+                  </EuiBadge>
+                )}
+                {showTags && (
+                  <TagListComponent object={object} data-test-subj="relationshipsTags" />
+                )}
+              </EuiBadgeGroup>
+            )}
+          </EuiFlexGroup>
         );
       },
     },

@@ -7,8 +7,6 @@
 
 import { isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import type {
   ActionType as ConnectorType,
@@ -20,14 +18,27 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  PAGER_DUTY_API_URL,
+  EVENT_ACTION_TRIGGER,
+  EVENT_ACTION_ACKNOWLEDGE,
+  EVENT_ACTION_RESOLVE,
+  ConfigSchema,
+  SecretsSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/pagerduty';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/pagerduty';
+import { convertTimestamp } from '@kbn/connector-schemas/common/utils';
 import { postPagerduty } from './post_pagerduty';
-import { convertTimestamp } from '../lib/convert_timestamp';
-
-// uses the PagerDuty Events API v2
-// https://v2.developer.pagerduty.com/docs/events-api-v2
-const PAGER_DUTY_API_URL = 'https://events.pagerduty.com/v2/enqueue';
 
 export type PagerDutyConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -41,114 +52,17 @@ export type PagerDutyConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions
   ActionParamsType
 >;
 
-// config definition
-
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
-
-const configSchemaProps = {
-  apiUrl: schema.nullable(schema.string()),
-};
-const ConfigSchema = schema.object(configSchemaProps);
-// secrets definition
-
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
-
-const SecretsSchema = schema.object({
-  routingKey: schema.string(),
-});
-
-// params definition
-
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-
-const EVENT_ACTION_TRIGGER = 'trigger';
-const EVENT_ACTION_RESOLVE = 'resolve';
-const EVENT_ACTION_ACKNOWLEDGE = 'acknowledge';
-const EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY = new Set([
-  EVENT_ACTION_RESOLVE,
-  EVENT_ACTION_ACKNOWLEDGE,
-]);
-
-const EventActionSchema = schema.oneOf([
-  schema.literal(EVENT_ACTION_TRIGGER),
-  schema.literal(EVENT_ACTION_RESOLVE),
-  schema.literal(EVENT_ACTION_ACKNOWLEDGE),
-]);
-
-const PayloadSeveritySchema = schema.oneOf([
-  schema.literal('critical'),
-  schema.literal('error'),
-  schema.literal('warning'),
-  schema.literal('info'),
-]);
-
-const LinksSchema = schema.arrayOf(schema.object({ href: schema.string(), text: schema.string() }));
-const customDetailsSchema = schema.recordOf(schema.string(), schema.any());
-
-export const ParamsSchema = schema.object(
-  {
-    eventAction: schema.maybe(EventActionSchema),
-    dedupKey: schema.maybe(schema.string({ maxLength: 255 })),
-    summary: schema.maybe(schema.string({ maxLength: 1024 })),
-    source: schema.maybe(schema.string()),
-    severity: schema.maybe(PayloadSeveritySchema),
-    timestamp: schema.maybe(schema.string()),
-    component: schema.maybe(schema.string()),
-    group: schema.maybe(schema.string()),
-    class: schema.maybe(schema.string()),
-    links: schema.maybe(LinksSchema),
-    customDetails: schema.maybe(customDetailsSchema),
-  },
-  { validate: validateParams }
-);
-
-function validateParams(paramsObject: unknown): string | void {
-  const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
-  const convertedTimestamp = convertTimestamp(timestamp);
-  if (convertedTimestamp != null) {
-    try {
-      const date = moment(convertedTimestamp);
-      if (!date.isValid()) {
-        return i18n.translate('xpack.stackConnectors.pagerduty.invalidTimestampErrorMessage', {
-          defaultMessage: `error parsing timestamp "{timestamp}"`,
-          values: {
-            timestamp,
-          },
-        });
-      }
-    } catch (err) {
-      return i18n.translate('xpack.stackConnectors.pagerduty.timestampParsingFailedErrorMessage', {
-        defaultMessage: `error parsing timestamp "{timestamp}": {message}`,
-        values: {
-          timestamp,
-          message: err.message,
-        },
-      });
-    }
-  }
-  if (eventAction && EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
-    return i18n.translate('xpack.stackConnectors.pagerduty.missingDedupkeyErrorMessage', {
-      defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
-      values: {
-        eventAction,
-      },
-    });
-  }
-}
-
-export const ConnectorTypeId = '.pagerduty';
 // connector type definition
 export function getConnectorType(): PagerDutyConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.pagerduty.title', {
-      defaultMessage: 'PagerDuty',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

@@ -27,8 +27,8 @@ export const SearchHomepageHeader: React.FC = () => {
         gutterSize="m"
         alignItems="stretch"
         style={{
-          paddingLeft: euiTheme.size.xxxl,
-          paddingRight: euiTheme.size.xxxl,
+          paddingLeft: euiTheme.size.xxl,
+          paddingRight: euiTheme.size.xxl,
         }}
       >
         <EuiFlexItem style={{ alignSelf: 'center' }}>
