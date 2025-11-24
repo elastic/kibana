@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 
 export const NoFailureStorePanel = ({
   openModal,
@@ -45,7 +45,7 @@ export const NoFailureStorePanel = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {manageFailureStorePrivilege && !Streams.WiredStream.GetResponse.is(definition) && (
+          {manageFailureStorePrivilege && (
             <div>
               <EuiButton
                 type="button"
