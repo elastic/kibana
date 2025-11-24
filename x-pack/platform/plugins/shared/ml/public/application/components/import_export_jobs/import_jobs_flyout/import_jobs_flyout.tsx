@@ -26,6 +26,7 @@ import {
   EuiPanel,
   EuiFormRow,
   EuiFieldText,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -51,13 +52,12 @@ export interface Props {
 export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) => {
   const {
     services: {
-      data: {
-        dataViews: { getTitles: getDataViewTitles },
-      },
       notifications: { toasts },
       mlServices: {
         mlUsageCollection,
         mlApi: {
+          validateDatafeedPreview,
+          esSearch,
           jobs: { bulkCreateJobs },
           dataFrameAnalytics: { createDataFrameAnalytics },
           filters: { filters: getFilters },
@@ -66,7 +66,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
     },
   } = useMlKibana();
 
-  const jobImportService = useMemo(() => new JobImportService(), []);
+  const jobImportService = useMemo(
+    () => new JobImportService(esSearch, validateDatafeedPreview, getFilters),
+    [esSearch, validateDatafeedPreview, getFilters]
+  );
 
   const [showFlyout, setShowFlyout] = useState(false);
   const [adJobs, setAdJobs] = useState<ImportedAdJob[]>([]);
@@ -143,9 +146,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
 
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
-        loadedFile.jobType,
-        getDataViewTitles,
-        getFilters
+        loadedFile.jobType
       );
 
       if (loadedFile.jobType === 'anomaly-detector') {
@@ -161,19 +162,25 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
       }
 
       setJobType(loadedFile.jobType);
+
       setJobIdObjects(
-        validatedJobs.jobs.map(({ jobId, destIndex }) => ({
-          jobId,
-          originalId: jobId,
-          jobIdValid: true,
-          jobIdInvalidMessage: '',
-          jobIdValidated: false,
-          destIndex,
-          originalDestIndex: destIndex,
-          destIndexValid: true,
-          destIndexInvalidMessage: '',
-          destIndexValidated: false,
-        }))
+        validatedJobs.jobs.map(({ jobId, destIndex }) => {
+          const datafeedValidation = validatedJobs.datafeedValidations.get(jobId);
+          return {
+            jobId,
+            originalId: jobId,
+            jobIdValid: true,
+            jobIdInvalidMessage: '',
+            jobIdValidated: false,
+            destIndex,
+            originalDestIndex: destIndex,
+            destIndexValid: true,
+            destIndexInvalidMessage: '',
+            destIndexValidated: false,
+            datafeedInvalid: datafeedValidation?.hasWarning,
+            datafeedWarningMessage: datafeedValidation?.warningMessage,
+          };
+        })
       );
 
       const ids = createIdsMash(validatedJobs.jobs as JobIdObject[], loadedFile.jobType);
@@ -375,6 +382,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
           hideCloseButton
           size="m"
           data-test-subj="mlJobMgmtImportJobsFlyout"
+          aria-label={i18n.translate('xpack.ml.importExport.importFlyout.flyoutAriaLabel', {
+            defaultMessage: 'Import jobs flyout',
+          })}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
@@ -469,32 +479,59 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                             </EuiFormRow>
 
                             {jobType === 'data-frame-analytics' && (
-                              <EuiFormRow
-                                helpText={
-                                  jobId.destIndexValid === true ? jobId.destIndexInvalidMessage : ''
-                                }
-                                error={
-                                  jobId.destIndexValid === false
-                                    ? jobId.destIndexInvalidMessage
-                                    : ''
-                                }
-                                isInvalid={jobId.destIndexValid === false}
-                              >
-                                <EuiFieldText
-                                  prepend={i18n.translate(
-                                    'xpack.ml.importExport.importFlyout.destIndex',
-                                    {
-                                      defaultMessage: 'Destination index',
-                                    }
-                                  )}
-                                  disabled={importing}
-                                  compressed={true}
-                                  value={jobId.destIndex}
-                                  onChange={(e) => renameDestIndex(e.target.value, i)}
+                              <>
+                                <EuiFormRow
+                                  helpText={
+                                    jobId.destIndexValid === true
+                                      ? jobId.destIndexInvalidMessage
+                                      : ''
+                                  }
+                                  error={
+                                    jobId.destIndexValid === false
+                                      ? jobId.destIndexInvalidMessage
+                                      : ''
+                                  }
                                   isInvalid={jobId.destIndexValid === false}
-                                />
-                              </EuiFormRow>
+                                >
+                                  <EuiFieldText
+                                    prepend={i18n.translate(
+                                      'xpack.ml.importExport.importFlyout.destIndex',
+                                      {
+                                        defaultMessage: 'Destination index',
+                                      }
+                                    )}
+                                    disabled={importing}
+                                    compressed={true}
+                                    value={jobId.destIndex}
+                                    onChange={(e) => renameDestIndex(e.target.value, i)}
+                                    isInvalid={jobId.destIndexValid === false}
+                                  />
+                                </EuiFormRow>
+                              </>
                             )}
+
+                            {jobType === 'anomaly-detector' &&
+                              jobId.datafeedInvalid === true &&
+                              jobId.datafeedWarningMessage && (
+                                <EuiFormRow>
+                                  <EuiCallOut
+                                    data-test-subj="mlJobImportJobDatafeedWarning"
+                                    title={i18n.translate(
+                                      'xpack.ml.importExport.importFlyout.datafeedWarning.title',
+                                      {
+                                        defaultMessage: 'Datafeed Warning',
+                                      }
+                                    )}
+                                    color="warning"
+                                    size="s"
+                                    announceOnMount
+                                  >
+                                    <EuiText size="xs" className="eui-textBreakWord">
+                                      {jobId.datafeedWarningMessage}
+                                    </EuiText>
+                                  </EuiCallOut>
+                                </EuiFormRow>
+                              )}
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <DeleteJobButton index={i} />
