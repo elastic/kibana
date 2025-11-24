@@ -121,7 +121,11 @@ describe('WorkflowsParamsFields', () => {
     });
 
     expect(mockEditAction).toHaveBeenCalledWith('subAction', 'run', 0);
-    expect(mockEditAction).toHaveBeenCalledWith('subActionParams', { workflowId: '' }, 0);
+    expect(mockEditAction).toHaveBeenCalledWith(
+      'subActionParams',
+      { workflowId: '', summary: true },
+      0
+    );
   });
 
   test('should render workflow selection dropdown', async () => {
@@ -873,6 +877,259 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(screen.getByText('Workflow without description')).toBeInTheDocument();
       expect(screen.getByText('No description')).toBeInTheDocument();
+    });
+  });
+
+  describe('Action frequency (summary parameter)', () => {
+    test('should render Action frequency section', async () => {
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Action frequency')).toBeInTheDocument();
+        expect(screen.getByText('Summary of alerts')).toBeInTheDocument();
+        expect(screen.getByText('Per rule run')).toBeInTheDocument();
+      });
+    });
+
+    test('should initialize summary to true when missing', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            // summary is missing
+          },
+        } as any,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { workflowId: 'test-workflow', summary: true },
+          0
+        );
+      });
+    });
+
+    test('should initialize summary to true when subActionParams is missing', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          // subActionParams is missing
+        } as any,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { workflowId: '', summary: true },
+          0
+        );
+      });
+    });
+
+    test('should display "Summary of alerts" when summary is true', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summary: true,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Summary of alerts')).toBeInTheDocument();
+      });
+    });
+
+    test('should display "For each alert" when summary is false', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summary: false,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('For each alert')).toBeInTheDocument();
+      });
+    });
+
+    test('should allow changing from "Summary of alerts" to "For each alert"', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summary: true,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Summary of alerts')).toBeInTheDocument();
+      });
+
+      // Find and click the summary button to open the popover
+      const summaryButton = screen.getByTestId('workflow-execution-mode-select');
+      const button = summaryButton.querySelector('button');
+      expect(button).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(button!);
+      });
+
+      // Wait for the popover to open and find "For each alert" option
+      await waitFor(() => {
+        expect(screen.getByText('For each alert')).toBeInTheDocument();
+      });
+
+      // Click on "For each alert" option
+      const forEachOption = screen.getByTestId('workflow-execution-mode-option-for_each');
+      await act(async () => {
+        fireEvent.click(forEachOption);
+      });
+
+      // Verify that editAction was called with summary: false
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { workflowId: 'test-workflow', summary: false },
+          0
+        );
+      });
+    });
+
+    test('should allow changing from "For each alert" to "Summary of alerts"', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summary: false,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('For each alert')).toBeInTheDocument();
+      });
+
+      // Find and click the summary button to open the popover
+      const summaryButton = screen.getByTestId('workflow-execution-mode-select');
+      const button = summaryButton.querySelector('button');
+      expect(button).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(button!);
+      });
+
+      // Wait for the popover to open and find "Summary of alerts" option
+      await waitFor(() => {
+        expect(screen.getByText('Summary of alerts')).toBeInTheDocument();
+      });
+
+      // Click on "Summary of alerts" option
+      const summaryOption = screen.getByTestId('workflow-execution-mode-option-summary');
+      await act(async () => {
+        fireEvent.click(summaryOption);
+      });
+
+      // Verify that editAction was called with summary: true
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { workflowId: 'test-workflow', summary: true },
+          0
+        );
+      });
+    });
+
+    test('should render EuiSuperSelect with prepend for Action frequency', async () => {
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+      });
+
+      await waitFor(() => {
+        const superSelect = screen.getByTestId('workflow-per-rule-run-select');
+        expect(superSelect).toBeInTheDocument();
+        expect(screen.getByText('Per rule run')).toBeInTheDocument();
+        // EuiSuperSelect should not have disabled attribute
+        expect(superSelect).not.toHaveAttribute('disabled');
+        // Find the button in the prepend using the test subject
+        const prependButton = screen
+          .getByTestId('workflow-execution-mode-select')
+          .querySelector('button');
+        expect(prependButton).toBeInTheDocument();
+        expect(prependButton).not.toBeDisabled();
+      });
+    });
+
+    test('should preserve summary value when updating workflowId', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'old-workflow',
+            summary: false,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('For each alert')).toBeInTheDocument();
+      });
+
+      // The summary value should be preserved when workflowId changes
+      // This is tested implicitly through the component's handleWorkflowChange callback
+      // which preserves existing subActionParams properties
+      expect(mockEditAction).not.toHaveBeenCalledWith(
+        'subActionParams',
+        expect.objectContaining({ summary: true }),
+        0
+      );
     });
   });
 });

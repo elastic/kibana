@@ -43,6 +43,12 @@ export interface WorkflowsExecutionEnginePluginStart {
     request?: KibanaRequest
   ): Promise<ExecuteWorkflowStepResponse>;
 
+  scheduleWorkflow(
+    workflow: WorkflowExecutionEngineModel,
+    context: Record<string, any>,
+    request: KibanaRequest
+  ): Promise<ExecuteWorkflowResponse>;
+
   cancelWorkflowExecution(workflowExecutionId: string, spaceId: string): Promise<void>;
 }
 

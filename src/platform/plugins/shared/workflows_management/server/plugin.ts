@@ -104,8 +104,42 @@ export class WorkflowsPlugin
         };
       };
 
+      // Create workflows scheduling service function for per-alert execution
+      const getScheduleWorkflowService = async (request: KibanaRequest) => {
+        return async (workflowId: string, spaceId: string, inputs: Record<string, unknown>) => {
+          if (!this.api) {
+            throw new Error('Workflows management API not initialized');
+          }
+
+          const workflow = await this.api.getWorkflow(workflowId, spaceId);
+          if (!workflow) {
+            throw new Error(`Workflow not found: ${workflowId}`);
+          }
+
+          if (!workflow.definition) {
+            throw new Error(`Workflow definition not found: ${workflowId}`);
+          }
+
+          if (!workflow.valid) {
+            throw new Error(`Workflow is not valid: ${workflowId}`);
+          }
+
+          const workflowToSchedule: WorkflowExecutionEngineModel = {
+            id: workflow.id,
+            name: workflow.name,
+            enabled: workflow.enabled,
+            definition: workflow.definition,
+            yaml: workflow.yaml,
+          };
+
+          return this.api.scheduleWorkflow(workflowToSchedule, spaceId, inputs, request);
+        };
+      };
+
       // Register the workflows connector
-      plugins.actions.registerType(getWorkflowsConnectorType({ getWorkflowsService }));
+      plugins.actions.registerType(
+        getWorkflowsConnectorType({ getWorkflowsService, getScheduleWorkflowService })
+      );
 
       // Register connector adapter for alerting if available
       if (plugins.alerting) {

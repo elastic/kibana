@@ -11,11 +11,23 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { ExternalService, RunWorkflowParams, WorkflowExecutionResponse } from './types';
+import type {
+  ExternalService,
+  RunWorkflowParams,
+  ScheduleWorkflowParams,
+  WorkflowExecutionResponse,
+} from './types';
 import { createServiceError } from './utils';
 
 // Type for the workflows service function that should be injected
 export type WorkflowsServiceFunction = (
+  workflowId: string,
+  spaceId: string,
+  inputs: Record<string, unknown>,
+  request: KibanaRequest
+) => Promise<string>;
+
+export type ScheduleWorkflowServiceFunction = (
   workflowId: string,
   spaceId: string,
   inputs: Record<string, unknown>,
@@ -29,7 +41,8 @@ export const createExternalService = (
   _connectorUsageCollector: ConnectorUsageCollector,
   request: KibanaRequest,
   // This should be injected like getCasesClient in the cases connector
-  runWorkflowService?: WorkflowsServiceFunction
+  runWorkflowService?: WorkflowsServiceFunction,
+  scheduleWorkflowService?: ScheduleWorkflowServiceFunction
 ): ExternalService => {
   const runWorkflow = async ({
     workflowId,
@@ -64,7 +77,38 @@ export const createExternalService = (
     }
   };
 
+  const scheduleWorkflow = async ({
+    workflowId,
+    spaceId,
+    inputs,
+  }: ScheduleWorkflowParams): Promise<string> => {
+    try {
+      logger.info(`Attempting to schedule workflow ${workflowId} via internal service`);
+
+      if (!scheduleWorkflowService) {
+        throw new Error(
+          'Workflows scheduling service not available. This connector requires workflows management plugin to be enabled.'
+        );
+      }
+
+      // Use the injected scheduling service function
+      const workflowRunId = await scheduleWorkflowService(workflowId, spaceId, inputs, request);
+
+      if (!workflowRunId) {
+        throw new Error('Invalid response: missing workflowRunId');
+      }
+
+      logger.info(`Successfully scheduled workflow ${workflowId}, run ID: ${workflowRunId}`);
+
+      return workflowRunId;
+    } catch (error) {
+      logger.error(`Error scheduling workflow ${workflowId}: ${error.message}`);
+      throw createServiceError(error, `Unable to schedule workflow ${workflowId}`);
+    }
+  };
+
   return {
     runWorkflow,
+    scheduleWorkflow,
   };
 };

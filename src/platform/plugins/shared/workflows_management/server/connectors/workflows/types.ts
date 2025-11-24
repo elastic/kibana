@@ -18,6 +18,7 @@ export type WorkflowsActionParamsType = ExecutorParams;
 export interface RunWorkflowParams {
   workflowId: string;
   spaceId: string;
+  summary?: boolean;
   inputs: {
     event: {
       alerts: AlertHit[];
@@ -48,8 +49,29 @@ export interface WorkflowExecutionResponse {
   status: string;
 }
 
+export interface ScheduleWorkflowParams {
+  workflowId: string;
+  spaceId: string;
+  inputs: {
+    event: {
+      alerts: AlertHit[];
+      rule: {
+        id: string;
+        name: string;
+        tags: string[];
+        consumer: string;
+        producer: string;
+        ruleTypeId: string;
+      };
+      ruleUrl?: string;
+      spaceId: string;
+    };
+  };
+}
+
 export interface ExternalService {
   runWorkflow: (params: RunWorkflowParams) => Promise<WorkflowExecutionResponse>;
+  scheduleWorkflow: (params: ScheduleWorkflowParams) => Promise<string>;
 }
 
 export interface ExternalServiceApiHandlerArgs {
