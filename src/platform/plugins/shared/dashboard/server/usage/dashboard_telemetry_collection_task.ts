@@ -113,8 +113,6 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
               const controls = JSON.parse(
                 dashboard.attributes.controlGroupInput?.panelsJSON as string
               ) as unknown as StoredControlGroupInput['panels'];
-
-              console.log({ controls });
               collectStickyControls(controls, dashboardData, embeddable);
             } catch (e) {
               logger.warn('Unable to parse panelsJSON for telemetry collection');

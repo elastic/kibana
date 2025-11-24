@@ -21,7 +21,21 @@ import { emptyState, type LatestTaskStateSchema } from './task_state';
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 export type DashboardCollectorData = DeepWriteable<LatestTaskStateSchema['telemetry']>;
 
-export const getEmptyDashboardData = (): DashboardCollectorData => emptyState.telemetry;
+export const getEmptyDashboardData = (): DashboardCollectorData => ({
+  panels: {
+    total: 0,
+    by_reference: 0,
+    by_value: 0,
+    by_type: {},
+  },
+  controls: {
+    total: 0,
+    by_type: {},
+  },
+  sections: {
+    total: 0,
+  },
+});
 
 export const getEmptyPanelTypeData = () => ({
   total: 0,

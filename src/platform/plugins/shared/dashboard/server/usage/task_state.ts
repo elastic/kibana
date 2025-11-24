@@ -29,6 +29,10 @@ export const stateSchemaByVersion = {
           by_value: state.telemetry?.panels?.by_value || 0,
           by_type: state.telemetry?.panels?.by_type || {},
         },
+        controls: {
+          total: state.telemetry?.controls?.total || 0,
+          by_type: state.telemetry?.controls?.by_type || {},
+        },
       },
     }),
     schema: schema.object({
