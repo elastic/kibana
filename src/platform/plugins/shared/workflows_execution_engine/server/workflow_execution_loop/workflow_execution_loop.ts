@@ -8,7 +8,8 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { runNode } from './run_node';
+import { executionFlowLoop } from './execution_flow_loop';
+import { persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 
 /**
@@ -41,23 +42,8 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     });
   });
 
-  const mainTask = async () => {
-    while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-      await runNode(params);
-    }
-  };
-
-  const persistenceTask = async () => {
-    while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-      await Promise.all([
-        params.workflowExecutionState.flush(),
-        params.workflowLogger.flushEvents(),
-      ]);
-      await new Promise((resolve) => setTimeout(resolve, 500)); // 0.5 second interval
-    }
-  };
   try {
-    await Promise.all([mainTask(), persistenceTask()]);
+    await Promise.all([executionFlowLoop(params), persistenceLoop(params)]);
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error as Error);
   } finally {
