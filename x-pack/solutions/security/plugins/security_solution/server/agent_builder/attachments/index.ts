@@ -6,4 +6,5 @@
  */
 
 export { createAlertAttachmentType } from './alert';
+export { createAttackDiscoveryAttachmentType } from './attack_discovery';
 // export { createAlertAttachmentType } from './core-alert';

@@ -70,7 +70,7 @@ MANDATORY WORKFLOW - Complete in order:
 
 7. Query CASES with the extracted alert id to find related cases. Case URLs must be included in response.
    Tool: ${sanitizeToolId(platformCoreTools.cases)}
-   Parameters: { query: "Do I have any open security cases with an attached alert id of [alert ID]?", owner: "securitySolution" }
+   Parameters: { query: "Do I have any open security cases?", alertIds: ["[alert ID]"], owner: "securitySolution" }
 
 8. Query SECURITY LABS:
    Tool: ${sanitizeToolId(SECURITY_LABS_SEARCH_TOOL_ID)}

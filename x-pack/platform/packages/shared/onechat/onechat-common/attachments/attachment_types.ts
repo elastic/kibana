@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   alert = 'alert',
+  attack_discovery = 'attack_discovery',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +25,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.alert]: AlertAttachmentData;
+  [AttachmentType.attack_discovery]: AttackDiscoveryAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -89,6 +91,18 @@ export const alertAttachmentDataSchema = z.object({
 export interface AlertAttachmentData {
   /** The condensed alert data in key-value format (comma-separated, newline-delimited) */
   alert: string;
+}
+
+export const attackDiscoveryAttachmentDataSchema = z.object({
+  attackDiscovery: z.string(),
+});
+
+/**
+ * Data for an attack discovery attachment.
+ */
+export interface AttackDiscoveryAttachmentData {
+  /** The formatted attack discovery data including title, summary, details, and attack chain */
+  attackDiscovery: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

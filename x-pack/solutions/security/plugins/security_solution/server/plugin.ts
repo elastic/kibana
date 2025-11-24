@@ -146,7 +146,10 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
-import { createAlertAttachmentType } from './agent_builder/attachments';
+import {
+  createAlertAttachmentType,
+  createAttackDiscoveryAttachmentType,
+} from './agent_builder/attachments';
 import {
   alertsTool,
   alertsIndexSearchTool,
@@ -628,6 +631,20 @@ export class Plugin implements ISecuritySolutionPlugin {
           );
         } else {
           this.logger.warn(`Failed to register alert attachment type: ${error}`);
+          // Don't throw - allow plugin to continue loading even if attachment registration fails
+        }
+      }
+
+      try {
+        // Register attack discovery attachment type
+        plugins.onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('already registered')) {
+          this.logger.debug(
+            'Attack discovery attachment type already registered by onechat plugin, using built-in version'
+          );
+        } else {
+          this.logger.warn(`Failed to register attack discovery attachment type: ${error}`);
           // Don't throw - allow plugin to continue loading even if attachment registration fails
         }
       }

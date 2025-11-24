@@ -12,7 +12,6 @@ import { createErrorResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { CoreSetup } from '@kbn/core/server';
 import type { OnechatStartDependencies, OnechatPluginStart } from '../../../../../types';
-import { parseCasesQuery } from './parse_query';
 import { getCaseUrl } from '../../../../../utils/case_urls';
 
 const casesSchema = z.object({
@@ -24,8 +23,27 @@ const casesSchema = z.object({
     ),
   query: z
     .string()
+    .optional()
     .describe(
-      'Natural language query describing which cases to retrieve (e.g., "cases updated in the last week", "cases from November 2nd")'
+      'Optional natural language query describing which cases to retrieve (e.g., "open cases", "recent cases"). This is informational only and does not affect filtering.'
+    ),
+  alertIds: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Array of alert IDs to find cases containing these alerts. If provided, cases containing any of these alert IDs will be returned. Alert IDs must be provided via this parameter - they will NOT be extracted from the query.'
+    ),
+  start: z
+    .string()
+    .optional()
+    .describe(
+      'ISO datetime string for the start time to fetch cases (inclusive). If not provided, no time range filtering will be applied. Format: "2025-01-15T00:00:00Z"'
+    ),
+  end: z
+    .string()
+    .optional()
+    .describe(
+      'ISO datetime string for the end time to fetch cases (exclusive). If not provided, no time range filtering will be applied. Format: "2025-01-22T00:00:00Z"'
     ),
 });
 
@@ -44,22 +62,30 @@ const normalizeTimeRange = (
   start: string | undefined,
   end: string | undefined,
   logger: any
-): { start: string; end: string | null; startDate: Date; endDate: Date | null } => {
+): {
+  start: string | null;
+  end: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+} | null => {
+  // If neither start nor end is provided, return null to indicate no time range filtering
+  if (!start && !end) {
+    return null;
+  }
+
   const now = new Date();
   const currentYear = now.getFullYear();
 
-  let startDate: Date;
+  let startDate: Date | null = null;
   if (start) {
     // If no year is specified, assume current year
     const startStr =
       start.includes('T') && !start.match(/^\d{4}/) ? `${currentYear}-${start}` : start;
     startDate = new Date(startStr);
     if (isNaN(startDate.getTime())) {
-      logger.warn(`Invalid start date: ${start}, using default`);
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Default to 7 days ago
+      logger.warn(`Invalid start date: ${start}`);
+      startDate = null;
     }
-  } else {
-    startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Default to 7 days ago
   }
 
   let endDate: Date | null = null;
@@ -67,13 +93,13 @@ const normalizeTimeRange = (
     const endStr = end.includes('T') && !end.match(/^\d{4}/) ? `${currentYear}-${end}` : end;
     endDate = new Date(endStr);
     if (isNaN(endDate.getTime())) {
-      logger.warn(`Invalid end date: ${end}, using now`);
+      logger.warn(`Invalid end date: ${end}`);
       endDate = null;
     }
   }
 
   return {
-    start: startDate.toISOString(),
+    start: startDate ? startDate.toISOString() : null,
     end: endDate ? endDate.toISOString() : null,
     startDate,
     endDate,
@@ -81,7 +107,7 @@ const normalizeTimeRange = (
 };
 
 const createEmptyResults = (
-  normalizedStart: string,
+  normalizedStart: string | null,
   normalizedEnd: string | null,
   message: string
 ) => ({
@@ -91,7 +117,7 @@ const createEmptyResults = (
       data: {
         cases: [],
         total: 0,
-        start: normalizedStart,
+        start: normalizedStart || null,
         end: normalizedEnd || null,
         message,
       },
@@ -109,23 +135,21 @@ export const casesTool = (
 
 Query examples: "cases updated in the last week", "cases from November 2nd", "cases with alert ID abc-123-def", "recent cases"
 Optional 'owner' filters by: "cases" (Stack Management), "observability", or "securitySolution" (Elastic Security).
-If query mentions an alert ID, finds all cases containing that alert. Otherwise searches by date ranges.
+Optional 'alertIds' parameter accepts an array of alert IDs. If provided, finds all cases containing any of these alerts. Alert IDs must be provided via this parameter.
+Optional 'start' and 'end' parameters accept ISO datetime strings for date range filtering. If not provided, no time range filtering will be applied and all cases will be returned (subject to other filters).
+If alertIds parameter is provided, finds all cases containing those alerts. Otherwise searches by date ranges from start/end parameters.
 Returns case details (id, title, description, status, severity, tags, assignees, observables, alerts/comments). Each case includes 'markdown_link' field with pre-formatted clickable link: [Case Title](url).
 
 **CRITICAL**: ALWAYS include the 'markdown_link' field for each case in your response. Format: brief summary (2-3 sentences) + markdown link. Example: "Security investigation case. Status: open. [View Case](url)"`,
     schema: casesSchema,
-    handler: async ({ owner, query }, { request, logger, modelProvider }) => {
+    handler: async ({ owner, query, alertIds, start, end }, { request, logger }) => {
       try {
-        // Parse natural language query to extract date ranges and alert IDs
-        const model = await modelProvider.getDefaultModel();
-        const parsedQuery = await parseCasesQuery({
-          nlQuery: query,
-          model,
-          logger,
-        });
+        // Use alertIds parameter - alert IDs must be provided via parameter
+        const finalAlertIds = alertIds && alertIds.length > 0 ? alertIds : undefined;
 
-        // Normalize and adjust time range
-        const timeRange = normalizeTimeRange(parsedQuery.start, parsedQuery.end, logger);
+        // Normalize and adjust time range using provided start/end parameters
+        // Returns null if no time range is provided
+        const timeRange = normalizeTimeRange(start, end, logger);
 
         // Get cases plugin from start services
         const [, plugins] = await coreSetup.getStartServices();
@@ -133,20 +157,48 @@ Returns case details (id, title, description, status, severity, tags, assignees,
 
         if (!casesPlugin) {
           logger.warn('[Cases Tool] Cases plugin not available, returning empty results');
-          return createEmptyResults(timeRange.start, timeRange.end, 'Cases plugin not available');
+          return createEmptyResults(
+            timeRange?.start || null,
+            timeRange?.end || null,
+            'Cases plugin not available'
+          );
         }
 
         // Get cases client
         const casesClient = await casesPlugin.getCasesClientWithRequest(request);
 
-        // Check if query is asking for cases by alert ID
-        if (parsedQuery.alertId) {
+        // Check if query is asking for cases by alert ID(s)
+        if (finalAlertIds && finalAlertIds.length > 0) {
           try {
-            logger.info(`[Cases Tool] Querying cases by alert ID: ${parsedQuery.alertId}`);
-            const relatedCases = await casesClient.cases.getCasesByAlertID({
-              alertID: parsedQuery.alertId,
-              options: owner ? { owner } : {},
-            });
+            logger.info(`[Cases Tool] Querying cases by alert IDs: ${finalAlertIds.join(', ')}`);
+            // Query each alert ID in parallel
+            const allRelatedCasesArrays = await Promise.all(
+              finalAlertIds.map(async (alertId) => {
+                try {
+                  return await casesClient.cases.getCasesByAlertID({
+                    alertID: alertId,
+                    options: owner ? { owner } : {},
+                  });
+                } catch (error) {
+                  logger.warn(
+                    `[Cases Tool] Failed to fetch cases for alert ID ${alertId}: ${error}`
+                  );
+                  return [];
+                }
+              })
+            );
+
+            // Flatten and deduplicate cases by case ID
+            const casesMap = new Map<string, any>();
+            for (const relatedCases of allRelatedCasesArrays) {
+              for (const relatedCase of relatedCases) {
+                if (!casesMap.has(relatedCase.id)) {
+                  casesMap.set(relatedCase.id, relatedCase);
+                }
+              }
+            }
+
+            const relatedCases = Array.from(casesMap.values());
 
             if (relatedCases.length === 0) {
               return {
@@ -156,9 +208,9 @@ Returns case details (id, title, description, status, severity, tags, assignees,
                     data: {
                       cases: [],
                       total: 0,
-                      start: timeRange.start,
-                      end: timeRange.end,
-                      message: `No cases found containing alert ID: ${parsedQuery.alertId}`,
+                      start: timeRange?.start || null,
+                      end: timeRange?.end || null,
+                      message: `No cases found containing alert IDs: ${finalAlertIds.join(', ')}`,
                     },
                   },
                 ],
@@ -299,9 +351,11 @@ Returns case details (id, title, description, status, severity, tags, assignees,
                   data: {
                     total: casesData.length,
                     cases: casesData,
-                    start: timeRange.start,
-                    end: timeRange.end,
-                    message: `Found ${casesData.length} case(s) containing alert ID: ${parsedQuery.alertId}`,
+                    start: timeRange?.start || null,
+                    end: timeRange?.end || null,
+                    message: `Found ${
+                      casesData.length
+                    } unique case(s) containing alert ID(s): ${finalAlertIds.join(', ')}`,
                   },
                 },
               ],
@@ -309,12 +363,14 @@ Returns case details (id, title, description, status, severity, tags, assignees,
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             logger.error(
-              `[Cases Tool] Error fetching cases by alert ID ${parsedQuery.alertId}: ${errorMessage}`
+              `[Cases Tool] Error fetching cases by alert IDs ${finalAlertIds.join(
+                ', '
+              )}: ${errorMessage}`
             );
             return {
               results: [
                 createErrorResult(
-                  `Error fetching cases for alert ID ${parsedQuery.alertId}: ${errorMessage}`
+                  `Error fetching cases for alert IDs ${finalAlertIds.join(', ')}: ${errorMessage}`
                 ),
               ],
             };
@@ -335,8 +391,8 @@ Returns case details (id, title, description, status, severity, tags, assignees,
         let currentPage = 1;
         const maxPages = 10;
         let hasMorePages = true;
-        const startTimestamp = timeRange.startDate.getTime();
-        const endTimestamp = timeRange.endDate ? timeRange.endDate.getTime() : null;
+        const startTimestamp = timeRange?.startDate ? timeRange.startDate.getTime() : null;
+        const endTimestamp = timeRange?.endDate ? timeRange.endDate.getTime() : null;
 
         while (hasMorePages && currentPage <= maxPages) {
           searchParams.page = currentPage;
@@ -347,26 +403,29 @@ Returns case details (id, title, description, status, severity, tags, assignees,
             break;
           }
 
-          // Filter cases by updatedAt date range
-          const pageFilteredCases = searchResult.cases.filter((caseItem: any) => {
-            const timestamp = getCaseTimestamp(caseItem);
-            if (timestamp === null) {
-              logger.warn(
-                `[Cases Tool] Case ${caseItem.id} has no valid updated_at or created_at field`
-              );
-              return false;
-            }
-            return (
-              timestamp >= startTimestamp && (endTimestamp === null || timestamp < endTimestamp)
-            );
-          });
+          // Filter cases by updatedAt date range only if time range is provided
+          const pageFilteredCases = timeRange
+            ? searchResult.cases.filter((caseItem: any) => {
+                const timestamp = getCaseTimestamp(caseItem);
+                if (timestamp === null) {
+                  logger.warn(
+                    `[Cases Tool] Case ${caseItem.id} has no valid updated_at or created_at field`
+                  );
+                  return false;
+                }
+                return (
+                  (startTimestamp === null || timestamp >= startTimestamp) &&
+                  (endTimestamp === null || timestamp < endTimestamp)
+                );
+              })
+            : searchResult.cases;
 
           allCases.push(...pageFilteredCases);
 
           // Check if we should continue fetching
           if (searchResult.cases.length < searchParams.perPage) {
             hasMorePages = false;
-          } else {
+          } else if (timeRange && startTimestamp !== null) {
             const lastCase = searchResult.cases[searchResult.cases.length - 1];
             const lastCaseTimestamp = getCaseTimestamp(lastCase);
             if (lastCaseTimestamp !== null && lastCaseTimestamp < startTimestamp) {
@@ -472,8 +531,8 @@ Returns case details (id, title, description, status, severity, tags, assignees,
               data: {
                 total: casesData.length,
                 cases: casesData,
-                start: timeRange.start,
-                end: timeRange.end,
+                start: timeRange?.start || null,
+                end: timeRange?.end || null,
               },
             },
           ],

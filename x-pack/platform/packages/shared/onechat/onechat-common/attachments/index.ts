@@ -12,6 +12,7 @@ export type {
   ScreenContextAttachment,
   EsqlAttachment,
   AlertAttachment,
+  AttackDiscoveryAttachment,
 } from './attachments';
 export {
   AttachmentType,
@@ -19,8 +20,10 @@ export {
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
   alertAttachmentDataSchema,
+  attackDiscoveryAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type EsqlAttachmentData,
   type AlertAttachmentData,
+  type AttackDiscoveryAttachmentData,
 } from './attachment_types';
