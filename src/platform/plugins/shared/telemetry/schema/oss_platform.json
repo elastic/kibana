@@ -9509,6 +9509,27 @@
             }
           }
         },
+        "controls": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of this type of control in all Control Groups"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "sections": {
           "properties": {
             "total": {
@@ -11011,7 +11032,7 @@
             "description": "Enable Group streams in Streams"
           }
         },
-          "observability:streamsEnableAttachments": {
+        "observability:streamsEnableAttachments": {
           "type": "boolean",
           "_meta": {
             "description": "Enable Streams attachments tab."
