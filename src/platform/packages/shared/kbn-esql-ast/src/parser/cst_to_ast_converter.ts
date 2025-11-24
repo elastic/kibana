@@ -1716,7 +1716,7 @@ export class CstToAstConverter {
     return command;
   }
 
-  private fromForkSubQuery(ctx: cst.ForkSubQueryContext): ast.ESQLAstQueryExpression {
+  private fromForkSubQuery(ctx: cst.ForkSubQueryContext): ast.ESQLParens {
     const commands: ast.ESQLCommand[] = [];
     const collectCommand = (cmdCtx: cst.ForkSubQueryProcessingCommandContext) => {
       const processingCommandCtx = cmdCtx.processingCommand();
@@ -1744,10 +1744,25 @@ export class CstToAstConverter {
 
     commands.reverse();
 
-    const parserFields = this.getParserFields(ctx);
-    const query = Builder.expression.query(commands, parserFields);
+    const openParen = ctx.LP();
+    const closeParen = ctx.RP();
 
-    return query;
+    const closeParenText = closeParen?.getText() ?? '';
+    const hasCloseParen = closeParen && !/<missing /.test(closeParenText);
+    const incomplete = Boolean(ctx.exception) || !hasCloseParen;
+
+    const query = Builder.expression.query(commands, {
+      ...this.getParserFields(ctx),
+      incomplete,
+    });
+
+    return Builder.expression.parens(query, {
+      incomplete: incomplete || query.incomplete,
+      location: getPosition(
+        openParen?.symbol ?? ctx.start,
+        hasCloseParen ? closeParen.symbol : ctx.stop
+      ),
+    });
   }
 
   // -------------------------------------------------------------- expressions
