@@ -41,8 +41,26 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     });
   });
 
-  while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    await runNode(params);
-    await params.workflowLogger.flushEvents();
+  const mainTask = async () => {
+    while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
+      await runNode(params);
+    }
+  };
+
+  const persistenceTask = async () => {
+    while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
+      await Promise.all([
+        params.workflowExecutionState.flush(),
+        params.workflowLogger.flushEvents(),
+      ]);
+      await new Promise((resolve) => setTimeout(resolve, 500)); // 1 second interval
+    }
+  };
+  try {
+    await Promise.all([mainTask(), persistenceTask()]);
+  } catch (error) {
+    params.workflowRuntime.setWorkflowError(error as Error);
+  } finally {
+    await Promise.all([params.workflowExecutionState.flush(), params.workflowLogger.flushEvents()]);
   }
 }
