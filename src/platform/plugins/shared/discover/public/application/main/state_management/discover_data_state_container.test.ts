@@ -76,11 +76,14 @@ describe('test getDataStateContainer', () => {
     });
 
     expect(resolveDataSourceProfileSpy).toHaveBeenCalledTimes(1);
-    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
-      dataSource: stateContainer.appState.get().dataSource,
-      dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
-      query: stateContainer.appState.get().query,
-    });
+    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith(
+      {
+        dataSource: stateContainer.appState.get().dataSource,
+        dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
+        query: stateContainer.appState.get().query,
+      },
+      expect.any(Function)
+    );
     expect(dataState.data$.totalHits$.value.result).toBe(0);
     expect(dataState.data$.documents$.value.result).toEqual([]);
 
