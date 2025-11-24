@@ -91,7 +91,11 @@ export class EntityStoreESQLService {
       (await getEntityStoreLastExecutionTime(this.soClient, type, this.namespace)) ||
       defaultLookback();
 
-    const now = moment().utc().subtract(1, 'minute').toISOString();
+    const now = moment().toISOString();
+
+    this.logger.info(
+      `[Entity Store ESQL] [${type}-${this.namespace}] Searching from ${lastExecutionTime} to ${now}`
+    );
 
     const query = await buildESQLQuery(
       this.namespace,
@@ -102,8 +106,6 @@ export class EntityStoreESQLService {
       now
     );
 
-    this.logger.info(`Running entity store query for type ${type}`);
-
     const docs = await executeEsqlQuery(this.esClient, query, this.logger);
 
     await storeEntityStoreDocs(this.esClient, type, this.namespace, docs);
@@ -111,7 +113,7 @@ export class EntityStoreESQLService {
     await updateEntityStoreLastExecutionTime(this.soClient, type, this.namespace, now);
 
     this.logger.info(
-      `Processed ${docs.length} entities for type ${type} on namespace ${this.namespace}`
+      `[Entity Store ESQL] [${type}-${this.namespace}] Processed ${docs.length} entities for type`
     );
   }
 }
