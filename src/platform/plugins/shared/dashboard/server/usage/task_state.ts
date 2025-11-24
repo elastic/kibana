@@ -48,6 +48,15 @@ export const stateSchemaByVersion = {
             })
           ),
         }),
+        controls: schema.object({
+          total: schema.number(),
+          by_type: schema.recordOf(
+            schema.string(),
+            schema.object({
+              total: schema.number(),
+            })
+          ),
+        }),
         sections: schema.object({ total: schema.number() }),
       }),
     }),
@@ -64,6 +73,10 @@ export const emptyState: LatestTaskStateSchema = {
       total: 0,
       by_reference: 0,
       by_value: 0,
+      by_type: {},
+    },
+    controls: {
+      total: 0,
       by_type: {},
     },
     sections: {
