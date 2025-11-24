@@ -22,7 +22,19 @@ import { PackagePolicyValidationError } from '../errors';
 import { packageToPackagePolicy } from '.';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
 
-export type SimplifiedVars = Record<string, string | string[] | boolean | number | number[] | null>;
+export type SimplifiedVars = Record<
+  string,
+  | string
+  | string[]
+  | boolean
+  | number
+  | number[]
+  | null
+  | {
+      isSecretRef: boolean;
+      id: string;
+    }
+>;
 
 export type SimplifiedPackagePolicyStreams = Record<
   string,
@@ -54,7 +66,7 @@ export interface SimplifiedPackagePolicy {
   inputs?: SimplifiedInputs;
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
-  additional_datastreams_permissions?: string[];
+  additional_datastreams_permissions?: string[] | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {

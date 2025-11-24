@@ -52,9 +52,6 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar } from './toolbar';
-import { XyStyleSettings } from './toolbar/style_settings';
-import { updateLayer } from './toolbar';
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
@@ -64,23 +61,23 @@ import {
   AnnotationsLayerHeader,
   LayerHeaderContent,
 } from './xy_config_panel/layer_header';
-import {
-  type State,
-  type XYLayerConfig,
-  type XYDataLayerConfig,
-  type SeriesType,
-  visualizationSubtypes,
-  visualizationTypes,
+import type {
+  XYLayerConfig,
+  XYDataLayerConfig,
+  SeriesType,
+  XYByValueAnnotationLayerConfig,
+  XYState,
 } from './types';
+import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
+import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
+import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
   annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
+  getColumnToLabelMap,
 } from './state_helpers';
-import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
-import { getColumnToLabelMap } from './state_helpers';
 import {
   getGroupsAvailableInData,
   getReferenceConfiguration,
@@ -93,6 +90,7 @@ import {
   setAnnotationsDimension,
   getUniqueLabels,
   onAnnotationDrop,
+  defaultAnnotationLabel,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -117,9 +115,6 @@ import {
   isTimeChart,
 } from './visualization_helpers';
 import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
-import type { XYByValueAnnotationLayerConfig, XYState } from './types';
-import { defaultSeriesType } from './types';
-import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
@@ -142,8 +137,8 @@ import {
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel/annotations_panel';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel/reference_line_panel';
 import { convertToRuntimeState } from './runtime_state';
-import { XyLegendSettings } from './toolbar/legend_settings';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { XyStyleSettings, XyLegendSettings, updateLayer } from './toolbar';
 
 const XY_ID = 'lnsXY';
 
@@ -171,7 +166,7 @@ export const getXyVisualization = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
+}): Visualization<XYState, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
   getVisualizationTypeId(state, layerId) {
     const type = getVisualizationType(state, layerId);
@@ -271,7 +266,7 @@ export const getXyVisualization = ({
 
   getDescription,
 
-  switchVisualizationType(seriesType: string, state: State, layerId?: string) {
+  switchVisualizationType(seriesType: string, state: XYState, layerId?: string) {
     const dataLayer = layerId
       ? state.layers.find((l) => l.layerId === layerId)
       : state.layers.at(0);
@@ -709,6 +704,10 @@ export const getXyVisualization = ({
       (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
     );
   },
+
+  isSubtypeSupported(subtype) {
+    return visualizationSubtypes.some(({ id }) => id === subtype);
+  },
   getSubtypeSwitch({ state, setState, layerId }) {
     const index = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[index];
@@ -744,10 +743,6 @@ export const getXyVisualization = ({
       );
     }
     return undefined;
-  },
-
-  ToolbarComponent(props) {
-    return <XyToolbar {...props} />;
   },
 
   FlyoutToolbarComponent(props) {

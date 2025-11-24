@@ -34,11 +34,9 @@ describe('getSupportedShapeTypes', () => {
         type: 'geo_point',
       },
     ]);
-    const descriptor = ESQLSource.createDescriptor({
-      dataViewId: '1234',
+    const esqlSource = new ESQLSource({
       esql: 'from kibana_sample_data_logs | keep geo.coordinates | limit 10000',
     });
-    const esqlSource = new ESQLSource(descriptor);
     expect(await esqlSource.getSupportedShapeTypes()).toEqual([VECTOR_SHAPE_TYPE.POINT]);
   });
 
@@ -49,11 +47,9 @@ describe('getSupportedShapeTypes', () => {
         type: 'geo_shape',
       },
     ]);
-    const descriptor = ESQLSource.createDescriptor({
-      dataViewId: '1234',
+    const esqlSource = new ESQLSource({
       esql: 'from world_countries | keep geometry | limit 10000',
     });
-    const esqlSource = new ESQLSource(descriptor);
     expect(await esqlSource.getSupportedShapeTypes()).toEqual([
       VECTOR_SHAPE_TYPE.POINT,
       VECTOR_SHAPE_TYPE.LINE,
@@ -63,11 +59,9 @@ describe('getSupportedShapeTypes', () => {
 
   test('should fallback to point when geometry column can not be found', async () => {
     mockGetESQLQueryColumnsRaw.mockImplementation(() => []);
-    const descriptor = ESQLSource.createDescriptor({
-      dataViewId: '1234',
+    const esqlSource = new ESQLSource({
       esql: 'from world_countries | keep geometry | limit 10000',
     });
-    const esqlSource = new ESQLSource(descriptor);
     expect(await esqlSource.getSupportedShapeTypes()).toEqual([VECTOR_SHAPE_TYPE.POINT]);
   });
 });

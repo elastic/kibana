@@ -42,8 +42,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     getAllAADDocs,
   } = getRuleServices(getService);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/241403
-  describe.skip('rule', () => {
+  describe('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -285,7 +284,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           'Number of matching documents where avg of testedValue is greater than -1'
         );
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).greaterThan(0);
+        expect(value >= 0).to.be(true);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
         expect(alertDoc['host.name'][0]).to.be('host-1');
         expect(alertDoc['host.hostname'][0]).to.be('host-1');

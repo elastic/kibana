@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { DocumentationGroup } from '../types';
 
 export const getESQLDocsSections = async () => {
-  const groups: Array<{
-    label: string;
-    description?: string;
-    items: Array<{ label: string; description?: JSX.Element }>;
-  }> = [];
+  const groups: DocumentationGroup[] = [];
   const {
     sourceCommands,
     processingCommands,

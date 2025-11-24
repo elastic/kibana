@@ -207,17 +207,31 @@ function getWebhookActionParams(
 
 function getSlackAPIActionParams(
   { defaultActionMessage, defaultRecoveryMessage }: Translations,
-  allowedChannels: Array<{ id: string; name: string }>,
+  allowedChannels: Array<{ id?: string; name: string }>,
   recovery = false
 ): SlackApiActionParams {
   return {
     subAction: 'postMessage',
     subActionParams: {
       text: recovery ? defaultRecoveryMessage : defaultActionMessage,
-      channelIds: allowedChannels.map((channel) => channel.id),
+      channels: getValidChannels(allowedChannels),
     },
   };
 }
+
+const getValidChannels = (allowedChannels: Array<{ id?: string; name: string }>) => {
+  return allowedChannels.reduce((channels, channel) => {
+    if (channel.name) {
+      channels.push(channel.name);
+    }
+
+    if (channel.id) {
+      channels.push(channel.id);
+    }
+
+    return channels;
+  }, [] as string[]);
+};
 
 function getPagerDutyActionParams(
   { defaultActionMessage, defaultRecoveryMessage }: Translations,

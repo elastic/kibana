@@ -64,6 +64,7 @@ export const EPM_API_ROUTES = {
 // Data stream API routes
 export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  DEPRECATED_ILM_CHECK_PATTERN: `${INTERNAL_ROOT}/data_streams/deprecated_ilm_check`,
 };
 
 // Package policy API routes
@@ -189,6 +190,11 @@ export const AGENT_API_ROUTES = {
   DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
   PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/{agentId}/privilege_level_change`,
   BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
+};
+
+export const AGENTLESS_POLICIES_ROUTES = {
+  CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
+  DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
