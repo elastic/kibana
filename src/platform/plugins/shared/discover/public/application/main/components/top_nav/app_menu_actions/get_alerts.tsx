@@ -23,7 +23,6 @@ import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
-import { useAppStateSelector } from '../../../state_management/discover_app_state_container';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -55,13 +54,11 @@ const CreateAlertFlyout: React.FC<{
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
   const timeField = getTimeField(dataView);
+  const { query, savedQuery: savedQueryId } = stateContainer.getCurrentTab().appState;
 
   /**
    * Provides the default parameters used to initialize the new rule
    */
-
-  const query = useAppStateSelector((state) => state.query);
-  const savedQueryId = useAppStateSelector((state) => state.savedQuery);
 
   const getParams = useCallback(() => {
     if (isEsqlMode) {
