@@ -28,7 +28,7 @@ import {
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { getInitialState } from './discover_app_state_container';
+import { getInitialAppState } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
@@ -595,7 +595,7 @@ describe('Discover state', () => {
         savedSearch,
         dataView: undefined,
         initialInternalState: undefined,
-        appState: getInitialState({
+        appState: getInitialAppState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,
@@ -849,7 +849,7 @@ describe('Discover state', () => {
         savedSearch,
         dataView: undefined,
         initialInternalState: undefined,
-        appState: getInitialState({
+        appState: getInitialAppState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,
@@ -883,7 +883,7 @@ describe('Discover state', () => {
         savedSearch,
         dataView: undefined,
         initialInternalState: undefined,
-        appState: getInitialState({
+        appState: getInitialAppState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,
@@ -937,7 +937,7 @@ describe('Discover state', () => {
         savedSearch,
         dataView: undefined,
         initialInternalState: undefined,
-        appState: getInitialState({
+        appState: getInitialAppState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,

@@ -40,7 +40,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { omit } from 'lodash';
 import {
   getCurrentUrlState,
-  getInitialState,
+  getInitialAppState,
 } from '../application/main/state_management/discover_app_state_container';
 
 interface CreateInternalStateStoreMockOptions {
@@ -332,7 +332,7 @@ export function getDiscoverStateMock({
   internalState.dispatch(
     internalStateActions.resetAppState({
       tabId: internalState.getState().tabs.unsafeCurrentId,
-      appState: getInitialState({
+      appState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
         savedSearch: finalSavedSearch,
         services,

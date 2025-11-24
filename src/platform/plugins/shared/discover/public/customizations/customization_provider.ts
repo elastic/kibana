@@ -18,7 +18,7 @@ import type {
   DiscoverCustomizationService,
 } from './customization_service';
 import { createCustomizationService } from './customization_service';
-import { getInitialState } from '../application/main/state_management/discover_app_state_container';
+import { getInitialAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverServices } from '../build_services';
 
 const customizationContext = createContext(createCustomizationService());
@@ -46,7 +46,7 @@ export const getExtendedDiscoverStateContainer = (
 ): ExtendedDiscoverStateContainer => ({
   ...stateContainer,
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
-    return getInitialState({
+    return getInitialAppState({
       initialUrlState: undefined,
       savedSearch: newSavedSearch,
       services,

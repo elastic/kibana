@@ -16,7 +16,7 @@ import {
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import { getInitialState, type AppStateUrl } from '../../discover_app_state_container';
+import { getInitialAppState, type AppStateUrl } from '../../discover_app_state_container';
 import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
 import { appendAdHocDataViews, setDataView } from './data_views';
@@ -206,7 +206,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
 
     // Get the initial app state based on a combo of the URL and persisted tab saved search,
     // then get an updated copy of the saved search with the applied initial state
-    const initialAppState = getInitialState({
+    const initialAppState = getInitialAppState({
       initialUrlState: urlAppState,
       savedSearch: persistedTabSavedSearch,
       overrideDataView: dataView,

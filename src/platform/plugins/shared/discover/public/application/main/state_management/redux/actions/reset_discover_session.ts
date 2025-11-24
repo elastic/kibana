@@ -18,7 +18,7 @@ import {
 import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './data_views';
 import { updateTabs } from './tabs';
-import { getInitialState } from '../../discover_app_state_container';
+import { getInitialAppState } from '../../discover_app_state_container';
 import type { DiscoverAppState } from '../types';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
@@ -69,7 +69,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
           tabStateContainer.savedSearchState.set(savedSearch);
 
-          initialAppState = getInitialState({
+          initialAppState = getInitialAppState({
             initialUrlState: undefined,
             savedSearch,
             services,

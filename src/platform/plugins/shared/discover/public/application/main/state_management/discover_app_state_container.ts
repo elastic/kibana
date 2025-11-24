@@ -39,7 +39,7 @@ export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: 
   );
 }
 
-export function getInitialState({
+export function getInitialAppState({
   initialUrlState,
   savedSearch,
   overrideDataView,
