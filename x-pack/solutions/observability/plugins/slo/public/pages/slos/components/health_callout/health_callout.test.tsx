@@ -8,7 +8,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { HealthCallout } from './health_callout';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 
@@ -40,6 +40,7 @@ const mockSlo1: SLOWithSummaryResponse = {
     },
     status: 'HEALTHY',
   },
+  instanceId: ALL_VALUE,
 } as SLOWithSummaryResponse;
 
 const mockSlo2: SLOWithSummaryResponse = {
@@ -53,8 +54,27 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'unhealthy', summary: 'healthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: {
+              isProblematic: true,
+              missing: false,
+              status: 'unhealthy',
+              state: 'started',
+              stateMatches: true,
+            },
+            summary: {
+              isProblematic: false,
+              missing: false,
+              status: 'healthy',
+              state: 'started',
+              stateMatches: true,
+            },
+          },
         },
       ],
     });
@@ -74,8 +94,27 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'healthy', summary: 'unhealthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: {
+              isProblematic: false,
+              missing: false,
+              status: 'healthy',
+              state: 'started',
+              stateMatches: true,
+            },
+            summary: {
+              isProblematic: true,
+              missing: false,
+              status: 'unhealthy',
+              state: 'started',
+              stateMatches: true,
+            },
+          },
         },
       ],
     });
@@ -95,8 +134,26 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'missing', summary: 'healthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: {
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
+            },
+            summary: {
+              isProblematic: false,
+              missing: false,
+              status: 'healthy',
+              state: 'started',
+              stateMatches: true,
+            },
+          },
         },
       ],
     });
@@ -116,8 +173,26 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'healthy', summary: 'missing' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: {
+              isProblematic: false,
+              missing: false,
+              status: 'healthy',
+              state: 'started',
+              stateMatches: true,
+            },
+            summary: {
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
+            },
+          },
         },
       ],
     });
@@ -137,8 +212,27 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'healthy', rollup: 'healthy', summary: 'healthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: false,
+            rollup: {
+              isProblematic: false,
+              missing: false,
+              status: 'healthy',
+              state: 'started',
+              stateMatches: true,
+            },
+            summary: {
+              isProblematic: false,
+              missing: false,
+              status: 'healthy',
+              state: 'started',
+              stateMatches: true,
+            },
+          },
         },
       ],
     });
@@ -156,12 +250,48 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'healthy', summary: 'unhealthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: {
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
+            },
+            summary: {
+              isProblematic: false,
+              missing: false,
+              status: 'healthy',
+              state: 'started',
+              stateMatches: true,
+            },
+          },
         },
         {
-          sloId: '2',
-          health: { overall: 'unhealthy', rollup: 'unhealthy', summary: 'healthy' },
+          id: '2',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 2',
+          health: {
+            isProblematic: true,
+            rollup: {
+              isProblematic: false,
+              missing: false,
+              status: 'healthy',
+              state: 'started',
+              stateMatches: true,
+            },
+            summary: {
+              isProblematic: true,
+              missing: true,
+              status: 'unavailable',
+              state: 'unavailable',
+            },
+          },
         },
       ],
     });
