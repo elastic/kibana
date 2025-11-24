@@ -114,6 +114,7 @@ describe('createGapFillAutoScheduler()', () => {
         gapFillRange: 'now-1d',
         maxBackfills: 100,
         numRetries: 3,
+        scope: ['scope-1'],
         ruleTypes: [
           { type: 'test-rule-type1', consumer: 'test-consumer' },
           { type: 'test-rule-type2', consumer: 'test-consumer' },
@@ -147,6 +148,7 @@ describe('createGapFillAutoScheduler()', () => {
         gapFillRange: 'now-1d',
         maxBackfills: 100,
         numRetries: 3,
+        scope: ['scope-1'],
         ruleTypes: [
           { type: 'test-rule-type1', consumer: 'test-consumer' },
           { type: 'test-rule-type2', consumer: 'test-consumer' },
@@ -172,6 +174,7 @@ describe('createGapFillAutoScheduler()', () => {
         gapFillRange: 'now-1d',
         maxBackfills: 100,
         numRetries: 3,
+        scope: ['scope-1'],
         ruleTypes: [
           { type: 'test-rule-type1', consumer: 'test-consumer' },
           { type: 'test-rule-type2', consumer: 'test-consumer' },
