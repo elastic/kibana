@@ -47,6 +47,7 @@ import {
   selectEditorYaml,
   selectHasChanges,
   selectIsExecutionsTab,
+  selectIsSavingYaml,
   selectStepExecutions,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -59,6 +60,7 @@ import type { YamlValidationResult } from '../../../features/validate_workflow_y
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
+import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -138,6 +140,7 @@ export const WorkflowYAMLEditor = ({
   const { http, notifications } = useKibana().services;
 
   const saveYaml = useSaveYaml();
+  const isSaving = useSelector(selectIsSavingYaml);
   const dispatch = useDispatch();
   const onChange = useCallback(
     (yaml: string) => {
@@ -160,6 +163,10 @@ export const WorkflowYAMLEditor = ({
   const stepExecutions = useSelector(selectStepExecutions);
   const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
   stepExecutionsRef.current = stepExecutions;
+
+  // Ref to track saving state for keyboard handlers
+  const isSavingRef = useRef<boolean>(false);
+  isSavingRef.current = isSaving;
 
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
@@ -187,6 +194,11 @@ export const WorkflowYAMLEditor = ({
 
   // Only show debug features in development
   const isDevelopment = process.env.NODE_ENV !== 'production';
+
+  // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
+  useEffect(() => {
+    interceptMonacoYamlProvider();
+  }, []);
 
   // Validation
   const { jsonSchema: workflowJsonSchemaStrict, uri: workflowSchemaUriStrict } =
@@ -245,9 +257,19 @@ export const WorkflowYAMLEditor = ({
   // they should not have any dependencies, so they are not affected by the changes in the component
   const keyboardHandlers = useMemo(
     () => ({
-      save: () => saveYaml(),
+      save: () => {
+        if (isSavingRef.current) {
+          return;
+        }
+        saveYaml();
+      },
       run: () => dispatch(setIsTestModalOpen(true)),
-      saveAndRun: () => saveYaml().then(() => dispatch(setIsTestModalOpen(true))),
+      saveAndRun: () => {
+        if (isSavingRef.current) {
+          return;
+        }
+        saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
+      },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
