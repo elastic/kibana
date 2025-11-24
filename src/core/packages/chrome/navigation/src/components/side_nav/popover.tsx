@@ -41,11 +41,11 @@ export interface PopoverProps {
   children?: ReactNode | ((closePopover: () => void) => ReactNode);
   container?: HTMLElement;
   hasContent: boolean;
-  isAnyPopoverOpen: boolean;
   isSidePanelOpen: boolean;
+  isAnyPopoverLocked?: boolean;
+  setIsLocked?: (isLocked: boolean) => void;
   label: string;
   persistent?: boolean;
-  setAnyPopoverOpen: (isOpen: boolean) => void;
   trigger: ReactElement<{
     ref?: Ref<HTMLElement>;
     onClick?: (e: MouseEvent) => void;
@@ -68,11 +68,11 @@ export const Popover = ({
   children,
   container,
   hasContent,
-  isAnyPopoverOpen,
   isSidePanelOpen,
+  isAnyPopoverLocked = false,
+  setIsLocked = () => {},
   label,
   persistent = false,
-  setAnyPopoverOpen,
   trigger,
 }: PopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -85,52 +85,48 @@ export const Popover = ({
   const [isOpen, setIsOpen] = useState(false);
   const [shouldFocusOnOpen, setShouldFocusOnOpen] = useState(false);
 
+  useEffect(() => {
+    if (persistent) {
+      setIsLocked(isOpenedByClick && isOpen);
+    }
+  }, [persistent, isOpenedByClick, isOpen, setIsLocked]);
+
   const setOpenedByClick = useCallback(() => setIsOpenedByClick(true), []);
 
   const clearOpenedByClick = useCallback(() => setIsOpenedByClick(false), []);
 
   const open = useCallback(() => {
     setIsOpen(true);
-    setAnyPopoverOpen(true);
-  }, [setAnyPopoverOpen]);
+  }, []);
 
   const close = useCallback(() => {
     setIsOpen(false);
     clearOpenedByClick();
     clearHoverTimeout();
     setShouldFocusOnOpen(false);
-    setAnyPopoverOpen(false);
-  }, [clearOpenedByClick, clearHoverTimeout, setAnyPopoverOpen]);
+  }, [clearOpenedByClick, clearHoverTimeout]);
 
   const handleClose = useCallback(() => {
     clearHoverTimeout();
     close();
   }, [clearHoverTimeout, close]);
 
-  const tryOpen = useCallback(() => {
-    if (!isSidePanelOpen && !isAnyPopoverOpen) {
-      open();
-    }
-  }, [isAnyPopoverOpen, isSidePanelOpen, open]);
-
   const handleMouseEnter = useCallback(() => {
-    if (!persistent || !isOpenedByClick) {
+    if ((!persistent || !isOpenedByClick) && (!isAnyPopoverLocked || isOpen)) {
       clearHoverTimeout();
-      if (isAnyPopoverOpen) {
-        setHoverTimeout(tryOpen, POPOVER_HOVER_DELAY);
-      } else if (!isSidePanelOpen) {
+      if (!isSidePanelOpen) {
         setHoverTimeout(open, POPOVER_HOVER_DELAY);
       }
     }
   }, [
     persistent,
     isOpenedByClick,
-    isAnyPopoverOpen,
+    isAnyPopoverLocked,
+    isOpen,
     isSidePanelOpen,
     clearHoverTimeout,
     open,
     setHoverTimeout,
-    tryOpen,
   ]);
 
   const handleMouseLeave = useCallback(() => {
