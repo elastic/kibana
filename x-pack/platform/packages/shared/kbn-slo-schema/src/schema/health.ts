@@ -34,4 +34,5 @@ const transformHealthSchema = t.intersection([
   }),
 ]);
 
+export type TransformHealthResponse = t.OutputOf<typeof transformHealthSchema>;
 export { transformHealthSchema };

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { HealthCallout } from './health_callout';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import {
+  aHealthyTransformHealth,
+  aMissingTransformHealth,
+  anUnhealthyTransformHealth,
+} from '../../../../data/slo/health';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
+import { HealthCallout } from './health_callout';
 
 jest.mock('../../../../hooks/use_fetch_slo_health');
 
@@ -60,20 +65,8 @@ describe('HealthCallout', () => {
           name: 'Test SLO 1',
           health: {
             isProblematic: true,
-            rollup: {
-              isProblematic: true,
-              missing: false,
-              status: 'unhealthy',
-              state: 'started',
-              stateMatches: true,
-            },
-            summary: {
-              isProblematic: false,
-              missing: false,
-              status: 'healthy',
-              state: 'started',
-              stateMatches: true,
-            },
+            rollup: anUnhealthyTransformHealth,
+            summary: aHealthyTransformHealth,
           },
         },
       ],
@@ -100,20 +93,8 @@ describe('HealthCallout', () => {
           name: 'Test SLO 1',
           health: {
             isProblematic: true,
-            rollup: {
-              isProblematic: false,
-              missing: false,
-              status: 'healthy',
-              state: 'started',
-              stateMatches: true,
-            },
-            summary: {
-              isProblematic: true,
-              missing: false,
-              status: 'unhealthy',
-              state: 'started',
-              stateMatches: true,
-            },
+            rollup: aHealthyTransformHealth,
+            summary: anUnhealthyTransformHealth,
           },
         },
       ],
@@ -140,19 +121,8 @@ describe('HealthCallout', () => {
           name: 'Test SLO 1',
           health: {
             isProblematic: true,
-            rollup: {
-              isProblematic: true,
-              missing: true,
-              status: 'unavailable',
-              state: 'unavailable',
-            },
-            summary: {
-              isProblematic: false,
-              missing: false,
-              status: 'healthy',
-              state: 'started',
-              stateMatches: true,
-            },
+            rollup: aMissingTransformHealth,
+            summary: aHealthyTransformHealth,
           },
         },
       ],
@@ -179,19 +149,8 @@ describe('HealthCallout', () => {
           name: 'Test SLO 1',
           health: {
             isProblematic: true,
-            rollup: {
-              isProblematic: false,
-              missing: false,
-              status: 'healthy',
-              state: 'started',
-              stateMatches: true,
-            },
-            summary: {
-              isProblematic: true,
-              missing: true,
-              status: 'unavailable',
-              state: 'unavailable',
-            },
+            rollup: aHealthyTransformHealth,
+            summary: aMissingTransformHealth,
           },
         },
       ],
@@ -218,20 +177,8 @@ describe('HealthCallout', () => {
           name: 'Test SLO 1',
           health: {
             isProblematic: false,
-            rollup: {
-              isProblematic: false,
-              missing: false,
-              status: 'healthy',
-              state: 'started',
-              stateMatches: true,
-            },
-            summary: {
-              isProblematic: false,
-              missing: false,
-              status: 'healthy',
-              state: 'started',
-              stateMatches: true,
-            },
+            rollup: aHealthyTransformHealth,
+            summary: aHealthyTransformHealth,
           },
         },
       ],
@@ -256,19 +203,8 @@ describe('HealthCallout', () => {
           name: 'Test SLO 1',
           health: {
             isProblematic: true,
-            rollup: {
-              isProblematic: true,
-              missing: true,
-              status: 'unavailable',
-              state: 'unavailable',
-            },
-            summary: {
-              isProblematic: false,
-              missing: false,
-              status: 'healthy',
-              state: 'started',
-              stateMatches: true,
-            },
+            rollup: anUnhealthyTransformHealth,
+            summary: aHealthyTransformHealth,
           },
         },
         {
@@ -278,19 +214,8 @@ describe('HealthCallout', () => {
           name: 'Test SLO 2',
           health: {
             isProblematic: true,
-            rollup: {
-              isProblematic: false,
-              missing: false,
-              status: 'healthy',
-              state: 'started',
-              stateMatches: true,
-            },
-            summary: {
-              isProblematic: true,
-              missing: true,
-              status: 'unavailable',
-              state: 'unavailable',
-            },
+            rollup: aHealthyTransformHealth,
+            summary: aMissingTransformHealth,
           },
         },
       ],
