@@ -22,6 +22,7 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
     lifecycle: { inherit: {} },
     processing: { steps: [] },
     settings: {},
+    failure_store: { inherit: {} },
   },
 };
 

@@ -85,6 +85,7 @@ export const PER_PACKAGE_ALLOWED_LICENSES = {
   'dompurify@3.2.4': ['(MPL-2.0 OR Apache-2.0)'],
   '@img/sharp-libvips-linuxmusl-x64@1.2.3': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linux-x64@1.2.3': ['LGPL-3.0-or-later'],
+  'dompurify@3.3.0': ['(MPL-2.0 OR Apache-2.0)'],
 };
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
