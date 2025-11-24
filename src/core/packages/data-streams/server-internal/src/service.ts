@@ -94,7 +94,7 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
     await Promise.all(setupPromises);
   }
 
-  async start({ elasticsearch }: StartDeps) {
+  async start({ elasticsearch }: StartDeps): Promise<DataStreamsStart> {
     const elasticsearchClient = elasticsearch.client.asInternalUser;
     await this.initializeAllDataStreams(elasticsearchClient);
 
