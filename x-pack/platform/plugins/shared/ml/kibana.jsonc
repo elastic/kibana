@@ -33,7 +33,8 @@
       "savedSearch",
       "contentManagement",
       "presentationUtil",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "fileUpload"
     ],
     "optionalPlugins": [
       "alerting",
