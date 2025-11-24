@@ -11,3 +11,5 @@ canvas-confetti
 @types/canvas-confetti
 undici
 ajv-formats
+dompurify
+magic-bytes.js
