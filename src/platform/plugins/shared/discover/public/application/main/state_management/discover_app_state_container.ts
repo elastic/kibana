@@ -7,95 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
+import type { Filter, FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isOfAggregateQueryType } from '@kbn/es-query';
-import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
-import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import defaultComparator from 'fast-deep-equal';
 import type { DiscoverServices } from '../../../build_services';
 import { cleanupUrlState } from './utils/cleanup_url_state';
 import { getStateDefaults } from './utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import type { DiscoverDataSource } from '../../../../common/data_sources';
 import { createEsqlDataSource, isEsqlSource } from '../../../../common/data_sources';
 import { useCurrentTabSelector } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
-
-export interface DiscoverAppState {
-  /**
-   * Columns displayed in the table
-   */
-  columns?: string[];
-  /**
-   * Array of applied filters
-   */
-  filters?: Filter[];
-  /**
-   * Data Grid related state
-   */
-  grid?: DiscoverGridSettings;
-  /**
-   * Hide chart
-   */
-  hideChart?: boolean;
-
-  /**
-   * The current data source
-   */
-  dataSource?: DiscoverDataSource;
-  /**
-   * Used interval of the histogram
-   */
-  interval?: string;
-  /**
-   * Lucence or KQL query
-   */
-  query?: Query | AggregateQuery;
-  /**
-   * Array of the used sorting [[field,direction],...]
-   */
-  sort?: string[][];
-  /**
-   * id of the used saved query
-   */
-  savedQuery?: string;
-  /**
-   * Table view: Documents vs Field Statistics
-   */
-  viewMode?: VIEW_MODE;
-  /**
-   * Hide mini distribution/preview charts when in Field Statistics mode
-   */
-  hideAggregatedPreview?: boolean;
-  /**
-   * Document explorer row height option
-   */
-  rowHeight?: number;
-  /**
-   * Document explorer header row height option
-   */
-  headerRowHeight?: number;
-  /**
-   * Number of rows in the grid per page
-   */
-  rowsPerPage?: number;
-  /**
-   * Custom sample size
-   */
-  sampleSize?: number;
-  /**
-   * Breakdown field of chart
-   */
-  breakdownField?: string;
-  /**
-   * Density of table
-   */
-  density?: DataGridDensity;
-}
+import type { DiscoverAppState } from './redux';
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   /**

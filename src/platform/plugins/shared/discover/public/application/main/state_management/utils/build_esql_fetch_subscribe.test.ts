@@ -22,7 +22,7 @@ import { FetchStatus } from '../../../types';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { internalStateActions } from '../redux';
-import type { DiscoverAppState } from '../discover_app_state_container';
+import type { DiscoverAppState } from '../redux';
 import { dataViewAdHoc } from '../../../../__mocks__/data_view_complex';
 
 async function getTestProps(

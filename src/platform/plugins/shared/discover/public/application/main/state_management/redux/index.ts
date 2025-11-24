@@ -39,6 +39,7 @@ export {
   type DiscoverInternalState,
   type TabState,
   type TabStateGlobalState,
+  type DiscoverAppState,
   type InternalStateDataRequestParams,
 } from './types';
 

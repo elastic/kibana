@@ -15,7 +15,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
 
-export type { DiscoverAppState } from './application/main/state_management/discover_app_state_container';
+export type { DiscoverAppState } from './application/main/state_management/redux';
 export type { DataDocumentsMsg } from './application/main/state_management/discover_data_state_container';
 export type { DiscoverContainerProps } from './components/discover_container';
 export type {

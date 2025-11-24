@@ -16,11 +16,8 @@ import {
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import {
-  getInitialState,
-  type AppStateUrl,
-  type DiscoverAppState,
-} from '../../discover_app_state_container';
+import { getInitialState, type AppStateUrl } from '../../discover_app_state_container';
+import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
 import { appendAdHocDataViews, setDataView } from './data_views';
 import { cleanupUrlState } from '../../utils/cleanup_url_state';

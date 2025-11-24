@@ -20,7 +20,7 @@ import {
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiscoverAppState } from '../discover_app_state_container';
+import type { DiscoverAppState } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';

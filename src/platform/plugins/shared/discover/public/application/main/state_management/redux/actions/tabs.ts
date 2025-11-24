@@ -18,7 +18,7 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import type { OpenInNewTabParams } from '../../../../../context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import { type TabState } from '../types';
+import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
@@ -36,7 +36,6 @@ import {
   GLOBAL_STATE_URL_KEY,
   NEW_TAB_ID,
 } from '../../../../../../common/constants';
-import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
