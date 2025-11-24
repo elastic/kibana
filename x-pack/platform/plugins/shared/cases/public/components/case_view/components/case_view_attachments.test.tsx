@@ -20,12 +20,6 @@ import * as similarCasesHook from '../../../containers/use_get_similar_cases';
 import { useCaseObservables } from '../use_case_observables';
 
 jest.mock('../../../containers/api');
-
-// Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
-// correct type inference, but it's actually a `memo(forwardRef())` component, which is hard to mock
-jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn(() => <div data-test-subj="alerts-table" />),
-}));
 jest.mock('../../../containers/use_get_case_file_stats');
 jest.mock('../../../common/navigation/hooks');
 jest.mock('../use_case_observables', () => ({
