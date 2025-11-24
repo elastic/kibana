@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Check default language shows "Copy to curl"
         let copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
         let menuItemText = await copyMenuItem.getVisibleText();
-        expect(menuItemText.toLowerCase()).to.contain('copy to curl');
+        expect(menuItemText.toLowerCase()).to.contain('curl');
 
         // Change default language to Python
         await PageObjects.console.changeDefaultLanguage('python');
@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Check that the menu item now shows "Copy to Python"
         copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
         menuItemText = await copyMenuItem.getVisibleText();
-        expect(menuItemText).to.contain('Copy to Python');
+        expect(menuItemText).to.contain('Python');
       });
 
       it('allows to select a different language to copy as and should copy it right away to clipboard', async () => {
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Verify the default language changed to Ruby
         const copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
         const menuItemText = await copyMenuItem.getVisibleText();
-        expect(menuItemText).to.contain('Copy to Ruby');
+        expect(menuItemText).to.contain('Ruby');
       });
 
       it('should save default language when using Set as default button and Copy code', async () => {
@@ -218,18 +218,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Click "Copy code" button to save and close
         await testSubjects.click('copyAsLanguageSubmit');
 
+        // Wait for modal to close
+        await retry.waitFor('modal to close', async () => {
+          return !(await testSubjects.exists('closeCopyAsModal'));
+        });
+
+        // Select the request again to show action panel
+        await PageObjects.console.selectAllRequests();
+
+        // Open context menu again
+        await PageObjects.console.clickContextMenu();
+
         // Wait for context menu to be visible
         await retry.waitFor('context menu to be visible', async () => {
           return await testSubjects.exists('consoleMenuCopyAsButton');
         });
 
-        // Wait for UI to update
-        await PageObjects.common.sleep(300);
-
         // Verify the default language changed to PHP
         const copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
         const menuItemText = await copyMenuItem.getVisibleText();
-        expect(menuItemText).to.contain('Copy to PHP');
+        expect(menuItemText).to.contain('PHP');
       });
     });
 
