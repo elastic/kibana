@@ -41,7 +41,7 @@ export class FindSLODefinitions {
         scopedClusterClient: this.scopedClusterClient,
       });
 
-      const healthBySloId = keyBy(healthResults, 'sloId');
+      const healthBySloId = keyBy(healthResults, (health) => health.id);
       const definitionsWithHealth = definitions.map((definition) => {
         return {
           ...definition,
