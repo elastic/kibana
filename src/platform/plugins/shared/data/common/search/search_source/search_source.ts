@@ -437,7 +437,6 @@ export class SearchSource {
       return { typeCounts: new Map(), rawTypes: [] };
     }
 
-    // Analyze the BUILT ES query (not the high-level Kibana Query object)
     return analyzeMultiMatchTypes(this.lastBuiltQuery);
   }
 
