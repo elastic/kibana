@@ -69,18 +69,31 @@ export class SearchGettingStartedPlugin
   }
 
   public start(core: CoreStart) {
-    // Create a subscription for the value of our feature flag
-    this.featureFlagSubscription = core.featureFlags
-      .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, false)
-      .subscribe((featureFlagEnabled) => {
-        const status: AppStatus = featureFlagEnabled
-          ? AppStatus.accessible
-          : AppStatus.inaccessible;
-        // This will update the Kibana application's status based on the current value of the feature flag
+    // Combine both feature flag and user role checks
+    core.userProfile.getCurrent().then((userProfile) => {
+      const userRoles = userProfile?.user.roles || [];
+      const isViewerRole = userRoles.length === 1 && userRoles.includes('viewer');
+
+      // If viewer role, keep app inaccessible permanently
+      if (isViewerRole) {
         this.appUpdater$.next(() => ({
-          status,
+          status: AppStatus.inaccessible,
         }));
-      });
+      } else {
+        // Subscribe to feature flag changes (only matters if not a viewer)
+        this.featureFlagSubscription = core.featureFlags
+          .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, false)
+          .subscribe((featureFlagEnabled) => {
+            const status: AppStatus = featureFlagEnabled
+              ? AppStatus.accessible
+              : AppStatus.inaccessible;
+            this.appUpdater$.next(() => ({
+              status,
+            }));
+          });
+      }
+    });
+
     return {};
   }
 
