@@ -302,13 +302,30 @@ export default function (providerContext: FtrProviderContextWithServices) {
           ],
         })
         .expect(200);
-      await waitForTask();
-      // Check that agent5 upgrade was retried
-      const res = await supertest
-        .get('/api/fleet/agents/agent5')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
-      expect(res.body.item.upgrade_attempts.length).to.eql(2);
+
+      await new Promise((resolve, reject) => {
+        let attempts = 0;
+        const intervalId = setInterval(async () => {
+          if (attempts > 10) {
+            clearInterval(intervalId);
+            reject(new Error('wait timed out'));
+          }
+          ++attempts;
+
+          // Check that agent5 upgrade was retried
+          const res = await supertest
+            .get('/api/fleet/agents/agent5')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+          if (res.body.item.upgrade_attempts.length > 1) {
+            expect(res.body.item.upgrade_attempts.length).to.be(2);
+            clearInterval(intervalId);
+            resolve({});
+          }
+        }, 3000);
+      }).catch((e) => {
+        throw e;
+      });
     });
   });
 }

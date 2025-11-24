@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const ID = '_id';
+
 export const TIMESTAMP_US = 'timestamp.us';
 export const AT_TIMESTAMP = '@timestamp';
 export const AGENT = 'agent';
