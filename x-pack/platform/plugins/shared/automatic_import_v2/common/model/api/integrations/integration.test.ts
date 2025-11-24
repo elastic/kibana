@@ -14,7 +14,6 @@ import {
   GetAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationResponse,
   GetAutoImportIntegrationsResponse,
-  StopAutoImportIntegrationRequestParams,
   UpdateAutoImportIntegrationRequestBody,
   UpdateAutoImportIntegrationRequestParams,
 } from './integration.gen';
@@ -867,51 +866,6 @@ describe('integration schemas', () => {
       };
 
       const result = DeleteAutoImportIntegrationRequestParams.safeParse(payload);
-      expectParseSuccess(result);
-
-      expect(result.data).toEqual({
-        integration_id: 'integration-123',
-      });
-    });
-  });
-
-  describe('StopAutoImportIntegrationRequestParams', () => {
-    it('requires integration_id', () => {
-      const result = StopAutoImportIntegrationRequestParams.safeParse({});
-      expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
-    });
-
-    it('rejects empty integration_id', () => {
-      const payload = {
-        integration_id: '   ',
-      };
-
-      const result = StopAutoImportIntegrationRequestParams.safeParse(payload);
-      expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
-    });
-
-    it('accepts valid params', () => {
-      const payload = {
-        integration_id: 'integration-123',
-      };
-
-      const result = StopAutoImportIntegrationRequestParams.safeParse(payload);
-      expectParseSuccess(result);
-
-      expect(result.data).toEqual(payload);
-    });
-
-    it('strips unknown properties', () => {
-      const payload = {
-        integration_id: 'integration-123',
-        unknown: 'property',
-      };
-
-      const result = StopAutoImportIntegrationRequestParams.safeParse(payload);
       expectParseSuccess(result);
 
       expect(result.data).toEqual({

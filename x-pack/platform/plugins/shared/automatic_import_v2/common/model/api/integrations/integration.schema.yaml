@@ -218,25 +218,3 @@ paths:
           description: The integration is deleted.
         404:
           description: The integration is not found.
-  /internal/automatic_import/integrations/{integration_id}/stop:
-    post:
-      summary: Stops an integration by its id.
-      operationId: StopAutoImportIntegration
-      x-codegen-enabled: true
-      x-internal: true
-      description: >-
-        Stops an integration by its id.
-      tags:
-        - Automatic Import Integrations
-      parameters:
-        - name: integration_id
-          in: path
-          required: true
-          description: The integration identifier
-          schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
-      responses:
-        200:
-          description: The integration is stopped.
-        404:
-          description: The integration is not found.

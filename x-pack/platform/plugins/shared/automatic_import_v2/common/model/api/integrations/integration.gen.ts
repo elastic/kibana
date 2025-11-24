@@ -115,19 +115,6 @@ export const GetAutoImportIntegrationResponse = z.object({
 export type GetAutoImportIntegrationsResponse = z.infer<typeof GetAutoImportIntegrationsResponse>;
 export const GetAutoImportIntegrationsResponse = z.array(Integration);
 
-export type StopAutoImportIntegrationRequestParams = z.infer<
-  typeof StopAutoImportIntegrationRequestParams
->;
-export const StopAutoImportIntegrationRequestParams = z.object({
-  /**
-   * The integration identifier
-   */
-  integration_id: NonEmptyString,
-});
-export type StopAutoImportIntegrationRequestParamsInput = z.input<
-  typeof StopAutoImportIntegrationRequestParams
->;
-
 export type UpdateAutoImportIntegrationRequestParams = z.infer<
   typeof UpdateAutoImportIntegrationRequestParams
 >;
