@@ -18,6 +18,14 @@ export interface EditorExtensions {
   recommendedFields: RecommendedField[];
 }
 
+interface QueryTemplate {
+  label: string;
+  description: string;
+  queryString: string;
+  sortText?: string;
+  category?: SuggestionCategory;
+}
+
 // Order starts with the simple ones and goes to more complex ones
 
 export const getRecommendedQueriesTemplates = ({
@@ -28,8 +36,8 @@ export const getRecommendedQueriesTemplates = ({
   fromCommand: string;
   timeField?: string;
   categorizationField?: string;
-}) => {
-  const queries = [
+}): QueryTemplate[] => {
+  const queries: QueryTemplate[] = [
     {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.label', {
         defaultMessage: 'Search all fields',
