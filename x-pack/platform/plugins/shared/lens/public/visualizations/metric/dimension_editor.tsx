@@ -663,7 +663,6 @@ const supportingVisualization = (state: MetricVisualizationState) =>
   state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'panel';
 
 function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps) {
-  const euiThemeContext = useEuiTheme();
   const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
   const setColor = useCallback(
     (color: string) => {
@@ -679,7 +678,7 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
 
   // Show static color control in Primary Metric editor when is not numeric.
   // Non-numeric metrics do not support the "Supporting visualization" section
-  const showStaticColorControl = !Boolean(isMetricNumeric && state.palette);
+  const showStaticColorControl = !isMetricNumeric && !state.palette;
 
   return (
     <div className="lnsIndexPatternDimensionEditor--padded">
