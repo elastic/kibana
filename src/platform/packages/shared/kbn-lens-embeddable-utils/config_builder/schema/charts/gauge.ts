@@ -121,7 +121,7 @@ export const gaugeStateSchemaNoESQL = schema.object({
   ),
 });
 
-const gaugeStateSchemaESQL = schema.object({
+export const gaugeStateSchemaESQL = schema.object({
   type: schema.literal('gauge'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,

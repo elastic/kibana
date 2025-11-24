@@ -110,7 +110,8 @@ export default ({ getService }: FtrProviderContext) => {
     }
   };
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Integrations Sync', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/243599
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Integrations Sync', () => {
     describe('integrations sync', async () => {
       beforeEach(async () => {
         await esArchiver.load(
