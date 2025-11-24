@@ -1,6 +1,6 @@
 # @kbn/synthtrace
 
-`@kbn/synthtrace` is a tool in technical preview to generate synthetic observability data (APM, logs, infrastructure metrics, and more). It is intended to be used for development and testing of Elastic Observability features in Kibana.
+`@kbn/synthtrace` is a tool to generate synthetic observability data (APM, logs, infrastructure metrics, and more). It is intended to be used for development and testing of Elastic Observability features in Kibana.
 
 At a high-level, the module works by modeling APM events/metricsets with [a fluent API](https://en.wikipedia.org/wiki/Fluent_interface). The models can then be serialized and converted to Elasticsearch documents. In the future we might support APM Server as an output as well.
 
@@ -125,7 +125,7 @@ _Assuming both Elasticsearch and Kibana are running on the default localhost por
 If the Kibana URL differs from the Elasticsearch URL in protocol or hostname, you should explicitly pass the `--kibana` option to the CLI along with `--target`.
 
 For example when running ES (with ssl) and Kibana (without ssl) locally in Serverless mode, it's recommended to provide both `--target` and `--kibana` options as the auto-discovered Kibana URL might not be correct in this case.
-Also use `localhost` instead of `127.0.0.1` as the hostname as `127.0.0.1` will likely not work with self-signed certificates.  
+Also use `localhost` instead of `127.0.0.1` as the hostname as `127.0.0.1` will likely not work with self-signed certificates.
 
 ```sh
 node scripts/synthtrace simple_trace.ts --target=https://elastic_serverless:changeme@localhost:9200 --kibana=http://elastic_serverless:changeme@localhost:5601
@@ -133,7 +133,7 @@ node scripts/synthtrace simple_trace.ts --target=https://elastic_serverless:chan
 
 #### Using CLI for Elastic Cloud URLs
 
-If you are ingesting data to Elastic Cloud, you can pass the `--target` option with the Elastic Cloud URL. The CLI will infer the Kibana URL from the Elasticsearch URL. 
+If you are ingesting data to Elastic Cloud, you can pass the `--target` option with the Elastic Cloud URL. The CLI will infer the Kibana URL from the Elasticsearch URL.
 Or you can pass only `--kibana` and the CLI will infer the Elasticsearch URL from the Kibana URL. Or pass both if URLs are not in default scheme.
 
 ```sh
