@@ -2730,9 +2730,15 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/require_kbn_fs': [
-          'warn',
+          'error',
           {
-            restrictedMethods: ['writeFile', 'writeFileSync', 'createWriteStream'],
+            restrictedMethods: [
+              'writeFile',
+              'writeFileSync',
+              'createWriteStream',
+              'appendFile',
+              'appendFileSync',
+            ],
             disallowedMessage:
               'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
           },
