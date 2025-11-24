@@ -18,6 +18,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
+const MAX_RULES_TO_FETCH = 10000;
 export async function getRuleIdsWithGaps(
   context: RulesClientContext,
   params: GetRuleIdsWithGapsParams
@@ -86,7 +87,7 @@ export async function getRuleIdsWithGaps(
           unique_rule_ids: {
             terms: {
               field: 'rule.id',
-              size: 10000,
+              size: params.maxRulesToFetch ?? MAX_RULES_TO_FETCH,
               order:
                 sortOrder === 'desc'
                   ? { newest_gap_timestamp: 'desc' }

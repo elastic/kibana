@@ -56,6 +56,7 @@ export const cleanupStuckInProgressGaps = async ({
       start: startDate.toISOString(),
       end: now.toISOString(),
       hasInProgressIntervals: true,
+      maxRulesToFetch: MAX_RULES_TO_PROCESS,
     });
 
     if (allRuleIds.length === 0) {
@@ -63,16 +64,13 @@ export const cleanupStuckInProgressGaps = async ({
       return;
     }
 
-    const ruleIdsToProcess = allRuleIds.slice(0, MAX_RULES_TO_PROCESS);
-    logger.debug(
-      `Processing ${ruleIdsToProcess.length} rules (out of ${allRuleIds.length} total) for stuck gap cleanup`
-    );
+    logger.debug(`Processing ${allRuleIds.length} rules for stuck gap cleanup`);
 
     const gapsResponse = await findGapsSearchAfter({
       eventLogClient,
       logger,
       params: {
-        ruleIds: ruleIdsToProcess,
+        ruleIds: allRuleIds,
         start: startDate.toISOString(),
         end: now.toISOString(),
         perPage: MAX_GAPS_TO_PROCESS,

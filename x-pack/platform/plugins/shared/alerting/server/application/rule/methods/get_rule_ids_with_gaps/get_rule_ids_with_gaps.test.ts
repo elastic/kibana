@@ -256,6 +256,45 @@ describe('getRuleIdsWithGaps', () => {
         })
       );
     });
+
+    it('should use the default maxRulesToFetch limit when param not provided', async () => {
+      await rulesClient.getRuleIdsWithGaps(params);
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          aggs: expect.objectContaining({
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                size: 10000,
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should respect custom maxRulesToFetch value', async () => {
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        maxRulesToFetch: 123,
+      });
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          aggs: expect.objectContaining({
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                size: 123,
+              }),
+            }),
+          }),
+        })
+      );
+    });
   });
 
   describe('ruleTypes filter', () => {
