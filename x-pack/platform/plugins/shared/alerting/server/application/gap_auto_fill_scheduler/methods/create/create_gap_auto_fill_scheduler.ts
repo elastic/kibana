@@ -89,7 +89,7 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
       }
     }
 
-    const createdBy = await context.getUserName?.();
+    const createdBy = await context.getUserName();
 
     const now = new Date().toISOString();
     const attributes = transformGapAutoFillSchedulerCreateParamToSavedObject(params, {
