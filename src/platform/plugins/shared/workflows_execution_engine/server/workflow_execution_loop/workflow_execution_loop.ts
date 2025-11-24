@@ -53,7 +53,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
         params.workflowExecutionState.flush(),
         params.workflowLogger.flushEvents(),
       ]);
-      await new Promise((resolve) => setTimeout(resolve, 500)); // 1 second interval
+      await new Promise((resolve) => setTimeout(resolve, 500)); // 0.5 second interval
     }
   };
   try {
