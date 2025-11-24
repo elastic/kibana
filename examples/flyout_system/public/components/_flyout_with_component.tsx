@@ -201,32 +201,6 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                 lobortis. Nam eget bibendum metus, non dictum mauris. Nulla at tellus sagittis,
                 viverra est a, bibendum metus.
               </p>
-              <p>
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
-                qui officia deserunt mollit anim id est laborum.
-              </p>
-              <p>
-                Sed non neque elit. Sed ut imperdiet nisi. Proin condimentum fermentum nunc. Etiam
-                pharetra, erat sed fermentum feugiat, velit mauris egestas quam, ut aliquam massa
-                nisl quis neque. Suspendisse in orci enim augue arcu, molestie vitae vehicula et,
-                feugiat in tellus. Donec convallis lacinia dui, a porttitor lectus condimentum
-                laoreet. Nunc eu ullamcorper orci. Quisque eget odio ac lectus vestibulum faucibus
-                eget in metus. In pellentesque faucibus vestibulum. Nulla at nulla justo, eget
-                luctus tortor. Nulla facilisi. Duis aliquet egestas purus in blandit volutpat.
-                Curabitur vulputate, ligula lacinia scelerisque tempor, lacus lacus ornare ante, ac
-                egestas est urna sit amet arcu.
-              </p>
-              <p>
-                Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos
-                himenaeos. Sed molestie augue sit amet leo consequat posuere. Vestibulum ante ipsum
-                primis in faucibus orci luctus et ultrices posuere cubilia Curae; Proin vel ante a
-                orci tempus eleifend ut et magna. Lorem ipsum dolor sit amet, consectetur adipiscing
-                elit. Vivamus luctus urna sed urna ultricies ac tempor dui sagittis. In condimentum
-                facilisis porta. Sed nec diam eu diam mattis viverra. Nulla fringilla, orci ac
-                euismod semper, magna diam porttitor mauris, quis sollicitudin sapien justo in
-                libero. Fusce sed odio eu odio tincidunt congue sit amet at magna.
-              </p>
             </EuiText>
             {childSize && (
               <>
@@ -254,6 +228,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
       {isChildFlyoutAOpen && (
         <EuiFlyout
           id={`childFlyout-${title}-a`}
+          session="inherit"
           aria-labelledby="childFlyoutATitle"
           size={childSize}
           maxWidth={childMaxWidth}
@@ -294,6 +269,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
       {isChildFlyoutBOpen && (
         <EuiFlyout
           id={`childFlyout-${title}-a`}
+          session="inherit"
           aria-labelledby="childFlyoutBTitle"
           size={childSize}
           maxWidth={childMaxWidth}
