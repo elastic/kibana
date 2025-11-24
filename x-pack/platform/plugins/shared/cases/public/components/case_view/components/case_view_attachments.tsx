@@ -13,7 +13,7 @@ import { useCaseViewNavigation } from '../../../common/navigation';
 import type { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
 import { CaseViewTabs } from '../case_view_tabs';
-import { useCaseViewTabs } from '../use_case_view_tabs';
+import { useCaseAttachmentTabs } from '../use_case_attachment_tabs';
 
 export const CaseViewAttachments = ({
   caseData,
@@ -23,7 +23,7 @@ export const CaseViewAttachments = ({
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
 }>) => {
-  const caseViewTabs = useCaseViewTabs({ caseData, activeTab });
+  const caseViewTabs = useCaseAttachmentTabs({ caseData, activeTab });
   const { navigateToCaseView } = useCaseViewNavigation();
 
   const tabAsSelectableOptions = useMemo(() => {

@@ -9,7 +9,7 @@ import { caseData } from './mocks';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import type { CaseViewTabsProps } from './case_view_tabs';
-import { useCaseViewTabs } from './use_case_view_tabs';
+import { useCaseAttachmentTabs } from './use_case_attachment_tabs';
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import React from 'react';
@@ -40,11 +40,11 @@ export const casePropsWithEvents: CaseViewTabsProps = {
   caseData: { ...caseData, totalEvents: 4 },
 };
 
-describe('useCaseViewTabs()', () => {
-  it('returns basic tabs', async () => {
+describe('useCaseAttachmentTabs()', () => {
+  it('returns basic case attachment tabs', async () => {
     const { result } = renderHook(
       () => {
-        return useCaseViewTabs({ caseData, activeTab: CASE_VIEW_PAGE_TABS.ALERTS });
+        return useCaseAttachmentTabs({ caseData, activeTab: CASE_VIEW_PAGE_TABS.ALERTS });
       },
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,

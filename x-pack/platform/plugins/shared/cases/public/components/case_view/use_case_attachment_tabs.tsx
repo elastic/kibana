@@ -151,7 +151,7 @@ const EventsBadge = ({
 
 EventsBadge.displayName = 'EventsBadge';
 
-export const useCaseViewTabs = ({
+export const useCaseAttachmentTabs = ({
   caseData,
   activeTab,
 }: {
