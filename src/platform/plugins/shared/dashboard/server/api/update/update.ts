@@ -14,27 +14,19 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
-import { read } from '../read/read';
 
 export async function update(
   requestCtx: RequestHandlerContext,
   id: string,
-  { data: updateState }: DashboardUpdateRequestBody
+  updateBody: DashboardUpdateRequestBody
 ): Promise<DashboardUpdateResponseBody> {
-  const { data: currentState } = await read(requestCtx, id);
-  const zippedReferences = [...(updateState.references ?? [])];
-  // todo zip references
-
   const { core } = await requestCtx.resolve(['core']);
+
   const {
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn({
-    ...currentState,
-    ...updateState,
-    references: zippedReferences,
-  });
+  } = transformDashboardIn(updateBody.data);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
