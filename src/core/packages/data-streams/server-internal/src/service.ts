@@ -99,7 +99,7 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
     await this.initializeAllDataStreams(elasticsearchClient);
 
     return {
-      getClient: async <
+      initializeClient: async <
         S extends MappingsDefinition,
         FullDocumentType extends GetFieldsOf<S> = GetFieldsOf<S>,
         SRM extends BaseSearchRuntimeMappings = never
