@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import { Streams, isInheritFailureStore } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
 import { isEqual, noop } from 'lodash';
 import type {
@@ -63,6 +63,10 @@ export function validateRootStreamChanges(
 
   if (isInheritLifecycle(nextStreamDefinition.ingest.lifecycle)) {
     throw new MalformedStreamError('Root stream cannot inherit lifecycle');
+  }
+
+  if (isInheritFailureStore(nextStreamDefinition.ingest.failure_store)) {
+    throw new MalformedStreamError('Root stream cannot inherit failure store');
   }
 }
 
