@@ -110,7 +110,8 @@ export class StreamsApp {
 
   async verifyDocCount(streamName: string, expectedCount: number) {
     await expect(this.page.locator(`[data-test-subj="streamsDocCount-${streamName}"]`)).toHaveText(
-      expectedCount.toString()
+      expectedCount.toString(),
+      { timeout: 250 }
     );
   }
 
