@@ -215,11 +215,9 @@ identify this reference. This guarantees that the id the reference points to alw
 
 ## Model versions [model-versions]
 
-The modelVersion API is a new way to define transformations (*"migrations"*) for your savedObject types, and will
-replace the "old" migration API after Kibana version `8.10.0` (where it will no longer be possible to register
-migrations using the old system).
+Saved Objects support changes using `modelVersions`. The modelVersion API is a new way to define transformations (*'migrations'*) for your savedObject types, and replaces the legacy migration API after {{kib}} version `8.10.0`. The legacy migration API has been deprecated, meaning it is no longer possible to register migrations using the legacy system.
 
-The main purpose of this API is to address two problems of the old migration system regarding managed ("serverless") deployments:
+Model versions are decoupled from the stack version and satisfy the requirements for zero downtime and backward-compatibility:
 
 * classic versioning (using the deprecated [migrations](https://github.com/elastic/kibana/blob/8efc5263142043c40648fe23270a06bb1d6b6234/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L81-L88)) is coupled to the stack versioning (migrations are registered per stack version)
 * migration functions are not safe in regard to our backwards-compatibility and and zero-downtime upgrade requirements (older versions of {{kib}} should continue to work as we run migrations)
@@ -257,10 +255,6 @@ And, unsurprisingly, the existing migration API (which allows to register any ki
 unsafe given our backward compatibility requirements.
 
 ## Defining model versions [defining-model-versions]
-
-Saved Objects support changes using `modelVersions`. The modelVersion API is a new way to define transformations (*'migrations'*) for your savedObject types, and replaces the legacy migration API after {{kib}} version `8.10.0`. The legacy migration API has been deprecated, meaning it is no longer possible to register migrations using the legacy system.
-
-Model versions are decoupled from the stack version and satisfy the requirements for zero downtime and backward-compatibility.
 
 Each Saved Object type may define model versions for its schema and are bound to a given [savedObject type](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L22-L27). Changes to a saved object type are specified by defining a new model.
 
@@ -545,9 +539,9 @@ As a refresher the `create` schema is a `@kbn/config-schema` object-type schema,
 Implementing this schema is optional, but still recommended, as otherwise there will be no validating when importing objects.
 :::
 
-For implementation examples, refer to [Use case examples](#saved-objects-use-case-examples).
+For implementation examples, refer to [Use case examples](#use-case-examples).
 
-### Use-case examples [saved-objects-use-case-examples]
+### Use-case examples
 
 These are example of the migration scenario currently supported (out of the box) by the system.
 
@@ -1214,7 +1208,7 @@ export const foo: SavedObjectsType = {
 
 [2] Set this to `true` to build your own HTTP API and have complete control over the route handler.
 
-## Removing a Saved Object type [removing-saved-object-types]
+## Removing a Saved Object type
 
 When you need to remove a Saved Object type from your plugin, there are important steps to follow to ensure the type name cannot be accidentally reused in the future.
 
@@ -1372,7 +1366,7 @@ These errors are pretty obvious. Model versions must be defined as consecutive n
 ```
 
 **Problem:** You removed a Saved Object type but didn't update the `removed_types.json` file to track the removal.
-**Solution:** Run `node scripts/check_saved_objects --baseline <mergeBase> --fix` locally to automatically update the `removed_types.json` file, then commit the changes. See the [Removing a Saved Object type](#removing-saved-object-types) section for detailed instructions on how to determine the correct merge-base commit.
+**Solution:** Run `node scripts/check_saved_objects --baseline <mergeBase> --fix` locally to automatically update the `removed_types.json` file, then commit the changes. See the [Removing a Saved Object type](#removing-a-saved-object-type) section for detailed instructions on how to determine the correct merge-base commit.
 
 ```shell
 ❌ Cannot re-register previously removed type(s): <soType>. Please use a different name.
