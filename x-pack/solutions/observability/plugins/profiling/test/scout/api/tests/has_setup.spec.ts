@@ -11,16 +11,15 @@ import {
   loadProfilingData,
   setupProfiling,
   getProfilingPackagePolicyIds,
-  deletePackagePolicy,
 } from '../../common/utils/profiling_data';
 
 const esResourcesEndpoint = 'GET /api/profiling/setup/es_resources';
 
 apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ esClient, log, kbnClient }) => {
+  apiTest.beforeAll(async ({ esClient, log, apiServices }) => {
     await cleanUpProfiling({
       es: esClient,
-      kbnClient,
+      apiServices,
       logger: log,
     });
   });
@@ -80,7 +79,7 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () 
   apiTest.beforeAll(async ({ esClient, kbnClient, apiServices, log }) => {
     await cleanUpProfiling({
       es: esClient,
-      kbnClient,
+      apiServices,
       logger: log,
     });
 
@@ -130,15 +129,12 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
     ]);
   });
 
-  apiTest('collector integration missing', async ({ roleBasedApiClient, log, kbnClient }) => {
-    const ids = await getProfilingPackagePolicyIds(kbnClient);
+  apiTest('collector integration missing', async ({ roleBasedApiClient, apiServices }) => {
+    const ids = await getProfilingPackagePolicyIds(apiServices);
     const collectorId = ids.collectorId;
 
-    try {
-      await deletePackagePolicy(kbnClient, collectorId!);
-    } catch (error) {
-      log(`Error deleting collector package policy: ${error}`);
-    }
+    await apiServices.fleet.package_policies.delete(collectorId!);
+
     expect(collectorId).toBeDefined();
 
     const adminRes = await roleBasedApiClient.adminUser({
@@ -161,16 +157,13 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
 
   apiTest(
     'Symbolizer integration is not installed',
-    async ({ roleBasedApiClient, kbnClient, log }) => {
-      const ids = await getProfilingPackagePolicyIds(kbnClient);
+    async ({ roleBasedApiClient, apiServices }) => {
+      const ids = await getProfilingPackagePolicyIds(apiServices);
 
       const symbolizerId = ids.symbolizerId;
 
-      try {
-        await deletePackagePolicy(kbnClient, symbolizerId!);
-      } catch (error) {
-        log(`Error deleting symbolizer package policy: ${error}`);
-      }
+      await apiServices.fleet.package_policies.delete(symbolizerId!);
+
       expect(symbolizerId).toBeDefined();
 
       const adminRes = await roleBasedApiClient.adminUser({

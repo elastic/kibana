@@ -122,13 +122,8 @@ export async function setupProfiling(
   log(`Universal Profiling set up`);
 }
 
-export async function getProfilingPackagePolicyIds(kbnClient: KbnClient) {
-  const res = (await kbnClient.request({
-    method: 'GET',
-    description: 'Get package policies',
-    path: '/api/fleet/package_policies',
-  })) as { data: { items: PackagePolicy[] } };
-
+export async function getProfilingPackagePolicyIds(apiServices: ApiServicesFixture) {
+  const res = await apiServices.fleet.package_policies.get();
   const policies: PackagePolicy[] = res.data.items;
 
   const collector = policies.find((item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME);
@@ -142,11 +137,11 @@ export async function getProfilingPackagePolicyIds(kbnClient: KbnClient) {
 
 export async function cleanUpProfiling({
   es,
-  kbnClient,
+  apiServices,
   logger,
 }: {
   es: Client;
-  kbnClient: KbnClient;
+  apiServices: ApiServicesFixture;
   logger: ToolingLog;
 }) {
   const log = logWithTimer(logger);
@@ -154,7 +149,7 @@ export async function cleanUpProfiling({
 
   const [indices, { collectorId, symbolizerId }] = await Promise.all([
     es.cat.indices({ format: 'json' }),
-    getProfilingPackagePolicyIds(kbnClient),
+    getProfilingPackagePolicyIds(apiServices),
   ]);
 
   const profilingIndices = indices
@@ -169,19 +164,8 @@ export async function cleanUpProfiling({
     es.indices.deleteDataStream({
       name: 'profiling-events*',
     }),
-    collectorId ? await deletePackagePolicy(kbnClient, collectorId) : Promise.resolve(),
-    symbolizerId ? await deletePackagePolicy(kbnClient, symbolizerId) : Promise.resolve(),
+    collectorId ? apiServices.fleet.package_policies.delete(collectorId) : Promise.resolve(),
+    symbolizerId ? apiServices.fleet.package_policies.delete(symbolizerId) : Promise.resolve(),
   ]);
   log('Unloaded Profiling data');
-}
-
-export async function deletePackagePolicy(kbnClient: KbnClient, policy: string) {
-  return await kbnClient.request({
-    method: 'POST',
-    description: 'Delete package policy',
-    path: '/api/fleet/package_policies/delete',
-    body: {
-      packagePolicyIds: [policy],
-    },
-  });
 }
