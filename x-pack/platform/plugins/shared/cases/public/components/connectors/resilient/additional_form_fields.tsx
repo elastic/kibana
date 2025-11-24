@@ -43,14 +43,21 @@ export const AdditionalFormFields = React.memo<{
   });
 
   // We need to filter out read-only fields and the ones that have dedicated form entries
-  const options = useMemo(() => {
+  const options = useMemo<EuiComboBoxOptionOption<string>[]>(() => {
     const fields = fieldsData?.data?.fields || [];
-    return fields.filter(
-      (field) =>
+    return fields.reduce<EuiComboBoxOptionOption<string>[]>((acc, field) => {
+      if (
         field.read_only !== true &&
         field.name !== 'incident_type_ids' &&
         field.name !== 'severity_code'
-    ) as EuiComboBoxOptionOption<string>[];
+      ) {
+        acc.push({
+          label: field.text,
+          value: field.name,
+        });
+      }
+      return acc;
+    }, []);
   }, [fieldsData]);
 
   const [additionalFields, setAdditionalFields] = React.useState<EuiComboBoxOptionOption<string>[]>(
