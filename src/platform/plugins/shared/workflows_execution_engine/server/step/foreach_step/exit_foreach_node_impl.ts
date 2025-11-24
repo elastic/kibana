@@ -33,7 +33,7 @@ export class ExitForeachNodeImpl implements NodeImplementation {
       return;
     }
 
-    await this.stepExecutionRuntime.finishStep();
+    this.stepExecutionRuntime.finishStep();
     this.workflowLogger.logDebug(
       `Exiting foreach step ${this.node.stepId} after processing all items.`,
       {

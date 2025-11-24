@@ -20,7 +20,7 @@ export class EnterTryBlockNodeImpl implements NodeImplementation, NodeWithErrorC
   ) {}
 
   public async run(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
+    this.stepExecutionRuntime.startStep();
     this.wfExecutionRuntimeManager.navigateToNode(this.node.enterNormalPathNodeId);
   }
 
@@ -31,7 +31,7 @@ export class EnterTryBlockNodeImpl implements NodeImplementation, NodeWithErrorC
     const stepState = this.stepExecutionRuntime.getCurrentStepState() || {};
 
     if (!stepState.isFallbackExecuted) {
-      await this.stepExecutionRuntime.setCurrentStepState({
+      this.stepExecutionRuntime.setCurrentStepState({
         ...stepState,
         isFallbackExecuted: true,
         error: this.wfExecutionRuntimeManager.getWorkflowExecution().error, // save error to the state of the enter node
