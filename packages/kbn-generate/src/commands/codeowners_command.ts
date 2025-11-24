@@ -8,6 +8,7 @@
  */
 
 import Fsp from 'fs/promises';
+import Fs from 'fs';
 import Path from 'path';
 
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
@@ -16,6 +17,10 @@ import { getPackages } from '@kbn/repo-packages';
 import type { GenerateCommand } from '../generate_command';
 
 const REL = '.github/CODEOWNERS';
+
+const UNIVERSAL_MAINTENANCE_TEAMS = ['@elastic/kibana-operations'];
+// These paths within every package are co-owned by universal maintenance teams
+const packageCoOwnedPaths = ['moon.yml'];
 
 const GENERATED_START = `####
 ## Everything at the top of the codeowners file is auto generated based on the
@@ -73,18 +78,38 @@ export const CodeownersCommand: GenerateCommand = {
       content = content.slice(0, ultStart);
     }
 
-    // sort genarated entries by directory name
+    // sort generated entries by directory name
     // this improves readability and makes sure that ownership for nested
-    // test plugins is not overriden by the parent package's entry
+    // test plugins is not overridden by the parent package's entry
     pkgs.sort((a, b) => a.directory.localeCompare(b.directory));
+    const packageDirsOwnerships =
+      pkgs
+        .flatMap((pkg) => {
+          const entries = [];
 
-    const newCodeowners = `${GENERATED_START}${pkgs
-      .map(
-        (pkg) =>
-          pkg.normalizedRepoRelativeDir +
-          (pkg.manifest.owner.length ? ' ' + pkg.manifest.owner.join(' ') : '')
-      )
-      .join('\n')}${GENERATED_END}${content}${ULTIMATE_PRIORITY_RULES}`;
+          // team owns the folder
+          const packageOwners = (pkg.manifest.owner || []).join(' ');
+          entries.push(pkg.normalizedRepoRelativeDir + ' ' + packageOwners);
+
+          // team co-owns specific paths within the package
+          const sharedOwnersSet = packageOwners + ' ' + UNIVERSAL_MAINTENANCE_TEAMS.join(' ');
+          packageCoOwnedPaths.forEach((subPath) => {
+            if (Fs.existsSync(Path.join(pkg.directory, subPath))) {
+              const filePath = Path.posix.join(pkg.normalizedRepoRelativeDir, subPath);
+              entries.push(filePath + ' ' + sharedOwnersSet);
+            }
+          });
+          return entries;
+        })
+        .join('\n') + '\n\n';
+
+    const newCodeowners = [
+      GENERATED_START,
+      packageDirsOwnerships,
+      GENERATED_END,
+      content,
+      ULTIMATE_PRIORITY_RULES,
+    ].join('');
 
     if (newCodeowners === oldCodeowners) {
       log.success(`${REL} is already up-to-date`);
