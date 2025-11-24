@@ -44,7 +44,6 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   const mainTask = async () => {
     while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
       await runNode(params);
-      await params.workflowLogger.flushEvents();
     }
   };
 
