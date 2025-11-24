@@ -86,7 +86,7 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
         defaultMessage: 'Click to choose',
       }),
       sortText: '1A',
-      category: SuggestionCategory.TIME_PARAM,
+      category: SuggestionCategory.CUSTOM_ACTION,
       command: {
         id: 'esql.timepicker.choose',
         title: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePicker', {
