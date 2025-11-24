@@ -48,6 +48,19 @@ export const getAddRowControl = (
             size="xs"
             aria-label={addRowText}
             onClick={onAddRow}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              // Focus back to the cell when pressing Escape
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                setTimeout(() => {
+                  dataTableRef.current?.setFocusedCell({
+                    rowIndex: props.rowIndex,
+                    colIndex: 1,
+                  });
+                }, 100);
+              }
+            }}
           />
         </EuiToolTip>
       </div>

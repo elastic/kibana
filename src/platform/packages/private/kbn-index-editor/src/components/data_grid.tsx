@@ -37,7 +37,6 @@ import { getCellValueRenderer } from './grid_custom_renderers/cell_value_rendere
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
 import { getAddRowControl } from './grid_custom_renderers/add_row_control';
 import { getCustomToolbar } from './grid_custom_renderers/custom_toolbar';
-import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { getAddColumnControl } from './grid_custom_renderers/add_column_control';
 
 interface ESQLDataGridProps {
@@ -230,7 +229,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const customToolbar = useMemo(() => {
     return getCustomToolbar({
-      rowsCount: rows.filter((row) => !row.id.startsWith(ROW_PLACEHOLDER_PREFIX)).length,
+      rowsCount: rows.length,
       onOpenIndexInDiscover: props.onOpenIndexInDiscover,
     });
   }, [props.onOpenIndexInDiscover, rows]);
@@ -298,7 +297,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         .unifiedDataTable__cellValue {
           height: 100%;
           width: 100%;
-          display: block;
         }
         .unifiedDataTable__headerCell {
           align-items: center !important;
