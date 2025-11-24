@@ -38,6 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const docId = response.hits.hits[0].fields?._id[0];
 
     return {
+      // @ts-expect-error
       id: preferDocId ? docId : (doc[processorEvent].id as string),
       timestamp: doc['@timestamp'],
     };
