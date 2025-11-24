@@ -13,7 +13,7 @@ test.describe(
   'Stream data retention - updating failure store',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ logsSynthtraceEsClient, esClient }) => {
+    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, esClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
       await esClient.indices.putDataStreamOptions(
         {
