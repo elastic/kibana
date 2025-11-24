@@ -22,9 +22,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/onechat-common';
-import { appPaths } from '../../utils/app_paths';
-import { useNavigation } from '../../hooks/use_navigation';
-import { labels } from '../../utils/i18n';
+import { appPaths } from '../../../utils/app_paths';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { labels } from '../../../utils/i18n';
 
 const agentSelectId = 'agentBuilderAgentSelect';
 
@@ -36,6 +36,7 @@ interface AgentSelectButtonProps {
 const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName, onClick }) => (
   <EuiButtonEmpty
     iconSide="right"
+    flush="both"
     iconType="arrowDown"
     onClick={onClick}
     aria-haspopup="menu"
