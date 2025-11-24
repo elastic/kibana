@@ -258,7 +258,7 @@ export const CreatePackagePolicyRequestBodySchema = schema.object({
         defaultValue: false,
         meta: {
           description:
-            'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of agentless policies API.',
+            'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.',
           deprecated: true,
         },
       })
