@@ -31,6 +31,7 @@ export const CaseViewAttachments = ({
       (tab) =>
         ({
           label: tab.name,
+          'data-test-subj': `case-view-tab-title-${tab.id}`,
           append: tab.badge,
           isFocused: tab.id === activeTab,
           onFocusBadge: false,
@@ -47,7 +48,9 @@ export const CaseViewAttachments = ({
         <CaseViewTabs caseData={caseData} activeTab={activeTab} />
         <EuiFlexGroup direction="row" responsive={false} data-test-subj="case-view-attachments">
           <EuiFlexItem grow={1} css={{ maxWidth: '18rem' }}>
-            <EuiSelectable options={tabAsSelectableOptions}>{(list) => list}</EuiSelectable>
+            <EuiSelectable singleSelection options={tabAsSelectableOptions}>
+              {(list) => list}
+            </EuiSelectable>
           </EuiFlexItem>
           <EuiFlexItem grow={1}>{children}</EuiFlexItem>
         </EuiFlexGroup>
