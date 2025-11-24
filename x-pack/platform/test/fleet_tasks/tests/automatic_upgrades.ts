@@ -184,6 +184,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           .expect(200);
         return res.body.items.filter((item: any) => item.status === 'updating').length === 1;
       });
+      expect(res.body.items.filter((item: any) => item.status === 'updating').length).to.be(1);
       expect(
         res.body.items.filter((item: any) => item.upgrade_started_at !== undefined).length
       ).to.be(1);
