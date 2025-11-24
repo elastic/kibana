@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { z } from '@kbn/zod';
-import { AI_VALUE_REPORT_LOCATOR, AI_VALUE_PATH, APP_UI_ID } from '../../constants';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
+import { AI_VALUE_PATH, APP_UI_ID } from '../../constants';
 
 const AIValueReportParamsSchema = z.object({
   timeRange: z.object({

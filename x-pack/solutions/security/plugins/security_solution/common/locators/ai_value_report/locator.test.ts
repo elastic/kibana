@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import { AIValueReportLocatorDefinition, parseLocationState } from './locator';
-import { AI_VALUE_REPORT_LOCATOR, AI_VALUE_PATH, APP_UI_ID } from '../../constants';
+import { AI_VALUE_PATH, APP_UI_ID } from '../../constants';
 
 describe('AIValueReportLocatorDefinition', () => {
   const locator = new AIValueReportLocatorDefinition();
