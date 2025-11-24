@@ -26,6 +26,7 @@ import React from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { NestedView } from '../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
 import { NewRoutingStreamEntry } from './new_routing_stream_entry';
@@ -56,7 +57,79 @@ function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestin
   }
 }
 
+type ChildStreamMode = 'ingestMode' | 'queryMode';
+
 export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
+  const { euiTheme } = useEuiTheme();
+
+  const { features } = useStreamsPrivileges();
+
+  const canUseQueryMode = features.queryStreams?.enabled;
+
+  const { changeChildStreamsMode } = useStreamRoutingEvents();
+
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const idSelected = useStreamsRoutingSelector((snapshot) => {
+    if (!canUseQueryMode) {
+      return 'ingestMode';
+    }
+    return snapshot.matches({ ready: 'ingestMode' }) ? 'ingestMode' : 'queryMode';
+  });
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      className={css`
+        overflow: auto;
+      `}
+    >
+      <CurrentStreamEntry definition={definition} />
+
+      {canUseQueryMode && (
+        <EuiButtonGroup
+          className={css`
+            display: flex;
+            position: relative;
+            margin-top: ${euiTheme.size.s};
+            &::before {
+              content: '';
+              margin-top: -${euiTheme.size.s};
+              border-left: ${euiTheme.border.thin};
+              position: absolute;
+              top: 0;
+              left: ${euiTheme.size.base};
+              height: ${euiTheme.size.s};
+            }
+          `}
+          legend={i18n.translate('xpack.streams.streamDetailRouting.childStreamList.legend', {
+            defaultMessage: 'Child streams type selector',
+          })}
+          options={[
+            {
+              id: 'ingestMode',
+              label: 'Index',
+            },
+            {
+              id: 'queryMode',
+              label: 'Query',
+            },
+          ]}
+          idSelected={idSelected}
+          onChange={(mode) => changeChildStreamsMode(mode as ChildStreamMode)}
+          buttonSize="compressed"
+          color="primary"
+        />
+      )}
+      {idSelected === 'ingestMode' && (
+        <IngestModeChildrenList availableStreams={availableStreams} />
+      )}
+      {canUseQueryMode && idSelected === 'queryMode' && <QueryModeChildrenList />}
+    </EuiFlexGroup>
+  );
+}
+
+function IngestModeChildrenList({ availableStreams }: { availableStreams: string[] }) {
   const { euiTheme } = useEuiTheme();
   const { changeRule, createNewRule, editRule, reorderRules } = useStreamRoutingEvents();
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -152,47 +225,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   };
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-      className={css`
-        overflow: auto;
-      `}
-    >
-      <CurrentStreamEntry definition={definition} />
-
-      <EuiButtonGroup
-        className={css`
-          display: flex;
-          position: relative;
-          margin-top: ${euiTheme.size.s};
-          &::before {
-            content: '';
-            margin-top: -${euiTheme.size.s};
-            border-left: ${euiTheme.border.thin};
-            position: absolute;
-            top: 0;
-            left: ${euiTheme.size.base};
-            height: ${euiTheme.size.s};
-          }
-        `}
-        legend="Child streams type selector"
-        options={[
-          {
-            id: 'index',
-            label: 'Index',
-          },
-          {
-            id: 'query',
-            label: 'Query',
-          },
-        ]}
-        idSelected="index"
-        onChange={(id) => {}}
-        buttonSize="compressed"
-        color="primary"
-      />
-
+    <>
       {/* Scrollable routing rules container */}
       <EuiFlexItem
         grow={false}
@@ -279,6 +312,16 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
       </EuiFlexItem>
 
       {shouldDisplayCreateButton && renderCreateButton()}
-    </EuiFlexGroup>
+    </>
+  );
+}
+
+function QueryModeChildrenList() {
+  return (
+    <div>
+      {i18n.translate('xpack.streams.queryModeChildrenList.div.queryModeChildrenListLabel', {
+        defaultMessage: 'Query mode children list',
+      })}
+    </div>
   );
 }

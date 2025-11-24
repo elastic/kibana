@@ -44,17 +44,17 @@ export function PreviewPanel() {
 
   let content;
 
-  if (routingSnapshot.matches({ ready: 'idle' })) {
+  if (routingSnapshot.matches({ ready: { ingestMode: 'idle' } })) {
     content = <SamplePreviewPanel enableActions={canCreateRoutingRules && !maxNestingLevel} />;
   } else if (
-    routingSnapshot.matches({ ready: 'editingRule' }) ||
-    routingSnapshot.matches({ ready: 'reorderingRules' })
+    routingSnapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
+    routingSnapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
   ) {
     content = <EditingPanel />;
   } else if (
-    routingSnapshot.matches({ ready: 'creatingNewRule' }) ||
-    routingSnapshot.matches({ ready: 'reviewSuggestedRule' }) ||
-    routingSnapshot.matches({ ready: 'editingSuggestedRule' })
+    routingSnapshot.matches({ ready: { ingestMode: 'creatingNewRule' } }) ||
+    routingSnapshot.matches({ ready: { ingestMode: 'reviewSuggestedRule' } }) ||
+    routingSnapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } })
   ) {
     content = <SamplePreviewPanel enableActions />;
   }

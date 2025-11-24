@@ -76,7 +76,7 @@ export function StreamDetailRoutingImpl() {
   const definition = routingSnapshot.context.definition;
 
   const shouldDisplayBottomBar =
-    routingSnapshot.matches({ ready: { reorderingRules: 'reordering' } }) &&
+    routingSnapshot.matches({ ready: { ingestMode: { reorderingRules: 'reordering' } } }) &&
     routingSnapshot.can({ type: 'routingRule.save' });
 
   const {
@@ -176,7 +176,7 @@ export function StreamDetailRoutingImpl() {
               onCancel={cancelChanges}
               onConfirm={saveChanges}
               isLoading={routingSnapshot.matches({
-                ready: { reorderingRules: 'updatingStream' },
+                ready: { ingestMode: { reorderingRules: 'updatingStream' } },
               })}
               disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
               insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}

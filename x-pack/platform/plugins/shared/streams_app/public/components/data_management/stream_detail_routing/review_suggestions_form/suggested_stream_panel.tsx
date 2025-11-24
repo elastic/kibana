@@ -58,7 +58,7 @@ export function SuggestedStreamPanel({
 
   const editedSuggestion = routingSnapshot.context.editedSuggestion;
   const isEditing =
-    routingSnapshot.matches({ ready: 'editingSuggestedRule' }) &&
+    routingSnapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
     routingSnapshot.context.editingSuggestionIndex === index;
 
   const currentSuggestion = isEditing && editedSuggestion ? editedSuggestion : partition;

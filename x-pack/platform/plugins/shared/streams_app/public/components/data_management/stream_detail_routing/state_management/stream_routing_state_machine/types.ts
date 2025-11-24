@@ -44,6 +44,8 @@ export interface StreamRoutingContext {
 
 export type StreamRoutingEvent =
   | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
+  | { type: 'childStreams.mode.changeToIngestMode' }
+  | { type: 'childStreams.mode.changeToQueryMode' }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }
