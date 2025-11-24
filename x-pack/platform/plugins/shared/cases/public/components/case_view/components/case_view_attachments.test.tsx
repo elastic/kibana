@@ -35,9 +35,10 @@ const basicLicense = licensingMock.createLicense({
   license: { type: 'basic' },
 });
 
+const data = { total: 3 };
+
 describe('Case View Attachments tab', () => {
   beforeEach(() => {
-    const data = { total: 3 };
     useGetCaseFileStatsMock.mockReturnValue({ data });
   });
 
@@ -93,21 +94,21 @@ describe('Case View Attachments tab', () => {
 
     expect(badge).toHaveTextContent('3');
   });
+
+  it('do not show count on the files tab if the call isLoading', async () => {
+    useGetCaseFileStatsMock.mockReturnValue({ isLoading: true, data });
+
+    renderWithTestingProviders(
+      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
+      {
+        wrapperProps: { license: basicLicense },
+      }
+    );
+
+    expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
+  });
 });
 
-//
-// it('do not show count on the files tab if the call isLoading', async () => {
-//   useGetCaseFileStatsMock.mockReturnValue({ isLoading: true, data });
-//
-//   renderWithTestingProviders(
-//     <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
-//     {
-//       wrapperProps: { license: basicLicense },
-//     }
-//   );
-//
-//   expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
-// });
 //
 // it('shows the alerts tab with the correct count', async () => {
 //   renderWithTestingProviders(
