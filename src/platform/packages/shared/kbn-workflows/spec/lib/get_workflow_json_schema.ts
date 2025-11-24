@@ -10,14 +10,14 @@
 import { z } from '@kbn/zod/v4';
 import type { JSONSchema } from '@kbn/zod/v4/core';
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JSONSchema.JSONSchema | null {
+export function getWorkflowJsonSchema(zodSchema: z.ZodType): JSONSchema.JSONSchema | null {
   try {
-    return z.toJSONSchema(yamlSchema, {
+    return z.toJSONSchema(zodSchema, {
       target: 'draft-7',
       unrepresentable: 'any', // do not throw an error for unrepresentable types
       reused: 'ref', // using ref reduces the size of the schema 4x
       override: (ctx) => {
-        // TODO: remove fields, which has default or optional from 'required' array because we validating user input not the result of safeParse. e.g. 'version' shouldn't be required
+        // Remove fields, which has default or optional from 'required' array because we validating user input not the result of safeParse. e.g. 'version' shouldn't be required
         // we'd love to use 'io:input' but it results in memory leak
         if (ctx.jsonSchema.required && ctx.jsonSchema.required.length > 0) {
           const newRequired = ctx.jsonSchema.required.filter((field) => {
@@ -28,22 +28,10 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JSONSchema.J
           });
           ctx.jsonSchema.required = newRequired.length > 0 ? newRequired : undefined;
         }
-        // TODO: remove useless anyOf from schema or at the zod level
-        // if (ctx.jsonSchema.anyOf) {
-        //   ctx.jsonSchema.anyOf = ctx.jsonSchema.anyOf.filter((schema) => !isEmptyObject(schema));
-        // }
       },
     });
   } catch (error) {
     // console.error('Error generating JSON schema from YAML schema:', error);
     return null;
   }
-}
-
-function isEmptyObject(jsonSchema: JSONSchema.JSONSchema): boolean {
-  return (
-    jsonSchema.type === 'object' &&
-    Object.keys(jsonSchema.properties ?? {}).length === 0 &&
-    Object.keys(jsonSchema.additionalProperties ?? {}).length === 0
-  );
 }

@@ -20,21 +20,16 @@ import {
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
 import type { SpecificationTypes } from './types';
-import type { HttpMethod, InternalConnectorContract } from '../../types/latest';
+import type { HttpMethod } from '../../types/latest';
 import {
+  type ContractMeta,
   generateContractBlock,
   generateParameterTypes,
   getRequestSchemaName,
   getResponseSchemaName,
+  StaticImports,
   toSnakeCase,
-} from '../generation_utils';
-
-export interface ContractMeta
-  extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
-  contractName: string;
-  operationIds: string[];
-  schemaImports: string[];
-}
+} from '../shared';
 
 export const generateAndSaveEsConnectors = () => {
   try {
@@ -78,7 +73,7 @@ export const generateAndSaveEsConnectors = () => {
 
 import type { InternalConnectorContract } from '../../types/latest';
 import { z } from '@kbn/zod/v4';
-import { getLooseObjectFromProperty, getShape } from '../utils';
+${StaticImports}
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import { ${contracts

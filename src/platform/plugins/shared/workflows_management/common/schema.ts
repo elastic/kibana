@@ -13,6 +13,7 @@ import type {
   ConnectorTypeInfo,
   EnhancedInternalConnectorContract,
   InternalConnectorContract,
+  StaticConnectorContract,
 } from '@kbn/workflows';
 import {
   enhanceKibanaConnectorsWithFetcher,
@@ -544,8 +545,9 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
 }
 
 // Static connectors used for schema generation
-const staticConnectors: ConnectorContractUnion[] = [
+const staticConnectors: StaticConnectorContract[] = [
   {
+    connectorGroup: 'static',
     type: 'console',
     summary: 'Console',
     paramsSchema: z
@@ -561,6 +563,7 @@ const staticConnectors: ConnectorContractUnion[] = [
   // Note: inference sub-actions are now generated dynamically
   // Generic request types for raw API calls
   {
+    connectorGroup: 'static',
     type: 'elasticsearch.request',
     summary: 'Elasticsearch Request',
     connectorIdRequired: false,
@@ -577,6 +580,7 @@ const staticConnectors: ConnectorContractUnion[] = [
     }),
   },
   {
+    connectorGroup: 'static',
     type: 'kibana.request',
     summary: 'Kibana Request',
     connectorIdRequired: false,
@@ -619,7 +623,7 @@ function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] 
   const {
     GENERATED_ELASTICSEARCH_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated/elasticsearch_connectors_v2.gen');
+  } = require('@kbn/workflows/common/generated/elasticsearch_connectors.gen');
 
   return GENERATED_ELASTICSEARCH_CONNECTORS;
   // const {
@@ -641,7 +645,7 @@ function generateKibanaConnectors(): InternalConnectorContract[] {
   const {
     GENERATED_KIBANA_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated/kibana_connectors_v2.gen');
+  } = require('@kbn/workflows/common/generated/kibana_connectors.gen');
 
   // Enhance connectors with fetcher parameter support
   return enhanceKibanaConnectorsWithFetcher(GENERATED_KIBANA_CONNECTORS);
@@ -678,6 +682,8 @@ export function convertDynamicConnectorsToContracts(
           const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, subAction.name);
 
           connectorContracts.push({
+            connectorGroup: 'dynamic',
+            actionTypeId: connectorType.actionTypeId,
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
@@ -695,6 +701,8 @@ export function convertDynamicConnectorsToContracts(
         const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, '');
 
         connectorContracts.push({
+          connectorGroup: 'dynamic',
+          actionTypeId: connectorType.actionTypeId,
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
@@ -709,6 +717,8 @@ export function convertDynamicConnectorsToContracts(
       // console.warn(`Error processing connector type ${connectorType.actionTypeId}:`, error);
       // Return a basic connector contract as fallback
       connectorContracts.push({
+        connectorGroup: 'dynamic',
+        actionTypeId: connectorType.actionTypeId,
         type: connectorType.actionTypeId,
         summary: connectorType.displayName,
         paramsSchema: z.any(),
@@ -716,6 +726,7 @@ export function convertDynamicConnectorsToContracts(
         connectorId: z.string(),
         outputSchema: z.any(),
         description: `${connectorType.displayName || connectorType.actionTypeId} connector`,
+        instances: connectorType.instances,
       });
     }
   });

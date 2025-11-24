@@ -308,7 +308,7 @@ describe('validateVariable', () => {
       schema: z.array(z.string()).default(['monday', 'tuesday']),
       scopedToPath: 'inputs.days_to_plan',
     });
-    mockGetZodTypeName.mockReturnValue('array');
+    mockGetZodTypeName.mockReturnValue('string[]');
 
     const result = validateVariable(variableItem, mockContext);
 
@@ -334,7 +334,7 @@ describe('validateVariable', () => {
       schema: z.array(z.string()),
       scopedToPath: 'inputs.items',
     });
-    mockGetZodTypeName.mockReturnValue('array');
+    mockGetZodTypeName.mockReturnValue('string[]');
 
     const result = validateVariable(variableItem, mockContext);
 

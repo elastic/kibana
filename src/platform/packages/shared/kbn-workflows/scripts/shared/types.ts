@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-require('@kbn/workflows/scripts/generate_es_connectors').generateAndSaveEsConnectors();
+import type { InternalConnectorContract } from '../../types/latest';
+
+export interface ContractMeta
+  extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
+  contractName: string;
+  operationIds: string[];
+  schemaImports: string[];
+}

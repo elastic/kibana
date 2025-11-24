@@ -13,34 +13,29 @@ import { REPO_ROOT } from '@kbn/repo-info';
 // source
 const SCRIPT_FOLDER_PATH = Path.resolve(
   REPO_ROOT,
-  'src/platform/packages/shared/kbn-workflows/scripts/generate_es_connectors_v2'
+  'src/platform/packages/shared/kbn-workflows/scripts/generate_kibana_connectors'
 );
-const ES_SPEC_OUTPUT_PATH = Path.resolve(REPO_ROOT, '../elasticsearch-specification/output');
-const ES_SPEC_SCHEMA_PATH = Path.resolve(ES_SPEC_OUTPUT_PATH, 'schema/schema.json');
-const ES_SPEC_OPENAPI_PATH = Path.resolve(
-  ES_SPEC_OUTPUT_PATH,
-  'openapi/elasticsearch-openapi.json'
-);
+const KIBANA_SPEC_OUTPUT_PATH = Path.resolve(REPO_ROOT, 'oas_docs/output');
+const KIBANA_SPEC_OPENAPI_PATH = Path.resolve(KIBANA_SPEC_OUTPUT_PATH, 'kibana.yaml');
 // output
-const ES_GENERATED_OUTPUT_FOLDER_PATH = Path.resolve(
+const KIBANA_GENERATED_OUTPUT_FOLDER_PATH = Path.resolve(
   REPO_ROOT,
   'src/platform/packages/shared/kbn-workflows/common/generated'
 );
 
-const ES_CONTRACTS_OUTPUT_FILE_PATH = Path.resolve(
-  ES_GENERATED_OUTPUT_FOLDER_PATH,
-  'elasticsearch_connectors_v2.gen.ts'
+const KIBANA_CONTRACTS_OUTPUT_FILE_PATH = Path.resolve(
+  KIBANA_GENERATED_OUTPUT_FOLDER_PATH,
+  'kibana_connectors.gen.ts'
 );
-const OPENAPI_TS_OUTPUT_FOLDER_PATH = Path.resolve(ES_GENERATED_OUTPUT_FOLDER_PATH, 'schemas');
+const OPENAPI_TS_OUTPUT_FOLDER_PATH = Path.resolve(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, 'schemas');
 const OPENAPI_TS_CONFIG_PATH = Path.resolve(SCRIPT_FOLDER_PATH, 'openapi_ts.config.ts');
-const OPENAPI_TS_OUTPUT_FILENAME = 'es_openapi_zod'; // .gen.ts will be added automatically
+const OPENAPI_TS_OUTPUT_FILENAME = 'kibana_openapi_zod'; // .gen.ts will be added automatically
 
 export {
-  ES_SPEC_OUTPUT_PATH,
-  ES_SPEC_SCHEMA_PATH,
-  ES_SPEC_OPENAPI_PATH,
-  ES_GENERATED_OUTPUT_FOLDER_PATH,
-  ES_CONTRACTS_OUTPUT_FILE_PATH,
+  KIBANA_SPEC_OUTPUT_PATH,
+  KIBANA_SPEC_OPENAPI_PATH,
+  KIBANA_GENERATED_OUTPUT_FOLDER_PATH,
+  KIBANA_CONTRACTS_OUTPUT_FILE_PATH,
   OPENAPI_TS_CONFIG_PATH,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
   OPENAPI_TS_OUTPUT_FILENAME,

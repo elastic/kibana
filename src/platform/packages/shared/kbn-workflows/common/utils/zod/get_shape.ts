@@ -24,24 +24,3 @@ export function getShape(
   }
   return {};
 }
-
-export function getZodObjectProperty(
-  schema: z.ZodObject | z.ZodOptional | z.ZodNever,
-  property: string
-): z.ZodType | null {
-  if (schema instanceof z.ZodObject) {
-    return schema.shape[property] ?? null;
-  }
-  return null;
-}
-
-export function getLooseObjectFromProperty(
-  schema: z.ZodObject | z.ZodOptional | z.ZodNever,
-  property: string
-): z.ZodObject {
-  const atProperty = getZodObjectProperty(schema, property);
-  if (atProperty === null) {
-    return z.looseObject({});
-  }
-  return z.looseObject({ ...getShape(atProperty as z.ZodObject) });
-}

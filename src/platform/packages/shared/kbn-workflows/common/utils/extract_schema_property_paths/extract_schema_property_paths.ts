@@ -10,10 +10,7 @@
 import { isZod } from '@kbn/zod';
 import type { ZodType } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  getZodSchemaType as getSchemaType,
-  type ZodTypeKind,
-} from '../get_zod_schema_type/get_zod_schema_type';
+import { getZodSchemaType as getSchemaType, type ZodTypeKind } from '../zod/get_zod_schema_type';
 
 export interface ExtractedSchemaPropertyPath {
   path: string;

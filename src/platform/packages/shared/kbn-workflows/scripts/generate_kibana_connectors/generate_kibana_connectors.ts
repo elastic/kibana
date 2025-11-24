@@ -23,14 +23,13 @@ import { isHttpMethod } from '../..';
 import type { HttpMethod } from '../../types/latest';
 import {
   type ContractMeta,
-  escapeString,
-  generateOutputSchemaString,
+  generateContractBlock,
   generateParameterTypes,
-  generateParamsSchemaString,
   getRequestSchemaName,
   getResponseSchemaName,
+  StaticImports,
   toSnakeCase,
-} from '../generation_utils';
+} from '../shared';
 
 export const generateAndSaveKibanaConnectors = () => {
   try {
@@ -69,7 +68,7 @@ export const generateAndSaveKibanaConnectors = () => {
 
 import type { InternalConnectorContract } from '../../types/latest';
 import { z } from '@kbn/zod/v4';
-import { getLooseObjectFromProperty, getShape } from '../utils';
+${StaticImports}
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import { ${contracts
@@ -140,26 +139,6 @@ function eslintFixAndPrettifyGeneratedCode() {
   }
 }
 
-function generateContractBlock(contract: ContractMeta): string {
-  return `
-const ${contract.contractName}: InternalConnectorContract = {
-  type: '${contract.type}',
-  summary: \`${escapeString(contract.summary ?? '')}\`,
-  description: \`${escapeString(contract.description ?? '')}\`,
-  methods: ${JSON.stringify(contract?.methods ?? [])},
-  patterns: ${JSON.stringify(contract?.patterns ?? [])},
-  isInternal: true,
-  documentation: '${contract.documentation}',
-  parameterTypes: {
-    pathParams: ${JSON.stringify(contract?.parameterTypes?.pathParams ?? [])},
-    urlParams: ${JSON.stringify(contract?.parameterTypes?.urlParams ?? [])},
-    bodyParams: ${JSON.stringify(contract?.parameterTypes?.bodyParams ?? [])},
-  },
-  paramsSchema: ${generateParamsSchemaString(contract.operationIds)},
-  outputSchema: ${generateOutputSchemaString(contract.operationIds)},
-}`.trim();
-}
-
 function generateContractName(operationId: string): string {
   return `${toSnakeCase(operationId).toUpperCase()}_CONTRACT`;
 }
@@ -183,19 +162,21 @@ function generateContractMetasFromPath(
       continue;
     }
     const type = `kibana.${toSnakeCase(operationId)}`;
-    const description = operation.description;
-    const documentation = getDocumentationUrl(path, pathItem);
+    const summary = operation.summary ?? null;
+    const description = operation.description ?? null;
     const parameterTypes = generateParameterTypes([operation], openApiDocument);
     const contractName = generateContractName(operationId);
     const schemaImports = [getRequestSchemaName(operationId), getResponseSchemaName(operationId)];
 
     contractMetas.push({
+      isInternal: true,
       type,
+      summary,
       description,
-      summary: operation.summary,
       methods: [method.toUpperCase() as HttpMethod],
       patterns: [path],
-      documentation,
+      // Kibana OpenAPI paths has doc links in the description, so we don't extract it as a separate field
+      documentation: null,
       parameterTypes,
 
       contractName,
@@ -204,8 +185,4 @@ function generateContractMetasFromPath(
     });
   }
   return contractMetas;
-}
-
-function getDocumentationUrl(path: string, pathItem: OpenAPIV3.PathItemObject): string {
-  return 'URL_NOT_IMPLEMENTED';
 }

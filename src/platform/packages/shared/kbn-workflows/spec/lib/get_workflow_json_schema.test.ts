@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { JSONSchema } from '@kbn/zod/v4/core';
-import { getJsonSchemaFromYamlSchema } from './get_json_schema_from_yaml_schema';
+import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 import { getOrResolveObject } from '../../common/utils';
 import { WorkflowSchema } from '../schema';
 
@@ -27,7 +27,7 @@ function findStepTypeSchema(
   );
 }
 
-describe('getJsonSchemaFromYamlSchema', () => {
+describe('getWorkflowJsonSchema', () => {
   it('should set `additionalProperties: {}` for loose objects', () => {
     const mockWithSchema = WorkflowSchema.extend({
       steps: z.array(
@@ -39,7 +39,7 @@ describe('getJsonSchemaFromYamlSchema', () => {
         })
       ),
     });
-    const jsonSchema = getJsonSchemaFromYamlSchema(mockWithSchema);
+    const jsonSchema = getWorkflowJsonSchema(mockWithSchema);
     expect(jsonSchema).toBeDefined();
     expect((jsonSchema as any)?.additionalProperties).toBe(false);
     expect((jsonSchema as any)?.properties.steps.items.properties.with.additionalProperties).toBe(
@@ -178,7 +178,7 @@ describe('addFetcherToKibanaConnectors', () => {
     ];
 
     const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors);
-    const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
+    const jsonSchema = getWorkflowJsonSchema(workflowSchema);
     expect(jsonSchema).toBeDefined();
 
     const kibanaStep = findStepTypeSchema(
@@ -223,7 +223,7 @@ describe('addFetcherToKibanaConnectors', () => {
     ];
 
     const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors);
-    const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
+    const jsonSchema = getWorkflowJsonSchema(workflowSchema);
 
     const esStep = findStepTypeSchema(jsonSchema as JSONSchema.JSONSchema, 'elasticsearch.search');
 
@@ -275,7 +275,7 @@ describe('addFetcherToKibanaConnectors', () => {
     ];
 
     const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors);
-    const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
+    const jsonSchema = getWorkflowJsonSchema(workflowSchema);
 
     const kibanaStep = findStepTypeSchema(
       jsonSchema as JSONSchema.JSONSchema,
@@ -298,7 +298,7 @@ describe('addFetcherToKibanaConnectors', () => {
     const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
 
     const workflowSchema = generateYamlSchemaFromConnectors([]);
-    const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
+    const jsonSchema = getWorkflowJsonSchema(workflowSchema);
 
     expect(jsonSchema).toBeDefined();
     // Should complete without errors even with no connectors

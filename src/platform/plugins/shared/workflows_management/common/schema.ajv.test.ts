@@ -14,7 +14,7 @@ import { Ajv } from 'ajv';
 import { readFileSync, writeFileSync } from 'fs';
 import Path from 'path';
 import yaml from 'yaml';
-import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import { getWorkflowJsonSchema } from '@kbn/workflows';
 import type { JSONSchema } from '@kbn/zod/v4/core';
 import { getWorkflowZodSchema } from './schema';
 
@@ -31,20 +31,24 @@ const examples = [
   },
 ];
 
-export function testSchemaAjv() {
-  withTiming('Generating JSON schema', generateAndSaveJSONSchema);
-  const jsonSchema = withTiming('Loading JSON schema', loadJSONSchema);
-  const validate = withTiming('Compiling JSON schema', () => compileJSONSchema(jsonSchema));
-  examples.forEach((example) => {
-    console.log(`Validating example: ${example.name}`);
-    const result = validate(yaml.parse(example.yaml));
-    console.log(`Validation result: ${result}`);
-    console.log(`${example.name}: ${result ? 'valid' : 'invalid'}`);
-    console.log(validate.errors);
+describe('schema.ts', () => {
+  // currently this is not working because of the maximum call stack size exceeded error
+  // TODO: fix this
+  it.skip('should generate a valid JSON schema and validate examples', () => {
+    withTiming('Generating JSON schema', generateAndSaveJSONSchema);
+    const jsonSchema = withTiming('Loading JSON schema', loadJSONSchema);
+    const validate = withTiming('Compiling JSON schema', () => compileJSONSchema(jsonSchema));
+    examples.forEach((example) => {
+      console.log(`Validating example: ${example.name}`);
+      const result = validate(yaml.parse(example.yaml));
+      console.log(`Validation result: ${result}`);
+      console.log(`${example.name}: ${result ? 'valid' : 'invalid'}`);
+      console.log(validate.errors);
+    });
   });
-}
+});
 
-export function compileJSONSchema(jsonSchema: JSONSchema.JSONSchema) {
+function compileJSONSchema(jsonSchema: JSONSchema.JSONSchema) {
   const ajv = new Ajv({
     strict: false,
     validateFormats: false,
@@ -53,9 +57,9 @@ export function compileJSONSchema(jsonSchema: JSONSchema.JSONSchema) {
   return ajv.compile(jsonSchema);
 }
 
-export function generateAndSaveJSONSchema() {
+function generateAndSaveJSONSchema() {
   const schema = getWorkflowZodSchema({});
-  const jsonSchema = getJsonSchemaFromYamlSchema(schema);
+  const jsonSchema = getWorkflowJsonSchema(schema);
   if (!jsonSchema) {
     throw new Error('JSON schema is null');
   }

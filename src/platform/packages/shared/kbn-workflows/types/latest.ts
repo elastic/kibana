@@ -52,6 +52,7 @@ export type {
   EnhancedInternalConnectorContract,
   InternalConnectorContract,
   DynamicConnectorContract,
+  StaticConnectorContract,
   HttpMethod,
 } from './v1';
 

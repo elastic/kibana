@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-require('@kbn/workflows/scripts/generate_es_connectors').generateAndSaveEsConnectors();
+import { z } from '@kbn/zod/v4';
+import { getShape } from './get_shape';
+import { getZodObjectProperty } from './get_zod_object_property';
+
+export function getZodLooseObjectFromProperty(
+  schema: z.ZodObject | z.ZodOptional | z.ZodNever,
+  property: string
+): z.ZodObject {
+  const atProperty = getZodObjectProperty(schema, property);
+  if (atProperty === null) {
+    return z.looseObject({});
+  }
+  return z.looseObject({ ...getShape(atProperty as z.ZodObject) });
+}

@@ -9,7 +9,6 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { JsonSchema7Type } from 'zod-to-json-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -25,9 +24,10 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { getJsonSchemaFromYamlSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { JSONSchema } from '@kbn/zod/v4/core';
 import type { LogSearchResult } from './lib/workflow_logger';
 import type {
   SearchWorkflowExecutionsParams,
@@ -417,12 +417,12 @@ export class WorkflowsManagementApi {
     { loose }: { loose: boolean },
     spaceId: string,
     request: KibanaRequest
-  ): Promise<JsonSchema7Type> {
+  ): Promise<JSONSchema.JSONSchema | null> {
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
       { loose: false },
       spaceId,
       request
     );
-    return getJsonSchemaFromYamlSchema(zodSchema);
+    return getWorkflowJsonSchema(zodSchema);
   }
 }

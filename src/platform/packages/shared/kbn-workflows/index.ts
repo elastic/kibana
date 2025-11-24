@@ -8,7 +8,7 @@
  */
 
 export * from './spec/lib/generate_yaml_schema_from_connectors';
-export * from './spec/lib/get_json_schema_from_yaml_schema';
+export * from './spec/lib/get_workflow_json_schema';
 export * from './spec/schema';
 export * from './types/latest';
 export * from './types/utils';

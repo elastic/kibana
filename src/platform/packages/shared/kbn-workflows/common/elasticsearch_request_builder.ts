@@ -41,7 +41,7 @@ export function buildRequestFromConnector(
   const {
     GENERATED_ELASTICSEARCH_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('./generated/elasticsearch_connectors_v2.gen');
+  } = require('./generated/elasticsearch_connectors.gen');
 
   // Find the connector definition for this step type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

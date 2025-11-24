@@ -7,4 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { generateAndSaveKibanaConnectors } from './generate_kibana_connectors_v2';
+import { z } from '@kbn/zod/v4';
+
+export function getZodObjectProperty(
+  schema: z.ZodObject | z.ZodOptional | z.ZodNever,
+  property: string
+): z.ZodType | null {
+  if (schema instanceof z.ZodObject) {
+    return schema.shape[property] ?? null;
+  }
+  return null;
+}

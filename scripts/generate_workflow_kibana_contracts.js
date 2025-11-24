@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/workflows/scripts/generate_kibana_connectors_v2').generateAndSaveKibanaConnectors();
+require('@kbn/workflows/scripts/generate_kibana_connectors').generateAndSaveKibanaConnectors();

@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-11-24T08:50:04.783Z
+ * Generated at: 2025-11-24T17:35:07.313Z
  * Source: /oas_docs/output/kibana.yaml (undefined APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
@@ -1065,13 +1065,15 @@ import {
   upsert_entity_response,
 } from './schemas/kibana_openapi_zod.gen';
 import type { InternalConnectorContract } from '../../types/latest';
-import { getLooseObjectFromProperty } from '../utils';
+
+import { getZodLooseObjectFromProperty } from '../utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 
 // declare contracts
 const GET_ACTIONS_CONNECTOR_TYPES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_actions_connector_types',
+  connectorGroup: 'internal',
   summary: `Get connector types`,
   description: `**Spaces method and path for this operation:**
 
@@ -1082,22 +1084,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 You do not need any Kibana feature privileges to run this API.`,
   methods: ['GET'],
   patterns: ['/api/actions/connector_types'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['feature_id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_actions_connector_types_request, 'body'),
-    getLooseObjectFromProperty(get_actions_connector_types_request, 'path'),
-    getLooseObjectFromProperty(get_actions_connector_types_request, 'query'),
+    getZodLooseObjectFromProperty(get_actions_connector_types_request, 'body'),
+    getZodLooseObjectFromProperty(get_actions_connector_types_request, 'path'),
+    getZodLooseObjectFromProperty(get_actions_connector_types_request, 'query'),
   ]),
   outputSchema: get_actions_connector_types_response,
 };
 const DELETE_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_actions_connector_id',
+  connectorGroup: 'internal',
   summary: `Delete a connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -1108,22 +1111,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 WARNING: When you delete a connector, it cannot be recovered.`,
   methods: ['DELETE'],
   patterns: ['/api/actions/connector/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_actions_connector_id_request, 'body'),
-    getLooseObjectFromProperty(delete_actions_connector_id_request, 'path'),
-    getLooseObjectFromProperty(delete_actions_connector_id_request, 'query'),
+    getZodLooseObjectFromProperty(delete_actions_connector_id_request, 'body'),
+    getZodLooseObjectFromProperty(delete_actions_connector_id_request, 'path'),
+    getZodLooseObjectFromProperty(delete_actions_connector_id_request, 'query'),
   ]),
   outputSchema: delete_actions_connector_id_response,
 };
 const GET_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_actions_connector_id',
+  connectorGroup: 'internal',
   summary: `Get connector information`,
   description: `**Spaces method and path for this operation:**
 
@@ -1132,22 +1136,23 @@ const GET_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/actions/connector/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_actions_connector_id_request, 'body'),
-    getLooseObjectFromProperty(get_actions_connector_id_request, 'path'),
-    getLooseObjectFromProperty(get_actions_connector_id_request, 'query'),
+    getZodLooseObjectFromProperty(get_actions_connector_id_request, 'body'),
+    getZodLooseObjectFromProperty(get_actions_connector_id_request, 'path'),
+    getZodLooseObjectFromProperty(get_actions_connector_id_request, 'query'),
   ]),
   outputSchema: get_actions_connector_id_response,
 };
 const POST_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_actions_connector_id',
+  connectorGroup: 'internal',
   summary: `Create a connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -1156,22 +1161,23 @@ const POST_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/actions/connector/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['connector_type_id', 'name', 'config', 'secrets'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_actions_connector_id_request, 'body'),
-    getLooseObjectFromProperty(post_actions_connector_id_request, 'path'),
-    getLooseObjectFromProperty(post_actions_connector_id_request, 'query'),
+    getZodLooseObjectFromProperty(post_actions_connector_id_request, 'body'),
+    getZodLooseObjectFromProperty(post_actions_connector_id_request, 'path'),
+    getZodLooseObjectFromProperty(post_actions_connector_id_request, 'query'),
   ]),
   outputSchema: post_actions_connector_id_response,
 };
 const PUT_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_actions_connector_id',
+  connectorGroup: 'internal',
   summary: `Update a connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -1180,22 +1186,23 @@ const PUT_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['PUT'],
   patterns: ['/api/actions/connector/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['name', 'config', 'secrets'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_actions_connector_id_request, 'body'),
-    getLooseObjectFromProperty(put_actions_connector_id_request, 'path'),
-    getLooseObjectFromProperty(put_actions_connector_id_request, 'query'),
+    getZodLooseObjectFromProperty(put_actions_connector_id_request, 'body'),
+    getZodLooseObjectFromProperty(put_actions_connector_id_request, 'path'),
+    getZodLooseObjectFromProperty(put_actions_connector_id_request, 'query'),
   ]),
   outputSchema: put_actions_connector_id_response,
 };
 const POST_ACTIONS_CONNECTOR_ID_EXECUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_actions_connector_id_execute',
+  connectorGroup: 'internal',
   summary: `Run a connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -1206,22 +1213,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.`,
   methods: ['POST'],
   patterns: ['/api/actions/connector/{id}/_execute'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['params'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_actions_connector_id_execute_request, 'body'),
-    getLooseObjectFromProperty(post_actions_connector_id_execute_request, 'path'),
-    getLooseObjectFromProperty(post_actions_connector_id_execute_request, 'query'),
+    getZodLooseObjectFromProperty(post_actions_connector_id_execute_request, 'body'),
+    getZodLooseObjectFromProperty(post_actions_connector_id_execute_request, 'path'),
+    getZodLooseObjectFromProperty(post_actions_connector_id_execute_request, 'query'),
   ]),
   outputSchema: post_actions_connector_id_execute_response,
 };
 const GET_ACTIONS_CONNECTORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_actions_connectors',
+  connectorGroup: 'internal',
   summary: `Get all connectors`,
   description: `**Spaces method and path for this operation:**
 
@@ -1230,22 +1238,23 @@ const GET_ACTIONS_CONNECTORS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/actions/connectors'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_actions_connectors_request, 'body'),
-    getLooseObjectFromProperty(get_actions_connectors_request, 'path'),
-    getLooseObjectFromProperty(get_actions_connectors_request, 'query'),
+    getZodLooseObjectFromProperty(get_actions_connectors_request, 'body'),
+    getZodLooseObjectFromProperty(get_actions_connectors_request, 'path'),
+    getZodLooseObjectFromProperty(get_actions_connectors_request, 'query'),
   ]),
   outputSchema: get_actions_connectors_response,
 };
 const POST_AGENT_BUILDER_A2A_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_a2a_agentid',
+  connectorGroup: 'internal',
   summary: `Send A2A task`,
   description: `**Spaces method and path for this operation:**
 
@@ -1256,22 +1265,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 WARNING: This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/a2a/{agentId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'body'),
-    getLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'path'),
-    getLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'query'),
+    getZodLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'body'),
+    getZodLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'path'),
+    getZodLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'query'),
   ]),
   outputSchema: post_agent_builder_a2a_agentid_response,
 };
 const GET_AGENT_BUILDER_A2A_AGENTID_JSON_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_a2a_agentid_json',
+  connectorGroup: 'internal',
   summary: `Get A2A agent card`,
   description: `**Spaces method and path for this operation:**
 
@@ -1282,22 +1292,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/a2a/{agentId}.json'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'body'),
-    getLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'path'),
-    getLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'query'),
+    getZodLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'body'),
+    getZodLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'path'),
+    getZodLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'query'),
   ]),
   outputSchema: get_agent_builder_a2a_agentid_json_response,
 };
 const GET_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_agents',
+  connectorGroup: 'internal',
   summary: `List agents`,
   description: `**Spaces method and path for this operation:**
 
@@ -1308,22 +1319,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/agents'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_builder_agents_request, 'body'),
-    getLooseObjectFromProperty(get_agent_builder_agents_request, 'path'),
-    getLooseObjectFromProperty(get_agent_builder_agents_request, 'query'),
+    getZodLooseObjectFromProperty(get_agent_builder_agents_request, 'body'),
+    getZodLooseObjectFromProperty(get_agent_builder_agents_request, 'path'),
+    getZodLooseObjectFromProperty(get_agent_builder_agents_request, 'query'),
   ]),
   outputSchema: get_agent_builder_agents_response,
 };
 const POST_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_agents',
+  connectorGroup: 'internal',
   summary: `Create an agent`,
   description: `**Spaces method and path for this operation:**
 
@@ -1334,9 +1346,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/agents'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -1350,14 +1362,15 @@ Create a new agent. Use this endpoint to define the agent's behavior, appearance
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_agent_builder_agents_request, 'body'),
-    getLooseObjectFromProperty(post_agent_builder_agents_request, 'path'),
-    getLooseObjectFromProperty(post_agent_builder_agents_request, 'query'),
+    getZodLooseObjectFromProperty(post_agent_builder_agents_request, 'body'),
+    getZodLooseObjectFromProperty(post_agent_builder_agents_request, 'path'),
+    getZodLooseObjectFromProperty(post_agent_builder_agents_request, 'query'),
   ]),
   outputSchema: post_agent_builder_agents_response,
 };
 const DELETE_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_agent_builder_agents_id',
+  connectorGroup: 'internal',
   summary: `Delete an agent`,
   description: `**Spaces method and path for this operation:**
 
@@ -1368,22 +1381,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
   methods: ['DELETE'],
   patterns: ['/api/agent_builder/agents/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'body'),
-    getLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'path'),
-    getLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'query'),
+    getZodLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'body'),
+    getZodLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'path'),
+    getZodLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'query'),
   ]),
   outputSchema: delete_agent_builder_agents_id_response,
 };
 const GET_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_agents_id',
+  connectorGroup: 'internal',
   summary: `Get an agent by ID`,
   description: `**Spaces method and path for this operation:**
 
@@ -1394,22 +1408,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/agents/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_builder_agents_id_request, 'body'),
-    getLooseObjectFromProperty(get_agent_builder_agents_id_request, 'path'),
-    getLooseObjectFromProperty(get_agent_builder_agents_id_request, 'query'),
+    getZodLooseObjectFromProperty(get_agent_builder_agents_id_request, 'body'),
+    getZodLooseObjectFromProperty(get_agent_builder_agents_id_request, 'path'),
+    getZodLooseObjectFromProperty(get_agent_builder_agents_id_request, 'query'),
   ]),
   outputSchema: get_agent_builder_agents_id_response,
 };
 const PUT_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_agent_builder_agents_id',
+  connectorGroup: 'internal',
   summary: `Update an agent`,
   description: `**Spaces method and path for this operation:**
 
@@ -1420,22 +1435,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
   methods: ['PUT'],
   patterns: ['/api/agent_builder/agents/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['avatar_color', 'avatar_symbol', 'configuration', 'description', 'labels', 'name'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_agent_builder_agents_id_request, 'body'),
-    getLooseObjectFromProperty(put_agent_builder_agents_id_request, 'path'),
-    getLooseObjectFromProperty(put_agent_builder_agents_id_request, 'query'),
+    getZodLooseObjectFromProperty(put_agent_builder_agents_id_request, 'body'),
+    getZodLooseObjectFromProperty(put_agent_builder_agents_id_request, 'path'),
+    getZodLooseObjectFromProperty(put_agent_builder_agents_id_request, 'query'),
   ]),
   outputSchema: put_agent_builder_agents_id_response,
 };
 const GET_AGENT_BUILDER_CONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_conversations',
+  connectorGroup: 'internal',
   summary: `List conversations`,
   description: `**Spaces method and path for this operation:**
 
@@ -1446,22 +1462,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/conversations'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['agent_id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_builder_conversations_request, 'body'),
-    getLooseObjectFromProperty(get_agent_builder_conversations_request, 'path'),
-    getLooseObjectFromProperty(get_agent_builder_conversations_request, 'query'),
+    getZodLooseObjectFromProperty(get_agent_builder_conversations_request, 'body'),
+    getZodLooseObjectFromProperty(get_agent_builder_conversations_request, 'path'),
+    getZodLooseObjectFromProperty(get_agent_builder_conversations_request, 'query'),
   ]),
   outputSchema: get_agent_builder_conversations_response,
 };
 const DELETE_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_agent_builder_conversations_conversation_id',
+  connectorGroup: 'internal',
   summary: `Delete conversation by ID`,
   description: `**Spaces method and path for this operation:**
 
@@ -1472,22 +1489,32 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['DELETE'],
   patterns: ['/api/agent_builder/conversations/{conversation_id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['conversation_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_agent_builder_conversations_conversation_id_request, 'body'),
-    getLooseObjectFromProperty(delete_agent_builder_conversations_conversation_id_request, 'path'),
-    getLooseObjectFromProperty(delete_agent_builder_conversations_conversation_id_request, 'query'),
+    getZodLooseObjectFromProperty(
+      delete_agent_builder_conversations_conversation_id_request,
+      'body'
+    ),
+    getZodLooseObjectFromProperty(
+      delete_agent_builder_conversations_conversation_id_request,
+      'path'
+    ),
+    getZodLooseObjectFromProperty(
+      delete_agent_builder_conversations_conversation_id_request,
+      'query'
+    ),
   ]),
   outputSchema: delete_agent_builder_conversations_conversation_id_response,
 };
 const GET_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_conversations_conversation_id',
+  connectorGroup: 'internal',
   summary: `Get conversation by ID`,
   description: `**Spaces method and path for this operation:**
 
@@ -1498,22 +1525,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/conversations/{conversation_id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['conversation_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'body'),
-    getLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'path'),
-    getLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'query'),
+    getZodLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'body'),
+    getZodLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'path'),
+    getZodLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'query'),
   ]),
   outputSchema: get_agent_builder_conversations_conversation_id_response,
 };
 const POST_AGENT_BUILDER_CONVERSE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_converse',
+  connectorGroup: 'internal',
   summary: `Send chat message`,
   description: `**Spaces method and path for this operation:**
 
@@ -1524,9 +1552,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/converse'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -1540,14 +1568,15 @@ Send a message to an agent and receive a complete response. This synchronous end
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_agent_builder_converse_request, 'body'),
-    getLooseObjectFromProperty(post_agent_builder_converse_request, 'path'),
-    getLooseObjectFromProperty(post_agent_builder_converse_request, 'query'),
+    getZodLooseObjectFromProperty(post_agent_builder_converse_request, 'body'),
+    getZodLooseObjectFromProperty(post_agent_builder_converse_request, 'path'),
+    getZodLooseObjectFromProperty(post_agent_builder_converse_request, 'query'),
   ]),
   outputSchema: post_agent_builder_converse_response,
 };
 const POST_AGENT_BUILDER_CONVERSE_ASYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_converse_async',
+  connectorGroup: 'internal',
   summary: `Send chat message (streaming)`,
   description: `**Spaces method and path for this operation:**
 
@@ -1734,9 +1763,9 @@ A typical conversation round emits events in this sequence:
 8. \`round_complete\`<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/converse/async'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -1750,14 +1779,15 @@ A typical conversation round emits events in this sequence:
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_agent_builder_converse_async_request, 'body'),
-    getLooseObjectFromProperty(post_agent_builder_converse_async_request, 'path'),
-    getLooseObjectFromProperty(post_agent_builder_converse_async_request, 'query'),
+    getZodLooseObjectFromProperty(post_agent_builder_converse_async_request, 'body'),
+    getZodLooseObjectFromProperty(post_agent_builder_converse_async_request, 'path'),
+    getZodLooseObjectFromProperty(post_agent_builder_converse_async_request, 'query'),
   ]),
   outputSchema: post_agent_builder_converse_async_response,
 };
 const POST_AGENT_BUILDER_MCP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_mcp',
+  connectorGroup: 'internal',
   summary: `MCP server`,
   description: `**Spaces method and path for this operation:**
 
@@ -1768,22 +1798,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/mcp'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_agent_builder_mcp_request, 'body'),
-    getLooseObjectFromProperty(post_agent_builder_mcp_request, 'path'),
-    getLooseObjectFromProperty(post_agent_builder_mcp_request, 'query'),
+    getZodLooseObjectFromProperty(post_agent_builder_mcp_request, 'body'),
+    getZodLooseObjectFromProperty(post_agent_builder_mcp_request, 'path'),
+    getZodLooseObjectFromProperty(post_agent_builder_mcp_request, 'query'),
   ]),
   outputSchema: post_agent_builder_mcp_response,
 };
 const GET_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_tools',
+  connectorGroup: 'internal',
   summary: `List tools`,
   description: `**Spaces method and path for this operation:**
 
@@ -1794,22 +1825,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/tools'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_builder_tools_request, 'body'),
-    getLooseObjectFromProperty(get_agent_builder_tools_request, 'path'),
-    getLooseObjectFromProperty(get_agent_builder_tools_request, 'query'),
+    getZodLooseObjectFromProperty(get_agent_builder_tools_request, 'body'),
+    getZodLooseObjectFromProperty(get_agent_builder_tools_request, 'path'),
+    getZodLooseObjectFromProperty(get_agent_builder_tools_request, 'query'),
   ]),
   outputSchema: get_agent_builder_tools_response,
 };
 const POST_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_tools',
+  connectorGroup: 'internal',
   summary: `Create a tool`,
   description: `**Spaces method and path for this operation:**
 
@@ -1820,22 +1852,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/tools'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['configuration', 'description', 'id', 'tags', 'type'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_agent_builder_tools_request, 'body'),
-    getLooseObjectFromProperty(post_agent_builder_tools_request, 'path'),
-    getLooseObjectFromProperty(post_agent_builder_tools_request, 'query'),
+    getZodLooseObjectFromProperty(post_agent_builder_tools_request, 'body'),
+    getZodLooseObjectFromProperty(post_agent_builder_tools_request, 'path'),
+    getZodLooseObjectFromProperty(post_agent_builder_tools_request, 'query'),
   ]),
   outputSchema: post_agent_builder_tools_response,
 };
 const POST_AGENT_BUILDER_TOOLS_EXECUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_tools_execute',
+  connectorGroup: 'internal',
   summary: `Execute a Tool`,
   description: `**Spaces method and path for this operation:**
 
@@ -1846,22 +1879,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/tools/_execute'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['connector_id', 'tool_id', 'tool_params'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'body'),
-    getLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'path'),
-    getLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'query'),
+    getZodLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'body'),
+    getZodLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'path'),
+    getZodLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'query'),
   ]),
   outputSchema: post_agent_builder_tools_execute_response,
 };
 const DELETE_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_agent_builder_tools_toolid',
+  connectorGroup: 'internal',
   summary: `Delete a tool`,
   description: `**Spaces method and path for this operation:**
 
@@ -1872,22 +1906,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
   methods: ['DELETE'],
   patterns: ['/api/agent_builder/tools/{toolId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['toolId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'body'),
-    getLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'path'),
-    getLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'query'),
   ]),
   outputSchema: delete_agent_builder_tools_toolid_response,
 };
 const GET_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_tools_toolid',
+  connectorGroup: 'internal',
   summary: `Get a tool by id`,
   description: `**Spaces method and path for this operation:**
 
@@ -1898,22 +1933,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
   patterns: ['/api/agent_builder/tools/{toolId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['toolId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'body'),
-    getLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'path'),
-    getLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'query'),
+    getZodLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'body'),
+    getZodLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'path'),
+    getZodLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'query'),
   ]),
   outputSchema: get_agent_builder_tools_toolid_response,
 };
 const PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_agent_builder_tools_toolid',
+  connectorGroup: 'internal',
   summary: `Update a tool`,
   description: `**Spaces method and path for this operation:**
 
@@ -1924,22 +1960,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
   methods: ['PUT'],
   patterns: ['/api/agent_builder/tools/{toolId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['toolId'],
     urlParams: [],
     bodyParams: ['configuration', 'description', 'tags'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'body'),
-    getLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'path'),
-    getLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'query'),
+    getZodLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'body'),
+    getZodLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'path'),
+    getZodLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'query'),
   ]),
   outputSchema: put_agent_builder_tools_toolid_response,
 };
 const GETALERTINGHEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAlertingHealth',
+  connectorGroup: 'internal',
   summary: `Get the alerting framework health`,
   description: `**Spaces method and path for this operation:**
 
@@ -1951,22 +1988,23 @@ You must have \`read\` privileges for the **Management > Stack Rules** feature o
 `,
   methods: ['GET'],
   patterns: ['/api/alerting/_health'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_alerting_health_request, 'body'),
-    getLooseObjectFromProperty(get_alerting_health_request, 'path'),
-    getLooseObjectFromProperty(get_alerting_health_request, 'query'),
+    getZodLooseObjectFromProperty(get_alerting_health_request, 'body'),
+    getZodLooseObjectFromProperty(get_alerting_health_request, 'path'),
+    getZodLooseObjectFromProperty(get_alerting_health_request, 'query'),
   ]),
   outputSchema: get_alerting_health_response,
 };
 const GETRULETYPES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getRuleTypes',
+  connectorGroup: 'internal',
   summary: `Get the rule types`,
   description: `**Spaces method and path for this operation:**
 
@@ -1978,22 +2016,23 @@ If you have \`read\` privileges for one or more Kibana features, the API respons
 `,
   methods: ['GET'],
   patterns: ['/api/alerting/rule_types'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_rule_types_request, 'body'),
-    getLooseObjectFromProperty(get_rule_types_request, 'path'),
-    getLooseObjectFromProperty(get_rule_types_request, 'query'),
+    getZodLooseObjectFromProperty(get_rule_types_request, 'body'),
+    getZodLooseObjectFromProperty(get_rule_types_request, 'path'),
+    getZodLooseObjectFromProperty(get_rule_types_request, 'query'),
   ]),
   outputSchema: get_rule_types_response,
 };
 const DELETE_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_alerting_rule_id',
+  connectorGroup: 'internal',
   summary: `Delete a rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -2002,22 +2041,23 @@ const DELETE_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/alerting/rule/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_alerting_rule_id_request, 'body'),
-    getLooseObjectFromProperty(delete_alerting_rule_id_request, 'path'),
-    getLooseObjectFromProperty(delete_alerting_rule_id_request, 'query'),
+    getZodLooseObjectFromProperty(delete_alerting_rule_id_request, 'body'),
+    getZodLooseObjectFromProperty(delete_alerting_rule_id_request, 'path'),
+    getZodLooseObjectFromProperty(delete_alerting_rule_id_request, 'query'),
   ]),
   outputSchema: delete_alerting_rule_id_response,
 };
 const GET_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_alerting_rule_id',
+  connectorGroup: 'internal',
   summary: `Get rule details`,
   description: `**Spaces method and path for this operation:**
 
@@ -2026,22 +2066,23 @@ const GET_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/alerting/rule/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_alerting_rule_id_request, 'body'),
-    getLooseObjectFromProperty(get_alerting_rule_id_request, 'path'),
-    getLooseObjectFromProperty(get_alerting_rule_id_request, 'query'),
+    getZodLooseObjectFromProperty(get_alerting_rule_id_request, 'body'),
+    getZodLooseObjectFromProperty(get_alerting_rule_id_request, 'path'),
+    getZodLooseObjectFromProperty(get_alerting_rule_id_request, 'query'),
   ]),
   outputSchema: get_alerting_rule_id_response,
 };
 const POST_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id',
+  connectorGroup: 'internal',
   summary: `Create a rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -2050,9 +2091,9 @@ const POST_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [
@@ -2072,14 +2113,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_alerting_rule_id_request, 'body'),
-    getLooseObjectFromProperty(post_alerting_rule_id_request, 'path'),
-    getLooseObjectFromProperty(post_alerting_rule_id_request, 'query'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_request, 'body'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_request, 'path'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_request, 'query'),
   ]),
   outputSchema: post_alerting_rule_id_response,
 };
 const PUT_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_alerting_rule_id',
+  connectorGroup: 'internal',
   summary: `Update a rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -2088,9 +2130,9 @@ const PUT_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['PUT'],
   patterns: ['/api/alerting/rule/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [
@@ -2107,14 +2149,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_alerting_rule_id_request, 'body'),
-    getLooseObjectFromProperty(put_alerting_rule_id_request, 'path'),
-    getLooseObjectFromProperty(put_alerting_rule_id_request, 'query'),
+    getZodLooseObjectFromProperty(put_alerting_rule_id_request, 'body'),
+    getZodLooseObjectFromProperty(put_alerting_rule_id_request, 'path'),
+    getZodLooseObjectFromProperty(put_alerting_rule_id_request, 'query'),
   ]),
   outputSchema: put_alerting_rule_id_response,
 };
 const POST_ALERTING_RULE_ID_DISABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_disable',
+  connectorGroup: 'internal',
   summary: `Disable a rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -2123,22 +2166,23 @@ const POST_ALERTING_RULE_ID_DISABLE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_disable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['untrack'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'body'),
-    getLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'path'),
-    getLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'query'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'body'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'path'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'query'),
   ]),
   outputSchema: post_alerting_rule_id_disable_response,
 };
 const POST_ALERTING_RULE_ID_ENABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_enable',
+  connectorGroup: 'internal',
   summary: `Enable a rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -2147,22 +2191,23 @@ const POST_ALERTING_RULE_ID_ENABLE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_enable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'body'),
-    getLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'path'),
-    getLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'query'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'body'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'path'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'query'),
   ]),
   outputSchema: post_alerting_rule_id_enable_response,
 };
 const POST_ALERTING_RULE_ID_MUTE_ALL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_mute_all',
+  connectorGroup: 'internal',
   summary: `Mute all alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -2171,22 +2216,23 @@ const POST_ALERTING_RULE_ID_MUTE_ALL_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_mute_all'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'body'),
-    getLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'path'),
-    getLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'query'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'body'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'path'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'query'),
   ]),
   outputSchema: post_alerting_rule_id_mute_all_response,
 };
 const POST_ALERTING_RULE_ID_UNMUTE_ALL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_unmute_all',
+  connectorGroup: 'internal',
   summary: `Unmute all alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -2195,22 +2241,23 @@ const POST_ALERTING_RULE_ID_UNMUTE_ALL_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_unmute_all'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'body'),
-    getLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'path'),
-    getLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'query'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'body'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'path'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'query'),
   ]),
   outputSchema: post_alerting_rule_id_unmute_all_response,
 };
 const POST_ALERTING_RULE_ID_UPDATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_update_api_key',
+  connectorGroup: 'internal',
   summary: `Update the API key for a rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -2219,22 +2266,23 @@ const POST_ALERTING_RULE_ID_UPDATE_API_KEY_CONTRACT: InternalConnectorContract =
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/_update_api_key'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'body'),
-    getLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'path'),
-    getLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'query'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'body'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'path'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'query'),
   ]),
   outputSchema: post_alerting_rule_id_update_api_key_response,
 };
 const POST_ALERTING_RULE_ID_SNOOZE_SCHEDULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_snooze_schedule',
+  connectorGroup: 'internal',
   summary: `Schedule a snooze for the rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -2245,22 +2293,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{id}/snooze_schedule'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['schedule'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'body'),
-    getLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'path'),
-    getLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'query'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'body'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'path'),
+    getZodLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'query'),
   ]),
   outputSchema: post_alerting_rule_id_snooze_schedule_response,
 };
 const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_MUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_rule_id_alert_alert_id_mute',
+  connectorGroup: 'internal',
   summary: `Mute an alert`,
   description: `**Spaces method and path for this operation:**
 
@@ -2269,22 +2318,23 @@ const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_MUTE_CONTRACT: InternalConnector
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['rule_id', 'alert_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'body'),
-    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'path'),
-    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'query'),
+    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'body'),
+    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'path'),
+    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'query'),
   ]),
   outputSchema: post_alerting_rule_rule_id_alert_alert_id_mute_response,
 };
 const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_UNMUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_rule_id_alert_alert_id_unmute',
+  connectorGroup: 'internal',
   summary: `Unmute an alert`,
   description: `**Spaces method and path for this operation:**
 
@@ -2293,22 +2343,26 @@ const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_UNMUTE_CONTRACT: InternalConnect
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['rule_id', 'alert_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'body'),
-    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'path'),
-    getLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'query'),
+    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'body'),
+    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'path'),
+    getZodLooseObjectFromProperty(
+      post_alerting_rule_rule_id_alert_alert_id_unmute_request,
+      'query'
+    ),
   ]),
   outputSchema: post_alerting_rule_rule_id_alert_alert_id_unmute_response,
 };
 const DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_alerting_rule_ruleid_snooze_schedule_scheduleid',
+  connectorGroup: 'internal',
   summary: `Delete a snooze schedule for a rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -2317,23 +2371,23 @@ const DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT: InternalC
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['ruleId', 'scheduleId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(
+    getZodLooseObjectFromProperty(
       delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
       'body'
     ),
-    getLooseObjectFromProperty(
+    getZodLooseObjectFromProperty(
       delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
       'path'
     ),
-    getLooseObjectFromProperty(
+    getZodLooseObjectFromProperty(
       delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
       'query'
     ),
@@ -2342,6 +2396,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_ALERTING_RULES_FIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_alerting_rules_find',
+  connectorGroup: 'internal',
   summary: `Get information about rules`,
   description: `**Spaces method and path for this operation:**
 
@@ -2350,9 +2405,9 @@ const GET_ALERTING_RULES_FIND_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/alerting/rules/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'per_page',
@@ -2370,14 +2425,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_alerting_rules_find_request, 'body'),
-    getLooseObjectFromProperty(get_alerting_rules_find_request, 'path'),
-    getLooseObjectFromProperty(get_alerting_rules_find_request, 'query'),
+    getZodLooseObjectFromProperty(get_alerting_rules_find_request, 'body'),
+    getZodLooseObjectFromProperty(get_alerting_rules_find_request, 'path'),
+    getZodLooseObjectFromProperty(get_alerting_rules_find_request, 'query'),
   ]),
   outputSchema: get_alerting_rules_find_response,
 };
 const CREATEAGENTKEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createAgentKey',
+  connectorGroup: 'internal',
   summary: `Create an APM agent key`,
   description: `**Spaces method and path for this operation:**
 
@@ -2391,22 +2447,23 @@ After it is created, you can copy the API key (Base64 encoded) and use it to to 
 `,
   methods: ['POST'],
   patterns: ['/api/apm/agent_keys'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['name', 'privileges'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_agent_key_request, 'body'),
-    getLooseObjectFromProperty(create_agent_key_request, 'path'),
-    getLooseObjectFromProperty(create_agent_key_request, 'query'),
+    getZodLooseObjectFromProperty(create_agent_key_request, 'body'),
+    getZodLooseObjectFromProperty(create_agent_key_request, 'path'),
+    getZodLooseObjectFromProperty(create_agent_key_request, 'query'),
   ]),
   outputSchema: create_agent_key_response,
 };
 const SAVEAPMSERVERSCHEMA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.saveApmServerSchema',
+  connectorGroup: 'internal',
   summary: `Save APM server schema`,
   description: `**Spaces method and path for this operation:**
 
@@ -2415,22 +2472,23 @@ const SAVEAPMSERVERSCHEMA_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/apm/fleet/apm_server_schema'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['schema'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(save_apm_server_schema_request, 'body'),
-    getLooseObjectFromProperty(save_apm_server_schema_request, 'path'),
-    getLooseObjectFromProperty(save_apm_server_schema_request, 'query'),
+    getZodLooseObjectFromProperty(save_apm_server_schema_request, 'body'),
+    getZodLooseObjectFromProperty(save_apm_server_schema_request, 'path'),
+    getZodLooseObjectFromProperty(save_apm_server_schema_request, 'query'),
   ]),
   outputSchema: save_apm_server_schema_response,
 };
 const CREATEANNOTATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createAnnotation',
+  connectorGroup: 'internal',
   summary: `Create a service annotation`,
   description: `**Spaces method and path for this operation:**
 
@@ -2441,22 +2499,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a new annotation for a specific service.`,
   methods: ['POST'],
   patterns: ['/api/apm/services/{serviceName}/annotation'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: ['serviceName'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['@timestamp', 'message', 'service', 'tags'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_annotation_request, 'body'),
-    getLooseObjectFromProperty(create_annotation_request, 'path'),
-    getLooseObjectFromProperty(create_annotation_request, 'query'),
+    getZodLooseObjectFromProperty(create_annotation_request, 'body'),
+    getZodLooseObjectFromProperty(create_annotation_request, 'path'),
+    getZodLooseObjectFromProperty(create_annotation_request, 'query'),
   ]),
   outputSchema: create_annotation_response,
 };
 const GETANNOTATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAnnotation',
+  connectorGroup: 'internal',
   summary: `Search for annotations`,
   description: `**Spaces method and path for this operation:**
 
@@ -2467,22 +2526,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Search for annotations related to a specific service.`,
   methods: ['GET'],
   patterns: ['/api/apm/services/{serviceName}/annotation/search'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version'],
     pathParams: ['serviceName'],
     urlParams: ['environment', 'start', 'end'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_annotation_request, 'body'),
-    getLooseObjectFromProperty(get_annotation_request, 'path'),
-    getLooseObjectFromProperty(get_annotation_request, 'query'),
+    getZodLooseObjectFromProperty(get_annotation_request, 'body'),
+    getZodLooseObjectFromProperty(get_annotation_request, 'path'),
+    getZodLooseObjectFromProperty(get_annotation_request, 'query'),
   ]),
   outputSchema: get_annotation_response,
 };
 const DELETEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteAgentConfiguration',
+  connectorGroup: 'internal',
   summary: `Delete agent configuration`,
   description: `**Spaces method and path for this operation:**
 
@@ -2491,22 +2551,23 @@ const DELETEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/apm/settings/agent-configuration'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['service'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_agent_configuration_request, 'body'),
-    getLooseObjectFromProperty(delete_agent_configuration_request, 'path'),
-    getLooseObjectFromProperty(delete_agent_configuration_request, 'query'),
+    getZodLooseObjectFromProperty(delete_agent_configuration_request, 'body'),
+    getZodLooseObjectFromProperty(delete_agent_configuration_request, 'path'),
+    getZodLooseObjectFromProperty(delete_agent_configuration_request, 'query'),
   ]),
   outputSchema: delete_agent_configuration_response,
 };
 const GETAGENTCONFIGURATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAgentConfigurations',
+  connectorGroup: 'internal',
   summary: `Get a list of agent configurations`,
   description: `**Spaces method and path for this operation:**
 
@@ -2515,22 +2576,23 @@ const GETAGENTCONFIGURATIONS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/apm/settings/agent-configuration'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_configurations_request, 'body'),
-    getLooseObjectFromProperty(get_agent_configurations_request, 'path'),
-    getLooseObjectFromProperty(get_agent_configurations_request, 'query'),
+    getZodLooseObjectFromProperty(get_agent_configurations_request, 'body'),
+    getZodLooseObjectFromProperty(get_agent_configurations_request, 'path'),
+    getZodLooseObjectFromProperty(get_agent_configurations_request, 'query'),
   ]),
   outputSchema: get_agent_configurations_response,
 };
 const CREATEUPDATEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createUpdateAgentConfiguration',
+  connectorGroup: 'internal',
   summary: `Create or update agent configuration`,
   description: `**Spaces method and path for this operation:**
 
@@ -2539,22 +2601,23 @@ const CREATEUPDATEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['PUT'],
   patterns: ['/api/apm/settings/agent-configuration'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],
     urlParams: ['overwrite'],
-    bodyParams: [],
+    bodyParams: ['agent_name', 'service', 'settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_update_agent_configuration_request, 'body'),
-    getLooseObjectFromProperty(create_update_agent_configuration_request, 'path'),
-    getLooseObjectFromProperty(create_update_agent_configuration_request, 'query'),
+    getZodLooseObjectFromProperty(create_update_agent_configuration_request, 'body'),
+    getZodLooseObjectFromProperty(create_update_agent_configuration_request, 'path'),
+    getZodLooseObjectFromProperty(create_update_agent_configuration_request, 'query'),
   ]),
   outputSchema: create_update_agent_configuration_response,
 };
 const GETAGENTNAMEFORSERVICE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAgentNameForService',
+  connectorGroup: 'internal',
   summary: `Get agent name for service`,
   description: `**Spaces method and path for this operation:**
 
@@ -2565,22 +2628,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Retrieve \`agentName\` for a service.`,
   methods: ['GET'],
   patterns: ['/api/apm/settings/agent-configuration/agent_name'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version'],
     pathParams: [],
     urlParams: ['serviceName'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_name_for_service_request, 'body'),
-    getLooseObjectFromProperty(get_agent_name_for_service_request, 'path'),
-    getLooseObjectFromProperty(get_agent_name_for_service_request, 'query'),
+    getZodLooseObjectFromProperty(get_agent_name_for_service_request, 'body'),
+    getZodLooseObjectFromProperty(get_agent_name_for_service_request, 'path'),
+    getZodLooseObjectFromProperty(get_agent_name_for_service_request, 'query'),
   ]),
   outputSchema: get_agent_name_for_service_response,
 };
 const GETENVIRONMENTSFORSERVICE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getEnvironmentsForService',
+  connectorGroup: 'internal',
   summary: `Get environments for service`,
   description: `**Spaces method and path for this operation:**
 
@@ -2589,22 +2653,23 @@ const GETENVIRONMENTSFORSERVICE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/apm/settings/agent-configuration/environments'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version'],
     pathParams: [],
     urlParams: ['serviceName'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_environments_for_service_request, 'body'),
-    getLooseObjectFromProperty(get_environments_for_service_request, 'path'),
-    getLooseObjectFromProperty(get_environments_for_service_request, 'query'),
+    getZodLooseObjectFromProperty(get_environments_for_service_request, 'body'),
+    getZodLooseObjectFromProperty(get_environments_for_service_request, 'path'),
+    getZodLooseObjectFromProperty(get_environments_for_service_request, 'query'),
   ]),
   outputSchema: get_environments_for_service_response,
 };
 const SEARCHSINGLECONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.searchSingleConfiguration',
+  connectorGroup: 'internal',
   summary: `Lookup single agent configuration`,
   description: `**Spaces method and path for this operation:**
 
@@ -2616,22 +2681,23 @@ This endpoint enables you to search for a single agent configuration and update 
 `,
   methods: ['POST'],
   patterns: ['/api/apm/settings/agent-configuration/search'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['etag', 'mark_as_applied_by_agent', 'service'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_single_configuration_request, 'body'),
-    getLooseObjectFromProperty(search_single_configuration_request, 'path'),
-    getLooseObjectFromProperty(search_single_configuration_request, 'query'),
+    getZodLooseObjectFromProperty(search_single_configuration_request, 'body'),
+    getZodLooseObjectFromProperty(search_single_configuration_request, 'path'),
+    getZodLooseObjectFromProperty(search_single_configuration_request, 'query'),
   ]),
   outputSchema: search_single_configuration_response,
 };
 const GETSINGLEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSingleAgentConfiguration',
+  connectorGroup: 'internal',
   summary: `Get single agent configuration`,
   description: `**Spaces method and path for this operation:**
 
@@ -2640,22 +2706,23 @@ const GETSINGLEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/apm/settings/agent-configuration/view'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version'],
     pathParams: [],
     urlParams: ['name', 'environment'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_single_agent_configuration_request, 'body'),
-    getLooseObjectFromProperty(get_single_agent_configuration_request, 'path'),
-    getLooseObjectFromProperty(get_single_agent_configuration_request, 'query'),
+    getZodLooseObjectFromProperty(get_single_agent_configuration_request, 'body'),
+    getZodLooseObjectFromProperty(get_single_agent_configuration_request, 'path'),
+    getZodLooseObjectFromProperty(get_single_agent_configuration_request, 'query'),
   ]),
   outputSchema: get_single_agent_configuration_response,
 };
 const GETSOURCEMAPS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSourceMaps',
+  connectorGroup: 'internal',
   summary: `Get source maps`,
   description: `**Spaces method and path for this operation:**
 
@@ -2667,22 +2734,23 @@ Get an array of Fleet artifacts, including source map uploads. You must have \`r
 `,
   methods: ['GET'],
   patterns: ['/api/apm/sourcemaps'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version'],
     pathParams: [],
     urlParams: ['page', 'perPage'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_source_maps_request, 'body'),
-    getLooseObjectFromProperty(get_source_maps_request, 'path'),
-    getLooseObjectFromProperty(get_source_maps_request, 'query'),
+    getZodLooseObjectFromProperty(get_source_maps_request, 'body'),
+    getZodLooseObjectFromProperty(get_source_maps_request, 'path'),
+    getZodLooseObjectFromProperty(get_source_maps_request, 'query'),
   ]),
   outputSchema: get_source_maps_response,
 };
 const UPLOADSOURCEMAP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.uploadSourceMap',
+  connectorGroup: 'internal',
   summary: `Upload a source map`,
   description: `**Spaces method and path for this operation:**
 
@@ -2695,22 +2763,23 @@ The maximum payload size is \`1mb\`. If you attempt to upload a source map that 
 `,
   methods: ['POST'],
   patterns: ['/api/apm/sourcemaps'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(upload_source_map_request, 'body'),
-    getLooseObjectFromProperty(upload_source_map_request, 'path'),
-    getLooseObjectFromProperty(upload_source_map_request, 'query'),
+    getZodLooseObjectFromProperty(upload_source_map_request, 'body'),
+    getZodLooseObjectFromProperty(upload_source_map_request, 'path'),
+    getZodLooseObjectFromProperty(upload_source_map_request, 'query'),
   ]),
   outputSchema: upload_source_map_response,
 };
 const DELETESOURCEMAP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSourceMap',
+  connectorGroup: 'internal',
   summary: `Delete source map`,
   description: `**Spaces method and path for this operation:**
 
@@ -2722,22 +2791,23 @@ Delete a previously uploaded source map. You must have \`all\` Kibana privileges
 `,
   methods: ['DELETE'],
   patterns: ['/api/apm/sourcemaps/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['elastic-api-version', 'kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_source_map_request, 'body'),
-    getLooseObjectFromProperty(delete_source_map_request, 'path'),
-    getLooseObjectFromProperty(delete_source_map_request, 'query'),
+    getZodLooseObjectFromProperty(delete_source_map_request, 'body'),
+    getZodLooseObjectFromProperty(delete_source_map_request, 'path'),
+    getZodLooseObjectFromProperty(delete_source_map_request, 'query'),
   ]),
   outputSchema: delete_source_map_response,
 };
 const DELETEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAssetCriticalityRecord',
+  connectorGroup: 'internal',
   summary: `Delete an asset criticality record`,
   description: `**Spaces method and path for this operation:**
 
@@ -2748,22 +2818,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete the asset criticality record for a specific entity.`,
   methods: ['DELETE'],
   patterns: ['/api/asset_criticality'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id_value', 'id_field', 'refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_asset_criticality_record_request, 'body'),
-    getLooseObjectFromProperty(delete_asset_criticality_record_request, 'path'),
-    getLooseObjectFromProperty(delete_asset_criticality_record_request, 'query'),
+    getZodLooseObjectFromProperty(delete_asset_criticality_record_request, 'body'),
+    getZodLooseObjectFromProperty(delete_asset_criticality_record_request, 'path'),
+    getZodLooseObjectFromProperty(delete_asset_criticality_record_request, 'query'),
   ]),
   outputSchema: delete_asset_criticality_record_response,
 };
 const GETASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAssetCriticalityRecord',
+  connectorGroup: 'internal',
   summary: `Get an asset criticality record`,
   description: `**Spaces method and path for this operation:**
 
@@ -2774,22 +2845,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the asset criticality record for a specific entity.`,
   methods: ['GET'],
   patterns: ['/api/asset_criticality'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id_value', 'id_field'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_asset_criticality_record_request, 'body'),
-    getLooseObjectFromProperty(get_asset_criticality_record_request, 'path'),
-    getLooseObjectFromProperty(get_asset_criticality_record_request, 'query'),
+    getZodLooseObjectFromProperty(get_asset_criticality_record_request, 'body'),
+    getZodLooseObjectFromProperty(get_asset_criticality_record_request, 'path'),
+    getZodLooseObjectFromProperty(get_asset_criticality_record_request, 'query'),
   ]),
   outputSchema: get_asset_criticality_record_response,
 };
 const CREATEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAssetCriticalityRecord',
+  connectorGroup: 'internal',
   summary: `Upsert an asset criticality record`,
   description: `**Spaces method and path for this operation:**
 
@@ -2803,22 +2875,23 @@ If a record already exists for the specified entity, that record is overwritten 
 `,
   methods: ['POST'],
   patterns: ['/api/asset_criticality'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_asset_criticality_record_request, 'body'),
-    getLooseObjectFromProperty(create_asset_criticality_record_request, 'path'),
-    getLooseObjectFromProperty(create_asset_criticality_record_request, 'query'),
+    getZodLooseObjectFromProperty(create_asset_criticality_record_request, 'body'),
+    getZodLooseObjectFromProperty(create_asset_criticality_record_request, 'path'),
+    getZodLooseObjectFromProperty(create_asset_criticality_record_request, 'query'),
   ]),
   outputSchema: create_asset_criticality_record_response,
 };
 const BULKUPSERTASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.BulkUpsertAssetCriticalityRecords',
+  connectorGroup: 'internal',
   summary: `Bulk upsert asset criticality records`,
   description: `**Spaces method and path for this operation:**
 
@@ -2832,22 +2905,23 @@ If asset criticality records already exist for the specified entities, those rec
 `,
   methods: ['POST'],
   patterns: ['/api/asset_criticality/bulk'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['records'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'body'),
-    getLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'path'),
-    getLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'query'),
+    getZodLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'body'),
+    getZodLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'path'),
+    getZodLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'query'),
   ]),
   outputSchema: bulk_upsert_asset_criticality_records_response,
 };
 const FINDASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAssetCriticalityRecords',
+  connectorGroup: 'internal',
   summary: `List asset criticality records`,
   description: `**Spaces method and path for this operation:**
 
@@ -2858,22 +2932,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 List asset criticality records, paging, sorting and filtering as needed.`,
   methods: ['GET'],
   patterns: ['/api/asset_criticality/list'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['sort_field', 'sort_direction', 'page', 'per_page', 'kuery'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_asset_criticality_records_request, 'body'),
-    getLooseObjectFromProperty(find_asset_criticality_records_request, 'path'),
-    getLooseObjectFromProperty(find_asset_criticality_records_request, 'query'),
+    getZodLooseObjectFromProperty(find_asset_criticality_records_request, 'body'),
+    getZodLooseObjectFromProperty(find_asset_criticality_records_request, 'path'),
+    getZodLooseObjectFromProperty(find_asset_criticality_records_request, 'query'),
   ]),
   outputSchema: find_asset_criticality_records_response,
 };
 const POSTATTACKDISCOVERYBULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryBulk',
+  connectorGroup: 'internal',
   summary: `Bulk update Attack discoveries`,
   description: `**Spaces method and path for this operation:**
 
@@ -2884,22 +2959,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Performs bulk updates on multiple Attack discoveries, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert. \`Technical preview\``,
   methods: ['POST'],
   patterns: ['/api/attack_discovery/_bulk'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['update'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_attack_discovery_bulk_request, 'body'),
-    getLooseObjectFromProperty(post_attack_discovery_bulk_request, 'path'),
-    getLooseObjectFromProperty(post_attack_discovery_bulk_request, 'query'),
+    getZodLooseObjectFromProperty(post_attack_discovery_bulk_request, 'body'),
+    getZodLooseObjectFromProperty(post_attack_discovery_bulk_request, 'path'),
+    getZodLooseObjectFromProperty(post_attack_discovery_bulk_request, 'query'),
   ]),
   outputSchema: post_attack_discovery_bulk_response,
 };
 const ATTACKDISCOVERYFIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.AttackDiscoveryFind',
+  connectorGroup: 'internal',
   summary: `Find Attack discoveries that match the search criteria`,
   description: `**Spaces method and path for this operation:**
 
@@ -2910,9 +2986,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Find Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. \`Technical preview\``,
   methods: ['GET'],
   patterns: ['/api/attack_discovery/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'alert_ids',
@@ -2934,14 +3010,15 @@ Find Attack discoveries that match the search criteria. Supports free text searc
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(attack_discovery_find_request, 'body'),
-    getLooseObjectFromProperty(attack_discovery_find_request, 'path'),
-    getLooseObjectFromProperty(attack_discovery_find_request, 'query'),
+    getZodLooseObjectFromProperty(attack_discovery_find_request, 'body'),
+    getZodLooseObjectFromProperty(attack_discovery_find_request, 'path'),
+    getZodLooseObjectFromProperty(attack_discovery_find_request, 'query'),
   ]),
   outputSchema: attack_discovery_find_response,
 };
 const POSTATTACKDISCOVERYGENERATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryGenerate',
+  connectorGroup: 'internal',
   summary: `Generate attack discoveries from alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -2952,22 +3029,35 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Initiates the generation of attack discoveries by analyzing security alerts using AI. Returns an execution UUID that can be used to track the generation progress and retrieve results. Results may also be retrieved via the find endpoint. \`Technical preview\``,
   methods: ['POST'],
   patterns: ['/api/attack_discovery/_generate'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'alertsIndexPattern',
+      'anonymizationFields',
+      'apiConfig',
+      'connectorName',
+      'end',
+      'filter',
+      'model',
+      'replacements',
+      'size',
+      'start',
+      'subAction',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_attack_discovery_generate_request, 'body'),
-    getLooseObjectFromProperty(post_attack_discovery_generate_request, 'path'),
-    getLooseObjectFromProperty(post_attack_discovery_generate_request, 'query'),
+    getZodLooseObjectFromProperty(post_attack_discovery_generate_request, 'body'),
+    getZodLooseObjectFromProperty(post_attack_discovery_generate_request, 'path'),
+    getZodLooseObjectFromProperty(post_attack_discovery_generate_request, 'query'),
   ]),
   outputSchema: post_attack_discovery_generate_response,
 };
 const GETATTACKDISCOVERYGENERATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoveryGenerations',
+  connectorGroup: 'internal',
   summary: `Get the latest attack discovery generations metadata for the current user`,
   description: `**Spaces method and path for this operation:**
 
@@ -2978,22 +3068,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the latest attack discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations. \`Technical preview\``,
   methods: ['GET'],
   patterns: ['/api/attack_discovery/generations'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['end', 'size', 'start'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_attack_discovery_generations_request, 'body'),
-    getLooseObjectFromProperty(get_attack_discovery_generations_request, 'path'),
-    getLooseObjectFromProperty(get_attack_discovery_generations_request, 'query'),
+    getZodLooseObjectFromProperty(get_attack_discovery_generations_request, 'body'),
+    getZodLooseObjectFromProperty(get_attack_discovery_generations_request, 'path'),
+    getZodLooseObjectFromProperty(get_attack_discovery_generations_request, 'query'),
   ]),
   outputSchema: get_attack_discovery_generations_response,
 };
 const GETATTACKDISCOVERYGENERATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoveryGeneration',
+  connectorGroup: 'internal',
   summary: `Get a single Attack discovery generation, including its discoveries and (optional) generation metadata`,
   description: `**Spaces method and path for this operation:**
 
@@ -3004,22 +3095,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics. \`Technical preview\``,
   methods: ['GET'],
   patterns: ['/api/attack_discovery/generations/{execution_uuid}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['execution_uuid'],
     urlParams: ['enable_field_rendering', 'with_replacements'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_attack_discovery_generation_request, 'body'),
-    getLooseObjectFromProperty(get_attack_discovery_generation_request, 'path'),
-    getLooseObjectFromProperty(get_attack_discovery_generation_request, 'query'),
+    getZodLooseObjectFromProperty(get_attack_discovery_generation_request, 'body'),
+    getZodLooseObjectFromProperty(get_attack_discovery_generation_request, 'path'),
+    getZodLooseObjectFromProperty(get_attack_discovery_generation_request, 'query'),
   ]),
   outputSchema: get_attack_discovery_generation_response,
 };
 const POSTATTACKDISCOVERYGENERATIONSDISMISS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryGenerationsDismiss',
+  connectorGroup: 'internal',
   summary: `Dismiss an attack discovery generation`,
   description: `**Spaces method and path for this operation:**
 
@@ -3030,22 +3122,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Dismisses an attack discovery generation for the current user, indicating that it's status should not be reported in the UI. This sets the generation's status to "dismissed" and affects how the generation appears in subsequent queries. \`Technical preview\``,
   methods: ['POST'],
   patterns: ['/api/attack_discovery/generations/{execution_uuid}/_dismiss'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['execution_uuid'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'body'),
-    getLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'path'),
-    getLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'query'),
+    getZodLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'body'),
+    getZodLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'path'),
+    getZodLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'query'),
   ]),
   outputSchema: post_attack_discovery_generations_dismiss_response,
 };
 const CREATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAttackDiscoverySchedules',
+  connectorGroup: 'internal',
   summary: `Create Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
@@ -3056,22 +3149,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found. \`Technical preview\``,
   methods: ['POST'],
   patterns: ['/api/attack_discovery/schedules'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['actions', 'enabled', 'name', 'params', 'schedule'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_attack_discovery_schedules_request, 'body'),
-    getLooseObjectFromProperty(create_attack_discovery_schedules_request, 'path'),
-    getLooseObjectFromProperty(create_attack_discovery_schedules_request, 'query'),
+    getZodLooseObjectFromProperty(create_attack_discovery_schedules_request, 'body'),
+    getZodLooseObjectFromProperty(create_attack_discovery_schedules_request, 'path'),
+    getZodLooseObjectFromProperty(create_attack_discovery_schedules_request, 'query'),
   ]),
   outputSchema: create_attack_discovery_schedules_response,
 };
 const FINDATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAttackDiscoverySchedules',
+  connectorGroup: 'internal',
   summary: `Finds Attack discovery schedules that match the search criteria`,
   description: `**Spaces method and path for this operation:**
 
@@ -3082,22 +3176,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields. \`Technical preview\``,
   methods: ['GET'],
   patterns: ['/api/attack_discovery/schedules/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['page', 'per_page', 'sort_field', 'sort_direction'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_attack_discovery_schedules_request, 'body'),
-    getLooseObjectFromProperty(find_attack_discovery_schedules_request, 'path'),
-    getLooseObjectFromProperty(find_attack_discovery_schedules_request, 'query'),
+    getZodLooseObjectFromProperty(find_attack_discovery_schedules_request, 'body'),
+    getZodLooseObjectFromProperty(find_attack_discovery_schedules_request, 'path'),
+    getZodLooseObjectFromProperty(find_attack_discovery_schedules_request, 'query'),
   ]),
   outputSchema: find_attack_discovery_schedules_response,
 };
 const DELETEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAttackDiscoverySchedules',
+  connectorGroup: 'internal',
   summary: `Delete Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
@@ -3108,22 +3203,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Permanently deletes an Attack discovery schedule and all associated configuration. \`Technical preview\``,
   methods: ['DELETE'],
   patterns: ['/api/attack_discovery/schedules/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'body'),
-    getLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'path'),
-    getLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'query'),
+    getZodLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'body'),
+    getZodLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'path'),
+    getZodLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'query'),
   ]),
   outputSchema: delete_attack_discovery_schedules_response,
 };
 const GETATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoverySchedules',
+  connectorGroup: 'internal',
   summary: `Get Attack discovery schedule by ID`,
   description: `**Spaces method and path for this operation:**
 
@@ -3134,22 +3230,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history. \`Technical preview\``,
   methods: ['GET'],
   patterns: ['/api/attack_discovery/schedules/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_attack_discovery_schedules_request, 'body'),
-    getLooseObjectFromProperty(get_attack_discovery_schedules_request, 'path'),
-    getLooseObjectFromProperty(get_attack_discovery_schedules_request, 'query'),
+    getZodLooseObjectFromProperty(get_attack_discovery_schedules_request, 'body'),
+    getZodLooseObjectFromProperty(get_attack_discovery_schedules_request, 'path'),
+    getZodLooseObjectFromProperty(get_attack_discovery_schedules_request, 'query'),
   ]),
   outputSchema: get_attack_discovery_schedules_response,
 };
 const UPDATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateAttackDiscoverySchedules',
+  connectorGroup: 'internal',
   summary: `Update Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
@@ -3160,22 +3257,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values. \`Technical preview\``,
   methods: ['PUT'],
   patterns: ['/api/attack_discovery/schedules/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['actions', 'name', 'params', 'schedule'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_attack_discovery_schedules_request, 'body'),
-    getLooseObjectFromProperty(update_attack_discovery_schedules_request, 'path'),
-    getLooseObjectFromProperty(update_attack_discovery_schedules_request, 'query'),
+    getZodLooseObjectFromProperty(update_attack_discovery_schedules_request, 'body'),
+    getZodLooseObjectFromProperty(update_attack_discovery_schedules_request, 'path'),
+    getZodLooseObjectFromProperty(update_attack_discovery_schedules_request, 'query'),
   ]),
   outputSchema: update_attack_discovery_schedules_response,
 };
 const DISABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DisableAttackDiscoverySchedules',
+  connectorGroup: 'internal',
   summary: `Disable Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
@@ -3186,22 +3284,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started. \`Technical preview\``,
   methods: ['POST'],
   patterns: ['/api/attack_discovery/schedules/{id}/_disable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'body'),
-    getLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'path'),
-    getLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'query'),
+    getZodLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'body'),
+    getZodLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'path'),
+    getZodLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'query'),
   ]),
   outputSchema: disable_attack_discovery_schedules_response,
 };
 const ENABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EnableAttackDiscoverySchedules',
+  connectorGroup: 'internal',
   summary: `Enable Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
@@ -3212,22 +3311,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration. \`Technical preview\``,
   methods: ['POST'],
   patterns: ['/api/attack_discovery/schedules/{id}/_enable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'body'),
-    getLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'path'),
-    getLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'query'),
+    getZodLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'body'),
+    getZodLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'path'),
+    getZodLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'query'),
   ]),
   outputSchema: enable_attack_discovery_schedules_response,
 };
 const DELETECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Delete cases`,
   description: `**Spaces method and path for this operation:**
 
@@ -3239,22 +3339,23 @@ You must have \`read\` or \`all\` privileges and the \`delete\` sub-feature priv
 `,
   methods: ['DELETE'],
   patterns: ['/api/cases'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['ids'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_case_default_space_request, 'body'),
-    getLooseObjectFromProperty(delete_case_default_space_request, 'path'),
-    getLooseObjectFromProperty(delete_case_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(delete_case_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(delete_case_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(delete_case_default_space_request, 'query'),
   ]),
   outputSchema: delete_case_default_space_response,
 };
 const UPDATECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateCaseDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Update cases`,
   description: `**Spaces method and path for this operation:**
 
@@ -3266,22 +3367,23 @@ You must have \`all\` privileges for the **Cases** feature in the  **Management*
 `,
   methods: ['PATCH'],
   patterns: ['/api/cases'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['cases'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_case_default_space_request, 'body'),
-    getLooseObjectFromProperty(update_case_default_space_request, 'path'),
-    getLooseObjectFromProperty(update_case_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(update_case_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(update_case_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(update_case_default_space_request, 'query'),
   ]),
   outputSchema: update_case_default_space_response,
 };
 const CREATECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createCaseDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Create a case`,
   description: `**Spaces method and path for this operation:**
 
@@ -3293,22 +3395,34 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
 `,
   methods: ['POST'],
   patterns: ['/api/cases'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'assignees',
+      'category',
+      'connector',
+      'customFields',
+      'description',
+      'owner',
+      'settings',
+      'severity',
+      'tags',
+      'title',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_case_default_space_request, 'body'),
-    getLooseObjectFromProperty(create_case_default_space_request, 'path'),
-    getLooseObjectFromProperty(create_case_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(create_case_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(create_case_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(create_case_default_space_request, 'query'),
   ]),
   outputSchema: create_case_default_space_response,
 };
 const FINDCASESDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCasesDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Search cases`,
   description: `**Spaces method and path for this operation:**
 
@@ -3320,9 +3434,9 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 `,
   methods: ['GET'],
   patterns: ['/api/cases/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'assignees',
@@ -3345,14 +3459,15 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_cases_default_space_request, 'body'),
-    getLooseObjectFromProperty(find_cases_default_space_request, 'path'),
-    getLooseObjectFromProperty(find_cases_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(find_cases_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(find_cases_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(find_cases_default_space_request, 'query'),
   ]),
   outputSchema: find_cases_default_space_response,
 };
 const GETCASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Get case information`,
   description: `**Spaces method and path for this operation:**
 
@@ -3364,22 +3479,23 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 `,
   methods: ['GET'],
   patterns: ['/api/cases/{caseId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_case_default_space_request, 'body'),
-    getLooseObjectFromProperty(get_case_default_space_request, 'path'),
-    getLooseObjectFromProperty(get_case_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(get_case_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(get_case_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(get_case_default_space_request, 'query'),
   ]),
   outputSchema: get_case_default_space_response,
 };
 const GETCASEALERTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseAlertsDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Get all alerts for a case`,
   description: `**Spaces method and path for this operation:**
 
@@ -3391,22 +3507,23 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 `,
   methods: ['GET'],
   patterns: ['/api/cases/{caseId}/alerts'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_case_alerts_default_space_request, 'body'),
-    getLooseObjectFromProperty(get_case_alerts_default_space_request, 'path'),
-    getLooseObjectFromProperty(get_case_alerts_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(get_case_alerts_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(get_case_alerts_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(get_case_alerts_default_space_request, 'query'),
   ]),
   outputSchema: get_case_alerts_default_space_response,
 };
 const DELETECASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseCommentsDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Delete all case comments and alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -3418,22 +3535,23 @@ Deletes all comments and alerts from a case. You must have \`all\` privileges fo
 `,
   methods: ['DELETE'],
   patterns: ['/api/cases/{caseId}/comments'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_case_comments_default_space_request, 'body'),
-    getLooseObjectFromProperty(delete_case_comments_default_space_request, 'path'),
-    getLooseObjectFromProperty(delete_case_comments_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(delete_case_comments_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(delete_case_comments_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(delete_case_comments_default_space_request, 'query'),
   ]),
   outputSchema: delete_case_comments_default_space_response,
 };
 const UPDATECASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateCaseCommentDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Update a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
@@ -3445,22 +3563,23 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
 `,
   methods: ['PATCH'],
   patterns: ['/api/cases/{caseId}/comments'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_case_comment_default_space_request, 'body'),
-    getLooseObjectFromProperty(update_case_comment_default_space_request, 'path'),
-    getLooseObjectFromProperty(update_case_comment_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(update_case_comment_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(update_case_comment_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(update_case_comment_default_space_request, 'query'),
   ]),
   outputSchema: update_case_comment_default_space_response,
 };
 const ADDCASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.addCaseCommentDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Add a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
@@ -3472,22 +3591,23 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
 `,
   methods: ['POST'],
   patterns: ['/api/cases/{caseId}/comments'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(add_case_comment_default_space_request, 'body'),
-    getLooseObjectFromProperty(add_case_comment_default_space_request, 'path'),
-    getLooseObjectFromProperty(add_case_comment_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(add_case_comment_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(add_case_comment_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(add_case_comment_default_space_request, 'query'),
   ]),
   outputSchema: add_case_comment_default_space_response,
 };
 const FINDCASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseCommentsDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Find case comments and alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -3499,22 +3619,23 @@ Retrieves a paginated list of comments for a case. You must have \`read\` privil
 `,
   methods: ['GET'],
   patterns: ['/api/cases/{caseId}/comments/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['caseId'],
     urlParams: ['page', 'perPage', 'sortOrder'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_case_comments_default_space_request, 'body'),
-    getLooseObjectFromProperty(find_case_comments_default_space_request, 'path'),
-    getLooseObjectFromProperty(find_case_comments_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(find_case_comments_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(find_case_comments_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(find_case_comments_default_space_request, 'query'),
   ]),
   outputSchema: find_case_comments_default_space_response,
 };
 const DELETECASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseCommentDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Delete a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
@@ -3526,22 +3647,23 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
 `,
   methods: ['DELETE'],
   patterns: ['/api/cases/{caseId}/comments/{commentId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['caseId', 'commentId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_case_comment_default_space_request, 'body'),
-    getLooseObjectFromProperty(delete_case_comment_default_space_request, 'path'),
-    getLooseObjectFromProperty(delete_case_comment_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(delete_case_comment_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(delete_case_comment_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(delete_case_comment_default_space_request, 'query'),
   ]),
   outputSchema: delete_case_comment_default_space_response,
 };
 const GETCASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseCommentDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Get a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
@@ -3553,22 +3675,23 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 `,
   methods: ['GET'],
   patterns: ['/api/cases/{caseId}/comments/{commentId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['caseId', 'commentId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_case_comment_default_space_request, 'body'),
-    getLooseObjectFromProperty(get_case_comment_default_space_request, 'path'),
-    getLooseObjectFromProperty(get_case_comment_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(get_case_comment_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(get_case_comment_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(get_case_comment_default_space_request, 'query'),
   ]),
   outputSchema: get_case_comment_default_space_response,
 };
 const PUSHCASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.pushCaseDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Push a case to an external service`,
   description: `**Spaces method and path for this operation:**
 
@@ -3580,22 +3703,23 @@ You must have \`all\` privileges for the **Actions and Connectors** feature in t
 `,
   methods: ['POST'],
   patterns: ['/api/cases/{caseId}/connector/{connectorId}/_push'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['caseId', 'connectorId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(push_case_default_space_request, 'body'),
-    getLooseObjectFromProperty(push_case_default_space_request, 'path'),
-    getLooseObjectFromProperty(push_case_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(push_case_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(push_case_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(push_case_default_space_request, 'query'),
   ]),
   outputSchema: push_case_default_space_response,
 };
 const ADDCASEFILEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.addCaseFileDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Attach a file to a case`,
   description: `**Spaces method and path for this operation:**
 
@@ -3609,22 +3733,23 @@ Attach a file to a case. You must have \`all\` privileges for the **Cases** feat
 `,
   methods: ['POST'],
   patterns: ['/api/cases/{caseId}/files'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(add_case_file_default_space_request, 'body'),
-    getLooseObjectFromProperty(add_case_file_default_space_request, 'path'),
-    getLooseObjectFromProperty(add_case_file_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(add_case_file_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(add_case_file_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(add_case_file_default_space_request, 'query'),
   ]),
   outputSchema: add_case_file_default_space_response,
 };
 const FINDCASEACTIVITYDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseActivityDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Find case activity`,
   description: `**Spaces method and path for this operation:**
 
@@ -3636,22 +3761,23 @@ Retrives a paginated list of user activity for a case. You must have \`read\` pr
 `,
   methods: ['GET'],
   patterns: ['/api/cases/{caseId}/user_actions/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['caseId'],
     urlParams: ['page', 'perPage', 'sortOrder', 'types'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_case_activity_default_space_request, 'body'),
-    getLooseObjectFromProperty(find_case_activity_default_space_request, 'path'),
-    getLooseObjectFromProperty(find_case_activity_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(find_case_activity_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(find_case_activity_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(find_case_activity_default_space_request, 'query'),
   ]),
   outputSchema: find_case_activity_default_space_response,
 };
 const GETCASESBYALERTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCasesByAlertDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Get cases for an alert`,
   description: `**Spaces method and path for this operation:**
 
@@ -3663,22 +3789,23 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 `,
   methods: ['GET'],
   patterns: ['/api/cases/alerts/{alertId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['alertId'],
     urlParams: ['owner'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'body'),
-    getLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'path'),
-    getLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'query'),
   ]),
   outputSchema: get_cases_by_alert_default_space_response,
 };
 const GETCASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseConfigurationDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Get case settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -3690,22 +3817,23 @@ Get setting details such as the closure type, custom fields, templatse, and the 
 `,
   methods: ['GET'],
   patterns: ['/api/cases/configure'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['owner'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_case_configuration_default_space_request, 'body'),
-    getLooseObjectFromProperty(get_case_configuration_default_space_request, 'path'),
-    getLooseObjectFromProperty(get_case_configuration_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(get_case_configuration_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(get_case_configuration_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(get_case_configuration_default_space_request, 'query'),
   ]),
   outputSchema: get_case_configuration_default_space_response,
 };
 const SETCASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.setCaseConfigurationDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Add case settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -3717,22 +3845,23 @@ Case settings include external connection details, custom fields, and templates.
 `,
   methods: ['POST'],
   patterns: ['/api/cases/configure'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['closure_type', 'connector', 'customFields', 'owner', 'templates'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(set_case_configuration_default_space_request, 'body'),
-    getLooseObjectFromProperty(set_case_configuration_default_space_request, 'path'),
-    getLooseObjectFromProperty(set_case_configuration_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(set_case_configuration_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(set_case_configuration_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(set_case_configuration_default_space_request, 'query'),
   ]),
   outputSchema: set_case_configuration_default_space_response,
 };
 const UPDATECASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateCaseConfigurationDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Update case settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -3744,22 +3873,23 @@ Updates setting details such as the closure type, custom fields, templates, and 
 `,
   methods: ['PATCH'],
   patterns: ['/api/cases/configure/{configurationId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['configurationId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['closure_type', 'connector', 'customFields', 'templates', 'version'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_case_configuration_default_space_request, 'body'),
-    getLooseObjectFromProperty(update_case_configuration_default_space_request, 'path'),
-    getLooseObjectFromProperty(update_case_configuration_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(update_case_configuration_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(update_case_configuration_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(update_case_configuration_default_space_request, 'query'),
   ]),
   outputSchema: update_case_configuration_default_space_response,
 };
 const FINDCASECONNECTORSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseConnectorsDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Get case connectors`,
   description: `**Spaces method and path for this operation:**
 
@@ -3771,43 +3901,45 @@ Get information about connectors that are supported for use in cases. You must h
 `,
   methods: ['GET'],
   patterns: ['/api/cases/configure/connectors/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_case_connectors_default_space_request, 'body'),
-    getLooseObjectFromProperty(find_case_connectors_default_space_request, 'path'),
-    getLooseObjectFromProperty(find_case_connectors_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(find_case_connectors_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(find_case_connectors_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(find_case_connectors_default_space_request, 'query'),
   ]),
   outputSchema: find_case_connectors_default_space_response,
 };
 const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseReportersDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Get case creators`,
   description: `Returns information about the users who opened cases. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases. The API returns information about the users as they existed at the time of the case creation, including their name, full name, and email address. If any of those details change thereafter or if a user is deleted, the information returned by this API is unchanged.
 `,
   methods: ['GET'],
   patterns: ['/api/cases/reporters'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['owner'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_case_reporters_default_space_request, 'body'),
-    getLooseObjectFromProperty(get_case_reporters_default_space_request, 'path'),
-    getLooseObjectFromProperty(get_case_reporters_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(get_case_reporters_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(get_case_reporters_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(get_case_reporters_default_space_request, 'query'),
   ]),
   outputSchema: get_case_reporters_default_space_response,
 };
 const GETCASETAGSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseTagsDefaultSpace',
+  connectorGroup: 'internal',
   summary: `Get case tags`,
   description: `**Spaces method and path for this operation:**
 
@@ -3819,22 +3951,23 @@ Aggregates and returns a list of case tags. You must have read privileges for th
 `,
   methods: ['GET'],
   patterns: ['/api/cases/tags'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['owner'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_case_tags_default_space_request, 'body'),
-    getLooseObjectFromProperty(get_case_tags_default_space_request, 'path'),
-    getLooseObjectFromProperty(get_case_tags_default_space_request, 'query'),
+    getZodLooseObjectFromProperty(get_case_tags_default_space_request, 'body'),
+    getZodLooseObjectFromProperty(get_case_tags_default_space_request, 'path'),
+    getZodLooseObjectFromProperty(get_case_tags_default_space_request, 'query'),
   ]),
   outputSchema: get_case_tags_default_space_response,
 };
 const GETALLDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAllDataViewsDefault',
+  connectorGroup: 'internal',
   summary: `Get all data views`,
   description: `**Spaces method and path for this operation:**
 
@@ -3843,22 +3976,23 @@ const GETALLDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/data_views'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_all_data_views_default_request, 'body'),
-    getLooseObjectFromProperty(get_all_data_views_default_request, 'path'),
-    getLooseObjectFromProperty(get_all_data_views_default_request, 'query'),
+    getZodLooseObjectFromProperty(get_all_data_views_default_request, 'body'),
+    getZodLooseObjectFromProperty(get_all_data_views_default_request, 'path'),
+    getZodLooseObjectFromProperty(get_all_data_views_default_request, 'query'),
   ]),
   outputSchema: get_all_data_views_default_response,
 };
 const CREATEDATAVIEWDEFAULTW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createDataViewDefaultw',
+  connectorGroup: 'internal',
   summary: `Create a data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -3867,22 +4001,23 @@ const CREATEDATAVIEWDEFAULTW_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/data_views/data_view'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['data_view', 'override'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_data_view_defaultw_request, 'body'),
-    getLooseObjectFromProperty(create_data_view_defaultw_request, 'path'),
-    getLooseObjectFromProperty(create_data_view_defaultw_request, 'query'),
+    getZodLooseObjectFromProperty(create_data_view_defaultw_request, 'body'),
+    getZodLooseObjectFromProperty(create_data_view_defaultw_request, 'path'),
+    getZodLooseObjectFromProperty(create_data_view_defaultw_request, 'query'),
   ]),
   outputSchema: create_data_view_defaultw_response,
 };
 const DELETEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteDataViewDefault',
+  connectorGroup: 'internal',
   summary: `Delete a data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -3894,22 +4029,23 @@ WARNING: When you delete a data view, it cannot be recovered.
 `,
   methods: ['DELETE'],
   patterns: ['/api/data_views/data_view/{viewId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['viewId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_data_view_default_request, 'body'),
-    getLooseObjectFromProperty(delete_data_view_default_request, 'path'),
-    getLooseObjectFromProperty(delete_data_view_default_request, 'query'),
+    getZodLooseObjectFromProperty(delete_data_view_default_request, 'body'),
+    getZodLooseObjectFromProperty(delete_data_view_default_request, 'path'),
+    getZodLooseObjectFromProperty(delete_data_view_default_request, 'query'),
   ]),
   outputSchema: delete_data_view_default_response,
 };
 const GETDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDataViewDefault',
+  connectorGroup: 'internal',
   summary: `Get a data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -3918,22 +4054,23 @@ const GETDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/data_views/data_view/{viewId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['viewId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_data_view_default_request, 'body'),
-    getLooseObjectFromProperty(get_data_view_default_request, 'path'),
-    getLooseObjectFromProperty(get_data_view_default_request, 'query'),
+    getZodLooseObjectFromProperty(get_data_view_default_request, 'body'),
+    getZodLooseObjectFromProperty(get_data_view_default_request, 'path'),
+    getZodLooseObjectFromProperty(get_data_view_default_request, 'query'),
   ]),
   outputSchema: get_data_view_default_response,
 };
 const UPDATEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateDataViewDefault',
+  connectorGroup: 'internal',
   summary: `Update a data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -3942,22 +4079,23 @@ const UPDATEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['viewId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['data_view', 'refresh_fields'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_data_view_default_request, 'body'),
-    getLooseObjectFromProperty(update_data_view_default_request, 'path'),
-    getLooseObjectFromProperty(update_data_view_default_request, 'query'),
+    getZodLooseObjectFromProperty(update_data_view_default_request, 'body'),
+    getZodLooseObjectFromProperty(update_data_view_default_request, 'path'),
+    getZodLooseObjectFromProperty(update_data_view_default_request, 'query'),
   ]),
   outputSchema: update_data_view_default_response,
 };
 const UPDATEFIELDSMETADATADEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateFieldsMetadataDefault',
+  connectorGroup: 'internal',
   summary: `Update data view fields metadata`,
   description: `**Spaces method and path for this operation:**
 
@@ -3969,22 +4107,23 @@ Update fields presentation metadata such as count, customLabel, customDescriptio
 `,
   methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}/fields'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['viewId'],
     urlParams: [],
     bodyParams: ['fields'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_fields_metadata_default_request, 'body'),
-    getLooseObjectFromProperty(update_fields_metadata_default_request, 'path'),
-    getLooseObjectFromProperty(update_fields_metadata_default_request, 'query'),
+    getZodLooseObjectFromProperty(update_fields_metadata_default_request, 'body'),
+    getZodLooseObjectFromProperty(update_fields_metadata_default_request, 'path'),
+    getZodLooseObjectFromProperty(update_fields_metadata_default_request, 'query'),
   ]),
   outputSchema: update_fields_metadata_default_response,
 };
 const CREATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createRuntimeFieldDefault',
+  connectorGroup: 'internal',
   summary: `Create a runtime field`,
   description: `**Spaces method and path for this operation:**
 
@@ -3993,22 +4132,23 @@ const CREATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['viewId'],
     urlParams: [],
     bodyParams: ['name', 'runtimeField'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_runtime_field_default_request, 'body'),
-    getLooseObjectFromProperty(create_runtime_field_default_request, 'path'),
-    getLooseObjectFromProperty(create_runtime_field_default_request, 'query'),
+    getZodLooseObjectFromProperty(create_runtime_field_default_request, 'body'),
+    getZodLooseObjectFromProperty(create_runtime_field_default_request, 'path'),
+    getZodLooseObjectFromProperty(create_runtime_field_default_request, 'query'),
   ]),
   outputSchema: create_runtime_field_default_response,
 };
 const CREATEUPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createUpdateRuntimeFieldDefault',
+  connectorGroup: 'internal',
   summary: `Create or update a runtime field`,
   description: `**Spaces method and path for this operation:**
 
@@ -4017,22 +4157,23 @@ const CREATEUPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['PUT'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['viewId'],
     urlParams: [],
     bodyParams: ['name', 'runtimeField'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_update_runtime_field_default_request, 'body'),
-    getLooseObjectFromProperty(create_update_runtime_field_default_request, 'path'),
-    getLooseObjectFromProperty(create_update_runtime_field_default_request, 'query'),
+    getZodLooseObjectFromProperty(create_update_runtime_field_default_request, 'body'),
+    getZodLooseObjectFromProperty(create_update_runtime_field_default_request, 'path'),
+    getZodLooseObjectFromProperty(create_update_runtime_field_default_request, 'query'),
   ]),
   outputSchema: create_update_runtime_field_default_response,
 };
 const DELETERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteRuntimeFieldDefault',
+  connectorGroup: 'internal',
   summary: `Delete a runtime field from a data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -4041,22 +4182,23 @@ const DELETERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field/{fieldName}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['fieldName', 'viewId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_runtime_field_default_request, 'body'),
-    getLooseObjectFromProperty(delete_runtime_field_default_request, 'path'),
-    getLooseObjectFromProperty(delete_runtime_field_default_request, 'query'),
+    getZodLooseObjectFromProperty(delete_runtime_field_default_request, 'body'),
+    getZodLooseObjectFromProperty(delete_runtime_field_default_request, 'path'),
+    getZodLooseObjectFromProperty(delete_runtime_field_default_request, 'query'),
   ]),
   outputSchema: delete_runtime_field_default_response,
 };
 const GETRUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getRuntimeFieldDefault',
+  connectorGroup: 'internal',
   summary: `Get a runtime field`,
   description: `**Spaces method and path for this operation:**
 
@@ -4065,22 +4207,23 @@ const GETRUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field/{fieldName}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['fieldName', 'viewId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_runtime_field_default_request, 'body'),
-    getLooseObjectFromProperty(get_runtime_field_default_request, 'path'),
-    getLooseObjectFromProperty(get_runtime_field_default_request, 'query'),
+    getZodLooseObjectFromProperty(get_runtime_field_default_request, 'body'),
+    getZodLooseObjectFromProperty(get_runtime_field_default_request, 'path'),
+    getZodLooseObjectFromProperty(get_runtime_field_default_request, 'query'),
   ]),
   outputSchema: get_runtime_field_default_response,
 };
 const UPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateRuntimeFieldDefault',
+  connectorGroup: 'internal',
   summary: `Update a runtime field`,
   description: `**Spaces method and path for this operation:**
 
@@ -4089,22 +4232,23 @@ const UPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/data_views/data_view/{viewId}/runtime_field/{fieldName}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['fieldName', 'viewId'],
     urlParams: [],
     bodyParams: ['runtimeField'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_runtime_field_default_request, 'body'),
-    getLooseObjectFromProperty(update_runtime_field_default_request, 'path'),
-    getLooseObjectFromProperty(update_runtime_field_default_request, 'query'),
+    getZodLooseObjectFromProperty(update_runtime_field_default_request, 'body'),
+    getZodLooseObjectFromProperty(update_runtime_field_default_request, 'path'),
+    getZodLooseObjectFromProperty(update_runtime_field_default_request, 'query'),
   ]),
   outputSchema: update_runtime_field_default_response,
 };
 const GETDEFAULTDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDefaultDataViewDefault',
+  connectorGroup: 'internal',
   summary: `Get the default data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -4113,22 +4257,23 @@ const GETDEFAULTDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/data_views/default'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_default_data_view_default_request, 'body'),
-    getLooseObjectFromProperty(get_default_data_view_default_request, 'path'),
-    getLooseObjectFromProperty(get_default_data_view_default_request, 'query'),
+    getZodLooseObjectFromProperty(get_default_data_view_default_request, 'body'),
+    getZodLooseObjectFromProperty(get_default_data_view_default_request, 'path'),
+    getZodLooseObjectFromProperty(get_default_data_view_default_request, 'query'),
   ]),
   outputSchema: get_default_data_view_default_response,
 };
 const SETDEFAULTDATAILVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.setDefaultDatailViewDefault',
+  connectorGroup: 'internal',
   summary: `Set the default data view`,
   description: `**Spaces method and path for this operation:**
 
@@ -4137,22 +4282,23 @@ const SETDEFAULTDATAILVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/data_views/default'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['data_view_id', 'force'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(set_default_datail_view_default_request, 'body'),
-    getLooseObjectFromProperty(set_default_datail_view_default_request, 'path'),
-    getLooseObjectFromProperty(set_default_datail_view_default_request, 'query'),
+    getZodLooseObjectFromProperty(set_default_datail_view_default_request, 'body'),
+    getZodLooseObjectFromProperty(set_default_datail_view_default_request, 'path'),
+    getZodLooseObjectFromProperty(set_default_datail_view_default_request, 'query'),
   ]),
   outputSchema: set_default_datail_view_default_response,
 };
 const SWAPDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.swapDataViewsDefault',
+  connectorGroup: 'internal',
   summary: `Swap saved object references`,
   description: `**Spaces method and path for this operation:**
 
@@ -4164,22 +4310,23 @@ Changes saved object references from one data view identifier to another. WARNIN
 `,
   methods: ['POST'],
   patterns: ['/api/data_views/swap_references'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['delete', 'forId', 'forType', 'fromId', 'fromType', 'toId'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(swap_data_views_default_request, 'body'),
-    getLooseObjectFromProperty(swap_data_views_default_request, 'path'),
-    getLooseObjectFromProperty(swap_data_views_default_request, 'query'),
+    getZodLooseObjectFromProperty(swap_data_views_default_request, 'body'),
+    getZodLooseObjectFromProperty(swap_data_views_default_request, 'path'),
+    getZodLooseObjectFromProperty(swap_data_views_default_request, 'query'),
   ]),
   outputSchema: swap_data_views_default_response,
 };
 const PREVIEWSWAPDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.previewSwapDataViewsDefault',
+  connectorGroup: 'internal',
   summary: `Preview a saved object reference swap`,
   description: `**Spaces method and path for this operation:**
 
@@ -4191,22 +4338,23 @@ Preview the impact of swapping saved object references from one data view identi
 `,
   methods: ['POST'],
   patterns: ['/api/data_views/swap_references/_preview'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['delete', 'forId', 'forType', 'fromId', 'fromType', 'toId'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(preview_swap_data_views_default_request, 'body'),
-    getLooseObjectFromProperty(preview_swap_data_views_default_request, 'path'),
-    getLooseObjectFromProperty(preview_swap_data_views_default_request, 'query'),
+    getZodLooseObjectFromProperty(preview_swap_data_views_default_request, 'body'),
+    getZodLooseObjectFromProperty(preview_swap_data_views_default_request, 'path'),
+    getZodLooseObjectFromProperty(preview_swap_data_views_default_request, 'query'),
   ]),
   outputSchema: preview_swap_data_views_default_response,
 };
 const DELETEALERTSINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAlertsIndex',
+  connectorGroup: 'internal',
   summary: `Delete an alerts index`,
   description: `**Spaces method and path for this operation:**
 
@@ -4215,22 +4363,23 @@ const DELETEALERTSINDEX_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/detection_engine/index'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_alerts_index_request, 'body'),
-    getLooseObjectFromProperty(delete_alerts_index_request, 'path'),
-    getLooseObjectFromProperty(delete_alerts_index_request, 'query'),
+    getZodLooseObjectFromProperty(delete_alerts_index_request, 'body'),
+    getZodLooseObjectFromProperty(delete_alerts_index_request, 'path'),
+    getZodLooseObjectFromProperty(delete_alerts_index_request, 'query'),
   ]),
   outputSchema: delete_alerts_index_response,
 };
 const READALERTSINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadAlertsIndex',
+  connectorGroup: 'internal',
   summary: `Reads the alert index name if it exists`,
   description: `**Spaces method and path for this operation:**
 
@@ -4239,22 +4388,23 @@ const READALERTSINDEX_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/detection_engine/index'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_alerts_index_request, 'body'),
-    getLooseObjectFromProperty(read_alerts_index_request, 'path'),
-    getLooseObjectFromProperty(read_alerts_index_request, 'query'),
+    getZodLooseObjectFromProperty(read_alerts_index_request, 'body'),
+    getZodLooseObjectFromProperty(read_alerts_index_request, 'path'),
+    getZodLooseObjectFromProperty(read_alerts_index_request, 'query'),
   ]),
   outputSchema: read_alerts_index_response,
 };
 const CREATEALERTSINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAlertsIndex',
+  connectorGroup: 'internal',
   summary: `Create an alerts index`,
   description: `**Spaces method and path for this operation:**
 
@@ -4263,22 +4413,23 @@ const CREATEALERTSINDEX_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/detection_engine/index'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_alerts_index_request, 'body'),
-    getLooseObjectFromProperty(create_alerts_index_request, 'path'),
-    getLooseObjectFromProperty(create_alerts_index_request, 'query'),
+    getZodLooseObjectFromProperty(create_alerts_index_request, 'body'),
+    getZodLooseObjectFromProperty(create_alerts_index_request, 'path'),
+    getZodLooseObjectFromProperty(create_alerts_index_request, 'query'),
   ]),
   outputSchema: create_alerts_index_response,
 };
 const READPRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadPrivileges',
+  connectorGroup: 'internal',
   summary: `Returns user privileges for the Kibana space`,
   description: `**Spaces method and path for this operation:**
 
@@ -4293,22 +4444,23 @@ detection engine rules.
 `,
   methods: ['GET'],
   patterns: ['/api/detection_engine/privileges'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_privileges_request, 'body'),
-    getLooseObjectFromProperty(read_privileges_request, 'path'),
-    getLooseObjectFromProperty(read_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(read_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(read_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(read_privileges_request, 'query'),
   ]),
   outputSchema: read_privileges_response,
 };
 const DELETERULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteRule',
+  connectorGroup: 'internal',
   summary: `Delete a detection rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -4327,22 +4479,23 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 `,
   methods: ['DELETE'],
   patterns: ['/api/detection_engine/rules'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'rule_id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_rule_request, 'body'),
-    getLooseObjectFromProperty(delete_rule_request, 'path'),
-    getLooseObjectFromProperty(delete_rule_request, 'query'),
+    getZodLooseObjectFromProperty(delete_rule_request, 'body'),
+    getZodLooseObjectFromProperty(delete_rule_request, 'path'),
+    getZodLooseObjectFromProperty(delete_rule_request, 'query'),
   ]),
   outputSchema: delete_rule_response,
 };
 const READRULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadRule',
+  connectorGroup: 'internal',
   summary: `Retrieve a detection rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -4361,22 +4514,23 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 `,
   methods: ['GET'],
   patterns: ['/api/detection_engine/rules'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'rule_id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_rule_request, 'body'),
-    getLooseObjectFromProperty(read_rule_request, 'path'),
-    getLooseObjectFromProperty(read_rule_request, 'query'),
+    getZodLooseObjectFromProperty(read_rule_request, 'body'),
+    getZodLooseObjectFromProperty(read_rule_request, 'path'),
+    getZodLooseObjectFromProperty(read_rule_request, 'query'),
   ]),
   outputSchema: read_rule_response,
 };
 const PATCHRULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchRule',
+  connectorGroup: 'internal',
   summary: `Patch a detection rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -4394,22 +4548,23 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 `,
   methods: ['PATCH'],
   patterns: ['/api/detection_engine/rules'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(patch_rule_request, 'body'),
-    getLooseObjectFromProperty(patch_rule_request, 'path'),
-    getLooseObjectFromProperty(patch_rule_request, 'query'),
+    getZodLooseObjectFromProperty(patch_rule_request, 'body'),
+    getZodLooseObjectFromProperty(patch_rule_request, 'path'),
+    getZodLooseObjectFromProperty(patch_rule_request, 'query'),
   ]),
   outputSchema: patch_rule_response,
 };
 const CREATERULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateRule',
+  connectorGroup: 'internal',
   summary: `Create a detection rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -4474,22 +4629,23 @@ For detailed information on Kibana actions and alerting, and additional API call
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/rules'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_rule_request, 'body'),
-    getLooseObjectFromProperty(create_rule_request, 'path'),
-    getLooseObjectFromProperty(create_rule_request, 'query'),
+    getZodLooseObjectFromProperty(create_rule_request, 'body'),
+    getZodLooseObjectFromProperty(create_rule_request, 'path'),
+    getZodLooseObjectFromProperty(create_rule_request, 'query'),
   ]),
   outputSchema: create_rule_response,
 };
 const UPDATERULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateRule',
+  connectorGroup: 'internal',
   summary: `Update a detection rule`,
   description: `**Spaces method and path for this operation:**
 
@@ -4507,22 +4663,23 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 `,
   methods: ['PUT'],
   patterns: ['/api/detection_engine/rules'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_rule_request, 'body'),
-    getLooseObjectFromProperty(update_rule_request, 'path'),
-    getLooseObjectFromProperty(update_rule_request, 'query'),
+    getZodLooseObjectFromProperty(update_rule_request, 'body'),
+    getZodLooseObjectFromProperty(update_rule_request, 'path'),
+    getZodLooseObjectFromProperty(update_rule_request, 'query'),
   ]),
   outputSchema: update_rule_response,
 };
 const PERFORMRULESBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformRulesBulkAction',
+  connectorGroup: 'internal',
   summary: `Apply a bulk action to detection rules`,
   description: `**Spaces method and path for this operation:**
 
@@ -4541,22 +4698,23 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/rules/_bulk_action'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['dry_run'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(perform_rules_bulk_action_request, 'body'),
-    getLooseObjectFromProperty(perform_rules_bulk_action_request, 'path'),
-    getLooseObjectFromProperty(perform_rules_bulk_action_request, 'query'),
+    getZodLooseObjectFromProperty(perform_rules_bulk_action_request, 'body'),
+    getZodLooseObjectFromProperty(perform_rules_bulk_action_request, 'path'),
+    getZodLooseObjectFromProperty(perform_rules_bulk_action_request, 'query'),
   ]),
   outputSchema: perform_rules_bulk_action_response,
 };
 const EXPORTRULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportRules',
+  connectorGroup: 'internal',
   summary: `Export detection rules`,
   description: `**Spaces method and path for this operation:**
 
@@ -4576,22 +4734,23 @@ Export detection rules to an \`.ndjson\` file. The following configuration items
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/rules/_export'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['exclude_export_details', 'file_name'],
     bodyParams: ['objects'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(export_rules_request, 'body'),
-    getLooseObjectFromProperty(export_rules_request, 'path'),
-    getLooseObjectFromProperty(export_rules_request, 'query'),
+    getZodLooseObjectFromProperty(export_rules_request, 'body'),
+    getZodLooseObjectFromProperty(export_rules_request, 'path'),
+    getZodLooseObjectFromProperty(export_rules_request, 'query'),
   ]),
   outputSchema: export_rules_response,
 };
 const FINDRULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindRules',
+  connectorGroup: 'internal',
   summary: `List all detection rules`,
   description: `**Spaces method and path for this operation:**
 
@@ -4602,9 +4761,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.`,
   methods: ['GET'],
   patterns: ['/api/detection_engine/rules/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'fields',
@@ -4619,14 +4778,15 @@ Retrieve a paginated list of detection rules. By default, the first page is retu
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_rules_request, 'body'),
-    getLooseObjectFromProperty(find_rules_request, 'path'),
-    getLooseObjectFromProperty(find_rules_request, 'query'),
+    getZodLooseObjectFromProperty(find_rules_request, 'body'),
+    getZodLooseObjectFromProperty(find_rules_request, 'path'),
+    getZodLooseObjectFromProperty(find_rules_request, 'query'),
   ]),
   outputSchema: find_rules_response,
 };
 const IMPORTRULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportRules',
+  connectorGroup: 'internal',
   summary: `Import detection rules`,
   description: `**Spaces method and path for this operation:**
 
@@ -4653,22 +4813,23 @@ Import detection rules from an \`.ndjson\` file, including actions and exception
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/rules/_import'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['overwrite', 'overwrite_exceptions', 'overwrite_action_connectors', 'as_new_list'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(import_rules_request, 'body'),
-    getLooseObjectFromProperty(import_rules_request, 'path'),
-    getLooseObjectFromProperty(import_rules_request, 'query'),
+    getZodLooseObjectFromProperty(import_rules_request, 'body'),
+    getZodLooseObjectFromProperty(import_rules_request, 'path'),
+    getZodLooseObjectFromProperty(import_rules_request, 'query'),
   ]),
   outputSchema: import_rules_response,
 };
 const CREATERULEEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateRuleExceptionListItems',
+  connectorGroup: 'internal',
   summary: `Create rule exception items`,
   description: `**Spaces method and path for this operation:**
 
@@ -4679,22 +4840,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create exception items that apply to a single detection rule.`,
   methods: ['POST'],
   patterns: ['/api/detection_engine/rules/{id}/exceptions'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['items'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_rule_exception_list_items_request, 'body'),
-    getLooseObjectFromProperty(create_rule_exception_list_items_request, 'path'),
-    getLooseObjectFromProperty(create_rule_exception_list_items_request, 'query'),
+    getZodLooseObjectFromProperty(create_rule_exception_list_items_request, 'body'),
+    getZodLooseObjectFromProperty(create_rule_exception_list_items_request, 'path'),
+    getZodLooseObjectFromProperty(create_rule_exception_list_items_request, 'query'),
   ]),
   outputSchema: create_rule_exception_list_items_response,
 };
 const INSTALLPREBUILTRULESANDTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrebuiltRulesAndTimelines',
+  connectorGroup: 'internal',
   summary: `Install prebuilt detection rules and Timelines`,
   description: `**Spaces method and path for this operation:**
 
@@ -4716,22 +4878,23 @@ providing you with the most current and effective threat detection capabilities.
 `,
   methods: ['PUT'],
   patterns: ['/api/detection_engine/rules/prepackaged'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'body'),
-    getLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'path'),
-    getLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'query'),
+    getZodLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'body'),
+    getZodLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'path'),
+    getZodLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'query'),
   ]),
   outputSchema: install_prebuilt_rules_and_timelines_response,
 };
 const READPREBUILTRULESANDTIMELINESSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadPrebuiltRulesAndTimelinesStatus',
+  connectorGroup: 'internal',
   summary: `Retrieve the status of prebuilt detection rules and Timelines`,
   description: `**Spaces method and path for this operation:**
 
@@ -4745,22 +4908,23 @@ This endpoint provides detailed information about the number of custom rules, in
 `,
   methods: ['GET'],
   patterns: ['/api/detection_engine/rules/prepackaged/_status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'body'),
-    getLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'path'),
-    getLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'query'),
+    getZodLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'body'),
+    getZodLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'path'),
+    getZodLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'query'),
   ]),
   outputSchema: read_prebuilt_rules_and_timelines_status_response,
 };
 const RULEPREVIEW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.RulePreview',
+  connectorGroup: 'internal',
   summary: `Preview rule alerts generated on specified time range`,
   description: `**Spaces method and path for this operation:**
 
@@ -4769,22 +4933,23 @@ const RULEPREVIEW_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/detection_engine/rules/preview'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['enable_logged_requests'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rule_preview_request, 'body'),
-    getLooseObjectFromProperty(rule_preview_request, 'path'),
-    getLooseObjectFromProperty(rule_preview_request, 'query'),
+    getZodLooseObjectFromProperty(rule_preview_request, 'body'),
+    getZodLooseObjectFromProperty(rule_preview_request, 'path'),
+    getZodLooseObjectFromProperty(rule_preview_request, 'query'),
   ]),
   outputSchema: rule_preview_response,
 };
 const SETALERTASSIGNEES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertAssignees',
+  connectorGroup: 'internal',
   summary: `Assign and unassign users from detection alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -4798,22 +4963,23 @@ Assign users to detection alerts, and unassign them from alerts.
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/assignees'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['assignees', 'ids'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(set_alert_assignees_request, 'body'),
-    getLooseObjectFromProperty(set_alert_assignees_request, 'path'),
-    getLooseObjectFromProperty(set_alert_assignees_request, 'query'),
+    getZodLooseObjectFromProperty(set_alert_assignees_request, 'body'),
+    getZodLooseObjectFromProperty(set_alert_assignees_request, 'path'),
+    getZodLooseObjectFromProperty(set_alert_assignees_request, 'query'),
   ]),
   outputSchema: set_alert_assignees_response,
 };
 const FINALIZEALERTSMIGRATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FinalizeAlertsMigration',
+  connectorGroup: 'internal',
   summary: `Finalize detection alert migrations`,
   description: `**Spaces method and path for this operation:**
 
@@ -4827,22 +4993,23 @@ finalize it.
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/finalize_migration'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['migration_ids'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(finalize_alerts_migration_request, 'body'),
-    getLooseObjectFromProperty(finalize_alerts_migration_request, 'path'),
-    getLooseObjectFromProperty(finalize_alerts_migration_request, 'query'),
+    getZodLooseObjectFromProperty(finalize_alerts_migration_request, 'body'),
+    getZodLooseObjectFromProperty(finalize_alerts_migration_request, 'path'),
+    getZodLooseObjectFromProperty(finalize_alerts_migration_request, 'query'),
   ]),
   outputSchema: finalize_alerts_migration_response,
 };
 const ALERTSMIGRATIONCLEANUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.AlertsMigrationCleanup',
+  connectorGroup: 'internal',
   summary: `Clean up detection alert migrations`,
   description: `**Spaces method and path for this operation:**
 
@@ -4860,22 +5027,23 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
 `,
   methods: ['DELETE'],
   patterns: ['/api/detection_engine/signals/migration'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['migration_ids'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(alerts_migration_cleanup_request, 'body'),
-    getLooseObjectFromProperty(alerts_migration_cleanup_request, 'path'),
-    getLooseObjectFromProperty(alerts_migration_cleanup_request, 'query'),
+    getZodLooseObjectFromProperty(alerts_migration_cleanup_request, 'body'),
+    getZodLooseObjectFromProperty(alerts_migration_cleanup_request, 'path'),
+    getZodLooseObjectFromProperty(alerts_migration_cleanup_request, 'query'),
   ]),
   outputSchema: alerts_migration_cleanup_response,
 };
 const CREATEALERTSMIGRATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAlertsMigration',
+  connectorGroup: 'internal',
   summary: `Initiate a detection alert migration`,
   description: `**Spaces method and path for this operation:**
 
@@ -4888,22 +5056,23 @@ Migrations are initiated per index. While the process is neither destructive nor
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/migration'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_alerts_migration_request, 'body'),
-    getLooseObjectFromProperty(create_alerts_migration_request, 'path'),
-    getLooseObjectFromProperty(create_alerts_migration_request, 'query'),
+    getZodLooseObjectFromProperty(create_alerts_migration_request, 'body'),
+    getZodLooseObjectFromProperty(create_alerts_migration_request, 'path'),
+    getZodLooseObjectFromProperty(create_alerts_migration_request, 'query'),
   ]),
   outputSchema: create_alerts_migration_response,
 };
 const READALERTSMIGRATIONSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadAlertsMigrationStatus',
+  connectorGroup: 'internal',
   summary: `Retrieve the status of detection alert migrations`,
   description: `**Spaces method and path for this operation:**
 
@@ -4914,22 +5083,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.`,
   methods: ['GET'],
   patterns: ['/api/detection_engine/signals/migration_status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['from'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_alerts_migration_status_request, 'body'),
-    getLooseObjectFromProperty(read_alerts_migration_status_request, 'path'),
-    getLooseObjectFromProperty(read_alerts_migration_status_request, 'query'),
+    getZodLooseObjectFromProperty(read_alerts_migration_status_request, 'body'),
+    getZodLooseObjectFromProperty(read_alerts_migration_status_request, 'path'),
+    getZodLooseObjectFromProperty(read_alerts_migration_status_request, 'query'),
   ]),
   outputSchema: read_alerts_migration_status_response,
 };
 const SEARCHALERTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SearchAlerts',
+  connectorGroup: 'internal',
   summary: `Find and/or aggregate detection alerts`,
   description: `**Spaces method and path for this operation:**
 
@@ -4940,9 +5110,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Find and/or aggregate detection alerts that match the given query.`,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/search'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -4957,14 +5127,15 @@ Find and/or aggregate detection alerts that match the given query.`,
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_alerts_request, 'body'),
-    getLooseObjectFromProperty(search_alerts_request, 'path'),
-    getLooseObjectFromProperty(search_alerts_request, 'query'),
+    getZodLooseObjectFromProperty(search_alerts_request, 'body'),
+    getZodLooseObjectFromProperty(search_alerts_request, 'path'),
+    getZodLooseObjectFromProperty(search_alerts_request, 'query'),
   ]),
   outputSchema: search_alerts_response,
 };
 const SETALERTSSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertsStatus',
+  connectorGroup: 'internal',
   summary: `Set a detection alert status`,
   description: `**Spaces method and path for this operation:**
 
@@ -4975,22 +5146,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Set the status of one or more detection alerts.`,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(set_alerts_status_request, 'body'),
-    getLooseObjectFromProperty(set_alerts_status_request, 'path'),
-    getLooseObjectFromProperty(set_alerts_status_request, 'query'),
+    getZodLooseObjectFromProperty(set_alerts_status_request, 'body'),
+    getZodLooseObjectFromProperty(set_alerts_status_request, 'path'),
+    getZodLooseObjectFromProperty(set_alerts_status_request, 'query'),
   ]),
   outputSchema: set_alerts_status_response,
 };
 const SETALERTTAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertTags',
+  connectorGroup: 'internal',
   summary: `Add and remove detection alert tags`,
   description: `**Spaces method and path for this operation:**
 
@@ -5004,22 +5176,23 @@ And tags to detection alerts, and remove them from alerts.
 `,
   methods: ['POST'],
   patterns: ['/api/detection_engine/signals/tags'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['ids', 'tags'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(set_alert_tags_request, 'body'),
-    getLooseObjectFromProperty(set_alert_tags_request, 'path'),
-    getLooseObjectFromProperty(set_alert_tags_request, 'query'),
+    getZodLooseObjectFromProperty(set_alert_tags_request, 'body'),
+    getZodLooseObjectFromProperty(set_alert_tags_request, 'path'),
+    getZodLooseObjectFromProperty(set_alert_tags_request, 'query'),
   ]),
   outputSchema: set_alert_tags_response,
 };
 const READTAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadTags',
+  connectorGroup: 'internal',
   summary: `List all detection rule tags`,
   description: `**Spaces method and path for this operation:**
 
@@ -5030,22 +5203,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 List all unique tags from all detection rules.`,
   methods: ['GET'],
   patterns: ['/api/detection_engine/tags'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_tags_request, 'body'),
-    getLooseObjectFromProperty(read_tags_request, 'path'),
-    getLooseObjectFromProperty(read_tags_request, 'query'),
+    getZodLooseObjectFromProperty(read_tags_request, 'body'),
+    getZodLooseObjectFromProperty(read_tags_request, 'path'),
+    getZodLooseObjectFromProperty(read_tags_request, 'query'),
   ]),
   outputSchema: read_tags_response,
 };
 const ROTATEENCRYPTIONKEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.rotateEncryptionKey',
+  connectorGroup: 'internal',
   summary: `Rotate a key for encrypted saved objects`,
   description: `Superuser role required.
 
@@ -5055,22 +5229,23 @@ This functionality is in technical preview and may be changed or removed in a fu
 `,
   methods: ['POST'],
   patterns: ['/api/encrypted_saved_objects/_rotate_key'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['batch_size', 'type'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rotate_encryption_key_request, 'body'),
-    getLooseObjectFromProperty(rotate_encryption_key_request, 'path'),
-    getLooseObjectFromProperty(rotate_encryption_key_request, 'query'),
+    getZodLooseObjectFromProperty(rotate_encryption_key_request, 'body'),
+    getZodLooseObjectFromProperty(rotate_encryption_key_request, 'path'),
+    getZodLooseObjectFromProperty(rotate_encryption_key_request, 'query'),
   ]),
   outputSchema: rotate_encryption_key_response,
 };
 const CREATEENDPOINTLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateEndpointList',
+  connectorGroup: 'internal',
   summary: `Create an Elastic Endpoint rule exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -5081,22 +5256,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a \`list_id\` of \`endpoint_list\`. If the Elastic Endpoint exception list already exists, your request will return an empty response.`,
   methods: ['POST'],
   patterns: ['/api/endpoint_list'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_endpoint_list_request, 'body'),
-    getLooseObjectFromProperty(create_endpoint_list_request, 'path'),
-    getLooseObjectFromProperty(create_endpoint_list_request, 'query'),
+    getZodLooseObjectFromProperty(create_endpoint_list_request, 'body'),
+    getZodLooseObjectFromProperty(create_endpoint_list_request, 'path'),
+    getZodLooseObjectFromProperty(create_endpoint_list_request, 'query'),
   ]),
   outputSchema: create_endpoint_list_response,
 };
 const DELETEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEndpointListItem',
+  connectorGroup: 'internal',
   summary: `Delete an Elastic Endpoint exception list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -5107,22 +5283,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an Elastic Endpoint exception list item, specified by the \`id\` or \`item_id\` field.`,
   methods: ['DELETE'],
   patterns: ['/api/endpoint_list/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'item_id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_endpoint_list_item_request, 'body'),
-    getLooseObjectFromProperty(delete_endpoint_list_item_request, 'path'),
-    getLooseObjectFromProperty(delete_endpoint_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(delete_endpoint_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(delete_endpoint_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(delete_endpoint_list_item_request, 'query'),
   ]),
   outputSchema: delete_endpoint_list_item_response,
 };
 const READENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadEndpointListItem',
+  connectorGroup: 'internal',
   summary: `Get an Elastic Endpoint rule exception list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -5133,22 +5310,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of an Elastic Endpoint exception list item, specified by the \`id\` or \`item_id\` field.`,
   methods: ['GET'],
   patterns: ['/api/endpoint_list/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'item_id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_endpoint_list_item_request, 'body'),
-    getLooseObjectFromProperty(read_endpoint_list_item_request, 'path'),
-    getLooseObjectFromProperty(read_endpoint_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(read_endpoint_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(read_endpoint_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(read_endpoint_list_item_request, 'query'),
   ]),
   outputSchema: read_endpoint_list_item_response,
 };
 const CREATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateEndpointListItem',
+  connectorGroup: 'internal',
   summary: `Create an Elastic Endpoint rule exception list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -5159,9 +5337,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.`,
   methods: ['POST'],
   patterns: ['/api/endpoint_list/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -5177,14 +5355,15 @@ Create an Elastic Endpoint exception list item, and associate it with the Elasti
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_endpoint_list_item_request, 'body'),
-    getLooseObjectFromProperty(create_endpoint_list_item_request, 'path'),
-    getLooseObjectFromProperty(create_endpoint_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(create_endpoint_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(create_endpoint_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(create_endpoint_list_item_request, 'query'),
   ]),
   outputSchema: create_endpoint_list_item_response,
 };
 const UPDATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateEndpointListItem',
+  connectorGroup: 'internal',
   summary: `Update an Elastic Endpoint rule exception list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -5195,9 +5374,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an Elastic Endpoint exception list item, specified by the \`id\` or \`item_id\` field.`,
   methods: ['PUT'],
   patterns: ['/api/endpoint_list/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -5215,14 +5394,15 @@ Update an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_endpoint_list_item_request, 'body'),
-    getLooseObjectFromProperty(update_endpoint_list_item_request, 'path'),
-    getLooseObjectFromProperty(update_endpoint_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(update_endpoint_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(update_endpoint_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(update_endpoint_list_item_request, 'query'),
   ]),
   outputSchema: update_endpoint_list_item_response,
 };
 const FINDENDPOINTLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindEndpointListItems',
+  connectorGroup: 'internal',
   summary: `Get Elastic Endpoint exception list items`,
   description: `**Spaces method and path for this operation:**
 
@@ -5233,22 +5413,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all Elastic Endpoint exception list items.`,
   methods: ['GET'],
   patterns: ['/api/endpoint_list/items/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['filter', 'page', 'per_page', 'sort_field', 'sort_order'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_endpoint_list_items_request, 'body'),
-    getLooseObjectFromProperty(find_endpoint_list_items_request, 'path'),
-    getLooseObjectFromProperty(find_endpoint_list_items_request, 'query'),
+    getZodLooseObjectFromProperty(find_endpoint_list_items_request, 'body'),
+    getZodLooseObjectFromProperty(find_endpoint_list_items_request, 'path'),
+    getZodLooseObjectFromProperty(find_endpoint_list_items_request, 'query'),
   ]),
   outputSchema: find_endpoint_list_items_response,
 };
 const ENDPOINTGETACTIONSLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsList',
+  connectorGroup: 'internal',
   summary: `Get response actions`,
   description: `**Spaces method and path for this operation:**
 
@@ -5259,9 +5440,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all response actions.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/action'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'page',
@@ -5278,14 +5459,15 @@ Get a list of all response actions.`,
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_get_actions_list_request, 'body'),
-    getLooseObjectFromProperty(endpoint_get_actions_list_request, 'path'),
-    getLooseObjectFromProperty(endpoint_get_actions_list_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_list_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_list_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_list_request, 'query'),
   ]),
   outputSchema: endpoint_get_actions_list_response,
 };
 const ENDPOINTGETACTIONSSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsStatus',
+  connectorGroup: 'internal',
   summary: `Get response actions status`,
   description: `**Spaces method and path for this operation:**
 
@@ -5296,22 +5478,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the status of response actions for the specified agent IDs.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/action_status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['query'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_get_actions_status_request, 'body'),
-    getLooseObjectFromProperty(endpoint_get_actions_status_request, 'path'),
-    getLooseObjectFromProperty(endpoint_get_actions_status_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_status_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_status_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_status_request, 'query'),
   ]),
   outputSchema: endpoint_get_actions_status_response,
 };
 const ENDPOINTGETACTIONSDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsDetails',
+  connectorGroup: 'internal',
   summary: `Get action details`,
   description: `**Spaces method and path for this operation:**
 
@@ -5322,22 +5505,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of a response action using the action ID.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/action/{action_id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['action_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_get_actions_details_request, 'body'),
-    getLooseObjectFromProperty(endpoint_get_actions_details_request, 'path'),
-    getLooseObjectFromProperty(endpoint_get_actions_details_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_details_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_details_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_details_request, 'query'),
   ]),
   outputSchema: endpoint_get_actions_details_response,
 };
 const ENDPOINTFILEINFO_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointFileInfo',
+  connectorGroup: 'internal',
   summary: `Get file information`,
   description: `**Spaces method and path for this operation:**
 
@@ -5349,22 +5533,23 @@ Get information for the specified response action file download.
 `,
   methods: ['GET'],
   patterns: ['/api/endpoint/action/{action_id}/file/{file_id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['action_id', 'file_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_file_info_request, 'body'),
-    getLooseObjectFromProperty(endpoint_file_info_request, 'path'),
-    getLooseObjectFromProperty(endpoint_file_info_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_file_info_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_file_info_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_file_info_request, 'query'),
   ]),
   outputSchema: endpoint_file_info_response,
 };
 const ENDPOINTFILEDOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointFileDownload',
+  connectorGroup: 'internal',
   summary: `Download a file`,
   description: `**Spaces method and path for this operation:**
 
@@ -5376,22 +5561,23 @@ Download a file associated with a response action.
 `,
   methods: ['GET'],
   patterns: ['/api/endpoint/action/{action_id}/file/{file_id}/download'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['action_id', 'file_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_file_download_request, 'body'),
-    getLooseObjectFromProperty(endpoint_file_download_request, 'path'),
-    getLooseObjectFromProperty(endpoint_file_download_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_file_download_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_file_download_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_file_download_request, 'query'),
   ]),
   outputSchema: endpoint_file_download_response,
 };
 const CANCELACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CancelAction',
+  connectorGroup: 'internal',
   summary: `Cancel a response action`,
   description: `**Spaces method and path for this operation:**
 
@@ -5402,22 +5588,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Cancel a running or pending response action (Applies only to some agent types).`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/cancel'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cancel_action_request, 'body'),
-    getLooseObjectFromProperty(cancel_action_request, 'path'),
-    getLooseObjectFromProperty(cancel_action_request, 'query'),
+    getZodLooseObjectFromProperty(cancel_action_request, 'body'),
+    getZodLooseObjectFromProperty(cancel_action_request, 'path'),
+    getZodLooseObjectFromProperty(cancel_action_request, 'query'),
   ]),
   outputSchema: cancel_action_response,
 };
 const ENDPOINTEXECUTEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointExecuteAction',
+  connectorGroup: 'internal',
   summary: `Run a command`,
   description: `**Spaces method and path for this operation:**
 
@@ -5428,22 +5615,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Run a shell command on an endpoint.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/execute'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_execute_action_request, 'body'),
-    getLooseObjectFromProperty(endpoint_execute_action_request, 'path'),
-    getLooseObjectFromProperty(endpoint_execute_action_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_execute_action_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_execute_action_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_execute_action_request, 'query'),
   ]),
   outputSchema: endpoint_execute_action_response,
 };
 const ENDPOINTGETFILEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetFileAction',
+  connectorGroup: 'internal',
   summary: `Get a file`,
   description: `**Spaces method and path for this operation:**
 
@@ -5454,22 +5642,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a file from an endpoint.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/get_file'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_get_file_action_request, 'body'),
-    getLooseObjectFromProperty(endpoint_get_file_action_request, 'path'),
-    getLooseObjectFromProperty(endpoint_get_file_action_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_get_file_action_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_get_file_action_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_get_file_action_request, 'query'),
   ]),
   outputSchema: endpoint_get_file_action_response,
 };
 const ENDPOINTISOLATEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointIsolateAction',
+  connectorGroup: 'internal',
   summary: `Isolate an endpoint`,
   description: `**Spaces method and path for this operation:**
 
@@ -5480,22 +5669,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Isolate an endpoint from the network. The endpoint remains isolated until it's released.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/isolate'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_isolate_action_request, 'body'),
-    getLooseObjectFromProperty(endpoint_isolate_action_request, 'path'),
-    getLooseObjectFromProperty(endpoint_isolate_action_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_isolate_action_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_isolate_action_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_isolate_action_request, 'query'),
   ]),
   outputSchema: endpoint_isolate_action_response,
 };
 const ENDPOINTKILLPROCESSACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointKillProcessAction',
+  connectorGroup: 'internal',
   summary: `Terminate a process`,
   description: `**Spaces method and path for this operation:**
 
@@ -5506,22 +5696,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Terminate a running process on an endpoint.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/kill_process'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_kill_process_action_request, 'body'),
-    getLooseObjectFromProperty(endpoint_kill_process_action_request, 'path'),
-    getLooseObjectFromProperty(endpoint_kill_process_action_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_kill_process_action_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_kill_process_action_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_kill_process_action_request, 'query'),
   ]),
   outputSchema: endpoint_kill_process_action_response,
 };
 const ENDPOINTGETPROCESSESACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetProcessesAction',
+  connectorGroup: 'internal',
   summary: `Get running processes`,
   description: `**Spaces method and path for this operation:**
 
@@ -5532,22 +5723,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all processes running on an endpoint.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/running_procs'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_get_processes_action_request, 'body'),
-    getLooseObjectFromProperty(endpoint_get_processes_action_request, 'path'),
-    getLooseObjectFromProperty(endpoint_get_processes_action_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_get_processes_action_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_get_processes_action_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_get_processes_action_request, 'query'),
   ]),
   outputSchema: endpoint_get_processes_action_response,
 };
 const RUNSCRIPTACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.RunScriptAction',
+  connectorGroup: 'internal',
   summary: `Run a script`,
   description: `**Spaces method and path for this operation:**
 
@@ -5558,22 +5750,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Run a script on a host. Currently supported only for some agent types.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/runscript'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(run_script_action_request, 'body'),
-    getLooseObjectFromProperty(run_script_action_request, 'path'),
-    getLooseObjectFromProperty(run_script_action_request, 'query'),
+    getZodLooseObjectFromProperty(run_script_action_request, 'body'),
+    getZodLooseObjectFromProperty(run_script_action_request, 'path'),
+    getZodLooseObjectFromProperty(run_script_action_request, 'query'),
   ]),
   outputSchema: run_script_action_response,
 };
 const ENDPOINTSCANACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointScanAction',
+  connectorGroup: 'internal',
   summary: `Scan a file or directory`,
   description: `**Spaces method and path for this operation:**
 
@@ -5584,22 +5777,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Scan a specific file or directory on an endpoint for malware.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/scan'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_scan_action_request, 'body'),
-    getLooseObjectFromProperty(endpoint_scan_action_request, 'path'),
-    getLooseObjectFromProperty(endpoint_scan_action_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_scan_action_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_scan_action_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_scan_action_request, 'query'),
   ]),
   outputSchema: endpoint_scan_action_response,
 };
 const ENDPOINTGETACTIONSSTATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsState',
+  connectorGroup: 'internal',
   summary: `Get actions state`,
   description: `**Spaces method and path for this operation:**
 
@@ -5610,22 +5804,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a response actions state, which reports whether encryption is enabled.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/action/state'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_get_actions_state_request, 'body'),
-    getLooseObjectFromProperty(endpoint_get_actions_state_request, 'path'),
-    getLooseObjectFromProperty(endpoint_get_actions_state_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_state_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_state_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_get_actions_state_request, 'query'),
   ]),
   outputSchema: endpoint_get_actions_state_response,
 };
 const ENDPOINTSUSPENDPROCESSACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointSuspendProcessAction',
+  connectorGroup: 'internal',
   summary: `Suspend a process`,
   description: `**Spaces method and path for this operation:**
 
@@ -5636,22 +5831,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Suspend a running process on an endpoint.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/suspend_process'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_suspend_process_action_request, 'body'),
-    getLooseObjectFromProperty(endpoint_suspend_process_action_request, 'path'),
-    getLooseObjectFromProperty(endpoint_suspend_process_action_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_suspend_process_action_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_suspend_process_action_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_suspend_process_action_request, 'query'),
   ]),
   outputSchema: endpoint_suspend_process_action_response,
 };
 const ENDPOINTUNISOLATEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointUnisolateAction',
+  connectorGroup: 'internal',
   summary: `Release an isolated endpoint`,
   description: `**Spaces method and path for this operation:**
 
@@ -5662,22 +5858,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Release an isolated endpoint, allowing it to rejoin a network.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/unisolate'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_unisolate_action_request, 'body'),
-    getLooseObjectFromProperty(endpoint_unisolate_action_request, 'path'),
-    getLooseObjectFromProperty(endpoint_unisolate_action_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_unisolate_action_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_unisolate_action_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_unisolate_action_request, 'query'),
   ]),
   outputSchema: endpoint_unisolate_action_response,
 };
 const ENDPOINTUPLOADACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointUploadAction',
+  connectorGroup: 'internal',
   summary: `Upload a file`,
   description: `**Spaces method and path for this operation:**
 
@@ -5688,22 +5885,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Upload a file to an endpoint.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/action/upload'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(endpoint_upload_action_request, 'body'),
-    getLooseObjectFromProperty(endpoint_upload_action_request, 'path'),
-    getLooseObjectFromProperty(endpoint_upload_action_request, 'query'),
+    getZodLooseObjectFromProperty(endpoint_upload_action_request, 'body'),
+    getZodLooseObjectFromProperty(endpoint_upload_action_request, 'path'),
+    getZodLooseObjectFromProperty(endpoint_upload_action_request, 'query'),
   ]),
   outputSchema: endpoint_upload_action_response,
 };
 const GETENDPOINTMETADATALIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEndpointMetadataList',
+  connectorGroup: 'internal',
   summary: `Get a metadata list`,
   description: `**Spaces method and path for this operation:**
 
@@ -5712,22 +5910,23 @@ const GETENDPOINTMETADATALIST_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/metadata'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['page', 'pageSize', 'kuery', 'hostStatuses', 'sortField', 'sortDirection'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_endpoint_metadata_list_request, 'body'),
-    getLooseObjectFromProperty(get_endpoint_metadata_list_request, 'path'),
-    getLooseObjectFromProperty(get_endpoint_metadata_list_request, 'query'),
+    getZodLooseObjectFromProperty(get_endpoint_metadata_list_request, 'body'),
+    getZodLooseObjectFromProperty(get_endpoint_metadata_list_request, 'path'),
+    getZodLooseObjectFromProperty(get_endpoint_metadata_list_request, 'query'),
   ]),
   outputSchema: get_endpoint_metadata_list_response,
 };
 const GETENDPOINTMETADATA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEndpointMetadata',
+  connectorGroup: 'internal',
   summary: `Get metadata`,
   description: `**Spaces method and path for this operation:**
 
@@ -5736,22 +5935,23 @@ const GETENDPOINTMETADATA_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/metadata/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_endpoint_metadata_request, 'body'),
-    getLooseObjectFromProperty(get_endpoint_metadata_request, 'path'),
-    getLooseObjectFromProperty(get_endpoint_metadata_request, 'query'),
+    getZodLooseObjectFromProperty(get_endpoint_metadata_request, 'body'),
+    getZodLooseObjectFromProperty(get_endpoint_metadata_request, 'path'),
+    getZodLooseObjectFromProperty(get_endpoint_metadata_request, 'query'),
   ]),
   outputSchema: get_endpoint_metadata_response,
 };
 const GETPOLICYRESPONSE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetPolicyResponse',
+  connectorGroup: 'internal',
   summary: `Get a policy response`,
   description: `**Spaces method and path for this operation:**
 
@@ -5760,22 +5960,23 @@ const GETPOLICYRESPONSE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/policy_response'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['query'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_policy_response_request, 'body'),
-    getLooseObjectFromProperty(get_policy_response_request, 'path'),
-    getLooseObjectFromProperty(get_policy_response_request, 'query'),
+    getZodLooseObjectFromProperty(get_policy_response_request, 'body'),
+    getZodLooseObjectFromProperty(get_policy_response_request, 'path'),
+    getZodLooseObjectFromProperty(get_policy_response_request, 'query'),
   ]),
   outputSchema: get_policy_response_response,
 };
 const GETPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetProtectionUpdatesNote',
+  connectorGroup: 'internal',
   summary: `Get a protection updates note`,
   description: `**Spaces method and path for this operation:**
 
@@ -5784,22 +5985,23 @@ const GETPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/endpoint/protection_updates_note/{package_policy_id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['package_policy_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_protection_updates_note_request, 'body'),
-    getLooseObjectFromProperty(get_protection_updates_note_request, 'path'),
-    getLooseObjectFromProperty(get_protection_updates_note_request, 'query'),
+    getZodLooseObjectFromProperty(get_protection_updates_note_request, 'body'),
+    getZodLooseObjectFromProperty(get_protection_updates_note_request, 'path'),
+    getZodLooseObjectFromProperty(get_protection_updates_note_request, 'query'),
   ]),
   outputSchema: get_protection_updates_note_response,
 };
 const CREATEUPDATEPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateUpdateProtectionUpdatesNote',
+  connectorGroup: 'internal',
   summary: `Create or update a protection updates note`,
   description: `**Spaces method and path for this operation:**
 
@@ -5808,22 +6010,23 @@ const CREATEUPDATEPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/endpoint/protection_updates_note/{package_policy_id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['package_policy_id'],
     urlParams: [],
     bodyParams: ['note'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_update_protection_updates_note_request, 'body'),
-    getLooseObjectFromProperty(create_update_protection_updates_note_request, 'path'),
-    getLooseObjectFromProperty(create_update_protection_updates_note_request, 'query'),
+    getZodLooseObjectFromProperty(create_update_protection_updates_note_request, 'body'),
+    getZodLooseObjectFromProperty(create_update_protection_updates_note_request, 'path'),
+    getZodLooseObjectFromProperty(create_update_protection_updates_note_request, 'query'),
   ]),
   outputSchema: create_update_protection_updates_note_response,
 };
 const DELETEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteMonitoringEngine',
+  connectorGroup: 'internal',
   summary: `Delete the Privilege Monitoring Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -5832,22 +6035,23 @@ const DELETEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/entity_analytics/monitoring/engine/delete'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['data'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_monitoring_engine_request, 'body'),
-    getLooseObjectFromProperty(delete_monitoring_engine_request, 'path'),
-    getLooseObjectFromProperty(delete_monitoring_engine_request, 'query'),
+    getZodLooseObjectFromProperty(delete_monitoring_engine_request, 'body'),
+    getZodLooseObjectFromProperty(delete_monitoring_engine_request, 'path'),
+    getZodLooseObjectFromProperty(delete_monitoring_engine_request, 'query'),
   ]),
   outputSchema: delete_monitoring_engine_response,
 };
 const DISABLEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DisableMonitoringEngine',
+  connectorGroup: 'internal',
   summary: `Disable the Privilege Monitoring Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -5856,22 +6060,23 @@ const DISABLEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/engine/disable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(disable_monitoring_engine_request, 'body'),
-    getLooseObjectFromProperty(disable_monitoring_engine_request, 'path'),
-    getLooseObjectFromProperty(disable_monitoring_engine_request, 'query'),
+    getZodLooseObjectFromProperty(disable_monitoring_engine_request, 'body'),
+    getZodLooseObjectFromProperty(disable_monitoring_engine_request, 'path'),
+    getZodLooseObjectFromProperty(disable_monitoring_engine_request, 'query'),
   ]),
   outputSchema: disable_monitoring_engine_response,
 };
 const INITMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitMonitoringEngine',
+  connectorGroup: 'internal',
   summary: `Initialize the Privilege Monitoring Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -5880,22 +6085,23 @@ const INITMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/engine/init'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(init_monitoring_engine_request, 'body'),
-    getLooseObjectFromProperty(init_monitoring_engine_request, 'path'),
-    getLooseObjectFromProperty(init_monitoring_engine_request, 'query'),
+    getZodLooseObjectFromProperty(init_monitoring_engine_request, 'body'),
+    getZodLooseObjectFromProperty(init_monitoring_engine_request, 'path'),
+    getZodLooseObjectFromProperty(init_monitoring_engine_request, 'query'),
   ]),
   outputSchema: init_monitoring_engine_response,
 };
 const SCHEDULEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ScheduleMonitoringEngine',
+  connectorGroup: 'internal',
   summary: `Schedule the Privilege Monitoring Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -5904,22 +6110,23 @@ const SCHEDULEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/engine/schedule_now'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(schedule_monitoring_engine_request, 'body'),
-    getLooseObjectFromProperty(schedule_monitoring_engine_request, 'path'),
-    getLooseObjectFromProperty(schedule_monitoring_engine_request, 'query'),
+    getZodLooseObjectFromProperty(schedule_monitoring_engine_request, 'body'),
+    getZodLooseObjectFromProperty(schedule_monitoring_engine_request, 'path'),
+    getZodLooseObjectFromProperty(schedule_monitoring_engine_request, 'query'),
   ]),
   outputSchema: schedule_monitoring_engine_response,
 };
 const PRIVMONHEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivMonHealth',
+  connectorGroup: 'internal',
   summary: `Health check on Privilege Monitoring`,
   description: `**Spaces method and path for this operation:**
 
@@ -5928,22 +6135,23 @@ const PRIVMONHEALTH_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/entity_analytics/monitoring/privileges/health'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(priv_mon_health_request, 'body'),
-    getLooseObjectFromProperty(priv_mon_health_request, 'path'),
-    getLooseObjectFromProperty(priv_mon_health_request, 'query'),
+    getZodLooseObjectFromProperty(priv_mon_health_request, 'body'),
+    getZodLooseObjectFromProperty(priv_mon_health_request, 'path'),
+    getZodLooseObjectFromProperty(priv_mon_health_request, 'query'),
   ]),
   outputSchema: priv_mon_health_response,
 };
 const PRIVMONPRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivMonPrivileges',
+  connectorGroup: 'internal',
   summary: `Run a privileges check on Privilege Monitoring`,
   description: `**Spaces method and path for this operation:**
 
@@ -5954,22 +6162,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Check if the current user has all required permissions for Privilege Monitoring`,
   methods: ['GET'],
   patterns: ['/api/entity_analytics/monitoring/privileges/privileges'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(priv_mon_privileges_request, 'body'),
-    getLooseObjectFromProperty(priv_mon_privileges_request, 'path'),
-    getLooseObjectFromProperty(priv_mon_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(priv_mon_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(priv_mon_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(priv_mon_privileges_request, 'query'),
   ]),
   outputSchema: priv_mon_privileges_response,
 };
 const CREATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreatePrivMonUser',
+  connectorGroup: 'internal',
   summary: `Create a new monitored user`,
   description: `**Spaces method and path for this operation:**
 
@@ -5978,22 +6187,23 @@ const CREATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/users'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['user'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_priv_mon_user_request, 'body'),
-    getLooseObjectFromProperty(create_priv_mon_user_request, 'path'),
-    getLooseObjectFromProperty(create_priv_mon_user_request, 'query'),
+    getZodLooseObjectFromProperty(create_priv_mon_user_request, 'body'),
+    getZodLooseObjectFromProperty(create_priv_mon_user_request, 'path'),
+    getZodLooseObjectFromProperty(create_priv_mon_user_request, 'query'),
   ]),
   outputSchema: create_priv_mon_user_response,
 };
 const PRIVMONBULKUPLOADUSERSCSV_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivmonBulkUploadUsersCSV',
+  connectorGroup: 'internal',
   summary: `Upsert multiple monitored users via CSV upload`,
   description: `**Spaces method and path for this operation:**
 
@@ -6002,22 +6212,23 @@ const PRIVMONBULKUPLOADUSERSCSV_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_analytics/monitoring/users/_csv'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'body'),
-    getLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'path'),
-    getLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'query'),
+    getZodLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'body'),
+    getZodLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'path'),
+    getZodLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'query'),
   ]),
   outputSchema: privmon_bulk_upload_users_c_s_v_response,
 };
 const DELETEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeletePrivMonUser',
+  connectorGroup: 'internal',
   summary: `Delete a monitored user`,
   description: `**Spaces method and path for this operation:**
 
@@ -6026,22 +6237,23 @@ const DELETEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/entity_analytics/monitoring/users/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_priv_mon_user_request, 'body'),
-    getLooseObjectFromProperty(delete_priv_mon_user_request, 'path'),
-    getLooseObjectFromProperty(delete_priv_mon_user_request, 'query'),
+    getZodLooseObjectFromProperty(delete_priv_mon_user_request, 'body'),
+    getZodLooseObjectFromProperty(delete_priv_mon_user_request, 'path'),
+    getZodLooseObjectFromProperty(delete_priv_mon_user_request, 'query'),
   ]),
   outputSchema: delete_priv_mon_user_response,
 };
 const UPDATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdatePrivMonUser',
+  connectorGroup: 'internal',
   summary: `Update a monitored user`,
   description: `**Spaces method and path for this operation:**
 
@@ -6050,22 +6262,23 @@ const UPDATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['PUT'],
   patterns: ['/api/entity_analytics/monitoring/users/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['entity_analytics_monitoring', 'id', 'labels', 'user'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_priv_mon_user_request, 'body'),
-    getLooseObjectFromProperty(update_priv_mon_user_request, 'path'),
-    getLooseObjectFromProperty(update_priv_mon_user_request, 'query'),
+    getZodLooseObjectFromProperty(update_priv_mon_user_request, 'body'),
+    getZodLooseObjectFromProperty(update_priv_mon_user_request, 'path'),
+    getZodLooseObjectFromProperty(update_priv_mon_user_request, 'query'),
   ]),
   outputSchema: update_priv_mon_user_response,
 };
 const LISTPRIVMONUSERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListPrivMonUsers',
+  connectorGroup: 'internal',
   summary: `List all monitored users`,
   description: `**Spaces method and path for this operation:**
 
@@ -6074,22 +6287,23 @@ const LISTPRIVMONUSERS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/entity_analytics/monitoring/users/list'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['kql'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(list_priv_mon_users_request, 'body'),
-    getLooseObjectFromProperty(list_priv_mon_users_request, 'path'),
-    getLooseObjectFromProperty(list_priv_mon_users_request, 'query'),
+    getZodLooseObjectFromProperty(list_priv_mon_users_request, 'body'),
+    getZodLooseObjectFromProperty(list_priv_mon_users_request, 'path'),
+    getZodLooseObjectFromProperty(list_priv_mon_users_request, 'query'),
   ]),
   outputSchema: list_priv_mon_users_response,
 };
 const INSTALLPRIVILEGEDACCESSDETECTIONPACKAGE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrivilegedAccessDetectionPackage',
+  connectorGroup: 'internal',
   summary: `Installs the privileged access detection package for the Entity Analytics privileged user monitoring experience`,
   description: `**Spaces method and path for this operation:**
 
@@ -6098,22 +6312,23 @@ const INSTALLPRIVILEGEDACCESSDETECTIONPACKAGE_CONTRACT: InternalConnectorContrac
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_analytics/privileged_user_monitoring/pad/install'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(install_privileged_access_detection_package_request, 'body'),
-    getLooseObjectFromProperty(install_privileged_access_detection_package_request, 'path'),
-    getLooseObjectFromProperty(install_privileged_access_detection_package_request, 'query'),
+    getZodLooseObjectFromProperty(install_privileged_access_detection_package_request, 'body'),
+    getZodLooseObjectFromProperty(install_privileged_access_detection_package_request, 'path'),
+    getZodLooseObjectFromProperty(install_privileged_access_detection_package_request, 'query'),
   ]),
   outputSchema: install_privileged_access_detection_package_response,
 };
 const GETPRIVILEGEDACCESSDETECTIONPACKAGESTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetPrivilegedAccessDetectionPackageStatus',
+  connectorGroup: 'internal',
   summary: `Gets the status of the privileged access detection package for the Entity Analytics privileged user monitoring experience`,
   description: `**Spaces method and path for this operation:**
 
@@ -6122,22 +6337,23 @@ const GETPRIVILEGEDACCESSDETECTIONPACKAGESTATUS_CONTRACT: InternalConnectorContr
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/entity_analytics/privileged_user_monitoring/pad/status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'body'),
-    getLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'path'),
-    getLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'query'),
+    getZodLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'body'),
+    getZodLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'path'),
+    getZodLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'query'),
   ]),
   outputSchema: get_privileged_access_detection_package_status_response,
 };
 const INITENTITYSTORE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitEntityStore',
+  connectorGroup: 'internal',
   summary: `Initialize the Entity Store`,
   description: `**Spaces method and path for this operation:**
 
@@ -6146,9 +6362,9 @@ const INITENTITYSTORE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_store/enable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -6167,14 +6383,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(init_entity_store_request, 'body'),
-    getLooseObjectFromProperty(init_entity_store_request, 'path'),
-    getLooseObjectFromProperty(init_entity_store_request, 'query'),
+    getZodLooseObjectFromProperty(init_entity_store_request, 'body'),
+    getZodLooseObjectFromProperty(init_entity_store_request, 'path'),
+    getZodLooseObjectFromProperty(init_entity_store_request, 'query'),
   ]),
   outputSchema: init_entity_store_response,
 };
 const DELETEENTITYENGINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEntityEngines',
+  connectorGroup: 'internal',
   summary: `Delete Entity Engines`,
   description: `**Spaces method and path for this operation:**
 
@@ -6183,22 +6400,23 @@ const DELETEENTITYENGINES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/entity_store/engines'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['entityTypes', 'delete_data'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_entity_engines_request, 'body'),
-    getLooseObjectFromProperty(delete_entity_engines_request, 'path'),
-    getLooseObjectFromProperty(delete_entity_engines_request, 'query'),
+    getZodLooseObjectFromProperty(delete_entity_engines_request, 'body'),
+    getZodLooseObjectFromProperty(delete_entity_engines_request, 'path'),
+    getZodLooseObjectFromProperty(delete_entity_engines_request, 'query'),
   ]),
   outputSchema: delete_entity_engines_response,
 };
 const LISTENTITYENGINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListEntityEngines',
+  connectorGroup: 'internal',
   summary: `List the Entity Engines`,
   description: `**Spaces method and path for this operation:**
 
@@ -6207,22 +6425,23 @@ const LISTENTITYENGINES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/entity_store/engines'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(list_entity_engines_request, 'body'),
-    getLooseObjectFromProperty(list_entity_engines_request, 'path'),
-    getLooseObjectFromProperty(list_entity_engines_request, 'query'),
+    getZodLooseObjectFromProperty(list_entity_engines_request, 'body'),
+    getZodLooseObjectFromProperty(list_entity_engines_request, 'path'),
+    getZodLooseObjectFromProperty(list_entity_engines_request, 'query'),
   ]),
   outputSchema: list_entity_engines_response,
 };
 const DELETEENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEntityEngine',
+  connectorGroup: 'internal',
   summary: `Delete the Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -6231,22 +6450,23 @@ const DELETEENTITYENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['DELETE'],
   patterns: ['/api/entity_store/engines/{entityType}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['entityType'],
     urlParams: ['delete_data', 'data'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_entity_engine_request, 'body'),
-    getLooseObjectFromProperty(delete_entity_engine_request, 'path'),
-    getLooseObjectFromProperty(delete_entity_engine_request, 'query'),
+    getZodLooseObjectFromProperty(delete_entity_engine_request, 'body'),
+    getZodLooseObjectFromProperty(delete_entity_engine_request, 'path'),
+    getZodLooseObjectFromProperty(delete_entity_engine_request, 'query'),
   ]),
   outputSchema: delete_entity_engine_response,
 };
 const GETENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEntityEngine',
+  connectorGroup: 'internal',
   summary: `Get an Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -6255,22 +6475,23 @@ const GETENTITYENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/entity_store/engines/{entityType}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['entityType'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_entity_engine_request, 'body'),
-    getLooseObjectFromProperty(get_entity_engine_request, 'path'),
-    getLooseObjectFromProperty(get_entity_engine_request, 'query'),
+    getZodLooseObjectFromProperty(get_entity_engine_request, 'body'),
+    getZodLooseObjectFromProperty(get_entity_engine_request, 'path'),
+    getZodLooseObjectFromProperty(get_entity_engine_request, 'query'),
   ]),
   outputSchema: get_entity_engine_response,
 };
 const INITENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitEntityEngine',
+  connectorGroup: 'internal',
   summary: `Initialize an Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -6279,9 +6500,9 @@ const INITENTITYENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_store/engines/{entityType}/init'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['entityType'],
     urlParams: [],
     bodyParams: [
@@ -6299,14 +6520,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(init_entity_engine_request, 'body'),
-    getLooseObjectFromProperty(init_entity_engine_request, 'path'),
-    getLooseObjectFromProperty(init_entity_engine_request, 'query'),
+    getZodLooseObjectFromProperty(init_entity_engine_request, 'body'),
+    getZodLooseObjectFromProperty(init_entity_engine_request, 'path'),
+    getZodLooseObjectFromProperty(init_entity_engine_request, 'query'),
   ]),
   outputSchema: init_entity_engine_response,
 };
 const STARTENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.StartEntityEngine',
+  connectorGroup: 'internal',
   summary: `Start an Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -6315,22 +6537,23 @@ const STARTENTITYENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_store/engines/{entityType}/start'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['entityType'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(start_entity_engine_request, 'body'),
-    getLooseObjectFromProperty(start_entity_engine_request, 'path'),
-    getLooseObjectFromProperty(start_entity_engine_request, 'query'),
+    getZodLooseObjectFromProperty(start_entity_engine_request, 'body'),
+    getZodLooseObjectFromProperty(start_entity_engine_request, 'path'),
+    getZodLooseObjectFromProperty(start_entity_engine_request, 'query'),
   ]),
   outputSchema: start_entity_engine_response,
 };
 const STOPENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.StopEntityEngine',
+  connectorGroup: 'internal',
   summary: `Stop an Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -6339,22 +6562,23 @@ const STOPENTITYENGINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_store/engines/{entityType}/stop'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['entityType'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(stop_entity_engine_request, 'body'),
-    getLooseObjectFromProperty(stop_entity_engine_request, 'path'),
-    getLooseObjectFromProperty(stop_entity_engine_request, 'query'),
+    getZodLooseObjectFromProperty(stop_entity_engine_request, 'body'),
+    getZodLooseObjectFromProperty(stop_entity_engine_request, 'path'),
+    getZodLooseObjectFromProperty(stop_entity_engine_request, 'query'),
   ]),
   outputSchema: stop_entity_engine_response,
 };
 const APPLYENTITYENGINEDATAVIEWINDICES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ApplyEntityEngineDataviewIndices',
+  connectorGroup: 'internal',
   summary: `Apply DataView indices to all installed engines`,
   description: `**Spaces method and path for this operation:**
 
@@ -6363,22 +6587,23 @@ const APPLYENTITYENGINEDATAVIEWINDICES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/entity_store/engines/apply_dataview_indices'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'body'),
-    getLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'path'),
-    getLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'query'),
+    getZodLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'body'),
+    getZodLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'path'),
+    getZodLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'query'),
   ]),
   outputSchema: apply_entity_engine_dataview_indices_response,
 };
 const DELETESINGLEENTITY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteSingleEntity',
+  connectorGroup: 'internal',
   summary: `Delete an entity in Entity Store`,
   description: `**Spaces method and path for this operation:**
 
@@ -6391,22 +6616,23 @@ The entity will be immediately deleted from the latest index.  It will remain av
 `,
   methods: ['DELETE'],
   patterns: ['/api/entity_store/entities/{entityType}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['entityType'],
     urlParams: [],
     bodyParams: ['id'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_single_entity_request, 'body'),
-    getLooseObjectFromProperty(delete_single_entity_request, 'path'),
-    getLooseObjectFromProperty(delete_single_entity_request, 'query'),
+    getZodLooseObjectFromProperty(delete_single_entity_request, 'body'),
+    getZodLooseObjectFromProperty(delete_single_entity_request, 'path'),
+    getZodLooseObjectFromProperty(delete_single_entity_request, 'query'),
   ]),
   outputSchema: delete_single_entity_response,
 };
 const UPSERTENTITY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpsertEntity',
+  connectorGroup: 'internal',
   summary: `Upsert an entity in Entity Store`,
   description: `**Spaces method and path for this operation:**
 
@@ -6421,22 +6647,23 @@ If the specified entity already exists, it is updated with the provided values. 
 `,
   methods: ['PUT'],
   patterns: ['/api/entity_store/entities/{entityType}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['entityType'],
     urlParams: ['force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(upsert_entity_request, 'body'),
-    getLooseObjectFromProperty(upsert_entity_request, 'path'),
-    getLooseObjectFromProperty(upsert_entity_request, 'query'),
+    getZodLooseObjectFromProperty(upsert_entity_request, 'body'),
+    getZodLooseObjectFromProperty(upsert_entity_request, 'path'),
+    getZodLooseObjectFromProperty(upsert_entity_request, 'query'),
   ]),
   outputSchema: upsert_entity_response,
 };
 const UPSERTENTITIESBULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpsertEntitiesBulk',
+  connectorGroup: 'internal',
   summary: `Upsert many entities in Entity Store`,
   description: `**Spaces method and path for this operation:**
 
@@ -6450,22 +6677,23 @@ The creation is asynchronous. The time for a document to be present in the  fina
 `,
   methods: ['PUT'],
   patterns: ['/api/entity_store/entities/bulk'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['force'],
-    bodyParams: [],
+    bodyParams: ['entities'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(upsert_entities_bulk_request, 'body'),
-    getLooseObjectFromProperty(upsert_entities_bulk_request, 'path'),
-    getLooseObjectFromProperty(upsert_entities_bulk_request, 'query'),
+    getZodLooseObjectFromProperty(upsert_entities_bulk_request, 'body'),
+    getZodLooseObjectFromProperty(upsert_entities_bulk_request, 'path'),
+    getZodLooseObjectFromProperty(upsert_entities_bulk_request, 'query'),
   ]),
   outputSchema: upsert_entities_bulk_response,
 };
 const LISTENTITIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListEntities',
+  connectorGroup: 'internal',
   summary: `List Entity Store Entities`,
   description: `**Spaces method and path for this operation:**
 
@@ -6476,22 +6704,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 List entities records, paging, sorting and filtering as needed.`,
   methods: ['GET'],
   patterns: ['/api/entity_store/entities/list'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['sort_field', 'sort_order', 'page', 'per_page', 'filterQuery', 'entity_types'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(list_entities_request, 'body'),
-    getLooseObjectFromProperty(list_entities_request, 'path'),
-    getLooseObjectFromProperty(list_entities_request, 'query'),
+    getZodLooseObjectFromProperty(list_entities_request, 'body'),
+    getZodLooseObjectFromProperty(list_entities_request, 'path'),
+    getZodLooseObjectFromProperty(list_entities_request, 'query'),
   ]),
   outputSchema: list_entities_response,
 };
 const GETENTITYSTORESTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEntityStoreStatus',
+  connectorGroup: 'internal',
   summary: `Get the status of the Entity Store`,
   description: `**Spaces method and path for this operation:**
 
@@ -6500,22 +6729,23 @@ const GETENTITYSTORESTATUS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/entity_store/status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['include_components'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_entity_store_status_request, 'body'),
-    getLooseObjectFromProperty(get_entity_store_status_request, 'path'),
-    getLooseObjectFromProperty(get_entity_store_status_request, 'query'),
+    getZodLooseObjectFromProperty(get_entity_store_status_request, 'body'),
+    getZodLooseObjectFromProperty(get_entity_store_status_request, 'path'),
+    getZodLooseObjectFromProperty(get_entity_store_status_request, 'query'),
   ]),
   outputSchema: get_entity_store_status_response,
 };
 const DELETEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteExceptionList',
+  connectorGroup: 'internal',
   summary: `Delete an exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -6526,22 +6756,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an exception list using the \`id\` or \`list_id\` field.`,
   methods: ['DELETE'],
   patterns: ['/api/exception_lists'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'list_id', 'namespace_type'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_exception_list_request, 'body'),
-    getLooseObjectFromProperty(delete_exception_list_request, 'path'),
-    getLooseObjectFromProperty(delete_exception_list_request, 'query'),
+    getZodLooseObjectFromProperty(delete_exception_list_request, 'body'),
+    getZodLooseObjectFromProperty(delete_exception_list_request, 'path'),
+    getZodLooseObjectFromProperty(delete_exception_list_request, 'query'),
   ]),
   outputSchema: delete_exception_list_response,
 };
 const READEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionList',
+  connectorGroup: 'internal',
   summary: `Get exception list details`,
   description: `**Spaces method and path for this operation:**
 
@@ -6552,22 +6783,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of an exception list using the \`id\` or \`list_id\` field.`,
   methods: ['GET'],
   patterns: ['/api/exception_lists'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'list_id', 'namespace_type'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_exception_list_request, 'body'),
-    getLooseObjectFromProperty(read_exception_list_request, 'path'),
-    getLooseObjectFromProperty(read_exception_list_request, 'query'),
+    getZodLooseObjectFromProperty(read_exception_list_request, 'body'),
+    getZodLooseObjectFromProperty(read_exception_list_request, 'path'),
+    getZodLooseObjectFromProperty(read_exception_list_request, 'query'),
   ]),
   outputSchema: read_exception_list_response,
 };
 const CREATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateExceptionList',
+  connectorGroup: 'internal',
   summary: `Create an exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -6581,9 +6813,9 @@ An exception list groups exception items and can be associated with detection ru
 `,
   methods: ['POST'],
   patterns: ['/api/exception_lists'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -6599,14 +6831,15 @@ An exception list groups exception items and can be associated with detection ru
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_exception_list_request, 'body'),
-    getLooseObjectFromProperty(create_exception_list_request, 'path'),
-    getLooseObjectFromProperty(create_exception_list_request, 'query'),
+    getZodLooseObjectFromProperty(create_exception_list_request, 'body'),
+    getZodLooseObjectFromProperty(create_exception_list_request, 'path'),
+    getZodLooseObjectFromProperty(create_exception_list_request, 'query'),
   ]),
   outputSchema: create_exception_list_response,
 };
 const UPDATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateExceptionList',
+  connectorGroup: 'internal',
   summary: `Update an exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -6617,9 +6850,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an exception list using the \`id\` or \`list_id\` field.`,
   methods: ['PUT'],
   patterns: ['/api/exception_lists'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -6637,14 +6870,15 @@ Update an exception list using the \`id\` or \`list_id\` field.`,
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_exception_list_request, 'body'),
-    getLooseObjectFromProperty(update_exception_list_request, 'path'),
-    getLooseObjectFromProperty(update_exception_list_request, 'query'),
+    getZodLooseObjectFromProperty(update_exception_list_request, 'body'),
+    getZodLooseObjectFromProperty(update_exception_list_request, 'path'),
+    getZodLooseObjectFromProperty(update_exception_list_request, 'query'),
   ]),
   outputSchema: update_exception_list_response,
 };
 const DUPLICATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DuplicateExceptionList',
+  connectorGroup: 'internal',
   summary: `Duplicate an exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -6655,22 +6889,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Duplicate an existing exception list.`,
   methods: ['POST'],
   patterns: ['/api/exception_lists/_duplicate'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['list_id', 'namespace_type', 'include_expired_exceptions'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(duplicate_exception_list_request, 'body'),
-    getLooseObjectFromProperty(duplicate_exception_list_request, 'path'),
-    getLooseObjectFromProperty(duplicate_exception_list_request, 'query'),
+    getZodLooseObjectFromProperty(duplicate_exception_list_request, 'body'),
+    getZodLooseObjectFromProperty(duplicate_exception_list_request, 'path'),
+    getZodLooseObjectFromProperty(duplicate_exception_list_request, 'query'),
   ]),
   outputSchema: duplicate_exception_list_response,
 };
 const EXPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportExceptionList',
+  connectorGroup: 'internal',
   summary: `Export an exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -6681,22 +6916,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Export an exception list and its associated items to an NDJSON file.`,
   methods: ['POST'],
   patterns: ['/api/exception_lists/_export'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'list_id', 'namespace_type', 'include_expired_exceptions'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(export_exception_list_request, 'body'),
-    getLooseObjectFromProperty(export_exception_list_request, 'path'),
-    getLooseObjectFromProperty(export_exception_list_request, 'query'),
+    getZodLooseObjectFromProperty(export_exception_list_request, 'body'),
+    getZodLooseObjectFromProperty(export_exception_list_request, 'path'),
+    getZodLooseObjectFromProperty(export_exception_list_request, 'query'),
   ]),
   outputSchema: export_exception_list_response,
 };
 const FINDEXCEPTIONLISTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindExceptionLists',
+  connectorGroup: 'internal',
   summary: `Get exception lists`,
   description: `**Spaces method and path for this operation:**
 
@@ -6707,22 +6943,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all exception list containers.`,
   methods: ['GET'],
   patterns: ['/api/exception_lists/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['filter', 'namespace_type', 'page', 'per_page', 'sort_field', 'sort_order'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_exception_lists_request, 'body'),
-    getLooseObjectFromProperty(find_exception_lists_request, 'path'),
-    getLooseObjectFromProperty(find_exception_lists_request, 'query'),
+    getZodLooseObjectFromProperty(find_exception_lists_request, 'body'),
+    getZodLooseObjectFromProperty(find_exception_lists_request, 'path'),
+    getZodLooseObjectFromProperty(find_exception_lists_request, 'query'),
   ]),
   outputSchema: find_exception_lists_response,
 };
 const IMPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportExceptionList',
+  connectorGroup: 'internal',
   summary: `Import an exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -6733,22 +6970,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Import an exception list and its associated items from an NDJSON file.`,
   methods: ['POST'],
   patterns: ['/api/exception_lists/_import'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['overwrite', 'as_new_list'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(import_exception_list_request, 'body'),
-    getLooseObjectFromProperty(import_exception_list_request, 'path'),
-    getLooseObjectFromProperty(import_exception_list_request, 'query'),
+    getZodLooseObjectFromProperty(import_exception_list_request, 'body'),
+    getZodLooseObjectFromProperty(import_exception_list_request, 'path'),
+    getZodLooseObjectFromProperty(import_exception_list_request, 'query'),
   ]),
   outputSchema: import_exception_list_response,
 };
 const DELETEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteExceptionListItem',
+  connectorGroup: 'internal',
   summary: `Delete an exception list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -6759,22 +6997,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an exception list item using the \`id\` or \`item_id\` field.`,
   methods: ['DELETE'],
   patterns: ['/api/exception_lists/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'item_id', 'namespace_type'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_exception_list_item_request, 'body'),
-    getLooseObjectFromProperty(delete_exception_list_item_request, 'path'),
-    getLooseObjectFromProperty(delete_exception_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(delete_exception_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(delete_exception_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(delete_exception_list_item_request, 'query'),
   ]),
   outputSchema: delete_exception_list_item_response,
 };
 const READEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionListItem',
+  connectorGroup: 'internal',
   summary: `Get an exception list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -6785,22 +7024,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of an exception list item using the \`id\` or \`item_id\` field.`,
   methods: ['GET'],
   patterns: ['/api/exception_lists/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'item_id', 'namespace_type'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_exception_list_item_request, 'body'),
-    getLooseObjectFromProperty(read_exception_list_item_request, 'path'),
-    getLooseObjectFromProperty(read_exception_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(read_exception_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(read_exception_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(read_exception_list_item_request, 'query'),
   ]),
   outputSchema: read_exception_list_item_response,
 };
 const CREATEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateExceptionListItem',
+  connectorGroup: 'internal',
   summary: `Create an exception list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -6814,9 +7054,9 @@ Create an exception item and associate it with the specified exception list.
 `,
   methods: ['POST'],
   patterns: ['/api/exception_lists/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -6835,14 +7075,15 @@ Create an exception item and associate it with the specified exception list.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_exception_list_item_request, 'body'),
-    getLooseObjectFromProperty(create_exception_list_item_request, 'path'),
-    getLooseObjectFromProperty(create_exception_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(create_exception_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(create_exception_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(create_exception_list_item_request, 'query'),
   ]),
   outputSchema: create_exception_list_item_response,
 };
 const UPDATEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateExceptionListItem',
+  connectorGroup: 'internal',
   summary: `Update an exception list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -6853,9 +7094,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an exception list item using the \`id\` or \`item_id\` field.`,
   methods: ['PUT'],
   patterns: ['/api/exception_lists/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -6876,14 +7117,15 @@ Update an exception list item using the \`id\` or \`item_id\` field.`,
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_exception_list_item_request, 'body'),
-    getLooseObjectFromProperty(update_exception_list_item_request, 'path'),
-    getLooseObjectFromProperty(update_exception_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(update_exception_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(update_exception_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(update_exception_list_item_request, 'query'),
   ]),
   outputSchema: update_exception_list_item_response,
 };
 const FINDEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindExceptionListItems',
+  connectorGroup: 'internal',
   summary: `Get exception list items`,
   description: `**Spaces method and path for this operation:**
 
@@ -6894,9 +7136,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all exception list items in the specified list.`,
   methods: ['GET'],
   patterns: ['/api/exception_lists/items/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'list_id',
@@ -6911,14 +7153,15 @@ Get a list of all exception list items in the specified list.`,
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_exception_list_items_request, 'body'),
-    getLooseObjectFromProperty(find_exception_list_items_request, 'path'),
-    getLooseObjectFromProperty(find_exception_list_items_request, 'query'),
+    getZodLooseObjectFromProperty(find_exception_list_items_request, 'body'),
+    getZodLooseObjectFromProperty(find_exception_list_items_request, 'path'),
+    getZodLooseObjectFromProperty(find_exception_list_items_request, 'query'),
   ]),
   outputSchema: find_exception_list_items_response,
 };
 const READEXCEPTIONLISTSUMMARY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionListSummary',
+  connectorGroup: 'internal',
   summary: `Get an exception list summary`,
   description: `**Spaces method and path for this operation:**
 
@@ -6929,22 +7172,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a summary of the specified exception list.`,
   methods: ['GET'],
   patterns: ['/api/exception_lists/summary'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'list_id', 'namespace_type', 'filter'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_exception_list_summary_request, 'body'),
-    getLooseObjectFromProperty(read_exception_list_summary_request, 'path'),
-    getLooseObjectFromProperty(read_exception_list_summary_request, 'query'),
+    getZodLooseObjectFromProperty(read_exception_list_summary_request, 'body'),
+    getZodLooseObjectFromProperty(read_exception_list_summary_request, 'path'),
+    getZodLooseObjectFromProperty(read_exception_list_summary_request, 'query'),
   ]),
   outputSchema: read_exception_list_summary_response,
 };
 const CREATESHAREDEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateSharedExceptionList',
+  connectorGroup: 'internal',
   summary: `Create a shared exception list`,
   description: `**Spaces method and path for this operation:**
 
@@ -6958,43 +7202,45 @@ An exception list groups exception items and can be associated with detection ru
 `,
   methods: ['POST'],
   patterns: ['/api/exceptions/shared'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['description', 'name'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_shared_exception_list_request, 'body'),
-    getLooseObjectFromProperty(create_shared_exception_list_request, 'path'),
-    getLooseObjectFromProperty(create_shared_exception_list_request, 'query'),
+    getZodLooseObjectFromProperty(create_shared_exception_list_request, 'body'),
+    getZodLooseObjectFromProperty(create_shared_exception_list_request, 'path'),
+    getZodLooseObjectFromProperty(create_shared_exception_list_request, 'query'),
   ]),
   outputSchema: create_shared_exception_list_response,
 };
 const GET_FEATURES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_features',
+  connectorGroup: 'internal',
   summary: `Get features`,
   description: `Get information about all Kibana features. Features are used by spaces and security to refine and secure access to Kibana.
 `,
   methods: ['GET'],
   patterns: ['/api/features'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_features_request, 'body'),
-    getLooseObjectFromProperty(get_features_request, 'path'),
-    getLooseObjectFromProperty(get_features_request, 'query'),
+    getZodLooseObjectFromProperty(get_features_request, 'body'),
+    getZodLooseObjectFromProperty(get_features_request, 'path'),
+    getZodLooseObjectFromProperty(get_features_request, 'query'),
   ]),
   outputSchema: get_features_response,
 };
 const GET_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_download_sources',
+  connectorGroup: 'internal',
   summary: `Get agent binary download sources`,
   description: `**Spaces method and path for this operation:**
 
@@ -7005,22 +7251,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agent_download_sources'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'query'),
   ]),
   outputSchema: get_fleet_agent_download_sources_response,
 };
 const POST_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_download_sources',
+  connectorGroup: 'internal',
   summary: `Create an agent binary download source`,
   description: `**Spaces method and path for this operation:**
 
@@ -7031,22 +7278,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agent_download_sources'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['host', 'id', 'is_default', 'name', 'proxy_id', 'secrets', 'ssl'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'query'),
   ]),
   outputSchema: post_fleet_agent_download_sources_response,
 };
 const DELETE_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agent_download_sources_sourceid',
+  connectorGroup: 'internal',
   summary: `Delete an agent binary download source`,
   description: `**Spaces method and path for this operation:**
 
@@ -7057,22 +7305,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/agent_download_sources/{sourceId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['sourceId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'query'),
   ]),
   outputSchema: delete_fleet_agent_download_sources_sourceid_response,
 };
 const GET_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_download_sources_sourceid',
+  connectorGroup: 'internal',
   summary: `Get an agent binary download source`,
   description: `**Spaces method and path for this operation:**
 
@@ -7083,22 +7332,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agent_download_sources/{sourceId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['sourceId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'query'),
   ]),
   outputSchema: get_fleet_agent_download_sources_sourceid_response,
 };
 const PUT_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_agent_download_sources_sourceid',
+  connectorGroup: 'internal',
   summary: `Update an agent binary download source`,
   description: `**Spaces method and path for this operation:**
 
@@ -7109,22 +7359,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/agent_download_sources/{sourceId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['sourceId'],
     urlParams: [],
     bodyParams: ['host', 'id', 'is_default', 'name', 'proxy_id', 'secrets', 'ssl'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'query'),
   ]),
   outputSchema: put_fleet_agent_download_sources_sourceid_response,
 };
 const GET_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies',
+  connectorGroup: 'internal',
   summary: `Get agent policies`,
   description: `**Spaces method and path for this operation:**
 
@@ -7135,9 +7386,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agent_policies'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'page',
@@ -7154,14 +7405,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agent_policies_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_request, 'query'),
   ]),
   outputSchema: get_fleet_agent_policies_response,
 };
 const POST_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies',
+  connectorGroup: 'internal',
   summary: `Create an agent policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7172,9 +7424,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agent_policies'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['sys_monitoring'],
     bodyParams: [
@@ -7210,14 +7462,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agent_policies_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_request, 'query'),
   ]),
   outputSchema: post_fleet_agent_policies_response,
 };
 const POST_FLEET_AGENT_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_bulk_get',
+  connectorGroup: 'internal',
   summary: `Bulk get agent policies`,
   description: `**Spaces method and path for this operation:**
 
@@ -7228,22 +7481,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agent_policies/_bulk_get'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['format'],
     bodyParams: ['full', 'ids', 'ignoreMissing'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'query'),
   ]),
   outputSchema: post_fleet_agent_policies_bulk_get_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid',
+  connectorGroup: 'internal',
   summary: `Get an agent policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7254,22 +7508,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['agentPolicyId'],
     urlParams: ['format'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'query'),
   ]),
   outputSchema: get_fleet_agent_policies_agentpolicyid_response,
 };
 const PUT_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_agent_policies_agentpolicyid',
+  connectorGroup: 'internal',
   summary: `Update an agent policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7280,9 +7535,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentPolicyId'],
     urlParams: ['format'],
     bodyParams: [
@@ -7319,15 +7574,16 @@ Update an agent policy by ID.<br/><br/>[Required authorization] Route required p
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'query'),
   ]),
   outputSchema: put_fleet_agent_policies_agentpolicyid_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_AUTO_UPGRADE_AGENTS_STATUS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status',
+    connectorGroup: 'internal',
     summary: `Get auto upgrade agent status`,
     description: `**Spaces method and path for this operation:**
 
@@ -7338,23 +7594,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get auto upgrade agent status<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.`,
     methods: ['GET'],
     patterns: ['/api/fleet/agent_policies/{agentPolicyId}/auto_upgrade_agents_status'],
-    isInternal: true,
-    documentation: 'URL_NOT_IMPLEMENTED',
+    documentation: null,
     parameterTypes: {
+      headerParams: [],
       pathParams: ['agentPolicyId'],
       urlParams: [],
       bodyParams: [],
     },
     paramsSchema: z.union([
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
         'body'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
         'path'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
         'query'
       ),
@@ -7363,6 +7619,7 @@ Get auto upgrade agent status<br/><br/>[Required authorization] Route required p
   };
 const POST_FLEET_AGENT_POLICIES_AGENTPOLICYID_COPY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_agentpolicyid_copy',
+  connectorGroup: 'internal',
   summary: `Copy an agent policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7373,22 +7630,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Copy an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}/copy'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentPolicyId'],
     urlParams: ['format'],
     bodyParams: ['description', 'name'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'query'),
   ]),
   outputSchema: post_fleet_agent_policies_agentpolicyid_copy_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_DOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid_download',
+  connectorGroup: 'internal',
   summary: `Download an agent policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7399,22 +7657,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}/download'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['agentPolicyId'],
     urlParams: ['download', 'standalone', 'kubernetes'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'query'),
   ]),
   outputSchema: get_fleet_agent_policies_agentpolicyid_download_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_FULL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid_full',
+  connectorGroup: 'internal',
   summary: `Get a full agent policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7425,22 +7684,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}/full'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['agentPolicyId'],
     urlParams: ['download', 'standalone', 'kubernetes'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'query'),
   ]),
   outputSchema: get_fleet_agent_policies_agentpolicyid_full_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid_outputs',
+  connectorGroup: 'internal',
   summary: `Get outputs for an agent policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7451,22 +7711,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of outputs associated with agent policy by policy id.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agent_policies/{agentPolicyId}/outputs'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['agentPolicyId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'query'),
   ]),
   outputSchema: get_fleet_agent_policies_agentpolicyid_outputs_response,
 };
 const POST_FLEET_AGENT_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_delete',
+  connectorGroup: 'internal',
   summary: `Delete an agent policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7477,22 +7738,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agent_policies/delete'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['agentPolicyId', 'force'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'query'),
   ]),
   outputSchema: post_fleet_agent_policies_delete_response,
 };
 const POST_FLEET_AGENT_POLICIES_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_outputs',
+  connectorGroup: 'internal',
   summary: `Get outputs for agent policies`,
   description: `**Spaces method and path for this operation:**
 
@@ -7503,22 +7765,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of outputs associated with agent policies.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-settings-read.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agent_policies/outputs'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['ids'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'query'),
   ]),
   outputSchema: post_fleet_agent_policies_outputs_response,
 };
 const GET_FLEET_AGENT_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_status',
+  connectorGroup: 'internal',
   summary: `Get an agent status summary`,
   description: `**Spaces method and path for this operation:**
 
@@ -7527,22 +7790,23 @@ const GET_FLEET_AGENT_STATUS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agent_status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['policyId', 'policyIds', 'kuery'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agent_status_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agent_status_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agent_status_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agent_status_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agent_status_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agent_status_request, 'query'),
   ]),
   outputSchema: get_fleet_agent_status_response,
 };
 const GET_FLEET_AGENT_STATUS_DATA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_status_data',
+  connectorGroup: 'internal',
   summary: `Get incoming agent data`,
   description: `**Spaces method and path for this operation:**
 
@@ -7553,22 +7817,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agent_status/data'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['agentsIds', 'pkgName', 'pkgVersion', 'previewData'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agent_status_data_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agent_status_data_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agent_status_data_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agent_status_data_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agent_status_data_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agent_status_data_request, 'query'),
   ]),
   outputSchema: get_fleet_agent_status_data_response,
 };
 const POST_FLEET_AGENTLESS_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agentless_policies',
+  connectorGroup: 'internal',
   summary: `Create an agentless policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7579,9 +7844,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create an agentless policy`,
   methods: ['POST'],
   patterns: ['/api/fleet/agentless_policies'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['format'],
     bodyParams: [
@@ -7597,14 +7862,15 @@ Create an agentless policy`,
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agentless_policies_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agentless_policies_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agentless_policies_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agentless_policies_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agentless_policies_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agentless_policies_request, 'query'),
   ]),
   outputSchema: post_fleet_agentless_policies_response,
 };
 const DELETE_FLEET_AGENTLESS_POLICIES_POLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agentless_policies_policyid',
+  connectorGroup: 'internal',
   summary: `Delete an agentless policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -7615,22 +7881,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an agentless policy`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/agentless_policies/{policyId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['policyId'],
     urlParams: ['force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'query'),
   ]),
   outputSchema: delete_fleet_agentless_policies_policyid_response,
 };
 const GET_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents',
+  connectorGroup: 'internal',
   summary: `Get agents`,
   description: `**Spaces method and path for this operation:**
 
@@ -7641,9 +7908,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agents'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'page',
@@ -7664,14 +7931,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agents_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agents_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agents_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agents_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agents_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agents_request, 'query'),
   ]),
   outputSchema: get_fleet_agents_response,
 };
 const POST_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents',
+  connectorGroup: 'internal',
   summary: `Get agents by action ids`,
   description: `**Spaces method and path for this operation:**
 
@@ -7682,22 +7950,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['actionIds'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_response,
 };
 const DELETE_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agents_agentid',
+  connectorGroup: 'internal',
   summary: `Delete an agent`,
   description: `**Spaces method and path for this operation:**
 
@@ -7708,22 +7977,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an agent by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/agents/{agentId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'query'),
   ]),
   outputSchema: delete_fleet_agents_agentid_response,
 };
 const GET_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_agentid',
+  connectorGroup: 'internal',
   summary: `Get an agent`,
   description: `**Spaces method and path for this operation:**
 
@@ -7734,22 +8004,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get an agent by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agents/{agentId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['agentId'],
     urlParams: ['withMetrics'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agents_agentid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agents_agentid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agents_agentid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agents_agentid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agents_agentid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agents_agentid_request, 'query'),
   ]),
   outputSchema: get_fleet_agents_agentid_response,
 };
 const PUT_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_agents_agentid',
+  connectorGroup: 'internal',
   summary: `Update an agent by ID`,
   description: `**Spaces method and path for this operation:**
 
@@ -7760,22 +8031,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an agent by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/agents/{agentId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: ['tags', 'user_provided_metadata'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_agents_agentid_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_agents_agentid_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_agents_agentid_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_agents_agentid_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_agents_agentid_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_agents_agentid_request, 'query'),
   ]),
   outputSchema: put_fleet_agents_agentid_response,
 };
 const POST_FLEET_AGENTS_AGENTID_ACTIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_actions',
+  connectorGroup: 'internal',
   summary: `Create an agent action`,
   description: `**Spaces method and path for this operation:**
 
@@ -7786,22 +8058,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/actions'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: ['action'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_agentid_actions_response,
 };
 const POST_FLEET_AGENTS_AGENTID_MIGRATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_migrate',
+  connectorGroup: 'internal',
   summary: `Migrate a single agent`,
   description: `**Spaces method and path for this operation:**
 
@@ -7812,22 +8085,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/migrate'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: ['enrollment_token', 'settings', 'uri'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_agentid_migrate_response,
 };
 const POST_FLEET_AGENTS_AGENTID_REASSIGN_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_reassign',
+  connectorGroup: 'internal',
   summary: `Reassign an agent`,
   description: `**Spaces method and path for this operation:**
 
@@ -7838,22 +8112,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/reassign'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: ['policy_id'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_agentid_reassign_response,
 };
 const POST_FLEET_AGENTS_AGENTID_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_request_diagnostics',
+  connectorGroup: 'internal',
   summary: `Request agent diagnostics`,
   description: `**Spaces method and path for this operation:**
 
@@ -7864,22 +8139,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/request_diagnostics'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: ['additional_metrics'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_agentid_request_diagnostics_response,
 };
 const POST_FLEET_AGENTS_AGENTID_UNENROLL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_unenroll',
+  connectorGroup: 'internal',
   summary: `Unenroll an agent`,
   description: `**Spaces method and path for this operation:**
 
@@ -7890,22 +8166,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/unenroll'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: ['force', 'revoke'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_agentid_unenroll_response,
 };
 const POST_FLEET_AGENTS_AGENTID_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_upgrade',
+  connectorGroup: 'internal',
   summary: `Upgrade an agent`,
   description: `**Spaces method and path for this operation:**
 
@@ -7916,22 +8193,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/{agentId}/upgrade'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: ['force', 'skipRateLimitCheck', 'source_uri', 'version'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_agentid_upgrade_response,
 };
 const GET_FLEET_AGENTS_AGENTID_UPLOADS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_agentid_uploads',
+  connectorGroup: 'internal',
   summary: `Get agent uploads`,
   description: `**Spaces method and path for this operation:**
 
@@ -7942,22 +8220,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agents/{agentId}/uploads'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['agentId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'query'),
   ]),
   outputSchema: get_fleet_agents_agentid_uploads_response,
 };
 const GET_FLEET_AGENTS_ACTION_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_action_status',
+  connectorGroup: 'internal',
   summary: `Get an agent action status`,
   description: `**Spaces method and path for this operation:**
 
@@ -7968,22 +8247,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agents/action_status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['page', 'perPage', 'date', 'latest', 'errorSize'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agents_action_status_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agents_action_status_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agents_action_status_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agents_action_status_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agents_action_status_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agents_action_status_request, 'query'),
   ]),
   outputSchema: get_fleet_agents_action_status_response,
 };
 const POST_FLEET_AGENTS_ACTIONS_ACTIONID_CANCEL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_actions_actionid_cancel',
+  connectorGroup: 'internal',
   summary: `Cancel an agent action`,
   description: `**Spaces method and path for this operation:**
 
@@ -7994,22 +8274,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/actions/{actionId}/cancel'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['actionId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_actions_actionid_cancel_response,
 };
 const GET_FLEET_AGENTS_AVAILABLE_VERSIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_available_versions',
+  connectorGroup: 'internal',
   summary: `Get available agent versions`,
   description: `**Spaces method and path for this operation:**
 
@@ -8020,22 +8301,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agents/available_versions'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'query'),
   ]),
   outputSchema: get_fleet_agents_available_versions_response,
 };
 const POST_FLEET_AGENTS_BULK_MIGRATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_migrate',
+  connectorGroup: 'internal',
   summary: `Migrate multiple agents`,
   description: `**Spaces method and path for this operation:**
 
@@ -8046,22 +8328,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_migrate'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['agents', 'batchSize', 'enrollment_token', 'settings', 'uri'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_bulk_migrate_response,
 };
 const POST_FLEET_AGENTS_BULK_REASSIGN_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_reassign',
+  connectorGroup: 'internal',
   summary: `Bulk reassign agents`,
   description: `**Spaces method and path for this operation:**
 
@@ -8072,22 +8355,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_reassign'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['agents', 'batchSize', 'includeInactive', 'policy_id'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_bulk_reassign_response,
 };
 const POST_FLEET_AGENTS_BULK_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_request_diagnostics',
+  connectorGroup: 'internal',
   summary: `Bulk request diagnostics from agents`,
   description: `**Spaces method and path for this operation:**
 
@@ -8098,22 +8382,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_request_diagnostics'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['additional_metrics', 'agents', 'batchSize'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_bulk_request_diagnostics_response,
 };
 const POST_FLEET_AGENTS_BULK_UNENROLL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_unenroll',
+  connectorGroup: 'internal',
   summary: `Bulk unenroll agents`,
   description: `**Spaces method and path for this operation:**
 
@@ -8124,22 +8409,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_unenroll'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['agents', 'batchSize', 'force', 'includeInactive', 'revoke'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_bulk_unenroll_response,
 };
 const POST_FLEET_AGENTS_BULK_UPDATE_AGENT_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_update_agent_tags',
+  connectorGroup: 'internal',
   summary: `Bulk update agent tags`,
   description: `**Spaces method and path for this operation:**
 
@@ -8150,22 +8436,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_update_agent_tags'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['agents', 'batchSize', 'includeInactive', 'tagsToAdd', 'tagsToRemove'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_bulk_update_agent_tags_response,
 };
 const POST_FLEET_AGENTS_BULK_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_upgrade',
+  connectorGroup: 'internal',
   summary: `Bulk upgrade agents`,
   description: `**Spaces method and path for this operation:**
 
@@ -8176,9 +8463,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/bulk_upgrade'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -8194,14 +8481,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_bulk_upgrade_response,
 };
 const DELETE_FLEET_AGENTS_FILES_FILEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agents_files_fileid',
+  connectorGroup: 'internal',
   summary: `Delete an uploaded file`,
   description: `**Spaces method and path for this operation:**
 
@@ -8212,22 +8500,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/agents/files/{fileId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['fileId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'query'),
   ]),
   outputSchema: delete_fleet_agents_files_fileid_response,
 };
 const GET_FLEET_AGENTS_FILES_FILEID_FILENAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_files_fileid_filename',
+  connectorGroup: 'internal',
   summary: `Get an uploaded file`,
   description: `**Spaces method and path for this operation:**
 
@@ -8238,22 +8527,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agents/files/{fileId}/{fileName}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['fileId', 'fileName'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'query'),
   ]),
   outputSchema: get_fleet_agents_files_fileid_filename_response,
 };
 const GET_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_setup',
+  connectorGroup: 'internal',
   summary: `Get agent setup info`,
   description: `**Spaces method and path for this operation:**
 
@@ -8264,22 +8554,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agents/setup'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agents_setup_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agents_setup_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agents_setup_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agents_setup_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agents_setup_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agents_setup_request, 'query'),
   ]),
   outputSchema: get_fleet_agents_setup_response,
 };
 const POST_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_setup',
+  connectorGroup: 'internal',
   summary: `Initiate agent setup`,
   description: `**Spaces method and path for this operation:**
 
@@ -8290,22 +8581,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup.`,
   methods: ['POST'],
   patterns: ['/api/fleet/agents/setup'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_agents_setup_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_agents_setup_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_agents_setup_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_agents_setup_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_agents_setup_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_agents_setup_request, 'query'),
   ]),
   outputSchema: post_fleet_agents_setup_response,
 };
 const GET_FLEET_AGENTS_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_tags',
+  connectorGroup: 'internal',
   summary: `Get agent tags`,
   description: `**Spaces method and path for this operation:**
 
@@ -8316,22 +8608,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/agents/tags'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['kuery', 'showInactive'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_agents_tags_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_agents_tags_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_agents_tags_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_agents_tags_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_agents_tags_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_agents_tags_request, 'query'),
   ]),
   outputSchema: get_fleet_agents_tags_response,
 };
 const GET_FLEET_CHECK_PERMISSIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_check_permissions',
+  connectorGroup: 'internal',
   summary: `Check permissions`,
   description: `**Spaces method and path for this operation:**
 
@@ -8340,22 +8633,23 @@ const GET_FLEET_CHECK_PERMISSIONS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/fleet/check-permissions'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['fleetServerSetup'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_check_permissions_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_check_permissions_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_check_permissions_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_check_permissions_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_check_permissions_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_check_permissions_request, 'query'),
   ]),
   outputSchema: get_fleet_check_permissions_response,
 };
 const GET_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_cloud_connectors',
+  connectorGroup: 'internal',
   summary: `Get cloud connectors`,
   description: `**Spaces method and path for this operation:**
 
@@ -8366,22 +8660,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/cloud_connectors'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['page', 'perPage', 'kuery'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'query'),
   ]),
   outputSchema: get_fleet_cloud_connectors_response,
 };
 const POST_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_cloud_connectors',
+  connectorGroup: 'internal',
   summary: `Create cloud connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -8392,22 +8687,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/cloud_connectors'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['cloudProvider', 'name', 'vars'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'query'),
   ]),
   outputSchema: post_fleet_cloud_connectors_response,
 };
 const DELETE_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_cloud_connectors_cloudconnectorid',
+  connectorGroup: 'internal',
   summary: `Delete cloud connector (supports force deletion)`,
   description: `**Spaces method and path for this operation:**
 
@@ -8418,22 +8714,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/cloud_connectors/{cloudConnectorId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['cloudConnectorId'],
     urlParams: ['force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
   ]),
   outputSchema: delete_fleet_cloud_connectors_cloudconnectorid_response,
 };
 const GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_cloud_connectors_cloudconnectorid',
+  connectorGroup: 'internal',
   summary: `Get cloud connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -8444,22 +8741,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/cloud_connectors/{cloudConnectorId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['cloudConnectorId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
   ]),
   outputSchema: get_fleet_cloud_connectors_cloudconnectorid_response,
 };
 const PUT_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_cloud_connectors_cloudconnectorid',
+  connectorGroup: 'internal',
   summary: `Update cloud connector`,
   description: `**Spaces method and path for this operation:**
 
@@ -8470,22 +8768,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/cloud_connectors/{cloudConnectorId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['cloudConnectorId'],
     urlParams: [],
     bodyParams: ['name', 'vars'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
   ]),
   outputSchema: put_fleet_cloud_connectors_cloudconnectorid_response,
 };
 const GET_FLEET_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_data_streams',
+  connectorGroup: 'internal',
   summary: `Get data streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -8496,22 +8795,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/data_streams'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_data_streams_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_data_streams_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_data_streams_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_data_streams_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_data_streams_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_data_streams_request, 'query'),
   ]),
   outputSchema: get_fleet_data_streams_response,
 };
 const GET_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_enrollment_api_keys',
+  connectorGroup: 'internal',
   summary: `Get enrollment API keys`,
   description: `**Spaces method and path for this operation:**
 
@@ -8522,22 +8822,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all OR fleet-setup.`,
   methods: ['GET'],
   patterns: ['/api/fleet/enrollment_api_keys'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['page', 'perPage', 'kuery'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'query'),
   ]),
   outputSchema: get_fleet_enrollment_api_keys_response,
 };
 const POST_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_enrollment_api_keys',
+  connectorGroup: 'internal',
   summary: `Create an enrollment API key`,
   description: `**Spaces method and path for this operation:**
 
@@ -8548,22 +8849,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/enrollment_api_keys'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['expiration', 'name', 'policy_id'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'query'),
   ]),
   outputSchema: post_fleet_enrollment_api_keys_response,
 };
 const DELETE_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_enrollment_api_keys_keyid',
+  connectorGroup: 'internal',
   summary: `Revoke an enrollment API key`,
   description: `**Spaces method and path for this operation:**
 
@@ -8574,22 +8876,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/enrollment_api_keys/{keyId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['keyId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'query'),
   ]),
   outputSchema: delete_fleet_enrollment_api_keys_keyid_response,
 };
 const GET_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_enrollment_api_keys_keyid',
+  connectorGroup: 'internal',
   summary: `Get an enrollment API key`,
   description: `**Spaces method and path for this operation:**
 
@@ -8600,22 +8903,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get an enrollment API key by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all OR fleet-setup.`,
   methods: ['GET'],
   patterns: ['/api/fleet/enrollment_api_keys/{keyId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['keyId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'query'),
   ]),
   outputSchema: get_fleet_enrollment_api_keys_keyid_response,
 };
 const POST_FLEET_EPM_BULK_ASSETS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_bulk_assets',
+  connectorGroup: 'internal',
   summary: `Bulk get assets`,
   description: `**Spaces method and path for this operation:**
 
@@ -8626,22 +8930,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/bulk_assets'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['assetIds'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'query'),
   ]),
   outputSchema: post_fleet_epm_bulk_assets_response,
 };
 const GET_FLEET_EPM_CATEGORIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_categories',
+  connectorGroup: 'internal',
   summary: `Get package categories`,
   description: `**Spaces method and path for this operation:**
 
@@ -8652,22 +8957,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/categories'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['prerelease', 'include_policy_templates'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_categories_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_categories_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_categories_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_categories_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_categories_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_categories_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_categories_response,
 };
 const POST_FLEET_EPM_CUSTOM_INTEGRATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_custom_integrations',
+  connectorGroup: 'internal',
   summary: `Create a custom integration`,
   description: `**Spaces method and path for this operation:**
 
@@ -8678,22 +8984,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/custom_integrations'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['datasets', 'force', 'integrationName'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'query'),
   ]),
   outputSchema: post_fleet_epm_custom_integrations_response,
 };
 const PUT_FLEET_EPM_CUSTOM_INTEGRATIONS_PKGNAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_epm_custom_integrations_pkgname',
+  connectorGroup: 'internal',
   summary: `Update a custom integration`,
   description: `**Spaces method and path for this operation:**
 
@@ -8704,22 +9011,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all AND integrations-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/epm/custom_integrations/{pkgName}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['pkgName'],
     urlParams: [],
     bodyParams: ['categories', 'readMeData'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'query'),
   ]),
   outputSchema: put_fleet_epm_custom_integrations_pkgname_response,
 };
 const GET_FLEET_EPM_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_data_streams',
+  connectorGroup: 'internal',
   summary: `Get data streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -8730,22 +9038,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/data_streams'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['type', 'datasetQuery', 'sortOrder', 'uncategorisedOnly'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_data_streams_response,
 };
 const GET_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages',
+  connectorGroup: 'internal',
   summary: `Get packages`,
   description: `**Spaces method and path for this operation:**
 
@@ -8756,22 +9065,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/packages'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['category', 'prerelease', 'excludeInstallStatus', 'withPackagePoliciesCount'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_packages_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_packages_response,
 };
 const POST_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages',
+  connectorGroup: 'internal',
   summary: `Install a package by upload`,
   description: `**Spaces method and path for this operation:**
 
@@ -8782,22 +9092,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['ignoreMappingUpdateErrors', 'skipDataStreamRollover'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_epm_packages_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_request, 'query'),
   ]),
   outputSchema: post_fleet_epm_packages_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk',
+  connectorGroup: 'internal',
   summary: `Bulk install packages`,
   description: `**Spaces method and path for this operation:**
 
@@ -8808,22 +9119,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/_bulk'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['prerelease'],
     bodyParams: ['force', 'packages'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'query'),
   ]),
   outputSchema: post_fleet_epm_packages_bulk_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_ROLLBACK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk_rollback',
+  connectorGroup: 'internal',
   summary: `Bulk rollback packages`,
   description: `**Spaces method and path for this operation:**
 
@@ -8834,22 +9146,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/_bulk_rollback'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['packages'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'query'),
   ]),
   outputSchema: post_fleet_epm_packages_bulk_rollback_response,
 };
 const GET_FLEET_EPM_PACKAGES_BULK_ROLLBACK_TASKID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_bulk_rollback_taskid',
+  connectorGroup: 'internal',
   summary: `Get Bulk rollback packages details`,
   description: `**Spaces method and path for this operation:**
 
@@ -8860,22 +9173,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/_bulk_rollback/{taskId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['taskId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_packages_bulk_rollback_taskid_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_UNINSTALL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk_uninstall',
+  connectorGroup: 'internal',
   summary: `Bulk uninstall packages`,
   description: `**Spaces method and path for this operation:**
 
@@ -8886,22 +9200,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/_bulk_uninstall'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['force', 'packages'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'query'),
   ]),
   outputSchema: post_fleet_epm_packages_bulk_uninstall_response,
 };
 const GET_FLEET_EPM_PACKAGES_BULK_UNINSTALL_TASKID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_bulk_uninstall_taskid',
+  connectorGroup: 'internal',
   summary: `Get Bulk uninstall packages details`,
   description: `**Spaces method and path for this operation:**
 
@@ -8912,22 +9227,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/_bulk_uninstall/{taskId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['taskId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_packages_bulk_uninstall_taskid_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk_upgrade',
+  connectorGroup: 'internal',
   summary: `Bulk upgrade packages`,
   description: `**Spaces method and path for this operation:**
 
@@ -8938,22 +9254,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/_bulk_upgrade'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['force', 'packages', 'prerelease', 'upgrade_package_policies'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'query'),
   ]),
   outputSchema: post_fleet_epm_packages_bulk_upgrade_response,
 };
 const GET_FLEET_EPM_PACKAGES_BULK_UPGRADE_TASKID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_bulk_upgrade_taskid',
+  connectorGroup: 'internal',
   summary: `Get Bulk upgrade packages details`,
   description: `**Spaces method and path for this operation:**
 
@@ -8964,22 +9281,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/_bulk_upgrade/{taskId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['taskId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_packages_bulk_upgrade_taskid_response,
 };
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_epm_packages_pkgname_pkgversion',
+  connectorGroup: 'internal',
   summary: `Delete a package`,
   description: `**Spaces method and path for this operation:**
 
@@ -8990,22 +9308,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['pkgName', 'pkgVersion'],
     urlParams: ['force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
   ]),
   outputSchema: delete_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_pkgname_pkgversion',
+  connectorGroup: 'internal',
   summary: `Get a package`,
   description: `**Spaces method and path for this operation:**
 
@@ -9014,22 +9333,23 @@ const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContr
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['pkgName', 'pkgVersion'],
     urlParams: ['ignoreUnverified', 'prerelease', 'full', 'withMetadata'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion',
+  connectorGroup: 'internal',
   summary: `Install a package from the registry`,
   description: `**Spaces method and path for this operation:**
 
@@ -9040,22 +9360,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['pkgName', 'pkgVersion'],
     urlParams: ['prerelease', 'ignoreMappingUpdateErrors', 'skipDataStreamRollover'],
     bodyParams: ['force', 'ignore_constraints'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
   ]),
   outputSchema: post_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const PUT_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_epm_packages_pkgname_pkgversion',
+  connectorGroup: 'internal',
   summary: `Update package settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -9066,22 +9387,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['pkgName', 'pkgVersion'],
     urlParams: [],
     bodyParams: ['keepPoliciesUpToDate'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
   ]),
   outputSchema: put_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_FILEPATH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_pkgname_pkgversion_filepath',
+  connectorGroup: 'internal',
   summary: `Get a package file`,
   description: `**Spaces method and path for this operation:**
 
@@ -9092,23 +9414,33 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['pkgName', 'pkgVersion', 'filePath'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'query'),
+    getZodLooseObjectFromProperty(
+      get_fleet_epm_packages_pkgname_pkgversion_filepath_request,
+      'body'
+    ),
+    getZodLooseObjectFromProperty(
+      get_fleet_epm_packages_pkgname_pkgversion_filepath_request,
+      'path'
+    ),
+    getZodLooseObjectFromProperty(
+      get_fleet_epm_packages_pkgname_pkgversion_filepath_request,
+      'query'
+    ),
   ]),
   outputSchema: get_fleet_epm_packages_pkgname_pkgversion_filepath_response,
 };
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_DATASTREAM_ASSETS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets',
+    connectorGroup: 'internal',
     summary: `Delete assets for an input package`,
     description: `**Spaces method and path for this operation:**
 
@@ -9119,23 +9451,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
     methods: ['DELETE'],
     patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/datastream_assets'],
-    isInternal: true,
-    documentation: 'URL_NOT_IMPLEMENTED',
+    documentation: null,
     parameterTypes: {
+      headerParams: ['kbn-xsrf'],
       pathParams: ['pkgName', 'pkgVersion'],
       urlParams: ['packagePolicyId'],
       bodyParams: [],
     },
     paramsSchema: z.union([
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request,
         'body'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request,
         'path'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request,
         'query'
       ),
@@ -9145,6 +9477,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets',
+    connectorGroup: 'internal',
     summary: `Delete Kibana assets for a package`,
     description: `**Spaces method and path for this operation:**
 
@@ -9155,23 +9488,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
     methods: ['DELETE'],
     patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets'],
-    isInternal: true,
-    documentation: 'URL_NOT_IMPLEMENTED',
+    documentation: null,
     parameterTypes: {
+      headerParams: ['kbn-xsrf'],
       pathParams: ['pkgName', 'pkgVersion'],
       urlParams: [],
       bodyParams: [],
     },
     paramsSchema: z.union([
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
         'body'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
         'path'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
         'query'
       ),
@@ -9181,6 +9514,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion_kibana_assets',
+    connectorGroup: 'internal',
     summary: `Install Kibana assets for a package`,
     description: `**Spaces method and path for this operation:**
 
@@ -9191,23 +9525,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
     methods: ['POST'],
     patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets'],
-    isInternal: true,
-    documentation: 'URL_NOT_IMPLEMENTED',
+    documentation: null,
     parameterTypes: {
+      headerParams: ['kbn-xsrf'],
       pathParams: ['pkgName', 'pkgVersion'],
       urlParams: [],
       bodyParams: ['force', 'space_ids'],
     },
     paramsSchema: z.union([
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
         'body'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
         'path'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
         'query'
       ),
@@ -9216,6 +9550,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_RULE_ASSETS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion_rule_assets',
+  connectorGroup: 'internal',
   summary: `Install Kibana alert rule for a package`,
   description: `**Spaces method and path for this operation:**
 
@@ -9226,23 +9561,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/rule_assets'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['pkgName', 'pkgVersion'],
     urlParams: [],
     bodyParams: ['force'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(
+    getZodLooseObjectFromProperty(
       post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
       'body'
     ),
-    getLooseObjectFromProperty(
+    getZodLooseObjectFromProperty(
       post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
       'path'
     ),
-    getLooseObjectFromProperty(
+    getZodLooseObjectFromProperty(
       post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
       'query'
     ),
@@ -9252,6 +9587,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_TRANSFORMS_AUTHORIZE_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize',
+    connectorGroup: 'internal',
     summary: `Authorize transforms`,
     description: `**Spaces method and path for this operation:**
 
@@ -9260,23 +9596,23 @@ const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_TRANSFORMS_AUTHORIZE_CONTRACT: 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
     methods: ['POST'],
     patterns: ['/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize'],
-    isInternal: true,
-    documentation: 'URL_NOT_IMPLEMENTED',
+    documentation: null,
     parameterTypes: {
+      headerParams: ['kbn-xsrf'],
       pathParams: ['pkgName', 'pkgVersion'],
       urlParams: ['prerelease'],
       bodyParams: ['transforms'],
     },
     paramsSchema: z.union([
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request,
         'body'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request,
         'path'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request,
         'query'
       ),
@@ -9285,6 +9621,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_ROLLBACK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_rollback',
+  connectorGroup: 'internal',
   summary: `Rollback a package to previous version`,
   description: `**Spaces method and path for this operation:**
 
@@ -9295,22 +9632,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/rollback'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['pkgName'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'query'),
   ]),
   outputSchema: post_fleet_epm_packages_pkgname_rollback_response,
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_STATS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_pkgname_stats',
+  connectorGroup: 'internal',
   summary: `Get package stats`,
   description: `**Spaces method and path for this operation:**
 
@@ -9321,22 +9659,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/{pkgName}/stats'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['pkgName'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_packages_pkgname_stats_response,
 };
 const GET_FLEET_EPM_PACKAGES_INSTALLED_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_installed',
+  connectorGroup: 'internal',
   summary: `Get installed packages`,
   description: `**Spaces method and path for this operation:**
 
@@ -9347,9 +9686,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/installed'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'dataStreamType',
@@ -9362,14 +9701,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_packages_installed_response,
 };
 const GET_FLEET_EPM_PACKAGES_LIMITED_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_limited',
+  connectorGroup: 'internal',
   summary: `Get a limited package list`,
   description: `**Spaces method and path for this operation:**
 
@@ -9380,22 +9720,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/packages/limited'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_packages_limited_response,
 };
 const GET_FLEET_EPM_TEMPLATES_PKGNAME_PKGVERSION_INPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_templates_pkgname_pkgversion_inputs',
+  connectorGroup: 'internal',
   summary: `Get an inputs template`,
   description: `**Spaces method and path for this operation:**
 
@@ -9406,22 +9747,32 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['pkgName', 'pkgVersion'],
     urlParams: ['format', 'prerelease', 'ignoreUnverified'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'query'),
+    getZodLooseObjectFromProperty(
+      get_fleet_epm_templates_pkgname_pkgversion_inputs_request,
+      'body'
+    ),
+    getZodLooseObjectFromProperty(
+      get_fleet_epm_templates_pkgname_pkgversion_inputs_request,
+      'path'
+    ),
+    getZodLooseObjectFromProperty(
+      get_fleet_epm_templates_pkgname_pkgversion_inputs_request,
+      'query'
+    ),
   ]),
   outputSchema: get_fleet_epm_templates_pkgname_pkgversion_inputs_response,
 };
 const GET_FLEET_EPM_VERIFICATION_KEY_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_verification_key_id',
+  connectorGroup: 'internal',
   summary: `Get a package signature verification key ID`,
   description: `**Spaces method and path for this operation:**
 
@@ -9432,22 +9783,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/epm/verification_key_id'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'query'),
   ]),
   outputSchema: get_fleet_epm_verification_key_id_response,
 };
 const GET_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_fleet_server_hosts',
+  connectorGroup: 'internal',
   summary: `Get Fleet Server hosts`,
   description: `**Spaces method and path for this operation:**
 
@@ -9458,22 +9810,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all OR fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/fleet_server_hosts'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'query'),
   ]),
   outputSchema: get_fleet_fleet_server_hosts_response,
 };
 const POST_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_fleet_server_hosts',
+  connectorGroup: 'internal',
   summary: `Create a Fleet Server host`,
   description: `**Spaces method and path for this operation:**
 
@@ -9484,9 +9837,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/fleet_server_hosts'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -9502,14 +9855,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'query'),
   ]),
   outputSchema: post_fleet_fleet_server_hosts_response,
 };
 const DELETE_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_fleet_server_hosts_itemid',
+  connectorGroup: 'internal',
   summary: `Delete a Fleet Server host`,
   description: `**Spaces method and path for this operation:**
 
@@ -9520,22 +9874,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/fleet_server_hosts/{itemId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['itemId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'query'),
   ]),
   outputSchema: delete_fleet_fleet_server_hosts_itemid_response,
 };
 const GET_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_fleet_server_hosts_itemid',
+  connectorGroup: 'internal',
   summary: `Get a Fleet Server host`,
   description: `**Spaces method and path for this operation:**
 
@@ -9546,22 +9901,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/fleet_server_hosts/{itemId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['itemId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'query'),
   ]),
   outputSchema: get_fleet_fleet_server_hosts_itemid_response,
 };
 const PUT_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_fleet_server_hosts_itemid',
+  connectorGroup: 'internal',
   summary: `Update a Fleet Server host`,
   description: `**Spaces method and path for this operation:**
 
@@ -9572,22 +9928,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/fleet_server_hosts/{itemId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['itemId'],
     urlParams: [],
     bodyParams: ['host_urls', 'is_default', 'is_internal', 'name', 'proxy_id', 'secrets', 'ssl'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'query'),
   ]),
   outputSchema: put_fleet_fleet_server_hosts_itemid_response,
 };
 const POST_FLEET_HEALTH_CHECK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_health_check',
+  connectorGroup: 'internal',
   summary: `Check Fleet Server health`,
   description: `**Spaces method and path for this operation:**
 
@@ -9598,22 +9955,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/health_check'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['id'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_health_check_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_health_check_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_health_check_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_health_check_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_health_check_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_health_check_request, 'query'),
   ]),
   outputSchema: post_fleet_health_check_response,
 };
 const GET_FLEET_KUBERNETES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_kubernetes',
+  connectorGroup: 'internal',
   summary: `Get a full K8s agent manifest`,
   description: `**Spaces method and path for this operation:**
 
@@ -9624,22 +9982,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.`,
   methods: ['GET'],
   patterns: ['/api/fleet/kubernetes'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['download', 'fleetServer', 'enrolToken'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_kubernetes_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_kubernetes_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_kubernetes_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_kubernetes_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_kubernetes_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_kubernetes_request, 'query'),
   ]),
   outputSchema: get_fleet_kubernetes_response,
 };
 const GET_FLEET_KUBERNETES_DOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_kubernetes_download',
+  connectorGroup: 'internal',
   summary: `Download an agent manifest`,
   description: `**Spaces method and path for this operation:**
 
@@ -9650,22 +10009,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.`,
   methods: ['GET'],
   patterns: ['/api/fleet/kubernetes/download'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['download', 'fleetServer', 'enrolToken'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'query'),
   ]),
   outputSchema: get_fleet_kubernetes_download_response,
 };
 const POST_FLEET_LOGSTASH_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_logstash_api_keys',
+  connectorGroup: 'internal',
   summary: `Generate a Logstash API key`,
   description: `**Spaces method and path for this operation:**
 
@@ -9676,22 +10036,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/logstash_api_keys'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'query'),
   ]),
   outputSchema: post_fleet_logstash_api_keys_response,
 };
 const POST_FLEET_MESSAGE_SIGNING_SERVICE_ROTATE_KEY_PAIR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_message_signing_service_rotate_key_pair',
+  connectorGroup: 'internal',
   summary: `Rotate a Fleet message signing key pair`,
   description: `**Spaces method and path for this operation:**
 
@@ -9702,22 +10063,32 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/message_signing_service/rotate_key_pair'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['acknowledge'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_message_signing_service_rotate_key_pair_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_message_signing_service_rotate_key_pair_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_message_signing_service_rotate_key_pair_request, 'query'),
+    getZodLooseObjectFromProperty(
+      post_fleet_message_signing_service_rotate_key_pair_request,
+      'body'
+    ),
+    getZodLooseObjectFromProperty(
+      post_fleet_message_signing_service_rotate_key_pair_request,
+      'path'
+    ),
+    getZodLooseObjectFromProperty(
+      post_fleet_message_signing_service_rotate_key_pair_request,
+      'query'
+    ),
   ]),
   outputSchema: post_fleet_message_signing_service_rotate_key_pair_response,
 };
 const GET_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_outputs',
+  connectorGroup: 'internal',
   summary: `Get outputs`,
   description: `**Spaces method and path for this operation:**
 
@@ -9728,22 +10099,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-read OR fleet-agent-policies-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/outputs'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_outputs_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_outputs_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_outputs_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_outputs_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_outputs_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_outputs_request, 'query'),
   ]),
   outputSchema: get_fleet_outputs_response,
 };
 const POST_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_outputs',
+  connectorGroup: 'internal',
   summary: `Create output`,
   description: `**Spaces method and path for this operation:**
 
@@ -9754,22 +10126,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/outputs'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_outputs_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_outputs_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_outputs_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_outputs_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_outputs_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_outputs_request, 'query'),
   ]),
   outputSchema: post_fleet_outputs_response,
 };
 const DELETE_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_outputs_outputid',
+  connectorGroup: 'internal',
   summary: `Delete output`,
   description: `**Spaces method and path for this operation:**
 
@@ -9780,22 +10153,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/outputs/{outputId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['outputId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'query'),
   ]),
   outputSchema: delete_fleet_outputs_outputid_response,
 };
 const GET_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_outputs_outputid',
+  connectorGroup: 'internal',
   summary: `Get output`,
   description: `**Spaces method and path for this operation:**
 
@@ -9806,22 +10180,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read OR fleet-agent-policies-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/outputs/{outputId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['outputId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'query'),
   ]),
   outputSchema: get_fleet_outputs_outputid_response,
 };
 const PUT_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_outputs_outputid',
+  connectorGroup: 'internal',
   summary: `Update output`,
   description: `**Spaces method and path for this operation:**
 
@@ -9832,22 +10207,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all OR fleet-agent-policies-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/outputs/{outputId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['outputId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'query'),
   ]),
   outputSchema: put_fleet_outputs_outputid_response,
 };
 const GET_FLEET_OUTPUTS_OUTPUTID_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_outputs_outputid_health',
+  connectorGroup: 'internal',
   summary: `Get the latest output health`,
   description: `**Spaces method and path for this operation:**
 
@@ -9858,22 +10234,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/outputs/{outputId}/health'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['outputId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'query'),
   ]),
   outputSchema: get_fleet_outputs_outputid_health_response,
 };
 const GET_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_package_policies',
+  connectorGroup: 'internal',
   summary: `Get package policies`,
   description: `**Spaces method and path for this operation:**
 
@@ -9882,9 +10259,9 @@ const GET_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/fleet/package_policies'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'page',
@@ -9899,14 +10276,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_package_policies_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_package_policies_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_package_policies_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_package_policies_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_package_policies_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_package_policies_request, 'query'),
   ]),
   outputSchema: get_fleet_package_policies_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies',
+  connectorGroup: 'internal',
   summary: `Create a package policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -9915,22 +10293,23 @@ const POST_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/fleet/package_policies'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['format'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_package_policies_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_package_policies_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_package_policies_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_request, 'query'),
   ]),
   outputSchema: post_fleet_package_policies_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_bulk_get',
+  connectorGroup: 'internal',
   summary: `Bulk get package policies`,
   description: `**Spaces method and path for this operation:**
 
@@ -9939,22 +10318,23 @@ const POST_FLEET_PACKAGE_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract =
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/fleet/package_policies/_bulk_get'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['format'],
     bodyParams: ['ids', 'ignoreMissing'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'query'),
   ]),
   outputSchema: post_fleet_package_policies_bulk_get_response,
 };
 const DELETE_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_package_policies_packagepolicyid',
+  connectorGroup: 'internal',
   summary: `Delete a package policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -9965,22 +10345,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a package policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/package_policies/{packagePolicyId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['packagePolicyId'],
     urlParams: ['force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'query'),
   ]),
   outputSchema: delete_fleet_package_policies_packagepolicyid_response,
 };
 const GET_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_package_policies_packagepolicyid',
+  connectorGroup: 'internal',
   summary: `Get a package policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -9991,22 +10372,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a package policy by ID.`,
   methods: ['GET'],
   patterns: ['/api/fleet/package_policies/{packagePolicyId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['packagePolicyId'],
     urlParams: ['format'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'query'),
   ]),
   outputSchema: get_fleet_package_policies_packagepolicyid_response,
 };
 const PUT_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_package_policies_packagepolicyid',
+  connectorGroup: 'internal',
   summary: `Update a package policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -10017,22 +10399,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update a package policy by ID.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/package_policies/{packagePolicyId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['packagePolicyId'],
     urlParams: ['format'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'query'),
   ]),
   outputSchema: put_fleet_package_policies_packagepolicyid_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_delete',
+  connectorGroup: 'internal',
   summary: `Bulk delete package policies`,
   description: `**Spaces method and path for this operation:**
 
@@ -10043,22 +10426,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/package_policies/delete'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['force', 'packagePolicyIds'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'query'),
   ]),
   outputSchema: post_fleet_package_policies_delete_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_upgrade',
+  connectorGroup: 'internal',
   summary: `Upgrade a package policy`,
   description: `**Spaces method and path for this operation:**
 
@@ -10069,22 +10453,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Upgrade a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/package_policies/upgrade'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['packagePolicyIds'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'query'),
   ]),
   outputSchema: post_fleet_package_policies_upgrade_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_UPGRADE_DRYRUN_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_upgrade_dryrun',
+  connectorGroup: 'internal',
   summary: `Dry run a package policy upgrade`,
   description: `**Spaces method and path for this operation:**
 
@@ -10095,22 +10480,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agent-policies-read AND integrations-read.`,
   methods: ['POST'],
   patterns: ['/api/fleet/package_policies/upgrade/dryrun'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['packagePolicyIds', 'packageVersion'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'query'),
   ]),
   outputSchema: post_fleet_package_policies_upgrade_dryrun_response,
 };
 const GET_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_proxies',
+  connectorGroup: 'internal',
   summary: `Get proxies`,
   description: `**Spaces method and path for this operation:**
 
@@ -10121,22 +10507,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/proxies'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_proxies_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_proxies_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_proxies_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_proxies_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_proxies_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_proxies_request, 'query'),
   ]),
   outputSchema: get_fleet_proxies_response,
 };
 const POST_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_proxies',
+  connectorGroup: 'internal',
   summary: `Create a proxy`,
   description: `**Spaces method and path for this operation:**
 
@@ -10147,9 +10534,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/proxies'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -10164,14 +10551,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_proxies_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_proxies_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_proxies_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_proxies_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_proxies_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_proxies_request, 'query'),
   ]),
   outputSchema: post_fleet_proxies_response,
 };
 const DELETE_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_proxies_itemid',
+  connectorGroup: 'internal',
   summary: `Delete a proxy`,
   description: `**Spaces method and path for this operation:**
 
@@ -10182,22 +10570,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['DELETE'],
   patterns: ['/api/fleet/proxies/{itemId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['itemId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'body'),
-    getLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'path'),
-    getLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'query'),
   ]),
   outputSchema: delete_fleet_proxies_itemid_response,
 };
 const GET_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_proxies_itemid',
+  connectorGroup: 'internal',
   summary: `Get a proxy`,
   description: `**Spaces method and path for this operation:**
 
@@ -10208,22 +10597,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/proxies/{itemId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['itemId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'query'),
   ]),
   outputSchema: get_fleet_proxies_itemid_response,
 };
 const PUT_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_proxies_itemid',
+  connectorGroup: 'internal',
   summary: `Update a proxy`,
   description: `**Spaces method and path for this operation:**
 
@@ -10234,9 +10624,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update a proxy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/proxies/{itemId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['itemId'],
     urlParams: [],
     bodyParams: [
@@ -10249,15 +10639,16 @@ Update a proxy by ID.<br/><br/>[Required authorization] Route required privilege
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'query'),
   ]),
   outputSchema: put_fleet_proxies_itemid_response,
 };
 const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_OUTPUTID_REMOTE_STATUS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.get_fleet_remote_synced_integrations_outputid_remote_status',
+    connectorGroup: 'internal',
     summary: `Get remote synced integrations status by outputId`,
     description: `**Spaces method and path for this operation:**
 
@@ -10268,23 +10659,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-read AND integrations-read.`,
     methods: ['GET'],
     patterns: ['/api/fleet/remote_synced_integrations/{outputId}/remote_status'],
-    isInternal: true,
-    documentation: 'URL_NOT_IMPLEMENTED',
+    documentation: null,
     parameterTypes: {
+      headerParams: [],
       pathParams: ['outputId'],
       urlParams: [],
       bodyParams: [],
     },
     paramsSchema: z.union([
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         get_fleet_remote_synced_integrations_outputid_remote_status_request,
         'body'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         get_fleet_remote_synced_integrations_outputid_remote_status_request,
         'path'
       ),
-      getLooseObjectFromProperty(
+      getZodLooseObjectFromProperty(
         get_fleet_remote_synced_integrations_outputid_remote_status_request,
         'query'
       ),
@@ -10293,6 +10684,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   };
 const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_remote_synced_integrations_status',
+  connectorGroup: 'internal',
   summary: `Get remote synced integrations status`,
   description: `**Spaces method and path for this operation:**
 
@@ -10303,22 +10695,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-read AND integrations-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/remote_synced_integrations/status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'query'),
   ]),
   outputSchema: get_fleet_remote_synced_integrations_status_response,
 };
 const POST_FLEET_SERVICE_TOKENS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_service_tokens',
+  connectorGroup: 'internal',
   summary: `Create a service token`,
   description: `**Spaces method and path for this operation:**
 
@@ -10329,22 +10722,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['POST'],
   patterns: ['/api/fleet/service_tokens'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['remote'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_service_tokens_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_service_tokens_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_service_tokens_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_service_tokens_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_service_tokens_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_service_tokens_request, 'query'),
   ]),
   outputSchema: post_fleet_service_tokens_response,
 };
 const GET_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_settings',
+  connectorGroup: 'internal',
   summary: `Get settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -10355,22 +10749,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-read.`,
   methods: ['GET'],
   patterns: ['/api/fleet/settings'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_settings_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_settings_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_settings_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_settings_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_settings_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_settings_request, 'query'),
   ]),
   outputSchema: get_fleet_settings_response,
 };
 const PUT_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_settings',
+  connectorGroup: 'internal',
   summary: `Update settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -10381,9 +10776,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/settings'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -10396,14 +10791,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_settings_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_settings_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_settings_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_settings_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_settings_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_settings_request, 'query'),
   ]),
   outputSchema: put_fleet_settings_response,
 };
 const POST_FLEET_SETUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_setup',
+  connectorGroup: 'internal',
   summary: `Initiate Fleet setup`,
   description: `**Spaces method and path for this operation:**
 
@@ -10414,22 +10810,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup.`,
   methods: ['POST'],
   patterns: ['/api/fleet/setup'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_fleet_setup_request, 'body'),
-    getLooseObjectFromProperty(post_fleet_setup_request, 'path'),
-    getLooseObjectFromProperty(post_fleet_setup_request, 'query'),
+    getZodLooseObjectFromProperty(post_fleet_setup_request, 'body'),
+    getZodLooseObjectFromProperty(post_fleet_setup_request, 'path'),
+    getZodLooseObjectFromProperty(post_fleet_setup_request, 'query'),
   ]),
   outputSchema: post_fleet_setup_response,
 };
 const GET_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_space_settings',
+  connectorGroup: 'internal',
   summary: `Get space settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -10438,22 +10835,23 @@ const GET_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/fleet/space_settings'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_space_settings_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_space_settings_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_space_settings_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_space_settings_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_space_settings_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_space_settings_request, 'query'),
   ]),
   outputSchema: get_fleet_space_settings_response,
 };
 const PUT_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_space_settings',
+  connectorGroup: 'internal',
   summary: `Create space settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -10464,22 +10862,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: fleet-settings-all.`,
   methods: ['PUT'],
   patterns: ['/api/fleet/space_settings'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['allowed_namespace_prefixes'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_fleet_space_settings_request, 'body'),
-    getLooseObjectFromProperty(put_fleet_space_settings_request, 'path'),
-    getLooseObjectFromProperty(put_fleet_space_settings_request, 'query'),
+    getZodLooseObjectFromProperty(put_fleet_space_settings_request, 'body'),
+    getZodLooseObjectFromProperty(put_fleet_space_settings_request, 'path'),
+    getZodLooseObjectFromProperty(put_fleet_space_settings_request, 'query'),
   ]),
   outputSchema: put_fleet_space_settings_response,
 };
 const GET_FLEET_UNINSTALL_TOKENS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_uninstall_tokens',
+  connectorGroup: 'internal',
   summary: `Get metadata for latest uninstall tokens`,
   description: `**Spaces method and path for this operation:**
 
@@ -10490,22 +10889,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/uninstall_tokens'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['policyId', 'search', 'perPage', 'page'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'query'),
   ]),
   outputSchema: get_fleet_uninstall_tokens_response,
 };
 const GET_FLEET_UNINSTALL_TOKENS_UNINSTALLTOKENID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_uninstall_tokens_uninstalltokenid',
+  connectorGroup: 'internal',
   summary: `Get a decrypted uninstall token`,
   description: `**Spaces method and path for this operation:**
 
@@ -10516,22 +10916,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.`,
   methods: ['GET'],
   patterns: ['/api/fleet/uninstall_tokens/{uninstallTokenId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['uninstallTokenId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'body'),
-    getLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'path'),
-    getLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'query'),
+    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'body'),
+    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'path'),
+    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'query'),
   ]),
   outputSchema: get_fleet_uninstall_tokens_uninstalltokenid_response,
 };
 const DELETELIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteList',
+  connectorGroup: 'internal',
   summary: `Delete a value list`,
   description: `**Spaces method and path for this operation:**
 
@@ -10545,22 +10946,23 @@ Delete a value list using the list ID.
 `,
   methods: ['DELETE'],
   patterns: ['/api/lists'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'deleteReferences', 'ignoreReferences'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_list_request, 'body'),
-    getLooseObjectFromProperty(delete_list_request, 'path'),
-    getLooseObjectFromProperty(delete_list_request, 'query'),
+    getZodLooseObjectFromProperty(delete_list_request, 'body'),
+    getZodLooseObjectFromProperty(delete_list_request, 'path'),
+    getZodLooseObjectFromProperty(delete_list_request, 'query'),
   ]),
   outputSchema: delete_list_response,
 };
 const READLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadList',
+  connectorGroup: 'internal',
   summary: `Get value list details`,
   description: `**Spaces method and path for this operation:**
 
@@ -10571,22 +10973,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of a value list using the list ID.`,
   methods: ['GET'],
   patterns: ['/api/lists'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_list_request, 'body'),
-    getLooseObjectFromProperty(read_list_request, 'path'),
-    getLooseObjectFromProperty(read_list_request, 'query'),
+    getZodLooseObjectFromProperty(read_list_request, 'body'),
+    getZodLooseObjectFromProperty(read_list_request, 'path'),
+    getZodLooseObjectFromProperty(read_list_request, 'query'),
   ]),
   outputSchema: read_list_response,
 };
 const PATCHLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchList',
+  connectorGroup: 'internal',
   summary: `Patch a value list`,
   description: `**Spaces method and path for this operation:**
 
@@ -10597,22 +11000,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update specific fields of an existing list using the list \`id\`.`,
   methods: ['PATCH'],
   patterns: ['/api/lists'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['_version', 'description', 'id', 'meta', 'name', 'version'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(patch_list_request, 'body'),
-    getLooseObjectFromProperty(patch_list_request, 'path'),
-    getLooseObjectFromProperty(patch_list_request, 'query'),
+    getZodLooseObjectFromProperty(patch_list_request, 'body'),
+    getZodLooseObjectFromProperty(patch_list_request, 'path'),
+    getZodLooseObjectFromProperty(patch_list_request, 'query'),
   ]),
   outputSchema: patch_list_response,
 };
 const CREATELIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateList',
+  connectorGroup: 'internal',
   summary: `Create a value list`,
   description: `**Spaces method and path for this operation:**
 
@@ -10623,9 +11027,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a new value list.`,
   methods: ['POST'],
   patterns: ['/api/lists'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -10640,14 +11044,15 @@ Create a new value list.`,
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_list_request, 'body'),
-    getLooseObjectFromProperty(create_list_request, 'path'),
-    getLooseObjectFromProperty(create_list_request, 'query'),
+    getZodLooseObjectFromProperty(create_list_request, 'body'),
+    getZodLooseObjectFromProperty(create_list_request, 'path'),
+    getZodLooseObjectFromProperty(create_list_request, 'query'),
   ]),
   outputSchema: create_list_response,
 };
 const UPDATELIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateList',
+  connectorGroup: 'internal',
   summary: `Update a value list`,
   description: `**Spaces method and path for this operation:**
 
@@ -10661,22 +11066,23 @@ Update a value list using the list \`id\`. The original list is replaced, and al
 `,
   methods: ['PUT'],
   patterns: ['/api/lists'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['_version', 'description', 'id', 'meta', 'name', 'version'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_list_request, 'body'),
-    getLooseObjectFromProperty(update_list_request, 'path'),
-    getLooseObjectFromProperty(update_list_request, 'query'),
+    getZodLooseObjectFromProperty(update_list_request, 'body'),
+    getZodLooseObjectFromProperty(update_list_request, 'path'),
+    getZodLooseObjectFromProperty(update_list_request, 'query'),
   ]),
   outputSchema: update_list_response,
 };
 const FINDLISTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindLists',
+  connectorGroup: 'internal',
   summary: `Get value lists`,
   description: `**Spaces method and path for this operation:**
 
@@ -10687,22 +11093,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.`,
   methods: ['GET'],
   patterns: ['/api/lists/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['page', 'per_page', 'sort_field', 'sort_order', 'cursor', 'filter'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_lists_request, 'body'),
-    getLooseObjectFromProperty(find_lists_request, 'path'),
-    getLooseObjectFromProperty(find_lists_request, 'query'),
+    getZodLooseObjectFromProperty(find_lists_request, 'body'),
+    getZodLooseObjectFromProperty(find_lists_request, 'path'),
+    getZodLooseObjectFromProperty(find_lists_request, 'query'),
   ]),
   outputSchema: find_lists_response,
 };
 const DELETELISTINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteListIndex',
+  connectorGroup: 'internal',
   summary: `Delete value list data streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -10713,22 +11120,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete the \`.lists\` and \`.items\` data streams.`,
   methods: ['DELETE'],
   patterns: ['/api/lists/index'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_list_index_request, 'body'),
-    getLooseObjectFromProperty(delete_list_index_request, 'path'),
-    getLooseObjectFromProperty(delete_list_index_request, 'query'),
+    getZodLooseObjectFromProperty(delete_list_index_request, 'body'),
+    getZodLooseObjectFromProperty(delete_list_index_request, 'path'),
+    getZodLooseObjectFromProperty(delete_list_index_request, 'query'),
   ]),
   outputSchema: delete_list_index_response,
 };
 const READLISTINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListIndex',
+  connectorGroup: 'internal',
   summary: `Get status of value list data streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -10739,22 +11147,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Verify that \`.lists\` and \`.items\` data streams exist.`,
   methods: ['GET'],
   patterns: ['/api/lists/index'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_list_index_request, 'body'),
-    getLooseObjectFromProperty(read_list_index_request, 'path'),
-    getLooseObjectFromProperty(read_list_index_request, 'query'),
+    getZodLooseObjectFromProperty(read_list_index_request, 'body'),
+    getZodLooseObjectFromProperty(read_list_index_request, 'path'),
+    getZodLooseObjectFromProperty(read_list_index_request, 'query'),
   ]),
   outputSchema: read_list_index_response,
 };
 const CREATELISTINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateListIndex',
+  connectorGroup: 'internal',
   summary: `Create list data streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -10765,22 +11174,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create \`.lists\` and \`.items\` data streams in the relevant space.`,
   methods: ['POST'],
   patterns: ['/api/lists/index'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_list_index_request, 'body'),
-    getLooseObjectFromProperty(create_list_index_request, 'path'),
-    getLooseObjectFromProperty(create_list_index_request, 'query'),
+    getZodLooseObjectFromProperty(create_list_index_request, 'body'),
+    getZodLooseObjectFromProperty(create_list_index_request, 'path'),
+    getZodLooseObjectFromProperty(create_list_index_request, 'query'),
   ]),
   outputSchema: create_list_index_response,
 };
 const DELETELISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteListItem',
+  connectorGroup: 'internal',
   summary: `Delete a value list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -10791,22 +11201,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a value list item using its \`id\`, or its \`list_id\` and \`value\` fields.`,
   methods: ['DELETE'],
   patterns: ['/api/lists/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'list_id', 'value', 'refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_list_item_request, 'body'),
-    getLooseObjectFromProperty(delete_list_item_request, 'path'),
-    getLooseObjectFromProperty(delete_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(delete_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(delete_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(delete_list_item_request, 'query'),
   ]),
   outputSchema: delete_list_item_response,
 };
 const READLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListItem',
+  connectorGroup: 'internal',
   summary: `Get a value list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -10817,22 +11228,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of a value list item.`,
   methods: ['GET'],
   patterns: ['/api/lists/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['id', 'list_id', 'value'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_list_item_request, 'body'),
-    getLooseObjectFromProperty(read_list_item_request, 'path'),
-    getLooseObjectFromProperty(read_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(read_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(read_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(read_list_item_request, 'query'),
   ]),
   outputSchema: read_list_item_response,
 };
 const PATCHLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchListItem',
+  connectorGroup: 'internal',
   summary: `Patch a value list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -10843,22 +11255,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update specific fields of an existing value list item using the item \`id\`.`,
   methods: ['PATCH'],
   patterns: ['/api/lists/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['_version', 'id', 'meta', 'refresh', 'value'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(patch_list_item_request, 'body'),
-    getLooseObjectFromProperty(patch_list_item_request, 'path'),
-    getLooseObjectFromProperty(patch_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(patch_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(patch_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(patch_list_item_request, 'query'),
   ]),
   outputSchema: patch_list_item_response,
 };
 const CREATELISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateListItem',
+  connectorGroup: 'internal',
   summary: `Create a value list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -10874,22 +11287,23 @@ All value list items in the same list must be the same type. For example, each l
 `,
   methods: ['POST'],
   patterns: ['/api/lists/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['id', 'list_id', 'meta', 'refresh', 'value'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_list_item_request, 'body'),
-    getLooseObjectFromProperty(create_list_item_request, 'path'),
-    getLooseObjectFromProperty(create_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(create_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(create_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(create_list_item_request, 'query'),
   ]),
   outputSchema: create_list_item_response,
 };
 const UPDATELISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateListItem',
+  connectorGroup: 'internal',
   summary: `Update a value list item`,
   description: `**Spaces method and path for this operation:**
 
@@ -10903,22 +11317,23 @@ Update a value list item using the list item ID. The original list item is repla
 `,
   methods: ['PUT'],
   patterns: ['/api/lists/items'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['_version', 'id', 'meta', 'value'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_list_item_request, 'body'),
-    getLooseObjectFromProperty(update_list_item_request, 'path'),
-    getLooseObjectFromProperty(update_list_item_request, 'query'),
+    getZodLooseObjectFromProperty(update_list_item_request, 'body'),
+    getZodLooseObjectFromProperty(update_list_item_request, 'path'),
+    getZodLooseObjectFromProperty(update_list_item_request, 'query'),
   ]),
   outputSchema: update_list_item_response,
 };
 const EXPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportListItems',
+  connectorGroup: 'internal',
   summary: `Export value list items`,
   description: `**Spaces method and path for this operation:**
 
@@ -10929,22 +11344,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Export list item values from the specified value list.`,
   methods: ['POST'],
   patterns: ['/api/lists/items/_export'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['list_id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(export_list_items_request, 'body'),
-    getLooseObjectFromProperty(export_list_items_request, 'path'),
-    getLooseObjectFromProperty(export_list_items_request, 'query'),
+    getZodLooseObjectFromProperty(export_list_items_request, 'body'),
+    getZodLooseObjectFromProperty(export_list_items_request, 'path'),
+    getZodLooseObjectFromProperty(export_list_items_request, 'query'),
   ]),
   outputSchema: export_list_items_response,
 };
 const FINDLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindListItems',
+  connectorGroup: 'internal',
   summary: `Get value list items`,
   description: `**Spaces method and path for this operation:**
 
@@ -10955,22 +11371,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get all value list items in the specified list.`,
   methods: ['GET'],
   patterns: ['/api/lists/items/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['list_id', 'page', 'per_page', 'sort_field', 'sort_order', 'cursor', 'filter'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_list_items_request, 'body'),
-    getLooseObjectFromProperty(find_list_items_request, 'path'),
-    getLooseObjectFromProperty(find_list_items_request, 'query'),
+    getZodLooseObjectFromProperty(find_list_items_request, 'body'),
+    getZodLooseObjectFromProperty(find_list_items_request, 'path'),
+    getZodLooseObjectFromProperty(find_list_items_request, 'query'),
   ]),
   outputSchema: find_list_items_response,
 };
 const IMPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportListItems',
+  connectorGroup: 'internal',
   summary: `Import value list items`,
   description: `**Spaces method and path for this operation:**
 
@@ -10984,22 +11401,23 @@ You can import items to a new or existing list.
 `,
   methods: ['POST'],
   patterns: ['/api/lists/items/_import'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['list_id', 'type', 'serializer', 'deserializer', 'refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(import_list_items_request, 'body'),
-    getLooseObjectFromProperty(import_list_items_request, 'path'),
-    getLooseObjectFromProperty(import_list_items_request, 'query'),
+    getZodLooseObjectFromProperty(import_list_items_request, 'body'),
+    getZodLooseObjectFromProperty(import_list_items_request, 'path'),
+    getZodLooseObjectFromProperty(import_list_items_request, 'query'),
   ]),
   outputSchema: import_list_items_response,
 };
 const READLISTPRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListPrivileges',
+  connectorGroup: 'internal',
   summary: `Get value list privileges`,
   description: `**Spaces method and path for this operation:**
 
@@ -11008,88 +11426,92 @@ const READLISTPRIVILEGES_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/lists/privileges'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_list_privileges_request, 'body'),
-    getLooseObjectFromProperty(read_list_privileges_request, 'path'),
-    getLooseObjectFromProperty(read_list_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(read_list_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(read_list_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(read_list_privileges_request, 'query'),
   ]),
   outputSchema: read_list_privileges_response,
 };
 const DELETE_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_logstash_pipeline',
+  connectorGroup: 'internal',
   summary: `Delete a Logstash pipeline`,
   description: `Delete a centrally-managed Logstash pipeline.
 If your Elasticsearch cluster is protected with basic authentication, you must have either the \`logstash_admin\` built-in role or a customized Logstash writer role.
 `,
   methods: ['DELETE'],
   patterns: ['/api/logstash/pipeline/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_logstash_pipeline_request, 'body'),
-    getLooseObjectFromProperty(delete_logstash_pipeline_request, 'path'),
-    getLooseObjectFromProperty(delete_logstash_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(delete_logstash_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(delete_logstash_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(delete_logstash_pipeline_request, 'query'),
   ]),
   outputSchema: delete_logstash_pipeline_response,
 };
 const GET_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_logstash_pipeline',
+  connectorGroup: 'internal',
   summary: `Get a Logstash pipeline`,
   description: `Get information for a centrally-managed Logstash pipeline.
 To use this API, you must have either the \`logstash_admin\` built-in role or a customized Logstash reader role.
 `,
   methods: ['GET'],
   patterns: ['/api/logstash/pipeline/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_logstash_pipeline_request, 'body'),
-    getLooseObjectFromProperty(get_logstash_pipeline_request, 'path'),
-    getLooseObjectFromProperty(get_logstash_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(get_logstash_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(get_logstash_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(get_logstash_pipeline_request, 'query'),
   ]),
   outputSchema: get_logstash_pipeline_response,
 };
 const PUT_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_logstash_pipeline',
+  connectorGroup: 'internal',
   summary: `Create or update a Logstash pipeline`,
   description: `Create a centrally-managed Logstash pipeline or update a pipeline.
 To use this API, you must have either the \`logstash_admin\` built-in role or a customized Logstash writer role.
 `,
   methods: ['PUT'],
   patterns: ['/api/logstash/pipeline/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['description', 'pipeline', 'settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_logstash_pipeline_request, 'body'),
-    getLooseObjectFromProperty(put_logstash_pipeline_request, 'path'),
-    getLooseObjectFromProperty(put_logstash_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(put_logstash_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(put_logstash_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(put_logstash_pipeline_request, 'query'),
   ]),
   outputSchema: put_logstash_pipeline_response,
 };
 const GET_LOGSTASH_PIPELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_logstash_pipelines',
+  connectorGroup: 'internal',
   summary: `Get all Logstash pipelines`,
   description: `Get a list of all centrally-managed Logstash pipelines.
 
@@ -11101,22 +11523,23 @@ The \`username\` property appears in the response when security is enabled and d
 `,
   methods: ['GET'],
   patterns: ['/api/logstash/pipelines'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_logstash_pipelines_request, 'body'),
-    getLooseObjectFromProperty(get_logstash_pipelines_request, 'path'),
-    getLooseObjectFromProperty(get_logstash_pipelines_request, 'query'),
+    getZodLooseObjectFromProperty(get_logstash_pipelines_request, 'body'),
+    getZodLooseObjectFromProperty(get_logstash_pipelines_request, 'path'),
+    getZodLooseObjectFromProperty(get_logstash_pipelines_request, 'query'),
   ]),
   outputSchema: get_logstash_pipelines_response,
 };
 const POST_MAINTENANCE_WINDOW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_maintenance_window',
+  connectorGroup: 'internal',
   summary: `Create a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
@@ -11127,22 +11550,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: write-maintenance-window.`,
   methods: ['POST'],
   patterns: ['/api/maintenance_window'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['enabled', 'schedule', 'scope', 'title'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_maintenance_window_request, 'body'),
-    getLooseObjectFromProperty(post_maintenance_window_request, 'path'),
-    getLooseObjectFromProperty(post_maintenance_window_request, 'query'),
+    getZodLooseObjectFromProperty(post_maintenance_window_request, 'body'),
+    getZodLooseObjectFromProperty(post_maintenance_window_request, 'path'),
+    getZodLooseObjectFromProperty(post_maintenance_window_request, 'query'),
   ]),
   outputSchema: post_maintenance_window_response,
 };
 const GET_MAINTENANCE_WINDOW_FIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_maintenance_window_find',
+  connectorGroup: 'internal',
   summary: `Search for a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
@@ -11153,22 +11577,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: read-maintenance-window.`,
   methods: ['GET'],
   patterns: ['/api/maintenance_window/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['title', 'created_by', 'status', 'page', 'per_page'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_maintenance_window_find_request, 'body'),
-    getLooseObjectFromProperty(get_maintenance_window_find_request, 'path'),
-    getLooseObjectFromProperty(get_maintenance_window_find_request, 'query'),
+    getZodLooseObjectFromProperty(get_maintenance_window_find_request, 'body'),
+    getZodLooseObjectFromProperty(get_maintenance_window_find_request, 'path'),
+    getZodLooseObjectFromProperty(get_maintenance_window_find_request, 'query'),
   ]),
   outputSchema: get_maintenance_window_find_response,
 };
 const DELETE_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_maintenance_window_id',
+  connectorGroup: 'internal',
   summary: `Delete a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
@@ -11179,22 +11604,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: write-maintenance-window.`,
   methods: ['DELETE'],
   patterns: ['/api/maintenance_window/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_maintenance_window_id_request, 'body'),
-    getLooseObjectFromProperty(delete_maintenance_window_id_request, 'path'),
-    getLooseObjectFromProperty(delete_maintenance_window_id_request, 'query'),
+    getZodLooseObjectFromProperty(delete_maintenance_window_id_request, 'body'),
+    getZodLooseObjectFromProperty(delete_maintenance_window_id_request, 'path'),
+    getZodLooseObjectFromProperty(delete_maintenance_window_id_request, 'query'),
   ]),
   outputSchema: delete_maintenance_window_id_response,
 };
 const GET_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_maintenance_window_id',
+  connectorGroup: 'internal',
   summary: `Get maintenance window details.`,
   description: `**Spaces method and path for this operation:**
 
@@ -11205,22 +11631,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: read-maintenance-window.`,
   methods: ['GET'],
   patterns: ['/api/maintenance_window/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_maintenance_window_id_request, 'body'),
-    getLooseObjectFromProperty(get_maintenance_window_id_request, 'path'),
-    getLooseObjectFromProperty(get_maintenance_window_id_request, 'query'),
+    getZodLooseObjectFromProperty(get_maintenance_window_id_request, 'body'),
+    getZodLooseObjectFromProperty(get_maintenance_window_id_request, 'path'),
+    getZodLooseObjectFromProperty(get_maintenance_window_id_request, 'query'),
   ]),
   outputSchema: get_maintenance_window_id_response,
 };
 const PATCH_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.patch_maintenance_window_id',
+  connectorGroup: 'internal',
   summary: `Update a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
@@ -11231,22 +11658,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: write-maintenance-window.`,
   methods: ['PATCH'],
   patterns: ['/api/maintenance_window/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['enabled', 'schedule', 'scope', 'title'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(patch_maintenance_window_id_request, 'body'),
-    getLooseObjectFromProperty(patch_maintenance_window_id_request, 'path'),
-    getLooseObjectFromProperty(patch_maintenance_window_id_request, 'query'),
+    getZodLooseObjectFromProperty(patch_maintenance_window_id_request, 'body'),
+    getZodLooseObjectFromProperty(patch_maintenance_window_id_request, 'path'),
+    getZodLooseObjectFromProperty(patch_maintenance_window_id_request, 'query'),
   ]),
   outputSchema: patch_maintenance_window_id_response,
 };
 const POST_MAINTENANCE_WINDOW_ID_ARCHIVE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_maintenance_window_id_archive',
+  connectorGroup: 'internal',
   summary: `Archive a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
@@ -11257,22 +11685,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: write-maintenance-window.`,
   methods: ['POST'],
   patterns: ['/api/maintenance_window/{id}/_archive'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'body'),
-    getLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'path'),
-    getLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'query'),
+    getZodLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'body'),
+    getZodLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'path'),
+    getZodLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'query'),
   ]),
   outputSchema: post_maintenance_window_id_archive_response,
 };
 const POST_MAINTENANCE_WINDOW_ID_UNARCHIVE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_maintenance_window_id_unarchive',
+  connectorGroup: 'internal',
   summary: `Unarchive a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
@@ -11283,22 +11712,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 [Required authorization] Route required privileges: write-maintenance-window.`,
   methods: ['POST'],
   patterns: ['/api/maintenance_window/{id}/_unarchive'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'body'),
-    getLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'path'),
-    getLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'query'),
+    getZodLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'body'),
+    getZodLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'path'),
+    getZodLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'query'),
   ]),
   outputSchema: post_maintenance_window_id_unarchive_response,
 };
 const MLSYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.mlSync',
+  connectorGroup: 'internal',
   summary: `Sync saved objects in the default space`,
   description: `**Spaces method and path for this operation:**
 
@@ -11310,22 +11740,23 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models i
 `,
   methods: ['GET'],
   patterns: ['/api/ml/saved_objects/sync'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['simulate'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_sync_request, 'body'),
-    getLooseObjectFromProperty(ml_sync_request, 'path'),
-    getLooseObjectFromProperty(ml_sync_request, 'query'),
+    getZodLooseObjectFromProperty(ml_sync_request, 'body'),
+    getZodLooseObjectFromProperty(ml_sync_request, 'path'),
+    getZodLooseObjectFromProperty(ml_sync_request, 'query'),
   ]),
   outputSchema: ml_sync_response,
 };
 const DELETENOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteNote',
+  connectorGroup: 'internal',
   summary: `Delete a note`,
   description: `**Spaces method and path for this operation:**
 
@@ -11336,22 +11767,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a note from a Timeline using the note ID.`,
   methods: ['DELETE'],
   patterns: ['/api/note'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_note_request, 'body'),
-    getLooseObjectFromProperty(delete_note_request, 'path'),
-    getLooseObjectFromProperty(delete_note_request, 'query'),
+    getZodLooseObjectFromProperty(delete_note_request, 'body'),
+    getZodLooseObjectFromProperty(delete_note_request, 'path'),
+    getZodLooseObjectFromProperty(delete_note_request, 'query'),
   ]),
   outputSchema: delete_note_response,
 };
 const GETNOTES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetNotes',
+  connectorGroup: 'internal',
   summary: `Get notes`,
   description: `**Spaces method and path for this operation:**
 
@@ -11362,9 +11794,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get all notes for a given document.`,
   methods: ['GET'],
   patterns: ['/api/note'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'documentIds',
@@ -11381,14 +11813,15 @@ Get all notes for a given document.`,
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_notes_request, 'body'),
-    getLooseObjectFromProperty(get_notes_request, 'path'),
-    getLooseObjectFromProperty(get_notes_request, 'query'),
+    getZodLooseObjectFromProperty(get_notes_request, 'body'),
+    getZodLooseObjectFromProperty(get_notes_request, 'path'),
+    getZodLooseObjectFromProperty(get_notes_request, 'query'),
   ]),
   outputSchema: get_notes_response,
 };
 const PERSISTNOTEROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistNoteRoute',
+  connectorGroup: 'internal',
   summary: `Add or update a note`,
   description: `**Spaces method and path for this operation:**
 
@@ -11399,22 +11832,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Add a note to a Timeline or update an existing note.`,
   methods: ['PATCH'],
   patterns: ['/api/note'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['note', 'noteId', 'version'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(persist_note_route_request, 'body'),
-    getLooseObjectFromProperty(persist_note_route_request, 'path'),
-    getLooseObjectFromProperty(persist_note_route_request, 'query'),
+    getZodLooseObjectFromProperty(persist_note_route_request, 'body'),
+    getZodLooseObjectFromProperty(persist_note_route_request, 'path'),
+    getZodLooseObjectFromProperty(persist_note_route_request, 'query'),
   ]),
   outputSchema: persist_note_route_response,
 };
 const OBSERVABILITY_AI_ASSISTANT_CHAT_COMPLETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.observability_ai_assistant_chat_complete',
+  connectorGroup: 'internal',
   summary: `Generate a chat completion`,
   description: `**Spaces method and path for this operation:**
 
@@ -11432,9 +11866,9 @@ This functionality is in technical preview and may be changed or removed in a fu
 `,
   methods: ['POST'],
   patterns: ['/api/observability_ai_assistant/chat/complete'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -11449,14 +11883,15 @@ This functionality is in technical preview and may be changed or removed in a fu
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'body'),
-    getLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'path'),
-    getLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'query'),
+    getZodLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'body'),
+    getZodLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'path'),
+    getZodLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'query'),
   ]),
   outputSchema: observability_ai_assistant_chat_complete_response,
 };
 const OSQUERYFINDLIVEQUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindLiveQueries',
+  connectorGroup: 'internal',
   summary: `Get live queries`,
   description: `**Spaces method and path for this operation:**
 
@@ -11467,22 +11902,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all live queries.`,
   methods: ['GET'],
   patterns: ['/api/osquery/live_queries'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['kuery', 'page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_find_live_queries_request, 'body'),
-    getLooseObjectFromProperty(osquery_find_live_queries_request, 'path'),
-    getLooseObjectFromProperty(osquery_find_live_queries_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_find_live_queries_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_find_live_queries_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_find_live_queries_request, 'query'),
   ]),
   outputSchema: osquery_find_live_queries_response,
 };
 const OSQUERYCREATELIVEQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreateLiveQuery',
+  connectorGroup: 'internal',
   summary: `Create a live query`,
   description: `**Spaces method and path for this operation:**
 
@@ -11493,22 +11929,37 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create and run a live query.`,
   methods: ['POST'],
   patterns: ['/api/osquery/live_queries'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'agent_all',
+      'agent_ids',
+      'agent_platforms',
+      'agent_policy_ids',
+      'alert_ids',
+      'case_ids',
+      'ecs_mapping',
+      'event_ids',
+      'metadata',
+      'pack_id',
+      'queries',
+      'query',
+      'saved_query_id',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_create_live_query_request, 'body'),
-    getLooseObjectFromProperty(osquery_create_live_query_request, 'path'),
-    getLooseObjectFromProperty(osquery_create_live_query_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_create_live_query_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_create_live_query_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_create_live_query_request, 'query'),
   ]),
   outputSchema: osquery_create_live_query_response,
 };
 const OSQUERYGETLIVEQUERYDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetLiveQueryDetails',
+  connectorGroup: 'internal',
   summary: `Get live query details`,
   description: `**Spaces method and path for this operation:**
 
@@ -11519,22 +11970,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of a live query using the query ID.`,
   methods: ['GET'],
   patterns: ['/api/osquery/live_queries/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_get_live_query_details_request, 'body'),
-    getLooseObjectFromProperty(osquery_get_live_query_details_request, 'path'),
-    getLooseObjectFromProperty(osquery_get_live_query_details_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_get_live_query_details_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_get_live_query_details_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_get_live_query_details_request, 'query'),
   ]),
   outputSchema: osquery_get_live_query_details_response,
 };
 const OSQUERYGETLIVEQUERYRESULTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetLiveQueryResults',
+  connectorGroup: 'internal',
   summary: `Get live query results`,
   description: `**Spaces method and path for this operation:**
 
@@ -11545,22 +11997,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the results of a live query using the query action ID.`,
   methods: ['GET'],
   patterns: ['/api/osquery/live_queries/{id}/results/{actionId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id', 'actionId'],
     urlParams: ['kuery', 'page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_get_live_query_results_request, 'body'),
-    getLooseObjectFromProperty(osquery_get_live_query_results_request, 'path'),
-    getLooseObjectFromProperty(osquery_get_live_query_results_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_get_live_query_results_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_get_live_query_results_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_get_live_query_results_request, 'query'),
   ]),
   outputSchema: osquery_get_live_query_results_response,
 };
 const OSQUERYFINDPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindPacks',
+  connectorGroup: 'internal',
   summary: `Get packs`,
   description: `**Spaces method and path for this operation:**
 
@@ -11571,22 +12024,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all query packs.`,
   methods: ['GET'],
   patterns: ['/api/osquery/packs'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_find_packs_request, 'body'),
-    getLooseObjectFromProperty(osquery_find_packs_request, 'path'),
-    getLooseObjectFromProperty(osquery_find_packs_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_find_packs_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_find_packs_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_find_packs_request, 'query'),
   ]),
   outputSchema: osquery_find_packs_response,
 };
 const OSQUERYCREATEPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreatePacks',
+  connectorGroup: 'internal',
   summary: `Create a pack`,
   description: `**Spaces method and path for this operation:**
 
@@ -11597,22 +12051,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a query pack.`,
   methods: ['POST'],
   patterns: ['/api/osquery/packs'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'enabled', 'name', 'policy_ids', 'queries', 'shards'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_create_packs_request, 'body'),
-    getLooseObjectFromProperty(osquery_create_packs_request, 'path'),
-    getLooseObjectFromProperty(osquery_create_packs_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_create_packs_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_create_packs_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_create_packs_request, 'query'),
   ]),
   outputSchema: osquery_create_packs_response,
 };
 const OSQUERYDELETEPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryDeletePacks',
+  connectorGroup: 'internal',
   summary: `Delete a pack`,
   description: `**Spaces method and path for this operation:**
 
@@ -11623,22 +12078,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a query pack using the pack ID.`,
   methods: ['DELETE'],
   patterns: ['/api/osquery/packs/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_delete_packs_request, 'body'),
-    getLooseObjectFromProperty(osquery_delete_packs_request, 'path'),
-    getLooseObjectFromProperty(osquery_delete_packs_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_delete_packs_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_delete_packs_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_delete_packs_request, 'query'),
   ]),
   outputSchema: osquery_delete_packs_response,
 };
 const OSQUERYGETPACKSDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetPacksDetails',
+  connectorGroup: 'internal',
   summary: `Get pack details`,
   description: `**Spaces method and path for this operation:**
 
@@ -11649,22 +12105,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of a query pack using the pack ID.`,
   methods: ['GET'],
   patterns: ['/api/osquery/packs/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_get_packs_details_request, 'body'),
-    getLooseObjectFromProperty(osquery_get_packs_details_request, 'path'),
-    getLooseObjectFromProperty(osquery_get_packs_details_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_get_packs_details_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_get_packs_details_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_get_packs_details_request, 'query'),
   ]),
   outputSchema: osquery_get_packs_details_response,
 };
 const OSQUERYUPDATEPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryUpdatePacks',
+  connectorGroup: 'internal',
   summary: `Update a pack`,
   description: `**Spaces method and path for this operation:**
 
@@ -11678,22 +12135,23 @@ Update a query pack using the pack ID.
 `,
   methods: ['PUT'],
   patterns: ['/api/osquery/packs/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'enabled', 'name', 'policy_ids', 'queries', 'shards'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_update_packs_request, 'body'),
-    getLooseObjectFromProperty(osquery_update_packs_request, 'path'),
-    getLooseObjectFromProperty(osquery_update_packs_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_update_packs_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_update_packs_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_update_packs_request, 'query'),
   ]),
   outputSchema: osquery_update_packs_response,
 };
 const OSQUERYFINDSAVEDQUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindSavedQueries',
+  connectorGroup: 'internal',
   summary: `Get saved queries`,
   description: `**Spaces method and path for this operation:**
 
@@ -11704,22 +12162,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all saved queries.`,
   methods: ['GET'],
   patterns: ['/api/osquery/saved_queries'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_find_saved_queries_request, 'body'),
-    getLooseObjectFromProperty(osquery_find_saved_queries_request, 'path'),
-    getLooseObjectFromProperty(osquery_find_saved_queries_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_find_saved_queries_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_find_saved_queries_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_find_saved_queries_request, 'query'),
   ]),
   outputSchema: osquery_find_saved_queries_response,
 };
 const OSQUERYCREATESAVEDQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreateSavedQuery',
+  connectorGroup: 'internal',
   summary: `Create a saved query`,
   description: `**Spaces method and path for this operation:**
 
@@ -11730,22 +12189,33 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create and run a saved query.`,
   methods: ['POST'],
   patterns: ['/api/osquery/saved_queries'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'description',
+      'ecs_mapping',
+      'id',
+      'interval',
+      'platform',
+      'query',
+      'removed',
+      'snapshot',
+      'version',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_create_saved_query_request, 'body'),
-    getLooseObjectFromProperty(osquery_create_saved_query_request, 'path'),
-    getLooseObjectFromProperty(osquery_create_saved_query_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_create_saved_query_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_create_saved_query_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_create_saved_query_request, 'query'),
   ]),
   outputSchema: osquery_create_saved_query_response,
 };
 const OSQUERYDELETESAVEDQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryDeleteSavedQuery',
+  connectorGroup: 'internal',
   summary: `Delete a saved query`,
   description: `**Spaces method and path for this operation:**
 
@@ -11756,22 +12226,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a saved query using the query ID.`,
   methods: ['DELETE'],
   patterns: ['/api/osquery/saved_queries/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_delete_saved_query_request, 'body'),
-    getLooseObjectFromProperty(osquery_delete_saved_query_request, 'path'),
-    getLooseObjectFromProperty(osquery_delete_saved_query_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_delete_saved_query_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_delete_saved_query_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_delete_saved_query_request, 'query'),
   ]),
   outputSchema: osquery_delete_saved_query_response,
 };
 const OSQUERYGETSAVEDQUERYDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetSavedQueryDetails',
+  connectorGroup: 'internal',
   summary: `Get saved query details`,
   description: `**Spaces method and path for this operation:**
 
@@ -11782,22 +12253,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of a saved query using the query ID.`,
   methods: ['GET'],
   patterns: ['/api/osquery/saved_queries/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_get_saved_query_details_request, 'body'),
-    getLooseObjectFromProperty(osquery_get_saved_query_details_request, 'path'),
-    getLooseObjectFromProperty(osquery_get_saved_query_details_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_get_saved_query_details_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_get_saved_query_details_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_get_saved_query_details_request, 'query'),
   ]),
   outputSchema: osquery_get_saved_query_details_response,
 };
 const OSQUERYUPDATESAVEDQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryUpdateSavedQuery',
+  connectorGroup: 'internal',
   summary: `Update a saved query`,
   description: `**Spaces method and path for this operation:**
 
@@ -11811,22 +12283,33 @@ Update a saved query using the query ID.
 `,
   methods: ['PUT'],
   patterns: ['/api/osquery/saved_queries/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'description',
+      'ecs_mapping',
+      'id',
+      'interval',
+      'platform',
+      'query',
+      'removed',
+      'snapshot',
+      'version',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(osquery_update_saved_query_request, 'body'),
-    getLooseObjectFromProperty(osquery_update_saved_query_request, 'path'),
-    getLooseObjectFromProperty(osquery_update_saved_query_request, 'query'),
+    getZodLooseObjectFromProperty(osquery_update_saved_query_request, 'body'),
+    getZodLooseObjectFromProperty(osquery_update_saved_query_request, 'path'),
+    getZodLooseObjectFromProperty(osquery_update_saved_query_request, 'query'),
   ]),
   outputSchema: osquery_update_saved_query_response,
 };
 const PERSISTPINNEDEVENTROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistPinnedEventRoute',
+  connectorGroup: 'internal',
   summary: `Pin/unpin an event`,
   description: `**Spaces method and path for this operation:**
 
@@ -11837,22 +12320,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Pin/unpin an event to/from an existing Timeline.`,
   methods: ['PATCH'],
   patterns: ['/api/pinned_event'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['eventId', 'pinnedEventId', 'timelineId'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(persist_pinned_event_route_request, 'body'),
-    getLooseObjectFromProperty(persist_pinned_event_route_request, 'path'),
-    getLooseObjectFromProperty(persist_pinned_event_route_request, 'query'),
+    getZodLooseObjectFromProperty(persist_pinned_event_route_request, 'body'),
+    getZodLooseObjectFromProperty(persist_pinned_event_route_request, 'path'),
+    getZodLooseObjectFromProperty(persist_pinned_event_route_request, 'query'),
   ]),
   outputSchema: persist_pinned_event_route_response,
 };
 const CLEANUPRISKENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CleanUpRiskEngine',
+  connectorGroup: 'internal',
   summary: `Cleanup the Risk Engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -11863,22 +12347,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Cleaning up the the Risk Engine by removing the indices, mapping and transforms`,
   methods: ['DELETE'],
   patterns: ['/api/risk_score/engine/dangerously_delete_data'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(clean_up_risk_engine_request, 'body'),
-    getLooseObjectFromProperty(clean_up_risk_engine_request, 'path'),
-    getLooseObjectFromProperty(clean_up_risk_engine_request, 'query'),
+    getZodLooseObjectFromProperty(clean_up_risk_engine_request, 'body'),
+    getZodLooseObjectFromProperty(clean_up_risk_engine_request, 'path'),
+    getZodLooseObjectFromProperty(clean_up_risk_engine_request, 'query'),
   ]),
   outputSchema: clean_up_risk_engine_response,
 };
 const CONFIGURERISKENGINESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ConfigureRiskEngineSavedObject',
+  connectorGroup: 'internal',
   summary: `Configure the Risk Engine Saved Object`,
   description: `**Spaces method and path for this operation:**
 
@@ -11889,9 +12374,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Configuring the Risk Engine Saved Object`,
   methods: ['PATCH'],
   patterns: ['/api/risk_score/engine/saved_object/configure'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -11903,14 +12388,15 @@ Configuring the Risk Engine Saved Object`,
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'body'),
-    getLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'path'),
-    getLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'query'),
+    getZodLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'body'),
+    getZodLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'path'),
+    getZodLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'query'),
   ]),
   outputSchema: configure_risk_engine_saved_object_response,
 };
 const SCHEDULERISKENGINENOW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ScheduleRiskEngineNow',
+  connectorGroup: 'internal',
   summary: `Run the risk scoring engine`,
   description: `**Spaces method and path for this operation:**
 
@@ -11921,22 +12407,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.`,
   methods: ['POST'],
   patterns: ['/api/risk_score/engine/schedule_now'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(schedule_risk_engine_now_request, 'body'),
-    getLooseObjectFromProperty(schedule_risk_engine_now_request, 'path'),
-    getLooseObjectFromProperty(schedule_risk_engine_now_request, 'query'),
+    getZodLooseObjectFromProperty(schedule_risk_engine_now_request, 'body'),
+    getZodLooseObjectFromProperty(schedule_risk_engine_now_request, 'path'),
+    getZodLooseObjectFromProperty(schedule_risk_engine_now_request, 'query'),
   ]),
   outputSchema: schedule_risk_engine_now_response,
 };
 const BULKCREATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkCreateSavedObjects',
+  connectorGroup: 'internal',
   summary: `Create saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -11945,22 +12432,23 @@ const BULKCREATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_create'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['overwrite'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(bulk_create_saved_objects_request, 'body'),
-    getLooseObjectFromProperty(bulk_create_saved_objects_request, 'path'),
-    getLooseObjectFromProperty(bulk_create_saved_objects_request, 'query'),
+    getZodLooseObjectFromProperty(bulk_create_saved_objects_request, 'body'),
+    getZodLooseObjectFromProperty(bulk_create_saved_objects_request, 'path'),
+    getZodLooseObjectFromProperty(bulk_create_saved_objects_request, 'query'),
   ]),
   outputSchema: bulk_create_saved_objects_response,
 };
 const BULKDELETESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteSavedObjects',
+  connectorGroup: 'internal',
   summary: `Delete saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -11972,22 +12460,23 @@ WARNING: When you delete a saved object, it cannot be recovered.
 `,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_delete'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(bulk_delete_saved_objects_request, 'body'),
-    getLooseObjectFromProperty(bulk_delete_saved_objects_request, 'path'),
-    getLooseObjectFromProperty(bulk_delete_saved_objects_request, 'query'),
+    getZodLooseObjectFromProperty(bulk_delete_saved_objects_request, 'body'),
+    getZodLooseObjectFromProperty(bulk_delete_saved_objects_request, 'path'),
+    getZodLooseObjectFromProperty(bulk_delete_saved_objects_request, 'query'),
   ]),
   outputSchema: bulk_delete_saved_objects_response,
 };
 const BULKGETSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkGetSavedObjects',
+  connectorGroup: 'internal',
   summary: `Get saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -11996,22 +12485,23 @@ const BULKGETSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_get'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(bulk_get_saved_objects_request, 'body'),
-    getLooseObjectFromProperty(bulk_get_saved_objects_request, 'path'),
-    getLooseObjectFromProperty(bulk_get_saved_objects_request, 'query'),
+    getZodLooseObjectFromProperty(bulk_get_saved_objects_request, 'body'),
+    getZodLooseObjectFromProperty(bulk_get_saved_objects_request, 'path'),
+    getZodLooseObjectFromProperty(bulk_get_saved_objects_request, 'query'),
   ]),
   outputSchema: bulk_get_saved_objects_response,
 };
 const BULKRESOLVESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkResolveSavedObjects',
+  connectorGroup: 'internal',
   summary: `Resolve saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -12023,22 +12513,23 @@ Retrieve multiple Kibana saved objects by identifier using any legacy URL aliase
 `,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_resolve'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'body'),
-    getLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'path'),
-    getLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'query'),
+    getZodLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'body'),
+    getZodLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'path'),
+    getZodLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'query'),
   ]),
   outputSchema: bulk_resolve_saved_objects_response,
 };
 const BULKUPDATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkUpdateSavedObjects',
+  connectorGroup: 'internal',
   summary: `Update saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -12049,22 +12540,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update the attributes for multiple Kibana saved objects.`,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_bulk_update'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(bulk_update_saved_objects_request, 'body'),
-    getLooseObjectFromProperty(bulk_update_saved_objects_request, 'path'),
-    getLooseObjectFromProperty(bulk_update_saved_objects_request, 'query'),
+    getZodLooseObjectFromProperty(bulk_update_saved_objects_request, 'body'),
+    getZodLooseObjectFromProperty(bulk_update_saved_objects_request, 'path'),
+    getZodLooseObjectFromProperty(bulk_update_saved_objects_request, 'query'),
   ]),
   outputSchema: bulk_update_saved_objects_response,
 };
 const POST_SAVED_OBJECTS_EXPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_saved_objects_export',
+  connectorGroup: 'internal',
   summary: `Export saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -12079,9 +12571,9 @@ Exported saved objects are not backwards compatible and cannot be imported into 
 NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the number of saved objects which may be exported.`,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_export'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -12094,14 +12586,15 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_saved_objects_export_request, 'body'),
-    getLooseObjectFromProperty(post_saved_objects_export_request, 'path'),
-    getLooseObjectFromProperty(post_saved_objects_export_request, 'query'),
+    getZodLooseObjectFromProperty(post_saved_objects_export_request, 'body'),
+    getZodLooseObjectFromProperty(post_saved_objects_export_request, 'path'),
+    getZodLooseObjectFromProperty(post_saved_objects_export_request, 'query'),
   ]),
   outputSchema: post_saved_objects_export_response,
 };
 const FINDSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findSavedObjects',
+  connectorGroup: 'internal',
   summary: `Search for saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -12112,9 +12605,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Retrieve a paginated set of Kibana saved objects.`,
   methods: ['GET'],
   patterns: ['/api/saved_objects/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'aggs',
@@ -12135,14 +12628,15 @@ Retrieve a paginated set of Kibana saved objects.`,
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_saved_objects_request, 'body'),
-    getLooseObjectFromProperty(find_saved_objects_request, 'path'),
-    getLooseObjectFromProperty(find_saved_objects_request, 'query'),
+    getZodLooseObjectFromProperty(find_saved_objects_request, 'body'),
+    getZodLooseObjectFromProperty(find_saved_objects_request, 'path'),
+    getZodLooseObjectFromProperty(find_saved_objects_request, 'query'),
   ]),
   outputSchema: find_saved_objects_response,
 };
 const POST_SAVED_OBJECTS_IMPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_saved_objects_import',
+  connectorGroup: 'internal',
   summary: `Import saved objects`,
   description: `**Spaces method and path for this operation:**
 
@@ -12155,22 +12649,23 @@ Create sets of Kibana saved objects from a file created by the export API. Saved
 Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.`,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_import'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['overwrite', 'createNewCopies', 'compatibilityMode'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_saved_objects_import_request, 'body'),
-    getLooseObjectFromProperty(post_saved_objects_import_request, 'path'),
-    getLooseObjectFromProperty(post_saved_objects_import_request, 'query'),
+    getZodLooseObjectFromProperty(post_saved_objects_import_request, 'body'),
+    getZodLooseObjectFromProperty(post_saved_objects_import_request, 'path'),
+    getZodLooseObjectFromProperty(post_saved_objects_import_request, 'query'),
   ]),
   outputSchema: post_saved_objects_import_response,
 };
 const RESOLVEIMPORTERRORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolveImportErrors',
+  connectorGroup: 'internal',
   summary: `Resolve import errors`,
   description: `**Spaces method and path for this operation:**
 
@@ -12186,22 +12681,23 @@ To resolve errors from the Import objects API, you can:
 `,
   methods: ['POST'],
   patterns: ['/api/saved_objects/_resolve_import_errors'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: ['compatibilityMode', 'createNewCopies'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(resolve_import_errors_request, 'body'),
-    getLooseObjectFromProperty(resolve_import_errors_request, 'path'),
-    getLooseObjectFromProperty(resolve_import_errors_request, 'query'),
+    getZodLooseObjectFromProperty(resolve_import_errors_request, 'body'),
+    getZodLooseObjectFromProperty(resolve_import_errors_request, 'path'),
+    getZodLooseObjectFromProperty(resolve_import_errors_request, 'query'),
   ]),
   outputSchema: resolve_import_errors_response,
 };
 const CREATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSavedObject',
+  connectorGroup: 'internal',
   summary: `Create a saved object`,
   description: `**Spaces method and path for this operation:**
 
@@ -12212,22 +12708,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a Kibana saved object with a randomly generated identifier.`,
   methods: ['POST'],
   patterns: ['/api/saved_objects/{type}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['type'],
     urlParams: ['overwrite'],
     bodyParams: ['attributes', 'initialNamespaces', 'references'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_saved_object_request, 'body'),
-    getLooseObjectFromProperty(create_saved_object_request, 'path'),
-    getLooseObjectFromProperty(create_saved_object_request, 'query'),
+    getZodLooseObjectFromProperty(create_saved_object_request, 'body'),
+    getZodLooseObjectFromProperty(create_saved_object_request, 'path'),
+    getZodLooseObjectFromProperty(create_saved_object_request, 'query'),
   ]),
   outputSchema: create_saved_object_response,
 };
 const GETSAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSavedObject',
+  connectorGroup: 'internal',
   summary: `Get a saved object`,
   description: `**Spaces method and path for this operation:**
 
@@ -12238,22 +12735,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Retrieve a single Kibana saved object by identifier.`,
   methods: ['GET'],
   patterns: ['/api/saved_objects/{type}/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id', 'type'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_saved_object_request, 'body'),
-    getLooseObjectFromProperty(get_saved_object_request, 'path'),
-    getLooseObjectFromProperty(get_saved_object_request, 'query'),
+    getZodLooseObjectFromProperty(get_saved_object_request, 'body'),
+    getZodLooseObjectFromProperty(get_saved_object_request, 'path'),
+    getZodLooseObjectFromProperty(get_saved_object_request, 'query'),
   ]),
   outputSchema: get_saved_object_response,
 };
 const CREATESAVEDOBJECTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSavedObjectId',
+  connectorGroup: 'internal',
   summary: `Create a saved object`,
   description: `**Spaces method and path for this operation:**
 
@@ -12264,22 +12762,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.`,
   methods: ['POST'],
   patterns: ['/api/saved_objects/{type}/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id', 'type'],
     urlParams: ['overwrite'],
     bodyParams: ['attributes', 'initialNamespaces', 'references'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_saved_object_id_request, 'body'),
-    getLooseObjectFromProperty(create_saved_object_id_request, 'path'),
-    getLooseObjectFromProperty(create_saved_object_id_request, 'query'),
+    getZodLooseObjectFromProperty(create_saved_object_id_request, 'body'),
+    getZodLooseObjectFromProperty(create_saved_object_id_request, 'path'),
+    getZodLooseObjectFromProperty(create_saved_object_id_request, 'query'),
   ]),
   outputSchema: create_saved_object_id_response,
 };
 const UPDATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateSavedObject',
+  connectorGroup: 'internal',
   summary: `Update a saved object`,
   description: `**Spaces method and path for this operation:**
 
@@ -12290,22 +12789,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update the attributes for Kibana saved objects.`,
   methods: ['PUT'],
   patterns: ['/api/saved_objects/{type}/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id', 'type'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_saved_object_request, 'body'),
-    getLooseObjectFromProperty(update_saved_object_request, 'path'),
-    getLooseObjectFromProperty(update_saved_object_request, 'query'),
+    getZodLooseObjectFromProperty(update_saved_object_request, 'body'),
+    getZodLooseObjectFromProperty(update_saved_object_request, 'path'),
+    getZodLooseObjectFromProperty(update_saved_object_request, 'query'),
   ]),
   outputSchema: update_saved_object_response,
 };
 const RESOLVESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolveSavedObject',
+  connectorGroup: 'internal',
   summary: `Resolve a saved object`,
   description: `**Spaces method and path for this operation:**
 
@@ -12317,22 +12817,23 @@ Retrieve a single Kibana saved object by identifier using any legacy URL alias i
 `,
   methods: ['GET'],
   patterns: ['/api/saved_objects/resolve/{type}/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id', 'type'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(resolve_saved_object_request, 'body'),
-    getLooseObjectFromProperty(resolve_saved_object_request, 'path'),
-    getLooseObjectFromProperty(resolve_saved_object_request, 'query'),
+    getZodLooseObjectFromProperty(resolve_saved_object_request, 'body'),
+    getZodLooseObjectFromProperty(resolve_saved_object_request, 'path'),
+    getZodLooseObjectFromProperty(resolve_saved_object_request, 'query'),
   ]),
   outputSchema: resolve_saved_object_response,
 };
 const PERFORMANONYMIZATIONFIELDSBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformAnonymizationFieldsBulkAction',
+  connectorGroup: 'internal',
   summary: `Apply a bulk action to anonymization fields`,
   description: `**Spaces method and path for this operation:**
 
@@ -12343,22 +12844,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Apply a bulk action to multiple anonymization fields. The bulk action is applied to all anonymization fields that match the filter or to the list of anonymization fields by their IDs.`,
   methods: ['POST'],
   patterns: ['/api/security_ai_assistant/anonymization_fields/_bulk_action'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['create', 'delete', 'update'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'body'),
-    getLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'path'),
-    getLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'query'),
+    getZodLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'body'),
+    getZodLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'path'),
+    getZodLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'query'),
   ]),
   outputSchema: perform_anonymization_fields_bulk_action_response,
 };
 const FINDANONYMIZATIONFIELDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAnonymizationFields',
+  connectorGroup: 'internal',
   summary: `Get anonymization fields`,
   description: `**Spaces method and path for this operation:**
 
@@ -12369,22 +12871,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all anonymization fields.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/anonymization_fields/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page', 'all_data'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_anonymization_fields_request, 'body'),
-    getLooseObjectFromProperty(find_anonymization_fields_request, 'path'),
-    getLooseObjectFromProperty(find_anonymization_fields_request, 'query'),
+    getZodLooseObjectFromProperty(find_anonymization_fields_request, 'body'),
+    getZodLooseObjectFromProperty(find_anonymization_fields_request, 'path'),
+    getZodLooseObjectFromProperty(find_anonymization_fields_request, 'query'),
   ]),
   outputSchema: find_anonymization_fields_response,
 };
 const CHATCOMPLETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ChatComplete',
+  connectorGroup: 'internal',
   summary: `Create a model response`,
   description: `**Spaces method and path for this operation:**
 
@@ -12395,22 +12898,34 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a model response for the given chat conversation.`,
   methods: ['POST'],
   patterns: ['/api/security_ai_assistant/chat/complete'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['content_references_disabled'],
-    bodyParams: [],
+    bodyParams: [
+      'connectorId',
+      'conversationId',
+      'isStream',
+      'langSmithApiKey',
+      'langSmithProject',
+      'messages',
+      'model',
+      'persist',
+      'promptId',
+      'responseLanguage',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(chat_complete_request, 'body'),
-    getLooseObjectFromProperty(chat_complete_request, 'path'),
-    getLooseObjectFromProperty(chat_complete_request, 'query'),
+    getZodLooseObjectFromProperty(chat_complete_request, 'body'),
+    getZodLooseObjectFromProperty(chat_complete_request, 'path'),
+    getZodLooseObjectFromProperty(chat_complete_request, 'query'),
   ]),
   outputSchema: chat_complete_response,
 };
 const DELETEALLCONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAllConversations',
+  connectorGroup: 'internal',
   summary: `Delete conversations`,
   description: `**Spaces method and path for this operation:**
 
@@ -12421,22 +12936,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 This endpoint allows users to permanently delete all conversations.`,
   methods: ['DELETE'],
   patterns: ['/api/security_ai_assistant/current_user/conversations'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['excludedIds'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_all_conversations_request, 'body'),
-    getLooseObjectFromProperty(delete_all_conversations_request, 'path'),
-    getLooseObjectFromProperty(delete_all_conversations_request, 'query'),
+    getZodLooseObjectFromProperty(delete_all_conversations_request, 'body'),
+    getZodLooseObjectFromProperty(delete_all_conversations_request, 'path'),
+    getZodLooseObjectFromProperty(delete_all_conversations_request, 'query'),
   ]),
   outputSchema: delete_all_conversations_response,
 };
 const CREATECONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateConversation',
+  connectorGroup: 'internal',
   summary: `Create a conversation`,
   description: `**Spaces method and path for this operation:**
 
@@ -12447,22 +12963,31 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a new Security AI Assistant conversation. This endpoint allows the user to initiate a conversation with the Security AI Assistant by providing the required parameters.`,
   methods: ['POST'],
   patterns: ['/api/security_ai_assistant/current_user/conversations'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'apiConfig',
+      'category',
+      'excludeFromLastConversationStorage',
+      'id',
+      'messages',
+      'replacements',
+      'title',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_conversation_request, 'body'),
-    getLooseObjectFromProperty(create_conversation_request, 'path'),
-    getLooseObjectFromProperty(create_conversation_request, 'query'),
+    getZodLooseObjectFromProperty(create_conversation_request, 'body'),
+    getZodLooseObjectFromProperty(create_conversation_request, 'path'),
+    getZodLooseObjectFromProperty(create_conversation_request, 'query'),
   ]),
   outputSchema: create_conversation_response,
 };
 const FINDCONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindConversations',
+  connectorGroup: 'internal',
   summary: `Get conversations`,
   description: `**Spaces method and path for this operation:**
 
@@ -12473,22 +12998,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all conversations for the current user. This endpoint allows users to search, filter, sort, and paginate through their conversations.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/current_user/conversations/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page', 'is_owner'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_conversations_request, 'body'),
-    getLooseObjectFromProperty(find_conversations_request, 'path'),
-    getLooseObjectFromProperty(find_conversations_request, 'query'),
+    getZodLooseObjectFromProperty(find_conversations_request, 'body'),
+    getZodLooseObjectFromProperty(find_conversations_request, 'path'),
+    getZodLooseObjectFromProperty(find_conversations_request, 'query'),
   ]),
   outputSchema: find_conversations_response,
 };
 const DELETECONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteConversation',
+  connectorGroup: 'internal',
   summary: `Delete a conversation`,
   description: `**Spaces method and path for this operation:**
 
@@ -12499,22 +13025,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete an existing conversation using the conversation ID. This endpoint allows users to permanently delete a conversation.`,
   methods: ['DELETE'],
   patterns: ['/api/security_ai_assistant/current_user/conversations/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_conversation_request, 'body'),
-    getLooseObjectFromProperty(delete_conversation_request, 'path'),
-    getLooseObjectFromProperty(delete_conversation_request, 'query'),
+    getZodLooseObjectFromProperty(delete_conversation_request, 'body'),
+    getZodLooseObjectFromProperty(delete_conversation_request, 'path'),
+    getZodLooseObjectFromProperty(delete_conversation_request, 'query'),
   ]),
   outputSchema: delete_conversation_response,
 };
 const READCONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadConversation',
+  connectorGroup: 'internal',
   summary: `Get a conversation`,
   description: `**Spaces method and path for this operation:**
 
@@ -12525,22 +13052,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of an existing conversation using the conversation ID. This allows users to fetch the specific conversation data by its unique ID.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/current_user/conversations/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_conversation_request, 'body'),
-    getLooseObjectFromProperty(read_conversation_request, 'path'),
-    getLooseObjectFromProperty(read_conversation_request, 'query'),
+    getZodLooseObjectFromProperty(read_conversation_request, 'body'),
+    getZodLooseObjectFromProperty(read_conversation_request, 'path'),
+    getZodLooseObjectFromProperty(read_conversation_request, 'query'),
   ]),
   outputSchema: read_conversation_response,
 };
 const UPDATECONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateConversation',
+  connectorGroup: 'internal',
   summary: `Update a conversation`,
   description: `**Spaces method and path for this operation:**
 
@@ -12551,22 +13079,32 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an existing conversation using the conversation ID. This endpoint allows users to modify the details of an existing conversation.`,
   methods: ['PUT'],
   patterns: ['/api/security_ai_assistant/current_user/conversations/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'apiConfig',
+      'category',
+      'excludeFromLastConversationStorage',
+      'id',
+      'messages',
+      'replacements',
+      'title',
+      'users',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_conversation_request, 'body'),
-    getLooseObjectFromProperty(update_conversation_request, 'path'),
-    getLooseObjectFromProperty(update_conversation_request, 'query'),
+    getZodLooseObjectFromProperty(update_conversation_request, 'body'),
+    getZodLooseObjectFromProperty(update_conversation_request, 'path'),
+    getZodLooseObjectFromProperty(update_conversation_request, 'query'),
   ]),
   outputSchema: update_conversation_response,
 };
 const GETKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetKnowledgeBase',
+  connectorGroup: 'internal',
   summary: `Read a KnowledgeBase`,
   description: `**Spaces method and path for this operation:**
 
@@ -12577,22 +13115,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Read a single KB`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_knowledge_base_request, 'body'),
-    getLooseObjectFromProperty(get_knowledge_base_request, 'path'),
-    getLooseObjectFromProperty(get_knowledge_base_request, 'query'),
+    getZodLooseObjectFromProperty(get_knowledge_base_request, 'body'),
+    getZodLooseObjectFromProperty(get_knowledge_base_request, 'path'),
+    getZodLooseObjectFromProperty(get_knowledge_base_request, 'query'),
   ]),
   outputSchema: get_knowledge_base_response,
 };
 const POSTKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostKnowledgeBase',
+  connectorGroup: 'internal',
   summary: `Create a KnowledgeBase`,
   description: `**Spaces method and path for this operation:**
 
@@ -12601,22 +13140,23 @@ const POSTKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['POST'],
   patterns: ['/api/security_ai_assistant/knowledge_base'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['modelId', 'ignoreSecurityLabs'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_knowledge_base_request, 'body'),
-    getLooseObjectFromProperty(post_knowledge_base_request, 'path'),
-    getLooseObjectFromProperty(post_knowledge_base_request, 'query'),
+    getZodLooseObjectFromProperty(post_knowledge_base_request, 'body'),
+    getZodLooseObjectFromProperty(post_knowledge_base_request, 'path'),
+    getZodLooseObjectFromProperty(post_knowledge_base_request, 'query'),
   ]),
   outputSchema: post_knowledge_base_response,
 };
 const READKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadKnowledgeBase',
+  connectorGroup: 'internal',
   summary: `Read a KnowledgeBase for a resource`,
   description: `**Spaces method and path for this operation:**
 
@@ -12627,22 +13167,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Read a knowledge base with a specific resource identifier.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base/{resource}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['resource'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_knowledge_base_request, 'body'),
-    getLooseObjectFromProperty(read_knowledge_base_request, 'path'),
-    getLooseObjectFromProperty(read_knowledge_base_request, 'query'),
+    getZodLooseObjectFromProperty(read_knowledge_base_request, 'body'),
+    getZodLooseObjectFromProperty(read_knowledge_base_request, 'path'),
+    getZodLooseObjectFromProperty(read_knowledge_base_request, 'query'),
   ]),
   outputSchema: read_knowledge_base_response,
 };
 const CREATEKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateKnowledgeBase',
+  connectorGroup: 'internal',
   summary: `Create a KnowledgeBase for a resource`,
   description: `**Spaces method and path for this operation:**
 
@@ -12653,22 +13194,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a knowledge base with a specific resource identifier.`,
   methods: ['POST'],
   patterns: ['/api/security_ai_assistant/knowledge_base/{resource}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['resource'],
     urlParams: ['modelId', 'ignoreSecurityLabs'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_knowledge_base_request, 'body'),
-    getLooseObjectFromProperty(create_knowledge_base_request, 'path'),
-    getLooseObjectFromProperty(create_knowledge_base_request, 'query'),
+    getZodLooseObjectFromProperty(create_knowledge_base_request, 'body'),
+    getZodLooseObjectFromProperty(create_knowledge_base_request, 'path'),
+    getZodLooseObjectFromProperty(create_knowledge_base_request, 'query'),
   ]),
   outputSchema: create_knowledge_base_response,
 };
 const CREATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateKnowledgeBaseEntry',
+  connectorGroup: 'internal',
   summary: `Create a Knowledge Base Entry`,
   description: `**Spaces method and path for this operation:**
 
@@ -12679,22 +13221,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a Knowledge Base Entry`,
   methods: ['POST'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_knowledge_base_entry_request, 'body'),
-    getLooseObjectFromProperty(create_knowledge_base_entry_request, 'path'),
-    getLooseObjectFromProperty(create_knowledge_base_entry_request, 'query'),
+    getZodLooseObjectFromProperty(create_knowledge_base_entry_request, 'body'),
+    getZodLooseObjectFromProperty(create_knowledge_base_entry_request, 'path'),
+    getZodLooseObjectFromProperty(create_knowledge_base_entry_request, 'query'),
   ]),
   outputSchema: create_knowledge_base_entry_response,
 };
 const PERFORMKNOWLEDGEBASEENTRYBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformKnowledgeBaseEntryBulkAction',
+  connectorGroup: 'internal',
   summary: `Applies a bulk action to multiple Knowledge Base Entries`,
   description: `**Spaces method and path for this operation:**
 
@@ -12705,22 +13248,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs.`,
   methods: ['POST'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/_bulk_action'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['create', 'delete', 'update'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'body'),
-    getLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'path'),
-    getLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'query'),
+    getZodLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'body'),
+    getZodLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'path'),
+    getZodLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'query'),
   ]),
   outputSchema: perform_knowledge_base_entry_bulk_action_response,
 };
 const FINDKNOWLEDGEBASEENTRIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindKnowledgeBaseEntries',
+  connectorGroup: 'internal',
   summary: `Finds Knowledge Base Entries that match the given query.`,
   description: `**Spaces method and path for this operation:**
 
@@ -12731,22 +13275,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Finds Knowledge Base Entries that match the given query.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_knowledge_base_entries_request, 'body'),
-    getLooseObjectFromProperty(find_knowledge_base_entries_request, 'path'),
-    getLooseObjectFromProperty(find_knowledge_base_entries_request, 'query'),
+    getZodLooseObjectFromProperty(find_knowledge_base_entries_request, 'body'),
+    getZodLooseObjectFromProperty(find_knowledge_base_entries_request, 'path'),
+    getZodLooseObjectFromProperty(find_knowledge_base_entries_request, 'query'),
   ]),
   outputSchema: find_knowledge_base_entries_response,
 };
 const DELETEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteKnowledgeBaseEntry',
+  connectorGroup: 'internal',
   summary: `Deletes a single Knowledge Base Entry using the \`id\` field`,
   description: `**Spaces method and path for this operation:**
 
@@ -12757,22 +13302,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete a Knowledge Base Entry by its unique \`id\`.`,
   methods: ['DELETE'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_knowledge_base_entry_request, 'body'),
-    getLooseObjectFromProperty(delete_knowledge_base_entry_request, 'path'),
-    getLooseObjectFromProperty(delete_knowledge_base_entry_request, 'query'),
+    getZodLooseObjectFromProperty(delete_knowledge_base_entry_request, 'body'),
+    getZodLooseObjectFromProperty(delete_knowledge_base_entry_request, 'path'),
+    getZodLooseObjectFromProperty(delete_knowledge_base_entry_request, 'query'),
   ]),
   outputSchema: delete_knowledge_base_entry_response,
 };
 const READKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadKnowledgeBaseEntry',
+  connectorGroup: 'internal',
   summary: `Read a Knowledge Base Entry`,
   description: `**Spaces method and path for this operation:**
 
@@ -12783,22 +13329,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Retrieve a Knowledge Base Entry by its unique \`id\`.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(read_knowledge_base_entry_request, 'body'),
-    getLooseObjectFromProperty(read_knowledge_base_entry_request, 'path'),
-    getLooseObjectFromProperty(read_knowledge_base_entry_request, 'query'),
+    getZodLooseObjectFromProperty(read_knowledge_base_entry_request, 'body'),
+    getZodLooseObjectFromProperty(read_knowledge_base_entry_request, 'path'),
+    getZodLooseObjectFromProperty(read_knowledge_base_entry_request, 'query'),
   ]),
   outputSchema: read_knowledge_base_entry_response,
 };
 const UPDATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateKnowledgeBaseEntry',
+  connectorGroup: 'internal',
   summary: `Update a Knowledge Base Entry`,
   description: `**Spaces method and path for this operation:**
 
@@ -12809,22 +13356,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an existing Knowledge Base Entry by its unique \`id\`.`,
   methods: ['PUT'],
   patterns: ['/api/security_ai_assistant/knowledge_base/entries/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_knowledge_base_entry_request, 'body'),
-    getLooseObjectFromProperty(update_knowledge_base_entry_request, 'path'),
-    getLooseObjectFromProperty(update_knowledge_base_entry_request, 'query'),
+    getZodLooseObjectFromProperty(update_knowledge_base_entry_request, 'body'),
+    getZodLooseObjectFromProperty(update_knowledge_base_entry_request, 'path'),
+    getZodLooseObjectFromProperty(update_knowledge_base_entry_request, 'query'),
   ]),
   outputSchema: update_knowledge_base_entry_response,
 };
 const PERFORMPROMPTSBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformPromptsBulkAction',
+  connectorGroup: 'internal',
   summary: `Apply a bulk action to prompts`,
   description: `**Spaces method and path for this operation:**
 
@@ -12835,22 +13383,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Apply a bulk action to multiple prompts. The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs. This action allows for bulk create, update, or delete operations.`,
   methods: ['POST'],
   patterns: ['/api/security_ai_assistant/prompts/_bulk_action'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['create', 'delete', 'update'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(perform_prompts_bulk_action_request, 'body'),
-    getLooseObjectFromProperty(perform_prompts_bulk_action_request, 'path'),
-    getLooseObjectFromProperty(perform_prompts_bulk_action_request, 'query'),
+    getZodLooseObjectFromProperty(perform_prompts_bulk_action_request, 'body'),
+    getZodLooseObjectFromProperty(perform_prompts_bulk_action_request, 'path'),
+    getZodLooseObjectFromProperty(perform_prompts_bulk_action_request, 'query'),
   ]),
   outputSchema: perform_prompts_bulk_action_response,
 };
 const FINDPROMPTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindPrompts',
+  connectorGroup: 'internal',
   summary: `Get prompts`,
   description: `**Spaces method and path for this operation:**
 
@@ -12861,255 +13410,267 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all prompts based on optional filters, sorting, and pagination.`,
   methods: ['GET'],
   patterns: ['/api/security_ai_assistant/prompts/_find'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_prompts_request, 'body'),
-    getLooseObjectFromProperty(find_prompts_request, 'path'),
-    getLooseObjectFromProperty(find_prompts_request, 'query'),
+    getZodLooseObjectFromProperty(find_prompts_request, 'body'),
+    getZodLooseObjectFromProperty(find_prompts_request, 'path'),
+    getZodLooseObjectFromProperty(find_prompts_request, 'query'),
   ]),
   outputSchema: find_prompts_response,
 };
 const GET_SECURITY_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_security_role',
+  connectorGroup: 'internal',
   summary: `Get all roles`,
-  description: ``,
+  description: null,
   methods: ['GET'],
   patterns: ['/api/security/role'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['replaceDeprecatedPrivileges'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_security_role_request, 'body'),
-    getLooseObjectFromProperty(get_security_role_request, 'path'),
-    getLooseObjectFromProperty(get_security_role_request, 'query'),
+    getZodLooseObjectFromProperty(get_security_role_request, 'body'),
+    getZodLooseObjectFromProperty(get_security_role_request, 'path'),
+    getZodLooseObjectFromProperty(get_security_role_request, 'query'),
   ]),
   outputSchema: get_security_role_response,
 };
 const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_role_query',
+  connectorGroup: 'internal',
   summary: `Query roles`,
-  description: ``,
+  description: null,
   methods: ['POST'],
   patterns: ['/api/security/role/_query'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['filters', 'from', 'query', 'size', 'sort'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_security_role_query_request, 'body'),
-    getLooseObjectFromProperty(post_security_role_query_request, 'path'),
-    getLooseObjectFromProperty(post_security_role_query_request, 'query'),
+    getZodLooseObjectFromProperty(post_security_role_query_request, 'body'),
+    getZodLooseObjectFromProperty(post_security_role_query_request, 'path'),
+    getZodLooseObjectFromProperty(post_security_role_query_request, 'query'),
   ]),
   outputSchema: post_security_role_query_response,
 };
 const DELETE_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_security_role_name',
+  connectorGroup: 'internal',
   summary: `Delete a role`,
-  description: ``,
+  description: null,
   methods: ['DELETE'],
   patterns: ['/api/security/role/{name}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_security_role_name_request, 'body'),
-    getLooseObjectFromProperty(delete_security_role_name_request, 'path'),
-    getLooseObjectFromProperty(delete_security_role_name_request, 'query'),
+    getZodLooseObjectFromProperty(delete_security_role_name_request, 'body'),
+    getZodLooseObjectFromProperty(delete_security_role_name_request, 'path'),
+    getZodLooseObjectFromProperty(delete_security_role_name_request, 'query'),
   ]),
   outputSchema: delete_security_role_name_response,
 };
 const GET_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_security_role_name',
+  connectorGroup: 'internal',
   summary: `Get a role`,
-  description: ``,
+  description: null,
   methods: ['GET'],
   patterns: ['/api/security/role/{name}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['replaceDeprecatedPrivileges'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_security_role_name_request, 'body'),
-    getLooseObjectFromProperty(get_security_role_name_request, 'path'),
-    getLooseObjectFromProperty(get_security_role_name_request, 'query'),
+    getZodLooseObjectFromProperty(get_security_role_name_request, 'body'),
+    getZodLooseObjectFromProperty(get_security_role_name_request, 'path'),
+    getZodLooseObjectFromProperty(get_security_role_name_request, 'query'),
   ]),
   outputSchema: get_security_role_name_response,
 };
 const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_security_role_name',
+  connectorGroup: 'internal',
   summary: `Create or update a role`,
   description: `Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.`,
   methods: ['PUT'],
   patterns: ['/api/security/role/{name}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: ['createOnly'],
     bodyParams: ['description', 'elasticsearch', 'kibana', 'metadata'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_security_role_name_request, 'body'),
-    getLooseObjectFromProperty(put_security_role_name_request, 'path'),
-    getLooseObjectFromProperty(put_security_role_name_request, 'query'),
+    getZodLooseObjectFromProperty(put_security_role_name_request, 'body'),
+    getZodLooseObjectFromProperty(put_security_role_name_request, 'path'),
+    getZodLooseObjectFromProperty(put_security_role_name_request, 'query'),
   ]),
   outputSchema: put_security_role_name_response,
 };
 const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_roles',
+  connectorGroup: 'internal',
   summary: `Create or update roles`,
-  description: ``,
+  description: null,
   methods: ['POST'],
   patterns: ['/api/security/roles'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['roles'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_security_roles_request, 'body'),
-    getLooseObjectFromProperty(post_security_roles_request, 'path'),
-    getLooseObjectFromProperty(post_security_roles_request, 'query'),
+    getZodLooseObjectFromProperty(post_security_roles_request, 'body'),
+    getZodLooseObjectFromProperty(post_security_roles_request, 'path'),
+    getZodLooseObjectFromProperty(post_security_roles_request, 'query'),
   ]),
   outputSchema: post_security_roles_response,
 };
 const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_session_invalidate',
+  connectorGroup: 'internal',
   summary: `Invalidate user sessions`,
   description: `Invalidate user sessions that match a query. To use this API, you must be a superuser.
 `,
   methods: ['POST'],
   patterns: ['/api/security/session/_invalidate'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['match', 'query'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_security_session_invalidate_request, 'body'),
-    getLooseObjectFromProperty(post_security_session_invalidate_request, 'path'),
-    getLooseObjectFromProperty(post_security_session_invalidate_request, 'query'),
+    getZodLooseObjectFromProperty(post_security_session_invalidate_request, 'body'),
+    getZodLooseObjectFromProperty(post_security_session_invalidate_request, 'path'),
+    getZodLooseObjectFromProperty(post_security_session_invalidate_request, 'query'),
   ]),
   outputSchema: post_security_session_invalidate_response,
 };
 const POST_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_url',
+  connectorGroup: 'internal',
   summary: `Create a short URL`,
   description: `Kibana URLs may be long and cumbersome, short URLs are much easier to remember and share.
 Short URLs are created by specifying the locator ID and locator parameters. When a short URL is resolved, the locator ID and locator parameters are used to redirect user to the right Kibana page.
 `,
   methods: ['POST'],
   patterns: ['/api/short_url'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['humanReadableSlug', 'locatorId', 'params', 'slug'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_url_request, 'body'),
-    getLooseObjectFromProperty(post_url_request, 'path'),
-    getLooseObjectFromProperty(post_url_request, 'query'),
+    getZodLooseObjectFromProperty(post_url_request, 'body'),
+    getZodLooseObjectFromProperty(post_url_request, 'path'),
+    getZodLooseObjectFromProperty(post_url_request, 'query'),
   ]),
   outputSchema: post_url_response,
 };
 const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolve_url',
+  connectorGroup: 'internal',
   summary: `Resolve a short URL`,
   description: `Resolve a Kibana short URL by its slug.
 `,
   methods: ['GET'],
   patterns: ['/api/short_url/_slug/{slug}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['slug'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(resolve_url_request, 'body'),
-    getLooseObjectFromProperty(resolve_url_request, 'path'),
-    getLooseObjectFromProperty(resolve_url_request, 'query'),
+    getZodLooseObjectFromProperty(resolve_url_request, 'body'),
+    getZodLooseObjectFromProperty(resolve_url_request, 'path'),
+    getZodLooseObjectFromProperty(resolve_url_request, 'query'),
   ]),
   outputSchema: resolve_url_response,
 };
 const DELETE_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_url',
+  connectorGroup: 'internal',
   summary: `Delete a short URL`,
   description: `Delete a Kibana short URL.
 `,
   methods: ['DELETE'],
   patterns: ['/api/short_url/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_url_request, 'body'),
-    getLooseObjectFromProperty(delete_url_request, 'path'),
-    getLooseObjectFromProperty(delete_url_request, 'query'),
+    getZodLooseObjectFromProperty(delete_url_request, 'body'),
+    getZodLooseObjectFromProperty(delete_url_request, 'path'),
+    getZodLooseObjectFromProperty(delete_url_request, 'query'),
   ]),
   outputSchema: delete_url_response,
 };
 const GET_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_url',
+  connectorGroup: 'internal',
   summary: `Get a short URL`,
   description: `Get a single Kibana short URL.
 `,
   methods: ['GET'],
   patterns: ['/api/short_url/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_url_request, 'body'),
-    getLooseObjectFromProperty(get_url_request, 'path'),
-    getLooseObjectFromProperty(get_url_request, 'query'),
+    getZodLooseObjectFromProperty(get_url_request, 'body'),
+    getZodLooseObjectFromProperty(get_url_request, 'path'),
+    getZodLooseObjectFromProperty(get_url_request, 'query'),
   ]),
   outputSchema: get_url_response,
 };
 const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_copy_saved_objects',
+  connectorGroup: 'internal',
   summary: `Copy saved objects between spaces`,
   description: `It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.`,
   methods: ['POST'],
   patterns: ['/api/spaces/_copy_saved_objects'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -13122,121 +13683,127 @@ const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'body'),
-    getLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'path'),
-    getLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'query'),
+    getZodLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'body'),
+    getZodLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'path'),
+    getZodLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'query'),
   ]),
   outputSchema: post_spaces_copy_saved_objects_response,
 };
 const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_disable_legacy_url_aliases',
+  connectorGroup: 'internal',
   summary: `Disable legacy URL aliases`,
-  description: ``,
+  description: null,
   methods: ['POST'],
   patterns: ['/api/spaces/_disable_legacy_url_aliases'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['aliases'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'body'),
-    getLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'path'),
-    getLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'query'),
+    getZodLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'body'),
+    getZodLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'path'),
+    getZodLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'query'),
   ]),
   outputSchema: post_spaces_disable_legacy_url_aliases_response,
 };
 const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_get_shareable_references',
+  connectorGroup: 'internal',
   summary: `Get shareable references`,
   description: `Collect references and space contexts for saved objects.`,
   methods: ['POST'],
   patterns: ['/api/spaces/_get_shareable_references'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['objects'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'body'),
-    getLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'path'),
-    getLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'query'),
+    getZodLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'body'),
+    getZodLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'path'),
+    getZodLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'query'),
   ]),
   outputSchema: post_spaces_get_shareable_references_response,
 };
 const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_resolve_copy_saved_objects_errors',
+  connectorGroup: 'internal',
   summary: `Resolve conflicts copying saved objects`,
   description: `Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.`,
   methods: ['POST'],
   patterns: ['/api/spaces/_resolve_copy_saved_objects_errors'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['compatibilityMode', 'createNewCopies', 'includeReferences', 'objects', 'retries'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'body'),
-    getLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'path'),
-    getLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'query'),
+    getZodLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'body'),
+    getZodLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'path'),
+    getZodLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'query'),
   ]),
   outputSchema: post_spaces_resolve_copy_saved_objects_errors_response,
 };
 const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_update_objects_spaces',
+  connectorGroup: 'internal',
   summary: `Update saved objects in spaces`,
   description: `Update one or more saved objects to add or remove them from some spaces.`,
   methods: ['POST'],
   patterns: ['/api/spaces/_update_objects_spaces'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: ['objects', 'spacesToAdd', 'spacesToRemove'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'body'),
-    getLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'path'),
-    getLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'query'),
+    getZodLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'body'),
+    getZodLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'path'),
+    getZodLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'query'),
   ]),
   outputSchema: post_spaces_update_objects_spaces_response,
 };
 const GET_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_spaces_space',
+  connectorGroup: 'internal',
   summary: `Get all spaces`,
-  description: ``,
+  description: null,
   methods: ['GET'],
   patterns: ['/api/spaces/space'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['purpose', 'include_authorized_purposes'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_spaces_space_request, 'body'),
-    getLooseObjectFromProperty(get_spaces_space_request, 'path'),
-    getLooseObjectFromProperty(get_spaces_space_request, 'query'),
+    getZodLooseObjectFromProperty(get_spaces_space_request, 'body'),
+    getZodLooseObjectFromProperty(get_spaces_space_request, 'path'),
+    getZodLooseObjectFromProperty(get_spaces_space_request, 'query'),
   ]),
   outputSchema: get_spaces_space_response,
 };
 const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_space',
+  connectorGroup: 'internal',
   summary: `Create a space`,
-  description: ``,
+  description: null,
   methods: ['POST'],
   patterns: ['/api/spaces/space'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -13252,61 +13819,64 @@ const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_spaces_space_request, 'body'),
-    getLooseObjectFromProperty(post_spaces_space_request, 'path'),
-    getLooseObjectFromProperty(post_spaces_space_request, 'query'),
+    getZodLooseObjectFromProperty(post_spaces_space_request, 'body'),
+    getZodLooseObjectFromProperty(post_spaces_space_request, 'path'),
+    getZodLooseObjectFromProperty(post_spaces_space_request, 'query'),
   ]),
   outputSchema: post_spaces_space_response,
 };
 const DELETE_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_spaces_space_id',
+  connectorGroup: 'internal',
   summary: `Delete a space`,
   description: `When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.`,
   methods: ['DELETE'],
   patterns: ['/api/spaces/space/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_spaces_space_id_request, 'body'),
-    getLooseObjectFromProperty(delete_spaces_space_id_request, 'path'),
-    getLooseObjectFromProperty(delete_spaces_space_id_request, 'query'),
+    getZodLooseObjectFromProperty(delete_spaces_space_id_request, 'body'),
+    getZodLooseObjectFromProperty(delete_spaces_space_id_request, 'path'),
+    getZodLooseObjectFromProperty(delete_spaces_space_id_request, 'query'),
   ]),
   outputSchema: delete_spaces_space_id_response,
 };
 const GET_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_spaces_space_id',
+  connectorGroup: 'internal',
   summary: `Get a space`,
-  description: ``,
+  description: null,
   methods: ['GET'],
   patterns: ['/api/spaces/space/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_spaces_space_id_request, 'body'),
-    getLooseObjectFromProperty(get_spaces_space_id_request, 'path'),
-    getLooseObjectFromProperty(get_spaces_space_id_request, 'query'),
+    getZodLooseObjectFromProperty(get_spaces_space_id_request, 'body'),
+    getZodLooseObjectFromProperty(get_spaces_space_id_request, 'path'),
+    getZodLooseObjectFromProperty(get_spaces_space_id_request, 'query'),
   ]),
   outputSchema: get_spaces_space_id_response,
 };
 const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_spaces_space_id',
+  connectorGroup: 'internal',
   summary: `Update a space`,
-  description: ``,
+  description: null,
   methods: ['PUT'],
   patterns: ['/api/spaces/space/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [
@@ -13322,34 +13892,36 @@ const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_spaces_space_id_request, 'body'),
-    getLooseObjectFromProperty(put_spaces_space_id_request, 'path'),
-    getLooseObjectFromProperty(put_spaces_space_id_request, 'query'),
+    getZodLooseObjectFromProperty(put_spaces_space_id_request, 'body'),
+    getZodLooseObjectFromProperty(put_spaces_space_id_request, 'path'),
+    getZodLooseObjectFromProperty(put_spaces_space_id_request, 'query'),
   ]),
   outputSchema: put_spaces_space_id_response,
 };
 const GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_status',
+  connectorGroup: 'internal',
   summary: `Get Kibana's current status`,
-  description: ``,
+  description: null,
   methods: ['GET'],
   patterns: ['/api/status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['v7format', 'v8format'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_status_request, 'body'),
-    getLooseObjectFromProperty(get_status_request, 'path'),
-    getLooseObjectFromProperty(get_status_request, 'query'),
+    getZodLooseObjectFromProperty(get_status_request, 'body'),
+    getZodLooseObjectFromProperty(get_status_request, 'path'),
+    getZodLooseObjectFromProperty(get_status_request, 'query'),
   ]),
   outputSchema: get_status_response,
 };
 const GET_STREAMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams',
+  connectorGroup: 'internal',
   summary: `Get stream list`,
   description: `**Spaces method and path for this operation:**
 
@@ -13360,22 +13932,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Fetches list of all streams<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_streams_request, 'body'),
-    getLooseObjectFromProperty(get_streams_request, 'path'),
-    getLooseObjectFromProperty(get_streams_request, 'query'),
+    getZodLooseObjectFromProperty(get_streams_request, 'body'),
+    getZodLooseObjectFromProperty(get_streams_request, 'path'),
+    getZodLooseObjectFromProperty(get_streams_request, 'query'),
   ]),
   outputSchema: get_streams_response,
 };
 const POST_STREAMS_DISABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_disable',
+  connectorGroup: 'internal',
   summary: `Disable streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -13386,22 +13959,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/_disable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_disable_request, 'body'),
-    getLooseObjectFromProperty(post_streams_disable_request, 'path'),
-    getLooseObjectFromProperty(post_streams_disable_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_disable_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_disable_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_disable_request, 'query'),
   ]),
   outputSchema: post_streams_disable_response,
 };
 const POST_STREAMS_ENABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_enable',
+  connectorGroup: 'internal',
   summary: `Enable streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -13412,22 +13986,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Enables wired streams<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/_enable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_enable_request, 'body'),
-    getLooseObjectFromProperty(post_streams_enable_request, 'path'),
-    getLooseObjectFromProperty(post_streams_enable_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_enable_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_enable_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_enable_request, 'query'),
   ]),
   outputSchema: post_streams_enable_response,
 };
 const POST_STREAMS_RESYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_resync',
+  connectorGroup: 'internal',
   summary: `Resync streams`,
   description: `**Spaces method and path for this operation:**
 
@@ -13438,22 +14013,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/_resync'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_resync_request, 'body'),
-    getLooseObjectFromProperty(post_streams_resync_request, 'path'),
-    getLooseObjectFromProperty(post_streams_resync_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_resync_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_resync_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_resync_request, 'query'),
   ]),
   outputSchema: post_streams_resync_response,
 };
 const DELETE_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name',
+  connectorGroup: 'internal',
   summary: `Delete a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13464,22 +14040,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Deletes a stream definition and the underlying data stream<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['DELETE'],
   patterns: ['/api/streams/{name}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_streams_name_request, 'body'),
-    getLooseObjectFromProperty(delete_streams_name_request, 'path'),
-    getLooseObjectFromProperty(delete_streams_name_request, 'query'),
+    getZodLooseObjectFromProperty(delete_streams_name_request, 'body'),
+    getZodLooseObjectFromProperty(delete_streams_name_request, 'path'),
+    getZodLooseObjectFromProperty(delete_streams_name_request, 'query'),
   ]),
   outputSchema: delete_streams_name_response,
 };
 const GET_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name',
+  connectorGroup: 'internal',
   summary: `Get a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13490,22 +14067,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Fetches a stream definition and associated dashboards<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams/{name}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_streams_name_request, 'body'),
-    getLooseObjectFromProperty(get_streams_name_request, 'path'),
-    getLooseObjectFromProperty(get_streams_name_request, 'query'),
+    getZodLooseObjectFromProperty(get_streams_name_request, 'body'),
+    getZodLooseObjectFromProperty(get_streams_name_request, 'path'),
+    getZodLooseObjectFromProperty(get_streams_name_request, 'query'),
   ]),
   outputSchema: get_streams_name_response,
 };
 const PUT_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name',
+  connectorGroup: 'internal',
   summary: `Create or update a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13516,22 +14094,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Creates or updates a stream definition. Classic streams can not be created through this API, only updated<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['PUT'],
   patterns: ['/api/streams/{name}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_streams_name_request, 'body'),
-    getLooseObjectFromProperty(put_streams_name_request, 'path'),
-    getLooseObjectFromProperty(put_streams_name_request, 'query'),
+    getZodLooseObjectFromProperty(put_streams_name_request, 'body'),
+    getZodLooseObjectFromProperty(put_streams_name_request, 'path'),
+    getZodLooseObjectFromProperty(put_streams_name_request, 'query'),
   ]),
   outputSchema: put_streams_name_response,
 };
 const POST_STREAMS_NAME_FORK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_fork',
+  connectorGroup: 'internal',
   summary: `Fork a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13542,22 +14121,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Forks a wired stream and creates a child stream<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/{name}/_fork'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: ['status', 'stream', 'where'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_name_fork_request, 'body'),
-    getLooseObjectFromProperty(post_streams_name_fork_request, 'path'),
-    getLooseObjectFromProperty(post_streams_name_fork_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_name_fork_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_name_fork_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_name_fork_request, 'query'),
   ]),
   outputSchema: post_streams_name_fork_response,
 };
 const GET_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_group',
+  connectorGroup: 'internal',
   summary: `Get group stream settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -13568,22 +14148,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Fetches the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams/{name}/_group'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_streams_name_group_request, 'body'),
-    getLooseObjectFromProperty(get_streams_name_group_request, 'path'),
-    getLooseObjectFromProperty(get_streams_name_group_request, 'query'),
+    getZodLooseObjectFromProperty(get_streams_name_group_request, 'body'),
+    getZodLooseObjectFromProperty(get_streams_name_group_request, 'path'),
+    getZodLooseObjectFromProperty(get_streams_name_group_request, 'query'),
   ]),
   outputSchema: get_streams_name_group_response,
 };
 const PUT_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_group',
+  connectorGroup: 'internal',
   summary: `Upsert group stream settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -13594,22 +14175,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Upserts the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['PUT'],
   patterns: ['/api/streams/{name}/_group'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: ['group'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_streams_name_group_request, 'body'),
-    getLooseObjectFromProperty(put_streams_name_group_request, 'path'),
-    getLooseObjectFromProperty(put_streams_name_group_request, 'query'),
+    getZodLooseObjectFromProperty(put_streams_name_group_request, 'body'),
+    getZodLooseObjectFromProperty(put_streams_name_group_request, 'path'),
+    getZodLooseObjectFromProperty(put_streams_name_group_request, 'query'),
   ]),
   outputSchema: put_streams_name_group_response,
 };
 const GET_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_ingest',
+  connectorGroup: 'internal',
   summary: `Get ingest stream settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -13620,22 +14202,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Fetches the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams/{name}/_ingest'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_streams_name_ingest_request, 'body'),
-    getLooseObjectFromProperty(get_streams_name_ingest_request, 'path'),
-    getLooseObjectFromProperty(get_streams_name_ingest_request, 'query'),
+    getZodLooseObjectFromProperty(get_streams_name_ingest_request, 'body'),
+    getZodLooseObjectFromProperty(get_streams_name_ingest_request, 'path'),
+    getZodLooseObjectFromProperty(get_streams_name_ingest_request, 'query'),
   ]),
   outputSchema: get_streams_name_ingest_response,
 };
 const PUT_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_ingest',
+  connectorGroup: 'internal',
   summary: `Update ingest stream settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -13646,22 +14229,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Upserts the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['PUT'],
   patterns: ['/api/streams/{name}/_ingest'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: ['ingest'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_streams_name_ingest_request, 'body'),
-    getLooseObjectFromProperty(put_streams_name_ingest_request, 'path'),
-    getLooseObjectFromProperty(put_streams_name_ingest_request, 'query'),
+    getZodLooseObjectFromProperty(put_streams_name_ingest_request, 'body'),
+    getZodLooseObjectFromProperty(put_streams_name_ingest_request, 'path'),
+    getZodLooseObjectFromProperty(put_streams_name_ingest_request, 'query'),
   ]),
   outputSchema: put_streams_name_ingest_response,
 };
 const POST_STREAMS_NAME_CONTENT_EXPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_content_export',
+  connectorGroup: 'internal',
   summary: `Export stream content`,
   description: `**Spaces method and path for this operation:**
 
@@ -13672,22 +14256,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/{name}/content/export'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: ['description', 'include', 'name', 'version'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_name_content_export_request, 'body'),
-    getLooseObjectFromProperty(post_streams_name_content_export_request, 'path'),
-    getLooseObjectFromProperty(post_streams_name_content_export_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_name_content_export_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_name_content_export_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_name_content_export_request, 'query'),
   ]),
   outputSchema: post_streams_name_content_export_response,
 };
 const POST_STREAMS_NAME_CONTENT_IMPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_content_import',
+  connectorGroup: 'internal',
   summary: `Import content into a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13698,22 +14283,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/{name}/content/import'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_name_content_import_request, 'body'),
-    getLooseObjectFromProperty(post_streams_name_content_import_request, 'path'),
-    getLooseObjectFromProperty(post_streams_name_content_import_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_name_content_import_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_name_content_import_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_name_content_import_request, 'query'),
   ]),
   outputSchema: post_streams_name_content_import_response,
 };
 const GET_STREAMS_NAME_DASHBOARDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_dashboards',
+  connectorGroup: 'internal',
   summary: `Get stream dashboards`,
   description: `**Spaces method and path for this operation:**
 
@@ -13724,22 +14310,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Fetches all dashboards linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams/{name}/dashboards'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_streams_name_dashboards_request, 'body'),
-    getLooseObjectFromProperty(get_streams_name_dashboards_request, 'path'),
-    getLooseObjectFromProperty(get_streams_name_dashboards_request, 'query'),
+    getZodLooseObjectFromProperty(get_streams_name_dashboards_request, 'body'),
+    getZodLooseObjectFromProperty(get_streams_name_dashboards_request, 'path'),
+    getZodLooseObjectFromProperty(get_streams_name_dashboards_request, 'query'),
   ]),
   outputSchema: get_streams_name_dashboards_response,
 };
 const POST_STREAMS_NAME_DASHBOARDS_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_dashboards_bulk',
+  connectorGroup: 'internal',
   summary: `Bulk update dashboards`,
   description: `**Spaces method and path for this operation:**
 
@@ -13750,22 +14337,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/{name}/dashboards/_bulk'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: ['operations'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'body'),
-    getLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'path'),
-    getLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'query'),
   ]),
   outputSchema: post_streams_name_dashboards_bulk_response,
 };
 const DELETE_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name_dashboards_dashboardid',
+  connectorGroup: 'internal',
   summary: `Unlink a dashboard from a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13776,22 +14364,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['DELETE'],
   patterns: ['/api/streams/{name}/dashboards/{dashboardId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name', 'dashboardId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'body'),
-    getLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'path'),
-    getLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'query'),
   ]),
   outputSchema: delete_streams_name_dashboards_dashboardid_response,
 };
 const PUT_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_dashboards_dashboardid',
+  connectorGroup: 'internal',
   summary: `Link a dashboard to a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13802,22 +14391,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['PUT'],
   patterns: ['/api/streams/{name}/dashboards/{dashboardId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name', 'dashboardId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'body'),
-    getLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'path'),
-    getLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'query'),
+    getZodLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'body'),
+    getZodLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'path'),
+    getZodLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'query'),
   ]),
   outputSchema: put_streams_name_dashboards_dashboardid_response,
 };
 const GET_STREAMS_NAME_QUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_queries',
+  connectorGroup: 'internal',
   summary: `Get stream queries`,
   description: `**Spaces method and path for this operation:**
 
@@ -13828,22 +14418,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams/{name}/queries'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_streams_name_queries_request, 'body'),
-    getLooseObjectFromProperty(get_streams_name_queries_request, 'path'),
-    getLooseObjectFromProperty(get_streams_name_queries_request, 'query'),
+    getZodLooseObjectFromProperty(get_streams_name_queries_request, 'body'),
+    getZodLooseObjectFromProperty(get_streams_name_queries_request, 'path'),
+    getZodLooseObjectFromProperty(get_streams_name_queries_request, 'query'),
   ]),
   outputSchema: get_streams_name_queries_response,
 };
 const POST_STREAMS_NAME_QUERIES_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_queries_bulk',
+  connectorGroup: 'internal',
   summary: `Bulk update queries`,
   description: `**Spaces method and path for this operation:**
 
@@ -13854,22 +14445,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Bulk update queries of a stream. Can add new queries and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/{name}/queries/_bulk'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: ['operations'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'body'),
-    getLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'path'),
-    getLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'query'),
   ]),
   outputSchema: post_streams_name_queries_bulk_response,
 };
 const DELETE_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name_queries_queryid',
+  connectorGroup: 'internal',
   summary: `Remove a query from a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13880,22 +14472,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['DELETE'],
   patterns: ['/api/streams/{name}/queries/{queryId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name', 'queryId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'body'),
-    getLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'path'),
-    getLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'query'),
   ]),
   outputSchema: delete_streams_name_queries_queryid_response,
 };
 const PUT_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_queries_queryid',
+  connectorGroup: 'internal',
   summary: `Upsert a query to a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13906,22 +14499,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['PUT'],
   patterns: ['/api/streams/{name}/queries/{queryId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name', 'queryId'],
     urlParams: [],
     bodyParams: ['feature', 'kql', 'title'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'body'),
-    getLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'path'),
-    getLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'query'),
+    getZodLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'body'),
+    getZodLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'path'),
+    getZodLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'query'),
   ]),
   outputSchema: put_streams_name_queries_queryid_response,
 };
 const GET_STREAMS_NAME_RULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_rules',
+  connectorGroup: 'internal',
   summary: `Get stream rules`,
   description: `**Spaces method and path for this operation:**
 
@@ -13932,22 +14526,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams/{name}/rules'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_streams_name_rules_request, 'body'),
-    getLooseObjectFromProperty(get_streams_name_rules_request, 'path'),
-    getLooseObjectFromProperty(get_streams_name_rules_request, 'query'),
+    getZodLooseObjectFromProperty(get_streams_name_rules_request, 'body'),
+    getZodLooseObjectFromProperty(get_streams_name_rules_request, 'path'),
+    getZodLooseObjectFromProperty(get_streams_name_rules_request, 'query'),
   ]),
   outputSchema: get_streams_name_rules_response,
 };
 const DELETE_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name_rules_ruleid',
+  connectorGroup: 'internal',
   summary: `Unlink a rule from a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13958,22 +14553,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['DELETE'],
   patterns: ['/api/streams/{name}/rules/{ruleId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name', 'ruleId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'body'),
-    getLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'path'),
-    getLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'query'),
+    getZodLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'body'),
+    getZodLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'path'),
+    getZodLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'query'),
   ]),
   outputSchema: delete_streams_name_rules_ruleid_response,
 };
 const PUT_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_rules_ruleid',
+  connectorGroup: 'internal',
   summary: `Link a rule to a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -13984,22 +14580,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
   methods: ['PUT'],
   patterns: ['/api/streams/{name}/rules/{ruleId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name', 'ruleId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'body'),
-    getLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'path'),
-    getLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'query'),
+    getZodLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'body'),
+    getZodLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'path'),
+    getZodLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'query'),
   ]),
   outputSchema: put_streams_name_rules_ruleid_response,
 };
 const GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_significant_events',
+  connectorGroup: 'internal',
   summary: `Read the significant events`,
   description: `**Spaces method and path for this operation:**
 
@@ -14010,22 +14607,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
   patterns: ['/api/streams/{name}/significant_events'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['from', 'to', 'bucketSize'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_streams_name_significant_events_request, 'body'),
-    getLooseObjectFromProperty(get_streams_name_significant_events_request, 'path'),
-    getLooseObjectFromProperty(get_streams_name_significant_events_request, 'query'),
+    getZodLooseObjectFromProperty(get_streams_name_significant_events_request, 'body'),
+    getZodLooseObjectFromProperty(get_streams_name_significant_events_request, 'path'),
+    getZodLooseObjectFromProperty(get_streams_name_significant_events_request, 'query'),
   ]),
   outputSchema: get_streams_name_significant_events_response,
 };
 const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_GENERATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_significant_events_generate',
+  connectorGroup: 'internal',
   summary: `Generate significant events`,
   description: `**Spaces method and path for this operation:**
 
@@ -14036,22 +14634,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Generate significant events queries based on the stream data<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/{name}/significant_events/_generate'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: ['connectorId', 'currentDate', 'from', 'to'],
     bodyParams: ['feature'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'body'),
-    getLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'path'),
-    getLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'query'),
   ]),
   outputSchema: post_streams_name_significant_events_generate_response,
 };
 const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_PREVIEW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_significant_events_preview',
+  connectorGroup: 'internal',
   summary: `Preview significant events`,
   description: `**Spaces method and path for this operation:**
 
@@ -14062,22 +14661,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['POST'],
   patterns: ['/api/streams/{name}/significant_events/_preview'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['name'],
     urlParams: ['from', 'to', 'bucketSize'],
     bodyParams: ['query'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'body'),
-    getLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'path'),
-    getLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'query'),
+    getZodLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'body'),
+    getZodLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'path'),
+    getZodLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'query'),
   ]),
   outputSchema: post_streams_name_significant_events_preview_response,
 };
 const POST_SYNTHETICS_MONITOR_TEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_synthetics_monitor_test',
+  connectorGroup: 'internal',
   summary: `Trigger an on-demand test run for a monitor`,
   description: `**Spaces method and path for this operation:**
 
@@ -14089,22 +14689,23 @@ Trigger an immediate test execution for the specified monitor. The response incl
 `,
   methods: ['POST'],
   patterns: ['/api/synthetics/monitor/test/{monitorId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['monitorId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_synthetics_monitor_test_request, 'body'),
-    getLooseObjectFromProperty(post_synthetics_monitor_test_request, 'path'),
-    getLooseObjectFromProperty(post_synthetics_monitor_test_request, 'query'),
+    getZodLooseObjectFromProperty(post_synthetics_monitor_test_request, 'body'),
+    getZodLooseObjectFromProperty(post_synthetics_monitor_test_request, 'path'),
+    getZodLooseObjectFromProperty(post_synthetics_monitor_test_request, 'query'),
   ]),
   outputSchema: post_synthetics_monitor_test_response,
 };
 const GET_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_synthetic_monitors',
+  connectorGroup: 'internal',
   summary: `Get monitors`,
   description: `**Spaces method and path for this operation:**
 
@@ -14117,9 +14718,9 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
 `,
   methods: ['GET'],
   patterns: ['/api/synthetics/monitors'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'filter',
@@ -14139,14 +14740,15 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_synthetic_monitors_request, 'body'),
-    getLooseObjectFromProperty(get_synthetic_monitors_request, 'path'),
-    getLooseObjectFromProperty(get_synthetic_monitors_request, 'query'),
+    getZodLooseObjectFromProperty(get_synthetic_monitors_request, 'body'),
+    getZodLooseObjectFromProperty(get_synthetic_monitors_request, 'path'),
+    getZodLooseObjectFromProperty(get_synthetic_monitors_request, 'query'),
   ]),
   outputSchema: get_synthetic_monitors_response,
 };
 const POST_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_synthetic_monitors',
+  connectorGroup: 'internal',
   summary: `Create a monitor`,
   description: `**Spaces method and path for this operation:**
 
@@ -14159,22 +14761,23 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 `,
   methods: ['POST'],
   patterns: ['/api/synthetics/monitors'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_synthetic_monitors_request, 'body'),
-    getLooseObjectFromProperty(post_synthetic_monitors_request, 'path'),
-    getLooseObjectFromProperty(post_synthetic_monitors_request, 'query'),
+    getZodLooseObjectFromProperty(post_synthetic_monitors_request, 'body'),
+    getZodLooseObjectFromProperty(post_synthetic_monitors_request, 'path'),
+    getZodLooseObjectFromProperty(post_synthetic_monitors_request, 'query'),
   ]),
   outputSchema: post_synthetic_monitors_response,
 };
 const DELETE_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_synthetic_monitors',
+  connectorGroup: 'internal',
   summary: `Delete monitors`,
   description: `**Spaces method and path for this operation:**
 
@@ -14186,22 +14789,23 @@ Delete multiple monitors by sending a list of config IDs.
 `,
   methods: ['POST'],
   patterns: ['/api/synthetics/monitors/_bulk_delete'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['ids'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_synthetic_monitors_request, 'body'),
-    getLooseObjectFromProperty(delete_synthetic_monitors_request, 'path'),
-    getLooseObjectFromProperty(delete_synthetic_monitors_request, 'query'),
+    getZodLooseObjectFromProperty(delete_synthetic_monitors_request, 'body'),
+    getZodLooseObjectFromProperty(delete_synthetic_monitors_request, 'path'),
+    getZodLooseObjectFromProperty(delete_synthetic_monitors_request, 'query'),
   ]),
   outputSchema: delete_synthetic_monitors_response,
 };
 const DELETE_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_synthetic_monitor',
+  connectorGroup: 'internal',
   summary: `Delete a monitor`,
   description: `**Spaces method and path for this operation:**
 
@@ -14214,22 +14818,23 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 `,
   methods: ['DELETE'],
   patterns: ['/api/synthetics/monitors/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_synthetic_monitor_request, 'body'),
-    getLooseObjectFromProperty(delete_synthetic_monitor_request, 'path'),
-    getLooseObjectFromProperty(delete_synthetic_monitor_request, 'query'),
+    getZodLooseObjectFromProperty(delete_synthetic_monitor_request, 'body'),
+    getZodLooseObjectFromProperty(delete_synthetic_monitor_request, 'path'),
+    getZodLooseObjectFromProperty(delete_synthetic_monitor_request, 'query'),
   ]),
   outputSchema: delete_synthetic_monitor_response,
 };
 const GET_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_synthetic_monitor',
+  connectorGroup: 'internal',
   summary: `Get a monitor`,
   description: `**Spaces method and path for this operation:**
 
@@ -14238,22 +14843,23 @@ const GET_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/synthetics/monitors/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_synthetic_monitor_request, 'body'),
-    getLooseObjectFromProperty(get_synthetic_monitor_request, 'path'),
-    getLooseObjectFromProperty(get_synthetic_monitor_request, 'query'),
+    getZodLooseObjectFromProperty(get_synthetic_monitor_request, 'body'),
+    getZodLooseObjectFromProperty(get_synthetic_monitor_request, 'path'),
+    getZodLooseObjectFromProperty(get_synthetic_monitor_request, 'query'),
   ]),
   outputSchema: get_synthetic_monitor_response,
 };
 const PUT_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_synthetic_monitor',
+  connectorGroup: 'internal',
   summary: `Update a monitor`,
   description: `**Spaces method and path for this operation:**
 
@@ -14267,22 +14873,23 @@ You can also partially update a monitor. This will only update the fields that a
 `,
   methods: ['PUT'],
   patterns: ['/api/synthetics/monitors/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_synthetic_monitor_request, 'body'),
-    getLooseObjectFromProperty(put_synthetic_monitor_request, 'path'),
-    getLooseObjectFromProperty(put_synthetic_monitor_request, 'query'),
+    getZodLooseObjectFromProperty(put_synthetic_monitor_request, 'body'),
+    getZodLooseObjectFromProperty(put_synthetic_monitor_request, 'path'),
+    getZodLooseObjectFromProperty(put_synthetic_monitor_request, 'query'),
   ]),
   outputSchema: put_synthetic_monitor_response,
 };
 const GET_PARAMETERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_parameters',
+  connectorGroup: 'internal',
   summary: `Get parameters`,
   description: `**Spaces method and path for this operation:**
 
@@ -14294,22 +14901,23 @@ Get a list of all parameters. You must have \`read\` privileges for the Syntheti
 `,
   methods: ['GET'],
   patterns: ['/api/synthetics/params'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_parameters_request, 'body'),
-    getLooseObjectFromProperty(get_parameters_request, 'path'),
-    getLooseObjectFromProperty(get_parameters_request, 'query'),
+    getZodLooseObjectFromProperty(get_parameters_request, 'body'),
+    getZodLooseObjectFromProperty(get_parameters_request, 'path'),
+    getZodLooseObjectFromProperty(get_parameters_request, 'query'),
   ]),
   outputSchema: get_parameters_response,
 };
 const POST_PARAMETERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_parameters',
+  connectorGroup: 'internal',
   summary: `Add parameters`,
   description: `**Spaces method and path for this operation:**
 
@@ -14322,22 +14930,23 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 `,
   methods: ['POST'],
   patterns: ['/api/synthetics/params'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_parameters_request, 'body'),
-    getLooseObjectFromProperty(post_parameters_request, 'path'),
-    getLooseObjectFromProperty(post_parameters_request, 'query'),
+    getZodLooseObjectFromProperty(post_parameters_request, 'body'),
+    getZodLooseObjectFromProperty(post_parameters_request, 'path'),
+    getZodLooseObjectFromProperty(post_parameters_request, 'query'),
   ]),
   outputSchema: post_parameters_response,
 };
 const DELETE_PARAMETERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_parameters',
+  connectorGroup: 'internal',
   summary: `Delete parameters`,
   description: `**Spaces method and path for this operation:**
 
@@ -14350,22 +14959,23 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 `,
   methods: ['DELETE'],
   patterns: ['/api/synthetics/params/_bulk_delete'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['ids'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_parameters_request, 'body'),
-    getLooseObjectFromProperty(delete_parameters_request, 'path'),
-    getLooseObjectFromProperty(delete_parameters_request, 'query'),
+    getZodLooseObjectFromProperty(delete_parameters_request, 'body'),
+    getZodLooseObjectFromProperty(delete_parameters_request, 'path'),
+    getZodLooseObjectFromProperty(delete_parameters_request, 'query'),
   ]),
   outputSchema: delete_parameters_response,
 };
 const DELETE_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_parameter',
+  connectorGroup: 'internal',
   summary: `Delete a parameter`,
   description: `**Spaces method and path for this operation:**
 
@@ -14378,22 +14988,23 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 `,
   methods: ['DELETE'],
   patterns: ['/api/synthetics/params/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_parameter_request, 'body'),
-    getLooseObjectFromProperty(delete_parameter_request, 'path'),
-    getLooseObjectFromProperty(delete_parameter_request, 'query'),
+    getZodLooseObjectFromProperty(delete_parameter_request, 'body'),
+    getZodLooseObjectFromProperty(delete_parameter_request, 'path'),
+    getZodLooseObjectFromProperty(delete_parameter_request, 'query'),
   ]),
   outputSchema: delete_parameter_response,
 };
 const GET_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_parameter',
+  connectorGroup: 'internal',
   summary: `Get a parameter`,
   description: `**Spaces method and path for this operation:**
 
@@ -14406,22 +15017,23 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
 `,
   methods: ['GET'],
   patterns: ['/api/synthetics/params/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_parameter_request, 'body'),
-    getLooseObjectFromProperty(get_parameter_request, 'path'),
-    getLooseObjectFromProperty(get_parameter_request, 'query'),
+    getZodLooseObjectFromProperty(get_parameter_request, 'body'),
+    getZodLooseObjectFromProperty(get_parameter_request, 'path'),
+    getZodLooseObjectFromProperty(get_parameter_request, 'query'),
   ]),
   outputSchema: get_parameter_response,
 };
 const PUT_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_parameter',
+  connectorGroup: 'internal',
   summary: `Update a parameter`,
   description: `**Spaces method and path for this operation:**
 
@@ -14434,22 +15046,23 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 `,
   methods: ['PUT'],
   patterns: ['/api/synthetics/params/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['description', 'key', 'tags', 'value'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_parameter_request, 'body'),
-    getLooseObjectFromProperty(put_parameter_request, 'path'),
-    getLooseObjectFromProperty(put_parameter_request, 'query'),
+    getZodLooseObjectFromProperty(put_parameter_request, 'body'),
+    getZodLooseObjectFromProperty(put_parameter_request, 'path'),
+    getZodLooseObjectFromProperty(put_parameter_request, 'query'),
   ]),
   outputSchema: put_parameter_response,
 };
 const GET_PRIVATE_LOCATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_private_locations',
+  connectorGroup: 'internal',
   summary: `Get private locations`,
   description: `**Spaces method and path for this operation:**
 
@@ -14462,22 +15075,23 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
 `,
   methods: ['GET'],
   patterns: ['/api/synthetics/private_locations'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_private_locations_request, 'body'),
-    getLooseObjectFromProperty(get_private_locations_request, 'path'),
-    getLooseObjectFromProperty(get_private_locations_request, 'query'),
+    getZodLooseObjectFromProperty(get_private_locations_request, 'body'),
+    getZodLooseObjectFromProperty(get_private_locations_request, 'path'),
+    getZodLooseObjectFromProperty(get_private_locations_request, 'query'),
   ]),
   outputSchema: get_private_locations_response,
 };
 const POST_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_private_location',
+  connectorGroup: 'internal',
   summary: `Create a private location`,
   description: `**Spaces method and path for this operation:**
 
@@ -14488,22 +15102,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 You must have \`all\` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.`,
   methods: ['POST'],
   patterns: ['/api/synthetics/private_locations'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['agentPolicyId', 'geo', 'label', 'spaces', 'tags'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(post_private_location_request, 'body'),
-    getLooseObjectFromProperty(post_private_location_request, 'path'),
-    getLooseObjectFromProperty(post_private_location_request, 'query'),
+    getZodLooseObjectFromProperty(post_private_location_request, 'body'),
+    getZodLooseObjectFromProperty(post_private_location_request, 'path'),
+    getZodLooseObjectFromProperty(post_private_location_request, 'query'),
   ]),
   outputSchema: post_private_location_response,
 };
 const DELETE_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_private_location',
+  connectorGroup: 'internal',
   summary: `Delete a private location`,
   description: `**Spaces method and path for this operation:**
 
@@ -14517,22 +15132,23 @@ A location cannot be deleted if it has associated monitors in use. You must dele
 `,
   methods: ['DELETE'],
   patterns: ['/api/synthetics/private_locations/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_private_location_request, 'body'),
-    getLooseObjectFromProperty(delete_private_location_request, 'path'),
-    getLooseObjectFromProperty(delete_private_location_request, 'query'),
+    getZodLooseObjectFromProperty(delete_private_location_request, 'body'),
+    getZodLooseObjectFromProperty(delete_private_location_request, 'path'),
+    getZodLooseObjectFromProperty(delete_private_location_request, 'query'),
   ]),
   outputSchema: delete_private_location_response,
 };
 const GET_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_private_location',
+  connectorGroup: 'internal',
   summary: `Get a private location`,
   description: `**Spaces method and path for this operation:**
 
@@ -14544,22 +15160,23 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
 `,
   methods: ['GET'],
   patterns: ['/api/synthetics/private_locations/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_private_location_request, 'body'),
-    getLooseObjectFromProperty(get_private_location_request, 'path'),
-    getLooseObjectFromProperty(get_private_location_request, 'query'),
+    getZodLooseObjectFromProperty(get_private_location_request, 'body'),
+    getZodLooseObjectFromProperty(get_private_location_request, 'path'),
+    getZodLooseObjectFromProperty(get_private_location_request, 'query'),
   ]),
   outputSchema: get_private_location_response,
 };
 const PUT_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_private_location',
+  connectorGroup: 'internal',
   summary: `Update a private location`,
   description: `**Spaces method and path for this operation:**
 
@@ -14573,43 +15190,45 @@ When a private location's label is updated, all monitors using this location wil
 `,
   methods: ['PUT'],
   patterns: ['/api/synthetics/private_locations/{id}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['label'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_private_location_request, 'body'),
-    getLooseObjectFromProperty(put_private_location_request, 'path'),
-    getLooseObjectFromProperty(put_private_location_request, 'query'),
+    getZodLooseObjectFromProperty(put_private_location_request, 'body'),
+    getZodLooseObjectFromProperty(put_private_location_request, 'path'),
+    getZodLooseObjectFromProperty(put_private_location_request, 'query'),
   ]),
   outputSchema: put_private_location_response,
 };
 const TASK_MANAGER_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.task_manager_health',
+  connectorGroup: 'internal',
   summary: `Get the task manager health`,
   description: `Get the health status of the Kibana task manager.
 `,
   methods: ['GET'],
   patterns: ['/api/task_manager/_health'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(task_manager_health_request, 'body'),
-    getLooseObjectFromProperty(task_manager_health_request, 'path'),
-    getLooseObjectFromProperty(task_manager_health_request, 'query'),
+    getZodLooseObjectFromProperty(task_manager_health_request, 'body'),
+    getZodLooseObjectFromProperty(task_manager_health_request, 'path'),
+    getZodLooseObjectFromProperty(task_manager_health_request, 'query'),
   ]),
   outputSchema: task_manager_health_response,
 };
 const DELETETIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteTimelines',
+  connectorGroup: 'internal',
   summary: `Delete Timelines or Timeline templates`,
   description: `**Spaces method and path for this operation:**
 
@@ -14620,22 +15239,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Delete one or more Timelines or Timeline templates.`,
   methods: ['DELETE'],
   patterns: ['/api/timeline'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['savedObjectIds', 'searchIds'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_timelines_request, 'body'),
-    getLooseObjectFromProperty(delete_timelines_request, 'path'),
-    getLooseObjectFromProperty(delete_timelines_request, 'query'),
+    getZodLooseObjectFromProperty(delete_timelines_request, 'body'),
+    getZodLooseObjectFromProperty(delete_timelines_request, 'path'),
+    getZodLooseObjectFromProperty(delete_timelines_request, 'query'),
   ]),
   outputSchema: delete_timelines_response,
 };
 const GETTIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetTimeline',
+  connectorGroup: 'internal',
   summary: `Get Timeline or Timeline template details`,
   description: `**Spaces method and path for this operation:**
 
@@ -14646,22 +15266,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of an existing saved Timeline or Timeline template.`,
   methods: ['GET'],
   patterns: ['/api/timeline'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['template_timeline_id', 'id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_timeline_request, 'body'),
-    getLooseObjectFromProperty(get_timeline_request, 'path'),
-    getLooseObjectFromProperty(get_timeline_request, 'query'),
+    getZodLooseObjectFromProperty(get_timeline_request, 'body'),
+    getZodLooseObjectFromProperty(get_timeline_request, 'path'),
+    getZodLooseObjectFromProperty(get_timeline_request, 'query'),
   ]),
   outputSchema: get_timeline_response,
 };
 const PATCHTIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchTimeline',
+  connectorGroup: 'internal',
   summary: `Update a Timeline`,
   description: `**Spaces method and path for this operation:**
 
@@ -14672,22 +15293,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.`,
   methods: ['PATCH'],
   patterns: ['/api/timeline'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['timeline', 'timelineId', 'version'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(patch_timeline_request, 'body'),
-    getLooseObjectFromProperty(patch_timeline_request, 'path'),
-    getLooseObjectFromProperty(patch_timeline_request, 'query'),
+    getZodLooseObjectFromProperty(patch_timeline_request, 'body'),
+    getZodLooseObjectFromProperty(patch_timeline_request, 'path'),
+    getZodLooseObjectFromProperty(patch_timeline_request, 'query'),
   ]),
   outputSchema: patch_timeline_response,
 };
 const CREATETIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateTimelines',
+  connectorGroup: 'internal',
   summary: `Create a Timeline or Timeline template`,
   description: `**Spaces method and path for this operation:**
 
@@ -14698,9 +15320,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Create a new Timeline or Timeline template.`,
   methods: ['POST'],
   patterns: ['/api/timeline'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -14714,14 +15336,15 @@ Create a new Timeline or Timeline template.`,
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_timelines_request, 'body'),
-    getLooseObjectFromProperty(create_timelines_request, 'path'),
-    getLooseObjectFromProperty(create_timelines_request, 'query'),
+    getZodLooseObjectFromProperty(create_timelines_request, 'body'),
+    getZodLooseObjectFromProperty(create_timelines_request, 'path'),
+    getZodLooseObjectFromProperty(create_timelines_request, 'query'),
   ]),
   outputSchema: create_timelines_response,
 };
 const COPYTIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CopyTimeline',
+  connectorGroup: 'internal',
   summary: `Copies timeline or timeline template`,
   description: `**Spaces method and path for this operation:**
 
@@ -14733,22 +15356,23 @@ Copies and returns a timeline or timeline template.
 `,
   methods: ['GET'],
   patterns: ['/api/timeline/_copy'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['timeline', 'timelineIdToCopy'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(copy_timeline_request, 'body'),
-    getLooseObjectFromProperty(copy_timeline_request, 'path'),
-    getLooseObjectFromProperty(copy_timeline_request, 'query'),
+    getZodLooseObjectFromProperty(copy_timeline_request, 'body'),
+    getZodLooseObjectFromProperty(copy_timeline_request, 'path'),
+    getZodLooseObjectFromProperty(copy_timeline_request, 'query'),
   ]),
   outputSchema: copy_timeline_response,
 };
 const GETDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetDraftTimelines',
+  connectorGroup: 'internal',
   summary: `Get draft Timeline or Timeline template details`,
   description: `**Spaces method and path for this operation:**
 
@@ -14759,22 +15383,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.`,
   methods: ['GET'],
   patterns: ['/api/timeline/_draft'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['timelineType'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_draft_timelines_request, 'body'),
-    getLooseObjectFromProperty(get_draft_timelines_request, 'path'),
-    getLooseObjectFromProperty(get_draft_timelines_request, 'query'),
+    getZodLooseObjectFromProperty(get_draft_timelines_request, 'body'),
+    getZodLooseObjectFromProperty(get_draft_timelines_request, 'path'),
+    getZodLooseObjectFromProperty(get_draft_timelines_request, 'query'),
   ]),
   outputSchema: get_draft_timelines_response,
 };
 const CLEANDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CleanDraftTimelines',
+  connectorGroup: 'internal',
   summary: `Create a clean draft Timeline or Timeline template`,
   description: `**Spaces method and path for this operation:**
 
@@ -14788,22 +15413,23 @@ Create a clean draft Timeline or Timeline template for the current user.
 `,
   methods: ['POST'],
   patterns: ['/api/timeline/_draft'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['timelineType'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(clean_draft_timelines_request, 'body'),
-    getLooseObjectFromProperty(clean_draft_timelines_request, 'path'),
-    getLooseObjectFromProperty(clean_draft_timelines_request, 'query'),
+    getZodLooseObjectFromProperty(clean_draft_timelines_request, 'body'),
+    getZodLooseObjectFromProperty(clean_draft_timelines_request, 'path'),
+    getZodLooseObjectFromProperty(clean_draft_timelines_request, 'query'),
   ]),
   outputSchema: clean_draft_timelines_response,
 };
 const EXPORTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportTimelines',
+  connectorGroup: 'internal',
   summary: `Export Timelines`,
   description: `**Spaces method and path for this operation:**
 
@@ -14814,22 +15440,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Export Timelines as an NDJSON file.`,
   methods: ['POST'],
   patterns: ['/api/timeline/_export'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['file_name'],
     bodyParams: ['ids'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(export_timelines_request, 'body'),
-    getLooseObjectFromProperty(export_timelines_request, 'path'),
-    getLooseObjectFromProperty(export_timelines_request, 'query'),
+    getZodLooseObjectFromProperty(export_timelines_request, 'body'),
+    getZodLooseObjectFromProperty(export_timelines_request, 'path'),
+    getZodLooseObjectFromProperty(export_timelines_request, 'query'),
   ]),
   outputSchema: export_timelines_response,
 };
 const PERSISTFAVORITEROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistFavoriteRoute',
+  connectorGroup: 'internal',
   summary: `Favorite a Timeline or Timeline template`,
   description: `**Spaces method and path for this operation:**
 
@@ -14840,22 +15467,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Favorite a Timeline or Timeline template for the current user.`,
   methods: ['PATCH'],
   patterns: ['/api/timeline/_favorite'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['templateTimelineId', 'templateTimelineVersion', 'timelineId', 'timelineType'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(persist_favorite_route_request, 'body'),
-    getLooseObjectFromProperty(persist_favorite_route_request, 'path'),
-    getLooseObjectFromProperty(persist_favorite_route_request, 'query'),
+    getZodLooseObjectFromProperty(persist_favorite_route_request, 'body'),
+    getZodLooseObjectFromProperty(persist_favorite_route_request, 'path'),
+    getZodLooseObjectFromProperty(persist_favorite_route_request, 'query'),
   ]),
   outputSchema: persist_favorite_route_response,
 };
 const IMPORTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportTimelines',
+  connectorGroup: 'internal',
   summary: `Import Timelines`,
   description: `**Spaces method and path for this operation:**
 
@@ -14866,22 +15494,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Import Timelines.`,
   methods: ['POST'],
   patterns: ['/api/timeline/_import'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['file', 'isImmutable'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(import_timelines_request, 'body'),
-    getLooseObjectFromProperty(import_timelines_request, 'path'),
-    getLooseObjectFromProperty(import_timelines_request, 'query'),
+    getZodLooseObjectFromProperty(import_timelines_request, 'body'),
+    getZodLooseObjectFromProperty(import_timelines_request, 'path'),
+    getZodLooseObjectFromProperty(import_timelines_request, 'query'),
   ]),
   outputSchema: import_timelines_response,
 };
 const INSTALLPREPACKEDTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrepackedTimelines',
+  connectorGroup: 'internal',
   summary: `Install prepackaged Timelines`,
   description: `**Spaces method and path for this operation:**
 
@@ -14892,22 +15521,23 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Install or update prepackaged Timelines.`,
   methods: ['POST'],
   patterns: ['/api/timeline/_prepackaged'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['prepackagedTimelines', 'timelinesToInstall', 'timelinesToUpdate'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(install_prepacked_timelines_request, 'body'),
-    getLooseObjectFromProperty(install_prepacked_timelines_request, 'path'),
-    getLooseObjectFromProperty(install_prepacked_timelines_request, 'query'),
+    getZodLooseObjectFromProperty(install_prepacked_timelines_request, 'body'),
+    getZodLooseObjectFromProperty(install_prepacked_timelines_request, 'path'),
+    getZodLooseObjectFromProperty(install_prepacked_timelines_request, 'query'),
   ]),
   outputSchema: install_prepacked_timelines_response,
 };
 const RESOLVETIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ResolveTimeline',
+  connectorGroup: 'internal',
   summary: `Get an existing saved Timeline or Timeline template`,
   description: `**Spaces method and path for this operation:**
 
@@ -14916,22 +15546,23 @@ const RESOLVETIMELINE_CONTRACT: InternalConnectorContract = {
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`,
   methods: ['GET'],
   patterns: ['/api/timeline/resolve'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['template_timeline_id', 'id'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(resolve_timeline_request, 'body'),
-    getLooseObjectFromProperty(resolve_timeline_request, 'path'),
-    getLooseObjectFromProperty(resolve_timeline_request, 'query'),
+    getZodLooseObjectFromProperty(resolve_timeline_request, 'body'),
+    getZodLooseObjectFromProperty(resolve_timeline_request, 'path'),
+    getZodLooseObjectFromProperty(resolve_timeline_request, 'query'),
   ]),
   outputSchema: resolve_timeline_response,
 };
 const GETTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetTimelines',
+  connectorGroup: 'internal',
   summary: `Get Timelines or Timeline templates`,
   description: `**Spaces method and path for this operation:**
 
@@ -14942,9 +15573,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 Get a list of all saved Timelines or Timeline templates.`,
   methods: ['GET'],
   patterns: ['/api/timelines'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'only_user_favorite',
@@ -14959,34 +15590,36 @@ Get a list of all saved Timelines or Timeline templates.`,
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_timelines_request, 'body'),
-    getLooseObjectFromProperty(get_timelines_request, 'path'),
-    getLooseObjectFromProperty(get_timelines_request, 'query'),
+    getZodLooseObjectFromProperty(get_timelines_request, 'body'),
+    getZodLooseObjectFromProperty(get_timelines_request, 'path'),
+    getZodLooseObjectFromProperty(get_timelines_request, 'query'),
   ]),
   outputSchema: get_timelines_response,
 };
 const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_upgrade_status',
+  connectorGroup: 'internal',
   summary: `Get the upgrade readiness status`,
   description: `Check the status of your cluster.`,
   methods: ['GET'],
   patterns: ['/api/upgrade_assistant/status'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_upgrade_status_request, 'body'),
-    getLooseObjectFromProperty(get_upgrade_status_request, 'path'),
-    getLooseObjectFromProperty(get_upgrade_status_request, 'query'),
+    getZodLooseObjectFromProperty(get_upgrade_status_request, 'body'),
+    getZodLooseObjectFromProperty(get_upgrade_status_request, 'path'),
+    getZodLooseObjectFromProperty(get_upgrade_status_request, 'query'),
   ]),
   outputSchema: get_upgrade_status_response,
 };
 const GET_UPTIME_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_uptime_settings',
+  connectorGroup: 'internal',
   summary: `Get uptime settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -14998,22 +15631,23 @@ You must have \`read\` privileges for the uptime feature in the Observability se
 `,
   methods: ['GET'],
   patterns: ['/api/uptime/settings'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_uptime_settings_request, 'body'),
-    getLooseObjectFromProperty(get_uptime_settings_request, 'path'),
-    getLooseObjectFromProperty(get_uptime_settings_request, 'query'),
+    getZodLooseObjectFromProperty(get_uptime_settings_request, 'body'),
+    getZodLooseObjectFromProperty(get_uptime_settings_request, 'path'),
+    getZodLooseObjectFromProperty(get_uptime_settings_request, 'query'),
   ]),
   outputSchema: get_uptime_settings_response,
 };
 const PUT_UPTIME_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_uptime_settings',
+  connectorGroup: 'internal',
   summary: `Update uptime settings`,
   description: `**Spaces method and path for this operation:**
 
@@ -15025,9 +15659,9 @@ Update uptime setting attributes like \`heartbeatIndices\`, \`certExpirationThre
 `,
   methods: ['PUT'],
   patterns: ['/api/uptime/settings'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [
@@ -15039,22 +15673,23 @@ Update uptime setting attributes like \`heartbeatIndices\`, \`certExpirationThre
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_uptime_settings_request, 'body'),
-    getLooseObjectFromProperty(put_uptime_settings_request, 'path'),
-    getLooseObjectFromProperty(put_uptime_settings_request, 'query'),
+    getZodLooseObjectFromProperty(put_uptime_settings_request, 'body'),
+    getZodLooseObjectFromProperty(put_uptime_settings_request, 'path'),
+    getZodLooseObjectFromProperty(put_uptime_settings_request, 'query'),
   ]),
   outputSchema: put_uptime_settings_response,
 };
 const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findSlosOp',
+  connectorGroup: 'internal',
   summary: `Get a paginated list of SLOs`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['GET'],
   patterns: ['/s/{spaceId}/api/observability/slos'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId'],
     urlParams: [
       'kqlQuery',
@@ -15069,261 +15704,296 @@ const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(find_slos_op_request, 'body'),
-    getLooseObjectFromProperty(find_slos_op_request, 'path'),
-    getLooseObjectFromProperty(find_slos_op_request, 'query'),
+    getZodLooseObjectFromProperty(find_slos_op_request, 'body'),
+    getZodLooseObjectFromProperty(find_slos_op_request, 'path'),
+    getZodLooseObjectFromProperty(find_slos_op_request, 'query'),
   ]),
   outputSchema: find_slos_op_response,
 };
 const CREATESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSloOp',
+  connectorGroup: 'internal',
   summary: `Create an SLO`,
   description: `You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'artifacts',
+      'budgetingMethod',
+      'description',
+      'groupBy',
+      'id',
+      'indicator',
+      'name',
+      'objective',
+      'settings',
+      'tags',
+      'timeWindow',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_slo_op_request, 'body'),
-    getLooseObjectFromProperty(create_slo_op_request, 'path'),
-    getLooseObjectFromProperty(create_slo_op_request, 'query'),
+    getZodLooseObjectFromProperty(create_slo_op_request, 'body'),
+    getZodLooseObjectFromProperty(create_slo_op_request, 'path'),
+    getZodLooseObjectFromProperty(create_slo_op_request, 'query'),
   ]),
   outputSchema: create_slo_op_response,
 };
 const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteOp',
+  connectorGroup: 'internal',
   summary: `Bulk delete SLO definitions and their associated summary and rollup data.`,
   description: `Bulk delete SLO definitions and their associated summary and rollup data.  This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete.  The status of the operation can be checked using the \`GET /api/slo/_bulk_delete/{taskId}\` endpoint.
 `,
   methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/_bulk_delete'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['list'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(bulk_delete_op_request, 'body'),
-    getLooseObjectFromProperty(bulk_delete_op_request, 'path'),
-    getLooseObjectFromProperty(bulk_delete_op_request, 'query'),
+    getZodLooseObjectFromProperty(bulk_delete_op_request, 'body'),
+    getZodLooseObjectFromProperty(bulk_delete_op_request, 'path'),
+    getZodLooseObjectFromProperty(bulk_delete_op_request, 'query'),
   ]),
   outputSchema: bulk_delete_op_response,
 };
 const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteStatusOp',
+  connectorGroup: 'internal',
   summary: `Retrieve the status of the bulk deletion`,
   description: `Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
 `,
   methods: ['GET'],
   patterns: ['/s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'taskId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(bulk_delete_status_op_request, 'body'),
-    getLooseObjectFromProperty(bulk_delete_status_op_request, 'path'),
-    getLooseObjectFromProperty(bulk_delete_status_op_request, 'query'),
+    getZodLooseObjectFromProperty(bulk_delete_status_op_request, 'body'),
+    getZodLooseObjectFromProperty(bulk_delete_status_op_request, 'path'),
+    getZodLooseObjectFromProperty(bulk_delete_status_op_request, 'query'),
   ]),
   outputSchema: bulk_delete_status_op_response,
 };
 const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteRollupDataOp',
+  connectorGroup: 'internal',
   summary: `Batch delete rollup and summary data`,
   description: `The deletion occurs for the specified list of \`sloId\`. You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/_bulk_purge_rollup'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['list', 'purgePolicy'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_rollup_data_op_request, 'body'),
-    getLooseObjectFromProperty(delete_rollup_data_op_request, 'path'),
-    getLooseObjectFromProperty(delete_rollup_data_op_request, 'query'),
+    getZodLooseObjectFromProperty(delete_rollup_data_op_request, 'body'),
+    getZodLooseObjectFromProperty(delete_rollup_data_op_request, 'path'),
+    getZodLooseObjectFromProperty(delete_rollup_data_op_request, 'query'),
   ]),
   outputSchema: delete_rollup_data_op_response,
 };
 const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSloInstancesOp',
+  connectorGroup: 'internal',
   summary: `Batch delete rollup and summary data`,
   description: `The deletion occurs for the specified list of \`sloId\` and \`instanceId\`. You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/_delete_instances'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['list'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_slo_instances_op_request, 'body'),
-    getLooseObjectFromProperty(delete_slo_instances_op_request, 'path'),
-    getLooseObjectFromProperty(delete_slo_instances_op_request, 'query'),
+    getZodLooseObjectFromProperty(delete_slo_instances_op_request, 'body'),
+    getZodLooseObjectFromProperty(delete_slo_instances_op_request, 'path'),
+    getZodLooseObjectFromProperty(delete_slo_instances_op_request, 'query'),
   ]),
   outputSchema: delete_slo_instances_op_response,
 };
 const DELETESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSloOp',
+  connectorGroup: 'internal',
   summary: `Delete an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['DELETE'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'sloId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_slo_op_request, 'body'),
-    getLooseObjectFromProperty(delete_slo_op_request, 'path'),
-    getLooseObjectFromProperty(delete_slo_op_request, 'query'),
+    getZodLooseObjectFromProperty(delete_slo_op_request, 'body'),
+    getZodLooseObjectFromProperty(delete_slo_op_request, 'path'),
+    getZodLooseObjectFromProperty(delete_slo_op_request, 'query'),
   ]),
   outputSchema: delete_slo_op_response,
 };
 const GETSLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSloOp',
+  connectorGroup: 'internal',
   summary: `Get an SLO`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['GET'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'sloId'],
     urlParams: ['instanceId'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_slo_op_request, 'body'),
-    getLooseObjectFromProperty(get_slo_op_request, 'path'),
-    getLooseObjectFromProperty(get_slo_op_request, 'query'),
+    getZodLooseObjectFromProperty(get_slo_op_request, 'body'),
+    getZodLooseObjectFromProperty(get_slo_op_request, 'path'),
+    getZodLooseObjectFromProperty(get_slo_op_request, 'query'),
   ]),
   outputSchema: get_slo_op_response,
 };
 const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateSloOp',
+  connectorGroup: 'internal',
   summary: `Update an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['PUT'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'sloId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'artifacts',
+      'budgetingMethod',
+      'description',
+      'groupBy',
+      'indicator',
+      'name',
+      'objective',
+      'settings',
+      'tags',
+      'timeWindow',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_slo_op_request, 'body'),
-    getLooseObjectFromProperty(update_slo_op_request, 'path'),
-    getLooseObjectFromProperty(update_slo_op_request, 'query'),
+    getZodLooseObjectFromProperty(update_slo_op_request, 'body'),
+    getZodLooseObjectFromProperty(update_slo_op_request, 'path'),
+    getZodLooseObjectFromProperty(update_slo_op_request, 'query'),
   ]),
   outputSchema: update_slo_op_response,
 };
 const RESETSLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resetSloOp',
+  connectorGroup: 'internal',
   summary: `Reset an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}/_reset'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'sloId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(reset_slo_op_request, 'body'),
-    getLooseObjectFromProperty(reset_slo_op_request, 'path'),
-    getLooseObjectFromProperty(reset_slo_op_request, 'query'),
+    getZodLooseObjectFromProperty(reset_slo_op_request, 'body'),
+    getZodLooseObjectFromProperty(reset_slo_op_request, 'path'),
+    getZodLooseObjectFromProperty(reset_slo_op_request, 'query'),
   ]),
   outputSchema: reset_slo_op_response,
 };
 const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.disableSloOp',
+  connectorGroup: 'internal',
   summary: `Disable an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}/disable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'sloId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(disable_slo_op_request, 'body'),
-    getLooseObjectFromProperty(disable_slo_op_request, 'path'),
-    getLooseObjectFromProperty(disable_slo_op_request, 'query'),
+    getZodLooseObjectFromProperty(disable_slo_op_request, 'body'),
+    getZodLooseObjectFromProperty(disable_slo_op_request, 'path'),
+    getZodLooseObjectFromProperty(disable_slo_op_request, 'query'),
   ]),
   outputSchema: disable_slo_op_response,
 };
 const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.enableSloOp',
+  connectorGroup: 'internal',
   summary: `Enable an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['POST'],
   patterns: ['/s/{spaceId}/api/observability/slos/{sloId}/enable'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId', 'sloId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(enable_slo_op_request, 'body'),
-    getLooseObjectFromProperty(enable_slo_op_request, 'path'),
-    getLooseObjectFromProperty(enable_slo_op_request, 'query'),
+    getZodLooseObjectFromProperty(enable_slo_op_request, 'body'),
+    getZodLooseObjectFromProperty(enable_slo_op_request, 'path'),
+    getZodLooseObjectFromProperty(enable_slo_op_request, 'query'),
   ]),
   outputSchema: enable_slo_op_response,
 };
 const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDefinitionsOp',
+  connectorGroup: 'internal',
   summary: `Get the SLO definitions`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['GET'],
   patterns: ['/s/{spaceId}/internal/observability/slos/_definitions'],
-  isInternal: true,
-  documentation: 'URL_NOT_IMPLEMENTED',
+  documentation: null,
   parameterTypes: {
+    headerParams: ['kbn-xsrf'],
     pathParams: ['spaceId'],
     urlParams: ['includeOutdatedOnly', 'includeHealth', 'tags', 'search', 'page', 'perPage'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_definitions_op_request, 'body'),
-    getLooseObjectFromProperty(get_definitions_op_request, 'path'),
-    getLooseObjectFromProperty(get_definitions_op_request, 'query'),
+    getZodLooseObjectFromProperty(get_definitions_op_request, 'body'),
+    getZodLooseObjectFromProperty(get_definitions_op_request, 'path'),
+    getZodLooseObjectFromProperty(get_definitions_op_request, 'query'),
   ]),
   outputSchema: get_definitions_op_response,
 };

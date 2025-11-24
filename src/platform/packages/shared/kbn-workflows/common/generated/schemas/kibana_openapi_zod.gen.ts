@@ -37121,7 +37121,8 @@ export const post_maintenance_window_response = z.object({
         'running',
         'upcoming',
         'finished',
-        'archived'
+        'archived',
+        'disabled'
     ]).register(z.globalRegistry, {
         description: 'The current status of the maintenance window.'
     }),
@@ -37154,13 +37155,15 @@ export const get_maintenance_window_find_request = z.object({
                 'running',
                 'finished',
                 'upcoming',
-                'archived'
+                'archived',
+                'disabled'
             ]),
             z.array(z.enum([
                 'running',
                 'finished',
                 'upcoming',
-                'archived'
+                'archived',
+                'disabled'
             ]))
         ])),
         page: z.optional(z.number().gte(1).lte(100).register(z.globalRegistry, {
@@ -37236,7 +37239,8 @@ export const get_maintenance_window_find_response = z.object({
             'running',
             'upcoming',
             'finished',
-            'archived'
+            'archived',
+            'disabled'
         ]).register(z.globalRegistry, {
             description: 'The current status of the maintenance window.'
         }),
@@ -37353,7 +37357,8 @@ export const get_maintenance_window_id_response = z.object({
         'running',
         'upcoming',
         'finished',
-        'archived'
+        'archived',
+        'disabled'
     ]).register(z.globalRegistry, {
         description: 'The current status of the maintenance window.'
     }),
@@ -37496,7 +37501,8 @@ export const patch_maintenance_window_id_response = z.object({
         'running',
         'upcoming',
         'finished',
-        'archived'
+        'archived',
+        'disabled'
     ]).register(z.globalRegistry, {
         description: 'The current status of the maintenance window.'
     }),
@@ -37592,7 +37598,8 @@ export const post_maintenance_window_id_archive_response = z.object({
         'running',
         'upcoming',
         'finished',
-        'archived'
+        'archived',
+        'disabled'
     ]).register(z.globalRegistry, {
         description: 'The current status of the maintenance window.'
     }),
@@ -37688,7 +37695,8 @@ export const post_maintenance_window_id_unarchive_response = z.object({
         'running',
         'upcoming',
         'finished',
-        'archived'
+        'archived',
+        'disabled'
     ]).register(z.globalRegistry, {
         description: 'The current status of the maintenance window.'
     }),
@@ -39903,6 +39911,28 @@ export const put_streams_name_request = z.object({
                     name: z.string()
                 })).and(z.object({
                     ingest: z.object({
+                        failure_store: z.union([
+                            z.object({
+                                inherit: z.object({})
+                            }),
+                            z.object({
+                                disabled: z.object({})
+                            }),
+                            z.union([
+                                z.object({
+                                    lifecycle: z.object({
+                                        enabled: z.object({
+                                            data_retention: z.optional(z.string().min(1))
+                                        })
+                                    })
+                                }),
+                                z.object({
+                                    lifecycle: z.object({
+                                        disabled: z.object({})
+                                    })
+                                })
+                            ])
+                        ]),
                         lifecycle: z.union([
                             z.object({
                                 dsl: z.object({
@@ -41477,6 +41507,28 @@ export const put_streams_name_request = z.object({
                     name: z.optional(z.unknown())
                 }).and(z.object({
                     ingest: z.object({
+                        failure_store: z.union([
+                            z.object({
+                                inherit: z.object({})
+                            }),
+                            z.object({
+                                disabled: z.object({})
+                            }),
+                            z.union([
+                                z.object({
+                                    lifecycle: z.object({
+                                        enabled: z.object({
+                                            data_retention: z.optional(z.string().min(1))
+                                        })
+                                    })
+                                }),
+                                z.object({
+                                    lifecycle: z.object({
+                                        disabled: z.object({})
+                                    })
+                                })
+                            ])
+                        ]),
                         lifecycle: z.union([
                             z.object({
                                 dsl: z.object({
@@ -42919,6 +42971,28 @@ export const put_streams_name_request = z.object({
                     name: z.string()
                 })).and(z.object({
                     ingest: z.object({
+                        failure_store: z.union([
+                            z.object({
+                                inherit: z.object({})
+                            }),
+                            z.object({
+                                disabled: z.object({})
+                            }),
+                            z.union([
+                                z.object({
+                                    lifecycle: z.object({
+                                        enabled: z.object({
+                                            data_retention: z.optional(z.string().min(1))
+                                        })
+                                    })
+                                }),
+                                z.object({
+                                    lifecycle: z.object({
+                                        disabled: z.object({})
+                                    })
+                                })
+                            ])
+                        ]),
                         lifecycle: z.union([
                             z.object({
                                 dsl: z.object({
@@ -44396,6 +44470,28 @@ export const put_streams_name_request = z.object({
                     name: z.optional(z.unknown())
                 }).and(z.object({
                     ingest: z.object({
+                        failure_store: z.union([
+                            z.object({
+                                inherit: z.object({})
+                            }),
+                            z.object({
+                                disabled: z.object({})
+                            }),
+                            z.union([
+                                z.object({
+                                    lifecycle: z.object({
+                                        enabled: z.object({
+                                            data_retention: z.optional(z.string().min(1))
+                                        })
+                                    })
+                                }),
+                                z.object({
+                                    lifecycle: z.object({
+                                        disabled: z.object({})
+                                    })
+                                })
+                            ])
+                        ]),
                         lifecycle: z.union([
                             z.object({
                                 dsl: z.object({
@@ -46012,6 +46108,28 @@ export const put_streams_name_ingest_request = z.object({
     body: z.optional(z.object({
         ingest: z.union([
             z.object({
+                failure_store: z.union([
+                    z.object({
+                        inherit: z.object({})
+                    }),
+                    z.object({
+                        disabled: z.object({})
+                    }),
+                    z.union([
+                        z.object({
+                            lifecycle: z.object({
+                                enabled: z.object({
+                                    data_retention: z.optional(z.string().min(1))
+                                })
+                            })
+                        }),
+                        z.object({
+                            lifecycle: z.object({
+                                disabled: z.object({})
+                            })
+                        })
+                    ])
+                ]),
                 lifecycle: z.union([
                     z.object({
                         dsl: z.object({
@@ -47465,6 +47583,28 @@ export const put_streams_name_ingest_request = z.object({
                 })
             })),
             z.object({
+                failure_store: z.union([
+                    z.object({
+                        inherit: z.object({})
+                    }),
+                    z.object({
+                        disabled: z.object({})
+                    }),
+                    z.union([
+                        z.object({
+                            lifecycle: z.object({
+                                enabled: z.object({
+                                    data_retention: z.optional(z.string().min(1))
+                                })
+                            })
+                        }),
+                        z.object({
+                            lifecycle: z.object({
+                                disabled: z.object({})
+                            })
+                        })
+                    ])
+                ]),
                 lifecycle: z.union([
                     z.object({
                         dsl: z.object({
@@ -49292,6 +49432,9 @@ export const post_streams_name_significant_events_generate_request = z.object({
     body: z.optional(z.object({
         feature: z.optional(z.object({
             description: z.string(),
+            name: z.string().min(1),
+            type: z.enum(['system'])
+        }).and(z.object({
             filter: z.union([
                 z.union([
                     z.object({
@@ -49379,14 +49522,15 @@ export const post_streams_name_significant_events_generate_request = z.object({
                     not: z.unknown()
                 }),
                 z.object({
-                    never: z.record(z.string(), z.never())
+                    never: z.object({})
                 }),
                 z.object({
-                    always: z.record(z.string(), z.never())
+                    always: z.object({})
                 })
-            ]),
-            name: z.string().min(1)
-        }))
+            ])
+        })).and(z.object({
+            type: z.enum(['system'])
+        })))
     })),
     path: z.object({
         name: z.string()
@@ -49501,7 +49645,7 @@ export const post_streams_name_significant_events_preview_request = z.object({
                         always: z.record(z.string(), z.never())
                     })
                 ]),
-                name: z.string().min(1)
+                name: z.string()
             })),
             kql: z.object({
                 query: z.string()

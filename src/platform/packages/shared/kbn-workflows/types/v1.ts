@@ -367,26 +367,22 @@ export interface ConnectorTypeInfo {
 }
 
 export interface ConnectorContract {
+  connectorGroup: 'internal' | 'dynamic' | 'static';
   type: string;
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
   connectorId?: z.ZodType;
   outputSchema: z.ZodType;
-  description?: string;
-  summary?: string;
-  instances?: ConnectorInstance[];
+  summary: string | null;
+  description: string | null;
 }
 
 export interface DynamicConnectorContract extends ConnectorContract {
+  connectorGroup: 'dynamic';
   /** Action type ID from Kibana actions plugin */
   actionTypeId: string;
   /** Available connector instances */
-  instances: Array<{
-    id: string;
-    name: string;
-    isPreconfigured: boolean;
-    isDeprecated: boolean;
-  }>;
+  instances: ConnectorInstance[];
   /** Whether this connector type is enabled */
   enabled?: boolean;
   /** Whether this is a system action type */
@@ -406,21 +402,20 @@ export const KNOWN_HTTP_METHODS = [
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
 export interface InternalConnectorContract extends ConnectorContract {
-  /** HTTP method(s) for this API endpoint */
-  methods?: HttpMethod[];
-  /** Summary for this API endpoint */
-  summary?: string;
-  /** URL pattern(s) for this API endpoint */
-  patterns?: string[];
   /** Whether this is an internal connector with hardcoded endpoint details */
-  isInternal?: boolean;
+  connectorGroup: 'internal';
+  /** HTTP method(s) for this API endpoint */
+  methods: HttpMethod[];
+  /** URL pattern(s) for this API endpoint */
+  patterns: string[];
   /** Documentation URL for this API endpoint */
-  documentation?: string | null;
+  documentation: string | null;
   /** Parameter type metadata for proper request building */
-  parameterTypes?: {
-    pathParams?: string[];
-    urlParams?: string[];
-    bodyParams?: string[];
+  parameterTypes: {
+    headerParams: string[];
+    pathParams: string[];
+    urlParams: string[];
+    bodyParams: string[];
   };
 }
 
@@ -433,7 +428,14 @@ export interface EnhancedInternalConnectorContract extends InternalConnectorCont
   examples?: ConnectorExamples;
 }
 
-export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;
+export interface StaticConnectorContract extends ConnectorContract {
+  connectorGroup: 'static';
+}
+
+export type ConnectorContractUnion =
+  | DynamicConnectorContract
+  | EnhancedInternalConnectorContract
+  | StaticConnectorContract;
 
 export interface WorkflowsSearchParams {
   size: number;

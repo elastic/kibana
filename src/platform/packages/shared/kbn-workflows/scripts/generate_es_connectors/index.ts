@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-require('@kbn/workflows/scripts/generate_es_connectors').generateAndSaveEsConnectors();
+export { generateAndSaveEsConnectors } from './generate_es_connectors';

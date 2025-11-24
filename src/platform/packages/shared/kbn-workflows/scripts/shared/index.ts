@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-require('@kbn/workflows/scripts/generate_es_connectors').generateAndSaveEsConnectors();
+export { type ContractMeta } from './types';
+export { generateParameterTypes } from './generate_parameter_types';
+export {
+  generateContractBlock,
+  generateParamsSchemaString,
+  generateOutputSchemaString,
+  getRequestSchemaName,
+  getResponseSchemaName,
+  sanitizeNamespaceIdentifier,
+  toSnakeCase,
+  getSchemaNamePrefix,
+  escapeString,
+  StaticImports,
+} from './generation_utils';

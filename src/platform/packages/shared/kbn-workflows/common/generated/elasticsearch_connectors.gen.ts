@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
- * Generated at: 2025-11-24T11:06:10.793Z
+ * Generated at: 2025-11-24T17:35:38.020Z
  * Source: elasticsearch-specification repository (582 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -1639,14 +1639,15 @@ import {
   xpack_usage_response,
 } from './schemas/es_openapi_zod.gen';
 import type { InternalConnectorContract } from '../../types/latest';
-import { getLooseObjectFromProperty } from '../utils';
+
+import { getZodLooseObjectFromProperty } from '../utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 
 // declare contracts
 const ASYNC_SEARCH_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.async_search.delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an async search`,
   description: `Delete an async search.
 
@@ -1660,20 +1661,21 @@ If the Elasticsearch security features are enabled, the deletion of a specific a
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(async_search_delete_request, 'body'),
-    getLooseObjectFromProperty(async_search_delete_request, 'path'),
-    getLooseObjectFromProperty(async_search_delete_request, 'query'),
+    getZodLooseObjectFromProperty(async_search_delete_request, 'body'),
+    getZodLooseObjectFromProperty(async_search_delete_request, 'path'),
+    getZodLooseObjectFromProperty(async_search_delete_request, 'query'),
   ]),
   outputSchema: async_search_delete_response,
 };
 const ASYNC_SEARCH_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.async_search.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get async search results`,
   description: `Get async search results.
 
@@ -1686,20 +1688,21 @@ If the Elasticsearch security features are enabled, access to the results of a s
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['keep_alive', 'typed_keys', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(async_search_get_request, 'body'),
-    getLooseObjectFromProperty(async_search_get_request, 'path'),
-    getLooseObjectFromProperty(async_search_get_request, 'query'),
+    getZodLooseObjectFromProperty(async_search_get_request, 'body'),
+    getZodLooseObjectFromProperty(async_search_get_request, 'path'),
+    getZodLooseObjectFromProperty(async_search_get_request, 'query'),
   ]),
   outputSchema: async_search_get_response,
 };
 const ASYNC_SEARCH_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.async_search.status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the async search status`,
   description: `Get the async search status.
 
@@ -1715,20 +1718,21 @@ If the Elasticsearch security features are enabled, the access to the status of 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['keep_alive'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(async_search_status_request, 'body'),
-    getLooseObjectFromProperty(async_search_status_request, 'path'),
-    getLooseObjectFromProperty(async_search_status_request, 'query'),
+    getZodLooseObjectFromProperty(async_search_status_request, 'body'),
+    getZodLooseObjectFromProperty(async_search_status_request, 'path'),
+    getZodLooseObjectFromProperty(async_search_status_request, 'query'),
   ]),
   outputSchema: async_search_status_response,
 };
 const ASYNC_SEARCH_SUBMIT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.async_search.submit',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run an async search`,
   description: `Run an async search.
 
@@ -1745,6 +1749,7 @@ The maximum allowed size for a stored async search response can be set by changi
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'wait_for_completion_timeout',
@@ -1827,19 +1832,19 @@ The maximum allowed size for a stored async search response can be set by changi
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(async_search_submit_request, 'body'),
-    getLooseObjectFromProperty(async_search_submit_request, 'path'),
-    getLooseObjectFromProperty(async_search_submit_request, 'query'),
-    getLooseObjectFromProperty(async_search_submit1_request, 'body'),
-    getLooseObjectFromProperty(async_search_submit1_request, 'path'),
-    getLooseObjectFromProperty(async_search_submit1_request, 'query'),
+    getZodLooseObjectFromProperty(async_search_submit_request, 'body'),
+    getZodLooseObjectFromProperty(async_search_submit_request, 'path'),
+    getZodLooseObjectFromProperty(async_search_submit_request, 'query'),
+    getZodLooseObjectFromProperty(async_search_submit1_request, 'body'),
+    getZodLooseObjectFromProperty(async_search_submit1_request, 'path'),
+    getZodLooseObjectFromProperty(async_search_submit1_request, 'query'),
   ]),
   outputSchema: z.union([async_search_submit_response, async_search_submit1_response]),
 };
 const AUTOSCALING_DELETE_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.delete_autoscaling_policy',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Delete an autoscaling policy.
 
 NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
@@ -1850,6 +1855,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-delete-autoscaling-policy',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -1859,8 +1865,8 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
 };
 const AUTOSCALING_GET_AUTOSCALING_CAPACITY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.get_autoscaling_capacity',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Get the autoscaling capacity.
 
 NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
@@ -1882,6 +1888,7 @@ Do not use this information to make autoscaling decisions.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-get-autoscaling-capacity',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -1891,8 +1898,8 @@ Do not use this information to make autoscaling decisions.
 };
 const AUTOSCALING_GET_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.get_autoscaling_policy',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Get an autoscaling policy.
 
 NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
@@ -1903,6 +1910,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-get-autoscaling-capacity',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -1912,8 +1920,8 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
 };
 const AUTOSCALING_PUT_AUTOSCALING_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.autoscaling.put_autoscaling_policy',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Create or update an autoscaling policy.
 
 NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
@@ -1924,6 +1932,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-put-autoscaling-policy',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -1933,7 +1942,7 @@ NOTE: This feature is designed for indirect use by Elasticsearch Service, Elasti
 };
 const BULK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.bulk',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Bulk index or delete documents`,
   description: `Bulk index or delete documents.
 Perform multiple \`index\`, \`create\`, \`delete\`, and \`update\` actions in a single request.
@@ -2055,6 +2064,7 @@ Refer to the linked documentation for step-by-step instructions using the index 
   patterns: ['_bulk', '{index}/_bulk'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'include_source_on_error',
@@ -2073,25 +2083,25 @@ Refer to the linked documentation for step-by-step instructions using the index 
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(bulk_request, 'body'),
-    getLooseObjectFromProperty(bulk_request, 'path'),
-    getLooseObjectFromProperty(bulk_request, 'query'),
-    getLooseObjectFromProperty(bulk1_request, 'body'),
-    getLooseObjectFromProperty(bulk1_request, 'path'),
-    getLooseObjectFromProperty(bulk1_request, 'query'),
-    getLooseObjectFromProperty(bulk2_request, 'body'),
-    getLooseObjectFromProperty(bulk2_request, 'path'),
-    getLooseObjectFromProperty(bulk2_request, 'query'),
-    getLooseObjectFromProperty(bulk3_request, 'body'),
-    getLooseObjectFromProperty(bulk3_request, 'path'),
-    getLooseObjectFromProperty(bulk3_request, 'query'),
+    getZodLooseObjectFromProperty(bulk_request, 'body'),
+    getZodLooseObjectFromProperty(bulk_request, 'path'),
+    getZodLooseObjectFromProperty(bulk_request, 'query'),
+    getZodLooseObjectFromProperty(bulk1_request, 'body'),
+    getZodLooseObjectFromProperty(bulk1_request, 'path'),
+    getZodLooseObjectFromProperty(bulk1_request, 'query'),
+    getZodLooseObjectFromProperty(bulk2_request, 'body'),
+    getZodLooseObjectFromProperty(bulk2_request, 'path'),
+    getZodLooseObjectFromProperty(bulk2_request, 'query'),
+    getZodLooseObjectFromProperty(bulk3_request, 'body'),
+    getZodLooseObjectFromProperty(bulk3_request, 'path'),
+    getZodLooseObjectFromProperty(bulk3_request, 'query'),
   ]),
   outputSchema: z.union([bulk_response, bulk1_response, bulk2_response, bulk3_response]),
 };
 const CAPABILITIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.capabilities',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Checks if the specified combination of method, API, parameters, and arbitrary capabilities are supported
 
  Documentation: https://github.com/elastic/elasticsearch/blob/main/rest-api-spec/src/yamlRestTest/resources/rest-api-spec/test/README.asciidoc#require-or-skip-api-capabilities`,
@@ -2100,6 +2110,7 @@ const CAPABILITIES_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://github.com/elastic/elasticsearch/blob/main/rest-api-spec/src/yamlRestTest/resources/rest-api-spec/test/README.asciidoc#require-or-skip-api-capabilities',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -2109,7 +2120,7 @@ const CAPABILITIES_CONTRACT: InternalConnectorContract = {
 };
 const CAT_ALIASES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.aliases',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get aliases`,
   description: `Get aliases.
 
@@ -2124,23 +2135,24 @@ IMPORTANT: CAT APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-aliases',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['h', 's', 'expand_wildcards', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_aliases_request, 'body'),
-    getLooseObjectFromProperty(cat_aliases_request, 'path'),
-    getLooseObjectFromProperty(cat_aliases_request, 'query'),
-    getLooseObjectFromProperty(cat_aliases1_request, 'body'),
-    getLooseObjectFromProperty(cat_aliases1_request, 'path'),
-    getLooseObjectFromProperty(cat_aliases1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_aliases_request, 'body'),
+    getZodLooseObjectFromProperty(cat_aliases_request, 'path'),
+    getZodLooseObjectFromProperty(cat_aliases_request, 'query'),
+    getZodLooseObjectFromProperty(cat_aliases1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_aliases1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_aliases1_request, 'query'),
   ]),
   outputSchema: z.union([cat_aliases_response, cat_aliases1_response]),
 };
 const CAT_ALLOCATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.allocation',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get shard allocation information`,
   description: `Get shard allocation information.
 
@@ -2154,24 +2166,25 @@ IMPORTANT: CAT APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-allocation',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id'],
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_allocation_request, 'body'),
-    getLooseObjectFromProperty(cat_allocation_request, 'path'),
-    getLooseObjectFromProperty(cat_allocation_request, 'query'),
-    getLooseObjectFromProperty(cat_allocation1_request, 'body'),
-    getLooseObjectFromProperty(cat_allocation1_request, 'path'),
-    getLooseObjectFromProperty(cat_allocation1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_allocation_request, 'body'),
+    getZodLooseObjectFromProperty(cat_allocation_request, 'path'),
+    getZodLooseObjectFromProperty(cat_allocation_request, 'query'),
+    getZodLooseObjectFromProperty(cat_allocation1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_allocation1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_allocation1_request, 'query'),
   ]),
   outputSchema: z.union([cat_allocation_response, cat_allocation1_response]),
 };
 const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.circuit_breaker',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Get circuit breakers statistics
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
@@ -2179,6 +2192,7 @@ const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
   patterns: ['_cat/circuit_breaker', '_cat/circuit_breaker/{circuit_breaker_patterns}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -2188,7 +2202,7 @@ const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
 };
 const CAT_COMPONENT_TEMPLATES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.component_templates',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get component templates`,
   description: `Get component templates.
 
@@ -2204,23 +2218,24 @@ They are not intended for use by applications. For application consumption, use 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-component-templates',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_component_templates_request, 'body'),
-    getLooseObjectFromProperty(cat_component_templates_request, 'path'),
-    getLooseObjectFromProperty(cat_component_templates_request, 'query'),
-    getLooseObjectFromProperty(cat_component_templates1_request, 'body'),
-    getLooseObjectFromProperty(cat_component_templates1_request, 'path'),
-    getLooseObjectFromProperty(cat_component_templates1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_component_templates_request, 'body'),
+    getZodLooseObjectFromProperty(cat_component_templates_request, 'path'),
+    getZodLooseObjectFromProperty(cat_component_templates_request, 'query'),
+    getZodLooseObjectFromProperty(cat_component_templates1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_component_templates1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_component_templates1_request, 'query'),
   ]),
   outputSchema: z.union([cat_component_templates_response, cat_component_templates1_response]),
 };
 const CAT_COUNT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.count',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a document count`,
   description: `Get a document count.
 
@@ -2235,23 +2250,24 @@ They are not intended for use by applications. For application consumption, use 
   patterns: ['_cat/count', '_cat/count/{index}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-count',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_count_request, 'body'),
-    getLooseObjectFromProperty(cat_count_request, 'path'),
-    getLooseObjectFromProperty(cat_count_request, 'query'),
-    getLooseObjectFromProperty(cat_count1_request, 'body'),
-    getLooseObjectFromProperty(cat_count1_request, 'path'),
-    getLooseObjectFromProperty(cat_count1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_count_request, 'body'),
+    getZodLooseObjectFromProperty(cat_count_request, 'path'),
+    getZodLooseObjectFromProperty(cat_count_request, 'query'),
+    getZodLooseObjectFromProperty(cat_count1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_count1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_count1_request, 'query'),
   ]),
   outputSchema: z.union([cat_count_response, cat_count1_response]),
 };
 const CAT_FIELDDATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.fielddata',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get field data cache information`,
   description: `Get field data cache information.
 
@@ -2266,23 +2282,24 @@ They are not intended for use by applications. For application consumption, use 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-fielddata',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['fields'],
     urlParams: ['fields', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_fielddata_request, 'body'),
-    getLooseObjectFromProperty(cat_fielddata_request, 'path'),
-    getLooseObjectFromProperty(cat_fielddata_request, 'query'),
-    getLooseObjectFromProperty(cat_fielddata1_request, 'body'),
-    getLooseObjectFromProperty(cat_fielddata1_request, 'path'),
-    getLooseObjectFromProperty(cat_fielddata1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_fielddata_request, 'body'),
+    getZodLooseObjectFromProperty(cat_fielddata_request, 'path'),
+    getZodLooseObjectFromProperty(cat_fielddata_request, 'query'),
+    getZodLooseObjectFromProperty(cat_fielddata1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_fielddata1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_fielddata1_request, 'query'),
   ]),
   outputSchema: z.union([cat_fielddata_response, cat_fielddata1_response]),
 };
 const CAT_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.health',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the cluster health status`,
   description: `Get the cluster health status.
 
@@ -2301,20 +2318,21 @@ You also can use the API to track the recovery of a large cluster over a longer 
   patterns: ['_cat/health'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-health',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['ts', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_health_request, 'body'),
-    getLooseObjectFromProperty(cat_health_request, 'path'),
-    getLooseObjectFromProperty(cat_health_request, 'query'),
+    getZodLooseObjectFromProperty(cat_health_request, 'body'),
+    getZodLooseObjectFromProperty(cat_health_request, 'path'),
+    getZodLooseObjectFromProperty(cat_health_request, 'query'),
   ]),
   outputSchema: cat_health_response,
 };
 const CAT_HELP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.help',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get CAT help`,
   description: `Get CAT help.
 
@@ -2325,20 +2343,21 @@ Get help for the CAT APIs.
   patterns: ['_cat'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-cat',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_help_request, 'body'),
-    getLooseObjectFromProperty(cat_help_request, 'path'),
-    getLooseObjectFromProperty(cat_help_request, 'query'),
+    getZodLooseObjectFromProperty(cat_help_request, 'body'),
+    getZodLooseObjectFromProperty(cat_help_request, 'path'),
+    getZodLooseObjectFromProperty(cat_help_request, 'query'),
   ]),
   outputSchema: cat_help_response,
 };
 const CAT_INDICES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.indices',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get index information`,
   description: `Get index information.
 
@@ -2363,6 +2382,7 @@ They are not intended for use by applications. For application consumption, use 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-indices',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'expand_wildcards',
@@ -2376,18 +2396,18 @@ They are not intended for use by applications. For application consumption, use 
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_indices_request, 'body'),
-    getLooseObjectFromProperty(cat_indices_request, 'path'),
-    getLooseObjectFromProperty(cat_indices_request, 'query'),
-    getLooseObjectFromProperty(cat_indices1_request, 'body'),
-    getLooseObjectFromProperty(cat_indices1_request, 'path'),
-    getLooseObjectFromProperty(cat_indices1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_indices_request, 'body'),
+    getZodLooseObjectFromProperty(cat_indices_request, 'path'),
+    getZodLooseObjectFromProperty(cat_indices_request, 'query'),
+    getZodLooseObjectFromProperty(cat_indices1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_indices1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_indices1_request, 'query'),
   ]),
   outputSchema: z.union([cat_indices_response, cat_indices1_response]),
 };
 const CAT_MASTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.master',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get master node information`,
   description: `Get master node information.
 
@@ -2400,20 +2420,21 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   patterns: ['_cat/master'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-master',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_master_request, 'body'),
-    getLooseObjectFromProperty(cat_master_request, 'path'),
-    getLooseObjectFromProperty(cat_master_request, 'query'),
+    getZodLooseObjectFromProperty(cat_master_request, 'body'),
+    getZodLooseObjectFromProperty(cat_master_request, 'path'),
+    getZodLooseObjectFromProperty(cat_master_request, 'query'),
   ]),
   outputSchema: cat_master_response,
 };
 const CAT_ML_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.ml_data_frame_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data frame analytics jobs`,
   description: `Get data frame analytics jobs.
 
@@ -2429,17 +2450,18 @@ application consumption, use the get data frame analytics jobs statistics API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-data-frame-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['allow_no_match', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'body'),
-    getLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'path'),
-    getLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'query'),
-    getLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'body'),
-    getLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'path'),
-    getLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_ml_data_frame_analytics1_request, 'query'),
   ]),
   outputSchema: z.union([
     cat_ml_data_frame_analytics_response,
@@ -2448,7 +2470,7 @@ application consumption, use the get data frame analytics jobs statistics API.
 };
 const CAT_ML_DATAFEEDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.ml_datafeeds',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get datafeeds`,
   description: `Get datafeeds.
 
@@ -2467,23 +2489,24 @@ application consumption, use the get datafeed statistics API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-datafeeds',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['datafeed_id'],
     urlParams: ['allow_no_match', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_ml_datafeeds_request, 'body'),
-    getLooseObjectFromProperty(cat_ml_datafeeds_request, 'path'),
-    getLooseObjectFromProperty(cat_ml_datafeeds_request, 'query'),
-    getLooseObjectFromProperty(cat_ml_datafeeds1_request, 'body'),
-    getLooseObjectFromProperty(cat_ml_datafeeds1_request, 'path'),
-    getLooseObjectFromProperty(cat_ml_datafeeds1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_ml_datafeeds_request, 'body'),
+    getZodLooseObjectFromProperty(cat_ml_datafeeds_request, 'path'),
+    getZodLooseObjectFromProperty(cat_ml_datafeeds_request, 'query'),
+    getZodLooseObjectFromProperty(cat_ml_datafeeds1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_ml_datafeeds1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_ml_datafeeds1_request, 'query'),
   ]),
   outputSchema: z.union([cat_ml_datafeeds_response, cat_ml_datafeeds1_response]),
 };
 const CAT_ML_JOBS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.ml_jobs',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get anomaly detection jobs`,
   description: `Get anomaly detection jobs.
 
@@ -2502,23 +2525,24 @@ application consumption, use the get anomaly detection job statistics API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-jobs',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['allow_no_match', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_ml_jobs_request, 'body'),
-    getLooseObjectFromProperty(cat_ml_jobs_request, 'path'),
-    getLooseObjectFromProperty(cat_ml_jobs_request, 'query'),
-    getLooseObjectFromProperty(cat_ml_jobs1_request, 'body'),
-    getLooseObjectFromProperty(cat_ml_jobs1_request, 'path'),
-    getLooseObjectFromProperty(cat_ml_jobs1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_ml_jobs_request, 'body'),
+    getZodLooseObjectFromProperty(cat_ml_jobs_request, 'path'),
+    getZodLooseObjectFromProperty(cat_ml_jobs_request, 'query'),
+    getZodLooseObjectFromProperty(cat_ml_jobs1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_ml_jobs1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_ml_jobs1_request, 'query'),
   ]),
   outputSchema: z.union([cat_ml_jobs_response, cat_ml_jobs1_response]),
 };
 const CAT_ML_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.ml_trained_models',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get trained models`,
   description: `Get trained models.
 
@@ -2534,23 +2558,24 @@ application consumption, use the get trained models statistics API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-trained-models',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: ['allow_no_match', 'h', 's', 'from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_ml_trained_models_request, 'body'),
-    getLooseObjectFromProperty(cat_ml_trained_models_request, 'path'),
-    getLooseObjectFromProperty(cat_ml_trained_models_request, 'query'),
-    getLooseObjectFromProperty(cat_ml_trained_models1_request, 'body'),
-    getLooseObjectFromProperty(cat_ml_trained_models1_request, 'path'),
-    getLooseObjectFromProperty(cat_ml_trained_models1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_ml_trained_models_request, 'body'),
+    getZodLooseObjectFromProperty(cat_ml_trained_models_request, 'path'),
+    getZodLooseObjectFromProperty(cat_ml_trained_models_request, 'query'),
+    getZodLooseObjectFromProperty(cat_ml_trained_models1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_ml_trained_models1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_ml_trained_models1_request, 'query'),
   ]),
   outputSchema: z.union([cat_ml_trained_models_response, cat_ml_trained_models1_response]),
 };
 const CAT_NODEATTRS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.nodeattrs',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get node attribute information`,
   description: `Get node attribute information.
 
@@ -2563,20 +2588,21 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-nodeattrs',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_nodeattrs_request, 'body'),
-    getLooseObjectFromProperty(cat_nodeattrs_request, 'path'),
-    getLooseObjectFromProperty(cat_nodeattrs_request, 'query'),
+    getZodLooseObjectFromProperty(cat_nodeattrs_request, 'body'),
+    getZodLooseObjectFromProperty(cat_nodeattrs_request, 'path'),
+    getZodLooseObjectFromProperty(cat_nodeattrs_request, 'query'),
   ]),
   outputSchema: cat_nodeattrs_response,
 };
 const CAT_NODES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.nodes',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get node information`,
   description: `Get node information.
 
@@ -2588,20 +2614,21 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   patterns: ['_cat/nodes'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-nodes',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['full_id', 'include_unloaded_segments', 'h', 's', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_nodes_request, 'body'),
-    getLooseObjectFromProperty(cat_nodes_request, 'path'),
-    getLooseObjectFromProperty(cat_nodes_request, 'query'),
+    getZodLooseObjectFromProperty(cat_nodes_request, 'body'),
+    getZodLooseObjectFromProperty(cat_nodes_request, 'path'),
+    getZodLooseObjectFromProperty(cat_nodes_request, 'query'),
   ]),
   outputSchema: cat_nodes_response,
 };
 const CAT_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.pending_tasks',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get pending task information`,
   description: `Get pending task information.
 
@@ -2614,20 +2641,21 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-pending-tasks',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_pending_tasks_request, 'body'),
-    getLooseObjectFromProperty(cat_pending_tasks_request, 'path'),
-    getLooseObjectFromProperty(cat_pending_tasks_request, 'query'),
+    getZodLooseObjectFromProperty(cat_pending_tasks_request, 'body'),
+    getZodLooseObjectFromProperty(cat_pending_tasks_request, 'path'),
+    getZodLooseObjectFromProperty(cat_pending_tasks_request, 'query'),
   ]),
   outputSchema: cat_pending_tasks_response,
 };
 const CAT_PLUGINS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.plugins',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get plugin information`,
   description: `Get plugin information.
 
@@ -2640,20 +2668,21 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-plugins',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['h', 's', 'include_bootstrap', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_plugins_request, 'body'),
-    getLooseObjectFromProperty(cat_plugins_request, 'path'),
-    getLooseObjectFromProperty(cat_plugins_request, 'query'),
+    getZodLooseObjectFromProperty(cat_plugins_request, 'body'),
+    getZodLooseObjectFromProperty(cat_plugins_request, 'path'),
+    getZodLooseObjectFromProperty(cat_plugins_request, 'query'),
   ]),
   outputSchema: cat_plugins_response,
 };
 const CAT_RECOVERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.recovery',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get shard recovery information`,
   description: `Get shard recovery information.
 
@@ -2668,23 +2697,24 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-recovery',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['active_only', 'detailed', 'index', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_recovery_request, 'body'),
-    getLooseObjectFromProperty(cat_recovery_request, 'path'),
-    getLooseObjectFromProperty(cat_recovery_request, 'query'),
-    getLooseObjectFromProperty(cat_recovery1_request, 'body'),
-    getLooseObjectFromProperty(cat_recovery1_request, 'path'),
-    getLooseObjectFromProperty(cat_recovery1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_recovery_request, 'body'),
+    getZodLooseObjectFromProperty(cat_recovery_request, 'path'),
+    getZodLooseObjectFromProperty(cat_recovery_request, 'query'),
+    getZodLooseObjectFromProperty(cat_recovery1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_recovery1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_recovery1_request, 'query'),
   ]),
   outputSchema: z.union([cat_recovery_response, cat_recovery1_response]),
 };
 const CAT_REPOSITORIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.repositories',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get snapshot repository information`,
   description: `Get snapshot repository information.
 
@@ -2697,20 +2727,21 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-repositories',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_repositories_request, 'body'),
-    getLooseObjectFromProperty(cat_repositories_request, 'path'),
-    getLooseObjectFromProperty(cat_repositories_request, 'query'),
+    getZodLooseObjectFromProperty(cat_repositories_request, 'body'),
+    getZodLooseObjectFromProperty(cat_repositories_request, 'path'),
+    getZodLooseObjectFromProperty(cat_repositories_request, 'query'),
   ]),
   outputSchema: cat_repositories_response,
 };
 const CAT_SEGMENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.segments',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get segment information`,
   description: `Get segment information.
 
@@ -2724,6 +2755,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-segments',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'h',
@@ -2739,18 +2771,18 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_segments_request, 'body'),
-    getLooseObjectFromProperty(cat_segments_request, 'path'),
-    getLooseObjectFromProperty(cat_segments_request, 'query'),
-    getLooseObjectFromProperty(cat_segments1_request, 'body'),
-    getLooseObjectFromProperty(cat_segments1_request, 'path'),
-    getLooseObjectFromProperty(cat_segments1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_segments_request, 'body'),
+    getZodLooseObjectFromProperty(cat_segments_request, 'path'),
+    getZodLooseObjectFromProperty(cat_segments_request, 'query'),
+    getZodLooseObjectFromProperty(cat_segments1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_segments1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_segments1_request, 'query'),
   ]),
   outputSchema: z.union([cat_segments_response, cat_segments1_response]),
 };
 const CAT_SHARDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.shards',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get shard information`,
   description: `Get shard information.
 
@@ -2763,23 +2795,24 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   patterns: ['_cat/shards', '_cat/shards/{index}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-shards',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['h', 's', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_shards_request, 'body'),
-    getLooseObjectFromProperty(cat_shards_request, 'path'),
-    getLooseObjectFromProperty(cat_shards_request, 'query'),
-    getLooseObjectFromProperty(cat_shards1_request, 'body'),
-    getLooseObjectFromProperty(cat_shards1_request, 'path'),
-    getLooseObjectFromProperty(cat_shards1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_shards_request, 'body'),
+    getZodLooseObjectFromProperty(cat_shards_request, 'path'),
+    getZodLooseObjectFromProperty(cat_shards_request, 'query'),
+    getZodLooseObjectFromProperty(cat_shards1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_shards1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_shards1_request, 'query'),
   ]),
   outputSchema: z.union([cat_shards_response, cat_shards1_response]),
 };
 const CAT_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.snapshots',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get snapshot information`,
   description: `Get snapshot information.
 
@@ -2793,23 +2826,24 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-snapshots',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository'],
     urlParams: ['ignore_unavailable', 'h', 's', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_snapshots_request, 'body'),
-    getLooseObjectFromProperty(cat_snapshots_request, 'path'),
-    getLooseObjectFromProperty(cat_snapshots_request, 'query'),
-    getLooseObjectFromProperty(cat_snapshots1_request, 'body'),
-    getLooseObjectFromProperty(cat_snapshots1_request, 'path'),
-    getLooseObjectFromProperty(cat_snapshots1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_snapshots_request, 'body'),
+    getZodLooseObjectFromProperty(cat_snapshots_request, 'path'),
+    getZodLooseObjectFromProperty(cat_snapshots_request, 'query'),
+    getZodLooseObjectFromProperty(cat_snapshots1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_snapshots1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_snapshots1_request, 'query'),
   ]),
   outputSchema: z.union([cat_snapshots_response, cat_snapshots1_response]),
 };
 const CAT_TASKS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.tasks',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get task information`,
   description: `Get task information.
 
@@ -2821,6 +2855,7 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   patterns: ['_cat/tasks'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-tasks',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'actions',
@@ -2835,15 +2870,15 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_tasks_request, 'body'),
-    getLooseObjectFromProperty(cat_tasks_request, 'path'),
-    getLooseObjectFromProperty(cat_tasks_request, 'query'),
+    getZodLooseObjectFromProperty(cat_tasks_request, 'body'),
+    getZodLooseObjectFromProperty(cat_tasks_request, 'path'),
+    getZodLooseObjectFromProperty(cat_tasks_request, 'query'),
   ]),
   outputSchema: cat_tasks_response,
 };
 const CAT_TEMPLATES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.templates',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get index template information`,
   description: `Get index template information.
 
@@ -2857,23 +2892,24 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-templates',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_templates_request, 'body'),
-    getLooseObjectFromProperty(cat_templates_request, 'path'),
-    getLooseObjectFromProperty(cat_templates_request, 'query'),
-    getLooseObjectFromProperty(cat_templates1_request, 'body'),
-    getLooseObjectFromProperty(cat_templates1_request, 'path'),
-    getLooseObjectFromProperty(cat_templates1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_templates_request, 'body'),
+    getZodLooseObjectFromProperty(cat_templates_request, 'path'),
+    getZodLooseObjectFromProperty(cat_templates_request, 'query'),
+    getZodLooseObjectFromProperty(cat_templates1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_templates1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_templates1_request, 'query'),
   ]),
   outputSchema: z.union([cat_templates_response, cat_templates1_response]),
 };
 const CAT_THREAD_POOL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.thread_pool',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get thread pool statistics`,
   description: `Get thread pool statistics.
 
@@ -2887,23 +2923,24 @@ IMPORTANT: cat APIs are only intended for human consumption using the command li
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-thread-pool',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['thread_pool_patterns'],
     urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_thread_pool_request, 'body'),
-    getLooseObjectFromProperty(cat_thread_pool_request, 'path'),
-    getLooseObjectFromProperty(cat_thread_pool_request, 'query'),
-    getLooseObjectFromProperty(cat_thread_pool1_request, 'body'),
-    getLooseObjectFromProperty(cat_thread_pool1_request, 'path'),
-    getLooseObjectFromProperty(cat_thread_pool1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_thread_pool_request, 'body'),
+    getZodLooseObjectFromProperty(cat_thread_pool_request, 'path'),
+    getZodLooseObjectFromProperty(cat_thread_pool_request, 'query'),
+    getZodLooseObjectFromProperty(cat_thread_pool1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_thread_pool1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_thread_pool1_request, 'query'),
   ]),
   outputSchema: z.union([cat_thread_pool_response, cat_thread_pool1_response]),
 };
 const CAT_TRANSFORMS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.transforms',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get transform information`,
   description: `Get transform information.
 
@@ -2919,23 +2956,24 @@ application consumption, use the get transform statistics API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-transforms',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['allow_no_match', 'from', 'h', 's', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cat_transforms_request, 'body'),
-    getLooseObjectFromProperty(cat_transforms_request, 'path'),
-    getLooseObjectFromProperty(cat_transforms_request, 'query'),
-    getLooseObjectFromProperty(cat_transforms1_request, 'body'),
-    getLooseObjectFromProperty(cat_transforms1_request, 'path'),
-    getLooseObjectFromProperty(cat_transforms1_request, 'query'),
+    getZodLooseObjectFromProperty(cat_transforms_request, 'body'),
+    getZodLooseObjectFromProperty(cat_transforms_request, 'path'),
+    getZodLooseObjectFromProperty(cat_transforms_request, 'query'),
+    getZodLooseObjectFromProperty(cat_transforms1_request, 'body'),
+    getZodLooseObjectFromProperty(cat_transforms1_request, 'path'),
+    getZodLooseObjectFromProperty(cat_transforms1_request, 'query'),
   ]),
   outputSchema: z.union([cat_transforms_response, cat_transforms1_response]),
 };
 const CCR_DELETE_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.delete_auto_follow_pattern',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete auto-follow patterns`,
   description: `Delete auto-follow patterns.
 
@@ -2947,20 +2985,21 @@ Delete a collection of cross-cluster replication auto-follow patterns.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-delete-auto-follow-pattern',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'body'),
-    getLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'path'),
-    getLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_delete_auto_follow_pattern_request, 'query'),
   ]),
   outputSchema: ccr_delete_auto_follow_pattern_response,
 };
 const CCR_FOLLOW_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.follow',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a follower`,
   description: `Create a follower.
 Create a cross-cluster replication follower index that follows a specific leader index.
@@ -2971,6 +3010,7 @@ When the API returns, the follower index exists and cross-cluster replication st
   patterns: ['{index}/_ccr/follow'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['master_timeout', 'wait_for_active_shards'],
     bodyParams: [
@@ -2991,15 +3031,15 @@ When the API returns, the follower index exists and cross-cluster replication st
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_follow_request, 'body'),
-    getLooseObjectFromProperty(ccr_follow_request, 'path'),
-    getLooseObjectFromProperty(ccr_follow_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_follow_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_follow_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_follow_request, 'query'),
   ]),
   outputSchema: ccr_follow_response,
 };
 const CCR_FOLLOW_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.follow_info',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get follower information`,
   description: `Get follower information.
 
@@ -3012,20 +3052,21 @@ For example, the results include follower index names, leader index names, repli
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow-info',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_follow_info_request, 'body'),
-    getLooseObjectFromProperty(ccr_follow_info_request, 'path'),
-    getLooseObjectFromProperty(ccr_follow_info_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_follow_info_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_follow_info_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_follow_info_request, 'query'),
   ]),
   outputSchema: ccr_follow_info_response,
 };
 const CCR_FOLLOW_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.follow_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get follower stats`,
   description: `Get follower stats.
 
@@ -3038,20 +3079,21 @@ The API returns shard-level stats about the "following tasks" associated with ea
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_follow_stats_request, 'body'),
-    getLooseObjectFromProperty(ccr_follow_stats_request, 'path'),
-    getLooseObjectFromProperty(ccr_follow_stats_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_follow_stats_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_follow_stats_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_follow_stats_request, 'query'),
   ]),
   outputSchema: ccr_follow_stats_response,
 };
 const CCR_FORGET_FOLLOWER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.forget_follower',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Forget a follower`,
   description: `Forget a follower.
 Remove the cross-cluster replication follower retention leases from the leader.
@@ -3072,6 +3114,7 @@ The only purpose of this API is to handle the case of failure to remove the foll
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-forget-follower',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['timeout'],
     bodyParams: [
@@ -3082,15 +3125,15 @@ The only purpose of this API is to handle the case of failure to remove the foll
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_forget_follower_request, 'body'),
-    getLooseObjectFromProperty(ccr_forget_follower_request, 'path'),
-    getLooseObjectFromProperty(ccr_forget_follower_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_forget_follower_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_forget_follower_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_forget_follower_request, 'query'),
   ]),
   outputSchema: ccr_forget_follower_response,
 };
 const CCR_GET_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.get_auto_follow_pattern',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get auto-follow patterns`,
   description: `Get auto-follow patterns.
 
@@ -3102,17 +3145,18 @@ Get cross-cluster replication auto-follow patterns.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-get-auto-follow-pattern-1',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'body'),
-    getLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'path'),
-    getLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'query'),
-    getLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'body'),
-    getLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'path'),
-    getLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_get_auto_follow_pattern1_request, 'query'),
   ]),
   outputSchema: z.union([
     ccr_get_auto_follow_pattern_response,
@@ -3121,7 +3165,7 @@ Get cross-cluster replication auto-follow patterns.
 };
 const CCR_PAUSE_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.pause_auto_follow_pattern',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Pause an auto-follow pattern`,
   description: `Pause an auto-follow pattern.
 
@@ -3139,20 +3183,21 @@ Remote indices that were created while the pattern was paused will also be follo
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-pause-auto-follow-pattern',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'body'),
-    getLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'path'),
-    getLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_pause_auto_follow_pattern_request, 'query'),
   ]),
   outputSchema: ccr_pause_auto_follow_pattern_response,
 };
 const CCR_PAUSE_FOLLOW_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.pause_follow',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Pause a follower`,
   description: `Pause a follower.
 
@@ -3167,20 +3212,21 @@ You can pause and resume a follower index to change the configuration of the fol
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-pause-follow',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_pause_follow_request, 'body'),
-    getLooseObjectFromProperty(ccr_pause_follow_request, 'path'),
-    getLooseObjectFromProperty(ccr_pause_follow_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_pause_follow_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_pause_follow_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_pause_follow_request, 'query'),
   ]),
   outputSchema: ccr_pause_follow_response,
 };
 const CCR_PUT_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.put_auto_follow_pattern',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update auto-follow patterns`,
   description: `Create or update auto-follow patterns.
 Create a collection of cross-cluster replication auto-follow patterns for a remote cluster.
@@ -3196,6 +3242,7 @@ NOTE: Follower indices that were configured automatically before updating an aut
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-put-auto-follow-pattern',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [
@@ -3217,15 +3264,15 @@ NOTE: Follower indices that were configured automatically before updating an aut
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'body'),
-    getLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'path'),
-    getLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'query'),
   ]),
   outputSchema: ccr_put_auto_follow_pattern_response,
 };
 const CCR_RESUME_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.resume_auto_follow_pattern',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Resume an auto-follow pattern`,
   description: `Resume an auto-follow pattern.
 
@@ -3239,20 +3286,21 @@ Remote indices created while the pattern was paused will also be followed unless
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-resume-auto-follow-pattern',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'body'),
-    getLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'path'),
-    getLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_resume_auto_follow_pattern_request, 'query'),
   ]),
   outputSchema: ccr_resume_auto_follow_pattern_response,
 };
 const CCR_RESUME_FOLLOW_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.resume_follow',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Resume a follower`,
   description: `Resume a follower.
 Resume a cross-cluster replication follower index that was paused.
@@ -3266,6 +3314,7 @@ When this API returns, the follower index will resume fetching operations from t
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-resume-follow',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['master_timeout'],
     bodyParams: [
@@ -3282,15 +3331,15 @@ When this API returns, the follower index will resume fetching operations from t
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_resume_follow_request, 'body'),
-    getLooseObjectFromProperty(ccr_resume_follow_request, 'path'),
-    getLooseObjectFromProperty(ccr_resume_follow_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_resume_follow_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_resume_follow_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_resume_follow_request, 'query'),
   ]),
   outputSchema: ccr_resume_follow_response,
 };
 const CCR_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get cross-cluster replication stats`,
   description: `Get cross-cluster replication stats.
 
@@ -3301,20 +3350,21 @@ This API returns stats about auto-following and the same shard-level stats as th
   patterns: ['_ccr/stats'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_stats_request, 'body'),
-    getLooseObjectFromProperty(ccr_stats_request, 'path'),
-    getLooseObjectFromProperty(ccr_stats_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_stats_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_stats_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_stats_request, 'query'),
   ]),
   outputSchema: ccr_stats_response,
 };
 const CCR_UNFOLLOW_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ccr.unfollow',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Unfollow an index`,
   description: `Unfollow an index.
 
@@ -3331,20 +3381,21 @@ The follower index must be paused and closed before you call the unfollow API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-unfollow',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ccr_unfollow_request, 'body'),
-    getLooseObjectFromProperty(ccr_unfollow_request, 'path'),
-    getLooseObjectFromProperty(ccr_unfollow_request, 'query'),
+    getZodLooseObjectFromProperty(ccr_unfollow_request, 'body'),
+    getZodLooseObjectFromProperty(ccr_unfollow_request, 'path'),
+    getZodLooseObjectFromProperty(ccr_unfollow_request, 'query'),
   ]),
   outputSchema: ccr_unfollow_response,
 };
 const CLEAR_SCROLL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.clear_scroll',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear a scrolling search`,
   description: `Clear a scrolling search.
 Clear the search context and results for a scrolling search.
@@ -3355,23 +3406,24 @@ Clear the search context and results for a scrolling search.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-clear-scroll',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['scroll_id'],
     urlParams: [],
     bodyParams: ['scroll_id'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(clear_scroll_request, 'body'),
-    getLooseObjectFromProperty(clear_scroll_request, 'path'),
-    getLooseObjectFromProperty(clear_scroll_request, 'query'),
-    getLooseObjectFromProperty(clear_scroll1_request, 'body'),
-    getLooseObjectFromProperty(clear_scroll1_request, 'path'),
-    getLooseObjectFromProperty(clear_scroll1_request, 'query'),
+    getZodLooseObjectFromProperty(clear_scroll_request, 'body'),
+    getZodLooseObjectFromProperty(clear_scroll_request, 'path'),
+    getZodLooseObjectFromProperty(clear_scroll_request, 'query'),
+    getZodLooseObjectFromProperty(clear_scroll1_request, 'body'),
+    getZodLooseObjectFromProperty(clear_scroll1_request, 'path'),
+    getZodLooseObjectFromProperty(clear_scroll1_request, 'query'),
   ]),
   outputSchema: z.union([clear_scroll_response, clear_scroll1_response]),
 };
 const CLOSE_POINT_IN_TIME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.close_point_in_time',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Close a point in time`,
   description: `Close a point in time.
 A point in time must be opened explicitly before being used in search requests.
@@ -3385,20 +3437,21 @@ However, keeping points in time has a cost; close them as soon as they are no lo
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-open-point-in-time',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['id'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(close_point_in_time_request, 'body'),
-    getLooseObjectFromProperty(close_point_in_time_request, 'path'),
-    getLooseObjectFromProperty(close_point_in_time_request, 'query'),
+    getZodLooseObjectFromProperty(close_point_in_time_request, 'body'),
+    getZodLooseObjectFromProperty(close_point_in_time_request, 'path'),
+    getZodLooseObjectFromProperty(close_point_in_time_request, 'query'),
   ]),
   outputSchema: close_point_in_time_response,
 };
 const CLUSTER_ALLOCATION_EXPLAIN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.allocation_explain',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Explain the shard allocations`,
   description: `Explain the shard allocations.
 Get explanations for shard allocations in the cluster.
@@ -3414,6 +3467,7 @@ Refer to the linked documentation for examples of how to troubleshoot allocation
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-allocation-explain',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'index',
@@ -3427,12 +3481,12 @@ Refer to the linked documentation for examples of how to troubleshoot allocation
     bodyParams: ['index', 'shard', 'primary', 'current_node'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_allocation_explain_request, 'body'),
-    getLooseObjectFromProperty(cluster_allocation_explain_request, 'path'),
-    getLooseObjectFromProperty(cluster_allocation_explain_request, 'query'),
-    getLooseObjectFromProperty(cluster_allocation_explain1_request, 'body'),
-    getLooseObjectFromProperty(cluster_allocation_explain1_request, 'path'),
-    getLooseObjectFromProperty(cluster_allocation_explain1_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_allocation_explain_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_allocation_explain_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_allocation_explain_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_allocation_explain1_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_allocation_explain1_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_allocation_explain1_request, 'query'),
   ]),
   outputSchema: z.union([
     cluster_allocation_explain_response,
@@ -3441,7 +3495,7 @@ Refer to the linked documentation for examples of how to troubleshoot allocation
 };
 const CLUSTER_DELETE_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.delete_component_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete component templates`,
   description: `Delete component templates.
 Component templates are building blocks for constructing index templates that specify index mappings, settings, and aliases.
@@ -3452,20 +3506,21 @@ Component templates are building blocks for constructing index templates that sp
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_delete_component_template_request, 'body'),
-    getLooseObjectFromProperty(cluster_delete_component_template_request, 'path'),
-    getLooseObjectFromProperty(cluster_delete_component_template_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_delete_component_template_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_delete_component_template_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_delete_component_template_request, 'query'),
   ]),
   outputSchema: cluster_delete_component_template_response,
 };
 const CLUSTER_DELETE_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.delete_voting_config_exclusions',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear cluster voting config exclusions`,
   description: `Clear cluster voting config exclusions.
 Remove master-eligible nodes from the voting configuration exclusion list.
@@ -3476,20 +3531,21 @@ Remove master-eligible nodes from the voting configuration exclusion list.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-post-voting-config-exclusions',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'wait_for_removal'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'body'),
-    getLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'path'),
-    getLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_delete_voting_config_exclusions_request, 'query'),
   ]),
   outputSchema: cluster_delete_voting_config_exclusions_response,
 };
 const CLUSTER_EXISTS_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.exists_component_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check component templates`,
   description: `Check component templates.
 Returns information about whether a particular component template exists.
@@ -3500,20 +3556,21 @@ Returns information about whether a particular component template exists.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout', 'local'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_exists_component_template_request, 'body'),
-    getLooseObjectFromProperty(cluster_exists_component_template_request, 'path'),
-    getLooseObjectFromProperty(cluster_exists_component_template_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_exists_component_template_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_exists_component_template_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_exists_component_template_request, 'query'),
   ]),
   outputSchema: cluster_exists_component_template_response,
 };
 const CLUSTER_GET_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.get_component_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get component templates`,
   description: `Get component templates.
 Get information about component templates.
@@ -3524,17 +3581,18 @@ Get information about component templates.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['flat_settings', 'settings_filter', 'include_defaults', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_get_component_template_request, 'body'),
-    getLooseObjectFromProperty(cluster_get_component_template_request, 'path'),
-    getLooseObjectFromProperty(cluster_get_component_template_request, 'query'),
-    getLooseObjectFromProperty(cluster_get_component_template1_request, 'body'),
-    getLooseObjectFromProperty(cluster_get_component_template1_request, 'path'),
-    getLooseObjectFromProperty(cluster_get_component_template1_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_get_component_template_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_get_component_template_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_get_component_template_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_get_component_template1_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_get_component_template1_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_get_component_template1_request, 'query'),
   ]),
   outputSchema: z.union([
     cluster_get_component_template_response,
@@ -3543,7 +3601,7 @@ Get information about component templates.
 };
 const CLUSTER_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.get_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get cluster-wide settings`,
   description: `Get cluster-wide settings.
 
@@ -3555,20 +3613,21 @@ By default, it returns only settings that have been explicitly defined.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-get-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['flat_settings', 'include_defaults', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_get_settings_request, 'body'),
-    getLooseObjectFromProperty(cluster_get_settings_request, 'path'),
-    getLooseObjectFromProperty(cluster_get_settings_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_get_settings_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_get_settings_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_get_settings_request, 'query'),
   ]),
   outputSchema: cluster_get_settings_response,
 };
 const CLUSTER_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.health',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the cluster health status`,
   description: `Get the cluster health status.
 
@@ -3588,6 +3647,7 @@ The cluster status is controlled by the worst index status.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-health',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'expand_wildcards',
@@ -3605,18 +3665,18 @@ The cluster status is controlled by the worst index status.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_health_request, 'body'),
-    getLooseObjectFromProperty(cluster_health_request, 'path'),
-    getLooseObjectFromProperty(cluster_health_request, 'query'),
-    getLooseObjectFromProperty(cluster_health1_request, 'body'),
-    getLooseObjectFromProperty(cluster_health1_request, 'path'),
-    getLooseObjectFromProperty(cluster_health1_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_health_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_health_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_health_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_health1_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_health1_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_health1_request, 'query'),
   ]),
   outputSchema: z.union([cluster_health_response, cluster_health1_response]),
 };
 const CLUSTER_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.info',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get cluster info`,
   description: `Get cluster info.
 Returns basic information about the cluster.
@@ -3627,20 +3687,21 @@ Returns basic information about the cluster.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-info',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['target'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_info_request, 'body'),
-    getLooseObjectFromProperty(cluster_info_request, 'path'),
-    getLooseObjectFromProperty(cluster_info_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_info_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_info_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_info_request, 'query'),
   ]),
   outputSchema: cluster_info_response,
 };
 const CLUSTER_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.pending_tasks',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the pending cluster tasks`,
   description: `Get the pending cluster tasks.
 Get information about cluster-level changes (such as create index, update mapping, allocate or fail shard) that have not yet taken effect.
@@ -3655,20 +3716,21 @@ However, if a user-initiated task such as a create index command causes a cluste
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-pending-tasks',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_pending_tasks_request, 'body'),
-    getLooseObjectFromProperty(cluster_pending_tasks_request, 'path'),
-    getLooseObjectFromProperty(cluster_pending_tasks_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_pending_tasks_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_pending_tasks_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_pending_tasks_request, 'query'),
   ]),
   outputSchema: cluster_pending_tasks_response,
 };
 const CLUSTER_POST_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.post_voting_config_exclusions',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update voting configuration exclusions`,
   description: `Update voting configuration exclusions.
 Update the cluster voting config exclusions by node IDs or node names.
@@ -3695,20 +3757,21 @@ They are not required when removing master-ineligible nodes or when removing few
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-post-voting-config-exclusions',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['node_names', 'node_ids', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'body'),
-    getLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'path'),
-    getLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_post_voting_config_exclusions_request, 'query'),
   ]),
   outputSchema: cluster_post_voting_config_exclusions_response,
 };
 const CLUSTER_PUT_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.put_component_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a component template`,
   description: `Create or update a component template.
 Component templates are building blocks for constructing index templates that specify index mappings, settings, and aliases.
@@ -3737,17 +3800,18 @@ To be applied, a component template must be included in an index template's \`co
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['create', 'cause', 'master_timeout'],
     bodyParams: ['template', 'version', '_meta', 'deprecated'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_put_component_template_request, 'body'),
-    getLooseObjectFromProperty(cluster_put_component_template_request, 'path'),
-    getLooseObjectFromProperty(cluster_put_component_template_request, 'query'),
-    getLooseObjectFromProperty(cluster_put_component_template1_request, 'body'),
-    getLooseObjectFromProperty(cluster_put_component_template1_request, 'path'),
-    getLooseObjectFromProperty(cluster_put_component_template1_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_put_component_template_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_put_component_template_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_put_component_template_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_put_component_template1_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_put_component_template1_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_put_component_template1_request, 'query'),
   ]),
   outputSchema: z.union([
     cluster_put_component_template_response,
@@ -3756,7 +3820,7 @@ To be applied, a component template must be included in an index template's \`co
 };
 const CLUSTER_PUT_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.put_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the cluster settings`,
   description: `Update the cluster settings.
 
@@ -3784,20 +3848,21 @@ If a cluster becomes unstable, transient settings can clear unexpectedly, result
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['flat_settings', 'master_timeout', 'timeout'],
     bodyParams: ['persistent', 'transient'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_put_settings_request, 'body'),
-    getLooseObjectFromProperty(cluster_put_settings_request, 'path'),
-    getLooseObjectFromProperty(cluster_put_settings_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_put_settings_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_put_settings_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_put_settings_request, 'query'),
   ]),
   outputSchema: cluster_put_settings_response,
 };
 const CLUSTER_REMOTE_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.remote_info',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get remote cluster information`,
   description: `Get remote cluster information.
 
@@ -3816,20 +3881,21 @@ The API returns connection and endpoint information keyed by the configured remo
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-remote-info',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_remote_info_request, 'body'),
-    getLooseObjectFromProperty(cluster_remote_info_request, 'path'),
-    getLooseObjectFromProperty(cluster_remote_info_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_remote_info_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_remote_info_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_remote_info_request, 'query'),
   ]),
   outputSchema: cluster_remote_info_response,
 };
 const CLUSTER_REROUTE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.reroute',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Reroute the cluster`,
   description: `Reroute the cluster.
 Manually change the allocation of individual shards in the cluster.
@@ -3852,20 +3918,21 @@ Once the problem has been corrected, allocation can be manually retried by calli
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-reroute',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['dry_run', 'explain', 'metric', 'retry_failed', 'master_timeout', 'timeout'],
     bodyParams: ['commands'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_reroute_request, 'body'),
-    getLooseObjectFromProperty(cluster_reroute_request, 'path'),
-    getLooseObjectFromProperty(cluster_reroute_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_reroute_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_reroute_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_reroute_request, 'query'),
   ]),
   outputSchema: cluster_reroute_response,
 };
 const CLUSTER_STATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.state',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the cluster state`,
   description: `Get the cluster state.
 Get comprehensive information about the state of the cluster.
@@ -3893,6 +3960,7 @@ Instead, obtain the information you require using other more stable cluster APIs
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-state',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['metric', 'index'],
     urlParams: [
       'allow_no_indices',
@@ -3907,21 +3975,21 @@ Instead, obtain the information you require using other more stable cluster APIs
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_state_request, 'body'),
-    getLooseObjectFromProperty(cluster_state_request, 'path'),
-    getLooseObjectFromProperty(cluster_state_request, 'query'),
-    getLooseObjectFromProperty(cluster_state1_request, 'body'),
-    getLooseObjectFromProperty(cluster_state1_request, 'path'),
-    getLooseObjectFromProperty(cluster_state1_request, 'query'),
-    getLooseObjectFromProperty(cluster_state2_request, 'body'),
-    getLooseObjectFromProperty(cluster_state2_request, 'path'),
-    getLooseObjectFromProperty(cluster_state2_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_state_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_state_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_state_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_state1_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_state1_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_state1_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_state2_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_state2_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_state2_request, 'query'),
   ]),
   outputSchema: z.union([cluster_state_response, cluster_state1_response, cluster_state2_response]),
 };
 const CLUSTER_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cluster.stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get cluster statistics`,
   description: `Get cluster statistics.
 Get basic index metrics (shard numbers, store size, memory usage) and information about the current nodes that form the cluster (number, roles, os, jvm versions, memory usage, cpu and installed plugins).
@@ -3932,23 +4000,24 @@ Get basic index metrics (shard numbers, store size, memory usage) and informatio
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id'],
     urlParams: ['include_remotes', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(cluster_stats_request, 'body'),
-    getLooseObjectFromProperty(cluster_stats_request, 'path'),
-    getLooseObjectFromProperty(cluster_stats_request, 'query'),
-    getLooseObjectFromProperty(cluster_stats1_request, 'body'),
-    getLooseObjectFromProperty(cluster_stats1_request, 'path'),
-    getLooseObjectFromProperty(cluster_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_stats_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_stats_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_stats_request, 'query'),
+    getZodLooseObjectFromProperty(cluster_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(cluster_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(cluster_stats1_request, 'query'),
   ]),
   outputSchema: z.union([cluster_stats_response, cluster_stats1_response]),
 };
 const CONNECTOR_CHECK_IN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.check_in',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check in a connector`,
   description: `Check in a connector.
 
@@ -3960,20 +4029,21 @@ Update the \`last_seen\` field in the connector and set it to the current timest
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-check-in',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_check_in_request, 'body'),
-    getLooseObjectFromProperty(connector_check_in_request, 'path'),
-    getLooseObjectFromProperty(connector_check_in_request, 'query'),
+    getZodLooseObjectFromProperty(connector_check_in_request, 'body'),
+    getZodLooseObjectFromProperty(connector_check_in_request, 'path'),
+    getZodLooseObjectFromProperty(connector_check_in_request, 'query'),
   ]),
   outputSchema: connector_check_in_response,
 };
 const CONNECTOR_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a connector`,
   description: `Delete a connector.
 
@@ -3988,20 +4058,21 @@ These need to be removed manually.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: ['delete_sync_jobs', 'hard'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_delete_request, 'body'),
-    getLooseObjectFromProperty(connector_delete_request, 'path'),
-    getLooseObjectFromProperty(connector_delete_request, 'query'),
+    getZodLooseObjectFromProperty(connector_delete_request, 'body'),
+    getZodLooseObjectFromProperty(connector_delete_request, 'path'),
+    getZodLooseObjectFromProperty(connector_delete_request, 'query'),
   ]),
   outputSchema: connector_delete_response,
 };
 const CONNECTOR_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a connector`,
   description: `Get a connector.
 
@@ -4013,21 +4084,22 @@ Get the details about a connector.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: ['include_deleted'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_get_request, 'body'),
-    getLooseObjectFromProperty(connector_get_request, 'path'),
-    getLooseObjectFromProperty(connector_get_request, 'query'),
+    getZodLooseObjectFromProperty(connector_get_request, 'body'),
+    getZodLooseObjectFromProperty(connector_get_request, 'path'),
+    getZodLooseObjectFromProperty(connector_get_request, 'query'),
   ]),
   outputSchema: connector_get_response,
 };
 const CONNECTOR_LAST_SYNC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.last_sync',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Update the connector last sync stats.
 
 Update the fields related to the last sync of a connector.
@@ -4039,6 +4111,7 @@ This action is used for analytics and monitoring.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-last-sync',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -4048,7 +4121,7 @@ This action is used for analytics and monitoring.
 };
 const CONNECTOR_LIST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.list',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get all connectors`,
   description: `Get all connectors.
 
@@ -4060,6 +4133,7 @@ Get information about all connectors.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-list',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'from',
@@ -4073,15 +4147,15 @@ Get information about all connectors.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_list_request, 'body'),
-    getLooseObjectFromProperty(connector_list_request, 'path'),
-    getLooseObjectFromProperty(connector_list_request, 'query'),
+    getZodLooseObjectFromProperty(connector_list_request, 'body'),
+    getZodLooseObjectFromProperty(connector_list_request, 'path'),
+    getZodLooseObjectFromProperty(connector_list_request, 'query'),
   ]),
   outputSchema: connector_list_response,
 };
 const CONNECTOR_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.post',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a connector`,
   description: `Create a connector.
 
@@ -4095,20 +4169,21 @@ Self-managed connectors (Connector clients) are self-managed on your infrastruct
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-put',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['description', 'index_name', 'is_native', 'language', 'name', 'service_type'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_post_request, 'body'),
-    getLooseObjectFromProperty(connector_post_request, 'path'),
-    getLooseObjectFromProperty(connector_post_request, 'query'),
+    getZodLooseObjectFromProperty(connector_post_request, 'body'),
+    getZodLooseObjectFromProperty(connector_post_request, 'path'),
+    getZodLooseObjectFromProperty(connector_post_request, 'query'),
   ]),
   outputSchema: connector_post_response,
 };
 const CONNECTOR_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.put',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a connector`,
   description: `Create or update a connector.
 
@@ -4118,31 +4193,33 @@ const CONNECTOR_PUT_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-put',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['description', 'index_name', 'is_native', 'language', 'name', 'service_type'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_put_request, 'body'),
-    getLooseObjectFromProperty(connector_put_request, 'path'),
-    getLooseObjectFromProperty(connector_put_request, 'query'),
-    getLooseObjectFromProperty(connector_put1_request, 'body'),
-    getLooseObjectFromProperty(connector_put1_request, 'path'),
-    getLooseObjectFromProperty(connector_put1_request, 'query'),
+    getZodLooseObjectFromProperty(connector_put_request, 'body'),
+    getZodLooseObjectFromProperty(connector_put_request, 'path'),
+    getZodLooseObjectFromProperty(connector_put_request, 'query'),
+    getZodLooseObjectFromProperty(connector_put1_request, 'body'),
+    getZodLooseObjectFromProperty(connector_put1_request, 'path'),
+    getZodLooseObjectFromProperty(connector_put1_request, 'query'),
   ]),
   outputSchema: z.union([connector_put_response, connector_put1_response]),
 };
 const CONNECTOR_SECRET_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_delete',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Deletes a connector secret
 
  Documentation: null`,
   methods: ['DELETE'],
   patterns: ['_connector/_secret/{id}'],
-  documentation: 'null',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -4152,15 +4229,16 @@ const CONNECTOR_SECRET_DELETE_CONTRACT: InternalConnectorContract = {
 };
 const CONNECTOR_SECRET_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_get',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Retrieves a secret stored by Connectors
 
  Documentation: null`,
   methods: ['GET'],
   patterns: ['_connector/_secret/{id}'],
-  documentation: 'null',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -4170,15 +4248,16 @@ const CONNECTOR_SECRET_GET_CONTRACT: InternalConnectorContract = {
 };
 const CONNECTOR_SECRET_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_post',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Creates a secret for a Connector
 
  Documentation: null`,
   methods: ['POST'],
   patterns: ['_connector/_secret'],
-  documentation: 'null',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -4188,15 +4267,16 @@ const CONNECTOR_SECRET_POST_CONTRACT: InternalConnectorContract = {
 };
 const CONNECTOR_SECRET_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_put',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Creates or updates a secret for a Connector
 
  Documentation: null`,
   methods: ['PUT'],
   patterns: ['_connector/_secret/{id}'],
-  documentation: 'null',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -4206,7 +4286,7 @@ const CONNECTOR_SECRET_PUT_CONTRACT: InternalConnectorContract = {
 };
 const CONNECTOR_SYNC_JOB_CANCEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_cancel',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Cancel a connector sync job`,
   description: `Cancel a connector sync job.
 
@@ -4219,20 +4299,21 @@ The connector service is then responsible for setting the status of connector sy
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-cancel',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_sync_job_cancel_request, 'body'),
-    getLooseObjectFromProperty(connector_sync_job_cancel_request, 'path'),
-    getLooseObjectFromProperty(connector_sync_job_cancel_request, 'query'),
+    getZodLooseObjectFromProperty(connector_sync_job_cancel_request, 'body'),
+    getZodLooseObjectFromProperty(connector_sync_job_cancel_request, 'path'),
+    getZodLooseObjectFromProperty(connector_sync_job_cancel_request, 'query'),
   ]),
   outputSchema: connector_sync_job_cancel_response,
 };
 const CONNECTOR_SYNC_JOB_CHECK_IN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_check_in',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check in a connector sync job`,
   description: `Check in a connector sync job.
 Check in a connector sync job and set the \`last_seen\` field to the current time before updating it in the internal index.
@@ -4246,20 +4327,21 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-check-in',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_sync_job_check_in_request, 'body'),
-    getLooseObjectFromProperty(connector_sync_job_check_in_request, 'path'),
-    getLooseObjectFromProperty(connector_sync_job_check_in_request, 'query'),
+    getZodLooseObjectFromProperty(connector_sync_job_check_in_request, 'body'),
+    getZodLooseObjectFromProperty(connector_sync_job_check_in_request, 'path'),
+    getZodLooseObjectFromProperty(connector_sync_job_check_in_request, 'query'),
   ]),
   outputSchema: connector_sync_job_check_in_response,
 };
 const CONNECTOR_SYNC_JOB_CLAIM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_claim',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Claim a connector sync job`,
   description: `Claim a connector sync job.
 This action updates the job status to \`in_progress\` and sets the \`last_seen\` and \`started_at\` timestamps to the current time.
@@ -4277,20 +4359,21 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-claim',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
     bodyParams: ['sync_cursor', 'worker_hostname'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_sync_job_claim_request, 'body'),
-    getLooseObjectFromProperty(connector_sync_job_claim_request, 'path'),
-    getLooseObjectFromProperty(connector_sync_job_claim_request, 'query'),
+    getZodLooseObjectFromProperty(connector_sync_job_claim_request, 'body'),
+    getZodLooseObjectFromProperty(connector_sync_job_claim_request, 'path'),
+    getZodLooseObjectFromProperty(connector_sync_job_claim_request, 'query'),
   ]),
   outputSchema: connector_sync_job_claim_response,
 };
 const CONNECTOR_SYNC_JOB_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a connector sync job`,
   description: `Delete a connector sync job.
 
@@ -4303,20 +4386,21 @@ This is a destructive action that is not recoverable.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_sync_job_delete_request, 'body'),
-    getLooseObjectFromProperty(connector_sync_job_delete_request, 'path'),
-    getLooseObjectFromProperty(connector_sync_job_delete_request, 'query'),
+    getZodLooseObjectFromProperty(connector_sync_job_delete_request, 'body'),
+    getZodLooseObjectFromProperty(connector_sync_job_delete_request, 'path'),
+    getZodLooseObjectFromProperty(connector_sync_job_delete_request, 'query'),
   ]),
   outputSchema: connector_sync_job_delete_response,
 };
 const CONNECTOR_SYNC_JOB_ERROR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_error',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Set a connector sync job error`,
   description: `Set a connector sync job error.
 Set the \`error\` field for a connector sync job and set its \`status\` to \`error\`.
@@ -4330,20 +4414,21 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-error',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
     bodyParams: ['error'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_sync_job_error_request, 'body'),
-    getLooseObjectFromProperty(connector_sync_job_error_request, 'path'),
-    getLooseObjectFromProperty(connector_sync_job_error_request, 'query'),
+    getZodLooseObjectFromProperty(connector_sync_job_error_request, 'body'),
+    getZodLooseObjectFromProperty(connector_sync_job_error_request, 'path'),
+    getZodLooseObjectFromProperty(connector_sync_job_error_request, 'query'),
   ]),
   outputSchema: connector_sync_job_error_response,
 };
 const CONNECTOR_SYNC_JOB_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a connector sync job`,
   description: `Get a connector sync job.
 
@@ -4353,20 +4438,21 @@ const CONNECTOR_SYNC_JOB_GET_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_sync_job_get_request, 'body'),
-    getLooseObjectFromProperty(connector_sync_job_get_request, 'path'),
-    getLooseObjectFromProperty(connector_sync_job_get_request, 'query'),
+    getZodLooseObjectFromProperty(connector_sync_job_get_request, 'body'),
+    getZodLooseObjectFromProperty(connector_sync_job_get_request, 'path'),
+    getZodLooseObjectFromProperty(connector_sync_job_get_request, 'query'),
   ]),
   outputSchema: connector_sync_job_get_response,
 };
 const CONNECTOR_SYNC_JOB_LIST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_list',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get all connector sync jobs`,
   description: `Get all connector sync jobs.
 
@@ -4378,20 +4464,21 @@ Get information about all stored connector sync jobs listed by their creation da
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-list',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['from', 'size', 'status', 'connector_id', 'job_type'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_sync_job_list_request, 'body'),
-    getLooseObjectFromProperty(connector_sync_job_list_request, 'path'),
-    getLooseObjectFromProperty(connector_sync_job_list_request, 'query'),
+    getZodLooseObjectFromProperty(connector_sync_job_list_request, 'body'),
+    getZodLooseObjectFromProperty(connector_sync_job_list_request, 'path'),
+    getZodLooseObjectFromProperty(connector_sync_job_list_request, 'query'),
   ]),
   outputSchema: connector_sync_job_list_response,
 };
 const CONNECTOR_SYNC_JOB_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_post',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a connector sync job`,
   description: `Create a connector sync job.
 
@@ -4403,20 +4490,21 @@ Create a connector sync job document in the internal index and initialize its co
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-post',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['id', 'job_type', 'trigger_method'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_sync_job_post_request, 'body'),
-    getLooseObjectFromProperty(connector_sync_job_post_request, 'path'),
-    getLooseObjectFromProperty(connector_sync_job_post_request, 'query'),
+    getZodLooseObjectFromProperty(connector_sync_job_post_request, 'body'),
+    getZodLooseObjectFromProperty(connector_sync_job_post_request, 'path'),
+    getZodLooseObjectFromProperty(connector_sync_job_post_request, 'query'),
   ]),
   outputSchema: connector_sync_job_post_response,
 };
 const CONNECTOR_SYNC_JOB_UPDATE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.sync_job_update_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Set the connector sync job stats`,
   description: `Set the connector sync job stats.
 Stats include: \`deleted_document_count\`, \`indexed_document_count\`, \`indexed_document_volume\`, and \`total_document_count\`.
@@ -4432,6 +4520,7 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-update-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
     bodyParams: [
@@ -4444,15 +4533,15 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_sync_job_update_stats_request, 'body'),
-    getLooseObjectFromProperty(connector_sync_job_update_stats_request, 'path'),
-    getLooseObjectFromProperty(connector_sync_job_update_stats_request, 'query'),
+    getZodLooseObjectFromProperty(connector_sync_job_update_stats_request, 'body'),
+    getZodLooseObjectFromProperty(connector_sync_job_update_stats_request, 'path'),
+    getZodLooseObjectFromProperty(connector_sync_job_update_stats_request, 'query'),
   ]),
   outputSchema: connector_sync_job_update_stats_response,
 };
 const CONNECTOR_UPDATE_ACTIVE_FILTERING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_active_filtering',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Activate the connector draft filter`,
   description: `Activate the connector draft filter.
 
@@ -4464,20 +4553,21 @@ Activates the valid draft filtering for a connector.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-filtering',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_active_filtering_request, 'body'),
-    getLooseObjectFromProperty(connector_update_active_filtering_request, 'path'),
-    getLooseObjectFromProperty(connector_update_active_filtering_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_active_filtering_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_active_filtering_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_active_filtering_request, 'query'),
   ]),
   outputSchema: connector_update_active_filtering_response,
 };
 const CONNECTOR_UPDATE_API_KEY_ID_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_api_key_id',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector API key ID`,
   description: `Update the connector API key ID.
 
@@ -4492,20 +4582,21 @@ Self-managed connectors (connector clients) do not use this field.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-api-key-id',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['api_key_id', 'api_key_secret_id'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_api_key_id_request, 'body'),
-    getLooseObjectFromProperty(connector_update_api_key_id_request, 'path'),
-    getLooseObjectFromProperty(connector_update_api_key_id_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_api_key_id_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_api_key_id_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_api_key_id_request, 'query'),
   ]),
   outputSchema: connector_update_api_key_id_response,
 };
 const CONNECTOR_UPDATE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_configuration',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector configuration`,
   description: `Update the connector configuration.
 
@@ -4517,20 +4608,21 @@ Update the configuration field in the connector document.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-configuration',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['configuration', 'values'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_configuration_request, 'body'),
-    getLooseObjectFromProperty(connector_update_configuration_request, 'path'),
-    getLooseObjectFromProperty(connector_update_configuration_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_configuration_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_configuration_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_configuration_request, 'query'),
   ]),
   outputSchema: connector_update_configuration_response,
 };
 const CONNECTOR_UPDATE_ERROR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_error',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector error field`,
   description: `Update the connector error field.
 
@@ -4544,20 +4636,21 @@ Otherwise, if the error is reset to null, the connector status is updated to con
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-error',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['error'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_error_request, 'body'),
-    getLooseObjectFromProperty(connector_update_error_request, 'path'),
-    getLooseObjectFromProperty(connector_update_error_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_error_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_error_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_error_request, 'query'),
   ]),
   outputSchema: connector_update_error_response,
 };
 const CONNECTOR_UPDATE_FEATURES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_features',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector features`,
   description: `Update the connector features.
 Update the connector features in the connector document.
@@ -4580,20 +4673,21 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-features',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['features'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_features_request, 'body'),
-    getLooseObjectFromProperty(connector_update_features_request, 'path'),
-    getLooseObjectFromProperty(connector_update_features_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_features_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_features_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_features_request, 'query'),
   ]),
   outputSchema: connector_update_features_response,
 };
 const CONNECTOR_UPDATE_FILTERING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_filtering',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector filtering`,
   description: `Update the connector filtering.
 
@@ -4607,20 +4701,21 @@ The filtering property is used to configure sync rules (both basic and advanced)
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-filtering',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['filtering', 'rules', 'advanced_snippet'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_filtering_request, 'body'),
-    getLooseObjectFromProperty(connector_update_filtering_request, 'path'),
-    getLooseObjectFromProperty(connector_update_filtering_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_filtering_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_filtering_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_filtering_request, 'query'),
   ]),
   outputSchema: connector_update_filtering_response,
 };
 const CONNECTOR_UPDATE_FILTERING_VALIDATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_filtering_validation',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector draft filtering validation`,
   description: `Update the connector draft filtering validation.
 
@@ -4632,20 +4727,21 @@ Update the draft filtering validation info for a connector.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-filtering-validation',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['validation'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_filtering_validation_request, 'body'),
-    getLooseObjectFromProperty(connector_update_filtering_validation_request, 'path'),
-    getLooseObjectFromProperty(connector_update_filtering_validation_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_filtering_validation_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_filtering_validation_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_filtering_validation_request, 'query'),
   ]),
   outputSchema: connector_update_filtering_validation_response,
 };
 const CONNECTOR_UPDATE_INDEX_NAME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_index_name',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector index name`,
   description: `Update the connector index name.
 
@@ -4657,20 +4753,21 @@ Update the \`index_name\` field of a connector, specifying the index where the d
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-index-name',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['index_name'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_index_name_request, 'body'),
-    getLooseObjectFromProperty(connector_update_index_name_request, 'path'),
-    getLooseObjectFromProperty(connector_update_index_name_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_index_name_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_index_name_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_index_name_request, 'query'),
   ]),
   outputSchema: connector_update_index_name_response,
 };
 const CONNECTOR_UPDATE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_name',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector name and description`,
   description: `Update the connector name and description.
 
@@ -4680,20 +4777,21 @@ const CONNECTOR_UPDATE_NAME_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-name',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['name', 'description'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_name_request, 'body'),
-    getLooseObjectFromProperty(connector_update_name_request, 'path'),
-    getLooseObjectFromProperty(connector_update_name_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_name_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_name_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_name_request, 'query'),
   ]),
   outputSchema: connector_update_name_response,
 };
 const CONNECTOR_UPDATE_NATIVE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_native',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector is_native flag`,
   description: `Update the connector is_native flag.
 
@@ -4703,20 +4801,21 @@ const CONNECTOR_UPDATE_NATIVE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-native',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['is_native'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_native_request, 'body'),
-    getLooseObjectFromProperty(connector_update_native_request, 'path'),
-    getLooseObjectFromProperty(connector_update_native_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_native_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_native_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_native_request, 'query'),
   ]),
   outputSchema: connector_update_native_response,
 };
 const CONNECTOR_UPDATE_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_pipeline',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector pipeline`,
   description: `Update the connector pipeline.
 
@@ -4728,20 +4827,21 @@ When you create a new connector, the configuration of an ingest pipeline is popu
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-pipeline',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['pipeline'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_pipeline_request, 'body'),
-    getLooseObjectFromProperty(connector_update_pipeline_request, 'path'),
-    getLooseObjectFromProperty(connector_update_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_pipeline_request, 'query'),
   ]),
   outputSchema: connector_update_pipeline_response,
 };
 const CONNECTOR_UPDATE_SCHEDULING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_scheduling',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector scheduling`,
   description: `Update the connector scheduling.
 
@@ -4751,20 +4851,21 @@ const CONNECTOR_UPDATE_SCHEDULING_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-scheduling',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['scheduling'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_scheduling_request, 'body'),
-    getLooseObjectFromProperty(connector_update_scheduling_request, 'path'),
-    getLooseObjectFromProperty(connector_update_scheduling_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_scheduling_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_scheduling_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_scheduling_request, 'query'),
   ]),
   outputSchema: connector_update_scheduling_response,
 };
 const CONNECTOR_UPDATE_SERVICE_TYPE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_service_type',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector service type`,
   description: `Update the connector service type.
 
@@ -4774,20 +4875,21 @@ const CONNECTOR_UPDATE_SERVICE_TYPE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-service-type',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['service_type'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_service_type_request, 'body'),
-    getLooseObjectFromProperty(connector_update_service_type_request, 'path'),
-    getLooseObjectFromProperty(connector_update_service_type_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_service_type_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_service_type_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_service_type_request, 'query'),
   ]),
   outputSchema: connector_update_service_type_response,
 };
 const CONNECTOR_UPDATE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.update_status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the connector status`,
   description: `Update the connector status.
 
@@ -4797,20 +4899,21 @@ const CONNECTOR_UPDATE_STATUS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['connector_id'],
     urlParams: [],
     bodyParams: ['status'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(connector_update_status_request, 'body'),
-    getLooseObjectFromProperty(connector_update_status_request, 'path'),
-    getLooseObjectFromProperty(connector_update_status_request, 'query'),
+    getZodLooseObjectFromProperty(connector_update_status_request, 'body'),
+    getZodLooseObjectFromProperty(connector_update_status_request, 'path'),
+    getZodLooseObjectFromProperty(connector_update_status_request, 'query'),
   ]),
   outputSchema: connector_update_status_response,
 };
 const COUNT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.count',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Count search results`,
   description: `Count search results.
 Get the number of documents matching a query.
@@ -4829,6 +4932,7 @@ This means that replicas increase the scalability of the count.
   patterns: ['_count', '{index}/_count'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-count',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -4849,24 +4953,24 @@ This means that replicas increase the scalability of the count.
     bodyParams: ['query'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(count_request, 'body'),
-    getLooseObjectFromProperty(count_request, 'path'),
-    getLooseObjectFromProperty(count_request, 'query'),
-    getLooseObjectFromProperty(count1_request, 'body'),
-    getLooseObjectFromProperty(count1_request, 'path'),
-    getLooseObjectFromProperty(count1_request, 'query'),
-    getLooseObjectFromProperty(count2_request, 'body'),
-    getLooseObjectFromProperty(count2_request, 'path'),
-    getLooseObjectFromProperty(count2_request, 'query'),
-    getLooseObjectFromProperty(count3_request, 'body'),
-    getLooseObjectFromProperty(count3_request, 'path'),
-    getLooseObjectFromProperty(count3_request, 'query'),
+    getZodLooseObjectFromProperty(count_request, 'body'),
+    getZodLooseObjectFromProperty(count_request, 'path'),
+    getZodLooseObjectFromProperty(count_request, 'query'),
+    getZodLooseObjectFromProperty(count1_request, 'body'),
+    getZodLooseObjectFromProperty(count1_request, 'path'),
+    getZodLooseObjectFromProperty(count1_request, 'query'),
+    getZodLooseObjectFromProperty(count2_request, 'body'),
+    getZodLooseObjectFromProperty(count2_request, 'path'),
+    getZodLooseObjectFromProperty(count2_request, 'query'),
+    getZodLooseObjectFromProperty(count3_request, 'body'),
+    getZodLooseObjectFromProperty(count3_request, 'path'),
+    getZodLooseObjectFromProperty(count3_request, 'query'),
   ]),
   outputSchema: z.union([count_response, count1_response, count2_response, count3_response]),
 };
 const CREATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.create',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a new document in the index`,
   description: `Create a new document in the index.
 
@@ -4946,6 +5050,7 @@ The \`_shards\` section of the API response reveals the number of shard copies o
   patterns: ['{index}/_create/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'include_source_on_error',
@@ -4962,18 +5067,18 @@ The \`_shards\` section of the API response reveals the number of shard copies o
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(create_request, 'body'),
-    getLooseObjectFromProperty(create_request, 'path'),
-    getLooseObjectFromProperty(create_request, 'query'),
-    getLooseObjectFromProperty(create1_request, 'body'),
-    getLooseObjectFromProperty(create1_request, 'path'),
-    getLooseObjectFromProperty(create1_request, 'query'),
+    getZodLooseObjectFromProperty(create_request, 'body'),
+    getZodLooseObjectFromProperty(create_request, 'path'),
+    getZodLooseObjectFromProperty(create_request, 'query'),
+    getZodLooseObjectFromProperty(create1_request, 'body'),
+    getZodLooseObjectFromProperty(create1_request, 'path'),
+    getZodLooseObjectFromProperty(create1_request, 'query'),
   ]),
   outputSchema: z.union([create_response, create1_response]),
 };
 const DANGLING_INDICES_DELETE_DANGLING_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.dangling_indices.delete_dangling_index',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a dangling index`,
   description: `Delete a dangling index.
 If Elasticsearch encounters index data that is absent from the current cluster state, those indices are considered to be dangling.
@@ -4985,20 +5090,21 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-delete-dangling-index',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index_uuid'],
     urlParams: ['accept_data_loss', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'body'),
-    getLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'path'),
-    getLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'query'),
+    getZodLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'body'),
+    getZodLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'path'),
+    getZodLooseObjectFromProperty(dangling_indices_delete_dangling_index_request, 'query'),
   ]),
   outputSchema: dangling_indices_delete_dangling_index_response,
 };
 const DANGLING_INDICES_IMPORT_DANGLING_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.dangling_indices.import_dangling_index',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Import a dangling index`,
   description: `Import a dangling index.
 
@@ -5011,20 +5117,21 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-import-dangling-index',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index_uuid'],
     urlParams: ['accept_data_loss', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'body'),
-    getLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'path'),
-    getLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'query'),
+    getZodLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'body'),
+    getZodLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'path'),
+    getZodLooseObjectFromProperty(dangling_indices_import_dangling_index_request, 'query'),
   ]),
   outputSchema: dangling_indices_import_dangling_index_response,
 };
 const DANGLING_INDICES_LIST_DANGLING_INDICES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.dangling_indices.list_dangling_indices',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the dangling indices`,
   description: `Get the dangling indices.
 
@@ -5039,20 +5146,21 @@ Use this API to list dangling indices, which you can then import or delete.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-list-dangling-indices',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'body'),
-    getLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'path'),
-    getLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'query'),
+    getZodLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'body'),
+    getZodLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'path'),
+    getZodLooseObjectFromProperty(dangling_indices_list_dangling_indices_request, 'query'),
   ]),
   outputSchema: dangling_indices_list_dangling_indices_response,
 };
 const DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a document`,
   description: `Delete a document.
 
@@ -5099,6 +5207,7 @@ It then gets redirected into the primary shard within that ID group and replicat
   patterns: ['{index}/_doc/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'if_primary_term',
@@ -5113,15 +5222,15 @@ It then gets redirected into the primary shard within that ID group and replicat
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_request, 'body'),
-    getLooseObjectFromProperty(delete_request, 'path'),
-    getLooseObjectFromProperty(delete_request, 'query'),
+    getZodLooseObjectFromProperty(delete_request, 'body'),
+    getZodLooseObjectFromProperty(delete_request, 'path'),
+    getZodLooseObjectFromProperty(delete_request, 'query'),
   ]),
   outputSchema: delete_response,
 };
 const DELETE_BY_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.delete_by_query',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete documents`,
   description: `Delete documents.
 
@@ -5210,6 +5319,7 @@ The get task status API will continue to list the delete by query task until thi
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-by-query',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -5245,15 +5355,15 @@ The get task status API will continue to list the delete by query task until thi
     bodyParams: ['max_docs', 'query', 'slice', 'sort'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_by_query_request, 'body'),
-    getLooseObjectFromProperty(delete_by_query_request, 'path'),
-    getLooseObjectFromProperty(delete_by_query_request, 'query'),
+    getZodLooseObjectFromProperty(delete_by_query_request, 'body'),
+    getZodLooseObjectFromProperty(delete_by_query_request, 'path'),
+    getZodLooseObjectFromProperty(delete_by_query_request, 'query'),
   ]),
   outputSchema: delete_by_query_response,
 };
 const DELETE_BY_QUERY_RETHROTTLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.delete_by_query_rethrottle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Throttle a delete by query operation`,
   description: `Throttle a delete by query operation.
 
@@ -5266,20 +5376,21 @@ Rethrottling that speeds up the query takes effect immediately but rethrotting t
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-by-query-rethrottle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_id'],
     urlParams: ['requests_per_second'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_by_query_rethrottle_request, 'body'),
-    getLooseObjectFromProperty(delete_by_query_rethrottle_request, 'path'),
-    getLooseObjectFromProperty(delete_by_query_rethrottle_request, 'query'),
+    getZodLooseObjectFromProperty(delete_by_query_rethrottle_request, 'body'),
+    getZodLooseObjectFromProperty(delete_by_query_rethrottle_request, 'path'),
+    getZodLooseObjectFromProperty(delete_by_query_rethrottle_request, 'query'),
   ]),
   outputSchema: delete_by_query_rethrottle_response,
 };
 const DELETE_SCRIPT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.delete_script',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a script or search template`,
   description: `Delete a script or search template.
 Deletes a stored script or search template.
@@ -5290,20 +5401,21 @@ Deletes a stored script or search template.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-script',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_script_request, 'body'),
-    getLooseObjectFromProperty(delete_script_request, 'path'),
-    getLooseObjectFromProperty(delete_script_request, 'query'),
+    getZodLooseObjectFromProperty(delete_script_request, 'body'),
+    getZodLooseObjectFromProperty(delete_script_request, 'path'),
+    getZodLooseObjectFromProperty(delete_script_request, 'query'),
   ]),
   outputSchema: delete_script_response,
 };
 const ENRICH_DELETE_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.delete_policy',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an enrich policy`,
   description: `Delete an enrich policy.
 Deletes an existing enrich policy and its enrich index.
@@ -5314,20 +5426,21 @@ Deletes an existing enrich policy and its enrich index.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-delete-policy',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(enrich_delete_policy_request, 'body'),
-    getLooseObjectFromProperty(enrich_delete_policy_request, 'path'),
-    getLooseObjectFromProperty(enrich_delete_policy_request, 'query'),
+    getZodLooseObjectFromProperty(enrich_delete_policy_request, 'body'),
+    getZodLooseObjectFromProperty(enrich_delete_policy_request, 'path'),
+    getZodLooseObjectFromProperty(enrich_delete_policy_request, 'query'),
   ]),
   outputSchema: enrich_delete_policy_response,
 };
 const ENRICH_EXECUTE_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.execute_policy',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run an enrich policy`,
   description: `Run an enrich policy.
 Create the enrich index for an existing enrich policy.
@@ -5338,20 +5451,21 @@ Create the enrich index for an existing enrich policy.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-execute-policy',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(enrich_execute_policy_request, 'body'),
-    getLooseObjectFromProperty(enrich_execute_policy_request, 'path'),
-    getLooseObjectFromProperty(enrich_execute_policy_request, 'query'),
+    getZodLooseObjectFromProperty(enrich_execute_policy_request, 'body'),
+    getZodLooseObjectFromProperty(enrich_execute_policy_request, 'path'),
+    getZodLooseObjectFromProperty(enrich_execute_policy_request, 'query'),
   ]),
   outputSchema: enrich_execute_policy_response,
 };
 const ENRICH_GET_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.get_policy',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get an enrich policy`,
   description: `Get an enrich policy.
 Returns information about an enrich policy.
@@ -5362,23 +5476,24 @@ Returns information about an enrich policy.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-get-policy',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(enrich_get_policy_request, 'body'),
-    getLooseObjectFromProperty(enrich_get_policy_request, 'path'),
-    getLooseObjectFromProperty(enrich_get_policy_request, 'query'),
-    getLooseObjectFromProperty(enrich_get_policy1_request, 'body'),
-    getLooseObjectFromProperty(enrich_get_policy1_request, 'path'),
-    getLooseObjectFromProperty(enrich_get_policy1_request, 'query'),
+    getZodLooseObjectFromProperty(enrich_get_policy_request, 'body'),
+    getZodLooseObjectFromProperty(enrich_get_policy_request, 'path'),
+    getZodLooseObjectFromProperty(enrich_get_policy_request, 'query'),
+    getZodLooseObjectFromProperty(enrich_get_policy1_request, 'body'),
+    getZodLooseObjectFromProperty(enrich_get_policy1_request, 'path'),
+    getZodLooseObjectFromProperty(enrich_get_policy1_request, 'query'),
   ]),
   outputSchema: z.union([enrich_get_policy_response, enrich_get_policy1_response]),
 };
 const ENRICH_PUT_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.put_policy',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an enrich policy`,
   description: `Create an enrich policy.
 Creates an enrich policy.
@@ -5389,20 +5504,21 @@ Creates an enrich policy.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-put-policy',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: ['geo_match', 'match', 'range'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(enrich_put_policy_request, 'body'),
-    getLooseObjectFromProperty(enrich_put_policy_request, 'path'),
-    getLooseObjectFromProperty(enrich_put_policy_request, 'query'),
+    getZodLooseObjectFromProperty(enrich_put_policy_request, 'body'),
+    getZodLooseObjectFromProperty(enrich_put_policy_request, 'path'),
+    getZodLooseObjectFromProperty(enrich_put_policy_request, 'query'),
   ]),
   outputSchema: enrich_put_policy_response,
 };
 const ENRICH_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.enrich.stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get enrich stats`,
   description: `Get enrich stats.
 Returns enrich coordinator statistics and information about enrich policies that are currently executing.
@@ -5413,20 +5529,21 @@ Returns enrich coordinator statistics and information about enrich policies that
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(enrich_stats_request, 'body'),
-    getLooseObjectFromProperty(enrich_stats_request, 'path'),
-    getLooseObjectFromProperty(enrich_stats_request, 'query'),
+    getZodLooseObjectFromProperty(enrich_stats_request, 'body'),
+    getZodLooseObjectFromProperty(enrich_stats_request, 'path'),
+    getZodLooseObjectFromProperty(enrich_stats_request, 'query'),
   ]),
   outputSchema: enrich_stats_response,
 };
 const EQL_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.eql.delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an async EQL search`,
   description: `Delete an async EQL search.
 Delete an async EQL search or a stored synchronous EQL search.
@@ -5437,20 +5554,21 @@ The API also deletes results for the search.
   patterns: ['_eql/search/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(eql_delete_request, 'body'),
-    getLooseObjectFromProperty(eql_delete_request, 'path'),
-    getLooseObjectFromProperty(eql_delete_request, 'query'),
+    getZodLooseObjectFromProperty(eql_delete_request, 'body'),
+    getZodLooseObjectFromProperty(eql_delete_request, 'path'),
+    getZodLooseObjectFromProperty(eql_delete_request, 'query'),
   ]),
   outputSchema: eql_delete_response,
 };
 const EQL_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.eql.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get async EQL search results`,
   description: `Get async EQL search results.
 Get the current status and available results for an async EQL search or a stored synchronous EQL search.
@@ -5460,20 +5578,21 @@ Get the current status and available results for an async EQL search or a stored
   patterns: ['_eql/search/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(eql_get_request, 'body'),
-    getLooseObjectFromProperty(eql_get_request, 'path'),
-    getLooseObjectFromProperty(eql_get_request, 'query'),
+    getZodLooseObjectFromProperty(eql_get_request, 'body'),
+    getZodLooseObjectFromProperty(eql_get_request, 'path'),
+    getZodLooseObjectFromProperty(eql_get_request, 'query'),
   ]),
   outputSchema: eql_get_response,
 };
 const EQL_GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.eql.get_status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the async EQL status`,
   description: `Get the async EQL status.
 Get the current status for an async EQL search or a stored synchronous EQL search without returning results.
@@ -5484,20 +5603,21 @@ Get the current status for an async EQL search or a stored synchronous EQL searc
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-get-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(eql_get_status_request, 'body'),
-    getLooseObjectFromProperty(eql_get_status_request, 'path'),
-    getLooseObjectFromProperty(eql_get_status_request, 'query'),
+    getZodLooseObjectFromProperty(eql_get_status_request, 'body'),
+    getZodLooseObjectFromProperty(eql_get_status_request, 'path'),
+    getZodLooseObjectFromProperty(eql_get_status_request, 'query'),
   ]),
   outputSchema: eql_get_status_response,
 };
 const EQL_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.eql.search',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get EQL search results`,
   description: `Get EQL search results.
 Returns search results for an Event Query Language (EQL) query.
@@ -5508,6 +5628,7 @@ EQL assumes each document in a data stream or index corresponds to an event.
   patterns: ['{index}/_eql/search'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-search',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -5541,18 +5662,18 @@ EQL assumes each document in a data stream or index corresponds to an event.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(eql_search_request, 'body'),
-    getLooseObjectFromProperty(eql_search_request, 'path'),
-    getLooseObjectFromProperty(eql_search_request, 'query'),
-    getLooseObjectFromProperty(eql_search1_request, 'body'),
-    getLooseObjectFromProperty(eql_search1_request, 'path'),
-    getLooseObjectFromProperty(eql_search1_request, 'query'),
+    getZodLooseObjectFromProperty(eql_search_request, 'body'),
+    getZodLooseObjectFromProperty(eql_search_request, 'path'),
+    getZodLooseObjectFromProperty(eql_search_request, 'query'),
+    getZodLooseObjectFromProperty(eql_search1_request, 'body'),
+    getZodLooseObjectFromProperty(eql_search1_request, 'path'),
+    getZodLooseObjectFromProperty(eql_search1_request, 'query'),
   ]),
   outputSchema: z.union([eql_search_response, eql_search1_response]),
 };
 const ESQL_ASYNC_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.async_query',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run an async ES|QL query`,
   description: `Run an async ES|QL query.
 Asynchronously run an ES|QL (Elasticsearch query language) query, monitor its progress, and retrieve results when they become available.
@@ -5565,6 +5686,7 @@ The API accepts the same parameters and request body as the synchronous query AP
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['allow_partial_results', 'delimiter', 'drop_null_columns', 'format'],
     bodyParams: [
@@ -5583,15 +5705,15 @@ The API accepts the same parameters and request body as the synchronous query AP
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(esql_async_query_request, 'body'),
-    getLooseObjectFromProperty(esql_async_query_request, 'path'),
-    getLooseObjectFromProperty(esql_async_query_request, 'query'),
+    getZodLooseObjectFromProperty(esql_async_query_request, 'body'),
+    getZodLooseObjectFromProperty(esql_async_query_request, 'path'),
+    getZodLooseObjectFromProperty(esql_async_query_request, 'query'),
   ]),
   outputSchema: esql_async_query_response,
 };
 const ESQL_ASYNC_QUERY_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.async_query_delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an async ES|QL query`,
   description: `Delete an async ES|QL query.
 If the query is still running, it is cancelled.
@@ -5608,20 +5730,21 @@ If the Elasticsearch security features are enabled, only the following users can
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(esql_async_query_delete_request, 'body'),
-    getLooseObjectFromProperty(esql_async_query_delete_request, 'path'),
-    getLooseObjectFromProperty(esql_async_query_delete_request, 'query'),
+    getZodLooseObjectFromProperty(esql_async_query_delete_request, 'body'),
+    getZodLooseObjectFromProperty(esql_async_query_delete_request, 'path'),
+    getZodLooseObjectFromProperty(esql_async_query_delete_request, 'query'),
   ]),
   outputSchema: esql_async_query_delete_response,
 };
 const ESQL_ASYNC_QUERY_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.async_query_get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get async ES|QL query results`,
   description: `Get async ES|QL query results.
 Get the current status and available results or stored results for an ES|QL asynchronous query.
@@ -5633,20 +5756,21 @@ If the Elasticsearch security features are enabled, only the user who first subm
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['drop_null_columns', 'format', 'keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(esql_async_query_get_request, 'body'),
-    getLooseObjectFromProperty(esql_async_query_get_request, 'path'),
-    getLooseObjectFromProperty(esql_async_query_get_request, 'query'),
+    getZodLooseObjectFromProperty(esql_async_query_get_request, 'body'),
+    getZodLooseObjectFromProperty(esql_async_query_get_request, 'path'),
+    getZodLooseObjectFromProperty(esql_async_query_get_request, 'query'),
   ]),
   outputSchema: esql_async_query_get_response,
 };
 const ESQL_ASYNC_QUERY_STOP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.async_query_stop',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Stop async ES|QL query`,
   description: `Stop async ES|QL query.
 
@@ -5659,20 +5783,21 @@ If the Elasticsearch security features are enabled, only the user who first subm
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-stop',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['drop_null_columns'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(esql_async_query_stop_request, 'body'),
-    getLooseObjectFromProperty(esql_async_query_stop_request, 'path'),
-    getLooseObjectFromProperty(esql_async_query_stop_request, 'query'),
+    getZodLooseObjectFromProperty(esql_async_query_stop_request, 'body'),
+    getZodLooseObjectFromProperty(esql_async_query_stop_request, 'path'),
+    getZodLooseObjectFromProperty(esql_async_query_stop_request, 'query'),
   ]),
   outputSchema: esql_async_query_stop_response,
 };
 const ESQL_GET_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.get_query',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a specific running ES|QL query information`,
   description: `Get a specific running ES|QL query information.
 Returns an object extended information about a running ES|QL query.
@@ -5683,20 +5808,21 @@ Returns an object extended information about a running ES|QL query.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-get-query',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(esql_get_query_request, 'body'),
-    getLooseObjectFromProperty(esql_get_query_request, 'path'),
-    getLooseObjectFromProperty(esql_get_query_request, 'query'),
+    getZodLooseObjectFromProperty(esql_get_query_request, 'body'),
+    getZodLooseObjectFromProperty(esql_get_query_request, 'path'),
+    getZodLooseObjectFromProperty(esql_get_query_request, 'query'),
   ]),
   outputSchema: esql_get_query_response,
 };
 const ESQL_LIST_QUERIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.list_queries',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get running ES|QL queries information`,
   description: `Get running ES|QL queries information.
 Returns an object containing IDs and other information about the running ES|QL queries.
@@ -5707,20 +5833,21 @@ Returns an object containing IDs and other information about the running ES|QL q
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-list-queries',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(esql_list_queries_request, 'body'),
-    getLooseObjectFromProperty(esql_list_queries_request, 'path'),
-    getLooseObjectFromProperty(esql_list_queries_request, 'query'),
+    getZodLooseObjectFromProperty(esql_list_queries_request, 'body'),
+    getZodLooseObjectFromProperty(esql_list_queries_request, 'path'),
+    getZodLooseObjectFromProperty(esql_list_queries_request, 'query'),
   ]),
   outputSchema: esql_list_queries_response,
 };
 const ESQL_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.esql.query',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run an ES|QL query`,
   description: `Run an ES|QL query.
 Get search results for an ES|QL (Elasticsearch query language) query.
@@ -5730,6 +5857,7 @@ Get search results for an ES|QL (Elasticsearch query language) query.
   patterns: ['_query'],
   documentation: 'https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql-rest',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['format', 'delimiter', 'drop_null_columns', 'allow_partial_results'],
     bodyParams: [
@@ -5745,15 +5873,15 @@ Get search results for an ES|QL (Elasticsearch query language) query.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(esql_query_request, 'body'),
-    getLooseObjectFromProperty(esql_query_request, 'path'),
-    getLooseObjectFromProperty(esql_query_request, 'query'),
+    getZodLooseObjectFromProperty(esql_query_request, 'body'),
+    getZodLooseObjectFromProperty(esql_query_request, 'path'),
+    getZodLooseObjectFromProperty(esql_query_request, 'query'),
   ]),
   outputSchema: esql_query_response,
 };
 const EXISTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.exists',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check a document`,
   description: `Check a document.
 
@@ -5780,6 +5908,7 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
   patterns: ['{index}/_doc/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'preference',
@@ -5796,15 +5925,15 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(exists_request, 'body'),
-    getLooseObjectFromProperty(exists_request, 'path'),
-    getLooseObjectFromProperty(exists_request, 'query'),
+    getZodLooseObjectFromProperty(exists_request, 'body'),
+    getZodLooseObjectFromProperty(exists_request, 'path'),
+    getZodLooseObjectFromProperty(exists_request, 'query'),
   ]),
   outputSchema: exists_response,
 };
 const EXISTS_SOURCE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.exists_source',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check for a document source`,
   description: `Check for a document source.
 
@@ -5822,6 +5951,7 @@ A document's source is not available if it is disabled in the mapping.
   patterns: ['{index}/_source/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'preference',
@@ -5837,15 +5967,15 @@ A document's source is not available if it is disabled in the mapping.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(exists_source_request, 'body'),
-    getLooseObjectFromProperty(exists_source_request, 'path'),
-    getLooseObjectFromProperty(exists_source_request, 'query'),
+    getZodLooseObjectFromProperty(exists_source_request, 'body'),
+    getZodLooseObjectFromProperty(exists_source_request, 'path'),
+    getZodLooseObjectFromProperty(exists_source_request, 'query'),
   ]),
   outputSchema: exists_source_response,
 };
 const EXPLAIN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.explain',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Explain a document match result`,
   description: `Explain a document match result.
 Get information about why a specific document matches, or doesn't match, a query.
@@ -5856,6 +5986,7 @@ It computes a score explanation for a query and a specific document.
   patterns: ['{index}/_explain/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-explain',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'analyzer',
@@ -5874,18 +6005,18 @@ It computes a score explanation for a query and a specific document.
     bodyParams: ['query'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(explain_request, 'body'),
-    getLooseObjectFromProperty(explain_request, 'path'),
-    getLooseObjectFromProperty(explain_request, 'query'),
-    getLooseObjectFromProperty(explain1_request, 'body'),
-    getLooseObjectFromProperty(explain1_request, 'path'),
-    getLooseObjectFromProperty(explain1_request, 'query'),
+    getZodLooseObjectFromProperty(explain_request, 'body'),
+    getZodLooseObjectFromProperty(explain_request, 'path'),
+    getZodLooseObjectFromProperty(explain_request, 'query'),
+    getZodLooseObjectFromProperty(explain1_request, 'body'),
+    getZodLooseObjectFromProperty(explain1_request, 'path'),
+    getZodLooseObjectFromProperty(explain1_request, 'query'),
   ]),
   outputSchema: z.union([explain_response, explain1_response]),
 };
 const FEATURES_GET_FEATURES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.features.get_features',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the features`,
   description: `Get the features.
 Get a list of features that can be included in snapshots using the \`feature_states\` field when creating a snapshot.
@@ -5904,20 +6035,21 @@ In order for a feature state to be listed in this API and recognized as a valid 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-features-get-features',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(features_get_features_request, 'body'),
-    getLooseObjectFromProperty(features_get_features_request, 'path'),
-    getLooseObjectFromProperty(features_get_features_request, 'query'),
+    getZodLooseObjectFromProperty(features_get_features_request, 'body'),
+    getZodLooseObjectFromProperty(features_get_features_request, 'path'),
+    getZodLooseObjectFromProperty(features_get_features_request, 'query'),
   ]),
   outputSchema: features_get_features_response,
 };
 const FEATURES_RESET_FEATURES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.features.reset_features',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Reset the features`,
   description: `Reset the features.
 Clear all of the state information stored in system indices by Elasticsearch features, including the security and machine learning indices.
@@ -5943,20 +6075,21 @@ IMPORTANT: The features installed on the node you submit this request to are the
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-features-reset-features',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(features_reset_features_request, 'body'),
-    getLooseObjectFromProperty(features_reset_features_request, 'path'),
-    getLooseObjectFromProperty(features_reset_features_request, 'query'),
+    getZodLooseObjectFromProperty(features_reset_features_request, 'body'),
+    getZodLooseObjectFromProperty(features_reset_features_request, 'path'),
+    getZodLooseObjectFromProperty(features_reset_features_request, 'query'),
   ]),
   outputSchema: features_reset_features_response,
 };
 const FIELD_CAPS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.field_caps',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the field capabilities`,
   description: `Get the field capabilities.
 
@@ -5971,6 +6104,7 @@ For example, a runtime field with a type of keyword is returned the same as any 
   patterns: ['_field_caps', '{index}/_field_caps'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-field-caps',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -5985,18 +6119,18 @@ For example, a runtime field with a type of keyword is returned the same as any 
     bodyParams: ['fields', 'index_filter', 'runtime_mappings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(field_caps_request, 'body'),
-    getLooseObjectFromProperty(field_caps_request, 'path'),
-    getLooseObjectFromProperty(field_caps_request, 'query'),
-    getLooseObjectFromProperty(field_caps1_request, 'body'),
-    getLooseObjectFromProperty(field_caps1_request, 'path'),
-    getLooseObjectFromProperty(field_caps1_request, 'query'),
-    getLooseObjectFromProperty(field_caps2_request, 'body'),
-    getLooseObjectFromProperty(field_caps2_request, 'path'),
-    getLooseObjectFromProperty(field_caps2_request, 'query'),
-    getLooseObjectFromProperty(field_caps3_request, 'body'),
-    getLooseObjectFromProperty(field_caps3_request, 'path'),
-    getLooseObjectFromProperty(field_caps3_request, 'query'),
+    getZodLooseObjectFromProperty(field_caps_request, 'body'),
+    getZodLooseObjectFromProperty(field_caps_request, 'path'),
+    getZodLooseObjectFromProperty(field_caps_request, 'query'),
+    getZodLooseObjectFromProperty(field_caps1_request, 'body'),
+    getZodLooseObjectFromProperty(field_caps1_request, 'path'),
+    getZodLooseObjectFromProperty(field_caps1_request, 'query'),
+    getZodLooseObjectFromProperty(field_caps2_request, 'body'),
+    getZodLooseObjectFromProperty(field_caps2_request, 'path'),
+    getZodLooseObjectFromProperty(field_caps2_request, 'query'),
+    getZodLooseObjectFromProperty(field_caps3_request, 'body'),
+    getZodLooseObjectFromProperty(field_caps3_request, 'path'),
+    getZodLooseObjectFromProperty(field_caps3_request, 'query'),
   ]),
   outputSchema: z.union([
     field_caps_response,
@@ -6007,15 +6141,16 @@ For example, a runtime field with a type of keyword is returned the same as any 
 };
 const FLEET_DELETE_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.delete_secret',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Deletes a secret stored by Fleet
 
  Documentation: null`,
   methods: ['DELETE'],
   patterns: ['_fleet/secret/{id}'],
-  documentation: 'null',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -6025,15 +6160,16 @@ const FLEET_DELETE_SECRET_CONTRACT: InternalConnectorContract = {
 };
 const FLEET_GET_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.get_secret',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Retrieves a secret stored by Fleet
 
  Documentation: null`,
   methods: ['GET'],
   patterns: ['_fleet/secret/{id}'],
-  documentation: 'null',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -6043,7 +6179,7 @@ const FLEET_GET_SECRET_CONTRACT: InternalConnectorContract = {
 };
 const FLEET_GLOBAL_CHECKPOINTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.global_checkpoints',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get global checkpoints`,
   description: `Get global checkpoints.
 
@@ -6055,20 +6191,21 @@ This API is designed for internal use by the Fleet server project.
   patterns: ['{index}/_fleet/global_checkpoints'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-fleet',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['wait_for_advance', 'wait_for_index', 'checkpoints', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(fleet_global_checkpoints_request, 'body'),
-    getLooseObjectFromProperty(fleet_global_checkpoints_request, 'path'),
-    getLooseObjectFromProperty(fleet_global_checkpoints_request, 'query'),
+    getZodLooseObjectFromProperty(fleet_global_checkpoints_request, 'body'),
+    getZodLooseObjectFromProperty(fleet_global_checkpoints_request, 'path'),
+    getZodLooseObjectFromProperty(fleet_global_checkpoints_request, 'query'),
   ]),
   outputSchema: fleet_global_checkpoints_response,
 };
 const FLEET_MSEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.msearch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run multiple Fleet searches`,
   description: `Run multiple Fleet searches.
 Run several Fleet searches with a single API request.
@@ -6081,6 +6218,7 @@ However, similar to the Fleet search API, it supports the \`wait_for_checkpoints
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-fleet-msearch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -6100,18 +6238,18 @@ However, similar to the Fleet search API, it supports the \`wait_for_checkpoints
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(fleet_msearch_request, 'body'),
-    getLooseObjectFromProperty(fleet_msearch_request, 'path'),
-    getLooseObjectFromProperty(fleet_msearch_request, 'query'),
-    getLooseObjectFromProperty(fleet_msearch1_request, 'body'),
-    getLooseObjectFromProperty(fleet_msearch1_request, 'path'),
-    getLooseObjectFromProperty(fleet_msearch1_request, 'query'),
-    getLooseObjectFromProperty(fleet_msearch2_request, 'body'),
-    getLooseObjectFromProperty(fleet_msearch2_request, 'path'),
-    getLooseObjectFromProperty(fleet_msearch2_request, 'query'),
-    getLooseObjectFromProperty(fleet_msearch3_request, 'body'),
-    getLooseObjectFromProperty(fleet_msearch3_request, 'path'),
-    getLooseObjectFromProperty(fleet_msearch3_request, 'query'),
+    getZodLooseObjectFromProperty(fleet_msearch_request, 'body'),
+    getZodLooseObjectFromProperty(fleet_msearch_request, 'path'),
+    getZodLooseObjectFromProperty(fleet_msearch_request, 'query'),
+    getZodLooseObjectFromProperty(fleet_msearch1_request, 'body'),
+    getZodLooseObjectFromProperty(fleet_msearch1_request, 'path'),
+    getZodLooseObjectFromProperty(fleet_msearch1_request, 'query'),
+    getZodLooseObjectFromProperty(fleet_msearch2_request, 'body'),
+    getZodLooseObjectFromProperty(fleet_msearch2_request, 'path'),
+    getZodLooseObjectFromProperty(fleet_msearch2_request, 'query'),
+    getZodLooseObjectFromProperty(fleet_msearch3_request, 'body'),
+    getZodLooseObjectFromProperty(fleet_msearch3_request, 'path'),
+    getZodLooseObjectFromProperty(fleet_msearch3_request, 'query'),
   ]),
   outputSchema: z.union([
     fleet_msearch_response,
@@ -6122,15 +6260,16 @@ However, similar to the Fleet search API, it supports the \`wait_for_checkpoints
 };
 const FLEET_POST_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.post_secret',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Creates a secret stored by Fleet
 
  Documentation: null`,
   methods: ['POST'],
   patterns: ['_fleet/secret'],
-  documentation: 'null',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -6140,7 +6279,7 @@ const FLEET_POST_SECRET_CONTRACT: InternalConnectorContract = {
 };
 const FLEET_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.search',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a Fleet search`,
   description: `Run a Fleet search.
 The purpose of the Fleet search API is to provide an API where the search will be run only
@@ -6152,6 +6291,7 @@ after the provided checkpoint has been processed and is visible for searches ins
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-fleet-search',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -6233,18 +6373,18 @@ after the provided checkpoint has been processed and is visible for searches ins
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(fleet_search_request, 'body'),
-    getLooseObjectFromProperty(fleet_search_request, 'path'),
-    getLooseObjectFromProperty(fleet_search_request, 'query'),
-    getLooseObjectFromProperty(fleet_search1_request, 'body'),
-    getLooseObjectFromProperty(fleet_search1_request, 'path'),
-    getLooseObjectFromProperty(fleet_search1_request, 'query'),
+    getZodLooseObjectFromProperty(fleet_search_request, 'body'),
+    getZodLooseObjectFromProperty(fleet_search_request, 'path'),
+    getZodLooseObjectFromProperty(fleet_search_request, 'query'),
+    getZodLooseObjectFromProperty(fleet_search1_request, 'body'),
+    getZodLooseObjectFromProperty(fleet_search1_request, 'path'),
+    getZodLooseObjectFromProperty(fleet_search1_request, 'query'),
   ]),
   outputSchema: z.union([fleet_search_response, fleet_search1_response]),
 };
 const GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a document by its ID`,
   description: `Get a document by its ID.
 
@@ -6310,6 +6450,7 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
   patterns: ['{index}/_doc/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'preference',
@@ -6327,15 +6468,15 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_request, 'body'),
-    getLooseObjectFromProperty(get_request, 'path'),
-    getLooseObjectFromProperty(get_request, 'query'),
+    getZodLooseObjectFromProperty(get_request, 'body'),
+    getZodLooseObjectFromProperty(get_request, 'path'),
+    getZodLooseObjectFromProperty(get_request, 'query'),
   ]),
   outputSchema: get_response,
 };
 const GET_SCRIPT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get_script',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a script or search template`,
   description: `Get a script or search template.
 Retrieves a stored script or search template.
@@ -6345,20 +6486,21 @@ Retrieves a stored script or search template.
   patterns: ['_scripts/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_script_request, 'body'),
-    getLooseObjectFromProperty(get_script_request, 'path'),
-    getLooseObjectFromProperty(get_script_request, 'query'),
+    getZodLooseObjectFromProperty(get_script_request, 'body'),
+    getZodLooseObjectFromProperty(get_script_request, 'path'),
+    getZodLooseObjectFromProperty(get_script_request, 'query'),
   ]),
   outputSchema: get_script_response,
 };
 const GET_SCRIPT_CONTEXT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get_script_context',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get script contexts`,
   description: `Get script contexts.
 
@@ -6370,20 +6512,21 @@ Get a list of supported script contexts and their methods.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script-context',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_script_context_request, 'body'),
-    getLooseObjectFromProperty(get_script_context_request, 'path'),
-    getLooseObjectFromProperty(get_script_context_request, 'query'),
+    getZodLooseObjectFromProperty(get_script_context_request, 'body'),
+    getZodLooseObjectFromProperty(get_script_context_request, 'path'),
+    getZodLooseObjectFromProperty(get_script_context_request, 'query'),
   ]),
   outputSchema: get_script_context_response,
 };
 const GET_SCRIPT_LANGUAGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get_script_languages',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get script languages`,
   description: `Get script languages.
 
@@ -6395,20 +6538,21 @@ Get a list of available script types, languages, and contexts.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script-languages',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_script_languages_request, 'body'),
-    getLooseObjectFromProperty(get_script_languages_request, 'path'),
-    getLooseObjectFromProperty(get_script_languages_request, 'query'),
+    getZodLooseObjectFromProperty(get_script_languages_request, 'body'),
+    getZodLooseObjectFromProperty(get_script_languages_request, 'path'),
+    getZodLooseObjectFromProperty(get_script_languages_request, 'query'),
   ]),
   outputSchema: get_script_languages_response,
 };
 const GET_SOURCE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.get_source',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a document's source`,
   description: `Get a document's source.
 
@@ -6430,6 +6574,7 @@ GET my-index-000001/_source/1/?_source_includes=*.id&_source_excludes=entities
   patterns: ['{index}/_source/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'preference',
@@ -6445,15 +6590,15 @@ GET my-index-000001/_source/1/?_source_includes=*.id&_source_excludes=entities
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_source_request, 'body'),
-    getLooseObjectFromProperty(get_source_request, 'path'),
-    getLooseObjectFromProperty(get_source_request, 'query'),
+    getZodLooseObjectFromProperty(get_source_request, 'body'),
+    getZodLooseObjectFromProperty(get_source_request, 'path'),
+    getZodLooseObjectFromProperty(get_source_request, 'query'),
   ]),
   outputSchema: get_source_response,
 };
 const GRAPH_EXPLORE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.graph.explore',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Explore graph analytics`,
   description: `Explore graph analytics.
 Extract and summarize information about the documents and terms in an Elasticsearch data stream or index.
@@ -6467,23 +6612,24 @@ You can exclude vertices that have already been returned.
   patterns: ['{index}/_graph/explore'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-graph',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['routing', 'timeout'],
     bodyParams: ['connections', 'controls', 'query', 'vertices'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(graph_explore_request, 'body'),
-    getLooseObjectFromProperty(graph_explore_request, 'path'),
-    getLooseObjectFromProperty(graph_explore_request, 'query'),
-    getLooseObjectFromProperty(graph_explore1_request, 'body'),
-    getLooseObjectFromProperty(graph_explore1_request, 'path'),
-    getLooseObjectFromProperty(graph_explore1_request, 'query'),
+    getZodLooseObjectFromProperty(graph_explore_request, 'body'),
+    getZodLooseObjectFromProperty(graph_explore_request, 'path'),
+    getZodLooseObjectFromProperty(graph_explore_request, 'query'),
+    getZodLooseObjectFromProperty(graph_explore1_request, 'body'),
+    getZodLooseObjectFromProperty(graph_explore1_request, 'path'),
+    getZodLooseObjectFromProperty(graph_explore1_request, 'query'),
   ]),
   outputSchema: z.union([graph_explore_response, graph_explore1_response]),
 };
 const HEALTH_REPORT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.health_report',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the cluster health`,
   description: `Get the cluster health.
 Get a report with the health status of an Elasticsearch cluster.
@@ -6510,23 +6656,24 @@ When setting up automated polling of the API for health status, set verbose to f
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-health-report',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['feature'],
     urlParams: ['timeout', 'verbose', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(health_report_request, 'body'),
-    getLooseObjectFromProperty(health_report_request, 'path'),
-    getLooseObjectFromProperty(health_report_request, 'query'),
-    getLooseObjectFromProperty(health_report1_request, 'body'),
-    getLooseObjectFromProperty(health_report1_request, 'path'),
-    getLooseObjectFromProperty(health_report1_request, 'query'),
+    getZodLooseObjectFromProperty(health_report_request, 'body'),
+    getZodLooseObjectFromProperty(health_report_request, 'path'),
+    getZodLooseObjectFromProperty(health_report_request, 'query'),
+    getZodLooseObjectFromProperty(health_report1_request, 'body'),
+    getZodLooseObjectFromProperty(health_report1_request, 'path'),
+    getZodLooseObjectFromProperty(health_report1_request, 'query'),
   ]),
   outputSchema: z.union([health_report_response, health_report1_response]),
 };
 const ILM_DELETE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.delete_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a lifecycle policy`,
   description: `Delete a lifecycle policy.
 You cannot delete policies that are currently in use. If the policy is being used to manage any indices, the request fails and returns an error.
@@ -6537,20 +6684,21 @@ You cannot delete policies that are currently in use. If the policy is being use
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-delete-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['policy'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_delete_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(ilm_delete_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(ilm_delete_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_delete_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_delete_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_delete_lifecycle_request, 'query'),
   ]),
   outputSchema: ilm_delete_lifecycle_response,
 };
 const ILM_EXPLAIN_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.explain_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Explain the lifecycle state`,
   description: `Explain the lifecycle state.
 Get the current lifecycle status for one or more indices.
@@ -6564,20 +6712,21 @@ The response indicates when the index entered each lifecycle state, provides the
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-explain-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['only_errors', 'only_managed', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_explain_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(ilm_explain_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(ilm_explain_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_explain_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_explain_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_explain_lifecycle_request, 'query'),
   ]),
   outputSchema: ilm_explain_lifecycle_response,
 };
 const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.get_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get lifecycle policies`,
   description: `Get lifecycle policies.
 
@@ -6587,23 +6736,24 @@ const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-get-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['policy'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_get_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(ilm_get_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(ilm_get_lifecycle_request, 'query'),
-    getLooseObjectFromProperty(ilm_get_lifecycle1_request, 'body'),
-    getLooseObjectFromProperty(ilm_get_lifecycle1_request, 'path'),
-    getLooseObjectFromProperty(ilm_get_lifecycle1_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_get_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_get_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_get_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_get_lifecycle1_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_get_lifecycle1_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_get_lifecycle1_request, 'query'),
   ]),
   outputSchema: z.union([ilm_get_lifecycle_response, ilm_get_lifecycle1_response]),
 };
 const ILM_GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.get_status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the ILM status`,
   description: `Get the ILM status.
 
@@ -6615,20 +6765,21 @@ Get the current index lifecycle management status.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-get-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_get_status_request, 'body'),
-    getLooseObjectFromProperty(ilm_get_status_request, 'path'),
-    getLooseObjectFromProperty(ilm_get_status_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_get_status_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_get_status_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_get_status_request, 'query'),
   ]),
   outputSchema: ilm_get_status_response,
 };
 const ILM_MIGRATE_TO_DATA_TIERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.migrate_to_data_tiers',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Migrate to data tiers routing`,
   description: `Migrate to data tiers routing.
 Switch the indices, ILM policies, and legacy, composable, and component templates from using custom node attributes and attribute-based allocation filters to using data tiers.
@@ -6651,20 +6802,21 @@ Use the stop ILM and get ILM status APIs to wait until the reported operation mo
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-migrate-to-data-tiers',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['dry_run', 'master_timeout'],
     bodyParams: ['legacy_template_to_delete', 'node_attribute'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'body'),
-    getLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'path'),
-    getLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'query'),
   ]),
   outputSchema: ilm_migrate_to_data_tiers_response,
 };
 const ILM_MOVE_TO_STEP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.move_to_step',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Move to a lifecycle step`,
   description: `Move to a lifecycle step.
 Manually move an index into a specific step in the lifecycle policy and run that step.
@@ -6687,20 +6839,21 @@ An index cannot move to a step that is not part of its policy.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-move-to-step',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [],
     bodyParams: ['current_step', 'next_step'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_move_to_step_request, 'body'),
-    getLooseObjectFromProperty(ilm_move_to_step_request, 'path'),
-    getLooseObjectFromProperty(ilm_move_to_step_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_move_to_step_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_move_to_step_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_move_to_step_request, 'query'),
   ]),
   outputSchema: ilm_move_to_step_response,
 };
 const ILM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.put_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a lifecycle policy`,
   description: `Create or update a lifecycle policy.
 If the specified policy exists, it is replaced and the policy version is incremented.
@@ -6713,20 +6866,21 @@ NOTE: Only the latest version of the policy is stored, you cannot revert to prev
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['policy'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['policy'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_put_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(ilm_put_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(ilm_put_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_put_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_put_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_put_lifecycle_request, 'query'),
   ]),
   outputSchema: ilm_put_lifecycle_response,
 };
 const ILM_REMOVE_POLICY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.remove_policy',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Remove policies from an index`,
   description: `Remove policies from an index.
 Remove the assigned lifecycle policies from an index or a data stream's backing indices.
@@ -6738,20 +6892,21 @@ It also stops managing the indices.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-remove-policy',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_remove_policy_request, 'body'),
-    getLooseObjectFromProperty(ilm_remove_policy_request, 'path'),
-    getLooseObjectFromProperty(ilm_remove_policy_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_remove_policy_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_remove_policy_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_remove_policy_request, 'query'),
   ]),
   outputSchema: ilm_remove_policy_response,
 };
 const ILM_RETRY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.retry',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Retry a policy`,
   description: `Retry a policy.
 Retry running the lifecycle policy for an index that is in the ERROR step.
@@ -6763,20 +6918,21 @@ Use the explain lifecycle state API to determine whether an index is in the ERRO
   patterns: ['{index}/_ilm/retry'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-retry',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_retry_request, 'body'),
-    getLooseObjectFromProperty(ilm_retry_request, 'path'),
-    getLooseObjectFromProperty(ilm_retry_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_retry_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_retry_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_retry_request, 'query'),
   ]),
   outputSchema: ilm_retry_response,
 };
 const ILM_START_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.start',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start the ILM plugin`,
   description: `Start the ILM plugin.
 Start the index lifecycle management plugin if it is currently stopped.
@@ -6788,20 +6944,21 @@ Restarting ILM is necessary only when it has been stopped using the stop ILM API
   patterns: ['_ilm/start'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-start',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_start_request, 'body'),
-    getLooseObjectFromProperty(ilm_start_request, 'path'),
-    getLooseObjectFromProperty(ilm_start_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_start_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_start_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_start_request, 'query'),
   ]),
   outputSchema: ilm_start_response,
 };
 const ILM_STOP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.stop',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Stop the ILM plugin`,
   description: `Stop the ILM plugin.
 Halt all lifecycle management operations and stop the index lifecycle management plugin.
@@ -6815,20 +6972,21 @@ Use the get ILM status API to check whether ILM is running.
   patterns: ['_ilm/stop'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-stop',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ilm_stop_request, 'body'),
-    getLooseObjectFromProperty(ilm_stop_request, 'path'),
-    getLooseObjectFromProperty(ilm_stop_request, 'query'),
+    getZodLooseObjectFromProperty(ilm_stop_request, 'body'),
+    getZodLooseObjectFromProperty(ilm_stop_request, 'path'),
+    getZodLooseObjectFromProperty(ilm_stop_request, 'query'),
   ]),
   outputSchema: ilm_stop_response,
 };
 const INDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.index',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a document in an index`,
   description: `Create or update a document in an index.
 
@@ -6955,6 +7113,7 @@ Even the simple case of updating the Elasticsearch index using data from a datab
   patterns: ['{index}/_doc/{id}', '{index}/_doc'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'if_primary_term',
@@ -6974,21 +7133,21 @@ Even the simple case of updating the Elasticsearch index using data from a datab
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(index_request, 'body'),
-    getLooseObjectFromProperty(index_request, 'path'),
-    getLooseObjectFromProperty(index_request, 'query'),
-    getLooseObjectFromProperty(index1_request, 'body'),
-    getLooseObjectFromProperty(index1_request, 'path'),
-    getLooseObjectFromProperty(index1_request, 'query'),
-    getLooseObjectFromProperty(index2_request, 'body'),
-    getLooseObjectFromProperty(index2_request, 'path'),
-    getLooseObjectFromProperty(index2_request, 'query'),
+    getZodLooseObjectFromProperty(index_request, 'body'),
+    getZodLooseObjectFromProperty(index_request, 'path'),
+    getZodLooseObjectFromProperty(index_request, 'query'),
+    getZodLooseObjectFromProperty(index1_request, 'body'),
+    getZodLooseObjectFromProperty(index1_request, 'path'),
+    getZodLooseObjectFromProperty(index1_request, 'query'),
+    getZodLooseObjectFromProperty(index2_request, 'body'),
+    getZodLooseObjectFromProperty(index2_request, 'path'),
+    getZodLooseObjectFromProperty(index2_request, 'query'),
   ]),
   outputSchema: z.union([index_response, index1_response, index2_response]),
 };
 const INDICES_ADD_BLOCK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.add_block',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Add an index block`,
   description: `Add an index block.
 
@@ -7001,6 +7160,7 @@ Index blocks limit the operations allowed on an index by blocking specific opera
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-add-block',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'block'],
     urlParams: [
       'allow_no_indices',
@@ -7012,15 +7172,15 @@ Index blocks limit the operations allowed on an index by blocking specific opera
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_add_block_request, 'body'),
-    getLooseObjectFromProperty(indices_add_block_request, 'path'),
-    getLooseObjectFromProperty(indices_add_block_request, 'query'),
+    getZodLooseObjectFromProperty(indices_add_block_request, 'body'),
+    getZodLooseObjectFromProperty(indices_add_block_request, 'path'),
+    getZodLooseObjectFromProperty(indices_add_block_request, 'query'),
   ]),
   outputSchema: indices_add_block_response,
 };
 const INDICES_ANALYZE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.analyze',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get tokens from text analysis`,
   description: `Get tokens from text analysis.
 The analyze API performs analysis on a text string and returns the resulting tokens.
@@ -7036,6 +7196,7 @@ The \`_analyze\` endpoint without a specified index will always use \`10000\` as
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-analyze',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['index'],
     bodyParams: [
@@ -7051,18 +7212,18 @@ The \`_analyze\` endpoint without a specified index will always use \`10000\` as
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_analyze_request, 'body'),
-    getLooseObjectFromProperty(indices_analyze_request, 'path'),
-    getLooseObjectFromProperty(indices_analyze_request, 'query'),
-    getLooseObjectFromProperty(indices_analyze1_request, 'body'),
-    getLooseObjectFromProperty(indices_analyze1_request, 'path'),
-    getLooseObjectFromProperty(indices_analyze1_request, 'query'),
-    getLooseObjectFromProperty(indices_analyze2_request, 'body'),
-    getLooseObjectFromProperty(indices_analyze2_request, 'path'),
-    getLooseObjectFromProperty(indices_analyze2_request, 'query'),
-    getLooseObjectFromProperty(indices_analyze3_request, 'body'),
-    getLooseObjectFromProperty(indices_analyze3_request, 'path'),
-    getLooseObjectFromProperty(indices_analyze3_request, 'query'),
+    getZodLooseObjectFromProperty(indices_analyze_request, 'body'),
+    getZodLooseObjectFromProperty(indices_analyze_request, 'path'),
+    getZodLooseObjectFromProperty(indices_analyze_request, 'query'),
+    getZodLooseObjectFromProperty(indices_analyze1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_analyze1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_analyze1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_analyze2_request, 'body'),
+    getZodLooseObjectFromProperty(indices_analyze2_request, 'path'),
+    getZodLooseObjectFromProperty(indices_analyze2_request, 'query'),
+    getZodLooseObjectFromProperty(indices_analyze3_request, 'body'),
+    getZodLooseObjectFromProperty(indices_analyze3_request, 'path'),
+    getZodLooseObjectFromProperty(indices_analyze3_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_analyze_response,
@@ -7073,7 +7234,7 @@ The \`_analyze\` endpoint without a specified index will always use \`10000\` as
 };
 const INDICES_CANCEL_MIGRATE_REINDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.cancel_migrate_reindex',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Cancel a migration reindex operation`,
   description: `Cancel a migration reindex operation.
 
@@ -7085,20 +7246,21 @@ Cancel a migration reindex attempt for a data stream or index.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-cancel-migrate-reindex',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'body'),
-    getLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'path'),
-    getLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'query'),
+    getZodLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'body'),
+    getZodLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'path'),
+    getZodLooseObjectFromProperty(indices_cancel_migrate_reindex_request, 'query'),
   ]),
   outputSchema: indices_cancel_migrate_reindex_response,
 };
 const INDICES_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.clear_cache',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear the cache`,
   description: `Clear the cache.
 Clear the cache of one or more indices.
@@ -7114,6 +7276,7 @@ To clear the cache only of specific fields, use the \`fields\` parameter.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-clear-cache',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'index',
@@ -7128,18 +7291,18 @@ To clear the cache only of specific fields, use the \`fields\` parameter.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_clear_cache_request, 'body'),
-    getLooseObjectFromProperty(indices_clear_cache_request, 'path'),
-    getLooseObjectFromProperty(indices_clear_cache_request, 'query'),
-    getLooseObjectFromProperty(indices_clear_cache1_request, 'body'),
-    getLooseObjectFromProperty(indices_clear_cache1_request, 'path'),
-    getLooseObjectFromProperty(indices_clear_cache1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_clear_cache_request, 'body'),
+    getZodLooseObjectFromProperty(indices_clear_cache_request, 'path'),
+    getZodLooseObjectFromProperty(indices_clear_cache_request, 'query'),
+    getZodLooseObjectFromProperty(indices_clear_cache1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_clear_cache1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_clear_cache1_request, 'query'),
   ]),
   outputSchema: z.union([indices_clear_cache_response, indices_clear_cache1_response]),
 };
 const INDICES_CLONE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.clone',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clone an index`,
   description: `Clone an index.
 Clone an existing index into a new index.
@@ -7193,23 +7356,24 @@ Because the clone operation creates a new index to clone the shards to, the wait
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-clone',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'target'],
     urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
     bodyParams: ['aliases', 'settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_clone_request, 'body'),
-    getLooseObjectFromProperty(indices_clone_request, 'path'),
-    getLooseObjectFromProperty(indices_clone_request, 'query'),
-    getLooseObjectFromProperty(indices_clone1_request, 'body'),
-    getLooseObjectFromProperty(indices_clone1_request, 'path'),
-    getLooseObjectFromProperty(indices_clone1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_clone_request, 'body'),
+    getZodLooseObjectFromProperty(indices_clone_request, 'path'),
+    getZodLooseObjectFromProperty(indices_clone_request, 'query'),
+    getZodLooseObjectFromProperty(indices_clone1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_clone1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_clone1_request, 'query'),
   ]),
   outputSchema: z.union([indices_clone_response, indices_clone1_response]),
 };
 const INDICES_CLOSE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.close',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Close an index`,
   description: `Close an index.
 A closed index is blocked for read or write operations and does not allow all operations that opened indices allow.
@@ -7236,6 +7400,7 @@ Closing indices can be turned off with the cluster settings API by setting \`clu
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-close',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -7248,15 +7413,15 @@ Closing indices can be turned off with the cluster settings API by setting \`clu
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_close_request, 'body'),
-    getLooseObjectFromProperty(indices_close_request, 'path'),
-    getLooseObjectFromProperty(indices_close_request, 'query'),
+    getZodLooseObjectFromProperty(indices_close_request, 'body'),
+    getZodLooseObjectFromProperty(indices_close_request, 'path'),
+    getZodLooseObjectFromProperty(indices_close_request, 'query'),
   ]),
   outputSchema: indices_close_response,
 };
 const INDICES_CREATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.create',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an index`,
   description: `Create an index.
 You can use the create index API to add a new index to an Elasticsearch cluster.
@@ -7285,20 +7450,21 @@ Note that changing this setting will also affect the \`wait_for_active_shards\` 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
     bodyParams: ['aliases', 'mappings', 'settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_create_request, 'body'),
-    getLooseObjectFromProperty(indices_create_request, 'path'),
-    getLooseObjectFromProperty(indices_create_request, 'query'),
+    getZodLooseObjectFromProperty(indices_create_request, 'body'),
+    getZodLooseObjectFromProperty(indices_create_request, 'path'),
+    getZodLooseObjectFromProperty(indices_create_request, 'query'),
   ]),
   outputSchema: indices_create_response,
 };
 const INDICES_CREATE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.create_data_stream',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a data stream`,
   description: `Create a data stream.
 
@@ -7310,20 +7476,21 @@ You must have a matching index template with data stream enabled.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create-data-stream',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_create_data_stream_request, 'body'),
-    getLooseObjectFromProperty(indices_create_data_stream_request, 'path'),
-    getLooseObjectFromProperty(indices_create_data_stream_request, 'query'),
+    getZodLooseObjectFromProperty(indices_create_data_stream_request, 'body'),
+    getZodLooseObjectFromProperty(indices_create_data_stream_request, 'path'),
+    getZodLooseObjectFromProperty(indices_create_data_stream_request, 'query'),
   ]),
   outputSchema: indices_create_data_stream_response,
 };
 const INDICES_CREATE_FROM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.create_from',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an index from a source index`,
   description: `Create an index from a source index.
 
@@ -7335,23 +7502,24 @@ Copy the mappings and settings from the source index to a destination index whil
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create-from',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['source', 'dest'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['mappings_override', 'settings_override', 'remove_index_blocks'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_create_from_request, 'body'),
-    getLooseObjectFromProperty(indices_create_from_request, 'path'),
-    getLooseObjectFromProperty(indices_create_from_request, 'query'),
-    getLooseObjectFromProperty(indices_create_from1_request, 'body'),
-    getLooseObjectFromProperty(indices_create_from1_request, 'path'),
-    getLooseObjectFromProperty(indices_create_from1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_create_from_request, 'body'),
+    getZodLooseObjectFromProperty(indices_create_from_request, 'path'),
+    getZodLooseObjectFromProperty(indices_create_from_request, 'query'),
+    getZodLooseObjectFromProperty(indices_create_from1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_create_from1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_create_from1_request, 'query'),
   ]),
   outputSchema: z.union([indices_create_from_response, indices_create_from1_response]),
 };
 const INDICES_DATA_STREAMS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.data_streams_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data stream stats`,
   description: `Get data stream stats.
 
@@ -7363,17 +7531,18 @@ Get statistics for one or more data streams.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-data-streams-stats-1',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_data_streams_stats_request, 'body'),
-    getLooseObjectFromProperty(indices_data_streams_stats_request, 'path'),
-    getLooseObjectFromProperty(indices_data_streams_stats_request, 'query'),
-    getLooseObjectFromProperty(indices_data_streams_stats1_request, 'body'),
-    getLooseObjectFromProperty(indices_data_streams_stats1_request, 'path'),
-    getLooseObjectFromProperty(indices_data_streams_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_data_streams_stats_request, 'body'),
+    getZodLooseObjectFromProperty(indices_data_streams_stats_request, 'path'),
+    getZodLooseObjectFromProperty(indices_data_streams_stats_request, 'query'),
+    getZodLooseObjectFromProperty(indices_data_streams_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_data_streams_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_data_streams_stats1_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_data_streams_stats_response,
@@ -7382,7 +7551,7 @@ Get statistics for one or more data streams.
 };
 const INDICES_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete indices`,
   description: `Delete indices.
 Deleting an index deletes its documents, shards, and metadata.
@@ -7398,6 +7567,7 @@ You can then use the delete index API to delete the previous write index.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -7409,15 +7579,15 @@ You can then use the delete index API to delete the previous write index.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_delete_request, 'body'),
-    getLooseObjectFromProperty(indices_delete_request, 'path'),
-    getLooseObjectFromProperty(indices_delete_request, 'query'),
+    getZodLooseObjectFromProperty(indices_delete_request, 'body'),
+    getZodLooseObjectFromProperty(indices_delete_request, 'path'),
+    getZodLooseObjectFromProperty(indices_delete_request, 'query'),
   ]),
   outputSchema: indices_delete_response,
 };
 const INDICES_DELETE_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_alias',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an alias`,
   description: `Delete an alias.
 Removes a data stream or index from an alias.
@@ -7428,23 +7598,24 @@ Removes a data stream or index from an alias.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-alias',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'name'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_delete_alias_request, 'body'),
-    getLooseObjectFromProperty(indices_delete_alias_request, 'path'),
-    getLooseObjectFromProperty(indices_delete_alias_request, 'query'),
-    getLooseObjectFromProperty(indices_delete_alias1_request, 'body'),
-    getLooseObjectFromProperty(indices_delete_alias1_request, 'path'),
-    getLooseObjectFromProperty(indices_delete_alias1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_delete_alias_request, 'body'),
+    getZodLooseObjectFromProperty(indices_delete_alias_request, 'path'),
+    getZodLooseObjectFromProperty(indices_delete_alias_request, 'query'),
+    getZodLooseObjectFromProperty(indices_delete_alias1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_delete_alias1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_delete_alias1_request, 'query'),
   ]),
   outputSchema: z.union([indices_delete_alias_response, indices_delete_alias1_response]),
 };
 const INDICES_DELETE_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_data_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete data stream lifecycles`,
   description: `Delete data stream lifecycles.
 Removes the data stream lifecycle from a data stream, rendering it not managed by the data stream lifecycle.
@@ -7455,20 +7626,21 @@ Removes the data stream lifecycle from a data stream, rendering it not managed b
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(indices_delete_data_lifecycle_request, 'query'),
   ]),
   outputSchema: indices_delete_data_lifecycle_response,
 };
 const INDICES_DELETE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_data_stream',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete data streams`,
   description: `Delete data streams.
 Deletes one or more data streams and their backing indices.
@@ -7479,20 +7651,21 @@ Deletes one or more data streams and their backing indices.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-stream',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout', 'expand_wildcards'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_delete_data_stream_request, 'body'),
-    getLooseObjectFromProperty(indices_delete_data_stream_request, 'path'),
-    getLooseObjectFromProperty(indices_delete_data_stream_request, 'query'),
+    getZodLooseObjectFromProperty(indices_delete_data_stream_request, 'body'),
+    getZodLooseObjectFromProperty(indices_delete_data_stream_request, 'path'),
+    getZodLooseObjectFromProperty(indices_delete_data_stream_request, 'query'),
   ]),
   outputSchema: indices_delete_data_stream_response,
 };
 const INDICES_DELETE_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_data_stream_options',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete data stream options`,
   description: `Delete data stream options.
 Removes the data stream options from a data stream.
@@ -7503,20 +7676,21 @@ Removes the data stream options from a data stream.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-stream-options',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_delete_data_stream_options_request, 'body'),
-    getLooseObjectFromProperty(indices_delete_data_stream_options_request, 'path'),
-    getLooseObjectFromProperty(indices_delete_data_stream_options_request, 'query'),
+    getZodLooseObjectFromProperty(indices_delete_data_stream_options_request, 'body'),
+    getZodLooseObjectFromProperty(indices_delete_data_stream_options_request, 'path'),
+    getZodLooseObjectFromProperty(indices_delete_data_stream_options_request, 'query'),
   ]),
   outputSchema: indices_delete_data_stream_options_response,
 };
 const INDICES_DELETE_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_index_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an index template`,
   description: `Delete an index template.
 The provided <index-template> may contain multiple template names separated by a comma. If multiple template
@@ -7529,21 +7703,22 @@ existing templates.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-index-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_delete_index_template_request, 'body'),
-    getLooseObjectFromProperty(indices_delete_index_template_request, 'path'),
-    getLooseObjectFromProperty(indices_delete_index_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_delete_index_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_delete_index_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_delete_index_template_request, 'query'),
   ]),
   outputSchema: indices_delete_index_template_response,
 };
 const INDICES_DELETE_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_sample_configuration',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Delete sampling configuration.
 Delete the sampling configuration for the specified index.
 
@@ -7552,6 +7727,7 @@ Delete the sampling configuration for the specified index.
   patterns: ['{index}/_sample/config'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -7561,7 +7737,7 @@ Delete the sampling configuration for the specified index.
 };
 const INDICES_DELETE_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.delete_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a legacy index template`,
   description: `Delete a legacy index template.
 IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.
@@ -7572,20 +7748,21 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_delete_template_request, 'body'),
-    getLooseObjectFromProperty(indices_delete_template_request, 'path'),
-    getLooseObjectFromProperty(indices_delete_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_delete_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_delete_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_delete_template_request, 'query'),
   ]),
   outputSchema: indices_delete_template_response,
 };
 const INDICES_DISK_USAGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.disk_usage',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Analyze the index disk usage`,
   description: `Analyze the index disk usage.
 Analyze the disk usage of each field of an index or data stream.
@@ -7604,6 +7781,7 @@ For usage examples see the External documentation or refer to [Analyze the index
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-disk-usage',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -7615,15 +7793,15 @@ For usage examples see the External documentation or refer to [Analyze the index
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_disk_usage_request, 'body'),
-    getLooseObjectFromProperty(indices_disk_usage_request, 'path'),
-    getLooseObjectFromProperty(indices_disk_usage_request, 'query'),
+    getZodLooseObjectFromProperty(indices_disk_usage_request, 'body'),
+    getZodLooseObjectFromProperty(indices_disk_usage_request, 'path'),
+    getZodLooseObjectFromProperty(indices_disk_usage_request, 'query'),
   ]),
   outputSchema: indices_disk_usage_response,
 };
 const INDICES_DOWNSAMPLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.downsample',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Downsample an index`,
   description: `Downsample an index.
 Downsamples a time series (TSDS) index and reduces its size by keeping the last value or by pre-aggregating metrics:
@@ -7645,20 +7823,21 @@ The source index must be read-only (\`index.blocks.write: true\`).
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-downsample',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'target_index'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['fixed_interval', 'sampling_method'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_downsample_request, 'body'),
-    getLooseObjectFromProperty(indices_downsample_request, 'path'),
-    getLooseObjectFromProperty(indices_downsample_request, 'query'),
+    getZodLooseObjectFromProperty(indices_downsample_request, 'body'),
+    getZodLooseObjectFromProperty(indices_downsample_request, 'path'),
+    getZodLooseObjectFromProperty(indices_downsample_request, 'query'),
   ]),
   outputSchema: indices_downsample_response,
 };
 const INDICES_EXISTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.exists',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check indices`,
   description: `Check indices.
 Check if one or more indices, index aliases, or data streams exist.
@@ -7669,6 +7848,7 @@ Check if one or more indices, index aliases, or data streams exist.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -7681,15 +7861,15 @@ Check if one or more indices, index aliases, or data streams exist.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_exists_request, 'body'),
-    getLooseObjectFromProperty(indices_exists_request, 'path'),
-    getLooseObjectFromProperty(indices_exists_request, 'query'),
+    getZodLooseObjectFromProperty(indices_exists_request, 'body'),
+    getZodLooseObjectFromProperty(indices_exists_request, 'path'),
+    getZodLooseObjectFromProperty(indices_exists_request, 'query'),
   ]),
   outputSchema: indices_exists_response,
 };
 const INDICES_EXISTS_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.exists_alias',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check aliases`,
   description: `Check aliases.
 
@@ -7701,23 +7881,24 @@ Check if one or more data stream or index aliases exist.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-alias',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name', 'index'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_exists_alias_request, 'body'),
-    getLooseObjectFromProperty(indices_exists_alias_request, 'path'),
-    getLooseObjectFromProperty(indices_exists_alias_request, 'query'),
-    getLooseObjectFromProperty(indices_exists_alias1_request, 'body'),
-    getLooseObjectFromProperty(indices_exists_alias1_request, 'path'),
-    getLooseObjectFromProperty(indices_exists_alias1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_exists_alias_request, 'body'),
+    getZodLooseObjectFromProperty(indices_exists_alias_request, 'path'),
+    getZodLooseObjectFromProperty(indices_exists_alias_request, 'query'),
+    getZodLooseObjectFromProperty(indices_exists_alias1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_exists_alias1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_exists_alias1_request, 'query'),
   ]),
   outputSchema: z.union([indices_exists_alias_response, indices_exists_alias1_response]),
 };
 const INDICES_EXISTS_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.exists_index_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check index templates`,
   description: `Check index templates.
 
@@ -7729,20 +7910,21 @@ Check whether index templates exist.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-index-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['local', 'flat_settings', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_exists_index_template_request, 'body'),
-    getLooseObjectFromProperty(indices_exists_index_template_request, 'path'),
-    getLooseObjectFromProperty(indices_exists_index_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_exists_index_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_exists_index_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_exists_index_template_request, 'query'),
   ]),
   outputSchema: indices_exists_index_template_response,
 };
 const INDICES_EXISTS_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.exists_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check existence of index templates`,
   description: `Check existence of index templates.
 Get information about whether index templates exist.
@@ -7756,20 +7938,21 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['flat_settings', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_exists_template_request, 'body'),
-    getLooseObjectFromProperty(indices_exists_template_request, 'path'),
-    getLooseObjectFromProperty(indices_exists_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_exists_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_exists_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_exists_template_request, 'query'),
   ]),
   outputSchema: indices_exists_template_response,
 };
 const INDICES_EXPLAIN_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.explain_data_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the status for a data stream lifecycle`,
   description: `Get the status for a data stream lifecycle.
 Get information about an index or data stream's current data stream lifecycle status, such as time since index creation, time since rollover, the lifecycle configuration managing the index, or any errors encountered during lifecycle execution.
@@ -7780,20 +7963,21 @@ Get information about an index or data stream's current data stream lifecycle st
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-explain-data-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['include_defaults', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(indices_explain_data_lifecycle_request, 'query'),
   ]),
   outputSchema: indices_explain_data_lifecycle_response,
 };
 const INDICES_FIELD_USAGE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.field_usage_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get field usage stats`,
   description: `Get field usage stats.
 Get field usage information for each shard and field of an index.
@@ -7809,20 +7993,21 @@ A given request will increment each count by a maximum value of 1, even if the r
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-field-usage-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'fields'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_field_usage_stats_request, 'body'),
-    getLooseObjectFromProperty(indices_field_usage_stats_request, 'path'),
-    getLooseObjectFromProperty(indices_field_usage_stats_request, 'query'),
+    getZodLooseObjectFromProperty(indices_field_usage_stats_request, 'body'),
+    getZodLooseObjectFromProperty(indices_field_usage_stats_request, 'path'),
+    getZodLooseObjectFromProperty(indices_field_usage_stats_request, 'query'),
   ]),
   outputSchema: indices_field_usage_stats_response,
 };
 const INDICES_FLUSH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.flush',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Flush data streams or indices`,
   description: `Flush data streams or indices.
 Flushing a data stream or index is the process of making sure that any data that is currently only stored in the transaction log is also permanently stored in the Lucene index.
@@ -7842,6 +8027,7 @@ If you call the flush API after indexing some documents then a successful respon
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-flush',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -7853,18 +8039,18 @@ If you call the flush API after indexing some documents then a successful respon
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_flush_request, 'body'),
-    getLooseObjectFromProperty(indices_flush_request, 'path'),
-    getLooseObjectFromProperty(indices_flush_request, 'query'),
-    getLooseObjectFromProperty(indices_flush1_request, 'body'),
-    getLooseObjectFromProperty(indices_flush1_request, 'path'),
-    getLooseObjectFromProperty(indices_flush1_request, 'query'),
-    getLooseObjectFromProperty(indices_flush2_request, 'body'),
-    getLooseObjectFromProperty(indices_flush2_request, 'path'),
-    getLooseObjectFromProperty(indices_flush2_request, 'query'),
-    getLooseObjectFromProperty(indices_flush3_request, 'body'),
-    getLooseObjectFromProperty(indices_flush3_request, 'path'),
-    getLooseObjectFromProperty(indices_flush3_request, 'query'),
+    getZodLooseObjectFromProperty(indices_flush_request, 'body'),
+    getZodLooseObjectFromProperty(indices_flush_request, 'path'),
+    getZodLooseObjectFromProperty(indices_flush_request, 'query'),
+    getZodLooseObjectFromProperty(indices_flush1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_flush1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_flush1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_flush2_request, 'body'),
+    getZodLooseObjectFromProperty(indices_flush2_request, 'path'),
+    getZodLooseObjectFromProperty(indices_flush2_request, 'query'),
+    getZodLooseObjectFromProperty(indices_flush3_request, 'body'),
+    getZodLooseObjectFromProperty(indices_flush3_request, 'path'),
+    getZodLooseObjectFromProperty(indices_flush3_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_flush_response,
@@ -7875,7 +8061,7 @@ If you call the flush API after indexing some documents then a successful respon
 };
 const INDICES_FORCEMERGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.forcemerge',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Force a merge`,
   description: `Force a merge.
 Perform the force merge operation on the shards of one or more indices.
@@ -7937,6 +8123,7 @@ POST /.ds-my-data-stream-2099.03.07-000001/_forcemerge?max_num_segments=1
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-forcemerge',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -7950,18 +8137,18 @@ POST /.ds-my-data-stream-2099.03.07-000001/_forcemerge?max_num_segments=1
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_forcemerge_request, 'body'),
-    getLooseObjectFromProperty(indices_forcemerge_request, 'path'),
-    getLooseObjectFromProperty(indices_forcemerge_request, 'query'),
-    getLooseObjectFromProperty(indices_forcemerge1_request, 'body'),
-    getLooseObjectFromProperty(indices_forcemerge1_request, 'path'),
-    getLooseObjectFromProperty(indices_forcemerge1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_forcemerge_request, 'body'),
+    getZodLooseObjectFromProperty(indices_forcemerge_request, 'path'),
+    getZodLooseObjectFromProperty(indices_forcemerge_request, 'query'),
+    getZodLooseObjectFromProperty(indices_forcemerge1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_forcemerge1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_forcemerge1_request, 'query'),
   ]),
   outputSchema: z.union([indices_forcemerge_response, indices_forcemerge1_response]),
 };
 const INDICES_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get index information`,
   description: `Get index information.
 Get information about one or more indices. For data streams, the API returns information about the
@@ -7973,6 +8160,7 @@ stream’s backing indices.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -7987,15 +8175,15 @@ stream’s backing indices.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_request, 'body'),
-    getLooseObjectFromProperty(indices_get_request, 'path'),
-    getLooseObjectFromProperty(indices_get_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_request, 'query'),
   ]),
   outputSchema: indices_get_response,
 };
 const INDICES_GET_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_alias',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get aliases`,
   description: `Get aliases.
 Retrieves information for one or more data stream or index aliases.
@@ -8006,23 +8194,24 @@ Retrieves information for one or more data stream or index aliases.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-alias',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name', 'index'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_alias_request, 'body'),
-    getLooseObjectFromProperty(indices_get_alias_request, 'path'),
-    getLooseObjectFromProperty(indices_get_alias_request, 'query'),
-    getLooseObjectFromProperty(indices_get_alias1_request, 'body'),
-    getLooseObjectFromProperty(indices_get_alias1_request, 'path'),
-    getLooseObjectFromProperty(indices_get_alias1_request, 'query'),
-    getLooseObjectFromProperty(indices_get_alias2_request, 'body'),
-    getLooseObjectFromProperty(indices_get_alias2_request, 'path'),
-    getLooseObjectFromProperty(indices_get_alias2_request, 'query'),
-    getLooseObjectFromProperty(indices_get_alias3_request, 'body'),
-    getLooseObjectFromProperty(indices_get_alias3_request, 'path'),
-    getLooseObjectFromProperty(indices_get_alias3_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_alias_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_alias_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_alias_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_alias1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_alias1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_alias1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_alias2_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_alias2_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_alias2_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_alias3_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_alias3_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_alias3_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_get_alias_response,
@@ -8033,8 +8222,8 @@ Retrieves information for one or more data stream or index aliases.
 };
 const INDICES_GET_ALL_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_all_sample_configuration',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Get all sampling configurations.
 Get the sampling configurations for all indices.
 
@@ -8043,6 +8232,7 @@ Get the sampling configurations for all indices.
   patterns: ['_sample/config'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -8052,7 +8242,7 @@ Get the sampling configurations for all indices.
 };
 const INDICES_GET_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data stream lifecycles`,
   description: `Get data stream lifecycles.
 
@@ -8064,20 +8254,21 @@ Get the data stream lifecycle configuration of one or more data streams.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards', 'include_defaults', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_data_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(indices_get_data_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(indices_get_data_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_data_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_data_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_data_lifecycle_request, 'query'),
   ]),
   outputSchema: indices_get_data_lifecycle_response,
 };
 const INDICES_GET_DATA_LIFECYCLE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_lifecycle_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data stream lifecycle stats`,
   description: `Get data stream lifecycle stats.
 Get statistics about the data streams that are managed by a data stream lifecycle.
@@ -8088,20 +8279,21 @@ Get statistics about the data streams that are managed by a data stream lifecycl
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-lifecycle-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'body'),
-    getLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'path'),
-    getLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_data_lifecycle_stats_request, 'query'),
   ]),
   outputSchema: indices_get_data_lifecycle_stats_response,
 };
 const INDICES_GET_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_stream',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data streams`,
   description: `Get data streams.
 
@@ -8113,23 +8305,24 @@ Get information about one or more data streams.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards', 'include_defaults', 'master_timeout', 'verbose'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_data_stream_request, 'body'),
-    getLooseObjectFromProperty(indices_get_data_stream_request, 'path'),
-    getLooseObjectFromProperty(indices_get_data_stream_request, 'query'),
-    getLooseObjectFromProperty(indices_get_data_stream1_request, 'body'),
-    getLooseObjectFromProperty(indices_get_data_stream1_request, 'path'),
-    getLooseObjectFromProperty(indices_get_data_stream1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_data_stream1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_data_stream1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_data_stream1_request, 'query'),
   ]),
   outputSchema: z.union([indices_get_data_stream_response, indices_get_data_stream1_response]),
 };
 const INDICES_GET_DATA_STREAM_MAPPINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_stream_mappings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data stream mappings`,
   description: `Get data stream mappings.
 
@@ -8141,20 +8334,21 @@ Get mapping information for one or more data streams.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream-mappings',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'body'),
-    getLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'path'),
-    getLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_mappings_request, 'query'),
   ]),
   outputSchema: indices_get_data_stream_mappings_response,
 };
 const INDICES_GET_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_stream_options',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data stream options`,
   description: `Get data stream options.
 
@@ -8166,20 +8360,21 @@ Get the data stream options configuration of one or more data streams.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream-options',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_data_stream_options_request, 'body'),
-    getLooseObjectFromProperty(indices_get_data_stream_options_request, 'path'),
-    getLooseObjectFromProperty(indices_get_data_stream_options_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_options_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_options_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_options_request, 'query'),
   ]),
   outputSchema: indices_get_data_stream_options_response,
 };
 const INDICES_GET_DATA_STREAM_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_data_stream_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data stream settings`,
   description: `Get data stream settings.
 
@@ -8191,20 +8386,21 @@ Get setting information for one or more data streams.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_data_stream_settings_request, 'body'),
-    getLooseObjectFromProperty(indices_get_data_stream_settings_request, 'path'),
-    getLooseObjectFromProperty(indices_get_data_stream_settings_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_settings_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_settings_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_data_stream_settings_request, 'query'),
   ]),
   outputSchema: indices_get_data_stream_settings_response,
 };
 const INDICES_GET_FIELD_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_field_mapping',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get mapping definitions`,
   description: `Get mapping definitions.
 Retrieves mapping definitions for one or more fields.
@@ -8218,23 +8414,24 @@ This API is useful if you don't need a complete mapping or if an index mapping c
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-mapping',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['fields', 'index'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'include_defaults'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_field_mapping_request, 'body'),
-    getLooseObjectFromProperty(indices_get_field_mapping_request, 'path'),
-    getLooseObjectFromProperty(indices_get_field_mapping_request, 'query'),
-    getLooseObjectFromProperty(indices_get_field_mapping1_request, 'body'),
-    getLooseObjectFromProperty(indices_get_field_mapping1_request, 'path'),
-    getLooseObjectFromProperty(indices_get_field_mapping1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_field_mapping_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_field_mapping_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_field_mapping_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_field_mapping1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_field_mapping1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_field_mapping1_request, 'query'),
   ]),
   outputSchema: z.union([indices_get_field_mapping_response, indices_get_field_mapping1_response]),
 };
 const INDICES_GET_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_index_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get index templates`,
   description: `Get index templates.
 Get information about one or more index templates.
@@ -8245,17 +8442,18 @@ Get information about one or more index templates.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-index-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['local', 'flat_settings', 'master_timeout', 'include_defaults'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_index_template_request, 'body'),
-    getLooseObjectFromProperty(indices_get_index_template_request, 'path'),
-    getLooseObjectFromProperty(indices_get_index_template_request, 'query'),
-    getLooseObjectFromProperty(indices_get_index_template1_request, 'body'),
-    getLooseObjectFromProperty(indices_get_index_template1_request, 'path'),
-    getLooseObjectFromProperty(indices_get_index_template1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_index_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_index_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_index_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_index_template1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_index_template1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_index_template1_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_get_index_template_response,
@@ -8264,7 +8462,7 @@ Get information about one or more index templates.
 };
 const INDICES_GET_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_mapping',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get mapping definitions`,
   description: `Get mapping definitions.
 For data streams, the API retrieves mappings for the stream’s backing indices.
@@ -8275,6 +8473,7 @@ For data streams, the API retrieves mappings for the stream’s backing indices.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-mapping',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -8286,18 +8485,18 @@ For data streams, the API retrieves mappings for the stream’s backing indices.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_mapping_request, 'body'),
-    getLooseObjectFromProperty(indices_get_mapping_request, 'path'),
-    getLooseObjectFromProperty(indices_get_mapping_request, 'query'),
-    getLooseObjectFromProperty(indices_get_mapping1_request, 'body'),
-    getLooseObjectFromProperty(indices_get_mapping1_request, 'path'),
-    getLooseObjectFromProperty(indices_get_mapping1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_mapping_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_mapping_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_mapping_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_mapping1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_mapping1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_mapping1_request, 'query'),
   ]),
   outputSchema: z.union([indices_get_mapping_response, indices_get_mapping1_response]),
 };
 const INDICES_GET_MIGRATE_REINDEX_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_migrate_reindex_status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the migration reindexing status`,
   description: `Get the migration reindexing status.
 
@@ -8308,21 +8507,22 @@ Get the status of a migration reindex attempt for a data stream or index.
   patterns: ['_migration/reindex/{index}/_status'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-migration',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'body'),
-    getLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'path'),
-    getLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_migrate_reindex_status_request, 'query'),
   ]),
   outputSchema: indices_get_migrate_reindex_status_response,
 };
 const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_sample',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Request for a random sample of raw documents ingested into the given index or data stream.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
@@ -8330,6 +8530,7 @@ const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
   patterns: ['{index}/_sample'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -8339,8 +8540,8 @@ const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
 };
 const INDICES_GET_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_sample_configuration',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Get sampling configuration.
 Get the sampling configuration for the specified index.
 
@@ -8349,6 +8550,7 @@ Get the sampling configuration for the specified index.
   patterns: ['{index}/_sample/config'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -8358,8 +8560,8 @@ Get the sampling configuration for the specified index.
 };
 const INDICES_GET_SAMPLE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_sample_stats',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Request stats for a random sample of raw documents ingested into the given index or data stream.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
@@ -8367,6 +8569,7 @@ const INDICES_GET_SAMPLE_STATS_CONTRACT: InternalConnectorContract = {
   patterns: ['{index}/_sample/stats'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -8376,7 +8579,7 @@ const INDICES_GET_SAMPLE_STATS_CONTRACT: InternalConnectorContract = {
 };
 const INDICES_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get index settings`,
   description: `Get index settings.
 Get setting information for one or more indices.
@@ -8388,6 +8591,7 @@ For data streams, it returns setting information for the stream's backing indice
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'name'],
     urlParams: [
       'allow_no_indices',
@@ -8401,18 +8605,18 @@ For data streams, it returns setting information for the stream's backing indice
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_settings_request, 'body'),
-    getLooseObjectFromProperty(indices_get_settings_request, 'path'),
-    getLooseObjectFromProperty(indices_get_settings_request, 'query'),
-    getLooseObjectFromProperty(indices_get_settings1_request, 'body'),
-    getLooseObjectFromProperty(indices_get_settings1_request, 'path'),
-    getLooseObjectFromProperty(indices_get_settings1_request, 'query'),
-    getLooseObjectFromProperty(indices_get_settings2_request, 'body'),
-    getLooseObjectFromProperty(indices_get_settings2_request, 'path'),
-    getLooseObjectFromProperty(indices_get_settings2_request, 'query'),
-    getLooseObjectFromProperty(indices_get_settings3_request, 'body'),
-    getLooseObjectFromProperty(indices_get_settings3_request, 'path'),
-    getLooseObjectFromProperty(indices_get_settings3_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_settings_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_settings_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_settings_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_settings1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_settings1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_settings1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_settings2_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_settings2_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_settings2_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_settings3_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_settings3_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_settings3_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_get_settings_response,
@@ -8423,7 +8627,7 @@ For data streams, it returns setting information for the stream's backing indice
 };
 const INDICES_GET_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.get_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get legacy index templates`,
   description: `Get legacy index templates.
 Get information about one or more index templates.
@@ -8436,23 +8640,24 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['flat_settings', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_get_template_request, 'body'),
-    getLooseObjectFromProperty(indices_get_template_request, 'path'),
-    getLooseObjectFromProperty(indices_get_template_request, 'query'),
-    getLooseObjectFromProperty(indices_get_template1_request, 'body'),
-    getLooseObjectFromProperty(indices_get_template1_request, 'path'),
-    getLooseObjectFromProperty(indices_get_template1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_get_template1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_get_template1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_get_template1_request, 'query'),
   ]),
   outputSchema: z.union([indices_get_template_response, indices_get_template1_response]),
 };
 const INDICES_MIGRATE_REINDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.migrate_reindex',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Reindex legacy backing indices`,
   description: `Reindex legacy backing indices.
 
@@ -8466,20 +8671,21 @@ The persistent task ID is returned immediately and the reindexing work is comple
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-migrate-reindex',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['mode', 'source'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_migrate_reindex_request, 'body'),
-    getLooseObjectFromProperty(indices_migrate_reindex_request, 'path'),
-    getLooseObjectFromProperty(indices_migrate_reindex_request, 'query'),
+    getZodLooseObjectFromProperty(indices_migrate_reindex_request, 'body'),
+    getZodLooseObjectFromProperty(indices_migrate_reindex_request, 'path'),
+    getZodLooseObjectFromProperty(indices_migrate_reindex_request, 'query'),
   ]),
   outputSchema: indices_migrate_reindex_response,
 };
 const INDICES_MIGRATE_TO_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.migrate_to_data_stream',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Convert an index alias to a data stream`,
   description: `Convert an index alias to a data stream.
 Converts an index alias to a data stream.
@@ -8499,20 +8705,21 @@ The write index for the alias becomes the write index for the stream.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-migrate-to-data-stream',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'body'),
-    getLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'path'),
-    getLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'query'),
+    getZodLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'body'),
+    getZodLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'path'),
+    getZodLooseObjectFromProperty(indices_migrate_to_data_stream_request, 'query'),
   ]),
   outputSchema: indices_migrate_to_data_stream_response,
 };
 const INDICES_MODIFY_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.modify_data_stream',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update data streams`,
   description: `Update data streams.
 Performs one or more data stream modification actions in a single atomic operation.
@@ -8523,20 +8730,21 @@ Performs one or more data stream modification actions in a single atomic operati
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-modify-data-stream',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['actions'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_modify_data_stream_request, 'body'),
-    getLooseObjectFromProperty(indices_modify_data_stream_request, 'path'),
-    getLooseObjectFromProperty(indices_modify_data_stream_request, 'query'),
+    getZodLooseObjectFromProperty(indices_modify_data_stream_request, 'body'),
+    getZodLooseObjectFromProperty(indices_modify_data_stream_request, 'path'),
+    getZodLooseObjectFromProperty(indices_modify_data_stream_request, 'query'),
   ]),
   outputSchema: indices_modify_data_stream_response,
 };
 const INDICES_OPEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.open',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Open a closed index`,
   description: `Open a closed index.
 For data streams, the API opens any closed backing indices.
@@ -8568,6 +8776,7 @@ Because opening or closing an index allocates its shards, the \`wait_for_active_
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-open',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -8580,15 +8789,15 @@ Because opening or closing an index allocates its shards, the \`wait_for_active_
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_open_request, 'body'),
-    getLooseObjectFromProperty(indices_open_request, 'path'),
-    getLooseObjectFromProperty(indices_open_request, 'query'),
+    getZodLooseObjectFromProperty(indices_open_request, 'body'),
+    getZodLooseObjectFromProperty(indices_open_request, 'path'),
+    getZodLooseObjectFromProperty(indices_open_request, 'query'),
   ]),
   outputSchema: indices_open_response,
 };
 const INDICES_PROMOTE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.promote_data_stream',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Promote a data stream`,
   description: `Promote a data stream.
 Promote a data stream from a replicated data stream managed by cross-cluster replication (CCR) to a regular data stream.
@@ -8608,20 +8817,21 @@ This will affect the lifecycle management of the data stream and interfere with 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-promote-data-stream',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_promote_data_stream_request, 'body'),
-    getLooseObjectFromProperty(indices_promote_data_stream_request, 'path'),
-    getLooseObjectFromProperty(indices_promote_data_stream_request, 'query'),
+    getZodLooseObjectFromProperty(indices_promote_data_stream_request, 'body'),
+    getZodLooseObjectFromProperty(indices_promote_data_stream_request, 'path'),
+    getZodLooseObjectFromProperty(indices_promote_data_stream_request, 'query'),
   ]),
   outputSchema: indices_promote_data_stream_response,
 };
 const INDICES_PUT_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_alias',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update an alias`,
   description: `Create or update an alias.
 Adds a data stream or index to an alias.
@@ -8632,23 +8842,24 @@ Adds a data stream or index to an alias.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-alias',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'name'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['filter', 'index_routing', 'is_write_index', 'routing', 'search_routing'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_put_alias_request, 'body'),
-    getLooseObjectFromProperty(indices_put_alias_request, 'path'),
-    getLooseObjectFromProperty(indices_put_alias_request, 'query'),
-    getLooseObjectFromProperty(indices_put_alias1_request, 'body'),
-    getLooseObjectFromProperty(indices_put_alias1_request, 'path'),
-    getLooseObjectFromProperty(indices_put_alias1_request, 'query'),
-    getLooseObjectFromProperty(indices_put_alias2_request, 'body'),
-    getLooseObjectFromProperty(indices_put_alias2_request, 'path'),
-    getLooseObjectFromProperty(indices_put_alias2_request, 'query'),
-    getLooseObjectFromProperty(indices_put_alias3_request, 'body'),
-    getLooseObjectFromProperty(indices_put_alias3_request, 'path'),
-    getLooseObjectFromProperty(indices_put_alias3_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_alias_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_alias_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_alias_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_alias1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_alias1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_alias1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_alias2_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_alias2_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_alias2_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_alias3_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_alias3_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_alias3_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_put_alias_response,
@@ -8659,7 +8870,7 @@ Adds a data stream or index to an alias.
 };
 const INDICES_PUT_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_data_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update data stream lifecycles`,
   description: `Update data stream lifecycles.
 Update the data stream lifecycle of the specified data streams.
@@ -8670,20 +8881,21 @@ Update the data stream lifecycle of the specified data streams.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: ['data_retention', 'downsampling', 'enabled'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_put_data_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(indices_put_data_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(indices_put_data_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_data_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_data_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_data_lifecycle_request, 'query'),
   ]),
   outputSchema: indices_put_data_lifecycle_response,
 };
 const INDICES_PUT_DATA_STREAM_MAPPINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_data_stream_mappings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update data stream mappings`,
   description: `Update data stream mappings.
 
@@ -8697,20 +8909,39 @@ that are created during rollover after this API is called. No indices are change
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-mappings',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['dry_run', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    bodyParams: [
+      'all_field',
+      'date_detection',
+      'dynamic',
+      'dynamic_date_formats',
+      'dynamic_templates',
+      '_field_names',
+      'index_field',
+      '_meta',
+      'numeric_detection',
+      'properties',
+      '_routing',
+      '_size',
+      '_source',
+      'runtime',
+      'enabled',
+      'subobjects',
+      '_data_stream_timestamp',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'body'),
-    getLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'path'),
-    getLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_data_stream_mappings_request, 'query'),
   ]),
   outputSchema: indices_put_data_stream_mappings_response,
 };
 const INDICES_PUT_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_data_stream_options',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update data stream options`,
   description: `Update data stream options.
 Update the data stream options of the specified data streams.
@@ -8721,20 +8952,21 @@ Update the data stream options of the specified data streams.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-options',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: ['failure_store'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_put_data_stream_options_request, 'body'),
-    getLooseObjectFromProperty(indices_put_data_stream_options_request, 'path'),
-    getLooseObjectFromProperty(indices_put_data_stream_options_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_data_stream_options_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_data_stream_options_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_data_stream_options_request, 'query'),
   ]),
   outputSchema: indices_put_data_stream_options_response,
 };
 const INDICES_PUT_DATA_STREAM_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_data_stream_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update data stream settings`,
   description: `Update data stream settings.
 
@@ -8749,20 +8981,78 @@ backing indices. Otherwise, it will be applied when the data stream is next roll
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['dry_run', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    bodyParams: [
+      'index',
+      'mode',
+      'routing_path',
+      'soft_deletes',
+      'sort',
+      'number_of_shards',
+      'number_of_replicas',
+      'number_of_routing_shards',
+      'check_on_startup',
+      'codec',
+      'routing_partition_size',
+      'load_fixed_bitset_filters_eagerly',
+      'hidden',
+      'auto_expand_replicas',
+      'merge',
+      'search',
+      'refresh_interval',
+      'max_result_window',
+      'max_inner_result_window',
+      'max_rescore_window',
+      'max_docvalue_fields_search',
+      'max_script_fields',
+      'max_ngram_diff',
+      'max_shingle_diff',
+      'blocks',
+      'max_refresh_listeners',
+      'analyze',
+      'highlight',
+      'max_terms_count',
+      'max_regex_length',
+      'routing',
+      'gc_deletes',
+      'default_pipeline',
+      'final_pipeline',
+      'lifecycle',
+      'provided_name',
+      'creation_date',
+      'creation_date_string',
+      'uuid',
+      'version',
+      'verified_before_close',
+      'format',
+      'max_slices_per_scroll',
+      'translog',
+      'query_string',
+      'priority',
+      'top_metrics_max_size',
+      'analysis',
+      'settings',
+      'time_series',
+      'queries',
+      'similarity',
+      'mapping',
+      'indexing.slowlog',
+      'indexing_pressure',
+      'store',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_put_data_stream_settings_request, 'body'),
-    getLooseObjectFromProperty(indices_put_data_stream_settings_request, 'path'),
-    getLooseObjectFromProperty(indices_put_data_stream_settings_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_data_stream_settings_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_data_stream_settings_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_data_stream_settings_request, 'query'),
   ]),
   outputSchema: indices_put_data_stream_settings_response,
 };
 const INDICES_PUT_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_index_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update an index template`,
   description: `Create or update an index template.
 Index templates define settings, mappings, and aliases that can be applied automatically to new indices.
@@ -8799,6 +9089,7 @@ If an entry already exists with the same key, then it is overwritten by the new 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-index-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['create', 'master_timeout', 'cause'],
     bodyParams: [
@@ -8815,12 +9106,12 @@ If an entry already exists with the same key, then it is overwritten by the new 
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_put_index_template_request, 'body'),
-    getLooseObjectFromProperty(indices_put_index_template_request, 'path'),
-    getLooseObjectFromProperty(indices_put_index_template_request, 'query'),
-    getLooseObjectFromProperty(indices_put_index_template1_request, 'body'),
-    getLooseObjectFromProperty(indices_put_index_template1_request, 'path'),
-    getLooseObjectFromProperty(indices_put_index_template1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_index_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_index_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_index_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_index_template1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_index_template1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_index_template1_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_put_index_template_response,
@@ -8829,7 +9120,7 @@ If an entry already exists with the same key, then it is overwritten by the new 
 };
 const INDICES_PUT_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_mapping',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update field mappings`,
   description: `Update field mappings.
 Add new fields to an existing data stream or index.
@@ -8851,6 +9142,7 @@ Learn how to use the update mapping API with practical examples in the [Update m
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-mapping',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -8875,19 +9167,19 @@ Learn how to use the update mapping API with practical examples in the [Update m
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_put_mapping_request, 'body'),
-    getLooseObjectFromProperty(indices_put_mapping_request, 'path'),
-    getLooseObjectFromProperty(indices_put_mapping_request, 'query'),
-    getLooseObjectFromProperty(indices_put_mapping1_request, 'body'),
-    getLooseObjectFromProperty(indices_put_mapping1_request, 'path'),
-    getLooseObjectFromProperty(indices_put_mapping1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_mapping_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_mapping_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_mapping_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_mapping1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_mapping1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_mapping1_request, 'query'),
   ]),
   outputSchema: z.union([indices_put_mapping_response, indices_put_mapping1_response]),
 };
 const INDICES_PUT_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_sample_configuration',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Create or update sampling configuration.
 Create or update the sampling configuration for the specified index.
 
@@ -8896,6 +9188,7 @@ Create or update the sampling configuration for the specified index.
   patterns: ['{index}/_sample/config'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -8905,7 +9198,7 @@ Create or update the sampling configuration for the specified index.
 };
 const INDICES_PUT_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update index settings`,
   description: `Update index settings.
 Changes dynamic index settings in real time.
@@ -8969,6 +9262,7 @@ Refer to [updating analyzers on existing indices](https://www.elastic.co/docs/ma
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -8980,21 +9274,78 @@ Refer to [updating analyzers on existing indices](https://www.elastic.co/docs/ma
       'reopen',
       'timeout',
     ],
-    bodyParams: [],
+    bodyParams: [
+      'index',
+      'mode',
+      'routing_path',
+      'soft_deletes',
+      'sort',
+      'number_of_shards',
+      'number_of_replicas',
+      'number_of_routing_shards',
+      'check_on_startup',
+      'codec',
+      'routing_partition_size',
+      'load_fixed_bitset_filters_eagerly',
+      'hidden',
+      'auto_expand_replicas',
+      'merge',
+      'search',
+      'refresh_interval',
+      'max_result_window',
+      'max_inner_result_window',
+      'max_rescore_window',
+      'max_docvalue_fields_search',
+      'max_script_fields',
+      'max_ngram_diff',
+      'max_shingle_diff',
+      'blocks',
+      'max_refresh_listeners',
+      'analyze',
+      'highlight',
+      'max_terms_count',
+      'max_regex_length',
+      'routing',
+      'gc_deletes',
+      'default_pipeline',
+      'final_pipeline',
+      'lifecycle',
+      'provided_name',
+      'creation_date',
+      'creation_date_string',
+      'uuid',
+      'version',
+      'verified_before_close',
+      'format',
+      'max_slices_per_scroll',
+      'translog',
+      'query_string',
+      'priority',
+      'top_metrics_max_size',
+      'analysis',
+      'settings',
+      'time_series',
+      'queries',
+      'similarity',
+      'mapping',
+      'indexing.slowlog',
+      'indexing_pressure',
+      'store',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_put_settings_request, 'body'),
-    getLooseObjectFromProperty(indices_put_settings_request, 'path'),
-    getLooseObjectFromProperty(indices_put_settings_request, 'query'),
-    getLooseObjectFromProperty(indices_put_settings1_request, 'body'),
-    getLooseObjectFromProperty(indices_put_settings1_request, 'path'),
-    getLooseObjectFromProperty(indices_put_settings1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_settings_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_settings_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_settings_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_settings1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_settings1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_settings1_request, 'query'),
   ]),
   outputSchema: z.union([indices_put_settings_response, indices_put_settings1_response]),
 };
 const INDICES_PUT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.put_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a legacy index template`,
   description: `Create or update a legacy index template.
 Index templates define settings, mappings, and aliases that can be applied automatically to new indices.
@@ -9024,23 +9375,24 @@ NOTE: Multiple matching templates with the same order value will result in a non
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['create', 'master_timeout', 'order', 'cause'],
     bodyParams: ['aliases', 'index_patterns', 'mappings', 'order', 'settings', 'version'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_put_template_request, 'body'),
-    getLooseObjectFromProperty(indices_put_template_request, 'path'),
-    getLooseObjectFromProperty(indices_put_template_request, 'query'),
-    getLooseObjectFromProperty(indices_put_template1_request, 'body'),
-    getLooseObjectFromProperty(indices_put_template1_request, 'path'),
-    getLooseObjectFromProperty(indices_put_template1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_put_template1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_put_template1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_put_template1_request, 'query'),
   ]),
   outputSchema: z.union([indices_put_template_response, indices_put_template1_response]),
 };
 const INDICES_RECOVERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.recovery',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get index recovery information`,
   description: `Get index recovery information.
 Get information about ongoing and completed shard recoveries for one or more indices.
@@ -9072,6 +9424,7 @@ This means that if a shard copy completes a recovery and then Elasticsearch relo
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-recovery',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'active_only',
@@ -9083,18 +9436,18 @@ This means that if a shard copy completes a recovery and then Elasticsearch relo
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_recovery_request, 'body'),
-    getLooseObjectFromProperty(indices_recovery_request, 'path'),
-    getLooseObjectFromProperty(indices_recovery_request, 'query'),
-    getLooseObjectFromProperty(indices_recovery1_request, 'body'),
-    getLooseObjectFromProperty(indices_recovery1_request, 'path'),
-    getLooseObjectFromProperty(indices_recovery1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_recovery_request, 'body'),
+    getZodLooseObjectFromProperty(indices_recovery_request, 'path'),
+    getZodLooseObjectFromProperty(indices_recovery_request, 'query'),
+    getZodLooseObjectFromProperty(indices_recovery1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_recovery1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_recovery1_request, 'query'),
   ]),
   outputSchema: z.union([indices_recovery_response, indices_recovery1_response]),
 };
 const INDICES_REFRESH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.refresh',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Refresh an index`,
   description: `Refresh an index.
 A refresh makes recent operations performed on one or more indices available for search.
@@ -9119,23 +9472,24 @@ This option ensures the indexing operation waits for a periodic refresh before r
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-refresh',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_refresh_request, 'body'),
-    getLooseObjectFromProperty(indices_refresh_request, 'path'),
-    getLooseObjectFromProperty(indices_refresh_request, 'query'),
-    getLooseObjectFromProperty(indices_refresh1_request, 'body'),
-    getLooseObjectFromProperty(indices_refresh1_request, 'path'),
-    getLooseObjectFromProperty(indices_refresh1_request, 'query'),
-    getLooseObjectFromProperty(indices_refresh2_request, 'body'),
-    getLooseObjectFromProperty(indices_refresh2_request, 'path'),
-    getLooseObjectFromProperty(indices_refresh2_request, 'query'),
-    getLooseObjectFromProperty(indices_refresh3_request, 'body'),
-    getLooseObjectFromProperty(indices_refresh3_request, 'path'),
-    getLooseObjectFromProperty(indices_refresh3_request, 'query'),
+    getZodLooseObjectFromProperty(indices_refresh_request, 'body'),
+    getZodLooseObjectFromProperty(indices_refresh_request, 'path'),
+    getZodLooseObjectFromProperty(indices_refresh_request, 'query'),
+    getZodLooseObjectFromProperty(indices_refresh1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_refresh1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_refresh1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_refresh2_request, 'body'),
+    getZodLooseObjectFromProperty(indices_refresh2_request, 'path'),
+    getZodLooseObjectFromProperty(indices_refresh2_request, 'query'),
+    getZodLooseObjectFromProperty(indices_refresh3_request, 'body'),
+    getZodLooseObjectFromProperty(indices_refresh3_request, 'path'),
+    getZodLooseObjectFromProperty(indices_refresh3_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_refresh_response,
@@ -9146,7 +9500,7 @@ This option ensures the indexing operation waits for a periodic refresh before r
 };
 const INDICES_RELOAD_SEARCH_ANALYZERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.reload_search_analyzers',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Reload search analyzers`,
   description: `Reload search analyzers.
 Reload an index's search analyzers and their resources.
@@ -9169,17 +9523,18 @@ This ensures the synonym file is updated everywhere in the cluster in case shard
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-reload-search-analyzers',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'resource'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_reload_search_analyzers_request, 'body'),
-    getLooseObjectFromProperty(indices_reload_search_analyzers_request, 'path'),
-    getLooseObjectFromProperty(indices_reload_search_analyzers_request, 'query'),
-    getLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'body'),
-    getLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'path'),
-    getLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_reload_search_analyzers_request, 'body'),
+    getZodLooseObjectFromProperty(indices_reload_search_analyzers_request, 'path'),
+    getZodLooseObjectFromProperty(indices_reload_search_analyzers_request, 'query'),
+    getZodLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_reload_search_analyzers1_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_reload_search_analyzers_response,
@@ -9188,7 +9543,7 @@ This ensures the synonym file is updated everywhere in the cluster in case shard
 };
 const INDICES_REMOVE_BLOCK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.remove_block',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Remove an index block`,
   description: `Remove an index block.
 
@@ -9201,6 +9556,7 @@ Index blocks limit the operations allowed on an index by blocking specific opera
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-remove-block',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'block'],
     urlParams: [
       'allow_no_indices',
@@ -9212,15 +9568,15 @@ Index blocks limit the operations allowed on an index by blocking specific opera
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_remove_block_request, 'body'),
-    getLooseObjectFromProperty(indices_remove_block_request, 'path'),
-    getLooseObjectFromProperty(indices_remove_block_request, 'query'),
+    getZodLooseObjectFromProperty(indices_remove_block_request, 'body'),
+    getZodLooseObjectFromProperty(indices_remove_block_request, 'path'),
+    getZodLooseObjectFromProperty(indices_remove_block_request, 'query'),
   ]),
   outputSchema: indices_remove_block_response,
 };
 const INDICES_RESOLVE_CLUSTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.resolve_cluster',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Resolve the cluster`,
   description: `Resolve the cluster.
 
@@ -9275,6 +9631,7 @@ If a connection was (re-)established, this will also cause the \`remote/info\` e
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-cluster',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [
       'allow_no_indices',
@@ -9286,18 +9643,18 @@ If a connection was (re-)established, this will also cause the \`remote/info\` e
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_resolve_cluster_request, 'body'),
-    getLooseObjectFromProperty(indices_resolve_cluster_request, 'path'),
-    getLooseObjectFromProperty(indices_resolve_cluster_request, 'query'),
-    getLooseObjectFromProperty(indices_resolve_cluster1_request, 'body'),
-    getLooseObjectFromProperty(indices_resolve_cluster1_request, 'path'),
-    getLooseObjectFromProperty(indices_resolve_cluster1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_resolve_cluster_request, 'body'),
+    getZodLooseObjectFromProperty(indices_resolve_cluster_request, 'path'),
+    getZodLooseObjectFromProperty(indices_resolve_cluster_request, 'query'),
+    getZodLooseObjectFromProperty(indices_resolve_cluster1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_resolve_cluster1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_resolve_cluster1_request, 'query'),
   ]),
   outputSchema: z.union([indices_resolve_cluster_response, indices_resolve_cluster1_response]),
 };
 const INDICES_RESOLVE_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.resolve_index',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Resolve indices`,
   description: `Resolve indices.
 Resolve the names and/or index patterns for indices, aliases, and data streams.
@@ -9309,20 +9666,21 @@ Multiple patterns and remote clusters are supported.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-index',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['expand_wildcards', 'ignore_unavailable', 'allow_no_indices', 'mode'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_resolve_index_request, 'body'),
-    getLooseObjectFromProperty(indices_resolve_index_request, 'path'),
-    getLooseObjectFromProperty(indices_resolve_index_request, 'query'),
+    getZodLooseObjectFromProperty(indices_resolve_index_request, 'body'),
+    getZodLooseObjectFromProperty(indices_resolve_index_request, 'path'),
+    getZodLooseObjectFromProperty(indices_resolve_index_request, 'query'),
   ]),
   outputSchema: indices_resolve_index_response,
 };
 const INDICES_ROLLOVER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.rollover',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Roll over to a new index`,
   description: `Roll over to a new index.
 TIP: We recommend using the index lifecycle rollover action to automate rollovers. However, Serverless does not support Index Lifecycle Management (ILM), so don't use this approach in the Serverless context.
@@ -9369,23 +9727,24 @@ If you roll over the alias on May 7, 2099, the new index's name is \`my-index-20
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-rollover',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['alias', 'new_index'],
     urlParams: ['dry_run', 'master_timeout', 'timeout', 'wait_for_active_shards', 'lazy'],
     bodyParams: ['aliases', 'conditions', 'mappings', 'settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_rollover_request, 'body'),
-    getLooseObjectFromProperty(indices_rollover_request, 'path'),
-    getLooseObjectFromProperty(indices_rollover_request, 'query'),
-    getLooseObjectFromProperty(indices_rollover1_request, 'body'),
-    getLooseObjectFromProperty(indices_rollover1_request, 'path'),
-    getLooseObjectFromProperty(indices_rollover1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_rollover_request, 'body'),
+    getZodLooseObjectFromProperty(indices_rollover_request, 'path'),
+    getZodLooseObjectFromProperty(indices_rollover_request, 'query'),
+    getZodLooseObjectFromProperty(indices_rollover1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_rollover1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_rollover1_request, 'query'),
   ]),
   outputSchema: z.union([indices_rollover_response, indices_rollover1_response]),
 };
 const INDICES_SEGMENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.segments',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get index segments`,
   description: `Get index segments.
 Get low-level information about the Lucene segments in index shards.
@@ -9397,23 +9756,24 @@ For data streams, the API returns information about the stream's backing indices
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-segments',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_segments_request, 'body'),
-    getLooseObjectFromProperty(indices_segments_request, 'path'),
-    getLooseObjectFromProperty(indices_segments_request, 'query'),
-    getLooseObjectFromProperty(indices_segments1_request, 'body'),
-    getLooseObjectFromProperty(indices_segments1_request, 'path'),
-    getLooseObjectFromProperty(indices_segments1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_segments_request, 'body'),
+    getZodLooseObjectFromProperty(indices_segments_request, 'path'),
+    getZodLooseObjectFromProperty(indices_segments_request, 'query'),
+    getZodLooseObjectFromProperty(indices_segments1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_segments1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_segments1_request, 'query'),
   ]),
   outputSchema: z.union([indices_segments_response, indices_segments1_response]),
 };
 const INDICES_SHARD_STORES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.shard_stores',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get index shard stores`,
   description: `Get index shard stores.
 Get store information about replica shards in one or more indices.
@@ -9434,23 +9794,24 @@ By default, the API returns store information only for primary shards that are u
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-shard-stores',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'status'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_shard_stores_request, 'body'),
-    getLooseObjectFromProperty(indices_shard_stores_request, 'path'),
-    getLooseObjectFromProperty(indices_shard_stores_request, 'query'),
-    getLooseObjectFromProperty(indices_shard_stores1_request, 'body'),
-    getLooseObjectFromProperty(indices_shard_stores1_request, 'path'),
-    getLooseObjectFromProperty(indices_shard_stores1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_shard_stores_request, 'body'),
+    getZodLooseObjectFromProperty(indices_shard_stores_request, 'path'),
+    getZodLooseObjectFromProperty(indices_shard_stores_request, 'query'),
+    getZodLooseObjectFromProperty(indices_shard_stores1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_shard_stores1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_shard_stores1_request, 'query'),
   ]),
   outputSchema: z.union([indices_shard_stores_response, indices_shard_stores1_response]),
 };
 const INDICES_SHRINK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.shrink',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Shrink an index`,
   description: `Shrink an index.
 Shrink an index into a new index with fewer primary shards.
@@ -9491,23 +9852,24 @@ IMPORTANT: Indices can only be shrunk if they satisfy the following requirements
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-shrink',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'target'],
     urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
     bodyParams: ['aliases', 'settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_shrink_request, 'body'),
-    getLooseObjectFromProperty(indices_shrink_request, 'path'),
-    getLooseObjectFromProperty(indices_shrink_request, 'query'),
-    getLooseObjectFromProperty(indices_shrink1_request, 'body'),
-    getLooseObjectFromProperty(indices_shrink1_request, 'path'),
-    getLooseObjectFromProperty(indices_shrink1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_shrink_request, 'body'),
+    getZodLooseObjectFromProperty(indices_shrink_request, 'path'),
+    getZodLooseObjectFromProperty(indices_shrink_request, 'query'),
+    getZodLooseObjectFromProperty(indices_shrink1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_shrink1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_shrink1_request, 'query'),
   ]),
   outputSchema: z.union([indices_shrink_response, indices_shrink1_response]),
 };
 const INDICES_SIMULATE_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.simulate_index_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Simulate an index`,
   description: `Simulate an index.
 Get the index configuration that would be applied to the specified index from an existing index template.
@@ -9518,20 +9880,36 @@ Get the index configuration that would be applied to the specified index from an
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-simulate-index-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['create', 'cause', 'master_timeout', 'include_defaults'],
-    bodyParams: [],
+    bodyParams: [
+      'index_patterns',
+      'composed_of',
+      'template',
+      'version',
+      'priority',
+      '_meta',
+      'allow_auto_create',
+      'data_stream',
+      'deprecated',
+      'ignore_missing_component_templates',
+      'created_date',
+      'created_date_millis',
+      'modified_date',
+      'modified_date_millis',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_simulate_index_template_request, 'body'),
-    getLooseObjectFromProperty(indices_simulate_index_template_request, 'path'),
-    getLooseObjectFromProperty(indices_simulate_index_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_simulate_index_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_simulate_index_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_simulate_index_template_request, 'query'),
   ]),
   outputSchema: indices_simulate_index_template_response,
 };
 const INDICES_SIMULATE_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.simulate_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Simulate an index template`,
   description: `Simulate an index template.
 Get the index configuration that would be applied by a particular index template.
@@ -9542,6 +9920,7 @@ Get the index configuration that would be applied by a particular index template
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-simulate-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['create', 'cause', 'master_timeout', 'include_defaults'],
     bodyParams: [
@@ -9558,18 +9937,18 @@ Get the index configuration that would be applied by a particular index template
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_simulate_template_request, 'body'),
-    getLooseObjectFromProperty(indices_simulate_template_request, 'path'),
-    getLooseObjectFromProperty(indices_simulate_template_request, 'query'),
-    getLooseObjectFromProperty(indices_simulate_template1_request, 'body'),
-    getLooseObjectFromProperty(indices_simulate_template1_request, 'path'),
-    getLooseObjectFromProperty(indices_simulate_template1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_simulate_template_request, 'body'),
+    getZodLooseObjectFromProperty(indices_simulate_template_request, 'path'),
+    getZodLooseObjectFromProperty(indices_simulate_template_request, 'query'),
+    getZodLooseObjectFromProperty(indices_simulate_template1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_simulate_template1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_simulate_template1_request, 'query'),
   ]),
   outputSchema: z.union([indices_simulate_template_response, indices_simulate_template1_response]),
 };
 const INDICES_SPLIT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.split',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Split an index`,
   description: `Split an index.
 Split an index into a new index with more primary shards.
@@ -9611,23 +9990,24 @@ IMPORTANT: Indices can only be split if they satisfy the following requirements:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-split',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'target'],
     urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
     bodyParams: ['aliases', 'settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_split_request, 'body'),
-    getLooseObjectFromProperty(indices_split_request, 'path'),
-    getLooseObjectFromProperty(indices_split_request, 'query'),
-    getLooseObjectFromProperty(indices_split1_request, 'body'),
-    getLooseObjectFromProperty(indices_split1_request, 'path'),
-    getLooseObjectFromProperty(indices_split1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_split_request, 'body'),
+    getZodLooseObjectFromProperty(indices_split_request, 'path'),
+    getZodLooseObjectFromProperty(indices_split_request, 'query'),
+    getZodLooseObjectFromProperty(indices_split1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_split1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_split1_request, 'query'),
   ]),
   outputSchema: z.union([indices_split_response, indices_split1_response]),
 };
 const INDICES_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get index statistics`,
   description: `Get index statistics.
 For data streams, the API retrieves statistics for the stream's backing indices.
@@ -9647,6 +10027,7 @@ Although the shard is no longer part of the node, that node retains any node-lev
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['metric', 'index'],
     urlParams: [
       'completion_fields',
@@ -9662,18 +10043,18 @@ Although the shard is no longer part of the node, that node retains any node-lev
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_stats_request, 'body'),
-    getLooseObjectFromProperty(indices_stats_request, 'path'),
-    getLooseObjectFromProperty(indices_stats_request, 'query'),
-    getLooseObjectFromProperty(indices_stats1_request, 'body'),
-    getLooseObjectFromProperty(indices_stats1_request, 'path'),
-    getLooseObjectFromProperty(indices_stats1_request, 'query'),
-    getLooseObjectFromProperty(indices_stats2_request, 'body'),
-    getLooseObjectFromProperty(indices_stats2_request, 'path'),
-    getLooseObjectFromProperty(indices_stats2_request, 'query'),
-    getLooseObjectFromProperty(indices_stats3_request, 'body'),
-    getLooseObjectFromProperty(indices_stats3_request, 'path'),
-    getLooseObjectFromProperty(indices_stats3_request, 'query'),
+    getZodLooseObjectFromProperty(indices_stats_request, 'body'),
+    getZodLooseObjectFromProperty(indices_stats_request, 'path'),
+    getZodLooseObjectFromProperty(indices_stats_request, 'query'),
+    getZodLooseObjectFromProperty(indices_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_stats2_request, 'body'),
+    getZodLooseObjectFromProperty(indices_stats2_request, 'path'),
+    getZodLooseObjectFromProperty(indices_stats2_request, 'query'),
+    getZodLooseObjectFromProperty(indices_stats3_request, 'body'),
+    getZodLooseObjectFromProperty(indices_stats3_request, 'path'),
+    getZodLooseObjectFromProperty(indices_stats3_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_stats_response,
@@ -9684,7 +10065,7 @@ Although the shard is no longer part of the node, that node retains any node-lev
 };
 const INDICES_UPDATE_ALIASES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.update_aliases',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update an alias`,
   description: `Create or update an alias.
 Adds a data stream or index to an alias.
@@ -9695,20 +10076,21 @@ Adds a data stream or index to an alias.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-update-aliases',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['actions'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_update_aliases_request, 'body'),
-    getLooseObjectFromProperty(indices_update_aliases_request, 'path'),
-    getLooseObjectFromProperty(indices_update_aliases_request, 'query'),
+    getZodLooseObjectFromProperty(indices_update_aliases_request, 'body'),
+    getZodLooseObjectFromProperty(indices_update_aliases_request, 'path'),
+    getZodLooseObjectFromProperty(indices_update_aliases_request, 'query'),
   ]),
   outputSchema: indices_update_aliases_response,
 };
 const INDICES_VALIDATE_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.indices.validate_query',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Validate a query`,
   description: `Validate a query.
 Validates a query without running it.
@@ -9719,6 +10101,7 @@ Validates a query without running it.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-validate-query',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -9737,18 +10120,18 @@ Validates a query without running it.
     bodyParams: ['query'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(indices_validate_query_request, 'body'),
-    getLooseObjectFromProperty(indices_validate_query_request, 'path'),
-    getLooseObjectFromProperty(indices_validate_query_request, 'query'),
-    getLooseObjectFromProperty(indices_validate_query1_request, 'body'),
-    getLooseObjectFromProperty(indices_validate_query1_request, 'path'),
-    getLooseObjectFromProperty(indices_validate_query1_request, 'query'),
-    getLooseObjectFromProperty(indices_validate_query2_request, 'body'),
-    getLooseObjectFromProperty(indices_validate_query2_request, 'path'),
-    getLooseObjectFromProperty(indices_validate_query2_request, 'query'),
-    getLooseObjectFromProperty(indices_validate_query3_request, 'body'),
-    getLooseObjectFromProperty(indices_validate_query3_request, 'path'),
-    getLooseObjectFromProperty(indices_validate_query3_request, 'query'),
+    getZodLooseObjectFromProperty(indices_validate_query_request, 'body'),
+    getZodLooseObjectFromProperty(indices_validate_query_request, 'path'),
+    getZodLooseObjectFromProperty(indices_validate_query_request, 'query'),
+    getZodLooseObjectFromProperty(indices_validate_query1_request, 'body'),
+    getZodLooseObjectFromProperty(indices_validate_query1_request, 'path'),
+    getZodLooseObjectFromProperty(indices_validate_query1_request, 'query'),
+    getZodLooseObjectFromProperty(indices_validate_query2_request, 'body'),
+    getZodLooseObjectFromProperty(indices_validate_query2_request, 'path'),
+    getZodLooseObjectFromProperty(indices_validate_query2_request, 'query'),
+    getZodLooseObjectFromProperty(indices_validate_query3_request, 'body'),
+    getZodLooseObjectFromProperty(indices_validate_query3_request, 'path'),
+    getZodLooseObjectFromProperty(indices_validate_query3_request, 'query'),
   ]),
   outputSchema: z.union([
     indices_validate_query_response,
@@ -9759,7 +10142,7 @@ Validates a query without running it.
 };
 const INFERENCE_CHAT_COMPLETION_UNIFIED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.chat_completion_unified',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Perform chat completion inference on the service
 `,
   description: `Perform chat completion inference on the service
@@ -9778,20 +10161,30 @@ If you use the \`openai\`, \`hugging_face\` or the \`elastic\` service, use the 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-unified-inference',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: [
+      'messages',
+      'model',
+      'max_completion_tokens',
+      'stop',
+      'temperature',
+      'tool_choice',
+      'tools',
+      'top_p',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_chat_completion_unified_request, 'body'),
-    getLooseObjectFromProperty(inference_chat_completion_unified_request, 'path'),
-    getLooseObjectFromProperty(inference_chat_completion_unified_request, 'query'),
+    getZodLooseObjectFromProperty(inference_chat_completion_unified_request, 'body'),
+    getZodLooseObjectFromProperty(inference_chat_completion_unified_request, 'path'),
+    getZodLooseObjectFromProperty(inference_chat_completion_unified_request, 'query'),
   ]),
   outputSchema: inference_chat_completion_unified_response,
 };
 const INFERENCE_COMPLETION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.completion',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Perform completion inference on the service
 `,
   description: `Perform completion inference on the service
@@ -9808,20 +10201,21 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['input', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_completion_request, 'body'),
-    getLooseObjectFromProperty(inference_completion_request, 'path'),
-    getLooseObjectFromProperty(inference_completion_request, 'query'),
+    getZodLooseObjectFromProperty(inference_completion_request, 'body'),
+    getZodLooseObjectFromProperty(inference_completion_request, 'path'),
+    getZodLooseObjectFromProperty(inference_completion_request, 'query'),
   ]),
   outputSchema: inference_completion_response,
 };
 const INFERENCE_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an inference endpoint
 `,
   description: `Delete an inference endpoint
@@ -9833,23 +10227,24 @@ This API requires the manage_inference cluster privilege (the built-in \`inferen
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id', 'task_type'],
     urlParams: ['dry_run', 'force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_delete_request, 'body'),
-    getLooseObjectFromProperty(inference_delete_request, 'path'),
-    getLooseObjectFromProperty(inference_delete_request, 'query'),
-    getLooseObjectFromProperty(inference_delete1_request, 'body'),
-    getLooseObjectFromProperty(inference_delete1_request, 'path'),
-    getLooseObjectFromProperty(inference_delete1_request, 'query'),
+    getZodLooseObjectFromProperty(inference_delete_request, 'body'),
+    getZodLooseObjectFromProperty(inference_delete_request, 'path'),
+    getZodLooseObjectFromProperty(inference_delete_request, 'query'),
+    getZodLooseObjectFromProperty(inference_delete1_request, 'body'),
+    getZodLooseObjectFromProperty(inference_delete1_request, 'path'),
+    getZodLooseObjectFromProperty(inference_delete1_request, 'query'),
   ]),
   outputSchema: z.union([inference_delete_response, inference_delete1_response]),
 };
 const INFERENCE_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get an inference endpoint
 `,
   description: `Get an inference endpoint
@@ -9861,26 +10256,27 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id', 'task_type'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_get_request, 'body'),
-    getLooseObjectFromProperty(inference_get_request, 'path'),
-    getLooseObjectFromProperty(inference_get_request, 'query'),
-    getLooseObjectFromProperty(inference_get1_request, 'body'),
-    getLooseObjectFromProperty(inference_get1_request, 'path'),
-    getLooseObjectFromProperty(inference_get1_request, 'query'),
-    getLooseObjectFromProperty(inference_get2_request, 'body'),
-    getLooseObjectFromProperty(inference_get2_request, 'path'),
-    getLooseObjectFromProperty(inference_get2_request, 'query'),
+    getZodLooseObjectFromProperty(inference_get_request, 'body'),
+    getZodLooseObjectFromProperty(inference_get_request, 'path'),
+    getZodLooseObjectFromProperty(inference_get_request, 'query'),
+    getZodLooseObjectFromProperty(inference_get1_request, 'body'),
+    getZodLooseObjectFromProperty(inference_get1_request, 'path'),
+    getZodLooseObjectFromProperty(inference_get1_request, 'query'),
+    getZodLooseObjectFromProperty(inference_get2_request, 'body'),
+    getZodLooseObjectFromProperty(inference_get2_request, 'path'),
+    getZodLooseObjectFromProperty(inference_get2_request, 'query'),
   ]),
   outputSchema: z.union([inference_get_response, inference_get1_response, inference_get2_response]),
 };
 const INFERENCE_INFERENCE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.inference',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Perform inference on the service`,
   description: `Perform inference on the service.
 
@@ -9899,23 +10295,24 @@ For details about using this API with a service, such as Amazon Bedrock, Anthrop
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id', 'task_type'],
     urlParams: ['timeout'],
     bodyParams: ['query', 'input', 'input_type', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_inference_request, 'body'),
-    getLooseObjectFromProperty(inference_inference_request, 'path'),
-    getLooseObjectFromProperty(inference_inference_request, 'query'),
-    getLooseObjectFromProperty(inference_inference1_request, 'body'),
-    getLooseObjectFromProperty(inference_inference1_request, 'path'),
-    getLooseObjectFromProperty(inference_inference1_request, 'query'),
+    getZodLooseObjectFromProperty(inference_inference_request, 'body'),
+    getZodLooseObjectFromProperty(inference_inference_request, 'path'),
+    getZodLooseObjectFromProperty(inference_inference_request, 'query'),
+    getZodLooseObjectFromProperty(inference_inference1_request, 'body'),
+    getZodLooseObjectFromProperty(inference_inference1_request, 'path'),
+    getZodLooseObjectFromProperty(inference_inference1_request, 'query'),
   ]),
   outputSchema: z.union([inference_inference_response, inference_inference1_response]),
 };
 const INFERENCE_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an inference endpoint`,
   description: `Create an inference endpoint.
 
@@ -9951,23 +10348,24 @@ The following integrations are available through the inference API. You can find
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id', 'task_type'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_request, 'body'),
-    getLooseObjectFromProperty(inference_put_request, 'path'),
-    getLooseObjectFromProperty(inference_put_request, 'query'),
-    getLooseObjectFromProperty(inference_put1_request, 'body'),
-    getLooseObjectFromProperty(inference_put1_request, 'path'),
-    getLooseObjectFromProperty(inference_put1_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put1_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put1_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put1_request, 'query'),
   ]),
   outputSchema: z.union([inference_put_response, inference_put1_response]),
 };
 const INFERENCE_PUT_AI21_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_ai21',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a AI21 inference endpoint`,
   description: `Create a AI21 inference endpoint.
 
@@ -9979,20 +10377,21 @@ Create an inference endpoint to perform an inference task with the \`ai21\` serv
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-ai21',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'ai21_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['service', 'service_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_ai21_request, 'body'),
-    getLooseObjectFromProperty(inference_put_ai21_request, 'path'),
-    getLooseObjectFromProperty(inference_put_ai21_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_ai21_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_ai21_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_ai21_request, 'query'),
   ]),
   outputSchema: inference_put_ai21_response,
 };
 const INFERENCE_PUT_ALIBABACLOUD_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_alibabacloud',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an AlibabaCloud AI Search inference endpoint`,
   description: `Create an AlibabaCloud AI Search inference endpoint.
 
@@ -10004,20 +10403,21 @@ Create an inference endpoint to perform an inference task with the \`alibabaclou
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-alibabacloud',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'alibabacloud_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_alibabacloud_request, 'body'),
-    getLooseObjectFromProperty(inference_put_alibabacloud_request, 'path'),
-    getLooseObjectFromProperty(inference_put_alibabacloud_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_alibabacloud_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_alibabacloud_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_alibabacloud_request, 'query'),
   ]),
   outputSchema: inference_put_alibabacloud_response,
 };
 const INFERENCE_PUT_AMAZONBEDROCK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_amazonbedrock',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an Amazon Bedrock inference endpoint`,
   description: `Create an Amazon Bedrock inference endpoint.
 
@@ -10032,20 +10432,21 @@ Create an inference endpoint to perform an inference task with the \`amazonbedro
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-amazonbedrock',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'amazonbedrock_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_amazonbedrock_request, 'body'),
-    getLooseObjectFromProperty(inference_put_amazonbedrock_request, 'path'),
-    getLooseObjectFromProperty(inference_put_amazonbedrock_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_amazonbedrock_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_amazonbedrock_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_amazonbedrock_request, 'query'),
   ]),
   outputSchema: inference_put_amazonbedrock_response,
 };
 const INFERENCE_PUT_AMAZONSAGEMAKER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_amazonsagemaker',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an Amazon SageMaker inference endpoint`,
   description: `Create an Amazon SageMaker inference endpoint.
 
@@ -10057,20 +10458,21 @@ Create an inference endpoint to perform an inference task with the \`amazon_sage
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-amazonsagemaker',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'amazonsagemaker_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'body'),
-    getLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'path'),
-    getLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'query'),
   ]),
   outputSchema: inference_put_amazonsagemaker_response,
 };
 const INFERENCE_PUT_ANTHROPIC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_anthropic',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an Anthropic inference endpoint`,
   description: `Create an Anthropic inference endpoint.
 
@@ -10082,20 +10484,21 @@ Create an inference endpoint to perform an inference task with the \`anthropic\`
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-anthropic',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'anthropic_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_anthropic_request, 'body'),
-    getLooseObjectFromProperty(inference_put_anthropic_request, 'path'),
-    getLooseObjectFromProperty(inference_put_anthropic_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_anthropic_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_anthropic_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_anthropic_request, 'query'),
   ]),
   outputSchema: inference_put_anthropic_response,
 };
 const INFERENCE_PUT_AZUREAISTUDIO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_azureaistudio',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an Azure AI studio inference endpoint`,
   description: `Create an Azure AI studio inference endpoint.
 
@@ -10107,20 +10510,21 @@ Create an inference endpoint to perform an inference task with the \`azureaistud
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-azureaistudio',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'azureaistudio_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_azureaistudio_request, 'body'),
-    getLooseObjectFromProperty(inference_put_azureaistudio_request, 'path'),
-    getLooseObjectFromProperty(inference_put_azureaistudio_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_azureaistudio_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_azureaistudio_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_azureaistudio_request, 'query'),
   ]),
   outputSchema: inference_put_azureaistudio_response,
 };
 const INFERENCE_PUT_AZUREOPENAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_azureopenai',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an Azure OpenAI inference endpoint`,
   description: `Create an Azure OpenAI inference endpoint.
 
@@ -10139,20 +10543,21 @@ The list of embeddings models that you can choose from in your deployment can be
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-azureopenai',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'azureopenai_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_azureopenai_request, 'body'),
-    getLooseObjectFromProperty(inference_put_azureopenai_request, 'path'),
-    getLooseObjectFromProperty(inference_put_azureopenai_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_azureopenai_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_azureopenai_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_azureopenai_request, 'query'),
   ]),
   outputSchema: inference_put_azureopenai_response,
 };
 const INFERENCE_PUT_COHERE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_cohere',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a Cohere inference endpoint`,
   description: `Create a Cohere inference endpoint.
 
@@ -10164,20 +10569,21 @@ Create an inference endpoint to perform an inference task with the \`cohere\` se
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-cohere',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'cohere_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_cohere_request, 'body'),
-    getLooseObjectFromProperty(inference_put_cohere_request, 'path'),
-    getLooseObjectFromProperty(inference_put_cohere_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_cohere_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_cohere_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_cohere_request, 'query'),
   ]),
   outputSchema: inference_put_cohere_response,
 };
 const INFERENCE_PUT_CONTEXTUALAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_contextualai',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an Contextual AI inference endpoint`,
   description: `Create an Contextual AI inference endpoint.
 
@@ -10191,20 +10597,21 @@ To review the available \`rerank\` models, refer to <https://docs.contextual.ai/
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-contextualai',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'contextualai_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_contextualai_request, 'body'),
-    getLooseObjectFromProperty(inference_put_contextualai_request, 'path'),
-    getLooseObjectFromProperty(inference_put_contextualai_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_contextualai_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_contextualai_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_contextualai_request, 'query'),
   ]),
   outputSchema: inference_put_contextualai_response,
 };
 const INFERENCE_PUT_CUSTOM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_custom',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a custom inference endpoint`,
   description: `Create a custom inference endpoint.
 
@@ -10255,20 +10662,21 @@ Pre-defined templates:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-custom',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'custom_inference_id'],
     urlParams: [],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_custom_request, 'body'),
-    getLooseObjectFromProperty(inference_put_custom_request, 'path'),
-    getLooseObjectFromProperty(inference_put_custom_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_custom_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_custom_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_custom_request, 'query'),
   ]),
   outputSchema: inference_put_custom_response,
 };
 const INFERENCE_PUT_DEEPSEEK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_deepseek',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a DeepSeek inference endpoint`,
   description: `Create a DeepSeek inference endpoint.
 
@@ -10280,20 +10688,21 @@ Create an inference endpoint to perform an inference task with the \`deepseek\` 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-deepseek',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'deepseek_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['service', 'service_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_deepseek_request, 'body'),
-    getLooseObjectFromProperty(inference_put_deepseek_request, 'path'),
-    getLooseObjectFromProperty(inference_put_deepseek_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_deepseek_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_deepseek_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_deepseek_request, 'query'),
   ]),
   outputSchema: inference_put_deepseek_response,
 };
 const INFERENCE_PUT_ELASTICSEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_elasticsearch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an Elasticsearch inference endpoint`,
   description: `Create an Elasticsearch inference endpoint.
 
@@ -10318,20 +10727,21 @@ Avoid creating multiple endpoints for the same model unless required, as each en
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-elasticsearch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'elasticsearch_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_elasticsearch_request, 'body'),
-    getLooseObjectFromProperty(inference_put_elasticsearch_request, 'path'),
-    getLooseObjectFromProperty(inference_put_elasticsearch_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_elasticsearch_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_elasticsearch_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_elasticsearch_request, 'query'),
   ]),
   outputSchema: inference_put_elasticsearch_response,
 };
 const INFERENCE_PUT_ELSER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_elser',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an ELSER inference endpoint`,
   description: `Create an ELSER inference endpoint.
 
@@ -10357,20 +10767,21 @@ Avoid creating multiple endpoints for the same model unless required, as each en
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-elser',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'elser_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_elser_request, 'body'),
-    getLooseObjectFromProperty(inference_put_elser_request, 'path'),
-    getLooseObjectFromProperty(inference_put_elser_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_elser_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_elser_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_elser_request, 'query'),
   ]),
   outputSchema: inference_put_elser_response,
 };
 const INFERENCE_PUT_GOOGLEAISTUDIO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_googleaistudio',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an Google AI Studio inference endpoint`,
   description: `Create an Google AI Studio inference endpoint.
 
@@ -10382,20 +10793,21 @@ Create an inference endpoint to perform an inference task with the \`googleaistu
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-googleaistudio',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'googleaistudio_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_googleaistudio_request, 'body'),
-    getLooseObjectFromProperty(inference_put_googleaistudio_request, 'path'),
-    getLooseObjectFromProperty(inference_put_googleaistudio_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_googleaistudio_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_googleaistudio_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_googleaistudio_request, 'query'),
   ]),
   outputSchema: inference_put_googleaistudio_response,
 };
 const INFERENCE_PUT_GOOGLEVERTEXAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_googlevertexai',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a Google Vertex AI inference endpoint`,
   description: `Create a Google Vertex AI inference endpoint.
 
@@ -10407,20 +10819,21 @@ Create an inference endpoint to perform an inference task with the \`googleverte
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-googlevertexai',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'googlevertexai_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_googlevertexai_request, 'body'),
-    getLooseObjectFromProperty(inference_put_googlevertexai_request, 'path'),
-    getLooseObjectFromProperty(inference_put_googlevertexai_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_googlevertexai_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_googlevertexai_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_googlevertexai_request, 'query'),
   ]),
   outputSchema: inference_put_googlevertexai_response,
 };
 const INFERENCE_PUT_HUGGING_FACE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_hugging_face',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a Hugging Face inference endpoint`,
   description: `Create a Hugging Face inference endpoint.
 
@@ -10467,20 +10880,21 @@ Tested models for \`rerank\` task:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-hugging-face',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'huggingface_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_hugging_face_request, 'body'),
-    getLooseObjectFromProperty(inference_put_hugging_face_request, 'path'),
-    getLooseObjectFromProperty(inference_put_hugging_face_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_hugging_face_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_hugging_face_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_hugging_face_request, 'query'),
   ]),
   outputSchema: inference_put_hugging_face_response,
 };
 const INFERENCE_PUT_JINAAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_jinaai',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an JinaAI inference endpoint`,
   description: `Create an JinaAI inference endpoint.
 
@@ -10495,20 +10909,21 @@ To review the available \`text_embedding\` models, refer to the <https://jina.ai
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-jinaai',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'jinaai_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_jinaai_request, 'body'),
-    getLooseObjectFromProperty(inference_put_jinaai_request, 'path'),
-    getLooseObjectFromProperty(inference_put_jinaai_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_jinaai_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_jinaai_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_jinaai_request, 'query'),
   ]),
   outputSchema: inference_put_jinaai_response,
 };
 const INFERENCE_PUT_LLAMA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_llama',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a Llama inference endpoint`,
   description: `Create a Llama inference endpoint.
 
@@ -10520,20 +10935,21 @@ Create an inference endpoint to perform an inference task with the \`llama\` ser
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-llama',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'llama_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_llama_request, 'body'),
-    getLooseObjectFromProperty(inference_put_llama_request, 'path'),
-    getLooseObjectFromProperty(inference_put_llama_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_llama_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_llama_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_llama_request, 'query'),
   ]),
   outputSchema: inference_put_llama_response,
 };
 const INFERENCE_PUT_MISTRAL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_mistral',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a Mistral inference endpoint`,
   description: `Create a Mistral inference endpoint.
 
@@ -10545,20 +10961,21 @@ Create an inference endpoint to perform an inference task with the \`mistral\` s
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-mistral',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'mistral_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_mistral_request, 'body'),
-    getLooseObjectFromProperty(inference_put_mistral_request, 'path'),
-    getLooseObjectFromProperty(inference_put_mistral_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_mistral_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_mistral_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_mistral_request, 'query'),
   ]),
   outputSchema: inference_put_mistral_response,
 };
 const INFERENCE_PUT_OPENAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_openai',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an OpenAI inference endpoint`,
   description: `Create an OpenAI inference endpoint.
 
@@ -10570,20 +10987,21 @@ Create an inference endpoint to perform an inference task with the \`openai\` se
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-openai',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'openai_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_openai_request, 'body'),
-    getLooseObjectFromProperty(inference_put_openai_request, 'path'),
-    getLooseObjectFromProperty(inference_put_openai_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_openai_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_openai_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_openai_request, 'query'),
   ]),
   outputSchema: inference_put_openai_response,
 };
 const INFERENCE_PUT_VOYAGEAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_voyageai',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a VoyageAI inference endpoint`,
   description: `Create a VoyageAI inference endpoint.
 
@@ -10597,20 +11015,21 @@ Avoid creating multiple endpoints for the same model unless required, as each en
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-voyageai',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'voyageai_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_voyageai_request, 'body'),
-    getLooseObjectFromProperty(inference_put_voyageai_request, 'path'),
-    getLooseObjectFromProperty(inference_put_voyageai_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_voyageai_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_voyageai_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_voyageai_request, 'query'),
   ]),
   outputSchema: inference_put_voyageai_response,
 };
 const INFERENCE_PUT_WATSONX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_watsonx',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a Watsonx inference endpoint`,
   description: `Create a Watsonx inference endpoint.
 
@@ -10624,20 +11043,21 @@ You can provision one through the IBM catalog, the Cloud Databases CLI plug-in, 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-watsonx',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_type', 'watsonx_inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_put_watsonx_request, 'body'),
-    getLooseObjectFromProperty(inference_put_watsonx_request, 'path'),
-    getLooseObjectFromProperty(inference_put_watsonx_request, 'query'),
+    getZodLooseObjectFromProperty(inference_put_watsonx_request, 'body'),
+    getZodLooseObjectFromProperty(inference_put_watsonx_request, 'path'),
+    getZodLooseObjectFromProperty(inference_put_watsonx_request, 'query'),
   ]),
   outputSchema: inference_put_watsonx_response,
 };
 const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.rerank',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Perform reranking inference on the service`,
   description: `Perform reranking inference on the service
 
@@ -10647,20 +11067,21 @@ const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['query', 'input', 'return_documents', 'top_n', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_rerank_request, 'body'),
-    getLooseObjectFromProperty(inference_rerank_request, 'path'),
-    getLooseObjectFromProperty(inference_rerank_request, 'query'),
+    getZodLooseObjectFromProperty(inference_rerank_request, 'body'),
+    getZodLooseObjectFromProperty(inference_rerank_request, 'path'),
+    getZodLooseObjectFromProperty(inference_rerank_request, 'query'),
   ]),
   outputSchema: inference_rerank_response,
 };
 const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.sparse_embedding',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Perform sparse embedding inference on the service`,
   description: `Perform sparse embedding inference on the service
 
@@ -10670,20 +11091,21 @@ const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['input', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_sparse_embedding_request, 'body'),
-    getLooseObjectFromProperty(inference_sparse_embedding_request, 'path'),
-    getLooseObjectFromProperty(inference_sparse_embedding_request, 'query'),
+    getZodLooseObjectFromProperty(inference_sparse_embedding_request, 'body'),
+    getZodLooseObjectFromProperty(inference_sparse_embedding_request, 'path'),
+    getZodLooseObjectFromProperty(inference_sparse_embedding_request, 'query'),
   ]),
   outputSchema: inference_sparse_embedding_response,
 };
 const INFERENCE_STREAM_COMPLETION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.stream_completion',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Perform streaming completion inference on the service
 `,
   description: `Perform streaming completion inference on the service
@@ -10700,20 +11122,21 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-stream-inference',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['input', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_stream_completion_request, 'body'),
-    getLooseObjectFromProperty(inference_stream_completion_request, 'path'),
-    getLooseObjectFromProperty(inference_stream_completion_request, 'query'),
+    getZodLooseObjectFromProperty(inference_stream_completion_request, 'body'),
+    getZodLooseObjectFromProperty(inference_stream_completion_request, 'path'),
+    getZodLooseObjectFromProperty(inference_stream_completion_request, 'query'),
   ]),
   outputSchema: inference_stream_completion_response,
 };
 const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.text_embedding',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Perform text embedding inference on the service`,
   description: `Perform text embedding inference on the service
 
@@ -10723,20 +11146,21 @@ const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
     bodyParams: ['input', 'input_type', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_text_embedding_request, 'body'),
-    getLooseObjectFromProperty(inference_text_embedding_request, 'path'),
-    getLooseObjectFromProperty(inference_text_embedding_request, 'query'),
+    getZodLooseObjectFromProperty(inference_text_embedding_request, 'body'),
+    getZodLooseObjectFromProperty(inference_text_embedding_request, 'path'),
+    getZodLooseObjectFromProperty(inference_text_embedding_request, 'query'),
   ]),
   outputSchema: inference_text_embedding_response,
 };
 const INFERENCE_UPDATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.update',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update an inference endpoint`,
   description: `Update an inference endpoint.
 
@@ -10752,23 +11176,24 @@ However, if you do not plan to use the inference APIs to use these models or if 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-update',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['inference_id', 'task_type'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(inference_update_request, 'body'),
-    getLooseObjectFromProperty(inference_update_request, 'path'),
-    getLooseObjectFromProperty(inference_update_request, 'query'),
-    getLooseObjectFromProperty(inference_update1_request, 'body'),
-    getLooseObjectFromProperty(inference_update1_request, 'path'),
-    getLooseObjectFromProperty(inference_update1_request, 'query'),
+    getZodLooseObjectFromProperty(inference_update_request, 'body'),
+    getZodLooseObjectFromProperty(inference_update_request, 'path'),
+    getZodLooseObjectFromProperty(inference_update_request, 'query'),
+    getZodLooseObjectFromProperty(inference_update1_request, 'body'),
+    getZodLooseObjectFromProperty(inference_update1_request, 'path'),
+    getZodLooseObjectFromProperty(inference_update1_request, 'query'),
   ]),
   outputSchema: z.union([inference_update_response, inference_update1_response]),
 };
 const INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.info',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get cluster info`,
   description: `Get cluster info.
 Get basic build, version, and cluster information.
@@ -10779,20 +11204,21 @@ Get basic build, version, and cluster information.
   patterns: [''],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-info',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(info_request, 'body'),
-    getLooseObjectFromProperty(info_request, 'path'),
-    getLooseObjectFromProperty(info_request, 'query'),
+    getZodLooseObjectFromProperty(info_request, 'body'),
+    getZodLooseObjectFromProperty(info_request, 'path'),
+    getZodLooseObjectFromProperty(info_request, 'query'),
   ]),
   outputSchema: info_response,
 };
 const INGEST_DELETE_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.delete_geoip_database',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete GeoIP database configurations`,
   description: `Delete GeoIP database configurations.
 
@@ -10804,20 +11230,21 @@ Delete one or more IP geolocation database configurations.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-geoip-database',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_delete_geoip_database_request, 'body'),
-    getLooseObjectFromProperty(ingest_delete_geoip_database_request, 'path'),
-    getLooseObjectFromProperty(ingest_delete_geoip_database_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_delete_geoip_database_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_delete_geoip_database_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_delete_geoip_database_request, 'query'),
   ]),
   outputSchema: ingest_delete_geoip_database_response,
 };
 const INGEST_DELETE_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.delete_ip_location_database',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete IP geolocation database configurations`,
   description: `Delete IP geolocation database configurations.
 
@@ -10827,20 +11254,21 @@ const INGEST_DELETE_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-ip-location-database',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'body'),
-    getLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'path'),
-    getLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_delete_ip_location_database_request, 'query'),
   ]),
   outputSchema: ingest_delete_ip_location_database_response,
 };
 const INGEST_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.delete_pipeline',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete pipelines`,
   description: `Delete pipelines.
 Delete one or more ingest pipelines.
@@ -10851,20 +11279,21 @@ Delete one or more ingest pipelines.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-pipeline',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_delete_pipeline_request, 'body'),
-    getLooseObjectFromProperty(ingest_delete_pipeline_request, 'path'),
-    getLooseObjectFromProperty(ingest_delete_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_delete_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_delete_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_delete_pipeline_request, 'query'),
   ]),
   outputSchema: ingest_delete_pipeline_response,
 };
 const INGEST_GEO_IP_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.geo_ip_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get GeoIP statistics`,
   description: `Get GeoIP statistics.
 Get download statistics for GeoIP2 databases that are used with the GeoIP processor.
@@ -10874,20 +11303,21 @@ Get download statistics for GeoIP2 databases that are used with the GeoIP proces
   patterns: ['_ingest/geoip/stats'],
   documentation: 'https://www.elastic.co/docs/reference/enrich-processor/geoip-processor',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_geo_ip_stats_request, 'body'),
-    getLooseObjectFromProperty(ingest_geo_ip_stats_request, 'path'),
-    getLooseObjectFromProperty(ingest_geo_ip_stats_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_geo_ip_stats_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_geo_ip_stats_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_geo_ip_stats_request, 'query'),
   ]),
   outputSchema: ingest_geo_ip_stats_response,
 };
 const INGEST_GET_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.get_geoip_database',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get GeoIP database configurations`,
   description: `Get GeoIP database configurations.
 
@@ -10899,23 +11329,24 @@ Get information about one or more IP geolocation database configurations.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-geoip-database',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_get_geoip_database_request, 'body'),
-    getLooseObjectFromProperty(ingest_get_geoip_database_request, 'path'),
-    getLooseObjectFromProperty(ingest_get_geoip_database_request, 'query'),
-    getLooseObjectFromProperty(ingest_get_geoip_database1_request, 'body'),
-    getLooseObjectFromProperty(ingest_get_geoip_database1_request, 'path'),
-    getLooseObjectFromProperty(ingest_get_geoip_database1_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_get_geoip_database_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_get_geoip_database_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_get_geoip_database_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_get_geoip_database1_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_get_geoip_database1_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_get_geoip_database1_request, 'query'),
   ]),
   outputSchema: z.union([ingest_get_geoip_database_response, ingest_get_geoip_database1_response]),
 };
 const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.get_ip_location_database',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get IP geolocation database configurations`,
   description: `Get IP geolocation database configurations.
 
@@ -10925,17 +11356,18 @@ const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-ip-location-database',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_get_ip_location_database_request, 'body'),
-    getLooseObjectFromProperty(ingest_get_ip_location_database_request, 'path'),
-    getLooseObjectFromProperty(ingest_get_ip_location_database_request, 'query'),
-    getLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'body'),
-    getLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'path'),
-    getLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_get_ip_location_database_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_get_ip_location_database_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_get_ip_location_database_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_get_ip_location_database1_request, 'query'),
   ]),
   outputSchema: z.union([
     ingest_get_ip_location_database_response,
@@ -10944,7 +11376,7 @@ const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
 };
 const INGEST_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.get_pipeline',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get pipelines`,
   description: `Get pipelines.
 
@@ -10957,23 +11389,24 @@ This API returns a local reference of the pipeline.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-pipeline',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout', 'summary'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_get_pipeline_request, 'body'),
-    getLooseObjectFromProperty(ingest_get_pipeline_request, 'path'),
-    getLooseObjectFromProperty(ingest_get_pipeline_request, 'query'),
-    getLooseObjectFromProperty(ingest_get_pipeline1_request, 'body'),
-    getLooseObjectFromProperty(ingest_get_pipeline1_request, 'path'),
-    getLooseObjectFromProperty(ingest_get_pipeline1_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_get_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_get_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_get_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_get_pipeline1_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_get_pipeline1_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_get_pipeline1_request, 'query'),
   ]),
   outputSchema: z.union([ingest_get_pipeline_response, ingest_get_pipeline1_response]),
 };
 const INGEST_PROCESSOR_GROK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.processor_grok',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a grok processor`,
   description: `Run a grok processor.
 Extract structured fields out of a single text field within a document.
@@ -10985,20 +11418,21 @@ A grok pattern is like a regular expression that supports aliased expressions th
   patterns: ['_ingest/processor/grok'],
   documentation: 'https://www.elastic.co/docs/reference/enrich-processor/grok-processor',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_processor_grok_request, 'body'),
-    getLooseObjectFromProperty(ingest_processor_grok_request, 'path'),
-    getLooseObjectFromProperty(ingest_processor_grok_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_processor_grok_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_processor_grok_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_processor_grok_request, 'query'),
   ]),
   outputSchema: ingest_processor_grok_response,
 };
 const INGEST_PUT_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.put_geoip_database',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a GeoIP database configuration`,
   description: `Create or update a GeoIP database configuration.
 
@@ -11010,20 +11444,21 @@ Refer to the create or update IP geolocation database configuration API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-put-geoip-database',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['name', 'maxmind'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_put_geoip_database_request, 'body'),
-    getLooseObjectFromProperty(ingest_put_geoip_database_request, 'path'),
-    getLooseObjectFromProperty(ingest_put_geoip_database_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_put_geoip_database_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_put_geoip_database_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_put_geoip_database_request, 'query'),
   ]),
   outputSchema: ingest_put_geoip_database_response,
 };
 const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.put_ip_location_database',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update an IP geolocation database configuration`,
   description: `Create or update an IP geolocation database configuration.
 
@@ -11033,20 +11468,21 @@ const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-put-ip-location-database',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_put_ip_location_database_request, 'body'),
-    getLooseObjectFromProperty(ingest_put_ip_location_database_request, 'path'),
-    getLooseObjectFromProperty(ingest_put_ip_location_database_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_put_ip_location_database_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_put_ip_location_database_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_put_ip_location_database_request, 'query'),
   ]),
   outputSchema: ingest_put_ip_location_database_response,
 };
 const INGEST_PUT_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.put_pipeline',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a pipeline`,
   description: `Create or update a pipeline.
 Changes made using this API take effect immediately.
@@ -11056,6 +11492,7 @@ Changes made using this API take effect immediately.
   patterns: ['_ingest/pipeline/{id}'],
   documentation: 'https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['master_timeout', 'timeout', 'if_version'],
     bodyParams: [
@@ -11069,15 +11506,15 @@ Changes made using this API take effect immediately.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_put_pipeline_request, 'body'),
-    getLooseObjectFromProperty(ingest_put_pipeline_request, 'path'),
-    getLooseObjectFromProperty(ingest_put_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_put_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_put_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_put_pipeline_request, 'query'),
   ]),
   outputSchema: ingest_put_pipeline_response,
 };
 const INGEST_SIMULATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.simulate',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Simulate a pipeline`,
   description: `Simulate a pipeline.
 
@@ -11090,23 +11527,24 @@ You can either specify an existing pipeline to use with the provided documents o
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-simulate',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['verbose'],
     bodyParams: ['docs', 'pipeline'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ingest_simulate_request, 'body'),
-    getLooseObjectFromProperty(ingest_simulate_request, 'path'),
-    getLooseObjectFromProperty(ingest_simulate_request, 'query'),
-    getLooseObjectFromProperty(ingest_simulate1_request, 'body'),
-    getLooseObjectFromProperty(ingest_simulate1_request, 'path'),
-    getLooseObjectFromProperty(ingest_simulate1_request, 'query'),
-    getLooseObjectFromProperty(ingest_simulate2_request, 'body'),
-    getLooseObjectFromProperty(ingest_simulate2_request, 'path'),
-    getLooseObjectFromProperty(ingest_simulate2_request, 'query'),
-    getLooseObjectFromProperty(ingest_simulate3_request, 'body'),
-    getLooseObjectFromProperty(ingest_simulate3_request, 'path'),
-    getLooseObjectFromProperty(ingest_simulate3_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_simulate_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_simulate_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_simulate_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_simulate1_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_simulate1_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_simulate1_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_simulate2_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_simulate2_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_simulate2_request, 'query'),
+    getZodLooseObjectFromProperty(ingest_simulate3_request, 'body'),
+    getZodLooseObjectFromProperty(ingest_simulate3_request, 'path'),
+    getZodLooseObjectFromProperty(ingest_simulate3_request, 'query'),
   ]),
   outputSchema: z.union([
     ingest_simulate_response,
@@ -11117,15 +11555,16 @@ You can either specify an existing pipeline to use with the provided documents o
 };
 const KNN_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.knn_search',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Performs a kNN search
 
  Documentation: null`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_knn_search'],
-  documentation: 'null',
+  documentation: null,
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -11135,7 +11574,7 @@ const KNN_SEARCH_CONTRACT: InternalConnectorContract = {
 };
 const LICENSE_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete the license`,
   description: `Delete the license.
 
@@ -11149,20 +11588,21 @@ If the operator privileges feature is enabled, only operator users can use this 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(license_delete_request, 'body'),
-    getLooseObjectFromProperty(license_delete_request, 'path'),
-    getLooseObjectFromProperty(license_delete_request, 'query'),
+    getZodLooseObjectFromProperty(license_delete_request, 'body'),
+    getZodLooseObjectFromProperty(license_delete_request, 'path'),
+    getZodLooseObjectFromProperty(license_delete_request, 'query'),
   ]),
   outputSchema: license_delete_response,
 };
 const LICENSE_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get license information`,
   description: `Get license information.
 
@@ -11178,20 +11618,21 @@ Get information about your Elastic license including its type, its status, when 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['accept_enterprise', 'local'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(license_get_request, 'body'),
-    getLooseObjectFromProperty(license_get_request, 'path'),
-    getLooseObjectFromProperty(license_get_request, 'query'),
+    getZodLooseObjectFromProperty(license_get_request, 'body'),
+    getZodLooseObjectFromProperty(license_get_request, 'path'),
+    getZodLooseObjectFromProperty(license_get_request, 'query'),
   ]),
   outputSchema: license_get_response,
 };
 const LICENSE_GET_BASIC_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.get_basic_status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the basic license status`,
   description: `Get the basic license status.
 
@@ -11201,20 +11642,21 @@ const LICENSE_GET_BASIC_STATUS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-get-basic-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(license_get_basic_status_request, 'body'),
-    getLooseObjectFromProperty(license_get_basic_status_request, 'path'),
-    getLooseObjectFromProperty(license_get_basic_status_request, 'query'),
+    getZodLooseObjectFromProperty(license_get_basic_status_request, 'body'),
+    getZodLooseObjectFromProperty(license_get_basic_status_request, 'path'),
+    getZodLooseObjectFromProperty(license_get_basic_status_request, 'query'),
   ]),
   outputSchema: license_get_basic_status_response,
 };
 const LICENSE_GET_TRIAL_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.get_trial_status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the trial status`,
   description: `Get the trial status.
 
@@ -11224,20 +11666,21 @@ const LICENSE_GET_TRIAL_STATUS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-get-trial-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(license_get_trial_status_request, 'body'),
-    getLooseObjectFromProperty(license_get_trial_status_request, 'path'),
-    getLooseObjectFromProperty(license_get_trial_status_request, 'query'),
+    getZodLooseObjectFromProperty(license_get_trial_status_request, 'body'),
+    getZodLooseObjectFromProperty(license_get_trial_status_request, 'path'),
+    getZodLooseObjectFromProperty(license_get_trial_status_request, 'query'),
   ]),
   outputSchema: license_get_trial_status_response,
 };
 const LICENSE_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.post',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update the license`,
   description: `Update the license.
 
@@ -11255,23 +11698,24 @@ If the operator privileges feature is enabled, only operator users can use this 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-post',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['acknowledge', 'master_timeout', 'timeout'],
     bodyParams: ['license', 'licenses'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(license_post_request, 'body'),
-    getLooseObjectFromProperty(license_post_request, 'path'),
-    getLooseObjectFromProperty(license_post_request, 'query'),
-    getLooseObjectFromProperty(license_post1_request, 'body'),
-    getLooseObjectFromProperty(license_post1_request, 'path'),
-    getLooseObjectFromProperty(license_post1_request, 'query'),
+    getZodLooseObjectFromProperty(license_post_request, 'body'),
+    getZodLooseObjectFromProperty(license_post_request, 'path'),
+    getZodLooseObjectFromProperty(license_post_request, 'query'),
+    getZodLooseObjectFromProperty(license_post1_request, 'body'),
+    getZodLooseObjectFromProperty(license_post1_request, 'path'),
+    getZodLooseObjectFromProperty(license_post1_request, 'query'),
   ]),
   outputSchema: z.union([license_post_response, license_post1_response]),
 };
 const LICENSE_POST_START_BASIC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.post_start_basic',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start a basic license`,
   description: `Start a basic license.
 
@@ -11290,20 +11734,21 @@ To check the status of your basic license, use the get basic license API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-post-start-basic',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['acknowledge', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(license_post_start_basic_request, 'body'),
-    getLooseObjectFromProperty(license_post_start_basic_request, 'path'),
-    getLooseObjectFromProperty(license_post_start_basic_request, 'query'),
+    getZodLooseObjectFromProperty(license_post_start_basic_request, 'body'),
+    getZodLooseObjectFromProperty(license_post_start_basic_request, 'path'),
+    getZodLooseObjectFromProperty(license_post_start_basic_request, 'query'),
   ]),
   outputSchema: license_post_start_basic_response,
 };
 const LICENSE_POST_START_TRIAL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.license.post_start_trial',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start a trial`,
   description: `Start a trial.
 Start a 30-day trial, which gives access to all subscription features.
@@ -11319,20 +11764,21 @@ To check the status of your trial, use the get trial status API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-post-start-trial',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['acknowledge', 'type', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(license_post_start_trial_request, 'body'),
-    getLooseObjectFromProperty(license_post_start_trial_request, 'path'),
-    getLooseObjectFromProperty(license_post_start_trial_request, 'query'),
+    getZodLooseObjectFromProperty(license_post_start_trial_request, 'body'),
+    getZodLooseObjectFromProperty(license_post_start_trial_request, 'path'),
+    getZodLooseObjectFromProperty(license_post_start_trial_request, 'query'),
   ]),
   outputSchema: license_post_start_trial_response,
 };
 const LOGSTASH_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.logstash.delete_pipeline',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a Logstash pipeline`,
   description: `Delete a Logstash pipeline.
 Delete a pipeline that is used for Logstash Central Management.
@@ -11344,20 +11790,21 @@ If the request succeeds, you receive an empty response with an appropriate statu
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-delete-pipeline',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(logstash_delete_pipeline_request, 'body'),
-    getLooseObjectFromProperty(logstash_delete_pipeline_request, 'path'),
-    getLooseObjectFromProperty(logstash_delete_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(logstash_delete_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(logstash_delete_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(logstash_delete_pipeline_request, 'query'),
   ]),
   outputSchema: logstash_delete_pipeline_response,
 };
 const LOGSTASH_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.logstash.get_pipeline',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get Logstash pipelines`,
   description: `Get Logstash pipelines.
 Get pipelines that are used for Logstash Central Management.
@@ -11368,23 +11815,24 @@ Get pipelines that are used for Logstash Central Management.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-get-pipeline',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(logstash_get_pipeline_request, 'body'),
-    getLooseObjectFromProperty(logstash_get_pipeline_request, 'path'),
-    getLooseObjectFromProperty(logstash_get_pipeline_request, 'query'),
-    getLooseObjectFromProperty(logstash_get_pipeline1_request, 'body'),
-    getLooseObjectFromProperty(logstash_get_pipeline1_request, 'path'),
-    getLooseObjectFromProperty(logstash_get_pipeline1_request, 'query'),
+    getZodLooseObjectFromProperty(logstash_get_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(logstash_get_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(logstash_get_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(logstash_get_pipeline1_request, 'body'),
+    getZodLooseObjectFromProperty(logstash_get_pipeline1_request, 'path'),
+    getZodLooseObjectFromProperty(logstash_get_pipeline1_request, 'query'),
   ]),
   outputSchema: z.union([logstash_get_pipeline_response, logstash_get_pipeline1_response]),
 };
 const LOGSTASH_PUT_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.logstash.put_pipeline',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a Logstash pipeline`,
   description: `Create or update a Logstash pipeline.
 
@@ -11397,20 +11845,28 @@ If the specified pipeline exists, it is replaced.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-put-pipeline',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'description',
+      'last_modified',
+      'pipeline',
+      'pipeline_metadata',
+      'pipeline_settings',
+      'username',
+    ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(logstash_put_pipeline_request, 'body'),
-    getLooseObjectFromProperty(logstash_put_pipeline_request, 'path'),
-    getLooseObjectFromProperty(logstash_put_pipeline_request, 'query'),
+    getZodLooseObjectFromProperty(logstash_put_pipeline_request, 'body'),
+    getZodLooseObjectFromProperty(logstash_put_pipeline_request, 'path'),
+    getZodLooseObjectFromProperty(logstash_put_pipeline_request, 'query'),
   ]),
   outputSchema: logstash_put_pipeline_response,
 };
 const MGET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.mget',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get multiple documents`,
   description: `Get multiple documents.
 
@@ -11435,6 +11891,7 @@ You can include the \`stored_fields\` query parameter in the request URI to spec
   patterns: ['_mget', '{index}/_mget'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mget',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'preference',
@@ -11449,24 +11906,24 @@ You can include the \`stored_fields\` query parameter in the request URI to spec
     bodyParams: ['docs', 'ids'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(mget_request, 'body'),
-    getLooseObjectFromProperty(mget_request, 'path'),
-    getLooseObjectFromProperty(mget_request, 'query'),
-    getLooseObjectFromProperty(mget1_request, 'body'),
-    getLooseObjectFromProperty(mget1_request, 'path'),
-    getLooseObjectFromProperty(mget1_request, 'query'),
-    getLooseObjectFromProperty(mget2_request, 'body'),
-    getLooseObjectFromProperty(mget2_request, 'path'),
-    getLooseObjectFromProperty(mget2_request, 'query'),
-    getLooseObjectFromProperty(mget3_request, 'body'),
-    getLooseObjectFromProperty(mget3_request, 'path'),
-    getLooseObjectFromProperty(mget3_request, 'query'),
+    getZodLooseObjectFromProperty(mget_request, 'body'),
+    getZodLooseObjectFromProperty(mget_request, 'path'),
+    getZodLooseObjectFromProperty(mget_request, 'query'),
+    getZodLooseObjectFromProperty(mget1_request, 'body'),
+    getZodLooseObjectFromProperty(mget1_request, 'path'),
+    getZodLooseObjectFromProperty(mget1_request, 'query'),
+    getZodLooseObjectFromProperty(mget2_request, 'body'),
+    getZodLooseObjectFromProperty(mget2_request, 'path'),
+    getZodLooseObjectFromProperty(mget2_request, 'query'),
+    getZodLooseObjectFromProperty(mget3_request, 'body'),
+    getZodLooseObjectFromProperty(mget3_request, 'path'),
+    getZodLooseObjectFromProperty(mget3_request, 'query'),
   ]),
   outputSchema: z.union([mget_response, mget1_response, mget2_response, mget3_response]),
 };
 const MIGRATION_DEPRECATIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.migration.deprecations',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get deprecation information`,
   description: `Get deprecation information.
 Get information about different cluster, node, and index level settings that use deprecated features that will be removed or changed in the next major version.
@@ -11480,23 +11937,24 @@ You are strongly recommended to use the Upgrade Assistant.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-deprecations',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(migration_deprecations_request, 'body'),
-    getLooseObjectFromProperty(migration_deprecations_request, 'path'),
-    getLooseObjectFromProperty(migration_deprecations_request, 'query'),
-    getLooseObjectFromProperty(migration_deprecations1_request, 'body'),
-    getLooseObjectFromProperty(migration_deprecations1_request, 'path'),
-    getLooseObjectFromProperty(migration_deprecations1_request, 'query'),
+    getZodLooseObjectFromProperty(migration_deprecations_request, 'body'),
+    getZodLooseObjectFromProperty(migration_deprecations_request, 'path'),
+    getZodLooseObjectFromProperty(migration_deprecations_request, 'query'),
+    getZodLooseObjectFromProperty(migration_deprecations1_request, 'body'),
+    getZodLooseObjectFromProperty(migration_deprecations1_request, 'path'),
+    getZodLooseObjectFromProperty(migration_deprecations1_request, 'query'),
   ]),
   outputSchema: z.union([migration_deprecations_response, migration_deprecations1_response]),
 };
 const MIGRATION_GET_FEATURE_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.migration.get_feature_upgrade_status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get feature migration information`,
   description: `Get feature migration information.
 Version upgrades sometimes require changes to how features store configuration information and data in system indices.
@@ -11511,20 +11969,21 @@ You are strongly recommended to use the Upgrade Assistant.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-get-feature-upgrade-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'body'),
-    getLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'path'),
-    getLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'query'),
+    getZodLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'body'),
+    getZodLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'path'),
+    getZodLooseObjectFromProperty(migration_get_feature_upgrade_status_request, 'query'),
   ]),
   outputSchema: migration_get_feature_upgrade_status_response,
 };
 const MIGRATION_POST_FEATURE_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.migration.post_feature_upgrade',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start the feature migration`,
   description: `Start the feature migration.
 Version upgrades sometimes require changes to how features store configuration information and data in system indices.
@@ -11540,20 +11999,21 @@ TIP: The API is designed for indirect use by the Upgrade Assistant. We strongly 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-get-feature-upgrade-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(migration_post_feature_upgrade_request, 'body'),
-    getLooseObjectFromProperty(migration_post_feature_upgrade_request, 'path'),
-    getLooseObjectFromProperty(migration_post_feature_upgrade_request, 'query'),
+    getZodLooseObjectFromProperty(migration_post_feature_upgrade_request, 'body'),
+    getZodLooseObjectFromProperty(migration_post_feature_upgrade_request, 'path'),
+    getZodLooseObjectFromProperty(migration_post_feature_upgrade_request, 'query'),
   ]),
   outputSchema: migration_post_feature_upgrade_response,
 };
 const ML_CLEAR_TRAINED_MODEL_DEPLOYMENT_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.clear_trained_model_deployment_cache',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear trained model deployment cache`,
   description: `Clear trained model deployment cache.
 
@@ -11568,20 +12028,21 @@ Calling this API clears the caches without restarting the deployment.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-clear-trained-model-deployment-cache',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'body'),
-    getLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'path'),
-    getLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'query'),
+    getZodLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'body'),
+    getZodLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'path'),
+    getZodLooseObjectFromProperty(ml_clear_trained_model_deployment_cache_request, 'query'),
   ]),
   outputSchema: ml_clear_trained_model_deployment_cache_response,
 };
 const ML_CLOSE_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.close_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Close anomaly detection jobs`,
   description: `Close anomaly detection jobs.
 
@@ -11596,20 +12057,21 @@ When a datafeed that has a specified end date stops, it automatically closes its
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-close-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['allow_no_match', 'force', 'timeout'],
     bodyParams: ['allow_no_match', 'force', 'timeout'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_close_job_request, 'body'),
-    getLooseObjectFromProperty(ml_close_job_request, 'path'),
-    getLooseObjectFromProperty(ml_close_job_request, 'query'),
+    getZodLooseObjectFromProperty(ml_close_job_request, 'body'),
+    getZodLooseObjectFromProperty(ml_close_job_request, 'path'),
+    getZodLooseObjectFromProperty(ml_close_job_request, 'query'),
   ]),
   outputSchema: ml_close_job_response,
 };
 const ML_DELETE_CALENDAR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_calendar',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a calendar`,
   description: `Delete a calendar.
 
@@ -11621,20 +12083,21 @@ Remove all scheduled events from a calendar, then delete it.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-calendar',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['calendar_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_calendar_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_calendar_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_calendar_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_calendar_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_calendar_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_calendar_request, 'query'),
   ]),
   outputSchema: ml_delete_calendar_response,
 };
 const ML_DELETE_CALENDAR_EVENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_calendar_event',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete events from a calendar`,
   description: `Delete events from a calendar.
 
@@ -11644,20 +12107,21 @@ const ML_DELETE_CALENDAR_EVENT_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-calendar-event',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['calendar_id', 'event_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_calendar_event_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_calendar_event_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_calendar_event_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_calendar_event_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_calendar_event_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_calendar_event_request, 'query'),
   ]),
   outputSchema: ml_delete_calendar_event_response,
 };
 const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_calendar_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete anomaly jobs from a calendar`,
   description: `Delete anomaly jobs from a calendar.
 
@@ -11667,20 +12131,21 @@ const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-calendar-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['calendar_id', 'job_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_calendar_job_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_calendar_job_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_calendar_job_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_calendar_job_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_calendar_job_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_calendar_job_request, 'query'),
   ]),
   outputSchema: ml_delete_calendar_job_response,
 };
 const ML_DELETE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_data_frame_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a data frame analytics job`,
   description: `Delete a data frame analytics job.
 
@@ -11690,20 +12155,21 @@ const ML_DELETE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-data-frame-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_data_frame_analytics_request, 'query'),
   ]),
   outputSchema: ml_delete_data_frame_analytics_response,
 };
 const ML_DELETE_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_datafeed',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a datafeed`,
   description: `Delete a datafeed.
 
@@ -11713,20 +12179,21 @@ const ML_DELETE_DATAFEED_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-datafeed',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['datafeed_id'],
     urlParams: ['force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_datafeed_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_datafeed_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_datafeed_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_datafeed_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_datafeed_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_datafeed_request, 'query'),
   ]),
   outputSchema: ml_delete_datafeed_response,
 };
 const ML_DELETE_EXPIRED_DATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_expired_data',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete expired ML data`,
   description: `Delete expired ML data.
 
@@ -11745,23 +12212,24 @@ jobs by using \`_all\`, by specifying \`*\` as the \`<job_id>\`, or by omitting 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-expired-data',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['requests_per_second', 'timeout'],
     bodyParams: ['requests_per_second', 'timeout'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_expired_data_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_expired_data_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_expired_data_request, 'query'),
-    getLooseObjectFromProperty(ml_delete_expired_data1_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_expired_data1_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_expired_data1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_expired_data_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_expired_data_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_expired_data_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_expired_data1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_expired_data1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_expired_data1_request, 'query'),
   ]),
   outputSchema: z.union([ml_delete_expired_data_response, ml_delete_expired_data1_response]),
 };
 const ML_DELETE_FILTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_filter',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a filter`,
   description: `Delete a filter.
 
@@ -11774,20 +12242,21 @@ filter. You must update or delete the job before you can delete the filter.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-filter',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['filter_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_filter_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_filter_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_filter_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_filter_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_filter_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_filter_request, 'query'),
   ]),
   outputSchema: ml_delete_filter_response,
 };
 const ML_DELETE_FORECAST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_forecast',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete forecasts from a job`,
   description: `Delete forecasts from a job.
 
@@ -11805,23 +12274,24 @@ forecasts before they expire.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-forecast',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id', 'forecast_id'],
     urlParams: ['allow_no_forecasts', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_forecast_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_forecast_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_forecast_request, 'query'),
-    getLooseObjectFromProperty(ml_delete_forecast1_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_forecast1_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_forecast1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_forecast_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_forecast_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_forecast_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_forecast1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_forecast1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_forecast1_request, 'query'),
   ]),
   outputSchema: z.union([ml_delete_forecast_response, ml_delete_forecast1_response]),
 };
 const ML_DELETE_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an anomaly detection job`,
   description: `Delete an anomaly detection job.
 
@@ -11838,20 +12308,21 @@ delete job request.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['force', 'delete_user_annotations', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_job_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_job_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_job_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_job_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_job_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_job_request, 'query'),
   ]),
   outputSchema: ml_delete_job_response,
 };
 const ML_DELETE_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_model_snapshot',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a model snapshot`,
   description: `Delete a model snapshot.
 
@@ -11865,20 +12336,21 @@ the \`model_snapshot_id\` in the results from the get jobs API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-model-snapshot',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id', 'snapshot_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_model_snapshot_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_model_snapshot_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_model_snapshot_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_model_snapshot_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_model_snapshot_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_model_snapshot_request, 'query'),
   ]),
   outputSchema: ml_delete_model_snapshot_response,
 };
 const ML_DELETE_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_trained_model',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an unreferenced trained model`,
   description: `Delete an unreferenced trained model.
 
@@ -11890,20 +12362,21 @@ The request deletes a trained inference model that is not referenced by an inges
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-trained-model',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_trained_model_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_trained_model_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_trained_model_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_trained_model_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_trained_model_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_trained_model_request, 'query'),
   ]),
   outputSchema: ml_delete_trained_model_response,
 };
 const ML_DELETE_TRAINED_MODEL_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.delete_trained_model_alias',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a trained model alias`,
   description: `Delete a trained model alias.
 
@@ -11917,20 +12390,21 @@ by the \`model_id\`, this API returns an error.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-trained-model-alias',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id', 'model_alias'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'body'),
-    getLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'path'),
-    getLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'query'),
+    getZodLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'body'),
+    getZodLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'path'),
+    getZodLooseObjectFromProperty(ml_delete_trained_model_alias_request, 'query'),
   ]),
   outputSchema: ml_delete_trained_model_alias_response,
 };
 const ML_ESTIMATE_MODEL_MEMORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.estimate_model_memory',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Estimate job model memory usage`,
   description: `Estimate job model memory usage.
 
@@ -11944,20 +12418,21 @@ estimates for the fields it references.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-estimate-model-memory',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['analysis_config', 'max_bucket_cardinality', 'overall_cardinality'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_estimate_model_memory_request, 'body'),
-    getLooseObjectFromProperty(ml_estimate_model_memory_request, 'path'),
-    getLooseObjectFromProperty(ml_estimate_model_memory_request, 'query'),
+    getZodLooseObjectFromProperty(ml_estimate_model_memory_request, 'body'),
+    getZodLooseObjectFromProperty(ml_estimate_model_memory_request, 'path'),
+    getZodLooseObjectFromProperty(ml_estimate_model_memory_request, 'query'),
   ]),
   outputSchema: ml_estimate_model_memory_response,
 };
 const ML_EVALUATE_DATA_FRAME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.evaluate_data_frame',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Evaluate data frame analytics`,
   description: `Evaluate data frame analytics.
 
@@ -11972,20 +12447,21 @@ field and an analytics result field to be present.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-evaluate-data-frame',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['evaluation', 'index', 'query'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_evaluate_data_frame_request, 'body'),
-    getLooseObjectFromProperty(ml_evaluate_data_frame_request, 'path'),
-    getLooseObjectFromProperty(ml_evaluate_data_frame_request, 'query'),
+    getZodLooseObjectFromProperty(ml_evaluate_data_frame_request, 'body'),
+    getZodLooseObjectFromProperty(ml_evaluate_data_frame_request, 'path'),
+    getZodLooseObjectFromProperty(ml_evaluate_data_frame_request, 'query'),
   ]),
   outputSchema: ml_evaluate_data_frame_response,
 };
 const ML_EXPLAIN_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.explain_data_frame_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Explain data frame analytics config`,
   description: `Explain data frame analytics config.
 
@@ -12002,6 +12478,7 @@ If you have object fields or fields that are excluded via source filtering, they
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-explain-data-frame-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [
@@ -12016,18 +12493,18 @@ If you have object fields or fields that are excluded via source filtering, they
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'body'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'path'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'query'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'body'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'path'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'query'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'body'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'path'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'query'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'body'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'path'),
-    getLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'query'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'body'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'path'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics2_request, 'query'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'body'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'path'),
+    getZodLooseObjectFromProperty(ml_explain_data_frame_analytics3_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_explain_data_frame_analytics_response,
@@ -12038,7 +12515,7 @@ If you have object fields or fields that are excluded via source filtering, they
 };
 const ML_FLUSH_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.flush_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Force buffered data to be processed`,
   description: `Force buffered data to be processed.
 The flush jobs API is only applicable when sending data for analysis using
@@ -12056,20 +12533,21 @@ analyzing further data.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-flush-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['advance_time', 'calc_interim', 'end', 'skip_time', 'start'],
     bodyParams: ['advance_time', 'calc_interim', 'end', 'skip_time', 'start'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_flush_job_request, 'body'),
-    getLooseObjectFromProperty(ml_flush_job_request, 'path'),
-    getLooseObjectFromProperty(ml_flush_job_request, 'query'),
+    getZodLooseObjectFromProperty(ml_flush_job_request, 'body'),
+    getZodLooseObjectFromProperty(ml_flush_job_request, 'path'),
+    getZodLooseObjectFromProperty(ml_flush_job_request, 'query'),
   ]),
   outputSchema: ml_flush_job_response,
 };
 const ML_FORECAST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.forecast',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Predict future behavior of a time series`,
   description: `Predict future behavior of a time series.
 
@@ -12084,20 +12562,21 @@ based on historical data.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-forecast',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['duration', 'expires_in', 'max_model_memory'],
     bodyParams: ['duration', 'expires_in', 'max_model_memory'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_forecast_request, 'body'),
-    getLooseObjectFromProperty(ml_forecast_request, 'path'),
-    getLooseObjectFromProperty(ml_forecast_request, 'query'),
+    getZodLooseObjectFromProperty(ml_forecast_request, 'body'),
+    getZodLooseObjectFromProperty(ml_forecast_request, 'path'),
+    getZodLooseObjectFromProperty(ml_forecast_request, 'query'),
   ]),
   outputSchema: ml_forecast_response,
 };
 const ML_GET_BUCKETS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_buckets',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get anomaly detection job results for buckets`,
   description: `Get anomaly detection job results for buckets.
 The API presents a chronological view of the records, grouped by bucket.
@@ -12111,6 +12590,7 @@ The API presents a chronological view of the records, grouped by bucket.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-buckets',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id', 'timestamp'],
     urlParams: [
       'anomaly_score',
@@ -12135,18 +12615,18 @@ The API presents a chronological view of the records, grouped by bucket.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_buckets_request, 'body'),
-    getLooseObjectFromProperty(ml_get_buckets_request, 'path'),
-    getLooseObjectFromProperty(ml_get_buckets_request, 'query'),
-    getLooseObjectFromProperty(ml_get_buckets1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_buckets1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_buckets1_request, 'query'),
-    getLooseObjectFromProperty(ml_get_buckets2_request, 'body'),
-    getLooseObjectFromProperty(ml_get_buckets2_request, 'path'),
-    getLooseObjectFromProperty(ml_get_buckets2_request, 'query'),
-    getLooseObjectFromProperty(ml_get_buckets3_request, 'body'),
-    getLooseObjectFromProperty(ml_get_buckets3_request, 'path'),
-    getLooseObjectFromProperty(ml_get_buckets3_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_buckets_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_buckets_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_buckets_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_buckets1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_buckets1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_buckets1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_buckets2_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_buckets2_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_buckets2_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_buckets3_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_buckets3_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_buckets3_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_get_buckets_response,
@@ -12157,7 +12637,7 @@ The API presents a chronological view of the records, grouped by bucket.
 };
 const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_calendar_events',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get info about events in calendars`,
   description: `Get info about events in calendars.
 
@@ -12167,20 +12647,21 @@ const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-calendar-events',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['calendar_id'],
     urlParams: ['end', 'from', 'job_id', 'size', 'start'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_calendar_events_request, 'body'),
-    getLooseObjectFromProperty(ml_get_calendar_events_request, 'path'),
-    getLooseObjectFromProperty(ml_get_calendar_events_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_calendar_events_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_calendar_events_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_calendar_events_request, 'query'),
   ]),
   outputSchema: ml_get_calendar_events_response,
 };
 const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_calendars',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get calendar configuration info`,
   description: `Get calendar configuration info.
 
@@ -12190,23 +12671,24 @@ const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-calendars',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['calendar_id'],
     urlParams: ['from', 'size'],
     bodyParams: ['page'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_calendars_request, 'body'),
-    getLooseObjectFromProperty(ml_get_calendars_request, 'path'),
-    getLooseObjectFromProperty(ml_get_calendars_request, 'query'),
-    getLooseObjectFromProperty(ml_get_calendars1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_calendars1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_calendars1_request, 'query'),
-    getLooseObjectFromProperty(ml_get_calendars2_request, 'body'),
-    getLooseObjectFromProperty(ml_get_calendars2_request, 'path'),
-    getLooseObjectFromProperty(ml_get_calendars2_request, 'query'),
-    getLooseObjectFromProperty(ml_get_calendars3_request, 'body'),
-    getLooseObjectFromProperty(ml_get_calendars3_request, 'path'),
-    getLooseObjectFromProperty(ml_get_calendars3_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_calendars_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_calendars_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_calendars_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_calendars1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_calendars1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_calendars1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_calendars2_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_calendars2_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_calendars2_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_calendars3_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_calendars3_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_calendars3_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_get_calendars_response,
@@ -12217,7 +12699,7 @@ const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
 };
 const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_categories',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get anomaly detection job results for categories`,
   description: `Get anomaly detection job results for categories.
 
@@ -12230,23 +12712,24 @@ const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-categories',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id', 'category_id'],
     urlParams: ['from', 'partition_field_value', 'size'],
     bodyParams: ['page'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_categories_request, 'body'),
-    getLooseObjectFromProperty(ml_get_categories_request, 'path'),
-    getLooseObjectFromProperty(ml_get_categories_request, 'query'),
-    getLooseObjectFromProperty(ml_get_categories1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_categories1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_categories1_request, 'query'),
-    getLooseObjectFromProperty(ml_get_categories2_request, 'body'),
-    getLooseObjectFromProperty(ml_get_categories2_request, 'path'),
-    getLooseObjectFromProperty(ml_get_categories2_request, 'query'),
-    getLooseObjectFromProperty(ml_get_categories3_request, 'body'),
-    getLooseObjectFromProperty(ml_get_categories3_request, 'path'),
-    getLooseObjectFromProperty(ml_get_categories3_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_categories_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_categories_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_categories_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_categories1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_categories1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_categories1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_categories2_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_categories2_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_categories2_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_categories3_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_categories3_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_categories3_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_get_categories_response,
@@ -12257,7 +12740,7 @@ const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
 };
 const ML_GET_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_data_frame_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data frame analytics job configuration info`,
   description: `Get data frame analytics job configuration info.
 You can get information for multiple data frame analytics jobs in a single
@@ -12270,17 +12753,18 @@ wildcard expression.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-data-frame-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['allow_no_match', 'from', 'size', 'exclude_generated'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'body'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'path'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'query'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics1_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_get_data_frame_analytics_response,
@@ -12289,7 +12773,7 @@ wildcard expression.
 };
 const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_data_frame_analytics_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get data frame analytics job stats`,
   description: `Get data frame analytics job stats.
 
@@ -12299,17 +12783,18 @@ const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-data-frame-analytics-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['allow_no_match', 'from', 'size', 'verbose'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'body'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'path'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'query'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_data_frame_analytics_stats1_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_get_data_frame_analytics_stats_response,
@@ -12318,7 +12803,7 @@ const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
 };
 const ML_GET_DATAFEED_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_datafeed_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get datafeed stats`,
   description: `Get datafeed stats.
 You can get statistics for multiple datafeeds in a single API request by
@@ -12334,23 +12819,24 @@ This API returns a maximum of 10,000 datafeeds.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-datafeed-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['datafeed_id'],
     urlParams: ['allow_no_match'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_datafeed_stats_request, 'body'),
-    getLooseObjectFromProperty(ml_get_datafeed_stats_request, 'path'),
-    getLooseObjectFromProperty(ml_get_datafeed_stats_request, 'query'),
-    getLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_datafeed_stats_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_datafeed_stats_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_datafeed_stats_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_datafeed_stats1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_datafeed_stats_response, ml_get_datafeed_stats1_response]),
 };
 const ML_GET_DATAFEEDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_datafeeds',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get datafeeds configuration info`,
   description: `Get datafeeds configuration info.
 You can get information for multiple datafeeds in a single API request by
@@ -12365,23 +12851,24 @@ This API returns a maximum of 10,000 datafeeds.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-datafeeds',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['datafeed_id'],
     urlParams: ['allow_no_match', 'exclude_generated'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_datafeeds_request, 'body'),
-    getLooseObjectFromProperty(ml_get_datafeeds_request, 'path'),
-    getLooseObjectFromProperty(ml_get_datafeeds_request, 'query'),
-    getLooseObjectFromProperty(ml_get_datafeeds1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_datafeeds1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_datafeeds1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_datafeeds_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_datafeeds_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_datafeeds_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_datafeeds1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_datafeeds1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_datafeeds1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_datafeeds_response, ml_get_datafeeds1_response]),
 };
 const ML_GET_FILTERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_filters',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get filters`,
   description: `Get filters.
 You can get a single filter or all filters.
@@ -12392,23 +12879,24 @@ You can get a single filter or all filters.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-filters',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['filter_id'],
     urlParams: ['from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_filters_request, 'body'),
-    getLooseObjectFromProperty(ml_get_filters_request, 'path'),
-    getLooseObjectFromProperty(ml_get_filters_request, 'query'),
-    getLooseObjectFromProperty(ml_get_filters1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_filters1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_filters1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_filters_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_filters_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_filters_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_filters1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_filters1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_filters1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_filters_response, ml_get_filters1_response]),
 };
 const ML_GET_INFLUENCERS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_influencers',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get anomaly detection job results for influencers`,
   description: `Get anomaly detection job results for influencers.
 Influencers are the entities that have contributed to, or are to blame for,
@@ -12421,6 +12909,7 @@ the anomalies. Influencer results are available only if an
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-influencers',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: [
       'desc',
@@ -12435,18 +12924,18 @@ the anomalies. Influencer results are available only if an
     bodyParams: ['page'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_influencers_request, 'body'),
-    getLooseObjectFromProperty(ml_get_influencers_request, 'path'),
-    getLooseObjectFromProperty(ml_get_influencers_request, 'query'),
-    getLooseObjectFromProperty(ml_get_influencers1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_influencers1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_influencers1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_influencers_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_influencers_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_influencers_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_influencers1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_influencers1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_influencers1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_influencers_response, ml_get_influencers1_response]),
 };
 const ML_GET_JOB_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_job_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get anomaly detection job stats`,
   description: `Get anomaly detection job stats.
 
@@ -12456,23 +12945,24 @@ const ML_GET_JOB_STATS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-job-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['allow_no_match'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_job_stats_request, 'body'),
-    getLooseObjectFromProperty(ml_get_job_stats_request, 'path'),
-    getLooseObjectFromProperty(ml_get_job_stats_request, 'query'),
-    getLooseObjectFromProperty(ml_get_job_stats1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_job_stats1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_job_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_job_stats_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_job_stats_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_job_stats_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_job_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_job_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_job_stats1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_job_stats_response, ml_get_job_stats1_response]),
 };
 const ML_GET_JOBS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_jobs',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get anomaly detection jobs configuration info`,
   description: `Get anomaly detection jobs configuration info.
 You can get information for multiple anomaly detection jobs in a single API
@@ -12486,23 +12976,24 @@ expression. You can get information for all anomaly detection jobs by using
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-jobs',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['allow_no_match', 'exclude_generated'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_jobs_request, 'body'),
-    getLooseObjectFromProperty(ml_get_jobs_request, 'path'),
-    getLooseObjectFromProperty(ml_get_jobs_request, 'query'),
-    getLooseObjectFromProperty(ml_get_jobs1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_jobs1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_jobs1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_jobs_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_jobs_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_jobs_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_jobs1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_jobs1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_jobs1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_jobs_response, ml_get_jobs1_response]),
 };
 const ML_GET_MEMORY_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_memory_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get machine learning memory usage info`,
   description: `Get machine learning memory usage info.
 Get information about how machine learning jobs and trained models are using memory,
@@ -12514,23 +13005,24 @@ on each node, both within the JVM heap, and natively, outside of the JVM.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-memory-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_memory_stats_request, 'body'),
-    getLooseObjectFromProperty(ml_get_memory_stats_request, 'path'),
-    getLooseObjectFromProperty(ml_get_memory_stats_request, 'query'),
-    getLooseObjectFromProperty(ml_get_memory_stats1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_memory_stats1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_memory_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_memory_stats_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_memory_stats_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_memory_stats_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_memory_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_memory_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_memory_stats1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_memory_stats_response, ml_get_memory_stats1_response]),
 };
 const ML_GET_MODEL_SNAPSHOT_UPGRADE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_model_snapshot_upgrade_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get anomaly detection job model snapshot upgrade usage info`,
   description: `Get anomaly detection job model snapshot upgrade usage info.
 
@@ -12540,20 +13032,21 @@ const ML_GET_MODEL_SNAPSHOT_UPGRADE_STATS_CONTRACT: InternalConnectorContract = 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-model-snapshot-upgrade-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id', 'snapshot_id'],
     urlParams: ['allow_no_match'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'body'),
-    getLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'path'),
-    getLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshot_upgrade_stats_request, 'query'),
   ]),
   outputSchema: ml_get_model_snapshot_upgrade_stats_response,
 };
 const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_model_snapshots',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get model snapshots info`,
   description: `Get model snapshots info.
 
@@ -12566,23 +13059,24 @@ const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-model-snapshots',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id', 'snapshot_id'],
     urlParams: ['desc', 'end', 'from', 'size', 'sort', 'start'],
     bodyParams: ['desc', 'end', 'page', 'sort', 'start'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_model_snapshots_request, 'body'),
-    getLooseObjectFromProperty(ml_get_model_snapshots_request, 'path'),
-    getLooseObjectFromProperty(ml_get_model_snapshots_request, 'query'),
-    getLooseObjectFromProperty(ml_get_model_snapshots1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_model_snapshots1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_model_snapshots1_request, 'query'),
-    getLooseObjectFromProperty(ml_get_model_snapshots2_request, 'body'),
-    getLooseObjectFromProperty(ml_get_model_snapshots2_request, 'path'),
-    getLooseObjectFromProperty(ml_get_model_snapshots2_request, 'query'),
-    getLooseObjectFromProperty(ml_get_model_snapshots3_request, 'body'),
-    getLooseObjectFromProperty(ml_get_model_snapshots3_request, 'path'),
-    getLooseObjectFromProperty(ml_get_model_snapshots3_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots2_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots2_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots2_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots3_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots3_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_model_snapshots3_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_get_model_snapshots_response,
@@ -12593,7 +13087,7 @@ const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
 };
 const ML_GET_OVERALL_BUCKETS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_overall_buckets',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get overall bucket results`,
   description: `Get overall bucket results.
 
@@ -12621,6 +13115,7 @@ jobs' largest bucket span.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-overall-buckets',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: [
       'allow_no_match',
@@ -12642,18 +13137,18 @@ jobs' largest bucket span.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_overall_buckets_request, 'body'),
-    getLooseObjectFromProperty(ml_get_overall_buckets_request, 'path'),
-    getLooseObjectFromProperty(ml_get_overall_buckets_request, 'query'),
-    getLooseObjectFromProperty(ml_get_overall_buckets1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_overall_buckets1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_overall_buckets1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_overall_buckets_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_overall_buckets_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_overall_buckets_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_overall_buckets1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_overall_buckets1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_overall_buckets1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_overall_buckets_response, ml_get_overall_buckets1_response]),
 };
 const ML_GET_RECORDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_records',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get anomaly records for an anomaly detection job`,
   description: `Get anomaly records for an anomaly detection job.
 Records contain the detailed analytical results. They describe the anomalous
@@ -12673,23 +13168,24 @@ number of detectors.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-records',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['desc', 'end', 'exclude_interim', 'from', 'record_score', 'size', 'sort', 'start'],
     bodyParams: ['desc', 'end', 'exclude_interim', 'page', 'record_score', 'sort', 'start'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_records_request, 'body'),
-    getLooseObjectFromProperty(ml_get_records_request, 'path'),
-    getLooseObjectFromProperty(ml_get_records_request, 'query'),
-    getLooseObjectFromProperty(ml_get_records1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_records1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_records1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_records_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_records_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_records_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_records1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_records1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_records1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_records_response, ml_get_records1_response]),
 };
 const ML_GET_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_trained_models',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get trained model configuration info`,
   description: `Get trained model configuration info.
 
@@ -12699,6 +13195,7 @@ const ML_GET_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-trained-models',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: [
       'allow_no_match',
@@ -12712,18 +13209,18 @@ const ML_GET_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_trained_models_request, 'body'),
-    getLooseObjectFromProperty(ml_get_trained_models_request, 'path'),
-    getLooseObjectFromProperty(ml_get_trained_models_request, 'query'),
-    getLooseObjectFromProperty(ml_get_trained_models1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_trained_models1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_trained_models1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_trained_models_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_trained_models_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_trained_models_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_trained_models1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_trained_models1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_trained_models1_request, 'query'),
   ]),
   outputSchema: z.union([ml_get_trained_models_response, ml_get_trained_models1_response]),
 };
 const ML_GET_TRAINED_MODELS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_trained_models_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get trained models usage info`,
   description: `Get trained models usage info.
 You can get usage information for multiple trained
@@ -12735,17 +13232,18 @@ models in a single API request by using a comma-separated list of model IDs or a
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-trained-models-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: ['allow_no_match', 'from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_get_trained_models_stats_request, 'body'),
-    getLooseObjectFromProperty(ml_get_trained_models_stats_request, 'path'),
-    getLooseObjectFromProperty(ml_get_trained_models_stats_request, 'query'),
-    getLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'body'),
-    getLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'path'),
-    getLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_trained_models_stats_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_trained_models_stats_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_trained_models_stats_request, 'query'),
+    getZodLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_get_trained_models_stats1_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_get_trained_models_stats_response,
@@ -12754,7 +13252,7 @@ models in a single API request by using a comma-separated list of model IDs or a
 };
 const ML_INFER_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.infer_trained_model',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Evaluate a trained model`,
   description: `Evaluate a trained model.
 
@@ -12764,20 +13262,21 @@ const ML_INFER_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-infer-trained-model',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: ['timeout'],
     bodyParams: ['docs', 'inference_config'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_infer_trained_model_request, 'body'),
-    getLooseObjectFromProperty(ml_infer_trained_model_request, 'path'),
-    getLooseObjectFromProperty(ml_infer_trained_model_request, 'query'),
+    getZodLooseObjectFromProperty(ml_infer_trained_model_request, 'body'),
+    getZodLooseObjectFromProperty(ml_infer_trained_model_request, 'path'),
+    getZodLooseObjectFromProperty(ml_infer_trained_model_request, 'query'),
   ]),
   outputSchema: ml_infer_trained_model_response,
 };
 const ML_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.info',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get machine learning information`,
   description: `Get machine learning information.
 Get defaults and limits used by machine learning.
@@ -12793,20 +13292,21 @@ cluster configuration.
   patterns: ['_ml/info'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-info',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_info_request, 'body'),
-    getLooseObjectFromProperty(ml_info_request, 'path'),
-    getLooseObjectFromProperty(ml_info_request, 'query'),
+    getZodLooseObjectFromProperty(ml_info_request, 'body'),
+    getZodLooseObjectFromProperty(ml_info_request, 'path'),
+    getZodLooseObjectFromProperty(ml_info_request, 'query'),
   ]),
   outputSchema: ml_info_response,
 };
 const ML_OPEN_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.open_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Open anomaly detection jobs`,
   description: `Open anomaly detection jobs.
 
@@ -12823,20 +13323,21 @@ new data is received.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-open-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['timeout'],
     bodyParams: ['timeout'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_open_job_request, 'body'),
-    getLooseObjectFromProperty(ml_open_job_request, 'path'),
-    getLooseObjectFromProperty(ml_open_job_request, 'query'),
+    getZodLooseObjectFromProperty(ml_open_job_request, 'body'),
+    getZodLooseObjectFromProperty(ml_open_job_request, 'path'),
+    getZodLooseObjectFromProperty(ml_open_job_request, 'query'),
   ]),
   outputSchema: ml_open_job_response,
 };
 const ML_POST_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.post_calendar_events',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Add scheduled events to the calendar`,
   description: `Add scheduled events to the calendar.
 
@@ -12846,20 +13347,21 @@ const ML_POST_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-post-calendar-events',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['calendar_id'],
     urlParams: [],
     bodyParams: ['events'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_post_calendar_events_request, 'body'),
-    getLooseObjectFromProperty(ml_post_calendar_events_request, 'path'),
-    getLooseObjectFromProperty(ml_post_calendar_events_request, 'query'),
+    getZodLooseObjectFromProperty(ml_post_calendar_events_request, 'body'),
+    getZodLooseObjectFromProperty(ml_post_calendar_events_request, 'path'),
+    getZodLooseObjectFromProperty(ml_post_calendar_events_request, 'query'),
   ]),
   outputSchema: ml_post_calendar_events_response,
 };
 const ML_POST_DATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.post_data',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Send data to an anomaly detection job for analysis`,
   description: `Send data to an anomaly detection job for analysis.
 
@@ -12872,20 +13374,21 @@ It is not currently possible to post data to multiple jobs using wildcards or a 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-post-data',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['reset_end', 'reset_start'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_post_data_request, 'body'),
-    getLooseObjectFromProperty(ml_post_data_request, 'path'),
-    getLooseObjectFromProperty(ml_post_data_request, 'query'),
+    getZodLooseObjectFromProperty(ml_post_data_request, 'body'),
+    getZodLooseObjectFromProperty(ml_post_data_request, 'path'),
+    getZodLooseObjectFromProperty(ml_post_data_request, 'query'),
   ]),
   outputSchema: ml_post_data_response,
 };
 const ML_PREVIEW_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.preview_data_frame_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Preview features used by data frame analytics`,
   description: `Preview features used by data frame analytics.
 Preview the extracted features used by a data frame analytics config.
@@ -12896,23 +13399,24 @@ Preview the extracted features used by a data frame analytics config.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-preview-data-frame-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['config'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'body'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'path'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'query'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'body'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'path'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'query'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'body'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'path'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'query'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'body'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'path'),
-    getLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'query'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'body'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'path'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics2_request, 'query'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'body'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'path'),
+    getZodLooseObjectFromProperty(ml_preview_data_frame_analytics3_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_preview_data_frame_analytics_response,
@@ -12923,7 +13427,7 @@ Preview the extracted features used by a data frame analytics config.
 };
 const ML_PREVIEW_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.preview_datafeed',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Preview a datafeed`,
   description: `Preview a datafeed.
 This API returns the first "page" of search results from a datafeed.
@@ -12941,23 +13445,24 @@ You can also use secondary authorization headers to supply the credentials.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-preview-datafeed',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['datafeed_id'],
     urlParams: ['start', 'end'],
     bodyParams: ['datafeed_config', 'job_config'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_preview_datafeed_request, 'body'),
-    getLooseObjectFromProperty(ml_preview_datafeed_request, 'path'),
-    getLooseObjectFromProperty(ml_preview_datafeed_request, 'query'),
-    getLooseObjectFromProperty(ml_preview_datafeed1_request, 'body'),
-    getLooseObjectFromProperty(ml_preview_datafeed1_request, 'path'),
-    getLooseObjectFromProperty(ml_preview_datafeed1_request, 'query'),
-    getLooseObjectFromProperty(ml_preview_datafeed2_request, 'body'),
-    getLooseObjectFromProperty(ml_preview_datafeed2_request, 'path'),
-    getLooseObjectFromProperty(ml_preview_datafeed2_request, 'query'),
-    getLooseObjectFromProperty(ml_preview_datafeed3_request, 'body'),
-    getLooseObjectFromProperty(ml_preview_datafeed3_request, 'path'),
-    getLooseObjectFromProperty(ml_preview_datafeed3_request, 'query'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed_request, 'body'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed_request, 'path'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed_request, 'query'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed1_request, 'body'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed1_request, 'path'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed1_request, 'query'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed2_request, 'body'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed2_request, 'path'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed2_request, 'query'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed3_request, 'body'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed3_request, 'path'),
+    getZodLooseObjectFromProperty(ml_preview_datafeed3_request, 'query'),
   ]),
   outputSchema: z.union([
     ml_preview_datafeed_response,
@@ -12968,7 +13473,7 @@ You can also use secondary authorization headers to supply the credentials.
 };
 const ML_PUT_CALENDAR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_calendar',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a calendar`,
   description: `Create a calendar.
 
@@ -12978,20 +13483,21 @@ const ML_PUT_CALENDAR_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-calendar',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['calendar_id'],
     urlParams: [],
     bodyParams: ['job_ids', 'description'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_calendar_request, 'body'),
-    getLooseObjectFromProperty(ml_put_calendar_request, 'path'),
-    getLooseObjectFromProperty(ml_put_calendar_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_calendar_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_calendar_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_calendar_request, 'query'),
   ]),
   outputSchema: ml_put_calendar_response,
 };
 const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_calendar_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Add anomaly detection job to calendar`,
   description: `Add anomaly detection job to calendar.
 
@@ -13001,20 +13507,21 @@ const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-calendar-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['calendar_id', 'job_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_calendar_job_request, 'body'),
-    getLooseObjectFromProperty(ml_put_calendar_job_request, 'path'),
-    getLooseObjectFromProperty(ml_put_calendar_job_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_calendar_job_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_calendar_job_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_calendar_job_request, 'query'),
   ]),
   outputSchema: ml_put_calendar_job_response,
 };
 const ML_PUT_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_data_frame_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a data frame analytics job`,
   description: `Create a data frame analytics job.
 This API creates a data frame analytics job that performs an analysis on the
@@ -13031,6 +13538,7 @@ If you supply only a subset of the regression or classification parameters, hype
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-data-frame-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [
@@ -13048,15 +13556,15 @@ If you supply only a subset of the regression or classification parameters, hype
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'body'),
-    getLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'path'),
-    getLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'query'),
   ]),
   outputSchema: ml_put_data_frame_analytics_response,
 };
 const ML_PUT_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_datafeed',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a datafeed`,
   description: `Create a datafeed.
 Datafeeds retrieve data from Elasticsearch for analysis by an anomaly detection job.
@@ -13077,6 +13585,7 @@ directly to the \`.ml-config\` index. Do not give users \`write\` privileges on 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-datafeed',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['datafeed_id'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_throttled', 'ignore_unavailable'],
     bodyParams: [
@@ -13097,15 +13606,15 @@ directly to the \`.ml-config\` index. Do not give users \`write\` privileges on 
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_datafeed_request, 'body'),
-    getLooseObjectFromProperty(ml_put_datafeed_request, 'path'),
-    getLooseObjectFromProperty(ml_put_datafeed_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_datafeed_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_datafeed_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_datafeed_request, 'query'),
   ]),
   outputSchema: ml_put_datafeed_response,
 };
 const ML_PUT_FILTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_filter',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a filter`,
   description: `Create a filter.
 A filter contains a list of strings. It can be used by one or more anomaly detection jobs.
@@ -13117,20 +13626,21 @@ Specifically, filters are referenced in the \`custom_rules\` property of detecto
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-filter',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['filter_id'],
     urlParams: [],
     bodyParams: ['description', 'items'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_filter_request, 'body'),
-    getLooseObjectFromProperty(ml_put_filter_request, 'path'),
-    getLooseObjectFromProperty(ml_put_filter_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_filter_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_filter_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_filter_request, 'query'),
   ]),
   outputSchema: ml_put_filter_response,
 };
 const ML_PUT_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an anomaly detection job`,
   description: `Create an anomaly detection job.
 
@@ -13142,6 +13652,7 @@ If you include a \`datafeed_config\` but do not provide a query, the datafeed us
   patterns: ['_ml/anomaly_detectors/{job_id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_throttled', 'ignore_unavailable'],
     bodyParams: [
@@ -13164,15 +13675,15 @@ If you include a \`datafeed_config\` but do not provide a query, the datafeed us
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_job_request, 'body'),
-    getLooseObjectFromProperty(ml_put_job_request, 'path'),
-    getLooseObjectFromProperty(ml_put_job_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_job_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_job_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_job_request, 'query'),
   ]),
   outputSchema: ml_put_job_response,
 };
 const ML_PUT_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_trained_model',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a trained model`,
   description: `Create a trained model.
 Enable you to supply a trained model that is not created by data frame analytics.
@@ -13183,6 +13694,7 @@ Enable you to supply a trained model that is not created by data frame analytics
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: ['defer_definition_decompression', 'wait_for_completion'],
     bodyParams: [
@@ -13200,15 +13712,15 @@ Enable you to supply a trained model that is not created by data frame analytics
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_trained_model_request, 'body'),
-    getLooseObjectFromProperty(ml_put_trained_model_request, 'path'),
-    getLooseObjectFromProperty(ml_put_trained_model_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_request, 'query'),
   ]),
   outputSchema: ml_put_trained_model_response,
 };
 const ML_PUT_TRAINED_MODEL_ALIAS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_trained_model_alias',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a trained model alias`,
   description: `Create or update a trained model alias.
 A trained model alias is a logical name used to reference a single trained
@@ -13234,20 +13746,21 @@ returns a warning.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model-alias',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id', 'model_alias'],
     urlParams: ['reassign'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_trained_model_alias_request, 'body'),
-    getLooseObjectFromProperty(ml_put_trained_model_alias_request, 'path'),
-    getLooseObjectFromProperty(ml_put_trained_model_alias_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_alias_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_alias_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_alias_request, 'query'),
   ]),
   outputSchema: ml_put_trained_model_alias_response,
 };
 const ML_PUT_TRAINED_MODEL_DEFINITION_PART_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_trained_model_definition_part',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create part of a trained model definition`,
   description: `Create part of a trained model definition.
 
@@ -13257,20 +13770,21 @@ const ML_PUT_TRAINED_MODEL_DEFINITION_PART_CONTRACT: InternalConnectorContract =
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model-definition-part',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id', 'part'],
     urlParams: [],
     bodyParams: ['definition', 'total_definition_length', 'total_parts'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'body'),
-    getLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'path'),
-    getLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'query'),
   ]),
   outputSchema: ml_put_trained_model_definition_part_response,
 };
 const ML_PUT_TRAINED_MODEL_VOCABULARY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.put_trained_model_vocabulary',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a trained model vocabulary`,
   description: `Create a trained model vocabulary.
 This API is supported only for natural language processing (NLP) models.
@@ -13282,20 +13796,21 @@ The vocabulary is stored in the index as described in \`inference_config.*.vocab
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model-vocabulary',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: [],
     bodyParams: ['vocabulary', 'merges', 'scores'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'body'),
-    getLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'path'),
-    getLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'query'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'body'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'path'),
+    getZodLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'query'),
   ]),
   outputSchema: ml_put_trained_model_vocabulary_response,
 };
 const ML_RESET_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.reset_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Reset an anomaly detection job`,
   description: `Reset an anomaly detection job.
 All model state and results are deleted. The job is ready to start over as if
@@ -13309,20 +13824,21 @@ comma separated list.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-reset-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: ['wait_for_completion', 'delete_user_annotations'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_reset_job_request, 'body'),
-    getLooseObjectFromProperty(ml_reset_job_request, 'path'),
-    getLooseObjectFromProperty(ml_reset_job_request, 'query'),
+    getZodLooseObjectFromProperty(ml_reset_job_request, 'body'),
+    getZodLooseObjectFromProperty(ml_reset_job_request, 'path'),
+    getZodLooseObjectFromProperty(ml_reset_job_request, 'query'),
   ]),
   outputSchema: ml_reset_job_response,
 };
 const ML_REVERT_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.revert_model_snapshot',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Revert to a snapshot`,
   description: `Revert to a snapshot.
 The machine learning features react quickly to anomalous input, learning new
@@ -13339,20 +13855,21 @@ snapshot after Black Friday or a critical system failure.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-revert-model-snapshot',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id', 'snapshot_id'],
     urlParams: ['delete_intervening_results'],
     bodyParams: ['delete_intervening_results'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_revert_model_snapshot_request, 'body'),
-    getLooseObjectFromProperty(ml_revert_model_snapshot_request, 'path'),
-    getLooseObjectFromProperty(ml_revert_model_snapshot_request, 'query'),
+    getZodLooseObjectFromProperty(ml_revert_model_snapshot_request, 'body'),
+    getZodLooseObjectFromProperty(ml_revert_model_snapshot_request, 'path'),
+    getZodLooseObjectFromProperty(ml_revert_model_snapshot_request, 'query'),
   ]),
   outputSchema: ml_revert_model_snapshot_response,
 };
 const ML_SET_UPGRADE_MODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.set_upgrade_mode',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Set upgrade_mode for ML indices`,
   description: `Set upgrade_mode for ML indices.
 Sets a cluster wide upgrade_mode setting that prepares machine learning
@@ -13374,20 +13891,21 @@ machine learning info API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-set-upgrade-mode',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['enabled', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_set_upgrade_mode_request, 'body'),
-    getLooseObjectFromProperty(ml_set_upgrade_mode_request, 'path'),
-    getLooseObjectFromProperty(ml_set_upgrade_mode_request, 'query'),
+    getZodLooseObjectFromProperty(ml_set_upgrade_mode_request, 'body'),
+    getZodLooseObjectFromProperty(ml_set_upgrade_mode_request, 'path'),
+    getZodLooseObjectFromProperty(ml_set_upgrade_mode_request, 'query'),
   ]),
   outputSchema: ml_set_upgrade_mode_response,
 };
 const ML_START_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.start_data_frame_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start a data frame analytics job`,
   description: `Start a data frame analytics job.
 A data frame analytics job can be started and stopped multiple times
@@ -13408,20 +13926,21 @@ the destination index in advance with custom settings and mappings.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-data-frame-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'body'),
-    getLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'path'),
-    getLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(ml_start_data_frame_analytics_request, 'query'),
   ]),
   outputSchema: ml_start_data_frame_analytics_response,
 };
 const ML_START_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.start_datafeed',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start datafeeds`,
   description: `Start datafeeds.
 
@@ -13443,20 +13962,21 @@ authorization headers when you created or updated the datafeed, those credential
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-datafeed',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['datafeed_id'],
     urlParams: ['end', 'start', 'timeout'],
     bodyParams: ['end', 'start', 'timeout'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_start_datafeed_request, 'body'),
-    getLooseObjectFromProperty(ml_start_datafeed_request, 'path'),
-    getLooseObjectFromProperty(ml_start_datafeed_request, 'query'),
+    getZodLooseObjectFromProperty(ml_start_datafeed_request, 'body'),
+    getZodLooseObjectFromProperty(ml_start_datafeed_request, 'path'),
+    getZodLooseObjectFromProperty(ml_start_datafeed_request, 'query'),
   ]),
   outputSchema: ml_start_datafeed_response,
 };
 const ML_START_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.start_trained_model_deployment',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start a trained model deployment`,
   description: `Start a trained model deployment.
 It allocates the model to every machine learning node.
@@ -13467,6 +13987,7 @@ It allocates the model to every machine learning node.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-trained-model-deployment',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: [
       'cache_size',
@@ -13481,15 +14002,15 @@ It allocates the model to every machine learning node.
     bodyParams: ['adaptive_allocations'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'body'),
-    getLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'path'),
-    getLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'query'),
+    getZodLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'body'),
+    getZodLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'path'),
+    getZodLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'query'),
   ]),
   outputSchema: ml_start_trained_model_deployment_response,
 };
 const ML_STOP_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.stop_data_frame_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Stop data frame analytics jobs`,
   description: `Stop data frame analytics jobs.
 A data frame analytics job can be started and stopped multiple times
@@ -13501,20 +14022,21 @@ throughout its lifecycle.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-stop-data-frame-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['allow_no_match', 'force', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'body'),
-    getLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'path'),
-    getLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(ml_stop_data_frame_analytics_request, 'query'),
   ]),
   outputSchema: ml_stop_data_frame_analytics_response,
 };
 const ML_STOP_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.stop_datafeed',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Stop datafeeds`,
   description: `Stop datafeeds.
 A datafeed that is stopped ceases to retrieve data from Elasticsearch. A datafeed can be started and stopped
@@ -13526,20 +14048,21 @@ multiple times throughout its lifecycle.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-stop-datafeed',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['datafeed_id'],
     urlParams: ['allow_no_match', 'force', 'timeout'],
     bodyParams: ['allow_no_match', 'force', 'timeout'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_stop_datafeed_request, 'body'),
-    getLooseObjectFromProperty(ml_stop_datafeed_request, 'path'),
-    getLooseObjectFromProperty(ml_stop_datafeed_request, 'query'),
+    getZodLooseObjectFromProperty(ml_stop_datafeed_request, 'body'),
+    getZodLooseObjectFromProperty(ml_stop_datafeed_request, 'path'),
+    getZodLooseObjectFromProperty(ml_stop_datafeed_request, 'query'),
   ]),
   outputSchema: ml_stop_datafeed_response,
 };
 const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.stop_trained_model_deployment',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Stop a trained model deployment`,
   description: `Stop a trained model deployment.
 
@@ -13549,20 +14072,21 @@ const ML_STOP_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-stop-trained-model-deployment',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: ['allow_no_match', 'force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'body'),
-    getLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'path'),
-    getLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'query'),
+    getZodLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'body'),
+    getZodLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'path'),
+    getZodLooseObjectFromProperty(ml_stop_trained_model_deployment_request, 'query'),
   ]),
   outputSchema: ml_stop_trained_model_deployment_response,
 };
 const ML_UPDATE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_data_frame_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update a data frame analytics job`,
   description: `Update a data frame analytics job.
 
@@ -13572,20 +14096,21 @@ const ML_UPDATE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-data-frame-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['description', 'model_memory_limit', 'max_num_threads', 'allow_lazy_start'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'body'),
-    getLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'path'),
-    getLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'query'),
   ]),
   outputSchema: ml_update_data_frame_analytics_response,
 };
 const ML_UPDATE_DATAFEED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_datafeed',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update a datafeed`,
   description: `Update a datafeed.
 You must stop and start the datafeed for the changes to be applied.
@@ -13599,6 +14124,7 @@ those credentials are used instead.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-datafeed',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['datafeed_id'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_throttled', 'ignore_unavailable'],
     bodyParams: [
@@ -13618,15 +14144,15 @@ those credentials are used instead.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_update_datafeed_request, 'body'),
-    getLooseObjectFromProperty(ml_update_datafeed_request, 'path'),
-    getLooseObjectFromProperty(ml_update_datafeed_request, 'query'),
+    getZodLooseObjectFromProperty(ml_update_datafeed_request, 'body'),
+    getZodLooseObjectFromProperty(ml_update_datafeed_request, 'path'),
+    getZodLooseObjectFromProperty(ml_update_datafeed_request, 'query'),
   ]),
   outputSchema: ml_update_datafeed_response,
 };
 const ML_UPDATE_FILTER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_filter',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update a filter`,
   description: `Update a filter.
 Updates the description of a filter, adds items, or removes items from the list.
@@ -13637,20 +14163,21 @@ Updates the description of a filter, adds items, or removes items from the list.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-filter',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['filter_id'],
     urlParams: [],
     bodyParams: ['add_items', 'description', 'remove_items'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_update_filter_request, 'body'),
-    getLooseObjectFromProperty(ml_update_filter_request, 'path'),
-    getLooseObjectFromProperty(ml_update_filter_request, 'query'),
+    getZodLooseObjectFromProperty(ml_update_filter_request, 'body'),
+    getZodLooseObjectFromProperty(ml_update_filter_request, 'path'),
+    getZodLooseObjectFromProperty(ml_update_filter_request, 'query'),
   ]),
   outputSchema: ml_update_filter_response,
 };
 const ML_UPDATE_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update an anomaly detection job`,
   description: `Update an anomaly detection job.
 Updates certain properties of an anomaly detection job.
@@ -13661,6 +14188,7 @@ Updates certain properties of an anomaly detection job.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id'],
     urlParams: [],
     bodyParams: [
@@ -13682,15 +14210,15 @@ Updates certain properties of an anomaly detection job.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_update_job_request, 'body'),
-    getLooseObjectFromProperty(ml_update_job_request, 'path'),
-    getLooseObjectFromProperty(ml_update_job_request, 'query'),
+    getZodLooseObjectFromProperty(ml_update_job_request, 'body'),
+    getZodLooseObjectFromProperty(ml_update_job_request, 'path'),
+    getZodLooseObjectFromProperty(ml_update_job_request, 'query'),
   ]),
   outputSchema: ml_update_job_response,
 };
 const ML_UPDATE_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_model_snapshot',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update a snapshot`,
   description: `Update a snapshot.
 Updates certain properties of a snapshot.
@@ -13701,20 +14229,21 @@ Updates certain properties of a snapshot.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-model-snapshot',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id', 'snapshot_id'],
     urlParams: [],
     bodyParams: ['description', 'retain'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_update_model_snapshot_request, 'body'),
-    getLooseObjectFromProperty(ml_update_model_snapshot_request, 'path'),
-    getLooseObjectFromProperty(ml_update_model_snapshot_request, 'query'),
+    getZodLooseObjectFromProperty(ml_update_model_snapshot_request, 'body'),
+    getZodLooseObjectFromProperty(ml_update_model_snapshot_request, 'path'),
+    getZodLooseObjectFromProperty(ml_update_model_snapshot_request, 'query'),
   ]),
   outputSchema: ml_update_model_snapshot_response,
 };
 const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.update_trained_model_deployment',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update a trained model deployment`,
   description: `Update a trained model deployment.
 
@@ -13724,20 +14253,21 @@ const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-trained-model-deployment',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['model_id'],
     urlParams: ['number_of_allocations'],
     bodyParams: ['number_of_allocations', 'adaptive_allocations'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'body'),
-    getLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'path'),
-    getLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'query'),
+    getZodLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'body'),
+    getZodLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'path'),
+    getZodLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'query'),
   ]),
   outputSchema: ml_update_trained_model_deployment_response,
 };
 const ML_UPGRADE_JOB_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.upgrade_job_snapshot',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Upgrade a snapshot`,
   description: `Upgrade a snapshot.
 Upgrade an anomaly detection model snapshot to the latest major version.
@@ -13756,21 +14286,22 @@ job.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-upgrade-job-snapshot',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['job_id', 'snapshot_id'],
     urlParams: ['wait_for_completion', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'body'),
-    getLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'path'),
-    getLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'query'),
+    getZodLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'body'),
+    getZodLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'path'),
+    getZodLooseObjectFromProperty(ml_upgrade_job_snapshot_request, 'query'),
   ]),
   outputSchema: ml_upgrade_job_snapshot_response,
 };
 const ML_VALIDATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.validate',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Validate an anomaly detection job.
 
  Documentation: https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html`,
@@ -13778,6 +14309,7 @@ const ML_VALIDATE_CONTRACT: InternalConnectorContract = {
   patterns: ['_ml/anomaly_detectors/_validate'],
   documentation: 'https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -13787,8 +14319,8 @@ const ML_VALIDATE_CONTRACT: InternalConnectorContract = {
 };
 const ML_VALIDATE_DETECTOR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.validate_detector',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Validate an anomaly detection job.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch`,
@@ -13796,6 +14328,7 @@ const ML_VALIDATE_DETECTOR_CONTRACT: InternalConnectorContract = {
   patterns: ['_ml/anomaly_detectors/_validate/detector'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -13805,8 +14338,8 @@ const ML_VALIDATE_DETECTOR_CONTRACT: InternalConnectorContract = {
 };
 const MONITORING_BULK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.monitoring.bulk',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Send monitoring data.
 This API is used by the monitoring features to send monitoring data.
 
@@ -13815,6 +14348,7 @@ This API is used by the monitoring features to send monitoring data.
   patterns: ['_monitoring/bulk', '_monitoring/{type}/bulk'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -13824,7 +14358,7 @@ This API is used by the monitoring features to send monitoring data.
 };
 const MSEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.msearch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run multiple searches`,
   description: `Run multiple searches.
 
@@ -13849,6 +14383,7 @@ When sending requests to this endpoint the \`Content-Type\` header should be set
   patterns: ['_msearch', '{index}/_msearch'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -13869,18 +14404,18 @@ When sending requests to this endpoint the \`Content-Type\` header should be set
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(msearch_request, 'body'),
-    getLooseObjectFromProperty(msearch_request, 'path'),
-    getLooseObjectFromProperty(msearch_request, 'query'),
-    getLooseObjectFromProperty(msearch1_request, 'body'),
-    getLooseObjectFromProperty(msearch1_request, 'path'),
-    getLooseObjectFromProperty(msearch1_request, 'query'),
-    getLooseObjectFromProperty(msearch2_request, 'body'),
-    getLooseObjectFromProperty(msearch2_request, 'path'),
-    getLooseObjectFromProperty(msearch2_request, 'query'),
-    getLooseObjectFromProperty(msearch3_request, 'body'),
-    getLooseObjectFromProperty(msearch3_request, 'path'),
-    getLooseObjectFromProperty(msearch3_request, 'query'),
+    getZodLooseObjectFromProperty(msearch_request, 'body'),
+    getZodLooseObjectFromProperty(msearch_request, 'path'),
+    getZodLooseObjectFromProperty(msearch_request, 'query'),
+    getZodLooseObjectFromProperty(msearch1_request, 'body'),
+    getZodLooseObjectFromProperty(msearch1_request, 'path'),
+    getZodLooseObjectFromProperty(msearch1_request, 'query'),
+    getZodLooseObjectFromProperty(msearch2_request, 'body'),
+    getZodLooseObjectFromProperty(msearch2_request, 'path'),
+    getZodLooseObjectFromProperty(msearch2_request, 'query'),
+    getZodLooseObjectFromProperty(msearch3_request, 'body'),
+    getZodLooseObjectFromProperty(msearch3_request, 'path'),
+    getZodLooseObjectFromProperty(msearch3_request, 'query'),
   ]),
   outputSchema: z.union([
     msearch_response,
@@ -13891,7 +14426,7 @@ When sending requests to this endpoint the \`Content-Type\` header should be set
 };
 const MSEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.msearch_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run multiple templated searches`,
   description: `Run multiple templated searches.
 
@@ -13915,6 +14450,7 @@ For example:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'ccs_minimize_roundtrips',
@@ -13926,18 +14462,18 @@ For example:
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(msearch_template_request, 'body'),
-    getLooseObjectFromProperty(msearch_template_request, 'path'),
-    getLooseObjectFromProperty(msearch_template_request, 'query'),
-    getLooseObjectFromProperty(msearch_template1_request, 'body'),
-    getLooseObjectFromProperty(msearch_template1_request, 'path'),
-    getLooseObjectFromProperty(msearch_template1_request, 'query'),
-    getLooseObjectFromProperty(msearch_template2_request, 'body'),
-    getLooseObjectFromProperty(msearch_template2_request, 'path'),
-    getLooseObjectFromProperty(msearch_template2_request, 'query'),
-    getLooseObjectFromProperty(msearch_template3_request, 'body'),
-    getLooseObjectFromProperty(msearch_template3_request, 'path'),
-    getLooseObjectFromProperty(msearch_template3_request, 'query'),
+    getZodLooseObjectFromProperty(msearch_template_request, 'body'),
+    getZodLooseObjectFromProperty(msearch_template_request, 'path'),
+    getZodLooseObjectFromProperty(msearch_template_request, 'query'),
+    getZodLooseObjectFromProperty(msearch_template1_request, 'body'),
+    getZodLooseObjectFromProperty(msearch_template1_request, 'path'),
+    getZodLooseObjectFromProperty(msearch_template1_request, 'query'),
+    getZodLooseObjectFromProperty(msearch_template2_request, 'body'),
+    getZodLooseObjectFromProperty(msearch_template2_request, 'path'),
+    getZodLooseObjectFromProperty(msearch_template2_request, 'query'),
+    getZodLooseObjectFromProperty(msearch_template3_request, 'body'),
+    getZodLooseObjectFromProperty(msearch_template3_request, 'path'),
+    getZodLooseObjectFromProperty(msearch_template3_request, 'query'),
   ]),
   outputSchema: z.union([
     msearch_template_response,
@@ -13948,7 +14484,7 @@ For example:
 };
 const MTERMVECTORS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.mtermvectors',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get multiple term vectors`,
   description: `Get multiple term vectors.
 
@@ -13969,6 +14505,7 @@ The mapping used is determined by the specified \`_index\`.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mtermvectors',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'ids',
@@ -13987,18 +14524,18 @@ The mapping used is determined by the specified \`_index\`.
     bodyParams: ['docs', 'ids'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(mtermvectors_request, 'body'),
-    getLooseObjectFromProperty(mtermvectors_request, 'path'),
-    getLooseObjectFromProperty(mtermvectors_request, 'query'),
-    getLooseObjectFromProperty(mtermvectors1_request, 'body'),
-    getLooseObjectFromProperty(mtermvectors1_request, 'path'),
-    getLooseObjectFromProperty(mtermvectors1_request, 'query'),
-    getLooseObjectFromProperty(mtermvectors2_request, 'body'),
-    getLooseObjectFromProperty(mtermvectors2_request, 'path'),
-    getLooseObjectFromProperty(mtermvectors2_request, 'query'),
-    getLooseObjectFromProperty(mtermvectors3_request, 'body'),
-    getLooseObjectFromProperty(mtermvectors3_request, 'path'),
-    getLooseObjectFromProperty(mtermvectors3_request, 'query'),
+    getZodLooseObjectFromProperty(mtermvectors_request, 'body'),
+    getZodLooseObjectFromProperty(mtermvectors_request, 'path'),
+    getZodLooseObjectFromProperty(mtermvectors_request, 'query'),
+    getZodLooseObjectFromProperty(mtermvectors1_request, 'body'),
+    getZodLooseObjectFromProperty(mtermvectors1_request, 'path'),
+    getZodLooseObjectFromProperty(mtermvectors1_request, 'query'),
+    getZodLooseObjectFromProperty(mtermvectors2_request, 'body'),
+    getZodLooseObjectFromProperty(mtermvectors2_request, 'path'),
+    getZodLooseObjectFromProperty(mtermvectors2_request, 'query'),
+    getZodLooseObjectFromProperty(mtermvectors3_request, 'body'),
+    getZodLooseObjectFromProperty(mtermvectors3_request, 'path'),
+    getZodLooseObjectFromProperty(mtermvectors3_request, 'query'),
   ]),
   outputSchema: z.union([
     mtermvectors_response,
@@ -14009,7 +14546,7 @@ The mapping used is determined by the specified \`_index\`.
 };
 const NODES_CLEAR_REPOSITORIES_METERING_ARCHIVE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.clear_repositories_metering_archive',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear the archived repositories metering`,
   description: `Clear the archived repositories metering.
 Clear the archived repositories metering information in the cluster.
@@ -14020,20 +14557,21 @@ Clear the archived repositories metering information in the cluster.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-clear-repositories-metering-archive',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id', 'max_archive_version'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'body'),
-    getLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'path'),
-    getLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_clear_repositories_metering_archive_request, 'query'),
   ]),
   outputSchema: nodes_clear_repositories_metering_archive_response,
 };
 const NODES_GET_REPOSITORIES_METERING_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.get_repositories_metering_info',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get cluster repositories metering`,
   description: `Get cluster repositories metering.
 Get repositories metering information for a cluster.
@@ -14046,20 +14584,21 @@ Additionally, the information exposed by this API is volatile, meaning that it w
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-get-repositories-metering-info',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'body'),
-    getLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'path'),
-    getLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_get_repositories_metering_info_request, 'query'),
   ]),
   outputSchema: nodes_get_repositories_metering_info_response,
 };
 const NODES_HOT_THREADS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.hot_threads',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the hot threads for nodes`,
   description: `Get the hot threads for nodes.
 Get a breakdown of the hot threads on each selected node in the cluster.
@@ -14071,6 +14610,7 @@ The output is plain text with a breakdown of the top hot threads for each node.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-hot-threads',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id'],
     urlParams: [
       'ignore_idle_threads',
@@ -14084,18 +14624,18 @@ The output is plain text with a breakdown of the top hot threads for each node.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(nodes_hot_threads_request, 'body'),
-    getLooseObjectFromProperty(nodes_hot_threads_request, 'path'),
-    getLooseObjectFromProperty(nodes_hot_threads_request, 'query'),
-    getLooseObjectFromProperty(nodes_hot_threads1_request, 'body'),
-    getLooseObjectFromProperty(nodes_hot_threads1_request, 'path'),
-    getLooseObjectFromProperty(nodes_hot_threads1_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_hot_threads_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_hot_threads_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_hot_threads_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_hot_threads1_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_hot_threads1_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_hot_threads1_request, 'query'),
   ]),
   outputSchema: z.union([nodes_hot_threads_response, nodes_hot_threads1_response]),
 };
 const NODES_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.info',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get node information`,
   description: `Get node information.
 
@@ -14106,23 +14646,24 @@ By default, the API returns all attributes and core settings for cluster nodes.
   patterns: ['_nodes', '_nodes/{node_id}', '_nodes/{metric}', '_nodes/{node_id}/{metric}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-info',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id', 'metric'],
     urlParams: ['flat_settings', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(nodes_info_request, 'body'),
-    getLooseObjectFromProperty(nodes_info_request, 'path'),
-    getLooseObjectFromProperty(nodes_info_request, 'query'),
-    getLooseObjectFromProperty(nodes_info1_request, 'body'),
-    getLooseObjectFromProperty(nodes_info1_request, 'path'),
-    getLooseObjectFromProperty(nodes_info1_request, 'query'),
-    getLooseObjectFromProperty(nodes_info2_request, 'body'),
-    getLooseObjectFromProperty(nodes_info2_request, 'path'),
-    getLooseObjectFromProperty(nodes_info2_request, 'query'),
-    getLooseObjectFromProperty(nodes_info3_request, 'body'),
-    getLooseObjectFromProperty(nodes_info3_request, 'path'),
-    getLooseObjectFromProperty(nodes_info3_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_info_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_info_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_info_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_info1_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_info1_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_info1_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_info2_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_info2_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_info2_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_info3_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_info3_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_info3_request, 'query'),
   ]),
   outputSchema: z.union([
     nodes_info_response,
@@ -14133,7 +14674,7 @@ By default, the API returns all attributes and core settings for cluster nodes.
 };
 const NODES_RELOAD_SECURE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.reload_secure_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Reload the keystore on nodes in the cluster`,
   description: `Reload the keystore on nodes in the cluster.
 
@@ -14151,17 +14692,18 @@ Alternatively, you can reload the secure settings on each node by locally access
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-reload-secure-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id'],
     urlParams: ['timeout'],
     bodyParams: ['secure_settings_password'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(nodes_reload_secure_settings_request, 'body'),
-    getLooseObjectFromProperty(nodes_reload_secure_settings_request, 'path'),
-    getLooseObjectFromProperty(nodes_reload_secure_settings_request, 'query'),
-    getLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'body'),
-    getLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'path'),
-    getLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_reload_secure_settings_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_reload_secure_settings_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_reload_secure_settings_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_reload_secure_settings1_request, 'query'),
   ]),
   outputSchema: z.union([
     nodes_reload_secure_settings_response,
@@ -14170,7 +14712,7 @@ Alternatively, you can reload the secure settings on each node by locally access
 };
 const NODES_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get node statistics`,
   description: `Get node statistics.
 Get statistics for nodes in a cluster.
@@ -14189,6 +14731,7 @@ By default, all stats are returned. You can limit the returned information by us
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id', 'metric', 'index_metric'],
     urlParams: [
       'completion_fields',
@@ -14204,24 +14747,24 @@ By default, all stats are returned. You can limit the returned information by us
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(nodes_stats_request, 'body'),
-    getLooseObjectFromProperty(nodes_stats_request, 'path'),
-    getLooseObjectFromProperty(nodes_stats_request, 'query'),
-    getLooseObjectFromProperty(nodes_stats1_request, 'body'),
-    getLooseObjectFromProperty(nodes_stats1_request, 'path'),
-    getLooseObjectFromProperty(nodes_stats1_request, 'query'),
-    getLooseObjectFromProperty(nodes_stats2_request, 'body'),
-    getLooseObjectFromProperty(nodes_stats2_request, 'path'),
-    getLooseObjectFromProperty(nodes_stats2_request, 'query'),
-    getLooseObjectFromProperty(nodes_stats3_request, 'body'),
-    getLooseObjectFromProperty(nodes_stats3_request, 'path'),
-    getLooseObjectFromProperty(nodes_stats3_request, 'query'),
-    getLooseObjectFromProperty(nodes_stats4_request, 'body'),
-    getLooseObjectFromProperty(nodes_stats4_request, 'path'),
-    getLooseObjectFromProperty(nodes_stats4_request, 'query'),
-    getLooseObjectFromProperty(nodes_stats5_request, 'body'),
-    getLooseObjectFromProperty(nodes_stats5_request, 'path'),
-    getLooseObjectFromProperty(nodes_stats5_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_stats_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_stats_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_stats_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_stats2_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_stats2_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_stats2_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_stats3_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_stats3_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_stats3_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_stats4_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_stats4_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_stats4_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_stats5_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_stats5_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_stats5_request, 'query'),
   ]),
   outputSchema: z.union([
     nodes_stats_response,
@@ -14234,7 +14777,7 @@ By default, all stats are returned. You can limit the returned information by us
 };
 const NODES_USAGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.usage',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get feature usage information`,
   description: `Get feature usage information.
 
@@ -14249,23 +14792,24 @@ const NODES_USAGE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-usage',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id', 'metric'],
     urlParams: ['timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(nodes_usage_request, 'body'),
-    getLooseObjectFromProperty(nodes_usage_request, 'path'),
-    getLooseObjectFromProperty(nodes_usage_request, 'query'),
-    getLooseObjectFromProperty(nodes_usage1_request, 'body'),
-    getLooseObjectFromProperty(nodes_usage1_request, 'path'),
-    getLooseObjectFromProperty(nodes_usage1_request, 'query'),
-    getLooseObjectFromProperty(nodes_usage2_request, 'body'),
-    getLooseObjectFromProperty(nodes_usage2_request, 'path'),
-    getLooseObjectFromProperty(nodes_usage2_request, 'query'),
-    getLooseObjectFromProperty(nodes_usage3_request, 'body'),
-    getLooseObjectFromProperty(nodes_usage3_request, 'path'),
-    getLooseObjectFromProperty(nodes_usage3_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_usage_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_usage_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_usage_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_usage1_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_usage1_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_usage1_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_usage2_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_usage2_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_usage2_request, 'query'),
+    getZodLooseObjectFromProperty(nodes_usage3_request, 'body'),
+    getZodLooseObjectFromProperty(nodes_usage3_request, 'path'),
+    getZodLooseObjectFromProperty(nodes_usage3_request, 'query'),
   ]),
   outputSchema: z.union([
     nodes_usage_response,
@@ -14276,7 +14820,7 @@ const NODES_USAGE_CONTRACT: InternalConnectorContract = {
 };
 const OPEN_POINT_IN_TIME_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.open_point_in_time',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Open a point in time`,
   description: `Open a point in time.
 
@@ -14322,6 +14866,7 @@ You can check how many point-in-times (that is, search contexts) are open with t
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-open-point-in-time',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'keep_alive',
@@ -14335,15 +14880,15 @@ You can check how many point-in-times (that is, search contexts) are open with t
     bodyParams: ['index_filter'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(open_point_in_time_request, 'body'),
-    getLooseObjectFromProperty(open_point_in_time_request, 'path'),
-    getLooseObjectFromProperty(open_point_in_time_request, 'query'),
+    getZodLooseObjectFromProperty(open_point_in_time_request, 'body'),
+    getZodLooseObjectFromProperty(open_point_in_time_request, 'path'),
+    getZodLooseObjectFromProperty(open_point_in_time_request, 'query'),
   ]),
   outputSchema: open_point_in_time_response,
 };
 const PING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ping',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Ping the cluster`,
   description: `Ping the cluster.
 Get information about whether the cluster is running.
@@ -14353,21 +14898,22 @@ Get information about whether the cluster is running.
   patterns: [''],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-cluster',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ping_request, 'body'),
-    getLooseObjectFromProperty(ping_request, 'path'),
-    getLooseObjectFromProperty(ping_request, 'query'),
+    getZodLooseObjectFromProperty(ping_request, 'body'),
+    getZodLooseObjectFromProperty(ping_request, 'path'),
+    getZodLooseObjectFromProperty(ping_request, 'query'),
   ]),
   outputSchema: ping_response,
 };
 const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.flamegraph',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Extracts a UI-optimized structure to render flamegraphs from Universal Profiling
 
  Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
@@ -14375,6 +14921,7 @@ const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
   patterns: ['_profiling/flamegraph'],
   documentation: 'https://www.elastic.co/guide/en/observability/current/universal-profiling.html',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -14384,8 +14931,8 @@ const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
 };
 const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.stacktraces',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Extracts raw stacktrace information from Universal Profiling
 
  Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
@@ -14393,6 +14940,7 @@ const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
   patterns: ['_profiling/stacktraces'],
   documentation: 'https://www.elastic.co/guide/en/observability/current/universal-profiling.html',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -14402,8 +14950,8 @@ const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
 };
 const PROFILING_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.status',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Returns basic information about the status of Universal Profiling
 
  Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
@@ -14411,6 +14959,7 @@ const PROFILING_STATUS_CONTRACT: InternalConnectorContract = {
   patterns: ['_profiling/status'],
   documentation: 'https://www.elastic.co/guide/en/observability/current/universal-profiling.html',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -14420,8 +14969,8 @@ const PROFILING_STATUS_CONTRACT: InternalConnectorContract = {
 };
 const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.topn_functions',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Extracts a list of topN functions from Universal Profiling
 
  Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
@@ -14429,6 +14978,7 @@ const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
   patterns: ['_profiling/topn/functions'],
   documentation: 'https://www.elastic.co/guide/en/observability/current/universal-profiling.html',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -14438,8 +14988,8 @@ const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
 };
 const PROJECT_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.project.tags',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Get tags.
 Get the tags that are defined for the project.
 
@@ -14449,6 +14999,7 @@ Get the tags that are defined for the project.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-project-tags',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -14458,7 +15009,7 @@ Get the tags that are defined for the project.
 };
 const PUT_SCRIPT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.put_script',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a script or search template`,
   description: `Create or update a script or search template.
 Creates or updates a stored script or search template.
@@ -14468,23 +15019,24 @@ Creates or updates a stored script or search template.
   patterns: ['_scripts/{id}', '_scripts/{id}/{context}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-put-script',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id', 'context'],
     urlParams: ['context', 'master_timeout', 'timeout'],
     bodyParams: ['script'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(put_script_request, 'body'),
-    getLooseObjectFromProperty(put_script_request, 'path'),
-    getLooseObjectFromProperty(put_script_request, 'query'),
-    getLooseObjectFromProperty(put_script1_request, 'body'),
-    getLooseObjectFromProperty(put_script1_request, 'path'),
-    getLooseObjectFromProperty(put_script1_request, 'query'),
-    getLooseObjectFromProperty(put_script2_request, 'body'),
-    getLooseObjectFromProperty(put_script2_request, 'path'),
-    getLooseObjectFromProperty(put_script2_request, 'query'),
-    getLooseObjectFromProperty(put_script3_request, 'body'),
-    getLooseObjectFromProperty(put_script3_request, 'path'),
-    getLooseObjectFromProperty(put_script3_request, 'query'),
+    getZodLooseObjectFromProperty(put_script_request, 'body'),
+    getZodLooseObjectFromProperty(put_script_request, 'path'),
+    getZodLooseObjectFromProperty(put_script_request, 'query'),
+    getZodLooseObjectFromProperty(put_script1_request, 'body'),
+    getZodLooseObjectFromProperty(put_script1_request, 'path'),
+    getZodLooseObjectFromProperty(put_script1_request, 'query'),
+    getZodLooseObjectFromProperty(put_script2_request, 'body'),
+    getZodLooseObjectFromProperty(put_script2_request, 'path'),
+    getZodLooseObjectFromProperty(put_script2_request, 'query'),
+    getZodLooseObjectFromProperty(put_script3_request, 'body'),
+    getZodLooseObjectFromProperty(put_script3_request, 'path'),
+    getZodLooseObjectFromProperty(put_script3_request, 'query'),
   ]),
   outputSchema: z.union([
     put_script_response,
@@ -14495,7 +15047,7 @@ Creates or updates a stored script or search template.
 };
 const QUERY_RULES_DELETE_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.delete_rule',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a query rule`,
   description: `Delete a query rule.
 Delete a query rule within a query ruleset.
@@ -14507,20 +15059,21 @@ This is a destructive action that is only recoverable by re-adding the same rule
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-delete-rule',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['ruleset_id', 'rule_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(query_rules_delete_rule_request, 'body'),
-    getLooseObjectFromProperty(query_rules_delete_rule_request, 'path'),
-    getLooseObjectFromProperty(query_rules_delete_rule_request, 'query'),
+    getZodLooseObjectFromProperty(query_rules_delete_rule_request, 'body'),
+    getZodLooseObjectFromProperty(query_rules_delete_rule_request, 'path'),
+    getZodLooseObjectFromProperty(query_rules_delete_rule_request, 'query'),
   ]),
   outputSchema: query_rules_delete_rule_response,
 };
 const QUERY_RULES_DELETE_RULESET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.delete_ruleset',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a query ruleset`,
   description: `Delete a query ruleset.
 Remove a query ruleset and its associated data.
@@ -14532,20 +15085,21 @@ This is a destructive action that is not recoverable.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-delete-ruleset',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['ruleset_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(query_rules_delete_ruleset_request, 'body'),
-    getLooseObjectFromProperty(query_rules_delete_ruleset_request, 'path'),
-    getLooseObjectFromProperty(query_rules_delete_ruleset_request, 'query'),
+    getZodLooseObjectFromProperty(query_rules_delete_ruleset_request, 'body'),
+    getZodLooseObjectFromProperty(query_rules_delete_ruleset_request, 'path'),
+    getZodLooseObjectFromProperty(query_rules_delete_ruleset_request, 'query'),
   ]),
   outputSchema: query_rules_delete_ruleset_response,
 };
 const QUERY_RULES_GET_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.get_rule',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a query rule`,
   description: `Get a query rule.
 Get details about a query rule within a query ruleset.
@@ -14556,20 +15110,21 @@ Get details about a query rule within a query ruleset.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-get-rule',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['ruleset_id', 'rule_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(query_rules_get_rule_request, 'body'),
-    getLooseObjectFromProperty(query_rules_get_rule_request, 'path'),
-    getLooseObjectFromProperty(query_rules_get_rule_request, 'query'),
+    getZodLooseObjectFromProperty(query_rules_get_rule_request, 'body'),
+    getZodLooseObjectFromProperty(query_rules_get_rule_request, 'path'),
+    getZodLooseObjectFromProperty(query_rules_get_rule_request, 'query'),
   ]),
   outputSchema: query_rules_get_rule_response,
 };
 const QUERY_RULES_GET_RULESET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.get_ruleset',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a query ruleset`,
   description: `Get a query ruleset.
 Get details about a query ruleset.
@@ -14580,20 +15135,21 @@ Get details about a query ruleset.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-get-ruleset',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['ruleset_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(query_rules_get_ruleset_request, 'body'),
-    getLooseObjectFromProperty(query_rules_get_ruleset_request, 'path'),
-    getLooseObjectFromProperty(query_rules_get_ruleset_request, 'query'),
+    getZodLooseObjectFromProperty(query_rules_get_ruleset_request, 'body'),
+    getZodLooseObjectFromProperty(query_rules_get_ruleset_request, 'path'),
+    getZodLooseObjectFromProperty(query_rules_get_ruleset_request, 'query'),
   ]),
   outputSchema: query_rules_get_ruleset_response,
 };
 const QUERY_RULES_LIST_RULESETS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.list_rulesets',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get all query rulesets`,
   description: `Get all query rulesets.
 Get summarized information about the query rulesets.
@@ -14604,20 +15160,21 @@ Get summarized information about the query rulesets.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-list-rulesets',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(query_rules_list_rulesets_request, 'body'),
-    getLooseObjectFromProperty(query_rules_list_rulesets_request, 'path'),
-    getLooseObjectFromProperty(query_rules_list_rulesets_request, 'query'),
+    getZodLooseObjectFromProperty(query_rules_list_rulesets_request, 'body'),
+    getZodLooseObjectFromProperty(query_rules_list_rulesets_request, 'path'),
+    getZodLooseObjectFromProperty(query_rules_list_rulesets_request, 'query'),
   ]),
   outputSchema: query_rules_list_rulesets_response,
 };
 const QUERY_RULES_PUT_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.put_rule',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a query rule`,
   description: `Create or update a query rule.
 Create or update a query rule within a query ruleset.
@@ -14633,20 +15190,21 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-put-rule',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['ruleset_id', 'rule_id'],
     urlParams: [],
     bodyParams: ['type', 'criteria', 'actions', 'priority'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(query_rules_put_rule_request, 'body'),
-    getLooseObjectFromProperty(query_rules_put_rule_request, 'path'),
-    getLooseObjectFromProperty(query_rules_put_rule_request, 'query'),
+    getZodLooseObjectFromProperty(query_rules_put_rule_request, 'body'),
+    getZodLooseObjectFromProperty(query_rules_put_rule_request, 'path'),
+    getZodLooseObjectFromProperty(query_rules_put_rule_request, 'query'),
   ]),
   outputSchema: query_rules_put_rule_response,
 };
 const QUERY_RULES_PUT_RULESET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.put_ruleset',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a query ruleset`,
   description: `Create or update a query ruleset.
 There is a limit of 100 rules per ruleset.
@@ -14663,20 +15221,21 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-put-ruleset',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['ruleset_id'],
     urlParams: [],
     bodyParams: ['rules'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(query_rules_put_ruleset_request, 'body'),
-    getLooseObjectFromProperty(query_rules_put_ruleset_request, 'path'),
-    getLooseObjectFromProperty(query_rules_put_ruleset_request, 'query'),
+    getZodLooseObjectFromProperty(query_rules_put_ruleset_request, 'body'),
+    getZodLooseObjectFromProperty(query_rules_put_ruleset_request, 'path'),
+    getZodLooseObjectFromProperty(query_rules_put_ruleset_request, 'query'),
   ]),
   outputSchema: query_rules_put_ruleset_response,
 };
 const QUERY_RULES_TEST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.query_rules.test',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Test a query ruleset`,
   description: `Test a query ruleset.
 Evaluate match criteria against a query ruleset to identify the rules that would match that criteria.
@@ -14687,20 +15246,21 @@ Evaluate match criteria against a query ruleset to identify the rules that would
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-test',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['ruleset_id'],
     urlParams: [],
     bodyParams: ['match_criteria'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(query_rules_test_request, 'body'),
-    getLooseObjectFromProperty(query_rules_test_request, 'path'),
-    getLooseObjectFromProperty(query_rules_test_request, 'query'),
+    getZodLooseObjectFromProperty(query_rules_test_request, 'body'),
+    getZodLooseObjectFromProperty(query_rules_test_request, 'path'),
+    getZodLooseObjectFromProperty(query_rules_test_request, 'query'),
   ]),
   outputSchema: query_rules_test_response,
 };
 const RANK_EVAL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rank_eval',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Evaluate ranked search results`,
   description: `Evaluate ranked search results.
 
@@ -14711,23 +15271,24 @@ Evaluate the quality of ranked search results over a set of typical search queri
   patterns: ['_rank_eval', '{index}/_rank_eval'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rank-eval',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'search_type'],
     bodyParams: ['requests', 'metric'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rank_eval_request, 'body'),
-    getLooseObjectFromProperty(rank_eval_request, 'path'),
-    getLooseObjectFromProperty(rank_eval_request, 'query'),
-    getLooseObjectFromProperty(rank_eval1_request, 'body'),
-    getLooseObjectFromProperty(rank_eval1_request, 'path'),
-    getLooseObjectFromProperty(rank_eval1_request, 'query'),
-    getLooseObjectFromProperty(rank_eval2_request, 'body'),
-    getLooseObjectFromProperty(rank_eval2_request, 'path'),
-    getLooseObjectFromProperty(rank_eval2_request, 'query'),
-    getLooseObjectFromProperty(rank_eval3_request, 'body'),
-    getLooseObjectFromProperty(rank_eval3_request, 'path'),
-    getLooseObjectFromProperty(rank_eval3_request, 'query'),
+    getZodLooseObjectFromProperty(rank_eval_request, 'body'),
+    getZodLooseObjectFromProperty(rank_eval_request, 'path'),
+    getZodLooseObjectFromProperty(rank_eval_request, 'query'),
+    getZodLooseObjectFromProperty(rank_eval1_request, 'body'),
+    getZodLooseObjectFromProperty(rank_eval1_request, 'path'),
+    getZodLooseObjectFromProperty(rank_eval1_request, 'query'),
+    getZodLooseObjectFromProperty(rank_eval2_request, 'body'),
+    getZodLooseObjectFromProperty(rank_eval2_request, 'path'),
+    getZodLooseObjectFromProperty(rank_eval2_request, 'query'),
+    getZodLooseObjectFromProperty(rank_eval3_request, 'body'),
+    getZodLooseObjectFromProperty(rank_eval3_request, 'path'),
+    getZodLooseObjectFromProperty(rank_eval3_request, 'query'),
   ]),
   outputSchema: z.union([
     rank_eval_response,
@@ -14738,7 +15299,7 @@ Evaluate the quality of ranked search results over a set of typical search queri
 };
 const REINDEX_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.reindex',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Reindex documents`,
   description: `Reindex documents.
 
@@ -14794,6 +15355,7 @@ Refer to the linked documentation for examples of how to reindex documents.
   patterns: ['_reindex'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'refresh',
@@ -14809,15 +15371,15 @@ Refer to the linked documentation for examples of how to reindex documents.
     bodyParams: ['conflicts', 'dest', 'max_docs', 'script', 'source'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(reindex_request, 'body'),
-    getLooseObjectFromProperty(reindex_request, 'path'),
-    getLooseObjectFromProperty(reindex_request, 'query'),
+    getZodLooseObjectFromProperty(reindex_request, 'body'),
+    getZodLooseObjectFromProperty(reindex_request, 'path'),
+    getZodLooseObjectFromProperty(reindex_request, 'query'),
   ]),
   outputSchema: reindex_response,
 };
 const REINDEX_RETHROTTLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.reindex_rethrottle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Throttle a reindex operation`,
   description: `Throttle a reindex operation.
 
@@ -14837,20 +15399,21 @@ This behavior prevents scroll timeouts.
   patterns: ['_reindex/{task_id}/_rethrottle'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_id'],
     urlParams: ['requests_per_second'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(reindex_rethrottle_request, 'body'),
-    getLooseObjectFromProperty(reindex_rethrottle_request, 'path'),
-    getLooseObjectFromProperty(reindex_rethrottle_request, 'query'),
+    getZodLooseObjectFromProperty(reindex_rethrottle_request, 'body'),
+    getZodLooseObjectFromProperty(reindex_rethrottle_request, 'path'),
+    getZodLooseObjectFromProperty(reindex_rethrottle_request, 'query'),
   ]),
   outputSchema: reindex_rethrottle_response,
 };
 const RENDER_SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.render_search_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Render a search template`,
   description: `Render a search template.
 
@@ -14862,23 +15425,24 @@ Render a search template as a search request body.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-render-search-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['id', 'file', 'params', 'source'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(render_search_template_request, 'body'),
-    getLooseObjectFromProperty(render_search_template_request, 'path'),
-    getLooseObjectFromProperty(render_search_template_request, 'query'),
-    getLooseObjectFromProperty(render_search_template1_request, 'body'),
-    getLooseObjectFromProperty(render_search_template1_request, 'path'),
-    getLooseObjectFromProperty(render_search_template1_request, 'query'),
-    getLooseObjectFromProperty(render_search_template2_request, 'body'),
-    getLooseObjectFromProperty(render_search_template2_request, 'path'),
-    getLooseObjectFromProperty(render_search_template2_request, 'query'),
-    getLooseObjectFromProperty(render_search_template3_request, 'body'),
-    getLooseObjectFromProperty(render_search_template3_request, 'path'),
-    getLooseObjectFromProperty(render_search_template3_request, 'query'),
+    getZodLooseObjectFromProperty(render_search_template_request, 'body'),
+    getZodLooseObjectFromProperty(render_search_template_request, 'path'),
+    getZodLooseObjectFromProperty(render_search_template_request, 'query'),
+    getZodLooseObjectFromProperty(render_search_template1_request, 'body'),
+    getZodLooseObjectFromProperty(render_search_template1_request, 'path'),
+    getZodLooseObjectFromProperty(render_search_template1_request, 'query'),
+    getZodLooseObjectFromProperty(render_search_template2_request, 'body'),
+    getZodLooseObjectFromProperty(render_search_template2_request, 'path'),
+    getZodLooseObjectFromProperty(render_search_template2_request, 'query'),
+    getZodLooseObjectFromProperty(render_search_template3_request, 'body'),
+    getZodLooseObjectFromProperty(render_search_template3_request, 'path'),
+    getZodLooseObjectFromProperty(render_search_template3_request, 'query'),
   ]),
   outputSchema: z.union([
     render_search_template_response,
@@ -14889,7 +15453,7 @@ Render a search template as a search request body.
 };
 const ROLLUP_DELETE_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.delete_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a rollup job`,
   description: `Delete a rollup job.
 
@@ -14922,20 +15486,21 @@ POST my_rollup_index/_delete_by_query
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-delete-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rollup_delete_job_request, 'body'),
-    getLooseObjectFromProperty(rollup_delete_job_request, 'path'),
-    getLooseObjectFromProperty(rollup_delete_job_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_delete_job_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_delete_job_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_delete_job_request, 'query'),
   ]),
   outputSchema: rollup_delete_job_response,
 };
 const ROLLUP_GET_JOBS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.get_jobs',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get rollup job information`,
   description: `Get rollup job information.
 Get the configuration, stats, and status of rollup jobs.
@@ -14950,23 +15515,24 @@ For details about a historical rollup job, the rollup capabilities API may be mo
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-get-jobs',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rollup_get_jobs_request, 'body'),
-    getLooseObjectFromProperty(rollup_get_jobs_request, 'path'),
-    getLooseObjectFromProperty(rollup_get_jobs_request, 'query'),
-    getLooseObjectFromProperty(rollup_get_jobs1_request, 'body'),
-    getLooseObjectFromProperty(rollup_get_jobs1_request, 'path'),
-    getLooseObjectFromProperty(rollup_get_jobs1_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_get_jobs_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_get_jobs_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_get_jobs_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_get_jobs1_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_get_jobs1_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_get_jobs1_request, 'query'),
   ]),
   outputSchema: z.union([rollup_get_jobs_response, rollup_get_jobs1_response]),
 };
 const ROLLUP_GET_ROLLUP_CAPS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.get_rollup_caps',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the rollup job capabilities`,
   description: `Get the rollup job capabilities.
 Get the capabilities of any rollup jobs that have been configured for a specific index or index pattern.
@@ -14984,23 +15550,24 @@ This API enables you to inspect an index and determine:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-get-rollup-caps',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rollup_get_rollup_caps_request, 'body'),
-    getLooseObjectFromProperty(rollup_get_rollup_caps_request, 'path'),
-    getLooseObjectFromProperty(rollup_get_rollup_caps_request, 'query'),
-    getLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'body'),
-    getLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'path'),
-    getLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_get_rollup_caps_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_get_rollup_caps_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_get_rollup_caps_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_get_rollup_caps1_request, 'query'),
   ]),
   outputSchema: z.union([rollup_get_rollup_caps_response, rollup_get_rollup_caps1_response]),
 };
 const ROLLUP_GET_ROLLUP_INDEX_CAPS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.get_rollup_index_caps',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the rollup index capabilities`,
   description: `Get the rollup index capabilities.
 Get the rollup capabilities of all jobs inside of a rollup index.
@@ -15015,20 +15582,21 @@ A single rollup index may store the data for multiple rollup jobs and may have a
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-get-rollup-index-caps',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'body'),
-    getLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'path'),
-    getLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_get_rollup_index_caps_request, 'query'),
   ]),
   outputSchema: rollup_get_rollup_index_caps_response,
 };
 const ROLLUP_PUT_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.put_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a rollup job`,
   description: `Create a rollup job.
 
@@ -15046,6 +15614,7 @@ Jobs are created in a \`STOPPED\` state. You can start them with the start rollu
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-put-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [
@@ -15060,15 +15629,15 @@ Jobs are created in a \`STOPPED\` state. You can start them with the start rollu
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rollup_put_job_request, 'body'),
-    getLooseObjectFromProperty(rollup_put_job_request, 'path'),
-    getLooseObjectFromProperty(rollup_put_job_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_put_job_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_put_job_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_put_job_request, 'query'),
   ]),
   outputSchema: rollup_put_job_response,
 };
 const ROLLUP_ROLLUP_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.rollup_search',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Search rolled-up data`,
   description: `Search rolled-up data.
 The rollup search endpoint is needed because, internally, rolled-up documents utilize a different document structure than the original data.
@@ -15088,23 +15657,24 @@ For more detailed examples of using the rollup search API, including querying ro
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-rollup-search',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['rest_total_hits_as_int', 'typed_keys'],
     bodyParams: ['aggregations', 'query', 'size'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rollup_rollup_search_request, 'body'),
-    getLooseObjectFromProperty(rollup_rollup_search_request, 'path'),
-    getLooseObjectFromProperty(rollup_rollup_search_request, 'query'),
-    getLooseObjectFromProperty(rollup_rollup_search1_request, 'body'),
-    getLooseObjectFromProperty(rollup_rollup_search1_request, 'path'),
-    getLooseObjectFromProperty(rollup_rollup_search1_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_rollup_search_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_rollup_search_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_rollup_search_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_rollup_search1_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_rollup_search1_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_rollup_search1_request, 'query'),
   ]),
   outputSchema: z.union([rollup_rollup_search_response, rollup_rollup_search1_response]),
 };
 const ROLLUP_START_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.start_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start rollup jobs`,
   description: `Start rollup jobs.
 If you try to start a job that does not exist, an exception occurs.
@@ -15116,20 +15686,21 @@ If you try to start a job that is already started, nothing happens.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-start-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rollup_start_job_request, 'body'),
-    getLooseObjectFromProperty(rollup_start_job_request, 'path'),
-    getLooseObjectFromProperty(rollup_start_job_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_start_job_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_start_job_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_start_job_request, 'query'),
   ]),
   outputSchema: rollup_start_job_response,
 };
 const ROLLUP_STOP_JOB_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.rollup.stop_job',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Stop rollup jobs`,
   description: `Stop rollup jobs.
 If you try to stop a job that does not exist, an exception occurs.
@@ -15150,20 +15721,21 @@ If the specified time elapses without the job moving to STOPPED, a timeout excep
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-stop-job',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['timeout', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(rollup_stop_job_request, 'body'),
-    getLooseObjectFromProperty(rollup_stop_job_request, 'path'),
-    getLooseObjectFromProperty(rollup_stop_job_request, 'query'),
+    getZodLooseObjectFromProperty(rollup_stop_job_request, 'body'),
+    getZodLooseObjectFromProperty(rollup_stop_job_request, 'path'),
+    getZodLooseObjectFromProperty(rollup_stop_job_request, 'query'),
   ]),
   outputSchema: rollup_stop_job_response,
 };
 const SCRIPTS_PAINLESS_EXECUTE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.scripts_painless_execute',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a script`,
   description: `Run a script.
 
@@ -15181,23 +15753,24 @@ Each context requires a script, but additional parameters depend on the context 
   documentation:
     'https://www.elastic.co/docs/reference/scripting-languages/painless/painless-api-examples',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['context', 'context_setup', 'script'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(scripts_painless_execute_request, 'body'),
-    getLooseObjectFromProperty(scripts_painless_execute_request, 'path'),
-    getLooseObjectFromProperty(scripts_painless_execute_request, 'query'),
-    getLooseObjectFromProperty(scripts_painless_execute1_request, 'body'),
-    getLooseObjectFromProperty(scripts_painless_execute1_request, 'path'),
-    getLooseObjectFromProperty(scripts_painless_execute1_request, 'query'),
+    getZodLooseObjectFromProperty(scripts_painless_execute_request, 'body'),
+    getZodLooseObjectFromProperty(scripts_painless_execute_request, 'path'),
+    getZodLooseObjectFromProperty(scripts_painless_execute_request, 'query'),
+    getZodLooseObjectFromProperty(scripts_painless_execute1_request, 'body'),
+    getZodLooseObjectFromProperty(scripts_painless_execute1_request, 'path'),
+    getZodLooseObjectFromProperty(scripts_painless_execute1_request, 'query'),
   ]),
   outputSchema: z.union([scripts_painless_execute_response, scripts_painless_execute1_response]),
 };
 const SCROLL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.scroll',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a scrolling search`,
   description: `Run a scrolling search.
 
@@ -15219,29 +15792,30 @@ IMPORTANT: Results from a scrolling search reflect the state of the index at the
   patterns: ['_search/scroll', '_search/scroll/{scroll_id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-scroll',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['scroll_id'],
     urlParams: ['scroll', 'scroll_id', 'rest_total_hits_as_int'],
     bodyParams: ['scroll', 'scroll_id'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(scroll_request, 'body'),
-    getLooseObjectFromProperty(scroll_request, 'path'),
-    getLooseObjectFromProperty(scroll_request, 'query'),
-    getLooseObjectFromProperty(scroll1_request, 'body'),
-    getLooseObjectFromProperty(scroll1_request, 'path'),
-    getLooseObjectFromProperty(scroll1_request, 'query'),
-    getLooseObjectFromProperty(scroll2_request, 'body'),
-    getLooseObjectFromProperty(scroll2_request, 'path'),
-    getLooseObjectFromProperty(scroll2_request, 'query'),
-    getLooseObjectFromProperty(scroll3_request, 'body'),
-    getLooseObjectFromProperty(scroll3_request, 'path'),
-    getLooseObjectFromProperty(scroll3_request, 'query'),
+    getZodLooseObjectFromProperty(scroll_request, 'body'),
+    getZodLooseObjectFromProperty(scroll_request, 'path'),
+    getZodLooseObjectFromProperty(scroll_request, 'query'),
+    getZodLooseObjectFromProperty(scroll1_request, 'body'),
+    getZodLooseObjectFromProperty(scroll1_request, 'path'),
+    getZodLooseObjectFromProperty(scroll1_request, 'query'),
+    getZodLooseObjectFromProperty(scroll2_request, 'body'),
+    getZodLooseObjectFromProperty(scroll2_request, 'path'),
+    getZodLooseObjectFromProperty(scroll2_request, 'query'),
+    getZodLooseObjectFromProperty(scroll3_request, 'body'),
+    getZodLooseObjectFromProperty(scroll3_request, 'path'),
+    getZodLooseObjectFromProperty(scroll3_request, 'query'),
   ]),
   outputSchema: z.union([scroll_response, scroll1_response, scroll2_response, scroll3_response]),
 };
 const SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a search`,
   description: `Run a search.
 
@@ -15269,6 +15843,7 @@ This situation can occur because the splitting criterion is based on Lucene docu
   patterns: ['_search', '{index}/_search'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -15354,24 +15929,24 @@ This situation can occur because the splitting criterion is based on Lucene docu
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_request, 'body'),
-    getLooseObjectFromProperty(search_request, 'path'),
-    getLooseObjectFromProperty(search_request, 'query'),
-    getLooseObjectFromProperty(search1_request, 'body'),
-    getLooseObjectFromProperty(search1_request, 'path'),
-    getLooseObjectFromProperty(search1_request, 'query'),
-    getLooseObjectFromProperty(search2_request, 'body'),
-    getLooseObjectFromProperty(search2_request, 'path'),
-    getLooseObjectFromProperty(search2_request, 'query'),
-    getLooseObjectFromProperty(search3_request, 'body'),
-    getLooseObjectFromProperty(search3_request, 'path'),
-    getLooseObjectFromProperty(search3_request, 'query'),
+    getZodLooseObjectFromProperty(search_request, 'body'),
+    getZodLooseObjectFromProperty(search_request, 'path'),
+    getZodLooseObjectFromProperty(search_request, 'query'),
+    getZodLooseObjectFromProperty(search1_request, 'body'),
+    getZodLooseObjectFromProperty(search1_request, 'path'),
+    getZodLooseObjectFromProperty(search1_request, 'query'),
+    getZodLooseObjectFromProperty(search2_request, 'body'),
+    getZodLooseObjectFromProperty(search2_request, 'path'),
+    getZodLooseObjectFromProperty(search2_request, 'query'),
+    getZodLooseObjectFromProperty(search3_request, 'body'),
+    getZodLooseObjectFromProperty(search3_request, 'path'),
+    getZodLooseObjectFromProperty(search3_request, 'query'),
   ]),
   outputSchema: z.union([search_response, search1_response, search2_response, search3_response]),
 };
 const SEARCH_APPLICATION_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a search application`,
   description: `Delete a search application.
 
@@ -15383,20 +15958,21 @@ Remove a search application and its associated alias. Indices attached to the se
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_delete_request, 'body'),
-    getLooseObjectFromProperty(search_application_delete_request, 'path'),
-    getLooseObjectFromProperty(search_application_delete_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_delete_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_delete_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_delete_request, 'query'),
   ]),
   outputSchema: search_application_delete_response,
 };
 const SEARCH_APPLICATION_DELETE_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.delete_behavioral_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a behavioral analytics collection`,
   description: `Delete a behavioral analytics collection.
 The associated data stream is also deleted.
@@ -15407,20 +15983,21 @@ The associated data stream is also deleted.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-delete-behavioral-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'body'),
-    getLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'path'),
-    getLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_delete_behavioral_analytics_request, 'query'),
   ]),
   outputSchema: search_application_delete_behavioral_analytics_response,
 };
 const SEARCH_APPLICATION_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get search application details`,
   description: `Get search application details.
 
@@ -15430,20 +16007,21 @@ const SEARCH_APPLICATION_GET_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_get_request, 'body'),
-    getLooseObjectFromProperty(search_application_get_request, 'path'),
-    getLooseObjectFromProperty(search_application_get_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_get_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_get_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_get_request, 'query'),
   ]),
   outputSchema: search_application_get_response,
 };
 const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.get_behavioral_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get behavioral analytics collections`,
   description: `Get behavioral analytics collections.
 
@@ -15453,17 +16031,18 @@ const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get-behavioral-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'body'),
-    getLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'path'),
-    getLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'query'),
-    getLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'body'),
-    getLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'path'),
-    getLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_get_behavioral_analytics1_request, 'query'),
   ]),
   outputSchema: z.union([
     search_application_get_behavioral_analytics_response,
@@ -15472,7 +16051,7 @@ const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
 };
 const SEARCH_APPLICATION_LIST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.list',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get search applications`,
   description: `Get search applications.
 Get information about search applications.
@@ -15483,20 +16062,21 @@ Get information about search applications.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get-behavioral-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['q', 'from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_list_request, 'body'),
-    getLooseObjectFromProperty(search_application_list_request, 'path'),
-    getLooseObjectFromProperty(search_application_list_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_list_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_list_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_list_request, 'query'),
   ]),
   outputSchema: search_application_list_response,
 };
 const SEARCH_APPLICATION_POST_BEHAVIORAL_ANALYTICS_EVENT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.post_behavioral_analytics_event',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a behavioral analytics collection event`,
   description: `Create a behavioral analytics collection event.
 
@@ -15506,20 +16086,30 @@ const SEARCH_APPLICATION_POST_BEHAVIORAL_ANALYTICS_EVENT_CONTRACT: InternalConne
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-post-behavioral-analytics-event',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['collection_name', 'event_type'],
     urlParams: ['debug'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_post_behavioral_analytics_event_request, 'body'),
-    getLooseObjectFromProperty(search_application_post_behavioral_analytics_event_request, 'path'),
-    getLooseObjectFromProperty(search_application_post_behavioral_analytics_event_request, 'query'),
+    getZodLooseObjectFromProperty(
+      search_application_post_behavioral_analytics_event_request,
+      'body'
+    ),
+    getZodLooseObjectFromProperty(
+      search_application_post_behavioral_analytics_event_request,
+      'path'
+    ),
+    getZodLooseObjectFromProperty(
+      search_application_post_behavioral_analytics_event_request,
+      'query'
+    ),
   ]),
   outputSchema: search_application_post_behavioral_analytics_event_response,
 };
 const SEARCH_APPLICATION_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.put',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a search application`,
   description: `Create or update a search application.
 
@@ -15529,20 +16119,21 @@ const SEARCH_APPLICATION_PUT_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-put',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['create'],
-    bodyParams: [],
+    bodyParams: ['indices', 'analytics_collection_name', 'template'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_put_request, 'body'),
-    getLooseObjectFromProperty(search_application_put_request, 'path'),
-    getLooseObjectFromProperty(search_application_put_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_put_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_put_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_put_request, 'query'),
   ]),
   outputSchema: search_application_put_response,
 };
 const SEARCH_APPLICATION_PUT_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.put_behavioral_analytics',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a behavioral analytics collection`,
   description: `Create a behavioral analytics collection.
 
@@ -15552,20 +16143,21 @@ const SEARCH_APPLICATION_PUT_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-put-behavioral-analytics',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'body'),
-    getLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'path'),
-    getLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_put_behavioral_analytics_request, 'query'),
   ]),
   outputSchema: search_application_put_behavioral_analytics_response,
 };
 const SEARCH_APPLICATION_RENDER_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.render_query',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Render a search application query`,
   description: `Render a search application query.
 Generate an Elasticsearch query using the specified query parameters and the search template associated with the search application or a default template if none is specified.
@@ -15580,20 +16172,21 @@ You must have \`read\` privileges on the backing alias of the search application
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-render-query',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: ['params'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_render_query_request, 'body'),
-    getLooseObjectFromProperty(search_application_render_query_request, 'path'),
-    getLooseObjectFromProperty(search_application_render_query_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_render_query_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_render_query_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_render_query_request, 'query'),
   ]),
   outputSchema: search_application_render_query_response,
 };
 const SEARCH_APPLICATION_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_application.search',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a search application search`,
   description: `Run a search application search.
 Generate and run an Elasticsearch query that uses the specified query parameteter and the search template associated with the search application or default template.
@@ -15605,23 +16198,24 @@ Unspecified template parameters are assigned their default values if applicable.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-search',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['typed_keys'],
     bodyParams: ['params'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_application_search_request, 'body'),
-    getLooseObjectFromProperty(search_application_search_request, 'path'),
-    getLooseObjectFromProperty(search_application_search_request, 'query'),
-    getLooseObjectFromProperty(search_application_search1_request, 'body'),
-    getLooseObjectFromProperty(search_application_search1_request, 'path'),
-    getLooseObjectFromProperty(search_application_search1_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_search_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_search_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_search_request, 'query'),
+    getZodLooseObjectFromProperty(search_application_search1_request, 'body'),
+    getZodLooseObjectFromProperty(search_application_search1_request, 'path'),
+    getZodLooseObjectFromProperty(search_application_search1_request, 'query'),
   ]),
   outputSchema: z.union([search_application_search_response, search_application_search1_response]),
 };
 const SEARCH_MVT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_mvt',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Search a vector tile`,
   description: `Search a vector tile.
 
@@ -15718,6 +16312,7 @@ Learn how to use the vector tile search API with practical examples in the [Vect
   patterns: ['{index}/_mvt/{field}/{zoom}/{x}/{y}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-mvt',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'field', 'zoom', 'x', 'y'],
     urlParams: [
       'exact_bounds',
@@ -15747,18 +16342,18 @@ Learn how to use the vector tile search API with practical examples in the [Vect
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_mvt_request, 'body'),
-    getLooseObjectFromProperty(search_mvt_request, 'path'),
-    getLooseObjectFromProperty(search_mvt_request, 'query'),
-    getLooseObjectFromProperty(search_mvt1_request, 'body'),
-    getLooseObjectFromProperty(search_mvt1_request, 'path'),
-    getLooseObjectFromProperty(search_mvt1_request, 'query'),
+    getZodLooseObjectFromProperty(search_mvt_request, 'body'),
+    getZodLooseObjectFromProperty(search_mvt_request, 'path'),
+    getZodLooseObjectFromProperty(search_mvt_request, 'query'),
+    getZodLooseObjectFromProperty(search_mvt1_request, 'body'),
+    getZodLooseObjectFromProperty(search_mvt1_request, 'path'),
+    getZodLooseObjectFromProperty(search_mvt1_request, 'query'),
   ]),
   outputSchema: z.union([search_mvt_response, search_mvt1_response]),
 };
 const SEARCH_SHARDS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_shards',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the search shards`,
   description: `Get the search shards.
 
@@ -15774,6 +16369,7 @@ If the Elasticsearch security features are enabled, you must have the \`view_ind
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-shards',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -15787,18 +16383,18 @@ If the Elasticsearch security features are enabled, you must have the \`view_ind
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_shards_request, 'body'),
-    getLooseObjectFromProperty(search_shards_request, 'path'),
-    getLooseObjectFromProperty(search_shards_request, 'query'),
-    getLooseObjectFromProperty(search_shards1_request, 'body'),
-    getLooseObjectFromProperty(search_shards1_request, 'path'),
-    getLooseObjectFromProperty(search_shards1_request, 'query'),
-    getLooseObjectFromProperty(search_shards2_request, 'body'),
-    getLooseObjectFromProperty(search_shards2_request, 'path'),
-    getLooseObjectFromProperty(search_shards2_request, 'query'),
-    getLooseObjectFromProperty(search_shards3_request, 'body'),
-    getLooseObjectFromProperty(search_shards3_request, 'path'),
-    getLooseObjectFromProperty(search_shards3_request, 'query'),
+    getZodLooseObjectFromProperty(search_shards_request, 'body'),
+    getZodLooseObjectFromProperty(search_shards_request, 'path'),
+    getZodLooseObjectFromProperty(search_shards_request, 'query'),
+    getZodLooseObjectFromProperty(search_shards1_request, 'body'),
+    getZodLooseObjectFromProperty(search_shards1_request, 'path'),
+    getZodLooseObjectFromProperty(search_shards1_request, 'query'),
+    getZodLooseObjectFromProperty(search_shards2_request, 'body'),
+    getZodLooseObjectFromProperty(search_shards2_request, 'path'),
+    getZodLooseObjectFromProperty(search_shards2_request, 'query'),
+    getZodLooseObjectFromProperty(search_shards3_request, 'body'),
+    getZodLooseObjectFromProperty(search_shards3_request, 'path'),
+    getZodLooseObjectFromProperty(search_shards3_request, 'query'),
   ]),
   outputSchema: z.union([
     search_shards_response,
@@ -15809,7 +16405,7 @@ If the Elasticsearch security features are enabled, you must have the \`view_ind
 };
 const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_template',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a search with a search template`,
   description: `Run a search with a search template.
 
@@ -15819,6 +16415,7 @@ const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-template',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -15838,18 +16435,18 @@ const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
     bodyParams: ['explain', 'id', 'params', 'profile', 'source'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(search_template_request, 'body'),
-    getLooseObjectFromProperty(search_template_request, 'path'),
-    getLooseObjectFromProperty(search_template_request, 'query'),
-    getLooseObjectFromProperty(search_template1_request, 'body'),
-    getLooseObjectFromProperty(search_template1_request, 'path'),
-    getLooseObjectFromProperty(search_template1_request, 'query'),
-    getLooseObjectFromProperty(search_template2_request, 'body'),
-    getLooseObjectFromProperty(search_template2_request, 'path'),
-    getLooseObjectFromProperty(search_template2_request, 'query'),
-    getLooseObjectFromProperty(search_template3_request, 'body'),
-    getLooseObjectFromProperty(search_template3_request, 'path'),
-    getLooseObjectFromProperty(search_template3_request, 'query'),
+    getZodLooseObjectFromProperty(search_template_request, 'body'),
+    getZodLooseObjectFromProperty(search_template_request, 'path'),
+    getZodLooseObjectFromProperty(search_template_request, 'query'),
+    getZodLooseObjectFromProperty(search_template1_request, 'body'),
+    getZodLooseObjectFromProperty(search_template1_request, 'path'),
+    getZodLooseObjectFromProperty(search_template1_request, 'query'),
+    getZodLooseObjectFromProperty(search_template2_request, 'body'),
+    getZodLooseObjectFromProperty(search_template2_request, 'path'),
+    getZodLooseObjectFromProperty(search_template2_request, 'query'),
+    getZodLooseObjectFromProperty(search_template3_request, 'body'),
+    getZodLooseObjectFromProperty(search_template3_request, 'path'),
+    getZodLooseObjectFromProperty(search_template3_request, 'query'),
   ]),
   outputSchema: z.union([
     search_template_response,
@@ -15860,7 +16457,7 @@ const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
 };
 const SEARCHABLE_SNAPSHOTS_CACHE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.cache_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get cache statistics`,
   description: `Get cache statistics.
 Get statistics about the shared cache for partially mounted indices.
@@ -15871,17 +16468,18 @@ Get statistics about the shared cache for partially mounted indices.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-cache-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['node_id'],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'body'),
-    getLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'path'),
-    getLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'query'),
-    getLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'body'),
-    getLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'path'),
-    getLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'body'),
+    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'path'),
+    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats_request, 'query'),
+    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(searchable_snapshots_cache_stats1_request, 'query'),
   ]),
   outputSchema: z.union([
     searchable_snapshots_cache_stats_response,
@@ -15890,7 +16488,7 @@ Get statistics about the shared cache for partially mounted indices.
 };
 const SEARCHABLE_SNAPSHOTS_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.clear_cache',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear the cache`,
   description: `Clear the cache.
 Clear indices and data streams from the shared cache for partially mounted indices.
@@ -15901,17 +16499,18 @@ Clear indices and data streams from the shared cache for partially mounted indic
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-clear-cache',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['expand_wildcards', 'allow_no_indices', 'ignore_unavailable'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'body'),
-    getLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'path'),
-    getLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'query'),
-    getLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'body'),
-    getLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'path'),
-    getLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'query'),
+    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'body'),
+    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'path'),
+    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache_request, 'query'),
+    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'body'),
+    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'path'),
+    getZodLooseObjectFromProperty(searchable_snapshots_clear_cache1_request, 'query'),
   ]),
   outputSchema: z.union([
     searchable_snapshots_clear_cache_response,
@@ -15920,7 +16519,7 @@ Clear indices and data streams from the shared cache for partially mounted indic
 };
 const SEARCHABLE_SNAPSHOTS_MOUNT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.mount',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Mount a snapshot`,
   description: `Mount a snapshot.
 Mount a snapshot as a searchable snapshot index.
@@ -15933,20 +16532,21 @@ Manually mounting ILM-managed snapshots can interfere with ILM processes.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-mount',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository', 'snapshot'],
     urlParams: ['master_timeout', 'wait_for_completion', 'storage'],
     bodyParams: ['index', 'renamed_index', 'index_settings', 'ignore_index_settings'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(searchable_snapshots_mount_request, 'body'),
-    getLooseObjectFromProperty(searchable_snapshots_mount_request, 'path'),
-    getLooseObjectFromProperty(searchable_snapshots_mount_request, 'query'),
+    getZodLooseObjectFromProperty(searchable_snapshots_mount_request, 'body'),
+    getZodLooseObjectFromProperty(searchable_snapshots_mount_request, 'path'),
+    getZodLooseObjectFromProperty(searchable_snapshots_mount_request, 'query'),
   ]),
   outputSchema: searchable_snapshots_mount_response,
 };
 const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get searchable snapshot statistics`,
   description: `Get searchable snapshot statistics.
 
@@ -15956,17 +16556,18 @@ const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['level'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(searchable_snapshots_stats_request, 'body'),
-    getLooseObjectFromProperty(searchable_snapshots_stats_request, 'path'),
-    getLooseObjectFromProperty(searchable_snapshots_stats_request, 'query'),
-    getLooseObjectFromProperty(searchable_snapshots_stats1_request, 'body'),
-    getLooseObjectFromProperty(searchable_snapshots_stats1_request, 'path'),
-    getLooseObjectFromProperty(searchable_snapshots_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(searchable_snapshots_stats_request, 'body'),
+    getZodLooseObjectFromProperty(searchable_snapshots_stats_request, 'path'),
+    getZodLooseObjectFromProperty(searchable_snapshots_stats_request, 'query'),
+    getZodLooseObjectFromProperty(searchable_snapshots_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(searchable_snapshots_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(searchable_snapshots_stats1_request, 'query'),
   ]),
   outputSchema: z.union([
     searchable_snapshots_stats_response,
@@ -15975,7 +16576,7 @@ const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
 };
 const SECURITY_ACTIVATE_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.activate_user_profile',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Activate a user profile`,
   description: `Activate a user profile.
 
@@ -15998,20 +16599,21 @@ Any updates do not change existing content for either the \`labels\` or \`data\`
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-activate-user-profile',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['access_token', 'grant_type', 'password', 'username'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_activate_user_profile_request, 'body'),
-    getLooseObjectFromProperty(security_activate_user_profile_request, 'path'),
-    getLooseObjectFromProperty(security_activate_user_profile_request, 'query'),
+    getZodLooseObjectFromProperty(security_activate_user_profile_request, 'body'),
+    getZodLooseObjectFromProperty(security_activate_user_profile_request, 'path'),
+    getZodLooseObjectFromProperty(security_activate_user_profile_request, 'query'),
   ]),
   outputSchema: security_activate_user_profile_response,
 };
 const SECURITY_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.authenticate',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Authenticate a user`,
   description: `Authenticate a user.
 
@@ -16026,20 +16628,21 @@ If the user cannot be authenticated, this API returns a 401 status code.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-authenticate',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_authenticate_request, 'body'),
-    getLooseObjectFromProperty(security_authenticate_request, 'path'),
-    getLooseObjectFromProperty(security_authenticate_request, 'query'),
+    getZodLooseObjectFromProperty(security_authenticate_request, 'body'),
+    getZodLooseObjectFromProperty(security_authenticate_request, 'path'),
+    getZodLooseObjectFromProperty(security_authenticate_request, 'query'),
   ]),
   outputSchema: security_authenticate_response,
 };
 const SECURITY_BULK_DELETE_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.bulk_delete_role',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Bulk delete roles`,
   description: `Bulk delete roles.
 
@@ -16052,20 +16655,21 @@ The bulk delete roles API cannot delete roles that are defined in roles files.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-bulk-delete-role',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['refresh'],
     bodyParams: ['names'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_bulk_delete_role_request, 'body'),
-    getLooseObjectFromProperty(security_bulk_delete_role_request, 'path'),
-    getLooseObjectFromProperty(security_bulk_delete_role_request, 'query'),
+    getZodLooseObjectFromProperty(security_bulk_delete_role_request, 'body'),
+    getZodLooseObjectFromProperty(security_bulk_delete_role_request, 'path'),
+    getZodLooseObjectFromProperty(security_bulk_delete_role_request, 'query'),
   ]),
   outputSchema: security_bulk_delete_role_response,
 };
 const SECURITY_BULK_PUT_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.bulk_put_role',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Bulk create or update roles`,
   description: `Bulk create or update roles.
 
@@ -16078,20 +16682,21 @@ The bulk create or update roles API cannot update roles that are defined in role
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-bulk-put-role',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['refresh'],
     bodyParams: ['roles'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_bulk_put_role_request, 'body'),
-    getLooseObjectFromProperty(security_bulk_put_role_request, 'path'),
-    getLooseObjectFromProperty(security_bulk_put_role_request, 'query'),
+    getZodLooseObjectFromProperty(security_bulk_put_role_request, 'body'),
+    getZodLooseObjectFromProperty(security_bulk_put_role_request, 'path'),
+    getZodLooseObjectFromProperty(security_bulk_put_role_request, 'query'),
   ]),
   outputSchema: security_bulk_put_role_response,
 };
 const SECURITY_BULK_UPDATE_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.bulk_update_api_keys',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Bulk update API keys`,
   description: `Bulk update API keys.
 Update the attributes for multiple API keys.
@@ -16116,20 +16721,21 @@ A successful request returns a JSON structure that contains the IDs of all updat
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-bulk-update-api-keys',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['expiration', 'ids', 'metadata', 'role_descriptors'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_bulk_update_api_keys_request, 'body'),
-    getLooseObjectFromProperty(security_bulk_update_api_keys_request, 'path'),
-    getLooseObjectFromProperty(security_bulk_update_api_keys_request, 'query'),
+    getZodLooseObjectFromProperty(security_bulk_update_api_keys_request, 'body'),
+    getZodLooseObjectFromProperty(security_bulk_update_api_keys_request, 'path'),
+    getZodLooseObjectFromProperty(security_bulk_update_api_keys_request, 'query'),
   ]),
   outputSchema: security_bulk_update_api_keys_response,
 };
 const SECURITY_CHANGE_PASSWORD_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.change_password',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Change passwords`,
   description: `Change passwords.
 
@@ -16141,23 +16747,24 @@ Change the passwords of users in the native realm and built-in users.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-change-password',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['username'],
     urlParams: ['refresh'],
     bodyParams: ['password', 'password_hash'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_change_password_request, 'body'),
-    getLooseObjectFromProperty(security_change_password_request, 'path'),
-    getLooseObjectFromProperty(security_change_password_request, 'query'),
-    getLooseObjectFromProperty(security_change_password1_request, 'body'),
-    getLooseObjectFromProperty(security_change_password1_request, 'path'),
-    getLooseObjectFromProperty(security_change_password1_request, 'query'),
-    getLooseObjectFromProperty(security_change_password2_request, 'body'),
-    getLooseObjectFromProperty(security_change_password2_request, 'path'),
-    getLooseObjectFromProperty(security_change_password2_request, 'query'),
-    getLooseObjectFromProperty(security_change_password3_request, 'body'),
-    getLooseObjectFromProperty(security_change_password3_request, 'path'),
-    getLooseObjectFromProperty(security_change_password3_request, 'query'),
+    getZodLooseObjectFromProperty(security_change_password_request, 'body'),
+    getZodLooseObjectFromProperty(security_change_password_request, 'path'),
+    getZodLooseObjectFromProperty(security_change_password_request, 'query'),
+    getZodLooseObjectFromProperty(security_change_password1_request, 'body'),
+    getZodLooseObjectFromProperty(security_change_password1_request, 'path'),
+    getZodLooseObjectFromProperty(security_change_password1_request, 'query'),
+    getZodLooseObjectFromProperty(security_change_password2_request, 'body'),
+    getZodLooseObjectFromProperty(security_change_password2_request, 'path'),
+    getZodLooseObjectFromProperty(security_change_password2_request, 'query'),
+    getZodLooseObjectFromProperty(security_change_password3_request, 'body'),
+    getZodLooseObjectFromProperty(security_change_password3_request, 'path'),
+    getZodLooseObjectFromProperty(security_change_password3_request, 'query'),
   ]),
   outputSchema: z.union([
     security_change_password_response,
@@ -16168,7 +16775,7 @@ Change the passwords of users in the native realm and built-in users.
 };
 const SECURITY_CLEAR_API_KEY_CACHE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_api_key_cache',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear the API key cache`,
   description: `Clear the API key cache.
 
@@ -16181,20 +16788,21 @@ The cache is also automatically cleared on state changes of the security index.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-api-key-cache',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['ids'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_clear_api_key_cache_request, 'body'),
-    getLooseObjectFromProperty(security_clear_api_key_cache_request, 'path'),
-    getLooseObjectFromProperty(security_clear_api_key_cache_request, 'query'),
+    getZodLooseObjectFromProperty(security_clear_api_key_cache_request, 'body'),
+    getZodLooseObjectFromProperty(security_clear_api_key_cache_request, 'path'),
+    getZodLooseObjectFromProperty(security_clear_api_key_cache_request, 'query'),
   ]),
   outputSchema: security_clear_api_key_cache_response,
 };
 const SECURITY_CLEAR_CACHED_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_cached_privileges',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear the privileges cache`,
   description: `Clear the privileges cache.
 
@@ -16207,20 +16815,21 @@ The cache is also automatically cleared for applications that have their privile
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-privileges',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['application'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_clear_cached_privileges_request, 'body'),
-    getLooseObjectFromProperty(security_clear_cached_privileges_request, 'path'),
-    getLooseObjectFromProperty(security_clear_cached_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(security_clear_cached_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(security_clear_cached_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(security_clear_cached_privileges_request, 'query'),
   ]),
   outputSchema: security_clear_cached_privileges_response,
 };
 const SECURITY_CLEAR_CACHED_REALMS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_cached_realms',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear the user cache`,
   description: `Clear the user cache.
 
@@ -16237,20 +16846,21 @@ For more information, refer to the documentation about controlling the user cach
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-realms',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['realms'],
     urlParams: ['usernames'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_clear_cached_realms_request, 'body'),
-    getLooseObjectFromProperty(security_clear_cached_realms_request, 'path'),
-    getLooseObjectFromProperty(security_clear_cached_realms_request, 'query'),
+    getZodLooseObjectFromProperty(security_clear_cached_realms_request, 'body'),
+    getZodLooseObjectFromProperty(security_clear_cached_realms_request, 'path'),
+    getZodLooseObjectFromProperty(security_clear_cached_realms_request, 'query'),
   ]),
   outputSchema: security_clear_cached_realms_response,
 };
 const SECURITY_CLEAR_CACHED_ROLES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_cached_roles',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear the roles cache`,
   description: `Clear the roles cache.
 
@@ -16262,20 +16872,21 @@ Evict roles from the native role cache.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-roles',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_clear_cached_roles_request, 'body'),
-    getLooseObjectFromProperty(security_clear_cached_roles_request, 'path'),
-    getLooseObjectFromProperty(security_clear_cached_roles_request, 'query'),
+    getZodLooseObjectFromProperty(security_clear_cached_roles_request, 'body'),
+    getZodLooseObjectFromProperty(security_clear_cached_roles_request, 'path'),
+    getZodLooseObjectFromProperty(security_clear_cached_roles_request, 'query'),
   ]),
   outputSchema: security_clear_cached_roles_response,
 };
 const SECURITY_CLEAR_CACHED_SERVICE_TOKENS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.clear_cached_service_tokens',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear service account token caches`,
   description: `Clear service account token caches.
 
@@ -16292,20 +16903,21 @@ The cache for tokens backed by the \`service_tokens\` file is cleared automatica
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-service-tokens',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['namespace', 'service', 'name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'body'),
-    getLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'path'),
-    getLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'query'),
+    getZodLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'body'),
+    getZodLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'path'),
+    getZodLooseObjectFromProperty(security_clear_cached_service_tokens_request, 'query'),
   ]),
   outputSchema: security_clear_cached_service_tokens_response,
 };
 const SECURITY_CREATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.create_api_key',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create an API key`,
   description: `Create an API key.
 
@@ -16328,23 +16940,24 @@ To configure or turn off the API key service, refer to API key service setting d
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['refresh'],
     bodyParams: ['expiration', 'name', 'role_descriptors', 'metadata'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_create_api_key_request, 'body'),
-    getLooseObjectFromProperty(security_create_api_key_request, 'path'),
-    getLooseObjectFromProperty(security_create_api_key_request, 'query'),
-    getLooseObjectFromProperty(security_create_api_key1_request, 'body'),
-    getLooseObjectFromProperty(security_create_api_key1_request, 'path'),
-    getLooseObjectFromProperty(security_create_api_key1_request, 'query'),
+    getZodLooseObjectFromProperty(security_create_api_key_request, 'body'),
+    getZodLooseObjectFromProperty(security_create_api_key_request, 'path'),
+    getZodLooseObjectFromProperty(security_create_api_key_request, 'query'),
+    getZodLooseObjectFromProperty(security_create_api_key1_request, 'body'),
+    getZodLooseObjectFromProperty(security_create_api_key1_request, 'path'),
+    getZodLooseObjectFromProperty(security_create_api_key1_request, 'query'),
   ]),
   outputSchema: z.union([security_create_api_key_response, security_create_api_key1_response]),
 };
 const SECURITY_CREATE_CROSS_CLUSTER_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.create_cross_cluster_api_key',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a cross-cluster API key`,
   description: `Create a cross-cluster API key.
 
@@ -16370,20 +16983,21 @@ Attempting to update them with the update REST API key API or the bulk update RE
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-cross-cluster-api-key',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['access', 'expiration', 'metadata', 'name', 'certificate_identity'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'body'),
-    getLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'path'),
-    getLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'query'),
+    getZodLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'body'),
+    getZodLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'path'),
+    getZodLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'query'),
   ]),
   outputSchema: security_create_cross_cluster_api_key_response,
 };
 const SECURITY_CREATE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.create_service_token',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a service account token`,
   description: `Create a service account token.
 
@@ -16401,20 +17015,21 @@ You must actively delete them if they are no longer needed.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-service-token',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['namespace', 'service', 'name'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_create_service_token_request, 'body'),
-    getLooseObjectFromProperty(security_create_service_token_request, 'path'),
-    getLooseObjectFromProperty(security_create_service_token_request, 'query'),
-    getLooseObjectFromProperty(security_create_service_token1_request, 'body'),
-    getLooseObjectFromProperty(security_create_service_token1_request, 'path'),
-    getLooseObjectFromProperty(security_create_service_token1_request, 'query'),
-    getLooseObjectFromProperty(security_create_service_token2_request, 'body'),
-    getLooseObjectFromProperty(security_create_service_token2_request, 'path'),
-    getLooseObjectFromProperty(security_create_service_token2_request, 'query'),
+    getZodLooseObjectFromProperty(security_create_service_token_request, 'body'),
+    getZodLooseObjectFromProperty(security_create_service_token_request, 'path'),
+    getZodLooseObjectFromProperty(security_create_service_token_request, 'query'),
+    getZodLooseObjectFromProperty(security_create_service_token1_request, 'body'),
+    getZodLooseObjectFromProperty(security_create_service_token1_request, 'path'),
+    getZodLooseObjectFromProperty(security_create_service_token1_request, 'query'),
+    getZodLooseObjectFromProperty(security_create_service_token2_request, 'body'),
+    getZodLooseObjectFromProperty(security_create_service_token2_request, 'path'),
+    getZodLooseObjectFromProperty(security_create_service_token2_request, 'query'),
   ]),
   outputSchema: z.union([
     security_create_service_token_response,
@@ -16424,7 +17039,7 @@ You must actively delete them if they are no longer needed.
 };
 const SECURITY_DELEGATE_PKI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delegate_pki',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delegate PKI authentication`,
   description: `Delegate PKI authentication.
 
@@ -16444,20 +17059,21 @@ The proxy is trusted to have performed the TLS authentication and this API trans
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delegate-pki',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['x509_certificate_chain'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_delegate_pki_request, 'body'),
-    getLooseObjectFromProperty(security_delegate_pki_request, 'path'),
-    getLooseObjectFromProperty(security_delegate_pki_request, 'query'),
+    getZodLooseObjectFromProperty(security_delegate_pki_request, 'body'),
+    getZodLooseObjectFromProperty(security_delegate_pki_request, 'path'),
+    getZodLooseObjectFromProperty(security_delegate_pki_request, 'query'),
   ]),
   outputSchema: security_delegate_pki_response,
 };
 const SECURITY_DELETE_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_privileges',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete application privileges`,
   description: `Delete application privileges.
 
@@ -16472,20 +17088,21 @@ To use this API, you must have one of the following privileges:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-privileges',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['application', 'name'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_delete_privileges_request, 'body'),
-    getLooseObjectFromProperty(security_delete_privileges_request, 'path'),
-    getLooseObjectFromProperty(security_delete_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(security_delete_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(security_delete_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(security_delete_privileges_request, 'query'),
   ]),
   outputSchema: security_delete_privileges_response,
 };
 const SECURITY_DELETE_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_role',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete roles`,
   description: `Delete roles.
 
@@ -16499,20 +17116,21 @@ The delete roles API cannot remove roles that are defined in roles files.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-role',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_delete_role_request, 'body'),
-    getLooseObjectFromProperty(security_delete_role_request, 'path'),
-    getLooseObjectFromProperty(security_delete_role_request, 'query'),
+    getZodLooseObjectFromProperty(security_delete_role_request, 'body'),
+    getZodLooseObjectFromProperty(security_delete_role_request, 'path'),
+    getZodLooseObjectFromProperty(security_delete_role_request, 'query'),
   ]),
   outputSchema: security_delete_role_response,
 };
 const SECURITY_DELETE_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_role_mapping',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete role mappings`,
   description: `Delete role mappings.
 
@@ -16526,20 +17144,21 @@ The delete role mappings API cannot remove role mappings that are defined in rol
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-role-mapping',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_delete_role_mapping_request, 'body'),
-    getLooseObjectFromProperty(security_delete_role_mapping_request, 'path'),
-    getLooseObjectFromProperty(security_delete_role_mapping_request, 'query'),
+    getZodLooseObjectFromProperty(security_delete_role_mapping_request, 'body'),
+    getZodLooseObjectFromProperty(security_delete_role_mapping_request, 'path'),
+    getZodLooseObjectFromProperty(security_delete_role_mapping_request, 'query'),
   ]),
   outputSchema: security_delete_role_mapping_response,
 };
 const SECURITY_DELETE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_service_token',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete service account tokens`,
   description: `Delete service account tokens.
 
@@ -16551,20 +17170,21 @@ Delete service account tokens for a service in a specified namespace.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-service-token',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['namespace', 'service', 'name'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_delete_service_token_request, 'body'),
-    getLooseObjectFromProperty(security_delete_service_token_request, 'path'),
-    getLooseObjectFromProperty(security_delete_service_token_request, 'query'),
+    getZodLooseObjectFromProperty(security_delete_service_token_request, 'body'),
+    getZodLooseObjectFromProperty(security_delete_service_token_request, 'path'),
+    getZodLooseObjectFromProperty(security_delete_service_token_request, 'query'),
   ]),
   outputSchema: security_delete_service_token_response,
 };
 const SECURITY_DELETE_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.delete_user',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete users`,
   description: `Delete users.
 
@@ -16576,20 +17196,21 @@ Delete users from the native realm.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-user',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['username'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_delete_user_request, 'body'),
-    getLooseObjectFromProperty(security_delete_user_request, 'path'),
-    getLooseObjectFromProperty(security_delete_user_request, 'query'),
+    getZodLooseObjectFromProperty(security_delete_user_request, 'body'),
+    getZodLooseObjectFromProperty(security_delete_user_request, 'path'),
+    getZodLooseObjectFromProperty(security_delete_user_request, 'query'),
   ]),
   outputSchema: security_delete_user_response,
 };
 const SECURITY_DISABLE_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.disable_user',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Disable users`,
   description: `Disable users.
 
@@ -16603,23 +17224,24 @@ You can use this API to revoke a user's access to Elasticsearch.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-disable-user',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['username'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_disable_user_request, 'body'),
-    getLooseObjectFromProperty(security_disable_user_request, 'path'),
-    getLooseObjectFromProperty(security_disable_user_request, 'query'),
-    getLooseObjectFromProperty(security_disable_user1_request, 'body'),
-    getLooseObjectFromProperty(security_disable_user1_request, 'path'),
-    getLooseObjectFromProperty(security_disable_user1_request, 'query'),
+    getZodLooseObjectFromProperty(security_disable_user_request, 'body'),
+    getZodLooseObjectFromProperty(security_disable_user_request, 'path'),
+    getZodLooseObjectFromProperty(security_disable_user_request, 'query'),
+    getZodLooseObjectFromProperty(security_disable_user1_request, 'body'),
+    getZodLooseObjectFromProperty(security_disable_user1_request, 'path'),
+    getZodLooseObjectFromProperty(security_disable_user1_request, 'query'),
   ]),
   outputSchema: z.union([security_disable_user_response, security_disable_user1_response]),
 };
 const SECURITY_DISABLE_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.disable_user_profile',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Disable a user profile`,
   description: `Disable a user profile.
 
@@ -16638,17 +17260,18 @@ To re-enable a disabled user profile, use the enable user profile API .
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-disable-user-profile',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['uid'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_disable_user_profile_request, 'body'),
-    getLooseObjectFromProperty(security_disable_user_profile_request, 'path'),
-    getLooseObjectFromProperty(security_disable_user_profile_request, 'query'),
-    getLooseObjectFromProperty(security_disable_user_profile1_request, 'body'),
-    getLooseObjectFromProperty(security_disable_user_profile1_request, 'path'),
-    getLooseObjectFromProperty(security_disable_user_profile1_request, 'query'),
+    getZodLooseObjectFromProperty(security_disable_user_profile_request, 'body'),
+    getZodLooseObjectFromProperty(security_disable_user_profile_request, 'path'),
+    getZodLooseObjectFromProperty(security_disable_user_profile_request, 'query'),
+    getZodLooseObjectFromProperty(security_disable_user_profile1_request, 'body'),
+    getZodLooseObjectFromProperty(security_disable_user_profile1_request, 'path'),
+    getZodLooseObjectFromProperty(security_disable_user_profile1_request, 'query'),
   ]),
   outputSchema: z.union([
     security_disable_user_profile_response,
@@ -16657,7 +17280,7 @@ To re-enable a disabled user profile, use the enable user profile API .
 };
 const SECURITY_ENABLE_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.enable_user',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Enable users`,
   description: `Enable users.
 
@@ -16670,23 +17293,24 @@ By default, when you create users, they are enabled.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['username'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_enable_user_request, 'body'),
-    getLooseObjectFromProperty(security_enable_user_request, 'path'),
-    getLooseObjectFromProperty(security_enable_user_request, 'query'),
-    getLooseObjectFromProperty(security_enable_user1_request, 'body'),
-    getLooseObjectFromProperty(security_enable_user1_request, 'path'),
-    getLooseObjectFromProperty(security_enable_user1_request, 'query'),
+    getZodLooseObjectFromProperty(security_enable_user_request, 'body'),
+    getZodLooseObjectFromProperty(security_enable_user_request, 'path'),
+    getZodLooseObjectFromProperty(security_enable_user_request, 'query'),
+    getZodLooseObjectFromProperty(security_enable_user1_request, 'body'),
+    getZodLooseObjectFromProperty(security_enable_user1_request, 'path'),
+    getZodLooseObjectFromProperty(security_enable_user1_request, 'query'),
   ]),
   outputSchema: z.union([security_enable_user_response, security_enable_user1_response]),
 };
 const SECURITY_ENABLE_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.enable_user_profile',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Enable a user profile`,
   description: `Enable a user profile.
 
@@ -16705,17 +17329,18 @@ If you later disable the user profile, you can use the enable user profile API t
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user-profile',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['uid'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_enable_user_profile_request, 'body'),
-    getLooseObjectFromProperty(security_enable_user_profile_request, 'path'),
-    getLooseObjectFromProperty(security_enable_user_profile_request, 'query'),
-    getLooseObjectFromProperty(security_enable_user_profile1_request, 'body'),
-    getLooseObjectFromProperty(security_enable_user_profile1_request, 'path'),
-    getLooseObjectFromProperty(security_enable_user_profile1_request, 'query'),
+    getZodLooseObjectFromProperty(security_enable_user_profile_request, 'body'),
+    getZodLooseObjectFromProperty(security_enable_user_profile_request, 'path'),
+    getZodLooseObjectFromProperty(security_enable_user_profile_request, 'query'),
+    getZodLooseObjectFromProperty(security_enable_user_profile1_request, 'body'),
+    getZodLooseObjectFromProperty(security_enable_user_profile1_request, 'path'),
+    getZodLooseObjectFromProperty(security_enable_user_profile1_request, 'query'),
   ]),
   outputSchema: z.union([
     security_enable_user_profile_response,
@@ -16724,7 +17349,7 @@ If you later disable the user profile, you can use the enable user profile API t
 };
 const SECURITY_ENROLL_KIBANA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.enroll_kibana',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Enroll Kibana`,
   description: `Enroll Kibana.
 
@@ -16739,20 +17364,21 @@ Kibana uses this API internally to configure itself for communications with an E
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enroll-kibana',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_enroll_kibana_request, 'body'),
-    getLooseObjectFromProperty(security_enroll_kibana_request, 'path'),
-    getLooseObjectFromProperty(security_enroll_kibana_request, 'query'),
+    getZodLooseObjectFromProperty(security_enroll_kibana_request, 'body'),
+    getZodLooseObjectFromProperty(security_enroll_kibana_request, 'path'),
+    getZodLooseObjectFromProperty(security_enroll_kibana_request, 'query'),
   ]),
   outputSchema: security_enroll_kibana_response,
 };
 const SECURITY_ENROLL_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.enroll_node',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Enroll a node`,
   description: `Enroll a node.
 
@@ -16767,20 +17393,21 @@ The response contains key and certificate material that allows the caller to gen
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enroll-node',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_enroll_node_request, 'body'),
-    getLooseObjectFromProperty(security_enroll_node_request, 'path'),
-    getLooseObjectFromProperty(security_enroll_node_request, 'query'),
+    getZodLooseObjectFromProperty(security_enroll_node_request, 'body'),
+    getZodLooseObjectFromProperty(security_enroll_node_request, 'path'),
+    getZodLooseObjectFromProperty(security_enroll_node_request, 'query'),
   ]),
   outputSchema: security_enroll_node_response,
 };
 const SECURITY_GET_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_api_key',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get API key information`,
   description: `Get API key information.
 
@@ -16794,6 +17421,7 @@ If you have \`read_security\`, \`manage_api_key\` or greater privileges (includi
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-api-key',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'id',
@@ -16808,15 +17436,15 @@ If you have \`read_security\`, \`manage_api_key\` or greater privileges (includi
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_api_key_request, 'body'),
-    getLooseObjectFromProperty(security_get_api_key_request, 'path'),
-    getLooseObjectFromProperty(security_get_api_key_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_api_key_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_api_key_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_api_key_request, 'query'),
   ]),
   outputSchema: security_get_api_key_response,
 };
 const SECURITY_GET_BUILTIN_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_builtin_privileges',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get builtin privileges`,
   description: `Get builtin privileges.
 
@@ -16828,20 +17456,21 @@ Get the list of cluster privileges and index privileges that are available in th
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-builtin-privileges',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_builtin_privileges_request, 'body'),
-    getLooseObjectFromProperty(security_get_builtin_privileges_request, 'path'),
-    getLooseObjectFromProperty(security_get_builtin_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_builtin_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_builtin_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_builtin_privileges_request, 'query'),
   ]),
   outputSchema: security_get_builtin_privileges_response,
 };
 const SECURITY_GET_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_privileges',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get application privileges`,
   description: `Get application privileges.
 
@@ -16860,20 +17489,21 @@ To use this API, you must have one of the following privileges:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-privileges',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['application', 'name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_privileges_request, 'body'),
-    getLooseObjectFromProperty(security_get_privileges_request, 'path'),
-    getLooseObjectFromProperty(security_get_privileges_request, 'query'),
-    getLooseObjectFromProperty(security_get_privileges1_request, 'body'),
-    getLooseObjectFromProperty(security_get_privileges1_request, 'path'),
-    getLooseObjectFromProperty(security_get_privileges1_request, 'query'),
-    getLooseObjectFromProperty(security_get_privileges2_request, 'body'),
-    getLooseObjectFromProperty(security_get_privileges2_request, 'path'),
-    getLooseObjectFromProperty(security_get_privileges2_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_privileges1_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_privileges1_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_privileges1_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_privileges2_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_privileges2_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_privileges2_request, 'query'),
   ]),
   outputSchema: z.union([
     security_get_privileges_response,
@@ -16883,7 +17513,7 @@ To use this API, you must have one of the following privileges:
 };
 const SECURITY_GET_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_role',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get roles`,
   description: `Get roles.
 
@@ -16897,23 +17527,24 @@ The get roles API cannot retrieve roles that are defined in roles files.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-role',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_role_request, 'body'),
-    getLooseObjectFromProperty(security_get_role_request, 'path'),
-    getLooseObjectFromProperty(security_get_role_request, 'query'),
-    getLooseObjectFromProperty(security_get_role1_request, 'body'),
-    getLooseObjectFromProperty(security_get_role1_request, 'path'),
-    getLooseObjectFromProperty(security_get_role1_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_role_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_role_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_role_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_role1_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_role1_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_role1_request, 'query'),
   ]),
   outputSchema: z.union([security_get_role_response, security_get_role1_response]),
 };
 const SECURITY_GET_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_role_mapping',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get role mappings`,
   description: `Get role mappings.
 
@@ -16927,23 +17558,24 @@ The get role mappings API cannot retrieve role mappings that are defined in role
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-role-mapping',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_role_mapping_request, 'body'),
-    getLooseObjectFromProperty(security_get_role_mapping_request, 'path'),
-    getLooseObjectFromProperty(security_get_role_mapping_request, 'query'),
-    getLooseObjectFromProperty(security_get_role_mapping1_request, 'body'),
-    getLooseObjectFromProperty(security_get_role_mapping1_request, 'path'),
-    getLooseObjectFromProperty(security_get_role_mapping1_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_role_mapping_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_role_mapping_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_role_mapping_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_role_mapping1_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_role_mapping1_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_role_mapping1_request, 'query'),
   ]),
   outputSchema: z.union([security_get_role_mapping_response, security_get_role_mapping1_response]),
 };
 const SECURITY_GET_SERVICE_ACCOUNTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_service_accounts',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get service accounts`,
   description: `Get service accounts.
 
@@ -16961,20 +17593,21 @@ NOTE: Currently, only the \`elastic/fleet-server\` service account is available.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-service-accounts',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['namespace', 'service'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_service_accounts_request, 'body'),
-    getLooseObjectFromProperty(security_get_service_accounts_request, 'path'),
-    getLooseObjectFromProperty(security_get_service_accounts_request, 'query'),
-    getLooseObjectFromProperty(security_get_service_accounts1_request, 'body'),
-    getLooseObjectFromProperty(security_get_service_accounts1_request, 'path'),
-    getLooseObjectFromProperty(security_get_service_accounts1_request, 'query'),
-    getLooseObjectFromProperty(security_get_service_accounts2_request, 'body'),
-    getLooseObjectFromProperty(security_get_service_accounts2_request, 'path'),
-    getLooseObjectFromProperty(security_get_service_accounts2_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_service_accounts_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_service_accounts_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_service_accounts_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_service_accounts1_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_service_accounts1_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_service_accounts1_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_service_accounts2_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_service_accounts2_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_service_accounts2_request, 'query'),
   ]),
   outputSchema: z.union([
     security_get_service_accounts_response,
@@ -16984,7 +17617,7 @@ NOTE: Currently, only the \`elastic/fleet-server\` service account is available.
 };
 const SECURITY_GET_SERVICE_CREDENTIALS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_service_credentials',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get service account credentials`,
   description: `Get service account credentials.
 
@@ -17001,20 +17634,21 @@ Tokens with the same name from different nodes are assumed to be the same token 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-service-credentials',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['namespace', 'service'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_service_credentials_request, 'body'),
-    getLooseObjectFromProperty(security_get_service_credentials_request, 'path'),
-    getLooseObjectFromProperty(security_get_service_credentials_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_service_credentials_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_service_credentials_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_service_credentials_request, 'query'),
   ]),
   outputSchema: security_get_service_credentials_response,
 };
 const SECURITY_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get security index settings`,
   description: `Get security index settings.
 
@@ -17031,20 +17665,21 @@ This includes:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_settings_request, 'body'),
-    getLooseObjectFromProperty(security_get_settings_request, 'path'),
-    getLooseObjectFromProperty(security_get_settings_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_settings_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_settings_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_settings_request, 'query'),
   ]),
   outputSchema: security_get_settings_response,
 };
 const SECURITY_GET_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get security stats`,
   description: `Get security stats.
 
@@ -17056,20 +17691,21 @@ Gather security usage statistics from all node(s) within the cluster.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_stats_request, 'body'),
-    getLooseObjectFromProperty(security_get_stats_request, 'path'),
-    getLooseObjectFromProperty(security_get_stats_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_stats_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_stats_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_stats_request, 'query'),
   ]),
   outputSchema: security_get_stats_response,
 };
 const SECURITY_GET_TOKEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_token',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a token`,
   description: `Get a token.
 
@@ -17092,20 +17728,21 @@ If you want to invalidate a token immediately, you can do so by using the invali
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-token',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['grant_type', 'scope', 'password', 'kerberos_ticket', 'refresh_token', 'username'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_token_request, 'body'),
-    getLooseObjectFromProperty(security_get_token_request, 'path'),
-    getLooseObjectFromProperty(security_get_token_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_token_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_token_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_token_request, 'query'),
   ]),
   outputSchema: security_get_token_response,
 };
 const SECURITY_GET_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_user',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get users`,
   description: `Get users.
 
@@ -17117,23 +17754,24 @@ Get information about users in the native realm and built-in users.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-user',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['username'],
     urlParams: ['with_profile_uid'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_user_request, 'body'),
-    getLooseObjectFromProperty(security_get_user_request, 'path'),
-    getLooseObjectFromProperty(security_get_user_request, 'query'),
-    getLooseObjectFromProperty(security_get_user1_request, 'body'),
-    getLooseObjectFromProperty(security_get_user1_request, 'path'),
-    getLooseObjectFromProperty(security_get_user1_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_user_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_user_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_user_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_user1_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_user1_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_user1_request, 'query'),
   ]),
   outputSchema: z.union([security_get_user_response, security_get_user1_response]),
 };
 const SECURITY_GET_USER_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_user_privileges',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get user privileges`,
   description: `Get user privileges.
 
@@ -17148,20 +17786,21 @@ To check whether a user has a specific list of privileges, use the has privilege
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-user-privileges',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_user_privileges_request, 'body'),
-    getLooseObjectFromProperty(security_get_user_privileges_request, 'path'),
-    getLooseObjectFromProperty(security_get_user_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_user_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_user_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_user_privileges_request, 'query'),
   ]),
   outputSchema: security_get_user_privileges_response,
 };
 const SECURITY_GET_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.get_user_profile',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a user profile`,
   description: `Get a user profile.
 
@@ -17177,20 +17816,21 @@ Elastic reserves the right to change or remove this feature in future releases w
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-user-profile',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['uid'],
     urlParams: ['data'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_get_user_profile_request, 'body'),
-    getLooseObjectFromProperty(security_get_user_profile_request, 'path'),
-    getLooseObjectFromProperty(security_get_user_profile_request, 'query'),
+    getZodLooseObjectFromProperty(security_get_user_profile_request, 'body'),
+    getZodLooseObjectFromProperty(security_get_user_profile_request, 'path'),
+    getZodLooseObjectFromProperty(security_get_user_profile_request, 'query'),
   ]),
   outputSchema: security_get_user_profile_response,
 };
 const SECURITY_GRANT_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.grant_api_key',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Grant an API key`,
   description: `Grant an API key.
 
@@ -17221,20 +17861,21 @@ By default, API keys never expire. You can specify expiration information when y
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-grant-api-key',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['refresh'],
     bodyParams: ['api_key', 'grant_type', 'access_token', 'username', 'password', 'run_as'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_grant_api_key_request, 'body'),
-    getLooseObjectFromProperty(security_grant_api_key_request, 'path'),
-    getLooseObjectFromProperty(security_grant_api_key_request, 'query'),
+    getZodLooseObjectFromProperty(security_grant_api_key_request, 'body'),
+    getZodLooseObjectFromProperty(security_grant_api_key_request, 'path'),
+    getZodLooseObjectFromProperty(security_grant_api_key_request, 'query'),
   ]),
   outputSchema: security_grant_api_key_response,
 };
 const SECURITY_HAS_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.has_privileges',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check user privileges`,
   description: `Check user privileges.
 
@@ -17248,23 +17889,24 @@ To check the privileges of other users, you must use the run as feature.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-has-privileges',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['user'],
     urlParams: [],
     bodyParams: ['application', 'cluster', 'index'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_has_privileges_request, 'body'),
-    getLooseObjectFromProperty(security_has_privileges_request, 'path'),
-    getLooseObjectFromProperty(security_has_privileges_request, 'query'),
-    getLooseObjectFromProperty(security_has_privileges1_request, 'body'),
-    getLooseObjectFromProperty(security_has_privileges1_request, 'path'),
-    getLooseObjectFromProperty(security_has_privileges1_request, 'query'),
-    getLooseObjectFromProperty(security_has_privileges2_request, 'body'),
-    getLooseObjectFromProperty(security_has_privileges2_request, 'path'),
-    getLooseObjectFromProperty(security_has_privileges2_request, 'query'),
-    getLooseObjectFromProperty(security_has_privileges3_request, 'body'),
-    getLooseObjectFromProperty(security_has_privileges3_request, 'path'),
-    getLooseObjectFromProperty(security_has_privileges3_request, 'query'),
+    getZodLooseObjectFromProperty(security_has_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(security_has_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(security_has_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(security_has_privileges1_request, 'body'),
+    getZodLooseObjectFromProperty(security_has_privileges1_request, 'path'),
+    getZodLooseObjectFromProperty(security_has_privileges1_request, 'query'),
+    getZodLooseObjectFromProperty(security_has_privileges2_request, 'body'),
+    getZodLooseObjectFromProperty(security_has_privileges2_request, 'path'),
+    getZodLooseObjectFromProperty(security_has_privileges2_request, 'query'),
+    getZodLooseObjectFromProperty(security_has_privileges3_request, 'body'),
+    getZodLooseObjectFromProperty(security_has_privileges3_request, 'path'),
+    getZodLooseObjectFromProperty(security_has_privileges3_request, 'query'),
   ]),
   outputSchema: z.union([
     security_has_privileges_response,
@@ -17275,7 +17917,7 @@ To check the privileges of other users, you must use the run as feature.
 };
 const SECURITY_HAS_PRIVILEGES_USER_PROFILE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.has_privileges_user_profile',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Check user profile privileges`,
   description: `Check user profile privileges.
 
@@ -17290,17 +17932,18 @@ Elastic reserves the right to change or remove this feature in future releases w
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-has-privileges-user-profile',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['uids', 'privileges'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_has_privileges_user_profile_request, 'body'),
-    getLooseObjectFromProperty(security_has_privileges_user_profile_request, 'path'),
-    getLooseObjectFromProperty(security_has_privileges_user_profile_request, 'query'),
-    getLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'body'),
-    getLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'path'),
-    getLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'query'),
+    getZodLooseObjectFromProperty(security_has_privileges_user_profile_request, 'body'),
+    getZodLooseObjectFromProperty(security_has_privileges_user_profile_request, 'path'),
+    getZodLooseObjectFromProperty(security_has_privileges_user_profile_request, 'query'),
+    getZodLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'body'),
+    getZodLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'path'),
+    getZodLooseObjectFromProperty(security_has_privileges_user_profile1_request, 'query'),
   ]),
   outputSchema: z.union([
     security_has_privileges_user_profile_response,
@@ -17309,7 +17952,7 @@ Elastic reserves the right to change or remove this feature in future releases w
 };
 const SECURITY_INVALIDATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.invalidate_api_key',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Invalidate API keys`,
   description: `Invalidate API keys.
 
@@ -17332,20 +17975,21 @@ In addition, with the \`manage_own_api_key\` privilege, an invalidation request 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-invalidate-api-key',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['id', 'ids', 'name', 'owner', 'realm_name', 'username'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_invalidate_api_key_request, 'body'),
-    getLooseObjectFromProperty(security_invalidate_api_key_request, 'path'),
-    getLooseObjectFromProperty(security_invalidate_api_key_request, 'query'),
+    getZodLooseObjectFromProperty(security_invalidate_api_key_request, 'body'),
+    getZodLooseObjectFromProperty(security_invalidate_api_key_request, 'path'),
+    getZodLooseObjectFromProperty(security_invalidate_api_key_request, 'query'),
   ]),
   outputSchema: security_invalidate_api_key_response,
 };
 const SECURITY_INVALIDATE_TOKEN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.invalidate_token',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Invalidate a token`,
   description: `Invalidate a token.
 
@@ -17367,20 +18011,21 @@ If none of these two are specified, then \`realm_name\` and/or \`username\` need
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-invalidate-token',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['token', 'refresh_token', 'realm_name', 'username'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_invalidate_token_request, 'body'),
-    getLooseObjectFromProperty(security_invalidate_token_request, 'path'),
-    getLooseObjectFromProperty(security_invalidate_token_request, 'query'),
+    getZodLooseObjectFromProperty(security_invalidate_token_request, 'body'),
+    getZodLooseObjectFromProperty(security_invalidate_token_request, 'path'),
+    getZodLooseObjectFromProperty(security_invalidate_token_request, 'query'),
   ]),
   outputSchema: security_invalidate_token_response,
 };
 const SECURITY_OIDC_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.oidc_authenticate',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Authenticate OpenID Connect`,
   description: `Authenticate OpenID Connect.
 
@@ -17395,20 +18040,21 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-oidc-authenticate',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['nonce', 'realm', 'redirect_uri', 'state'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_oidc_authenticate_request, 'body'),
-    getLooseObjectFromProperty(security_oidc_authenticate_request, 'path'),
-    getLooseObjectFromProperty(security_oidc_authenticate_request, 'query'),
+    getZodLooseObjectFromProperty(security_oidc_authenticate_request, 'body'),
+    getZodLooseObjectFromProperty(security_oidc_authenticate_request, 'path'),
+    getZodLooseObjectFromProperty(security_oidc_authenticate_request, 'query'),
   ]),
   outputSchema: security_oidc_authenticate_response,
 };
 const SECURITY_OIDC_LOGOUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.oidc_logout',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Logout of OpenID Connect`,
   description: `Logout of OpenID Connect.
 
@@ -17425,20 +18071,21 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-oidc-logout',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['token', 'refresh_token'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_oidc_logout_request, 'body'),
-    getLooseObjectFromProperty(security_oidc_logout_request, 'path'),
-    getLooseObjectFromProperty(security_oidc_logout_request, 'query'),
+    getZodLooseObjectFromProperty(security_oidc_logout_request, 'body'),
+    getZodLooseObjectFromProperty(security_oidc_logout_request, 'path'),
+    getZodLooseObjectFromProperty(security_oidc_logout_request, 'query'),
   ]),
   outputSchema: security_oidc_logout_response,
 };
 const SECURITY_OIDC_PREPARE_AUTHENTICATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.oidc_prepare_authentication',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Prepare OpenID connect authentication`,
   description: `Prepare OpenID connect authentication.
 
@@ -17455,20 +18102,21 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-oidc-prepare-authentication',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['iss', 'login_hint', 'nonce', 'realm', 'state'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'body'),
-    getLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'path'),
-    getLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'query'),
+    getZodLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'body'),
+    getZodLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'path'),
+    getZodLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'query'),
   ]),
   outputSchema: security_oidc_prepare_authentication_response,
 };
 const SECURITY_PUT_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.put_privileges',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update application privileges`,
   description: `Create or update application privileges.
 
@@ -17496,23 +18144,24 @@ Action names can contain any number of printable ASCII characters and must conta
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-privileges',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_put_privileges_request, 'body'),
-    getLooseObjectFromProperty(security_put_privileges_request, 'path'),
-    getLooseObjectFromProperty(security_put_privileges_request, 'query'),
-    getLooseObjectFromProperty(security_put_privileges1_request, 'body'),
-    getLooseObjectFromProperty(security_put_privileges1_request, 'path'),
-    getLooseObjectFromProperty(security_put_privileges1_request, 'query'),
+    getZodLooseObjectFromProperty(security_put_privileges_request, 'body'),
+    getZodLooseObjectFromProperty(security_put_privileges_request, 'path'),
+    getZodLooseObjectFromProperty(security_put_privileges_request, 'query'),
+    getZodLooseObjectFromProperty(security_put_privileges1_request, 'body'),
+    getZodLooseObjectFromProperty(security_put_privileges1_request, 'path'),
+    getZodLooseObjectFromProperty(security_put_privileges1_request, 'query'),
   ]),
   outputSchema: z.union([security_put_privileges_response, security_put_privileges1_response]),
 };
 const SECURITY_PUT_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.put_role',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update roles`,
   description: `Create or update roles.
 
@@ -17526,6 +18175,7 @@ File-based role management is not available in Elastic Serverless.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-role',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['refresh'],
     bodyParams: [
@@ -17542,18 +18192,18 @@ File-based role management is not available in Elastic Serverless.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_put_role_request, 'body'),
-    getLooseObjectFromProperty(security_put_role_request, 'path'),
-    getLooseObjectFromProperty(security_put_role_request, 'query'),
-    getLooseObjectFromProperty(security_put_role1_request, 'body'),
-    getLooseObjectFromProperty(security_put_role1_request, 'path'),
-    getLooseObjectFromProperty(security_put_role1_request, 'query'),
+    getZodLooseObjectFromProperty(security_put_role_request, 'body'),
+    getZodLooseObjectFromProperty(security_put_role_request, 'path'),
+    getZodLooseObjectFromProperty(security_put_role_request, 'query'),
+    getZodLooseObjectFromProperty(security_put_role1_request, 'body'),
+    getZodLooseObjectFromProperty(security_put_role1_request, 'path'),
+    getZodLooseObjectFromProperty(security_put_role1_request, 'query'),
   ]),
   outputSchema: z.union([security_put_role_response, security_put_role1_response]),
 };
 const SECURITY_PUT_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.put_role_mapping',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update role mappings`,
   description: `Create or update role mappings.
 
@@ -17588,23 +18238,24 @@ If the format of the template is set to "json" then the template is expected to 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-role-mapping',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['name'],
     urlParams: ['refresh'],
     bodyParams: ['enabled', 'metadata', 'roles', 'role_templates', 'rules', 'run_as'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_put_role_mapping_request, 'body'),
-    getLooseObjectFromProperty(security_put_role_mapping_request, 'path'),
-    getLooseObjectFromProperty(security_put_role_mapping_request, 'query'),
-    getLooseObjectFromProperty(security_put_role_mapping1_request, 'body'),
-    getLooseObjectFromProperty(security_put_role_mapping1_request, 'path'),
-    getLooseObjectFromProperty(security_put_role_mapping1_request, 'query'),
+    getZodLooseObjectFromProperty(security_put_role_mapping_request, 'body'),
+    getZodLooseObjectFromProperty(security_put_role_mapping_request, 'path'),
+    getZodLooseObjectFromProperty(security_put_role_mapping_request, 'query'),
+    getZodLooseObjectFromProperty(security_put_role_mapping1_request, 'body'),
+    getZodLooseObjectFromProperty(security_put_role_mapping1_request, 'path'),
+    getZodLooseObjectFromProperty(security_put_role_mapping1_request, 'query'),
   ]),
   outputSchema: z.union([security_put_role_mapping_response, security_put_role_mapping1_response]),
 };
 const SECURITY_PUT_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.put_user',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update users`,
   description: `Create or update users.
 
@@ -17618,6 +18269,7 @@ To change a user's password without updating any other fields, use the change pa
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-user',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['username'],
     urlParams: ['refresh'],
     bodyParams: [
@@ -17632,18 +18284,18 @@ To change a user's password without updating any other fields, use the change pa
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_put_user_request, 'body'),
-    getLooseObjectFromProperty(security_put_user_request, 'path'),
-    getLooseObjectFromProperty(security_put_user_request, 'query'),
-    getLooseObjectFromProperty(security_put_user1_request, 'body'),
-    getLooseObjectFromProperty(security_put_user1_request, 'path'),
-    getLooseObjectFromProperty(security_put_user1_request, 'query'),
+    getZodLooseObjectFromProperty(security_put_user_request, 'body'),
+    getZodLooseObjectFromProperty(security_put_user_request, 'path'),
+    getZodLooseObjectFromProperty(security_put_user_request, 'query'),
+    getZodLooseObjectFromProperty(security_put_user1_request, 'body'),
+    getZodLooseObjectFromProperty(security_put_user1_request, 'path'),
+    getZodLooseObjectFromProperty(security_put_user1_request, 'query'),
   ]),
   outputSchema: z.union([security_put_user_response, security_put_user1_response]),
 };
 const SECURITY_QUERY_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.query_api_keys',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Find API keys with a query`,
   description: `Find API keys with a query.
 
@@ -17661,23 +18313,24 @@ Refer to the linked documentation for examples of how to find API keys:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-query-api-keys',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['with_limited_by', 'with_profile_uid', 'typed_keys'],
     bodyParams: ['aggregations', 'query', 'from', 'sort', 'size', 'search_after'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_query_api_keys_request, 'body'),
-    getLooseObjectFromProperty(security_query_api_keys_request, 'path'),
-    getLooseObjectFromProperty(security_query_api_keys_request, 'query'),
-    getLooseObjectFromProperty(security_query_api_keys1_request, 'body'),
-    getLooseObjectFromProperty(security_query_api_keys1_request, 'path'),
-    getLooseObjectFromProperty(security_query_api_keys1_request, 'query'),
+    getZodLooseObjectFromProperty(security_query_api_keys_request, 'body'),
+    getZodLooseObjectFromProperty(security_query_api_keys_request, 'path'),
+    getZodLooseObjectFromProperty(security_query_api_keys_request, 'query'),
+    getZodLooseObjectFromProperty(security_query_api_keys1_request, 'body'),
+    getZodLooseObjectFromProperty(security_query_api_keys1_request, 'path'),
+    getZodLooseObjectFromProperty(security_query_api_keys1_request, 'query'),
   ]),
   outputSchema: z.union([security_query_api_keys_response, security_query_api_keys1_response]),
 };
 const SECURITY_QUERY_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.query_role',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Find roles with a query`,
   description: `Find roles with a query.
 
@@ -17693,23 +18346,24 @@ Also, the results can be paginated and sorted.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-query-role',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['query', 'from', 'sort', 'size', 'search_after'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_query_role_request, 'body'),
-    getLooseObjectFromProperty(security_query_role_request, 'path'),
-    getLooseObjectFromProperty(security_query_role_request, 'query'),
-    getLooseObjectFromProperty(security_query_role1_request, 'body'),
-    getLooseObjectFromProperty(security_query_role1_request, 'path'),
-    getLooseObjectFromProperty(security_query_role1_request, 'query'),
+    getZodLooseObjectFromProperty(security_query_role_request, 'body'),
+    getZodLooseObjectFromProperty(security_query_role_request, 'path'),
+    getZodLooseObjectFromProperty(security_query_role_request, 'query'),
+    getZodLooseObjectFromProperty(security_query_role1_request, 'body'),
+    getZodLooseObjectFromProperty(security_query_role1_request, 'path'),
+    getZodLooseObjectFromProperty(security_query_role1_request, 'query'),
   ]),
   outputSchema: z.union([security_query_role_response, security_query_role1_response]),
 };
 const SECURITY_QUERY_USER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.query_user',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Find users with a query`,
   description: `Find users with a query.
 
@@ -17725,23 +18379,24 @@ This API is only for native users.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-query-user',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['with_profile_uid'],
     bodyParams: ['query', 'from', 'sort', 'size', 'search_after'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_query_user_request, 'body'),
-    getLooseObjectFromProperty(security_query_user_request, 'path'),
-    getLooseObjectFromProperty(security_query_user_request, 'query'),
-    getLooseObjectFromProperty(security_query_user1_request, 'body'),
-    getLooseObjectFromProperty(security_query_user1_request, 'path'),
-    getLooseObjectFromProperty(security_query_user1_request, 'query'),
+    getZodLooseObjectFromProperty(security_query_user_request, 'body'),
+    getZodLooseObjectFromProperty(security_query_user_request, 'path'),
+    getZodLooseObjectFromProperty(security_query_user_request, 'query'),
+    getZodLooseObjectFromProperty(security_query_user1_request, 'body'),
+    getZodLooseObjectFromProperty(security_query_user1_request, 'path'),
+    getZodLooseObjectFromProperty(security_query_user1_request, 'query'),
   ]),
   outputSchema: z.union([security_query_user_response, security_query_user1_response]),
 };
 const SECURITY_SAML_AUTHENTICATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_authenticate',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Authenticate SAML`,
   description: `Authenticate SAML.
 
@@ -17766,20 +18421,21 @@ This API endpoint essentially exchanges SAML responses that indicate successful 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-authenticate',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['content', 'ids', 'realm'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_saml_authenticate_request, 'body'),
-    getLooseObjectFromProperty(security_saml_authenticate_request, 'path'),
-    getLooseObjectFromProperty(security_saml_authenticate_request, 'query'),
+    getZodLooseObjectFromProperty(security_saml_authenticate_request, 'body'),
+    getZodLooseObjectFromProperty(security_saml_authenticate_request, 'path'),
+    getZodLooseObjectFromProperty(security_saml_authenticate_request, 'query'),
   ]),
   outputSchema: security_saml_authenticate_response,
 };
 const SECURITY_SAML_COMPLETE_LOGOUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_complete_logout',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Logout of SAML completely`,
   description: `Logout of SAML completely.
 
@@ -17800,20 +18456,21 @@ The caller of this API must prepare the request accordingly so that this API can
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-complete-logout',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['realm', 'ids', 'query_string', 'content'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_saml_complete_logout_request, 'body'),
-    getLooseObjectFromProperty(security_saml_complete_logout_request, 'path'),
-    getLooseObjectFromProperty(security_saml_complete_logout_request, 'query'),
+    getZodLooseObjectFromProperty(security_saml_complete_logout_request, 'body'),
+    getZodLooseObjectFromProperty(security_saml_complete_logout_request, 'path'),
+    getZodLooseObjectFromProperty(security_saml_complete_logout_request, 'query'),
   ]),
   outputSchema: security_saml_complete_logout_response,
 };
 const SECURITY_SAML_INVALIDATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_invalidate',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Invalidate SAML`,
   description: `Invalidate SAML.
 
@@ -17833,20 +18490,21 @@ Thus the user can be redirected back to their IdP.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-invalidate',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['acs', 'query_string', 'realm'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_saml_invalidate_request, 'body'),
-    getLooseObjectFromProperty(security_saml_invalidate_request, 'path'),
-    getLooseObjectFromProperty(security_saml_invalidate_request, 'query'),
+    getZodLooseObjectFromProperty(security_saml_invalidate_request, 'body'),
+    getZodLooseObjectFromProperty(security_saml_invalidate_request, 'path'),
+    getZodLooseObjectFromProperty(security_saml_invalidate_request, 'query'),
   ]),
   outputSchema: security_saml_invalidate_response,
 };
 const SECURITY_SAML_LOGOUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_logout',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Logout of SAML`,
   description: `Logout of SAML.
 
@@ -17864,20 +18522,21 @@ If the SAML realm in Elasticsearch is configured accordingly and the SAML IdP su
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-logout',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['token', 'refresh_token'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_saml_logout_request, 'body'),
-    getLooseObjectFromProperty(security_saml_logout_request, 'path'),
-    getLooseObjectFromProperty(security_saml_logout_request, 'query'),
+    getZodLooseObjectFromProperty(security_saml_logout_request, 'body'),
+    getZodLooseObjectFromProperty(security_saml_logout_request, 'path'),
+    getZodLooseObjectFromProperty(security_saml_logout_request, 'query'),
   ]),
   outputSchema: security_saml_logout_response,
 };
 const SECURITY_SAML_PREPARE_AUTHENTICATION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_prepare_authentication',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Prepare SAML authentication`,
   description: `Prepare SAML authentication.
 
@@ -17900,20 +18559,21 @@ The caller of this API needs to store this identifier as it needs to be used in 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-prepare-authentication',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['acs', 'realm', 'relay_state'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_saml_prepare_authentication_request, 'body'),
-    getLooseObjectFromProperty(security_saml_prepare_authentication_request, 'path'),
-    getLooseObjectFromProperty(security_saml_prepare_authentication_request, 'query'),
+    getZodLooseObjectFromProperty(security_saml_prepare_authentication_request, 'body'),
+    getZodLooseObjectFromProperty(security_saml_prepare_authentication_request, 'path'),
+    getZodLooseObjectFromProperty(security_saml_prepare_authentication_request, 'query'),
   ]),
   outputSchema: security_saml_prepare_authentication_response,
 };
 const SECURITY_SAML_SERVICE_PROVIDER_METADATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.saml_service_provider_metadata',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create SAML service provider metadata`,
   description: `Create SAML service provider metadata.
 
@@ -17928,20 +18588,21 @@ This API generates Service Provider metadata based on the configuration of a SAM
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-service-provider-metadata',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['realm_name'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'body'),
-    getLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'path'),
-    getLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'query'),
+    getZodLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'body'),
+    getZodLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'path'),
+    getZodLooseObjectFromProperty(security_saml_service_provider_metadata_request, 'query'),
   ]),
   outputSchema: security_saml_service_provider_metadata_response,
 };
 const SECURITY_SUGGEST_USER_PROFILES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.suggest_user_profiles',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Suggest a user profile`,
   description: `Suggest a user profile.
 
@@ -17957,17 +18618,18 @@ Elastic reserves the right to change or remove this feature in future releases w
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-suggest-user-profiles',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['data'],
     bodyParams: ['name', 'size', 'data', 'hint'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_suggest_user_profiles_request, 'body'),
-    getLooseObjectFromProperty(security_suggest_user_profiles_request, 'path'),
-    getLooseObjectFromProperty(security_suggest_user_profiles_request, 'query'),
-    getLooseObjectFromProperty(security_suggest_user_profiles1_request, 'body'),
-    getLooseObjectFromProperty(security_suggest_user_profiles1_request, 'path'),
-    getLooseObjectFromProperty(security_suggest_user_profiles1_request, 'query'),
+    getZodLooseObjectFromProperty(security_suggest_user_profiles_request, 'body'),
+    getZodLooseObjectFromProperty(security_suggest_user_profiles_request, 'path'),
+    getZodLooseObjectFromProperty(security_suggest_user_profiles_request, 'query'),
+    getZodLooseObjectFromProperty(security_suggest_user_profiles1_request, 'body'),
+    getZodLooseObjectFromProperty(security_suggest_user_profiles1_request, 'path'),
+    getZodLooseObjectFromProperty(security_suggest_user_profiles1_request, 'query'),
   ]),
   outputSchema: z.union([
     security_suggest_user_profiles_response,
@@ -17976,7 +18638,7 @@ Elastic reserves the right to change or remove this feature in future releases w
 };
 const SECURITY_UPDATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_api_key',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update an API key`,
   description: `Update an API key.
 
@@ -18005,20 +18667,21 @@ This change can occur if the owner user's permissions have changed since the API
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-api-key',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['role_descriptors', 'metadata', 'expiration'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_update_api_key_request, 'body'),
-    getLooseObjectFromProperty(security_update_api_key_request, 'path'),
-    getLooseObjectFromProperty(security_update_api_key_request, 'query'),
+    getZodLooseObjectFromProperty(security_update_api_key_request, 'body'),
+    getZodLooseObjectFromProperty(security_update_api_key_request, 'path'),
+    getZodLooseObjectFromProperty(security_update_api_key_request, 'query'),
   ]),
   outputSchema: security_update_api_key_response,
 };
 const SECURITY_UPDATE_CROSS_CLUSTER_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_cross_cluster_api_key',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update a cross-cluster API key`,
   description: `Update a cross-cluster API key.
 
@@ -18046,20 +18709,21 @@ To learn more about how to use this API, refer to the [Update cross cluter API k
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-cross-cluster-api-key',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: ['access', 'expiration', 'metadata', 'certificate_identity'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'body'),
-    getLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'path'),
-    getLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'query'),
+    getZodLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'body'),
+    getZodLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'path'),
+    getZodLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'query'),
   ]),
   outputSchema: security_update_cross_cluster_api_key_response,
 };
 const SECURITY_UPDATE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update security index settings`,
   description: `Update security index settings.
 
@@ -18076,20 +18740,21 @@ This API does not yet support configuring the settings for indices before they a
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['security', 'security-profile', 'security-tokens'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_update_settings_request, 'body'),
-    getLooseObjectFromProperty(security_update_settings_request, 'path'),
-    getLooseObjectFromProperty(security_update_settings_request, 'query'),
+    getZodLooseObjectFromProperty(security_update_settings_request, 'body'),
+    getZodLooseObjectFromProperty(security_update_settings_request, 'path'),
+    getZodLooseObjectFromProperty(security_update_settings_request, 'query'),
   ]),
   outputSchema: security_update_settings_response,
 };
 const SECURITY_UPDATE_USER_PROFILE_DATA_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.security.update_user_profile_data',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update user profile data`,
   description: `Update user profile data.
 
@@ -18116,17 +18781,18 @@ The \`update_profile_data\` global privilege grants privileges for updating only
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-user-profile-data',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['uid'],
     urlParams: ['if_seq_no', 'if_primary_term', 'refresh'],
     bodyParams: ['labels', 'data'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(security_update_user_profile_data_request, 'body'),
-    getLooseObjectFromProperty(security_update_user_profile_data_request, 'path'),
-    getLooseObjectFromProperty(security_update_user_profile_data_request, 'query'),
-    getLooseObjectFromProperty(security_update_user_profile_data1_request, 'body'),
-    getLooseObjectFromProperty(security_update_user_profile_data1_request, 'path'),
-    getLooseObjectFromProperty(security_update_user_profile_data1_request, 'query'),
+    getZodLooseObjectFromProperty(security_update_user_profile_data_request, 'body'),
+    getZodLooseObjectFromProperty(security_update_user_profile_data_request, 'path'),
+    getZodLooseObjectFromProperty(security_update_user_profile_data_request, 'query'),
+    getZodLooseObjectFromProperty(security_update_user_profile_data1_request, 'body'),
+    getZodLooseObjectFromProperty(security_update_user_profile_data1_request, 'path'),
+    getZodLooseObjectFromProperty(security_update_user_profile_data1_request, 'query'),
   ]),
   outputSchema: z.union([
     security_update_user_profile_data_response,
@@ -18135,8 +18801,8 @@ The \`update_profile_data\` global privilege grants privileges for updating only
 };
 const SHUTDOWN_DELETE_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.shutdown.delete_node',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Cancel node shutdown preparations.
 Remove a node from the shutdown list so it can resume normal operations.
 You must explicitly clear the shutdown request when a node rejoins the cluster or when a node has permanently left the cluster.
@@ -18153,6 +18819,7 @@ If the operator privileges feature is enabled, you must be an operator to use th
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-shutdown-delete-node',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -18162,8 +18829,8 @@ If the operator privileges feature is enabled, you must be an operator to use th
 };
 const SHUTDOWN_GET_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.shutdown.get_node',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Get the shutdown status.
 
 Get information about nodes that are ready to be shut down, have shut down preparations still in progress, or have stalled.
@@ -18179,6 +18846,7 @@ If the operator privileges feature is enabled, you must be an operator to use th
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-shutdown-get-node',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -18188,8 +18856,8 @@ If the operator privileges feature is enabled, you must be an operator to use th
 };
 const SHUTDOWN_PUT_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.shutdown.put_node',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Prepare a node to be shut down.
 
 NOTE: This feature is designed for indirect use by Elastic Cloud, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
@@ -18213,6 +18881,7 @@ Monitor the node shutdown status to determine when it is safe to stop Elasticsea
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-shutdown-put-node',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -18222,7 +18891,7 @@ Monitor the node shutdown status to determine when it is safe to stop Elasticsea
 };
 const SIMULATE_INGEST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.simulate.ingest',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Simulate data ingestion`,
   description: `Simulate data ingestion.
 Run ingest pipelines against a set of provided documents, optionally with substitute pipeline definitions, to simulate ingesting data into an index.
@@ -18248,6 +18917,7 @@ These will be used in place of the pipeline definitions that are already in the 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-simulate-ingest',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: ['pipeline', 'merge_type'],
     bodyParams: [
@@ -18259,18 +18929,18 @@ These will be used in place of the pipeline definitions that are already in the 
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(simulate_ingest_request, 'body'),
-    getLooseObjectFromProperty(simulate_ingest_request, 'path'),
-    getLooseObjectFromProperty(simulate_ingest_request, 'query'),
-    getLooseObjectFromProperty(simulate_ingest1_request, 'body'),
-    getLooseObjectFromProperty(simulate_ingest1_request, 'path'),
-    getLooseObjectFromProperty(simulate_ingest1_request, 'query'),
-    getLooseObjectFromProperty(simulate_ingest2_request, 'body'),
-    getLooseObjectFromProperty(simulate_ingest2_request, 'path'),
-    getLooseObjectFromProperty(simulate_ingest2_request, 'query'),
-    getLooseObjectFromProperty(simulate_ingest3_request, 'body'),
-    getLooseObjectFromProperty(simulate_ingest3_request, 'path'),
-    getLooseObjectFromProperty(simulate_ingest3_request, 'query'),
+    getZodLooseObjectFromProperty(simulate_ingest_request, 'body'),
+    getZodLooseObjectFromProperty(simulate_ingest_request, 'path'),
+    getZodLooseObjectFromProperty(simulate_ingest_request, 'query'),
+    getZodLooseObjectFromProperty(simulate_ingest1_request, 'body'),
+    getZodLooseObjectFromProperty(simulate_ingest1_request, 'path'),
+    getZodLooseObjectFromProperty(simulate_ingest1_request, 'query'),
+    getZodLooseObjectFromProperty(simulate_ingest2_request, 'body'),
+    getZodLooseObjectFromProperty(simulate_ingest2_request, 'path'),
+    getZodLooseObjectFromProperty(simulate_ingest2_request, 'query'),
+    getZodLooseObjectFromProperty(simulate_ingest3_request, 'body'),
+    getZodLooseObjectFromProperty(simulate_ingest3_request, 'path'),
+    getZodLooseObjectFromProperty(simulate_ingest3_request, 'query'),
   ]),
   outputSchema: z.union([
     simulate_ingest_response,
@@ -18281,7 +18951,7 @@ These will be used in place of the pipeline definitions that are already in the 
 };
 const SLM_DELETE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.delete_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a policy`,
   description: `Delete a policy.
 Delete a snapshot lifecycle policy definition.
@@ -18293,20 +18963,21 @@ This operation prevents any future snapshots from being taken but does not cance
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-delete-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['policy_id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(slm_delete_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(slm_delete_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(slm_delete_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(slm_delete_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(slm_delete_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(slm_delete_lifecycle_request, 'query'),
   ]),
   outputSchema: slm_delete_lifecycle_response,
 };
 const SLM_EXECUTE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.execute_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a policy`,
   description: `Run a policy.
 Immediately create a snapshot according to the snapshot lifecycle policy without waiting for the scheduled time.
@@ -18318,20 +18989,21 @@ The snapshot policy is normally applied according to its schedule, but you might
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-execute-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['policy_id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(slm_execute_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(slm_execute_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(slm_execute_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(slm_execute_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(slm_execute_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(slm_execute_lifecycle_request, 'query'),
   ]),
   outputSchema: slm_execute_lifecycle_response,
 };
 const SLM_EXECUTE_RETENTION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.execute_retention',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a retention policy`,
   description: `Run a retention policy.
 Manually apply the retention policy to force immediate removal of snapshots that are expired according to the snapshot lifecycle policy retention rules.
@@ -18343,20 +19015,21 @@ The retention policy is normally applied according to its schedule.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-execute-retention',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(slm_execute_retention_request, 'body'),
-    getLooseObjectFromProperty(slm_execute_retention_request, 'path'),
-    getLooseObjectFromProperty(slm_execute_retention_request, 'query'),
+    getZodLooseObjectFromProperty(slm_execute_retention_request, 'body'),
+    getZodLooseObjectFromProperty(slm_execute_retention_request, 'path'),
+    getZodLooseObjectFromProperty(slm_execute_retention_request, 'query'),
   ]),
   outputSchema: slm_execute_retention_response,
 };
 const SLM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.get_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get policy information`,
   description: `Get policy information.
 Get snapshot lifecycle policy definitions and information about the latest snapshot attempts.
@@ -18367,23 +19040,24 @@ Get snapshot lifecycle policy definitions and information about the latest snaps
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-get-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['policy_id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(slm_get_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(slm_get_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(slm_get_lifecycle_request, 'query'),
-    getLooseObjectFromProperty(slm_get_lifecycle1_request, 'body'),
-    getLooseObjectFromProperty(slm_get_lifecycle1_request, 'path'),
-    getLooseObjectFromProperty(slm_get_lifecycle1_request, 'query'),
+    getZodLooseObjectFromProperty(slm_get_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(slm_get_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(slm_get_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(slm_get_lifecycle1_request, 'body'),
+    getZodLooseObjectFromProperty(slm_get_lifecycle1_request, 'path'),
+    getZodLooseObjectFromProperty(slm_get_lifecycle1_request, 'query'),
   ]),
   outputSchema: z.union([slm_get_lifecycle_response, slm_get_lifecycle1_response]),
 };
 const SLM_GET_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.get_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get snapshot lifecycle management statistics`,
   description: `Get snapshot lifecycle management statistics.
 Get global and policy-level statistics about actions taken by snapshot lifecycle management.
@@ -18394,20 +19068,21 @@ Get global and policy-level statistics about actions taken by snapshot lifecycle
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-get-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(slm_get_stats_request, 'body'),
-    getLooseObjectFromProperty(slm_get_stats_request, 'path'),
-    getLooseObjectFromProperty(slm_get_stats_request, 'query'),
+    getZodLooseObjectFromProperty(slm_get_stats_request, 'body'),
+    getZodLooseObjectFromProperty(slm_get_stats_request, 'path'),
+    getZodLooseObjectFromProperty(slm_get_stats_request, 'query'),
   ]),
   outputSchema: slm_get_stats_response,
 };
 const SLM_GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.get_status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the snapshot lifecycle management status`,
   description: `Get the snapshot lifecycle management status.
 
@@ -18417,20 +19092,21 @@ const SLM_GET_STATUS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-get-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(slm_get_status_request, 'body'),
-    getLooseObjectFromProperty(slm_get_status_request, 'path'),
-    getLooseObjectFromProperty(slm_get_status_request, 'query'),
+    getZodLooseObjectFromProperty(slm_get_status_request, 'body'),
+    getZodLooseObjectFromProperty(slm_get_status_request, 'path'),
+    getZodLooseObjectFromProperty(slm_get_status_request, 'query'),
   ]),
   outputSchema: slm_get_status_response,
 };
 const SLM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.put_lifecycle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a policy`,
   description: `Create or update a policy.
 Create or update a snapshot lifecycle policy.
@@ -18443,20 +19119,21 @@ Only the latest version of a policy is stored.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-put-lifecycle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['policy_id'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['config', 'name', 'repository', 'retention', 'schedule'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(slm_put_lifecycle_request, 'body'),
-    getLooseObjectFromProperty(slm_put_lifecycle_request, 'path'),
-    getLooseObjectFromProperty(slm_put_lifecycle_request, 'query'),
+    getZodLooseObjectFromProperty(slm_put_lifecycle_request, 'body'),
+    getZodLooseObjectFromProperty(slm_put_lifecycle_request, 'path'),
+    getZodLooseObjectFromProperty(slm_put_lifecycle_request, 'query'),
   ]),
   outputSchema: slm_put_lifecycle_response,
 };
 const SLM_START_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.start',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start snapshot lifecycle management`,
   description: `Start snapshot lifecycle management.
 Snapshot lifecycle management (SLM) starts automatically when a cluster is formed.
@@ -18467,20 +19144,21 @@ Manually starting SLM is necessary only if it has been stopped using the stop SL
   patterns: ['_slm/start'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-start',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(slm_start_request, 'body'),
-    getLooseObjectFromProperty(slm_start_request, 'path'),
-    getLooseObjectFromProperty(slm_start_request, 'query'),
+    getZodLooseObjectFromProperty(slm_start_request, 'body'),
+    getZodLooseObjectFromProperty(slm_start_request, 'path'),
+    getZodLooseObjectFromProperty(slm_start_request, 'query'),
   ]),
   outputSchema: slm_start_response,
 };
 const SLM_STOP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.slm.stop',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Stop snapshot lifecycle management`,
   description: `Stop snapshot lifecycle management.
 Stop all snapshot lifecycle management (SLM) operations and the SLM plugin.
@@ -18496,20 +19174,21 @@ Use the get snapshot lifecycle management status API to see if SLM is running.
   patterns: ['_slm/stop'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-stop',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(slm_stop_request, 'body'),
-    getLooseObjectFromProperty(slm_stop_request, 'path'),
-    getLooseObjectFromProperty(slm_stop_request, 'query'),
+    getZodLooseObjectFromProperty(slm_stop_request, 'body'),
+    getZodLooseObjectFromProperty(slm_stop_request, 'path'),
+    getZodLooseObjectFromProperty(slm_stop_request, 'query'),
   ]),
   outputSchema: slm_stop_response,
 };
 const SNAPSHOT_CLEANUP_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.cleanup_repository',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clean up the snapshot repository`,
   description: `Clean up the snapshot repository.
 Trigger the review of the contents of a snapshot repository and delete any stale data not referenced by existing snapshots.
@@ -18520,20 +19199,21 @@ Trigger the review of the contents of a snapshot repository and delete any stale
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-cleanup-repository',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_cleanup_repository_request, 'body'),
-    getLooseObjectFromProperty(snapshot_cleanup_repository_request, 'path'),
-    getLooseObjectFromProperty(snapshot_cleanup_repository_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_cleanup_repository_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_cleanup_repository_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_cleanup_repository_request, 'query'),
   ]),
   outputSchema: snapshot_cleanup_repository_response,
 };
 const SNAPSHOT_CLONE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.clone',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clone a snapshot`,
   description: `Clone a snapshot.
 Clone part of all of a snapshot into another snapshot in the same repository.
@@ -18544,20 +19224,21 @@ Clone part of all of a snapshot into another snapshot in the same repository.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-clone',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository', 'snapshot', 'target_snapshot'],
     urlParams: ['master_timeout'],
     bodyParams: ['indices'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_clone_request, 'body'),
-    getLooseObjectFromProperty(snapshot_clone_request, 'path'),
-    getLooseObjectFromProperty(snapshot_clone_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_clone_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_clone_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_clone_request, 'query'),
   ]),
   outputSchema: snapshot_clone_response,
 };
 const SNAPSHOT_CREATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.create',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a snapshot`,
   description: `Create a snapshot.
 Take a snapshot of a cluster or of data streams and indices.
@@ -18568,6 +19249,7 @@ Take a snapshot of a cluster or of data streams and indices.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-create',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository', 'snapshot'],
     urlParams: ['master_timeout', 'wait_for_completion'],
     bodyParams: [
@@ -18581,18 +19263,18 @@ Take a snapshot of a cluster or of data streams and indices.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_create_request, 'body'),
-    getLooseObjectFromProperty(snapshot_create_request, 'path'),
-    getLooseObjectFromProperty(snapshot_create_request, 'query'),
-    getLooseObjectFromProperty(snapshot_create1_request, 'body'),
-    getLooseObjectFromProperty(snapshot_create1_request, 'path'),
-    getLooseObjectFromProperty(snapshot_create1_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_create_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_create_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_create_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_create1_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_create1_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_create1_request, 'query'),
   ]),
   outputSchema: z.union([snapshot_create_response, snapshot_create1_response]),
 };
 const SNAPSHOT_CREATE_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.create_repository',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a snapshot repository`,
   description: `Create or update a snapshot repository.
 IMPORTANT: If you are migrating searchable snapshots, the repository name must be identical in the source and destination clusters.
@@ -18608,17 +19290,18 @@ If both parameters are specified, only the query parameter is used.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-create-repository',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository'],
     urlParams: ['master_timeout', 'timeout', 'verify'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_create_repository_request, 'body'),
-    getLooseObjectFromProperty(snapshot_create_repository_request, 'path'),
-    getLooseObjectFromProperty(snapshot_create_repository_request, 'query'),
-    getLooseObjectFromProperty(snapshot_create_repository1_request, 'body'),
-    getLooseObjectFromProperty(snapshot_create_repository1_request, 'path'),
-    getLooseObjectFromProperty(snapshot_create_repository1_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_create_repository_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_create_repository_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_create_repository_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_create_repository1_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_create_repository1_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_create_repository1_request, 'query'),
   ]),
   outputSchema: z.union([
     snapshot_create_repository_response,
@@ -18627,7 +19310,7 @@ If both parameters are specified, only the query parameter is used.
 };
 const SNAPSHOT_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.delete',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete snapshots`,
   description: `Delete snapshots.
 
@@ -18637,20 +19320,21 @@ const SNAPSHOT_DELETE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-delete',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository', 'snapshot'],
     urlParams: ['master_timeout', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_delete_request, 'body'),
-    getLooseObjectFromProperty(snapshot_delete_request, 'path'),
-    getLooseObjectFromProperty(snapshot_delete_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_delete_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_delete_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_delete_request, 'query'),
   ]),
   outputSchema: snapshot_delete_response,
 };
 const SNAPSHOT_DELETE_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.delete_repository',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete snapshot repositories`,
   description: `Delete snapshot repositories.
 When a repository is unregistered, Elasticsearch removes only the reference to the location where the repository is storing the snapshots.
@@ -18662,20 +19346,21 @@ The snapshots themselves are left untouched and in place.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-delete-repository',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_delete_repository_request, 'body'),
-    getLooseObjectFromProperty(snapshot_delete_repository_request, 'path'),
-    getLooseObjectFromProperty(snapshot_delete_repository_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_delete_repository_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_delete_repository_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_delete_repository_request, 'query'),
   ]),
   outputSchema: snapshot_delete_repository_response,
 };
 const SNAPSHOT_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get snapshot information`,
   description: `Get snapshot information.
 
@@ -18689,6 +19374,7 @@ Snapshots concurrently created may be seen during an iteration.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-get',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository', 'snapshot'],
     urlParams: [
       'after',
@@ -18709,15 +19395,15 @@ Snapshots concurrently created may be seen during an iteration.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_get_request, 'body'),
-    getLooseObjectFromProperty(snapshot_get_request, 'path'),
-    getLooseObjectFromProperty(snapshot_get_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_get_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_get_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_get_request, 'query'),
   ]),
   outputSchema: snapshot_get_response,
 };
 const SNAPSHOT_GET_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.get_repository',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get snapshot repository information`,
   description: `Get snapshot repository information.
 
@@ -18727,23 +19413,24 @@ const SNAPSHOT_GET_REPOSITORY_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-get-repository',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository'],
     urlParams: ['local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_get_repository_request, 'body'),
-    getLooseObjectFromProperty(snapshot_get_repository_request, 'path'),
-    getLooseObjectFromProperty(snapshot_get_repository_request, 'query'),
-    getLooseObjectFromProperty(snapshot_get_repository1_request, 'body'),
-    getLooseObjectFromProperty(snapshot_get_repository1_request, 'path'),
-    getLooseObjectFromProperty(snapshot_get_repository1_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_get_repository_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_get_repository_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_get_repository_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_get_repository1_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_get_repository1_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_get_repository1_request, 'query'),
   ]),
   outputSchema: z.union([snapshot_get_repository_response, snapshot_get_repository1_response]),
 };
 const SNAPSHOT_REPOSITORY_ANALYZE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.repository_analyze',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Analyze a snapshot repository`,
   description: `Analyze a snapshot repository.
 
@@ -18856,6 +19543,7 @@ Some operations also verify the behavior on small blobs with sizes other than 8 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-repository-analyze',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository'],
     urlParams: [
       'blob_count',
@@ -18874,15 +19562,15 @@ Some operations also verify the behavior on small blobs with sizes other than 8 
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_repository_analyze_request, 'body'),
-    getLooseObjectFromProperty(snapshot_repository_analyze_request, 'path'),
-    getLooseObjectFromProperty(snapshot_repository_analyze_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_repository_analyze_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_repository_analyze_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_repository_analyze_request, 'query'),
   ]),
   outputSchema: snapshot_repository_analyze_response,
 };
 const SNAPSHOT_REPOSITORY_VERIFY_INTEGRITY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.repository_verify_integrity',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Verify the repository integrity`,
   description: `Verify the repository integrity.
 Verify the integrity of the contents of a snapshot repository.
@@ -18927,6 +19615,7 @@ The response body format is therefore not considered stable and may be different
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-repository-verify-integrity',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository'],
     urlParams: [
       'blob_thread_pool_concurrency',
@@ -18941,15 +19630,15 @@ The response body format is therefore not considered stable and may be different
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'body'),
-    getLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'path'),
-    getLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_repository_verify_integrity_request, 'query'),
   ]),
   outputSchema: snapshot_repository_verify_integrity_response,
 };
 const SNAPSHOT_RESTORE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.restore',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Restore a snapshot`,
   description: `Restore a snapshot.
 Restore a snapshot of a cluster or data streams and indices.
@@ -18976,6 +19665,7 @@ If your snapshot contains data from App Search or Workplace Search, you must res
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-restore',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository', 'snapshot'],
     urlParams: ['master_timeout', 'wait_for_completion'],
     bodyParams: [
@@ -18992,15 +19682,15 @@ If your snapshot contains data from App Search or Workplace Search, you must res
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_restore_request, 'body'),
-    getLooseObjectFromProperty(snapshot_restore_request, 'path'),
-    getLooseObjectFromProperty(snapshot_restore_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_restore_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_restore_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_restore_request, 'query'),
   ]),
   outputSchema: snapshot_restore_response,
 };
 const SNAPSHOT_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the snapshot status`,
   description: `Get the snapshot status.
 Get a detailed description of the current state for each shard participating in the snapshot.
@@ -19035,20 +19725,21 @@ These requests can also tax machine resources and, when using cloud storage, inc
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository', 'snapshot'],
     urlParams: ['ignore_unavailable', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_status_request, 'body'),
-    getLooseObjectFromProperty(snapshot_status_request, 'path'),
-    getLooseObjectFromProperty(snapshot_status_request, 'query'),
-    getLooseObjectFromProperty(snapshot_status1_request, 'body'),
-    getLooseObjectFromProperty(snapshot_status1_request, 'path'),
-    getLooseObjectFromProperty(snapshot_status1_request, 'query'),
-    getLooseObjectFromProperty(snapshot_status2_request, 'body'),
-    getLooseObjectFromProperty(snapshot_status2_request, 'path'),
-    getLooseObjectFromProperty(snapshot_status2_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_status_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_status_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_status_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_status1_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_status1_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_status1_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_status2_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_status2_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_status2_request, 'query'),
   ]),
   outputSchema: z.union([
     snapshot_status_response,
@@ -19058,7 +19749,7 @@ These requests can also tax machine resources and, when using cloud storage, inc
 };
 const SNAPSHOT_VERIFY_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.verify_repository',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Verify a snapshot repository`,
   description: `Verify a snapshot repository.
 Check for common misconfigurations in a snapshot repository.
@@ -19069,20 +19760,21 @@ Check for common misconfigurations in a snapshot repository.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-verify-repository',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['repository'],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(snapshot_verify_repository_request, 'body'),
-    getLooseObjectFromProperty(snapshot_verify_repository_request, 'path'),
-    getLooseObjectFromProperty(snapshot_verify_repository_request, 'query'),
+    getZodLooseObjectFromProperty(snapshot_verify_repository_request, 'body'),
+    getZodLooseObjectFromProperty(snapshot_verify_repository_request, 'path'),
+    getZodLooseObjectFromProperty(snapshot_verify_repository_request, 'query'),
   ]),
   outputSchema: snapshot_verify_repository_response,
 };
 const SQL_CLEAR_CURSOR_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.clear_cursor',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Clear an SQL search cursor`,
   description: `Clear an SQL search cursor.
 
@@ -19092,20 +19784,21 @@ const SQL_CLEAR_CURSOR_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-clear-cursor',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['cursor'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(sql_clear_cursor_request, 'body'),
-    getLooseObjectFromProperty(sql_clear_cursor_request, 'path'),
-    getLooseObjectFromProperty(sql_clear_cursor_request, 'query'),
+    getZodLooseObjectFromProperty(sql_clear_cursor_request, 'body'),
+    getZodLooseObjectFromProperty(sql_clear_cursor_request, 'path'),
+    getZodLooseObjectFromProperty(sql_clear_cursor_request, 'query'),
   ]),
   outputSchema: sql_clear_cursor_response,
 };
 const SQL_DELETE_ASYNC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.delete_async',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete an async SQL search`,
   description: `Delete an async SQL search.
 Delete an async SQL search or a stored synchronous SQL search.
@@ -19122,20 +19815,21 @@ If the Elasticsearch security features are enabled, only the following users can
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-delete-async',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(sql_delete_async_request, 'body'),
-    getLooseObjectFromProperty(sql_delete_async_request, 'path'),
-    getLooseObjectFromProperty(sql_delete_async_request, 'query'),
+    getZodLooseObjectFromProperty(sql_delete_async_request, 'body'),
+    getZodLooseObjectFromProperty(sql_delete_async_request, 'path'),
+    getZodLooseObjectFromProperty(sql_delete_async_request, 'query'),
   ]),
   outputSchema: sql_delete_async_response,
 };
 const SQL_GET_ASYNC_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.get_async',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get async SQL search results`,
   description: `Get async SQL search results.
 Get the current status and available results for an async SQL search or stored synchronous SQL search.
@@ -19148,20 +19842,21 @@ If the Elasticsearch security features are enabled, only the user who first subm
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-get-async',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['delimiter', 'format', 'keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(sql_get_async_request, 'body'),
-    getLooseObjectFromProperty(sql_get_async_request, 'path'),
-    getLooseObjectFromProperty(sql_get_async_request, 'query'),
+    getZodLooseObjectFromProperty(sql_get_async_request, 'body'),
+    getZodLooseObjectFromProperty(sql_get_async_request, 'path'),
+    getZodLooseObjectFromProperty(sql_get_async_request, 'query'),
   ]),
   outputSchema: sql_get_async_response,
 };
 const SQL_GET_ASYNC_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.get_async_status',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get the async SQL search status`,
   description: `Get the async SQL search status.
 Get the current status of an async SQL search or a stored synchronous SQL search.
@@ -19172,20 +19867,21 @@ Get the current status of an async SQL search or a stored synchronous SQL search
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-get-async-status',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(sql_get_async_status_request, 'body'),
-    getLooseObjectFromProperty(sql_get_async_status_request, 'path'),
-    getLooseObjectFromProperty(sql_get_async_status_request, 'query'),
+    getZodLooseObjectFromProperty(sql_get_async_status_request, 'body'),
+    getZodLooseObjectFromProperty(sql_get_async_status_request, 'path'),
+    getZodLooseObjectFromProperty(sql_get_async_status_request, 'query'),
   ]),
   outputSchema: sql_get_async_status_response,
 };
 const SQL_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.query',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get SQL search results`,
   description: `Get SQL search results.
 Run an SQL request.
@@ -19195,6 +19891,7 @@ Run an SQL request.
   patterns: ['_sql'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-query',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['format'],
     bodyParams: [
@@ -19218,18 +19915,18 @@ Run an SQL request.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(sql_query_request, 'body'),
-    getLooseObjectFromProperty(sql_query_request, 'path'),
-    getLooseObjectFromProperty(sql_query_request, 'query'),
-    getLooseObjectFromProperty(sql_query1_request, 'body'),
-    getLooseObjectFromProperty(sql_query1_request, 'path'),
-    getLooseObjectFromProperty(sql_query1_request, 'query'),
+    getZodLooseObjectFromProperty(sql_query_request, 'body'),
+    getZodLooseObjectFromProperty(sql_query_request, 'path'),
+    getZodLooseObjectFromProperty(sql_query_request, 'query'),
+    getZodLooseObjectFromProperty(sql_query1_request, 'body'),
+    getZodLooseObjectFromProperty(sql_query1_request, 'path'),
+    getZodLooseObjectFromProperty(sql_query1_request, 'query'),
   ]),
   outputSchema: z.union([sql_query_response, sql_query1_response]),
 };
 const SQL_TRANSLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.sql.translate',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Translate SQL into Elasticsearch queries`,
   description: `Translate SQL into Elasticsearch queries.
 Translate an SQL search into a search API request containing Query DSL.
@@ -19241,23 +19938,24 @@ It accepts the same request body parameters as the SQL search API, excluding \`c
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-translate',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['fetch_size', 'filter', 'query', 'time_zone'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(sql_translate_request, 'body'),
-    getLooseObjectFromProperty(sql_translate_request, 'path'),
-    getLooseObjectFromProperty(sql_translate_request, 'query'),
-    getLooseObjectFromProperty(sql_translate1_request, 'body'),
-    getLooseObjectFromProperty(sql_translate1_request, 'path'),
-    getLooseObjectFromProperty(sql_translate1_request, 'query'),
+    getZodLooseObjectFromProperty(sql_translate_request, 'body'),
+    getZodLooseObjectFromProperty(sql_translate_request, 'path'),
+    getZodLooseObjectFromProperty(sql_translate_request, 'query'),
+    getZodLooseObjectFromProperty(sql_translate1_request, 'body'),
+    getZodLooseObjectFromProperty(sql_translate1_request, 'path'),
+    getZodLooseObjectFromProperty(sql_translate1_request, 'query'),
   ]),
   outputSchema: z.union([sql_translate_response, sql_translate1_response]),
 };
 const SSL_CERTIFICATES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ssl.certificates',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get SSL certificates`,
   description: `Get SSL certificates.
 
@@ -19283,21 +19981,22 @@ If Elasticsearch is configured to use a keystore or truststore, the API output i
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ssl-certificates',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(ssl_certificates_request, 'body'),
-    getLooseObjectFromProperty(ssl_certificates_request, 'path'),
-    getLooseObjectFromProperty(ssl_certificates_request, 'query'),
+    getZodLooseObjectFromProperty(ssl_certificates_request, 'body'),
+    getZodLooseObjectFromProperty(ssl_certificates_request, 'path'),
+    getZodLooseObjectFromProperty(ssl_certificates_request, 'query'),
   ]),
   outputSchema: ssl_certificates_response,
 };
 const STREAMS_LOGS_DISABLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.streams.logs_disable',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Disable logs stream.
 
 Turn off the logs stream feature for this cluster.
@@ -19307,6 +20006,7 @@ Turn off the logs stream feature for this cluster.
   patterns: ['_streams/logs/_disable'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -19316,8 +20016,8 @@ Turn off the logs stream feature for this cluster.
 };
 const STREAMS_LOGS_ENABLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.streams.logs_enable',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Enable logs stream.
 
 Turn on the logs stream feature for this cluster.
@@ -19331,6 +20031,7 @@ If those indices or data streams exist, a \`409 - Conflict\` response and error 
   patterns: ['_streams/logs/_enable'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -19340,8 +20041,8 @@ If those indices or data streams exist, a \`409 - Conflict\` response and error 
 };
 const STREAMS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.streams.status',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Get the status of streams.
 
 Get the current status for all types of streams.
@@ -19351,6 +20052,7 @@ Get the current status for all types of streams.
   patterns: ['_streams/status'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -19360,7 +20062,7 @@ Get the current status for all types of streams.
 };
 const SYNONYMS_DELETE_SYNONYM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.delete_synonym',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a synonym set`,
   description: `Delete a synonym set.
 
@@ -19387,20 +20089,21 @@ When the synonyms set is not used in analyzers, you will be able to delete it.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-delete-synonym',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(synonyms_delete_synonym_request, 'body'),
-    getLooseObjectFromProperty(synonyms_delete_synonym_request, 'path'),
-    getLooseObjectFromProperty(synonyms_delete_synonym_request, 'query'),
+    getZodLooseObjectFromProperty(synonyms_delete_synonym_request, 'body'),
+    getZodLooseObjectFromProperty(synonyms_delete_synonym_request, 'path'),
+    getZodLooseObjectFromProperty(synonyms_delete_synonym_request, 'query'),
   ]),
   outputSchema: synonyms_delete_synonym_response,
 };
 const SYNONYMS_DELETE_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.delete_synonym_rule',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a synonym rule`,
   description: `Delete a synonym rule.
 Delete a synonym rule from a synonym set.
@@ -19411,20 +20114,21 @@ Delete a synonym rule from a synonym set.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-delete-synonym-rule',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['set_id', 'rule_id'],
     urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'body'),
-    getLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'path'),
-    getLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'query'),
+    getZodLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'body'),
+    getZodLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'path'),
+    getZodLooseObjectFromProperty(synonyms_delete_synonym_rule_request, 'query'),
   ]),
   outputSchema: synonyms_delete_synonym_rule_response,
 };
 const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.get_synonym',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a synonym set`,
   description: `Get a synonym set.
 
@@ -19434,20 +20138,21 @@ const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(synonyms_get_synonym_request, 'body'),
-    getLooseObjectFromProperty(synonyms_get_synonym_request, 'path'),
-    getLooseObjectFromProperty(synonyms_get_synonym_request, 'query'),
+    getZodLooseObjectFromProperty(synonyms_get_synonym_request, 'body'),
+    getZodLooseObjectFromProperty(synonyms_get_synonym_request, 'path'),
+    getZodLooseObjectFromProperty(synonyms_get_synonym_request, 'query'),
   ]),
   outputSchema: synonyms_get_synonym_response,
 };
 const SYNONYMS_GET_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.get_synonym_rule',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a synonym rule`,
   description: `Get a synonym rule.
 Get a synonym rule from a synonym set.
@@ -19458,20 +20163,21 @@ Get a synonym rule from a synonym set.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym-rule',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['set_id', 'rule_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'body'),
-    getLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'path'),
-    getLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'query'),
+    getZodLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'body'),
+    getZodLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'path'),
+    getZodLooseObjectFromProperty(synonyms_get_synonym_rule_request, 'query'),
   ]),
   outputSchema: synonyms_get_synonym_rule_response,
 };
 const SYNONYMS_GET_SYNONYMS_SETS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.get_synonyms_sets',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get all synonym sets`,
   description: `Get all synonym sets.
 Get a summary of all defined synonym sets.
@@ -19482,20 +20188,21 @@ Get a summary of all defined synonym sets.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'body'),
-    getLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'path'),
-    getLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'query'),
+    getZodLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'body'),
+    getZodLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'path'),
+    getZodLooseObjectFromProperty(synonyms_get_synonyms_sets_request, 'query'),
   ]),
   outputSchema: synonyms_get_synonyms_sets_response,
 };
 const SYNONYMS_PUT_SYNONYM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.put_synonym',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a synonym set`,
   description: `Create or update a synonym set.
 Synonyms sets are limited to a maximum of 10,000 synonym rules per set.
@@ -19512,20 +20219,21 @@ For practical examples of how to create or update a synonyms set, refer to the E
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-put-synonym',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['refresh'],
     bodyParams: ['synonyms_set'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(synonyms_put_synonym_request, 'body'),
-    getLooseObjectFromProperty(synonyms_put_synonym_request, 'path'),
-    getLooseObjectFromProperty(synonyms_put_synonym_request, 'query'),
+    getZodLooseObjectFromProperty(synonyms_put_synonym_request, 'body'),
+    getZodLooseObjectFromProperty(synonyms_put_synonym_request, 'path'),
+    getZodLooseObjectFromProperty(synonyms_put_synonym_request, 'query'),
   ]),
   outputSchema: synonyms_put_synonym_response,
 };
 const SYNONYMS_PUT_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.synonyms.put_synonym_rule',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a synonym rule`,
   description: `Create or update a synonym rule.
 Create or update a synonym rule in a synonym set.
@@ -19540,20 +20248,21 @@ When you update a synonym rule, all analyzers using the synonyms set will be rel
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-put-synonym-rule',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['set_id', 'rule_id'],
     urlParams: ['refresh'],
     bodyParams: ['synonyms'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'body'),
-    getLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'path'),
-    getLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'query'),
+    getZodLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'body'),
+    getZodLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'path'),
+    getZodLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'query'),
   ]),
   outputSchema: synonyms_put_synonym_rule_response,
 };
 const TASKS_CANCEL_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.tasks.cancel',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Cancel a task`,
   description: `Cancel a task.
 
@@ -19573,23 +20282,24 @@ You can also use the node hot threads API to obtain detailed information about t
   patterns: ['_tasks/_cancel', '_tasks/{task_id}/_cancel'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_id'],
     urlParams: ['actions', 'nodes', 'parent_task_id', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(tasks_cancel_request, 'body'),
-    getLooseObjectFromProperty(tasks_cancel_request, 'path'),
-    getLooseObjectFromProperty(tasks_cancel_request, 'query'),
-    getLooseObjectFromProperty(tasks_cancel1_request, 'body'),
-    getLooseObjectFromProperty(tasks_cancel1_request, 'path'),
-    getLooseObjectFromProperty(tasks_cancel1_request, 'query'),
+    getZodLooseObjectFromProperty(tasks_cancel_request, 'body'),
+    getZodLooseObjectFromProperty(tasks_cancel_request, 'path'),
+    getZodLooseObjectFromProperty(tasks_cancel_request, 'query'),
+    getZodLooseObjectFromProperty(tasks_cancel1_request, 'body'),
+    getZodLooseObjectFromProperty(tasks_cancel1_request, 'path'),
+    getZodLooseObjectFromProperty(tasks_cancel1_request, 'query'),
   ]),
   outputSchema: z.union([tasks_cancel_response, tasks_cancel1_response]),
 };
 const TASKS_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.tasks.get',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get task information`,
   description: `Get task information.
 Get information about a task currently running in the cluster.
@@ -19604,20 +20314,21 @@ If the task identifier is not found, a 404 response code indicates that there ar
   patterns: ['_tasks/{task_id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_id'],
     urlParams: ['timeout', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(tasks_get_request, 'body'),
-    getLooseObjectFromProperty(tasks_get_request, 'path'),
-    getLooseObjectFromProperty(tasks_get_request, 'query'),
+    getZodLooseObjectFromProperty(tasks_get_request, 'body'),
+    getZodLooseObjectFromProperty(tasks_get_request, 'path'),
+    getZodLooseObjectFromProperty(tasks_get_request, 'query'),
   ]),
   outputSchema: tasks_get_response,
 };
 const TASKS_LIST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.tasks.list',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get all tasks`,
   description: `Get all tasks.
 Get information about the tasks currently running on one or more nodes in the cluster.
@@ -19684,6 +20395,7 @@ The \`X-Opaque-Id\` in the children \`headers\` is the child task of the task th
   patterns: ['_tasks'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'actions',
@@ -19697,15 +20409,15 @@ The \`X-Opaque-Id\` in the children \`headers\` is the child task of the task th
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(tasks_list_request, 'body'),
-    getLooseObjectFromProperty(tasks_list_request, 'path'),
-    getLooseObjectFromProperty(tasks_list_request, 'query'),
+    getZodLooseObjectFromProperty(tasks_list_request, 'body'),
+    getZodLooseObjectFromProperty(tasks_list_request, 'path'),
+    getZodLooseObjectFromProperty(tasks_list_request, 'query'),
   ]),
   outputSchema: tasks_list_response,
 };
 const TERMS_ENUM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.terms_enum',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get terms in an index`,
   description: `Get terms in an index.
 
@@ -19720,6 +20432,7 @@ This API is designed for low-latency look-ups used in auto-complete scenarios.
   patterns: ['{index}/_terms_enum'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-terms-enum',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [],
     bodyParams: [
@@ -19733,18 +20446,18 @@ This API is designed for low-latency look-ups used in auto-complete scenarios.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(terms_enum_request, 'body'),
-    getLooseObjectFromProperty(terms_enum_request, 'path'),
-    getLooseObjectFromProperty(terms_enum_request, 'query'),
-    getLooseObjectFromProperty(terms_enum1_request, 'body'),
-    getLooseObjectFromProperty(terms_enum1_request, 'path'),
-    getLooseObjectFromProperty(terms_enum1_request, 'query'),
+    getZodLooseObjectFromProperty(terms_enum_request, 'body'),
+    getZodLooseObjectFromProperty(terms_enum_request, 'path'),
+    getZodLooseObjectFromProperty(terms_enum_request, 'query'),
+    getZodLooseObjectFromProperty(terms_enum1_request, 'body'),
+    getZodLooseObjectFromProperty(terms_enum1_request, 'path'),
+    getZodLooseObjectFromProperty(terms_enum1_request, 'query'),
   ]),
   outputSchema: z.union([terms_enum_response, terms_enum1_response]),
 };
 const TERMVECTORS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.termvectors',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get term vector information`,
   description: `Get term vector information.
 
@@ -19795,6 +20508,7 @@ Refer to the linked documentation for detailed examples of how to use this API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-termvectors',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'fields',
@@ -19825,18 +20539,18 @@ Refer to the linked documentation for detailed examples of how to use this API.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(termvectors_request, 'body'),
-    getLooseObjectFromProperty(termvectors_request, 'path'),
-    getLooseObjectFromProperty(termvectors_request, 'query'),
-    getLooseObjectFromProperty(termvectors1_request, 'body'),
-    getLooseObjectFromProperty(termvectors1_request, 'path'),
-    getLooseObjectFromProperty(termvectors1_request, 'query'),
-    getLooseObjectFromProperty(termvectors2_request, 'body'),
-    getLooseObjectFromProperty(termvectors2_request, 'path'),
-    getLooseObjectFromProperty(termvectors2_request, 'query'),
-    getLooseObjectFromProperty(termvectors3_request, 'body'),
-    getLooseObjectFromProperty(termvectors3_request, 'path'),
-    getLooseObjectFromProperty(termvectors3_request, 'query'),
+    getZodLooseObjectFromProperty(termvectors_request, 'body'),
+    getZodLooseObjectFromProperty(termvectors_request, 'path'),
+    getZodLooseObjectFromProperty(termvectors_request, 'query'),
+    getZodLooseObjectFromProperty(termvectors1_request, 'body'),
+    getZodLooseObjectFromProperty(termvectors1_request, 'path'),
+    getZodLooseObjectFromProperty(termvectors1_request, 'query'),
+    getZodLooseObjectFromProperty(termvectors2_request, 'body'),
+    getZodLooseObjectFromProperty(termvectors2_request, 'path'),
+    getZodLooseObjectFromProperty(termvectors2_request, 'query'),
+    getZodLooseObjectFromProperty(termvectors3_request, 'body'),
+    getZodLooseObjectFromProperty(termvectors3_request, 'path'),
+    getZodLooseObjectFromProperty(termvectors3_request, 'query'),
   ]),
   outputSchema: z.union([
     termvectors_response,
@@ -19847,7 +20561,7 @@ Refer to the linked documentation for detailed examples of how to use this API.
 };
 const TEXT_STRUCTURE_FIND_FIELD_STRUCTURE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.find_field_structure',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Find the structure of a text field`,
   description: `Find the structure of a text field.
 Find the structure of a text field in an Elasticsearch index.
@@ -19873,6 +20587,7 @@ It helps determine why the returned structure was chosen.
   patterns: ['_text_structure/find_field_structure'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-text_structure',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'column_names',
@@ -19893,15 +20608,15 @@ It helps determine why the returned structure was chosen.
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(text_structure_find_field_structure_request, 'body'),
-    getLooseObjectFromProperty(text_structure_find_field_structure_request, 'path'),
-    getLooseObjectFromProperty(text_structure_find_field_structure_request, 'query'),
+    getZodLooseObjectFromProperty(text_structure_find_field_structure_request, 'body'),
+    getZodLooseObjectFromProperty(text_structure_find_field_structure_request, 'path'),
+    getZodLooseObjectFromProperty(text_structure_find_field_structure_request, 'query'),
   ]),
   outputSchema: text_structure_find_field_structure_response,
 };
 const TEXT_STRUCTURE_FIND_MESSAGE_STRUCTURE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.find_message_structure',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Find the structure of text messages`,
   description: `Find the structure of text messages.
 Find the structure of a list of text messages.
@@ -19929,6 +20644,7 @@ It helps determine why the returned structure was chosen.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-text-structure-find-message-structure',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'column_names',
@@ -19946,12 +20662,12 @@ It helps determine why the returned structure was chosen.
     bodyParams: ['messages'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(text_structure_find_message_structure_request, 'body'),
-    getLooseObjectFromProperty(text_structure_find_message_structure_request, 'path'),
-    getLooseObjectFromProperty(text_structure_find_message_structure_request, 'query'),
-    getLooseObjectFromProperty(text_structure_find_message_structure1_request, 'body'),
-    getLooseObjectFromProperty(text_structure_find_message_structure1_request, 'path'),
-    getLooseObjectFromProperty(text_structure_find_message_structure1_request, 'query'),
+    getZodLooseObjectFromProperty(text_structure_find_message_structure_request, 'body'),
+    getZodLooseObjectFromProperty(text_structure_find_message_structure_request, 'path'),
+    getZodLooseObjectFromProperty(text_structure_find_message_structure_request, 'query'),
+    getZodLooseObjectFromProperty(text_structure_find_message_structure1_request, 'body'),
+    getZodLooseObjectFromProperty(text_structure_find_message_structure1_request, 'path'),
+    getZodLooseObjectFromProperty(text_structure_find_message_structure1_request, 'query'),
   ]),
   outputSchema: z.union([
     text_structure_find_message_structure_response,
@@ -19960,7 +20676,7 @@ It helps determine why the returned structure was chosen.
 };
 const TEXT_STRUCTURE_FIND_STRUCTURE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.find_structure',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Find the structure of a text file`,
   description: `Find the structure of a text file.
 The text file must contain data that is suitable to be ingested into Elasticsearch.
@@ -19986,6 +20702,7 @@ However, you can optionally override some of the decisions about the text struct
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-text-structure-find-structure',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [
       'charset',
@@ -20007,15 +20724,15 @@ However, you can optionally override some of the decisions about the text struct
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(text_structure_find_structure_request, 'body'),
-    getLooseObjectFromProperty(text_structure_find_structure_request, 'path'),
-    getLooseObjectFromProperty(text_structure_find_structure_request, 'query'),
+    getZodLooseObjectFromProperty(text_structure_find_structure_request, 'body'),
+    getZodLooseObjectFromProperty(text_structure_find_structure_request, 'path'),
+    getZodLooseObjectFromProperty(text_structure_find_structure_request, 'query'),
   ]),
   outputSchema: text_structure_find_structure_response,
 };
 const TEXT_STRUCTURE_TEST_GROK_PATTERN_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.text_structure.test_grok_pattern',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Test a Grok pattern`,
   description: `Test a Grok pattern.
 Test a Grok pattern on one or more lines of text.
@@ -20027,17 +20744,18 @@ The API indicates whether the lines match the pattern together with the offsets 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-text-structure-test-grok-pattern',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['ecs_compatibility'],
     bodyParams: ['grok_pattern', 'text'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'body'),
-    getLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'path'),
-    getLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'query'),
-    getLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'body'),
-    getLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'path'),
-    getLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'query'),
+    getZodLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'body'),
+    getZodLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'path'),
+    getZodLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'query'),
+    getZodLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'body'),
+    getZodLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'path'),
+    getZodLooseObjectFromProperty(text_structure_test_grok_pattern1_request, 'query'),
   ]),
   outputSchema: z.union([
     text_structure_test_grok_pattern_response,
@@ -20046,7 +20764,7 @@ The API indicates whether the lines match the pattern together with the offsets 
 };
 const TRANSFORM_DELETE_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.delete_transform',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a transform`,
   description: `Delete a transform.
 
@@ -20056,21 +20774,22 @@ const TRANSFORM_DELETE_TRANSFORM_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-delete-transform',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['force', 'delete_dest_index', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_delete_transform_request, 'body'),
-    getLooseObjectFromProperty(transform_delete_transform_request, 'path'),
-    getLooseObjectFromProperty(transform_delete_transform_request, 'query'),
+    getZodLooseObjectFromProperty(transform_delete_transform_request, 'body'),
+    getZodLooseObjectFromProperty(transform_delete_transform_request, 'path'),
+    getZodLooseObjectFromProperty(transform_delete_transform_request, 'query'),
   ]),
   outputSchema: transform_delete_transform_response,
 };
 const TRANSFORM_GET_NODE_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.get_node_stats',
-  isInternal: true,
-  summary: ``,
+  connectorGroup: 'internal',
+  summary: null,
   description: `Retrieves transform usage information for transform nodes
 
  Documentation: https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform-node-stats.html`,
@@ -20079,6 +20798,7 @@ const TRANSFORM_GET_NODE_STATS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform-node-stats.html',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: [],
@@ -20088,7 +20808,7 @@ const TRANSFORM_GET_NODE_STATS_CONTRACT: InternalConnectorContract = {
 };
 const TRANSFORM_GET_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.get_transform',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get transforms`,
   description: `Get transforms.
 Get configuration information for transforms.
@@ -20099,23 +20819,24 @@ Get configuration information for transforms.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-get-transform',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['allow_no_match', 'from', 'size', 'exclude_generated'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_get_transform_request, 'body'),
-    getLooseObjectFromProperty(transform_get_transform_request, 'path'),
-    getLooseObjectFromProperty(transform_get_transform_request, 'query'),
-    getLooseObjectFromProperty(transform_get_transform1_request, 'body'),
-    getLooseObjectFromProperty(transform_get_transform1_request, 'path'),
-    getLooseObjectFromProperty(transform_get_transform1_request, 'query'),
+    getZodLooseObjectFromProperty(transform_get_transform_request, 'body'),
+    getZodLooseObjectFromProperty(transform_get_transform_request, 'path'),
+    getZodLooseObjectFromProperty(transform_get_transform_request, 'query'),
+    getZodLooseObjectFromProperty(transform_get_transform1_request, 'body'),
+    getZodLooseObjectFromProperty(transform_get_transform1_request, 'path'),
+    getZodLooseObjectFromProperty(transform_get_transform1_request, 'query'),
   ]),
   outputSchema: z.union([transform_get_transform_response, transform_get_transform1_response]),
 };
 const TRANSFORM_GET_TRANSFORM_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.get_transform_stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get transform stats`,
   description: `Get transform stats.
 
@@ -20127,20 +20848,21 @@ Get usage information for transforms.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-get-transform-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['allow_no_match', 'from', 'size', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_get_transform_stats_request, 'body'),
-    getLooseObjectFromProperty(transform_get_transform_stats_request, 'path'),
-    getLooseObjectFromProperty(transform_get_transform_stats_request, 'query'),
+    getZodLooseObjectFromProperty(transform_get_transform_stats_request, 'body'),
+    getZodLooseObjectFromProperty(transform_get_transform_stats_request, 'path'),
+    getZodLooseObjectFromProperty(transform_get_transform_stats_request, 'query'),
   ]),
   outputSchema: transform_get_transform_stats_response,
 };
 const TRANSFORM_PREVIEW_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.preview_transform',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Preview a transform`,
   description: `Preview a transform.
 Generates a preview of the results that you will get when you create a transform with the same configuration.
@@ -20155,6 +20877,7 @@ types of the source index and the transform aggregations.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-preview-transform',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['timeout'],
     bodyParams: [
@@ -20170,18 +20893,18 @@ types of the source index and the transform aggregations.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_preview_transform_request, 'body'),
-    getLooseObjectFromProperty(transform_preview_transform_request, 'path'),
-    getLooseObjectFromProperty(transform_preview_transform_request, 'query'),
-    getLooseObjectFromProperty(transform_preview_transform1_request, 'body'),
-    getLooseObjectFromProperty(transform_preview_transform1_request, 'path'),
-    getLooseObjectFromProperty(transform_preview_transform1_request, 'query'),
-    getLooseObjectFromProperty(transform_preview_transform2_request, 'body'),
-    getLooseObjectFromProperty(transform_preview_transform2_request, 'path'),
-    getLooseObjectFromProperty(transform_preview_transform2_request, 'query'),
-    getLooseObjectFromProperty(transform_preview_transform3_request, 'body'),
-    getLooseObjectFromProperty(transform_preview_transform3_request, 'path'),
-    getLooseObjectFromProperty(transform_preview_transform3_request, 'query'),
+    getZodLooseObjectFromProperty(transform_preview_transform_request, 'body'),
+    getZodLooseObjectFromProperty(transform_preview_transform_request, 'path'),
+    getZodLooseObjectFromProperty(transform_preview_transform_request, 'query'),
+    getZodLooseObjectFromProperty(transform_preview_transform1_request, 'body'),
+    getZodLooseObjectFromProperty(transform_preview_transform1_request, 'path'),
+    getZodLooseObjectFromProperty(transform_preview_transform1_request, 'query'),
+    getZodLooseObjectFromProperty(transform_preview_transform2_request, 'body'),
+    getZodLooseObjectFromProperty(transform_preview_transform2_request, 'path'),
+    getZodLooseObjectFromProperty(transform_preview_transform2_request, 'query'),
+    getZodLooseObjectFromProperty(transform_preview_transform3_request, 'body'),
+    getZodLooseObjectFromProperty(transform_preview_transform3_request, 'path'),
+    getZodLooseObjectFromProperty(transform_preview_transform3_request, 'query'),
   ]),
   outputSchema: z.union([
     transform_preview_transform_response,
@@ -20192,7 +20915,7 @@ types of the source index and the transform aggregations.
 };
 const TRANSFORM_PUT_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.put_transform',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create a transform`,
   description: `Create a transform.
 Creates a transform.
@@ -20223,6 +20946,7 @@ give users any privileges on \`.data-frame-internal*\` indices.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-put-transform',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['defer_validation', 'timeout'],
     bodyParams: [
@@ -20239,15 +20963,15 @@ give users any privileges on \`.data-frame-internal*\` indices.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_put_transform_request, 'body'),
-    getLooseObjectFromProperty(transform_put_transform_request, 'path'),
-    getLooseObjectFromProperty(transform_put_transform_request, 'query'),
+    getZodLooseObjectFromProperty(transform_put_transform_request, 'body'),
+    getZodLooseObjectFromProperty(transform_put_transform_request, 'path'),
+    getZodLooseObjectFromProperty(transform_put_transform_request, 'query'),
   ]),
   outputSchema: transform_put_transform_response,
 };
 const TRANSFORM_RESET_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.reset_transform',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Reset a transform`,
   description: `Reset a transform.
 
@@ -20260,20 +20984,21 @@ If the destination index was created by the transform, it is deleted.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-reset-transform',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_reset_transform_request, 'body'),
-    getLooseObjectFromProperty(transform_reset_transform_request, 'path'),
-    getLooseObjectFromProperty(transform_reset_transform_request, 'query'),
+    getZodLooseObjectFromProperty(transform_reset_transform_request, 'body'),
+    getZodLooseObjectFromProperty(transform_reset_transform_request, 'path'),
+    getZodLooseObjectFromProperty(transform_reset_transform_request, 'query'),
   ]),
   outputSchema: transform_reset_transform_response,
 };
 const TRANSFORM_SCHEDULE_NOW_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.schedule_now_transform',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Schedule a transform to start now`,
   description: `Schedule a transform to start now.
 
@@ -20289,20 +21014,21 @@ is called again in the meantime.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-schedule-now-transform',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_schedule_now_transform_request, 'body'),
-    getLooseObjectFromProperty(transform_schedule_now_transform_request, 'path'),
-    getLooseObjectFromProperty(transform_schedule_now_transform_request, 'query'),
+    getZodLooseObjectFromProperty(transform_schedule_now_transform_request, 'body'),
+    getZodLooseObjectFromProperty(transform_schedule_now_transform_request, 'path'),
+    getZodLooseObjectFromProperty(transform_schedule_now_transform_request, 'query'),
   ]),
   outputSchema: transform_schedule_now_transform_response,
 };
 const TRANSFORM_SET_UPGRADE_MODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.set_upgrade_mode',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Set upgrade_mode for transform indices`,
   description: `Set upgrade_mode for transform indices.
 Sets a cluster wide upgrade_mode setting that prepares transform
@@ -20324,20 +21050,21 @@ transform info API.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-set-upgrade-mode',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['enabled', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_set_upgrade_mode_request, 'body'),
-    getLooseObjectFromProperty(transform_set_upgrade_mode_request, 'path'),
-    getLooseObjectFromProperty(transform_set_upgrade_mode_request, 'query'),
+    getZodLooseObjectFromProperty(transform_set_upgrade_mode_request, 'body'),
+    getZodLooseObjectFromProperty(transform_set_upgrade_mode_request, 'path'),
+    getZodLooseObjectFromProperty(transform_set_upgrade_mode_request, 'query'),
   ]),
   outputSchema: transform_set_upgrade_mode_response,
 };
 const TRANSFORM_START_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.start_transform',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start a transform`,
   description: `Start a transform.
 
@@ -20362,20 +21089,21 @@ destination indices, the transform fails when it attempts unauthorized operation
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-start-transform',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['timeout', 'from'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_start_transform_request, 'body'),
-    getLooseObjectFromProperty(transform_start_transform_request, 'path'),
-    getLooseObjectFromProperty(transform_start_transform_request, 'query'),
+    getZodLooseObjectFromProperty(transform_start_transform_request, 'body'),
+    getZodLooseObjectFromProperty(transform_start_transform_request, 'path'),
+    getZodLooseObjectFromProperty(transform_start_transform_request, 'query'),
   ]),
   outputSchema: transform_start_transform_response,
 };
 const TRANSFORM_STOP_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.stop_transform',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Stop transforms`,
   description: `Stop transforms.
 Stops one or more transforms.
@@ -20386,20 +21114,21 @@ Stops one or more transforms.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-stop-transform',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['allow_no_match', 'force', 'timeout', 'wait_for_checkpoint', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_stop_transform_request, 'body'),
-    getLooseObjectFromProperty(transform_stop_transform_request, 'path'),
-    getLooseObjectFromProperty(transform_stop_transform_request, 'query'),
+    getZodLooseObjectFromProperty(transform_stop_transform_request, 'body'),
+    getZodLooseObjectFromProperty(transform_stop_transform_request, 'path'),
+    getZodLooseObjectFromProperty(transform_stop_transform_request, 'query'),
   ]),
   outputSchema: transform_stop_transform_response,
 };
 const TRANSFORM_UPDATE_TRANSFORM_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.update_transform',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update a transform`,
   description: `Update a transform.
 Updates certain properties of a transform.
@@ -20416,6 +21145,7 @@ time of update and runs with those privileges.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-update-transform',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['transform_id'],
     urlParams: ['defer_validation', 'timeout'],
     bodyParams: [
@@ -20430,15 +21160,15 @@ time of update and runs with those privileges.
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_update_transform_request, 'body'),
-    getLooseObjectFromProperty(transform_update_transform_request, 'path'),
-    getLooseObjectFromProperty(transform_update_transform_request, 'query'),
+    getZodLooseObjectFromProperty(transform_update_transform_request, 'body'),
+    getZodLooseObjectFromProperty(transform_update_transform_request, 'path'),
+    getZodLooseObjectFromProperty(transform_update_transform_request, 'query'),
   ]),
   outputSchema: transform_update_transform_response,
 };
 const TRANSFORM_UPGRADE_TRANSFORMS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.transform.upgrade_transforms',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Upgrade all transforms`,
   description: `Upgrade all transforms.
 
@@ -20462,20 +21192,21 @@ You may want to perform a recent cluster backup prior to the upgrade.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-upgrade-transforms',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['dry_run', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(transform_upgrade_transforms_request, 'body'),
-    getLooseObjectFromProperty(transform_upgrade_transforms_request, 'path'),
-    getLooseObjectFromProperty(transform_upgrade_transforms_request, 'query'),
+    getZodLooseObjectFromProperty(transform_upgrade_transforms_request, 'body'),
+    getZodLooseObjectFromProperty(transform_upgrade_transforms_request, 'path'),
+    getZodLooseObjectFromProperty(transform_upgrade_transforms_request, 'query'),
   ]),
   outputSchema: transform_upgrade_transforms_response,
 };
 const UPDATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.update',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update a document`,
   description: `Update a document.
 
@@ -20503,6 +21234,7 @@ For usage examples such as partial updates, upserts, and scripted updates, see t
   patterns: ['{index}/_update/{id}'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index', 'id'],
     urlParams: [
       'if_primary_term',
@@ -20530,15 +21262,15 @@ For usage examples such as partial updates, upserts, and scripted updates, see t
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_request, 'body'),
-    getLooseObjectFromProperty(update_request, 'path'),
-    getLooseObjectFromProperty(update_request, 'query'),
+    getZodLooseObjectFromProperty(update_request, 'body'),
+    getZodLooseObjectFromProperty(update_request, 'path'),
+    getZodLooseObjectFromProperty(update_request, 'query'),
   ]),
   outputSchema: update_response,
 };
 const UPDATE_BY_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.update_by_query',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update documents`,
   description: `Update documents.
 Updates documents that match the specified query.
@@ -20640,6 +21372,7 @@ Refer to the linked documentation for examples of how to update documents using 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update-by-query',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
@@ -20677,15 +21410,15 @@ Refer to the linked documentation for examples of how to update documents using 
     bodyParams: ['max_docs', 'query', 'script', 'slice', 'conflicts'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_by_query_request, 'body'),
-    getLooseObjectFromProperty(update_by_query_request, 'path'),
-    getLooseObjectFromProperty(update_by_query_request, 'query'),
+    getZodLooseObjectFromProperty(update_by_query_request, 'body'),
+    getZodLooseObjectFromProperty(update_by_query_request, 'path'),
+    getZodLooseObjectFromProperty(update_by_query_request, 'query'),
   ]),
   outputSchema: update_by_query_response,
 };
 const UPDATE_BY_QUERY_RETHROTTLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.update_by_query_rethrottle',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Throttle an update by query operation`,
   description: `Throttle an update by query operation.
 
@@ -20698,20 +21431,21 @@ Rethrottling that speeds up the query takes effect immediately but rethrotting t
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update-by-query-rethrottle',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['task_id'],
     urlParams: ['requests_per_second'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(update_by_query_rethrottle_request, 'body'),
-    getLooseObjectFromProperty(update_by_query_rethrottle_request, 'path'),
-    getLooseObjectFromProperty(update_by_query_rethrottle_request, 'query'),
+    getZodLooseObjectFromProperty(update_by_query_rethrottle_request, 'body'),
+    getZodLooseObjectFromProperty(update_by_query_rethrottle_request, 'path'),
+    getZodLooseObjectFromProperty(update_by_query_rethrottle_request, 'query'),
   ]),
   outputSchema: update_by_query_rethrottle_response,
 };
 const WATCHER_ACK_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.ack_watch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Acknowledge a watch`,
   description: `Acknowledge a watch.
 Acknowledging a watch enables you to manually throttle the execution of the watch's actions.
@@ -20731,23 +21465,24 @@ To demonstrate how throttling works in practice and how it can be configured for
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-ack-watch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['watch_id', 'action_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_ack_watch_request, 'body'),
-    getLooseObjectFromProperty(watcher_ack_watch_request, 'path'),
-    getLooseObjectFromProperty(watcher_ack_watch_request, 'query'),
-    getLooseObjectFromProperty(watcher_ack_watch1_request, 'body'),
-    getLooseObjectFromProperty(watcher_ack_watch1_request, 'path'),
-    getLooseObjectFromProperty(watcher_ack_watch1_request, 'query'),
-    getLooseObjectFromProperty(watcher_ack_watch2_request, 'body'),
-    getLooseObjectFromProperty(watcher_ack_watch2_request, 'path'),
-    getLooseObjectFromProperty(watcher_ack_watch2_request, 'query'),
-    getLooseObjectFromProperty(watcher_ack_watch3_request, 'body'),
-    getLooseObjectFromProperty(watcher_ack_watch3_request, 'path'),
-    getLooseObjectFromProperty(watcher_ack_watch3_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_ack_watch_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_ack_watch_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_ack_watch_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_ack_watch1_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_ack_watch1_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_ack_watch1_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_ack_watch2_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_ack_watch2_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_ack_watch2_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_ack_watch3_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_ack_watch3_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_ack_watch3_request, 'query'),
   ]),
   outputSchema: z.union([
     watcher_ack_watch_response,
@@ -20758,7 +21493,7 @@ To demonstrate how throttling works in practice and how it can be configured for
 };
 const WATCHER_ACTIVATE_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.activate_watch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Activate a watch`,
   description: `Activate a watch.
 A watch can be either active or inactive.
@@ -20769,23 +21504,24 @@ A watch can be either active or inactive.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-activate-watch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['watch_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_activate_watch_request, 'body'),
-    getLooseObjectFromProperty(watcher_activate_watch_request, 'path'),
-    getLooseObjectFromProperty(watcher_activate_watch_request, 'query'),
-    getLooseObjectFromProperty(watcher_activate_watch1_request, 'body'),
-    getLooseObjectFromProperty(watcher_activate_watch1_request, 'path'),
-    getLooseObjectFromProperty(watcher_activate_watch1_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_activate_watch_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_activate_watch_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_activate_watch_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_activate_watch1_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_activate_watch1_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_activate_watch1_request, 'query'),
   ]),
   outputSchema: z.union([watcher_activate_watch_response, watcher_activate_watch1_response]),
 };
 const WATCHER_DEACTIVATE_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.deactivate_watch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Deactivate a watch`,
   description: `Deactivate a watch.
 A watch can be either active or inactive.
@@ -20796,23 +21532,24 @@ A watch can be either active or inactive.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-deactivate-watch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['watch_id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_deactivate_watch_request, 'body'),
-    getLooseObjectFromProperty(watcher_deactivate_watch_request, 'path'),
-    getLooseObjectFromProperty(watcher_deactivate_watch_request, 'query'),
-    getLooseObjectFromProperty(watcher_deactivate_watch1_request, 'body'),
-    getLooseObjectFromProperty(watcher_deactivate_watch1_request, 'path'),
-    getLooseObjectFromProperty(watcher_deactivate_watch1_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_deactivate_watch_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_deactivate_watch_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_deactivate_watch_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_deactivate_watch1_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_deactivate_watch1_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_deactivate_watch1_request, 'query'),
   ]),
   outputSchema: z.union([watcher_deactivate_watch_response, watcher_deactivate_watch1_response]),
 };
 const WATCHER_DELETE_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.delete_watch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Delete a watch`,
   description: `Delete a watch.
 When the watch is removed, the document representing the watch in the \`.watches\` index is gone and it will never be run again.
@@ -20829,20 +21566,21 @@ When Elasticsearch security features are enabled, make sure no write privileges 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-delete-watch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_delete_watch_request, 'body'),
-    getLooseObjectFromProperty(watcher_delete_watch_request, 'path'),
-    getLooseObjectFromProperty(watcher_delete_watch_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_delete_watch_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_delete_watch_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_delete_watch_request, 'query'),
   ]),
   outputSchema: watcher_delete_watch_response,
 };
 const WATCHER_EXECUTE_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.execute_watch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Run a watch`,
   description: `Run a watch.
 This API can be used to force execution of the watch outside of its triggering logic or to simulate the watch execution for debugging purposes.
@@ -20866,6 +21604,7 @@ Refer to the external documentation for examples of watch execution requests, in
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-execute-watch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['debug'],
     bodyParams: [
@@ -20879,18 +21618,18 @@ Refer to the external documentation for examples of watch execution requests, in
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_execute_watch_request, 'body'),
-    getLooseObjectFromProperty(watcher_execute_watch_request, 'path'),
-    getLooseObjectFromProperty(watcher_execute_watch_request, 'query'),
-    getLooseObjectFromProperty(watcher_execute_watch1_request, 'body'),
-    getLooseObjectFromProperty(watcher_execute_watch1_request, 'path'),
-    getLooseObjectFromProperty(watcher_execute_watch1_request, 'query'),
-    getLooseObjectFromProperty(watcher_execute_watch2_request, 'body'),
-    getLooseObjectFromProperty(watcher_execute_watch2_request, 'path'),
-    getLooseObjectFromProperty(watcher_execute_watch2_request, 'query'),
-    getLooseObjectFromProperty(watcher_execute_watch3_request, 'body'),
-    getLooseObjectFromProperty(watcher_execute_watch3_request, 'path'),
-    getLooseObjectFromProperty(watcher_execute_watch3_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_execute_watch_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_execute_watch_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_execute_watch_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_execute_watch1_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_execute_watch1_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_execute_watch1_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_execute_watch2_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_execute_watch2_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_execute_watch2_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_execute_watch3_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_execute_watch3_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_execute_watch3_request, 'query'),
   ]),
   outputSchema: z.union([
     watcher_execute_watch_response,
@@ -20901,7 +21640,7 @@ Refer to the external documentation for examples of watch execution requests, in
 };
 const WATCHER_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.get_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get Watcher index settings`,
   description: `Get Watcher index settings.
 Get settings for the Watcher internal index (\`.watches\`).
@@ -20913,20 +21652,21 @@ Only a subset of settings are shown, for example \`index.auto_expand_replicas\` 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-get-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_get_settings_request, 'body'),
-    getLooseObjectFromProperty(watcher_get_settings_request, 'path'),
-    getLooseObjectFromProperty(watcher_get_settings_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_get_settings_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_get_settings_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_get_settings_request, 'query'),
   ]),
   outputSchema: watcher_get_settings_response,
 };
 const WATCHER_GET_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.get_watch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get a watch`,
   description: `Get a watch.
 
@@ -20936,20 +21676,21 @@ const WATCHER_GET_WATCH_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-get-watch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_get_watch_request, 'body'),
-    getLooseObjectFromProperty(watcher_get_watch_request, 'path'),
-    getLooseObjectFromProperty(watcher_get_watch_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_get_watch_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_get_watch_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_get_watch_request, 'query'),
   ]),
   outputSchema: watcher_get_watch_response,
 };
 const WATCHER_PUT_WATCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.put_watch',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Create or update a watch`,
   description: `Create or update a watch.
 When a watch is registered, a new document that represents the watch is added to the \`.watches\` index and its trigger is immediately registered with the relevant trigger engine.
@@ -20970,6 +21711,7 @@ If the user is able to read index \`a\`, but not index \`b\`, the same will appl
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-put-watch',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['id'],
     urlParams: ['active', 'if_primary_term', 'if_seq_no', 'version'],
     bodyParams: [
@@ -20984,18 +21726,18 @@ If the user is able to read index \`a\`, but not index \`b\`, the same will appl
     ],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_put_watch_request, 'body'),
-    getLooseObjectFromProperty(watcher_put_watch_request, 'path'),
-    getLooseObjectFromProperty(watcher_put_watch_request, 'query'),
-    getLooseObjectFromProperty(watcher_put_watch1_request, 'body'),
-    getLooseObjectFromProperty(watcher_put_watch1_request, 'path'),
-    getLooseObjectFromProperty(watcher_put_watch1_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_put_watch_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_put_watch_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_put_watch_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_put_watch1_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_put_watch1_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_put_watch1_request, 'query'),
   ]),
   outputSchema: z.union([watcher_put_watch_response, watcher_put_watch1_response]),
 };
 const WATCHER_QUERY_WATCHES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.query_watches',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Query watches`,
   description: `Query watches.
 Get all registered watches in a paginated manner and optionally filter watches by a query.
@@ -21008,23 +21750,24 @@ Note that only the \`_id\` and \`metadata.*\` fields are queryable or sortable.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-query-watches',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: [],
     bodyParams: ['from', 'size', 'query', 'sort', 'search_after'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_query_watches_request, 'body'),
-    getLooseObjectFromProperty(watcher_query_watches_request, 'path'),
-    getLooseObjectFromProperty(watcher_query_watches_request, 'query'),
-    getLooseObjectFromProperty(watcher_query_watches1_request, 'body'),
-    getLooseObjectFromProperty(watcher_query_watches1_request, 'path'),
-    getLooseObjectFromProperty(watcher_query_watches1_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_query_watches_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_query_watches_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_query_watches_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_query_watches1_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_query_watches1_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_query_watches1_request, 'query'),
   ]),
   outputSchema: z.union([watcher_query_watches_response, watcher_query_watches1_response]),
 };
 const WATCHER_START_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.start',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Start the watch service`,
   description: `Start the watch service.
 Start the Watcher service if it is not already running.
@@ -21035,20 +21778,21 @@ Start the Watcher service if it is not already running.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-start',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_start_request, 'body'),
-    getLooseObjectFromProperty(watcher_start_request, 'path'),
-    getLooseObjectFromProperty(watcher_start_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_start_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_start_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_start_request, 'query'),
   ]),
   outputSchema: watcher_start_response,
 };
 const WATCHER_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.stats',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get Watcher statistics`,
   description: `Get Watcher statistics.
 This API always returns basic metrics.
@@ -21060,23 +21804,24 @@ You retrieve more metrics by using the metric parameter.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-stats',
   parameterTypes: {
+    headerParams: [],
     pathParams: ['metric'],
     urlParams: ['emit_stacktraces', 'metric'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_stats_request, 'body'),
-    getLooseObjectFromProperty(watcher_stats_request, 'path'),
-    getLooseObjectFromProperty(watcher_stats_request, 'query'),
-    getLooseObjectFromProperty(watcher_stats1_request, 'body'),
-    getLooseObjectFromProperty(watcher_stats1_request, 'path'),
-    getLooseObjectFromProperty(watcher_stats1_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_stats_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_stats_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_stats_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_stats1_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_stats1_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_stats1_request, 'query'),
   ]),
   outputSchema: z.union([watcher_stats_response, watcher_stats1_response]),
 };
 const WATCHER_STOP_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.stop',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Stop the watch service`,
   description: `Stop the watch service.
 Stop the Watcher service if it is running.
@@ -21087,20 +21832,21 @@ Stop the Watcher service if it is running.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-stop',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_stop_request, 'body'),
-    getLooseObjectFromProperty(watcher_stop_request, 'path'),
-    getLooseObjectFromProperty(watcher_stop_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_stop_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_stop_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_stop_request, 'query'),
   ]),
   outputSchema: watcher_stop_response,
 };
 const WATCHER_UPDATE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.watcher.update_settings',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Update Watcher index settings`,
   description: `Update Watcher index settings.
 Update settings for the Watcher internal index (\`.watches\`).
@@ -21116,20 +21862,21 @@ Watcher shards must always be in the \`data_content\` tier.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-update-settings',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
     bodyParams: ['index.auto_expand_replicas', 'index.number_of_replicas'],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(watcher_update_settings_request, 'body'),
-    getLooseObjectFromProperty(watcher_update_settings_request, 'path'),
-    getLooseObjectFromProperty(watcher_update_settings_request, 'query'),
+    getZodLooseObjectFromProperty(watcher_update_settings_request, 'body'),
+    getZodLooseObjectFromProperty(watcher_update_settings_request, 'path'),
+    getZodLooseObjectFromProperty(watcher_update_settings_request, 'query'),
   ]),
   outputSchema: watcher_update_settings_response,
 };
 const XPACK_INFO_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.xpack.info',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get information`,
   description: `Get information.
 The information provided by the API includes:
@@ -21143,20 +21890,21 @@ The information provided by the API includes:
   patterns: ['_xpack'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-info',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['categories', 'accept_enterprise', 'human'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(xpack_info_request, 'body'),
-    getLooseObjectFromProperty(xpack_info_request, 'path'),
-    getLooseObjectFromProperty(xpack_info_request, 'query'),
+    getZodLooseObjectFromProperty(xpack_info_request, 'body'),
+    getZodLooseObjectFromProperty(xpack_info_request, 'path'),
+    getZodLooseObjectFromProperty(xpack_info_request, 'query'),
   ]),
   outputSchema: xpack_info_response,
 };
 const XPACK_USAGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.xpack.usage',
-  isInternal: true,
+  connectorGroup: 'internal',
   summary: `Get usage information`,
   description: `Get usage information.
 Get information about the features that are currently enabled and available under the current license.
@@ -21167,14 +21915,15 @@ The API also provides some usage statistics.
   patterns: ['_xpack/usage'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-xpack',
   parameterTypes: {
+    headerParams: [],
     pathParams: [],
     urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(xpack_usage_request, 'body'),
-    getLooseObjectFromProperty(xpack_usage_request, 'path'),
-    getLooseObjectFromProperty(xpack_usage_request, 'query'),
+    getZodLooseObjectFromProperty(xpack_usage_request, 'body'),
+    getZodLooseObjectFromProperty(xpack_usage_request, 'path'),
+    getZodLooseObjectFromProperty(xpack_usage_request, 'query'),
   ]),
   outputSchema: xpack_usage_response,
 };
