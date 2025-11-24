@@ -158,7 +158,9 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
         const newRoleHash = JSON.stringify(role);
 
         if (isCustomRoleSet(newRoleHash)) {
-          log.debug(`Custom role '${customRoleName}' already exists, skipping creation`);
+          log.debug(
+            `Custom role '${customRoleName}' with provided privileges already exists, reusing it`
+          );
           return;
         }
 
