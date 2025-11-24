@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
@@ -19,6 +19,7 @@ import {
   useIsWithinBreakpoints,
   EuiHorizontalRule,
   useEuiTheme,
+  EuiFocusTrap,
 } from '@elastic/eui';
 import type { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { RuleErrorLogWithApi } from './rule_error_log';
@@ -37,6 +38,14 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
 
   const { euiTheme } = useEuiTheme();
 
+  const initialFocusRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (initialFocusRef.current) {
+      initialFocusRef.current.focus();
+    }
+  }, []);
+
   const {
     id,
     rule_id: ruleId,
@@ -53,65 +62,72 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
   );
 
   return (
-    <EuiFlyout
-      type={isFlyoutPush ? 'push' : 'overlay'}
-      onClose={onClose}
-      size={isFlyoutPush ? 'm' : 'l'}
-      data-test-subj="ruleActionErrorLogFlyout"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.actionErrors"
-              defaultMessage="Errored Actions"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiText
-          size="xs"
-          style={{
-            fontWeight: euiTheme.font.weight.bold,
-          }}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.message"
-            defaultMessage="Message"
-          />
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiText data-test-subj="ruleActionErrorLogFlyoutMessageText">{message}</EuiText>
-        <EuiHorizontalRule size="full" />
-        <div>
-          <RuleActionErrorBadge totalErrors={totalErrors} />
-          &nbsp;
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.actionErrorsPlural"
-            defaultMessage="{value, plural, one {errored action} other {errored actions}}"
-            values={{
-              value: totalErrors,
+    <EuiFocusTrap autoFocus initialFocus="[data-test-subj='ruleActionErrorLogFlyoutCloseButton']">
+      <EuiFlyout
+        type={isFlyoutPush ? 'push' : 'overlay'}
+        onClose={onClose}
+        size={isFlyoutPush ? 'm' : 'l'}
+        data-test-subj="ruleActionErrorLogFlyout"
+        aria-label="ruleActionErrorLogFlyout"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.actionErrors"
+                defaultMessage="Errored Actions"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiText
+            size="xs"
+            style={{
+              fontWeight: euiTheme.font.weight.bold,
             }}
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.message"
+              defaultMessage="Message"
+            />
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText data-test-subj="ruleActionErrorLogFlyoutMessageText">{message}</EuiText>
+          <EuiHorizontalRule size="full" />
+          <div>
+            <RuleActionErrorBadge totalErrors={totalErrors} />
+            &nbsp;
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.actionErrorsPlural"
+              defaultMessage="{value, plural, one {errored action} other {errored actions}}"
+              values={{
+                value: totalErrors,
+              }}
+            />
+          </div>
+          <RuleErrorLogWithApi
+            ruleId={ruleId}
+            runId={id}
+            spaceId={spaceIds[0]}
+            logFromDifferentSpace={logFromDifferentSpace}
+            refreshToken={refreshToken}
           />
-        </div>
-        <RuleErrorLogWithApi
-          ruleId={ruleId}
-          runId={id}
-          spaceId={spaceIds[0]}
-          logFromDifferentSpace={logFromDifferentSpace}
-          refreshToken={refreshToken}
-        />
-        <EuiSpacer />
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiButton data-test-subj="ruleActionErrorLogFlyoutCloseButton" onClick={onClose}>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.close"
-            defaultMessage="Close"
-          />
-        </EuiButton>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+          <EuiSpacer />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiButton
+            data-test-subj="ruleActionErrorLogFlyoutCloseButton"
+            onClick={onClose}
+            buttonRef={initialFocusRef}
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.close"
+              defaultMessage="Close"
+            />
+          </EuiButton>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </EuiFocusTrap>
   );
 };
