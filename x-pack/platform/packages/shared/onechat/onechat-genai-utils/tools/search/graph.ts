@@ -58,6 +58,7 @@ export const createSearchToolGraph = ({
 
   const selectAndValidateIndex = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
+
     const explorerRes = await indexExplorer({
       nlQuery: state.nlQuery,
       indexPattern: state.targetPattern ?? '*',
