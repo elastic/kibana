@@ -123,6 +123,7 @@
     "@kbn/alerting-plugin",
     "@kbn/spaces-utils",
     "@kbn/setup-node-env",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/fs"
   ]
 }
