@@ -230,7 +230,6 @@ describe('applyPrivmonModifier', () => {
       expect(result[1]).toEqual({
         category_3_score: 0,
         category_3_count: 0,
-        is_privileged_user: false,
       });
     });
 
@@ -314,12 +313,10 @@ describe('applyPrivmonModifier', () => {
         {
           category_3_score: 0,
           category_3_count: 0,
-          is_privileged_user: false,
         },
         {
           category_3_score: 0,
           category_3_count: 0,
-          is_privileged_user: false,
         },
       ]);
     });
@@ -361,7 +358,6 @@ describe('applyPrivmonModifier', () => {
       expect(result[1]).toEqual({
         category_3_score: 0,
         category_3_count: 0,
-        is_privileged_user: false,
       });
     });
   });
@@ -393,7 +389,6 @@ describe('applyPrivmonModifier', () => {
       expect(result[0]).toEqual({
         category_3_score: 0,
         category_3_count: 0,
-        is_privileged_user: false,
       });
     });
   });
@@ -432,12 +427,10 @@ describe('applyPrivmonModifier', () => {
         {
           category_3_score: 0,
           category_3_count: 0,
-          is_privileged_user: false,
         },
         {
           category_3_score: 0,
           category_3_count: 0,
-          is_privileged_user: false,
         },
       ]);
     });
@@ -465,12 +458,10 @@ describe('applyPrivmonModifier', () => {
         {
           category_3_score: 0,
           category_3_count: 0,
-          is_privileged_user: false,
         },
         {
           category_3_score: 0,
           category_3_count: 0,
-          is_privileged_user: false,
         },
       ]);
     });
