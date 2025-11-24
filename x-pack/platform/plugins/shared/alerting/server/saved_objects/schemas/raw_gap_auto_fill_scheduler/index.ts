@@ -21,6 +21,7 @@ export const rawGapAutoFillSchedulerSchemaV1 = schema.object(
     gapFillRange: schema.string(),
     maxBackfills: schema.number(maxBackfills),
     numRetries: schema.number(numRetries),
+    scope: schema.arrayOf(schema.string()),
     ruleTypes: schema.arrayOf(
       schema.object({
         type: schema.string(),
