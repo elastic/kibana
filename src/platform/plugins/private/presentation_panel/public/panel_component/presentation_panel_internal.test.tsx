@@ -24,6 +24,7 @@ import type {
   PanelCompatibleComponent,
   PresentationPanelInternalProps,
 } from './types';
+import { EuiThemeProvider } from '@elastic/eui';
 
 describe('Presentation panel', () => {
   const editPanelSpy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
@@ -56,7 +57,11 @@ describe('Presentation panel', () => {
 
       blockingError$: new BehaviorSubject<Error | undefined>(new Error('UH OH')),
     };
-    render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />);
+    render(
+      <EuiThemeProvider>
+        <PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />
+      </EuiThemeProvider>
+    );
     await waitFor(() => expect(screen.getByTestId('embeddableError')).toBeInTheDocument());
   });
 
