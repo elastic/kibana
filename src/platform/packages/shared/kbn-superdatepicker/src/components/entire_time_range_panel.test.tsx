@@ -14,14 +14,36 @@ import userEvent from '@testing-library/user-event';
 import { EntireTimeRangePanel } from './entire_time_range_panel';
 
 const onTimeChangeMock = jest.fn();
-const mockGetTimeFieldRange = jest.fn();
+const abortErrorMock = new DOMException('Aborted', 'AbortError');
+
+const getEntireTimeRangeMock = jest.fn();
+
+const getEntireTimeRangeWithAbortMock = jest.fn((signal?: AbortSignal) => {
+  return new Promise<{ start: string; end: string }>((_, reject) => {
+    if (signal?.aborted) return reject(abortErrorMock);
+
+    const onAbort = () => {
+      signal?.removeEventListener('abort', onAbort);
+      reject(abortErrorMock);
+    };
+
+    signal?.addEventListener('abort', onAbort);
+  });
+});
 
 describe('EntireTimeRangePanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should render the link with correct text', () => {
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  it('should render the button with correct text', () => {
+    const mockGetTimeFieldRange = jest.fn();
+
     renderWithI18n(
       <EntireTimeRangePanel
         onTimeChange={onTimeChangeMock}
@@ -29,21 +51,24 @@ describe('EntireTimeRangePanel', () => {
       />
     );
 
-    expect(screen.getByText('Entire time range')).toBeInTheDocument();
+    const entireTimeRangeButton = screen.getByText('Entire time range');
+
+    expect(entireTimeRangeButton).toBeInTheDocument();
   });
 
   it('should call onTimeChange with correct parameters on successful response', async () => {
+    getEntireTimeRangeMock.mockResolvedValue({ start: 'now-30d', end: 'now' });
+
     renderWithI18n(
       <EntireTimeRangePanel
         onTimeChange={onTimeChangeMock}
-        getEntireTimeRange={mockGetTimeFieldRange.mockResolvedValue({
-          start: 'now-30d',
-          end: 'now',
-        })}
+        getEntireTimeRange={getEntireTimeRangeMock}
       />
     );
 
-    await userEvent.click(screen.getByText('Entire time range'));
+    const entireTimeRangeButton = screen.getByText('Entire time range');
+
+    await userEvent.click(entireTimeRangeButton);
 
     await waitFor(() => {
       expect(onTimeChangeMock).toHaveBeenCalledWith({
@@ -53,5 +78,52 @@ describe('EntireTimeRangePanel', () => {
         isQuickSelection: true,
       });
     });
+  });
+
+  it('should abort request when cancel button is clicked', async () => {
+    renderWithI18n(
+      <EntireTimeRangePanel
+        onTimeChange={onTimeChangeMock}
+        getEntireTimeRange={getEntireTimeRangeWithAbortMock}
+      />
+    );
+
+    const entireTimeRangeButton = screen.getByText('Entire time range');
+
+    await userEvent.click(entireTimeRangeButton);
+
+    const cancelRequestButton = screen.getByLabelText('Cancel request');
+
+    await waitFor(() => {
+      expect(cancelRequestButton).toBeInTheDocument();
+    });
+
+    await userEvent.click(cancelRequestButton);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('euiLoadingSpinner')).not.toBeInTheDocument();
+      expect(onTimeChangeMock).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should abort request when component unmounts', async () => {
+    const { unmount } = renderWithI18n(
+      <EntireTimeRangePanel
+        onTimeChange={onTimeChangeMock}
+        getEntireTimeRange={getEntireTimeRangeWithAbortMock}
+      />
+    );
+
+    const entireTimeRangeButton = screen.getByText('Entire time range');
+
+    await userEvent.click(entireTimeRangeButton);
+
+    await waitFor(() => {
+      expect(entireTimeRangeButton).toHaveAttribute('disabled');
+    });
+
+    unmount();
+
+    expect(onTimeChangeMock).not.toHaveBeenCalled();
   });
 });
