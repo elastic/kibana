@@ -511,6 +511,40 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.AlertingAuthorization.bulkEnsureAuthorized",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkEnsureAuthorized",
+            "description": [],
+            "signature": [
+              "({ ruleTypeIdConsumersPairs, operation, entity, additionalPrivileges, }: ",
+              "BulkEnsureAuthorizedOpts",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.bulkEnsureAuthorized.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    ruleTypeIdConsumersPairs,\n    operation,\n    entity,\n    additionalPrivileges = [],\n  }",
+                "description": [],
+                "signature": [
+                  "BulkEnsureAuthorizedOpts"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.AlertingAuthorization.getFindAuthorizationFilter",
             "type": "Function",
             "tags": [],
