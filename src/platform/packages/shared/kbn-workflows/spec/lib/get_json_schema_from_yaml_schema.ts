@@ -14,8 +14,8 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JSONSchema.J
   try {
     return z.toJSONSchema(yamlSchema, {
       target: 'draft-7',
-      unrepresentable: 'any',
-      reused: 'ref',
+      unrepresentable: 'any', // do not throw an error for unrepresentable types
+      reused: 'ref', // using ref reduces the size of the schema 4x
       override: (ctx) => {
         // TODO: remove fields, which has default or optional from 'required' array because we validating user input not the result of safeParse. e.g. 'version' shouldn't be required
         // we'd love to use 'io:input' but it results in memory leak

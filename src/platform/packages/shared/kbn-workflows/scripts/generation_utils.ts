@@ -21,11 +21,11 @@ export function generateContractBlock(contract: ContractMeta): string {
   return `
   const ${contract.contractName}: InternalConnectorContract = {
     type: '${contract.type}',
+    isInternal: true,
     summary: \`${escapeString(contract.summary ?? '')}\`,
     description: \`${escapeString(contract.description ?? '')}\`,
     methods: ${JSON.stringify(contract?.methods ?? [])},
     patterns: ${JSON.stringify(contract?.patterns ?? [])},
-    isInternal: false,
     documentation: '${contract.documentation}',
     parameterTypes: {
       pathParams: ${JSON.stringify(contract?.parameterTypes?.pathParams ?? [])},

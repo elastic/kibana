@@ -15,3 +15,4 @@ export { extractPropertyPathsFromKql } from './extract_property_paths_from_kql/e
 export { isPropertyAccess } from './is_property_access/is_property_access';
 export { getShape, getZodObjectProperty, getLooseObjectFromProperty } from './get_shape/get_shape';
 export { getZodSchemaType } from './get_zod_schema_type/get_zod_schema_type';
+export { getOrResolveObject } from './json_schema/get_or_resolve_object';

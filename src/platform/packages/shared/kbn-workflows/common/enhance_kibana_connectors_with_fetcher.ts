@@ -36,3 +36,9 @@ export function enhanceKibanaConnectorsWithFetcher(
     };
   });
 }
+
+export function addFetcherToKibanaConnectorParamsSchema(paramsSchema: z.ZodType): z.ZodType {
+  return paramsSchema instanceof z.ZodObject
+    ? paramsSchema.extend({ fetcher: FetcherConfigSchema })
+    : z.intersection(paramsSchema, z.looseObject({ fetcher: FetcherConfigSchema }));
+}
