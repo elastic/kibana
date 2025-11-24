@@ -110,7 +110,7 @@ function BreakdownByEditor({ setState, state }: SubProps) {
     });
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         label={i18n.translate('xpack.lens.metric.maxColumns', {
           defaultMessage: 'Layout columns',
@@ -126,7 +126,7 @@ function BreakdownByEditor({ setState, state }: SubProps) {
           onChange={({ target: { value } }) => handleMaxColsChange(value)}
         />
       </EuiFormRow>
-    </>
+    </div>
   );
 }
 
@@ -463,7 +463,7 @@ function SecondaryMetricEditor({
   });
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -655,7 +655,7 @@ function SecondaryMetricEditor({
           datasource={datasource}
         />
       ) : null}
-    </>
+    </div>
   );
 }
 
@@ -664,25 +664,128 @@ const supportingVisualization = (state: MetricVisualizationState) =>
 
 function PrimaryMetricEditor({ state, setState }: SubProps) {
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      fullWidth
-      label={i18n.translate('xpack.lens.metric.icon', {
-        defaultMessage: 'Icon decoration',
-      })}
-    >
-      <IconSelect
-        customIconSet={metricIconsSet}
-        value={state?.icon}
-        onChange={(newIcon) => {
-          if (state.icon === newIcon) return;
+    <div className="lnsIndexPatternDimensionEditor--padded">
+      {isMetricNumeric && (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.metric.colorByValue.label', {
+            defaultMessage: 'Color by value',
+          })}
+        >
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.colorByValue.label', {
+              defaultMessage: 'Color by value',
+            })}
+            data-test-subj="lnsMetric_color_mode_buttons"
+            options={[
+              {
+                id: `${idPrefix}static`,
+                label: i18n.translate('xpack.lens.metric.colorMode.static', {
+                  defaultMessage: 'Static',
+                }),
+                value: 'static',
+                'data-test-subj': 'lnsMetric_color_mode_static',
+              },
+              {
+                id: `${idPrefix}dynamic`,
+                label: i18n.translate('xpack.lens.metric.colorMode.dynamic', {
+                  defaultMessage: 'Dynamic',
+                }),
+                value: 'dynamic',
+                'data-test-subj': 'lnsMetric_color_mode_dynamic',
+              },
+            ]}
+            idSelected={`${idPrefix}${colorByValue}`}
+            onChange={(_id, newColorByValue) => {
+              if (newColorByValue === colorByValue) return;
 
-          // If no icon selected, remove icon and iconAlign properties from the state
-          if (newIcon === 'empty') {
-            const { icon, iconAlign, ...restState } = state;
-            setState({ ...restState });
-            return;
-          }
+              setState({
+                ...state,
+                ...(newColorByValue === 'dynamic'
+                  ? {
+                      palette: {
+                        ...activePalette,
+                        params: {
+                          ...activePalette.params,
+                          stops: displayStops,
+                        },
+                      },
+                      color: undefined,
+                    }
+                  : {
+                      palette: undefined,
+                      color: undefined,
+                    }),
+              });
+            }}
+          />
+        </EuiFormRow>
+      )}
+      {hasDynamicColoring ? (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
+            defaultMessage: 'Color mapping',
+          })}
+        >
+          <PalettePanelContainer
+            palette={displayStops.map(({ color }) => color)}
+            siblingRef={props.panelRef}
+            isInlineEditing={isInlineEditing}
+          >
+            <CustomizablePalette
+              palettes={props.paletteService}
+              activePalette={activePalette}
+              dataBounds={currentMinMax}
+              showRangeTypeSelector={supportsPercentPalette}
+              setPalette={(newPalette) => {
+                setState({
+                  ...state,
+                  palette: newPalette,
+                });
+              }}
+            />
+          </PalettePanelContainer>
+        </EuiFormRow>
+      ) : (
+        <StaticColorControl
+          getColor={getColor}
+          setColor={setColor}
+          {...(showVisTextColorSwatches ? { swatches: visTextColorSwatches(euiTheme) } : undefined)}
+        />
+      )}
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.metric.icon', {
+          defaultMessage: 'Icon decoration',
+        })}
+      >
+        <IconSelect
+          customIconSet={metricIconsSet}
+          value={state?.icon}
+          onChange={(newIcon) => {
+            if (state.icon === newIcon) return;
+
+            // If no icon selected, remove icon and iconAlign properties from the state
+            if (newIcon === 'empty') {
+              const { icon, iconAlign, ...restState } = state;
+              setState({ ...restState });
+              return;
+            }
+
+            // If both icon and iconAlign are set, only update icon
+            if (state.icon && state.iconAlign) {
+              setState({
+                ...state,
+                icon: newIcon,
+              });
+              return;
+            }
 
           // If both icon and iconAlign are set, only update icon
           if (state.icon && state.iconAlign) {
@@ -701,18 +804,10 @@ function PrimaryMetricEditor({ state, setState }: SubProps) {
               icon: newIcon,
               iconAlign: legacyMetricStateDefaults.iconAlign,
             });
-            return;
-          }
-
-          // If icon is missing, always set iconAlign to the default
-          setState({
-            ...state,
-            icon: newIcon,
-            iconAlign: metricStateDefaults.iconAlign,
-          });
-        }}
-      />
-    </EuiFormRow>
+          }}
+        />
+      </EuiFormRow>
+    </div>
   );
 }
 

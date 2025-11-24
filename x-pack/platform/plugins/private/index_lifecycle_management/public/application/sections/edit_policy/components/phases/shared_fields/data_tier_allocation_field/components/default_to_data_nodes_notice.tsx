@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '../../../../../../../../shared_imports';
 import type { PhaseWithAllocation } from '../../../../../../../../../common/types';
 import {
   noCustomAttributesTitle,
@@ -19,6 +20,10 @@ import {
 export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
   phase,
 }) => {
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   return (
     <EuiCallOut
       data-test-subj="defaultToDataNodesNotice"
@@ -32,11 +37,7 @@ export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAlloc
           { defaultMessage: 'Data will be allocated to any available data node.' }
         )}
       </p>
-
-      {
-        // @ts-expect-error Type '({ docLinks }: Props) => React.JSX.Element' is not assignable to type 'ReactNode'.
-        nodeAllocationMigrationGuidance
-      }
+      {nodeAllocationMigrationGuidance({ docLinks })}
     </EuiCallOut>
   );
 };
