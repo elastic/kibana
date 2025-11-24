@@ -77,37 +77,21 @@ export JEST_ALL_CHECKPOINT_PATH="$CHECKPOINT_FILE"
 # Try to download existing checkpoint from previous run (if job was restarted)
 if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
   echo "--- Downloading checkpoint from previous run attempt"
-  echo "Checkpoint: Looking for $CHECKPOINT_FILE from retry ${BUILDKITE_RETRY_COUNT}"
-  echo "Checkpoint: Build ID: ${BUILDKITE_BUILD_ID}"
-  echo "Checkpoint: Step ID: ${BUILDKITE_STEP_ID}"
-  
   # Multiple uploads of the same checkpoint occur during a run (after each config completes)
   # This causes "Multiple artifacts" error. Solution: Download all to temp dir and pick the best one
-  
-  CHECKPOINT_TEMP_DIR=$(mktemp -d)
-  echo "Checkpoint: Temp directory: $CHECKPOINT_TEMP_DIR"
-  
+  CHECKPOINT_TEMP_DIR=$(mktemp -d)  
   set +e
   
   # Download all checkpoint progress files (each upload has unique .progress_N.json suffix)
   # e.g., jest_checkpoint_integration_0.progress_1.json, .progress_2.json, etc.
   CHECKPOINT_PATTERN="${CHECKPOINT_FILE%.json}.progress_*.json"
-  echo "Checkpoint: Searching for pattern: $CHECKPOINT_PATTERN"
   
   buildkite-agent artifact download "$CHECKPOINT_PATTERN" "$CHECKPOINT_TEMP_DIR/" --include-retried-jobs
   download_code=$?
-  echo "Checkpoint: Download exit code: $download_code"
   
   set -e
   
-  if [ $download_code -eq 0 ]; then
-    echo "Checkpoint: Download successful, looking for checkpoint files..."
-    
-    # List what was downloaded
-    echo "Checkpoint: Files in temp directory:"
-    ls -lah "$CHECKPOINT_TEMP_DIR" || true
-    find "$CHECKPOINT_TEMP_DIR" -type f || true
-    
+  if [ $download_code -eq 0 ]; then   
     # Find checkpoint with the most completed configs (latest progress)
     MAX_CONFIGS=0
     BEST_CHECKPOINT=""
@@ -115,9 +99,7 @@ if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
     # Check all downloaded checkpoint progress files
     for checkpoint_file in "$CHECKPOINT_TEMP_DIR"/target/*.progress_*.json; do
       if [ -f "$checkpoint_file" ]; then
-        echo "Checkpoint: Examining $checkpoint_file"
         config_count=$(jq -r '.completedConfigs | length' "$checkpoint_file" 2>/dev/null || echo "0")
-        echo "Checkpoint: $checkpoint_file has $config_count completed configs"
         if [ "$config_count" -ge "$MAX_CONFIGS" ]; then
           MAX_CONFIGS=$config_count
           BEST_CHECKPOINT="$checkpoint_file"
@@ -129,15 +111,14 @@ if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
       # Create target directory if it doesn't exist
       mkdir -p "$(dirname "$CHECKPOINT_FILE")"
       cp "$BEST_CHECKPOINT" "$CHECKPOINT_FILE"
-      echo "Checkpoint: Found ${MAX_CONFIGS} already-completed configs from previous attempt"
-      echo "Checkpoint: Using $BEST_CHECKPOINT"
+      echo "Checkpoint: Found ${MAX_CONFIGS} already-completed configs from previous attempt in $BEST_CHECKPOINT"
     else
-      echo "Checkpoint: No valid checkpoint found (MAX_CONFIGS=$MAX_CONFIGS, BEST_CHECKPOINT=$BEST_CHECKPOINT)"
-      echo "Checkpoint: Starting fresh"
+      echo "No valid checkpoint found (MAX_CONFIGS=$MAX_CONFIGS, BEST_CHECKPOINT=$BEST_CHECKPOINT)"
+      echo "Starting fresh"
     fi
   else
-    echo "Checkpoint: Download failed with code $download_code"
-    echo "Checkpoint: No previous checkpoint found, starting fresh"
+    echo "Download failed with code $download_code"
+    echo "No previous checkpoint found, starting fresh"
   fi
   
   # Cleanup

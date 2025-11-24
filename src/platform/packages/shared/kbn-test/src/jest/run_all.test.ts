@@ -66,6 +66,8 @@ describe('run_all.ts', () => {
     mkdir: jest.Mock;
     writeFile: jest.Mock;
     readFile: jest.Mock;
+    copyFile: jest.Mock;
+    unlink: jest.Mock;
   };
 
   beforeEach(() => {
@@ -90,6 +92,8 @@ describe('run_all.ts', () => {
     mockGetTimeReporter.mockReturnValue(mockReporter);
     mockFs = jest.mocked(jest.requireMock('fs').promises);
     mockFs.readFile.mockRejectedValue({ code: 'ENOENT' }); // Default: checkpoint doesn't exist
+    mockFs.copyFile = jest.fn().mockResolvedValue(undefined);
+    mockFs.unlink = jest.fn().mockResolvedValue(undefined);
 
     // Default mock implementations
     mockGetopts.mockReturnValue({
@@ -684,6 +688,8 @@ describe('run_all.ts', () => {
     describe('checkpoint functionality', () => {
       it('should write checkpoint file when a config succeeds', async () => {
         process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        // Ensure BUILDKITE is not set
+        delete process.env.BUILDKITE;
 
         mockGetJestConfigs.mockResolvedValue({
           configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
@@ -705,10 +711,10 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        // Should write checkpoint after successful config
+        // Should write checkpoint after successful config (with relative path)
         expect(mockFs.writeFile).toHaveBeenCalledWith(
           '/tmp/checkpoint.json',
-          expect.stringContaining('/path/to/config1.js'),
+          expect.stringContaining('config1.js'),
           'utf8'
         );
       });
@@ -756,10 +762,14 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        // Should have called buildkite-agent to upload checkpoint
+        // Should have called buildkite-agent to upload checkpoint with progress suffix
         expect(mockSpawn).toHaveBeenCalledWith(
           'buildkite-agent',
-          ['artifact', 'upload', '/tmp/checkpoint.json'],
+          expect.arrayContaining([
+            'artifact',
+            'upload',
+            expect.stringMatching(/\/tmp\/checkpoint\.progress_\d+\.json/),
+          ]),
           expect.objectContaining({ stdio: 'pipe' })
         );
 
@@ -808,11 +818,13 @@ describe('run_all.ts', () => {
 
       it('should load checkpoint and skip completed configs', async () => {
         process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        // Ensure BUILDKITE is not set so no upload spawn happens
+        delete process.env.BUILDKITE;
 
-        // Mock existing checkpoint with config1 already completed
+        // Mock existing checkpoint with config1 already completed (relative path)
         mockFs.readFile.mockResolvedValue(
           JSON.stringify({
-            completedConfigs: ['/path/to/config1.js'],
+            completedConfigs: ['config1.js'],
           })
         );
 
@@ -928,11 +940,13 @@ describe('run_all.ts', () => {
 
       it('should display resumed configs in discovery summary', async () => {
         process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        // Ensure BUILDKITE is not set
+        delete process.env.BUILDKITE;
 
-        // Mock existing checkpoint with config1 already completed
+        // Mock existing checkpoint with config1 already completed (relative path)
         mockFs.readFile.mockResolvedValue(
           JSON.stringify({
-            completedConfigs: ['/path/to/config1.js'],
+            completedConfigs: ['config1.js'],
           })
         );
 
@@ -965,16 +979,16 @@ describe('run_all.ts', () => {
         await runPromise;
 
         // Should log Config Discovery Summary with resumed configs row
-        expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringContaining('Config Discovery Summary:')
-        );
-        expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringContaining('Configs resumed from previous run')
-        );
+        // The table is logged as a string, so check if any log.info call contains the text
+        const allLogCalls = mockLog.info.mock.calls.map((call) => call[0]).join('\n');
+        expect(allLogCalls).toContain('Config Discovery Summary:');
+        expect(allLogCalls).toContain('Configs resumed from previous run');
       });
 
       it('should accumulate completed configs in checkpoint across multiple successes', async () => {
         process.env.JEST_ALL_CHECKPOINT_PATH = '/tmp/checkpoint.json';
+        // Ensure BUILDKITE is not set
+        delete process.env.BUILDKITE;
 
         mockGetJestConfigs.mockResolvedValue({
           configsWithTests: [
@@ -1009,11 +1023,11 @@ describe('run_all.ts', () => {
 
         expect(checkpointWrites.length).toBeGreaterThanOrEqual(2);
 
-        // Final checkpoint should contain both configs
+        // Final checkpoint should contain both configs (as relative paths)
         const finalCheckpoint = checkpointWrites[checkpointWrites.length - 1][1];
         const parsed = JSON.parse(finalCheckpoint);
-        expect(parsed.completedConfigs).toContain('/path/to/config1.js');
-        expect(parsed.completedConfigs).toContain('/path/to/config2.js');
+        expect(parsed.completedConfigs).toContain('config1.js');
+        expect(parsed.completedConfigs).toContain('config2.js');
       });
     });
   });

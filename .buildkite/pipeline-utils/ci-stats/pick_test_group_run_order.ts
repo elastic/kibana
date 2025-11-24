@@ -368,7 +368,6 @@ export async function pickTestGroupRunOrder() {
             agents: expandAgentQueue('n2-4-spot'),
             env: {
               SCOUT_TARGET_TYPE: 'local',
-              JEST_CHECKPOINT_TEST_FAIL_AFTER: '3', // TODO: Remove after testing checkpoint/resume
             } as Record<string, string | number>,
             depends_on: JEST_CONFIGS_DEPS,
             retry: {
