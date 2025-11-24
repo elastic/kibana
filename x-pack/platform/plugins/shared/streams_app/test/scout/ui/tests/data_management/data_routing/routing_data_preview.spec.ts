@@ -23,6 +23,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await browserAuth.loginAsAdmin();
     await pageObjects.streams.gotoPartitioningTab('logs');
     await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
+    await pageObjects.streams.switchToColumnsView();
   });
 
   test.afterAll(async ({ logsSynthtraceEsClient }) => {
@@ -211,7 +212,12 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('%');
   });
 
-  test('should switch between matched and unmatched documents', async ({ page, pageObjects }) => {
+  // This test is failing in Cloud run even with improved cleanup b/w test spec files
+  // See https://github.com/elastic/kibana/issues/242931
+  test.skip('should switch between matched and unmatched documents', async ({
+    page,
+    pageObjects,
+  }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('filter-switch-test');
 
