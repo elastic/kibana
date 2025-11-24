@@ -6,7 +6,7 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect, tags } from '@kbn/scout';
+import { apiTest, expect } from '@kbn/scout';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
