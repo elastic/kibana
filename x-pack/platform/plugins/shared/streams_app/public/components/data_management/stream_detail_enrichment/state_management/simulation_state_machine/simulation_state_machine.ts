@@ -126,13 +126,12 @@ export const simulationMachine = setup({
       !hasSamples(params.samples),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoBjACx2JgAUAnMANxTAHcAIoTqwAYiix4w7ANoAGALqJQAB0KpqxZSAAeiAGwBmOTQDsAJnP65AFnMAOAIw2598wBoQAT0SOArFY09vqmjmGGNvZy+vY2AL5xnhTY+ERkyVRpNJywYHjySkggahpp2noIALSWNEYAnHX2fnX6djHRNp4+CI76zjRycobNFo729sOmCUnoKZrks5m0nHRgKFxgAPqwOGgqWHAF2iUomuWI1ea1hg1NLW1RrV2+poamNC6N5n5+hs4u8USIAyqRIC0ooOI2TAq3WWx2ewOsBkjkKqnUpzKRQqfhs7zq5j+hn0dUihkM5kczwQrT8NEsch++gC9xsfmmwMWkPBcyyKzWG22u32h3MaOKGLO2IuNXqjWarSsj063l8wRMTmsv1iAICHJB8xU7GEcFghHYsBoACojkUTlLQBVLtdbgqHh1qc5KQM6q9hrZzHi7PquYbjatYGb2PRmKssLb0aUSOcqrKbvL7kqPaqen5HO8frY-NFHHI6sNDCGIWGTZHzfQmCwwAmJUmtNKqnZHEFTAFHFZGhEbL7qTZ+pZ9MzYsFxvpzFXeWCjbWozQIGADlIW-asY6LjcbDRjKXeuY6qWKXVqbT6eZGYr7HVi8GgQa0qRlxHV+vN83UcdJV3XQZSuOU7kVdonhzRwn3eAd-EMR9zFMYJ9AXJYoRQCADh5DCaAAM14LAIEtNAcBUbdAOTDtBwGQkbGJQkjG+a8JmuRlA0aYcbnsdDIRoLCcLfWhCI3EiaAwYgyIoxQALbFNaLkejGOJCk-GpFCTFcYl7FCfsfgaPjNDXMAACNCEkugUBYABhRsYFgUgdFgPB8DAGgcHwqR2AACk-U1zTs5gYAEMyLOIVYABV0DAABKXD+PXczLOsqAgqbZFZLtKj2z3BBFOUudVJY6CbneG5GV6Nw3jeKZX1DLIcEjaQCBYAAlMAAEcMBQTg0DAYg8Ecyj5I7UsGnpCJkMiX0YLnT1-HeGJTBsGwjCGH5AyMxrmvYVqoA67rerAfrBuG-9stGvKwjCGgfjW4YGKUlDDGvN52NxRDkIJX1tuWSTiFSgBlBqwQgEh3OsrhCAAa3c4TiDagHpAAQToPBzRGzFqLy4d7BoMYVvLZDhhHHN7jMJw7y9AldLqP6oXYAHgdBshpGNaN9nwfDzTQGgEaR4hiFR9HMayxNsdy4CEDxgndO4kmRmpXTuwpR4KUGUlCQSIFiEIdd4CKBG5MllNKjWuoez7AcJlWsnunzcqLFGKx82sAkGYE7CwBNh1paMfG5DGVxTDqaIzz+akrEPXTkOD30-GZJ9PaS8KrNs+y4F9oCKiKmgw4JSdVv8RxhmpAI6WZIY7HJL6+k9prcj21LDp6vqBqG7Ocel893jkImmn7sc8XscviXz5xGVMUwy0QtlPaZoWWerICd27iown0AZcRJBik7ZUecyQj4z2YomZ7LHW4iAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoBjACx2JgAUAnMANxTAHcAIoTqwAYiix4w7ANoAGALqJQAB0KpqxZSAAeiAGwBmAJw1DAJgAs544cOWAHPoeGAjABoQAT0SvzAX39PCmx8IjIQqnCaTlgwPHklJBA1DXDtPQQAVgB2Tx8EV30cyxobfXNDEstLVztDQOD0UM1yZqjaTjowFC4wAH1YKRVYRO1UlE0MxFz8xGtXGgcsh2M5OVtXV0sjHMaQSLCSNsoj4hiwbt6B2Bw0FSw4MeSJqeTM2e9fStLcnP1XE4snZbA59odWhDol0en1BncHk9XElVOpJul3jM8l9soCzH5XHJlkS5NVwe0zicWtDLrCbgjHqNzCiUmi3qAPtiCtssqVLFVDMsbOZ9FkReTTq0VJwePwAMKELAYNDEWA0DAqCD4MAAUR0DxQdEmWC8OuIOAARo8IAqlSrRopxmyMRysXNCnUHDQ-DUtqT9DsVhLqcdpdxeHxbcrVerNdq9QajXgTQIULcrZAo-bnqi0iRptkub4csYcjQcnJzOYciZrHJXMYssGOmQw7LI4ro2rCOwINIc6y81pMYX3YTajRin45PZjI2qmCggcKVKZRGszG4ngAMo9ggsAevF26N04uq5GjGBy1HK31y5KyWZuUoZgFT0JgsMCH535kefApqz5ORciyLJCQqVwSybJcoWOV93z7R4pB-IcCwA4sy0bEUcgcKC5Esetn0hYYaCQ+Jv2RJ00P-ItCjAuQljWUkZxAup9GI6IUAgR4qRbGgADNeCwCA1TQHAVFQ9E-1dQp1kYqtRRrMDCKJMc7CyJYslLLJ9AIgFLBgppJS4niwD4s5BOE0T1WIcTJMdF5f2HWTCXWMoRVyQwVPWBwx35cx8XKQwKkMUkGlgldoj7C1CAwYgjRYOVPxgWBSB0IZtRoHABKkdgAAppWEOBYB7ZLmBgAQwFi+LugAFXQMAAEoLM0MjqrihKUCSlKnkc3NpJck85PcxSvJ8tScQsUpBUqPDgTkYor042gcFgOJ2H3KAACUwAARwwFBODQMBiDwNKpPZYatiKGh+RybT6wbMVLHdfQKhoGcHByPxymBa8VvONaNq23aDqOsATrOi6qKcmjXMWr1inMRbDPrRaPDPKxDEvRaAXMQF7BewGYni4huqgbcouOCASDAGhuq4QgAGt6bg4htrJ6QAEE6DwHtLuPTJLEbMw1gDXkKxKBwCPdb6cbnQE6hFCocnFSKTM6MmKapzWyGkdgexoB58AEns0BodnOeIYgeb5gX+sHQaCxFzSTFRyXSUcWWcVwxj-oDPDRSyesYKXYhCD7eBknZ6jnZHYx3TWO6xWcEOfRcSw9g1kNzm4x446uzI8MCwm3FLGWbF0sdqxxkOHBRytwIegGc-4mLOsSqByq-aOBqLxBcLdlGibAh71kMd0LBx2aq2MUVtjWCLjNz7L1ukUH9sO47TvOwuhd8CxFm0wUK35ZZCTo4FTH+DYjBR96HFWEn2G1lhddz-eZOuuoylyb6G7GDRhsSeOJRT6EvOxNWfhdIAjDv4IAA */
   id: 'simulation',
   context: ({ input }) => ({
     detectedSchemaFields: [],
     detectedSchemaFieldsCache: new Map(),
     previewDocsFilter: 'outcome_filter_all',
-    previewDocuments: [],
     explicitlyDisabledPreviewColumns: [],
     explicitlyEnabledPreviewColumns: [],
     previewColumnsOrder: [],
@@ -150,6 +149,10 @@ export const simulationMachine = setup({
     'simulation.reset': {
       target: '.idle',
       actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSteps' }],
+    },
+    'simulation.receive_steps': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
     'simulation.receive_samples': [
       {
@@ -170,59 +173,6 @@ export const simulationMachine = setup({
         actions: [{ type: 'storeSamples', params: ({ event }) => event }],
       },
     ],
-    'previewColumns.updateExplicitlyEnabledColumns': {
-      actions: [
-        {
-          type: 'storeExplicitlyEnabledPreviewColumns',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    'previewColumns.updateExplicitlyDisabledColumns': {
-      actions: [
-        {
-          type: 'storeExplicitlyDisabledPreviewColumns',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    'previewColumns.order': {
-      actions: [
-        {
-          type: 'storePreviewColumnsOrder',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    'previewColumns.setSorting': {
-      actions: [
-        {
-          type: 'storePreviewColumnsSorting',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    // Handle adding/reordering steps
-    'step.*': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
-    },
-    'step.cancel': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
-    },
-    'step.edit': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
-    },
-    'step.save': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
-    },
     'step.change': {
       target: '.debouncingChanges',
       reenter: true,
@@ -254,6 +204,38 @@ export const simulationMachine = setup({
         'simulation.fields.unmap': {
           target: 'assertingRequirements',
           actions: [{ type: 'unmapField', params: ({ event }) => event }],
+        },
+        'previewColumns.updateExplicitlyEnabledColumns': {
+          actions: [
+            {
+              type: 'storeExplicitlyEnabledPreviewColumns',
+              params: ({ event }) => event,
+            },
+          ],
+        },
+        'previewColumns.updateExplicitlyDisabledColumns': {
+          actions: [
+            {
+              type: 'storeExplicitlyDisabledPreviewColumns',
+              params: ({ event }) => event,
+            },
+          ],
+        },
+        'previewColumns.order': {
+          actions: [
+            {
+              type: 'storePreviewColumnsOrder',
+              params: ({ event }) => event,
+            },
+          ],
+        },
+        'previewColumns.setSorting': {
+          actions: [
+            {
+              type: 'storePreviewColumnsSorting',
+              params: ({ event }) => event,
+            },
+          ],
         },
       },
     },

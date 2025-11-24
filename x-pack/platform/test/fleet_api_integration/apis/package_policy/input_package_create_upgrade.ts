@@ -219,7 +219,7 @@ export default function (providerContext: FtrProviderContext) {
         template: {
           settings: {
             index: {
-              lifecycle: { name: 'logs' },
+              lifecycle: { name: 'logs@lifecycle' },
               default_pipeline: 'logs-dataset1-1.0.0',
               mapping: {
                 total_fields: { limit: '1000' },

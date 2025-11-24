@@ -46,7 +46,7 @@ import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_sou
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
 import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
-import { getData, getIndexPatternService, getUiSettings } from '../../../kibana_services';
+import { getData, getHttp, getIndexPatternService, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
 import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE, getFields } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -383,7 +383,11 @@ export class ESQLSource
   }
 
   getIndexPattern() {
-    return getESQLAdHocDataview(this._descriptor.esql, getIndexPatternService());
+    return getESQLAdHocDataview({
+      dataViewsService: getIndexPatternService(),
+      query: this._descriptor.esql,
+      http: getHttp(),
+    });
   }
 
   getGeoFieldName() {

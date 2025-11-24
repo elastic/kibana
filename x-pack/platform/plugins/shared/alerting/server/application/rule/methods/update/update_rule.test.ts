@@ -2275,7 +2275,7 @@ describe('update()', () => {
         ],
       });
 
-      taskManager.runSoon.mockReturnValueOnce(Promise.resolve({ id: alertId }));
+      taskManager.runSoon.mockReturnValueOnce(Promise.resolve({ id: alertId, forced: false }));
     }
 
     test('updating the alert schedule should call taskManager.bulkUpdateSchedules', async () => {

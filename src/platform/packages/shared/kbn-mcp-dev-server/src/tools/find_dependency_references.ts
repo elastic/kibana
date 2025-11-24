@@ -340,6 +340,7 @@ function matchPathToPattern(filePath: string, pattern: string): boolean {
 
   // Convert glob pattern to regex
   let regexPattern = normalizedPattern
+    .replace(/\\/g, '\\\\') // Escape backslashes
     .replace(/\./g, '\\.') // Escape dots
     .replace(/\*\*/g, '___DOUBLESTAR___') // Placeholder for **
     .replace(/\*/g, '[^/]*') // Single * matches anything except /

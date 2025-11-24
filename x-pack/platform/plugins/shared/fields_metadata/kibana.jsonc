@@ -12,5 +12,6 @@
     "configPath": ["xpack", "fields_metadata"],
     "requiredPlugins": [],
     "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }
