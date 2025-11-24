@@ -72,31 +72,42 @@ export const LanguageSelectorModal = ({
     return options.map((option) => ({
       ...option,
       ...(noOptionsSelected && option.key === currentLanguage && { checked: 'on' }),
-      append: option.key === currentLanguage ? DEFAULT_BADGE : undefined,
+      append: option.key === selectedLanguage ? DEFAULT_BADGE : undefined,
     }));
-  }, [options, currentLanguage, noOptionsSelected]);
+  }, [options, selectedLanguage, currentLanguage, noOptionsSelected]);
 
   const handleOptionsChange = (changedOptions: EuiSelectableOption[]) => {
     setOptions(changedOptions);
-
-    // Update selectedLanguage when user clicks a different option
-    const checkedOption = changedOptions.find((option) => option.checked);
-    if (checkedOption?.key) {
-      setSelectedLanguage(checkedOption.key);
-    }
   };
 
   const onCopyCode = () => {
-    onSubmit(selectedLanguage);
+    const selectedOption = options.find((option) => option.checked);
+    const language = selectedOption?.key || selectedLanguage;
+
+    // If the default language is changed, save it
+    if (currentLanguage !== selectedLanguage) {
+      changeDefaultLanguage(selectedLanguage);
+    }
+
+    onSubmit(language);
   };
 
   const onSetAsDefault = () => {
+    // Move the "Default" badge to the currently checked language
+    const selectedOption = options.find((option) => option.checked);
+    if (selectedOption?.key) {
+      setSelectedLanguage(selectedOption.key);
+    }
+  };
+
+  const onCloseModal = () => {
+    // Save the selected language as default when modal closes
     changeDefaultLanguage(selectedLanguage);
-    // Keep modal open after setting default
+    closeModal();
   };
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={onCloseModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
@@ -130,7 +141,7 @@ export const LanguageSelectorModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal} data-test-subj="closeCopyAsModal">
+        <EuiButtonEmpty onClick={onCloseModal} data-test-subj="closeCopyAsModal">
           <FormattedMessage
             id="console.requestPanel.contextMenu.languageSelectorModalCancel"
             defaultMessage="Cancel"

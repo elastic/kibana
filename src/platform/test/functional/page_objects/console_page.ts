@@ -522,8 +522,11 @@ export class ConsolePageObject extends FtrService {
     // Select the language option
     await this.testSubjects.click(`languageOption-${language}`);
 
-    // Click "Set as default" button
+    // Click "Set as default" button (moves the badge)
     await this.testSubjects.click('setAsDefaultLanguage');
+
+    // Click "Cancel" to close modal and save the default
+    await this.testSubjects.click('closeCopyAsModal');
   }
 
   public async clickCopyToLanguageButton() {

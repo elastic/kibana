@@ -158,6 +158,79 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(clipboardText).to.contain('require("@elastic/elasticsearch")');
         }
       });
+
+      it('should allow setting default language via Set as default button and Cancel', async () => {
+        await PageObjects.console.clickContextMenu();
+
+        // Open language selector modal
+        await testSubjects.click('consoleMenuSelectLanguage');
+
+        // Wait for modal to open
+        await retry.waitFor('language selector modal to open', async () => {
+          return await testSubjects.exists('languageOption-ruby');
+        });
+
+        // Select Ruby option
+        await testSubjects.click('languageOption-ruby');
+
+        // Click "Set as default" button
+        await testSubjects.click('setAsDefaultLanguage');
+
+        // Badge should have moved but modal is still open
+        await retry.waitFor('modal to remain open', async () => {
+          return await testSubjects.exists('setAsDefaultLanguage');
+        });
+
+        // Close modal with Cancel button to save the default
+        await testSubjects.click('closeCopyAsModal');
+
+        // Wait for context menu to be visible
+        await retry.waitFor('context menu to be visible', async () => {
+          return await testSubjects.exists('consoleMenuCopyAsButton');
+        });
+
+        // Wait for UI to update
+        await PageObjects.common.sleep(300);
+
+        // Verify the default language changed to Ruby
+        const copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
+        const menuItemText = await copyMenuItem.getVisibleText();
+        expect(menuItemText).to.contain('Copy to Ruby');
+      });
+
+      it('should save default language when using Set as default button and Copy code', async () => {
+        await PageObjects.console.clickContextMenu();
+
+        // Open language selector modal
+        await testSubjects.click('consoleMenuSelectLanguage');
+
+        // Wait for modal to open
+        await retry.waitFor('language selector modal to open', async () => {
+          return await testSubjects.exists('languageOption-php');
+        });
+
+        // Select PHP option
+        await testSubjects.click('languageOption-php');
+
+        // Click "Set as default" button
+        await testSubjects.click('setAsDefaultLanguage');
+
+        // Click "Copy code" button to save and close
+        await testSubjects.click('copyAsLanguageSubmit');
+
+        // Wait for context menu to be visible
+        await retry.waitFor('context menu to be visible', async () => {
+          return await testSubjects.exists('consoleMenuCopyAsButton');
+        });
+
+        // Wait for UI to update
+        await PageObjects.common.sleep(300);
+
+        // Verify the default language changed to PHP
+        const copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
+        const menuItemText = await copyMenuItem.getVisibleText();
+        expect(menuItemText).to.contain('Copy to PHP');
+      });
     });
 
     it('should open documentation when open documentation button is clicked', async () => {
