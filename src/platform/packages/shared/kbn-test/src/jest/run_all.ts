@@ -120,7 +120,11 @@ export async function runJestAll() {
         log.info(`Checkpoint: Completed configs: ${Array.from(completedConfigs).join(', ')}`);
 
         const beforeFilter = configs.length;
-        configs = configs.filter((c) => !completedConfigs.has(c));
+        // Convert configs to relative paths for comparison
+        configs = configs.filter((c) => {
+          const relativeConfig = relative(REPO_ROOT, c);
+          return !completedConfigs.has(relativeConfig);
+        });
         resumedConfigCount = beforeFilter - configs.length;
 
         log.info(
@@ -339,7 +343,9 @@ async function runConfigs(
 
           // Save checkpoint when a config succeeds
           if (code === 0 && checkpointPath && completedConfigs) {
-            completedConfigs.add(config);
+            // Store config as relative path to ensure it matches when comparing on retry
+            const relativeConfig = relative(REPO_ROOT, config);
+            completedConfigs.add(relativeConfig);
 
             try {
               await fs.mkdir(dirname(checkpointPath), { recursive: true });
