@@ -67,11 +67,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     [activeTab, caseViewTabs, euiTheme, oneAttachmentsTabEnabled, similarCasesData?.total]
   );
 
-  const isAttachmentsTabActive = useMemo(
-    () => oneAttachmentsTabEnabled && caseViewTabs.find((tab) => tab.id === activeTab),
-    [activeTab, caseViewTabs, oneAttachmentsTabEnabled]
-  );
-
   const renderTabs = useCallback(() => {
     return tabs.map((tab, index) => (
       <EuiTab
