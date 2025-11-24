@@ -34,3 +34,5 @@ simple-statistics
 monaco-promql
 react-element-to-jsx-string
 @babel/plugin-transform-class-static-block
+dompurify
+magic-bytes.js
