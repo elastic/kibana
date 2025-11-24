@@ -11,6 +11,10 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionLoopParams } from './types';
 import { abortableTimeout, TimeoutAbortedError } from '../utils';
 
+export function flushState(params: WorkflowExecutionLoopParams) {
+  return Promise.all([params.workflowExecutionState.flush(), params.workflowLogger.flushEvents()]);
+}
+
 /**
  * Continuously persists workflow execution state and logs while the workflow is running.
  *
@@ -32,7 +36,7 @@ import { abortableTimeout, TimeoutAbortedError } from '../utils';
  */
 export async function persistenceLoop(params: WorkflowExecutionLoopParams) {
   while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    await Promise.all([params.workflowExecutionState.flush(), params.workflowLogger.flushEvents()]);
+    await flushState(params);
 
     try {
       await abortableTimeout(500, params.taskAbortController.signal);

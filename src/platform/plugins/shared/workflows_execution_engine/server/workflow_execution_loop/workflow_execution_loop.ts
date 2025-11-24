@@ -9,7 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { executionFlowLoop } from './execution_flow_loop';
-import { persistenceLoop } from './persistence_loop';
+import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 
 /**
@@ -47,6 +47,6 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error as Error);
   } finally {
-    await Promise.all([params.workflowExecutionState.flush(), params.workflowLogger.flushEvents()]);
+    await flushState(params);
   }
 }
