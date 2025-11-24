@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-11-22T01:09:36.721Z
+ * Generated at: 2025-11-24T08:15:43.075Z
  * Source: /oas_docs/output/kibana.yaml (undefined APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
@@ -123,8 +123,8 @@ import {
   delete_agent_builder_agents_id_response,
   delete_agent_builder_conversations_conversation_id_request,
   delete_agent_builder_conversations_conversation_id_response,
-  delete_agent_builder_tools_id_request,
-  delete_agent_builder_tools_id_response,
+  delete_agent_builder_tools_toolid_request,
+  delete_agent_builder_tools_toolid_response,
   delete_agent_configuration_request,
   delete_agent_configuration_response,
   delete_alerting_rule_id_request,
@@ -347,10 +347,10 @@ import {
   get_agent_builder_conversations_conversation_id_response,
   get_agent_builder_conversations_request,
   get_agent_builder_conversations_response,
-  get_agent_builder_tools_id_request,
-  get_agent_builder_tools_id_response,
   get_agent_builder_tools_request,
   get_agent_builder_tools_response,
+  get_agent_builder_tools_toolid_request,
+  get_agent_builder_tools_toolid_response,
   get_agent_configurations_request,
   get_agent_configurations_response,
   get_agent_name_for_service_request,
@@ -1161,7 +1161,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['connector_type_id', 'name', 'config', 'secrets'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_actions_connector_id_request, 'body'),
@@ -1185,7 +1185,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['name', 'config', 'secrets'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_actions_connector_id_request, 'body'),
@@ -1211,7 +1211,7 @@ You can use this API to test an action that involves interaction with Kibana ser
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['params'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_actions_connector_id_execute_request, 'body'),
@@ -1339,7 +1339,15 @@ Create a new agent. Use this endpoint to define the agent's behavior, appearance
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'avatar_color',
+      'avatar_symbol',
+      'configuration',
+      'description',
+      'id',
+      'labels',
+      'name',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_agent_builder_agents_request, 'body'),
@@ -1417,7 +1425,7 @@ Update an existing agent configuration. Use this endpoint to modify any aspect o
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['avatar_color', 'avatar_symbol', 'configuration', 'description', 'labels', 'name'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_agent_builder_agents_id_request, 'body'),
@@ -1521,7 +1529,15 @@ Send a message to an agent and receive a complete response. This synchronous end
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'agent_id',
+      'attachments',
+      'browser_api_tools',
+      'capabilities',
+      'connector_id',
+      'conversation_id',
+      'input',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_agent_builder_converse_request, 'body'),
@@ -1723,7 +1739,15 @@ A typical conversation round emits events in this sequence:
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'agent_id',
+      'attachments',
+      'browser_api_tools',
+      'capabilities',
+      'connector_id',
+      'conversation_id',
+      'input',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_agent_builder_converse_async_request, 'body'),
@@ -1801,7 +1825,7 @@ Create a new tool. Use this endpoint to define a custom tool with specific funct
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['configuration', 'description', 'id', 'tags', 'type'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_agent_builder_tools_request, 'body'),
@@ -1827,7 +1851,7 @@ Execute a tool with parameters. Use this endpoint to run a tool directly with sp
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['connector_id', 'tool_id', 'tool_params'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'body'),
@@ -1836,57 +1860,57 @@ Execute a tool with parameters. Use this endpoint to run a tool directly with sp
   ]),
   outputSchema: post_agent_builder_tools_execute_response,
 };
-const DELETE_AGENT_BUILDER_TOOLS_ID_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.delete_agent_builder_tools_id',
+const DELETE_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.delete_agent_builder_tools_toolid',
   summary: `Delete a tool`,
   description: `**Spaces method and path for this operation:**
 
-<div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{id}</span></div>
+<div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{toolId}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.`,
   methods: ['DELETE'],
-  patterns: ['/api/agent_builder/tools/{id}'],
+  patterns: ['/api/agent_builder/tools/{toolId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: ['id'],
+    pathParams: ['toolId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(delete_agent_builder_tools_id_request, 'body'),
-    getLooseObjectFromProperty(delete_agent_builder_tools_id_request, 'path'),
-    getLooseObjectFromProperty(delete_agent_builder_tools_id_request, 'query'),
+    getLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'body'),
+    getLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'path'),
+    getLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'query'),
   ]),
-  outputSchema: delete_agent_builder_tools_id_response,
+  outputSchema: delete_agent_builder_tools_toolid_response,
 };
-const GET_AGENT_BUILDER_TOOLS_ID_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.get_agent_builder_tools_id',
+const GET_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.get_agent_builder_tools_toolid',
   summary: `Get a tool by id`,
   description: `**Spaces method and path for this operation:**
 
-<div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{id}</span></div>
+<div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{toolId}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
 Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['GET'],
-  patterns: ['/api/agent_builder/tools/{id}'],
+  patterns: ['/api/agent_builder/tools/{toolId}'],
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: ['id'],
+    pathParams: ['toolId'],
     urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
-    getLooseObjectFromProperty(get_agent_builder_tools_id_request, 'body'),
-    getLooseObjectFromProperty(get_agent_builder_tools_id_request, 'path'),
-    getLooseObjectFromProperty(get_agent_builder_tools_id_request, 'query'),
+    getLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'body'),
+    getLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'path'),
+    getLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'query'),
   ]),
-  outputSchema: get_agent_builder_tools_id_response,
+  outputSchema: get_agent_builder_tools_toolid_response,
 };
 const PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_agent_builder_tools_toolid',
@@ -1905,7 +1929,7 @@ Update an existing tool. Use this endpoint to modify any aspect of the tool's co
   parameterTypes: {
     pathParams: ['toolId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['configuration', 'description', 'tags'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'body'),
@@ -2031,7 +2055,21 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'actions',
+      'alert_delay',
+      'artifacts',
+      'consumer',
+      'enabled',
+      'flapping',
+      'name',
+      'notify_when',
+      'rule_type_id',
+      'schedule',
+      'tags',
+      'throttle',
+      'params',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_alerting_rule_id_request, 'body'),
@@ -2055,7 +2093,18 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'actions',
+      'alert_delay',
+      'artifacts',
+      'flapping',
+      'name',
+      'notify_when',
+      'params',
+      'schedule',
+      'tags',
+      'throttle',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_alerting_rule_id_request, 'body'),
@@ -2079,7 +2128,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['untrack'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'body'),
@@ -2201,7 +2250,7 @@ When you snooze a rule, the rule checks continue to run but alerts will not gene
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['schedule'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'body'),
@@ -2371,7 +2420,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['schema'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(save_apm_server_schema_request, 'body'),
@@ -2788,7 +2837,7 @@ If asset criticality records already exist for the specified entities, those rec
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['records'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'body'),
@@ -2840,7 +2889,7 @@ Performs bulk updates on multiple Attack discoveries, including workflow status 
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['update'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_attack_discovery_bulk_request, 'body'),
@@ -3194,7 +3243,7 @@ You must have \`read\` or \`all\` privileges and the \`delete\` sub-feature priv
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
+    urlParams: ['ids'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3275,7 +3324,24 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
+    urlParams: [
+      'assignees',
+      'category',
+      'defaultSearchOperator',
+      'from',
+      'owner',
+      'page',
+      'perPage',
+      'reporters',
+      'search',
+      'searchFields',
+      'severity',
+      'sortField',
+      'sortOrder',
+      'status',
+      'tags',
+      'to',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3301,7 +3367,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3328,7 +3394,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3355,7 +3421,7 @@ Deletes all comments and alerts from a case. You must have \`all\` privileges fo
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3382,7 +3448,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3409,7 +3475,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3436,8 +3502,8 @@ Retrieves a paginated list of comments for a case. You must have \`read\` privil
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['caseId'],
+    urlParams: ['page', 'perPage', 'sortOrder'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3463,7 +3529,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['caseId', 'commentId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3490,7 +3556,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['caseId', 'commentId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3517,7 +3583,7 @@ You must have \`all\` privileges for the **Actions and Connectors** feature in t
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['caseId', 'connectorId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3546,7 +3612,7 @@ Attach a file to a case. You must have \`all\` privileges for the **Cases** feat
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['caseId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3573,8 +3639,8 @@ Retrives a paginated list of user activity for a case. You must have \`read\` pr
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['caseId'],
+    urlParams: ['page', 'perPage', 'sortOrder', 'types'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3600,8 +3666,8 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['alertId'],
+    urlParams: ['owner'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3628,7 +3694,7 @@ Get setting details such as the closure type, custom fields, templatse, and the 
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
+    urlParams: ['owner'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3681,7 +3747,7 @@ Updates setting details such as the closure type, custom fields, templates, and 
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['configurationId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3730,7 +3796,7 @@ const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
+    urlParams: ['owner'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3757,7 +3823,7 @@ Aggregates and returns a list of case tags. You must have read privileges for th
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
+    urlParams: ['owner'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3831,7 +3897,7 @@ WARNING: When you delete a data view, it cannot be recovered.
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['viewId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3855,7 +3921,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['viewId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3879,7 +3945,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['viewId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -3906,9 +3972,9 @@ Update fields presentation metadata such as count, customLabel, customDescriptio
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['viewId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['fields'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(update_fields_metadata_default_request, 'body'),
@@ -3930,9 +3996,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['viewId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['name', 'runtimeField'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_runtime_field_default_request, 'body'),
@@ -3956,7 +4022,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['viewId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['name', 'runtimeField'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_update_runtime_field_default_request, 'body'),
@@ -3978,7 +4044,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['fieldName', 'viewId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -4002,7 +4068,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['fieldName', 'viewId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -4026,9 +4092,9 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['fieldName', 'viewId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['runtimeField'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(update_runtime_field_default_request, 'body'),
@@ -4076,7 +4142,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['data_view_id', 'force'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(set_default_datail_view_default_request, 'body'),
@@ -4515,7 +4581,7 @@ Export detection rules to an \`.ndjson\` file. The following configuration items
   parameterTypes: {
     pathParams: [],
     urlParams: ['exclude_export_details', 'file_name'],
-    bodyParams: [],
+    bodyParams: ['objects'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(export_rules_request, 'body'),
@@ -4618,7 +4684,7 @@ Create exception items that apply to a single detection rule.`,
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['items'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_rule_exception_list_items_request, 'body'),
@@ -4737,7 +4803,7 @@ Assign users to detection alerts, and unassign them from alerts.
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['assignees', 'ids'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(set_alert_assignees_request, 'body'),
@@ -4766,7 +4832,7 @@ finalize it.
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['migration_ids'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(finalize_alerts_migration_request, 'body'),
@@ -4799,7 +4865,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['migration_ids'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(alerts_migration_cleanup_request, 'body'),
@@ -4879,7 +4945,16 @@ Find and/or aggregate detection alerts that match the given query.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      '_source',
+      'aggs',
+      'fields',
+      'query',
+      'runtime_mappings',
+      'size',
+      'sort',
+      'track_total_hits',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(search_alerts_request, 'body'),
@@ -4934,7 +5009,7 @@ And tags to detection alerts, and remove them from alerts.
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['ids', 'tags'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(set_alert_tags_request, 'body'),
@@ -5089,7 +5164,17 @@ Create an Elastic Endpoint exception list item, and associate it with the Elasti
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'comments',
+      'description',
+      'entries',
+      'item_id',
+      'meta',
+      'name',
+      'os_types',
+      'tags',
+      'type',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_endpoint_list_item_request, 'body'),
@@ -5115,7 +5200,19 @@ Update an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      '_version',
+      'comments',
+      'description',
+      'entries',
+      'id',
+      'item_id',
+      'meta',
+      'name',
+      'os_types',
+      'tags',
+      'type',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(update_endpoint_list_item_request, 'body'),
@@ -5388,7 +5485,7 @@ Isolate an endpoint from the network. The endpoint remains isolated until it's r
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(endpoint_isolate_action_request, 'body'),
@@ -5570,7 +5667,7 @@ Release an isolated endpoint, allowing it to rejoin a network.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(endpoint_unisolate_action_request, 'body'),
@@ -5716,7 +5813,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['package_policy_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['note'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_update_protection_updates_note_request, 'body'),
@@ -6054,7 +6151,20 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'delay',
+      'docsPerSecond',
+      'enrichPolicyExecutionInterval',
+      'entityTypes',
+      'fieldHistoryLength',
+      'filter',
+      'frequency',
+      'indexPattern',
+      'lookbackPeriod',
+      'maxPageSearchSize',
+      'timeout',
+      'timestampField',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(init_entity_store_request, 'body'),
@@ -6174,7 +6284,19 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['entityType'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'delay',
+      'docsPerSecond',
+      'enrichPolicyExecutionInterval',
+      'fieldHistoryLength',
+      'filter',
+      'frequency',
+      'indexPattern',
+      'lookbackPeriod',
+      'maxPageSearchSize',
+      'timeout',
+      'timestampField',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(init_entity_engine_request, 'body'),
@@ -6274,7 +6396,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
   parameterTypes: {
     pathParams: ['entityType'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['id'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(delete_single_entity_request, 'body'),
@@ -6464,7 +6586,17 @@ An exception list groups exception items and can be associated with detection ru
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'description',
+      'list_id',
+      'meta',
+      'name',
+      'namespace_type',
+      'os_types',
+      'tags',
+      'type',
+      'version',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_exception_list_request, 'body'),
@@ -6490,7 +6622,19 @@ Update an exception list using the \`id\` or \`list_id\` field.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      '_version',
+      'description',
+      'id',
+      'list_id',
+      'meta',
+      'name',
+      'namespace_type',
+      'os_types',
+      'tags',
+      'type',
+      'version',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(update_exception_list_request, 'body'),
@@ -6675,7 +6819,20 @@ Create an exception item and associate it with the specified exception list.
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'comments',
+      'description',
+      'entries',
+      'expire_time',
+      'item_id',
+      'list_id',
+      'meta',
+      'name',
+      'namespace_type',
+      'os_types',
+      'tags',
+      'type',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_exception_list_item_request, 'body'),
@@ -6701,7 +6858,22 @@ Update an exception list item using the \`id\` or \`item_id\` field.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      '_version',
+      'comments',
+      'description',
+      'entries',
+      'expire_time',
+      'id',
+      'item_id',
+      'list_id',
+      'meta',
+      'name',
+      'namespace_type',
+      'os_types',
+      'tags',
+      'type',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(update_exception_list_item_request, 'body'),
@@ -6791,7 +6963,7 @@ An exception list groups exception items and can be associated with detection ru
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'name'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_shared_exception_list_request, 'body'),
@@ -6864,7 +7036,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['host', 'id', 'is_default', 'name', 'proxy_id', 'secrets', 'ssl'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'body'),
@@ -6942,7 +7114,7 @@ Update an agent binary download source by ID.<br/><br/>[Required authorization] 
   parameterTypes: {
     pathParams: ['sourceId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['host', 'id', 'is_default', 'name', 'proxy_id', 'secrets', 'ssl'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'body'),
@@ -7005,7 +7177,37 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: ['sys_monitoring'],
-    bodyParams: [],
+    bodyParams: [
+      'advanced_settings',
+      'agent_features',
+      'agentless',
+      'data_output_id',
+      'description',
+      'download_source_id',
+      'fleet_server_host_id',
+      'force',
+      'global_data_tags',
+      'has_fleet_server',
+      'id',
+      'inactivity_timeout',
+      'is_default',
+      'is_default_fleet_server',
+      'is_managed',
+      'is_protected',
+      'keep_monitoring_alive',
+      'monitoring_diagnostics',
+      'monitoring_enabled',
+      'monitoring_http',
+      'monitoring_output_id',
+      'monitoring_pprof_enabled',
+      'name',
+      'namespace',
+      'overrides',
+      'required_versions',
+      'space_ids',
+      'supports_agentless',
+      'unenroll_timeout',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agent_policies_request, 'body'),
@@ -7031,7 +7233,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: ['format'],
-    bodyParams: [],
+    bodyParams: ['full', 'ids', 'ignoreMissing'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'body'),
@@ -7083,7 +7285,38 @@ Update an agent policy by ID.<br/><br/>[Required authorization] Route required p
   parameterTypes: {
     pathParams: ['agentPolicyId'],
     urlParams: ['format'],
-    bodyParams: [],
+    bodyParams: [
+      'advanced_settings',
+      'agent_features',
+      'agentless',
+      'bumpRevision',
+      'data_output_id',
+      'description',
+      'download_source_id',
+      'fleet_server_host_id',
+      'force',
+      'global_data_tags',
+      'has_fleet_server',
+      'id',
+      'inactivity_timeout',
+      'is_default',
+      'is_default_fleet_server',
+      'is_managed',
+      'is_protected',
+      'keep_monitoring_alive',
+      'monitoring_diagnostics',
+      'monitoring_enabled',
+      'monitoring_http',
+      'monitoring_output_id',
+      'monitoring_pprof_enabled',
+      'name',
+      'namespace',
+      'overrides',
+      'required_versions',
+      'space_ids',
+      'supports_agentless',
+      'unenroll_timeout',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'body'),
@@ -7145,7 +7378,7 @@ Copy an agent policy by ID.<br/><br/>[Required authorization] Route required pri
   parameterTypes: {
     pathParams: ['agentPolicyId'],
     urlParams: ['format'],
-    bodyParams: [],
+    bodyParams: ['description', 'name'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'body'),
@@ -7249,7 +7482,7 @@ Delete an agent policy by ID.<br/><br/>[Required authorization] Route required p
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agentPolicyId', 'force'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'body'),
@@ -7275,7 +7508,7 @@ Get a list of outputs associated with agent policies.<br/><br/>[Required authori
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['ids'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'body'),
@@ -7351,7 +7584,17 @@ Create an agentless policy`,
   parameterTypes: {
     pathParams: [],
     urlParams: ['format'],
-    bodyParams: [],
+    bodyParams: [
+      'additional_datastreams_permissions',
+      'description',
+      'force',
+      'id',
+      'inputs',
+      'name',
+      'namespace',
+      'package',
+      'vars',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agentless_policies_request, 'body'),
@@ -7444,7 +7687,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['actionIds'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_request, 'body'),
@@ -7522,7 +7765,7 @@ Update an agent by ID.<br/><br/>[Required authorization] Route required privileg
   parameterTypes: {
     pathParams: ['agentId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['tags', 'user_provided_metadata'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_agents_agentid_request, 'body'),
@@ -7548,7 +7791,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['agentId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['action'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'body'),
@@ -7574,7 +7817,7 @@ Migrate a single agent to another cluster.<br/><br/>[Required authorization] Rou
   parameterTypes: {
     pathParams: ['agentId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['enrollment_token', 'settings', 'uri'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'body'),
@@ -7600,7 +7843,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['agentId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['policy_id'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'body'),
@@ -7626,7 +7869,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['agentId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['additional_metrics'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'body'),
@@ -7652,7 +7895,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['agentId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['force', 'revoke'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'body'),
@@ -7678,7 +7921,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['agentId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['force', 'skipRateLimitCheck', 'source_uri', 'version'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'body'),
@@ -7808,7 +8051,7 @@ Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route 
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agents', 'batchSize', 'enrollment_token', 'settings', 'uri'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'body'),
@@ -7834,7 +8077,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agents', 'batchSize', 'includeInactive', 'policy_id'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'body'),
@@ -7860,7 +8103,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['additional_metrics', 'agents', 'batchSize'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'body'),
@@ -7886,7 +8129,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agents', 'batchSize', 'force', 'includeInactive', 'revoke'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'body'),
@@ -7912,7 +8155,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agents', 'batchSize', 'includeInactive', 'tagsToAdd', 'tagsToRemove'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'body'),
@@ -7938,7 +8181,17 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'agents',
+      'batchSize',
+      'force',
+      'includeInactive',
+      'rollout_duration_seconds',
+      'skipRateLimitCheck',
+      'source_uri',
+      'start_time',
+      'version',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'body'),
@@ -8144,7 +8397,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['cloudProvider', 'name', 'vars'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'body'),
@@ -8222,7 +8475,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['cloudConnectorId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['name', 'vars'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
@@ -8300,7 +8553,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['expiration', 'name', 'policy_id'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'body'),
@@ -8378,7 +8631,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['assetIds'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'body'),
@@ -8430,7 +8683,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['datasets', 'force', 'integrationName'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'body'),
@@ -8456,7 +8709,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['pkgName'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['categories', 'readMeData'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'body'),
@@ -8560,7 +8813,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: ['prerelease'],
-    bodyParams: [],
+    bodyParams: ['force', 'packages'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'body'),
@@ -8586,7 +8839,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['packages'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'body'),
@@ -8638,7 +8891,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['force', 'packages'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'body'),
@@ -8690,7 +8943,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['force', 'packages', 'prerelease', 'upgrade_package_policies'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'body'),
@@ -8792,7 +9045,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['pkgName', 'pkgVersion'],
     urlParams: ['prerelease', 'ignoreMappingUpdateErrors', 'skipDataStreamRollover'],
-    bodyParams: [],
+    bodyParams: ['force', 'ignore_constraints'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
@@ -8818,7 +9071,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['pkgName', 'pkgVersion'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['keepPoliciesUpToDate'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
@@ -8943,7 +9196,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     parameterTypes: {
       pathParams: ['pkgName', 'pkgVersion'],
       urlParams: [],
-      bodyParams: [],
+      bodyParams: ['force', 'space_ids'],
     },
     paramsSchema: z.union([
       getLooseObjectFromProperty(
@@ -8978,7 +9231,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['pkgName', 'pkgVersion'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['force'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(
@@ -9012,7 +9265,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     parameterTypes: {
       pathParams: ['pkgName', 'pkgVersion'],
       urlParams: ['prerelease'],
-      bodyParams: [],
+      bodyParams: ['transforms'],
     },
     paramsSchema: z.union([
       getLooseObjectFromProperty(
@@ -9236,7 +9489,17 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'host_urls',
+      'id',
+      'is_default',
+      'is_internal',
+      'is_preconfigured',
+      'name',
+      'proxy_id',
+      'secrets',
+      'ssl',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'body'),
@@ -9314,7 +9577,7 @@ Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route requir
   parameterTypes: {
     pathParams: ['itemId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['host_urls', 'is_default', 'is_internal', 'name', 'proxy_id', 'secrets', 'ssl'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'body'),
@@ -9340,7 +9603,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['id'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_health_check_request, 'body'),
@@ -9681,7 +9944,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: ['format'],
-    bodyParams: [],
+    bodyParams: ['ids', 'ignoreMissing'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'body'),
@@ -9785,7 +10048,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['force', 'packagePolicyIds'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'body'),
@@ -9811,7 +10074,7 @@ Upgrade a package policy to a newer package version.<br/><br/>[Required authoriz
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['packagePolicyIds'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'body'),
@@ -9837,7 +10100,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['packagePolicyIds', 'packageVersion'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'body'),
@@ -9889,7 +10152,16 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'certificate',
+      'certificate_authorities',
+      'certificate_key',
+      'id',
+      'is_preconfigured',
+      'name',
+      'proxy_headers',
+      'url',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_proxies_request, 'body'),
@@ -9967,7 +10239,14 @@ Update a proxy by ID.<br/><br/>[Required authorization] Route required privilege
   parameterTypes: {
     pathParams: ['itemId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'certificate',
+      'certificate_authorities',
+      'certificate_key',
+      'name',
+      'proxy_headers',
+      'url',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'body'),
@@ -10055,7 +10334,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['remote'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_fleet_service_tokens_request, 'body'),
@@ -10107,7 +10386,14 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'additional_yaml_config',
+      'delete_unenrolled_agents',
+      'has_seen_add_data_notice',
+      'kibana_ca_sha256',
+      'kibana_urls',
+      'prerelease_integrations_enabled',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_settings_request, 'body'),
@@ -10183,7 +10469,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['allowed_namespace_prefixes'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_fleet_space_settings_request, 'body'),
@@ -10316,7 +10602,7 @@ Update specific fields of an existing list using the list \`id\`.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['_version', 'description', 'id', 'meta', 'name', 'version'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(patch_list_request, 'body'),
@@ -10342,7 +10628,16 @@ Create a new value list.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'description',
+      'deserializer',
+      'id',
+      'meta',
+      'name',
+      'serializer',
+      'type',
+      'version',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_list_request, 'body'),
@@ -10371,7 +10666,7 @@ Update a value list using the list \`id\`. The original list is replaced, and al
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['_version', 'description', 'id', 'meta', 'name', 'version'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(update_list_request, 'body'),
@@ -10553,7 +10848,7 @@ Update specific fields of an existing value list item using the item \`id\`.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['_version', 'id', 'meta', 'refresh', 'value'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(patch_list_item_request, 'body'),
@@ -10584,7 +10879,7 @@ All value list items in the same list must be the same type. For example, each l
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['id', 'list_id', 'meta', 'refresh', 'value'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_list_item_request, 'body'),
@@ -10613,7 +10908,7 @@ Update a value list item using the list item ID. The original list item is repla
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['_version', 'id', 'meta', 'value'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(update_list_item_request, 'body'),
@@ -10784,7 +11079,7 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'pipeline', 'settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_logstash_pipeline_request, 'body'),
@@ -10837,7 +11132,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['enabled', 'schedule', 'scope', 'title'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_maintenance_window_request, 'body'),
@@ -10941,7 +11236,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['enabled', 'schedule', 'scope', 'title'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(patch_maintenance_window_id_request, 'body'),
@@ -11019,7 +11314,7 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models i
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
+    urlParams: ['simulate'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11109,7 +11404,7 @@ Add a note to a Timeline or update an existing note.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['note', 'noteId', 'version'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(persist_note_route_request, 'body'),
@@ -11142,7 +11437,16 @@ This functionality is in technical preview and may be changed or removed in a fu
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'actions',
+      'connectorId',
+      'conversationId',
+      'disableFunctions',
+      'instructions',
+      'messages',
+      'persist',
+      'title',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'body'),
@@ -11538,7 +11842,7 @@ Pin/unpin an event to/from an existing Timeline.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['eventId', 'pinnedEventId', 'timelineId'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(persist_pinned_event_route_request, 'body'),
@@ -11590,7 +11894,13 @@ Configuring the Risk Engine Saved Object`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'enable_reset_to_zero',
+      'exclude_alert_statuses',
+      'exclude_alert_tags',
+      'filters',
+      'range',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'body'),
@@ -11774,7 +12084,14 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'excludeExportDetails',
+      'hasReference',
+      'includeReferencesDeep',
+      'objects',
+      'search',
+      'type',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_saved_objects_export_request, 'body'),
@@ -11898,9 +12215,9 @@ Create a Kibana saved object with a randomly generated identifier.`,
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['type'],
     urlParams: ['overwrite'],
-    bodyParams: [],
+    bodyParams: ['attributes', 'initialNamespaces', 'references'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_saved_object_request, 'body'),
@@ -11924,7 +12241,7 @@ Retrieve a single Kibana saved object by identifier.`,
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id', 'type'],
     urlParams: [],
     bodyParams: [],
   },
@@ -11950,9 +12267,9 @@ Create a Kibana saved object and specify its identifier instead of using a rando
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id', 'type'],
     urlParams: ['overwrite'],
-    bodyParams: [],
+    bodyParams: ['attributes', 'initialNamespaces', 'references'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_saved_object_id_request, 'body'),
@@ -11976,7 +12293,7 @@ Update the attributes for Kibana saved objects.`,
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id', 'type'],
     urlParams: [],
     bodyParams: [],
   },
@@ -12003,7 +12320,7 @@ Retrieve a single Kibana saved object by identifier using any legacy URL alias i
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id', 'type'],
     urlParams: [],
     bodyParams: [],
   },
@@ -12031,7 +12348,7 @@ Apply a bulk action to multiple anonymization fields. The bulk action is applied
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['create', 'delete', 'update'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'body'),
@@ -12109,7 +12426,7 @@ This endpoint allows users to permanently delete all conversations.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['excludedIds'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(delete_all_conversations_request, 'body'),
@@ -12393,7 +12710,7 @@ The bulk action is applied to all Knowledge Base Entries that match the filter o
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['create', 'delete', 'update'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'body'),
@@ -12523,7 +12840,7 @@ Apply a bulk action to multiple prompts. The bulk action is applied to all promp
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['create', 'delete', 'update'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(perform_prompts_bulk_action_request, 'body'),
@@ -12589,7 +12906,7 @@ const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['filters', 'from', 'query', 'size', 'sort'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_security_role_query_request, 'body'),
@@ -12649,7 +12966,7 @@ const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['name'],
     urlParams: ['createOnly'],
-    bodyParams: [],
+    bodyParams: ['description', 'elasticsearch', 'kibana', 'metadata'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_security_role_name_request, 'body'),
@@ -12669,7 +12986,7 @@ const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['roles'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_security_roles_request, 'body'),
@@ -12690,7 +13007,7 @@ const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['match', 'query'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_security_session_invalidate_request, 'body'),
@@ -12712,7 +13029,7 @@ Short URLs are created by specifying the locator ID and locator parameters. When
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['humanReadableSlug', 'locatorId', 'params', 'slug'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_url_request, 'body'),
@@ -12752,7 +13069,7 @@ const DELETE_URL_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -12773,7 +13090,7 @@ const GET_URL_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -12795,7 +13112,14 @@ const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'compatibilityMode',
+      'createNewCopies',
+      'includeReferences',
+      'objects',
+      'overwrite',
+      'spaces',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'body'),
@@ -12815,7 +13139,7 @@ const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['aliases'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'body'),
@@ -12835,7 +13159,7 @@ const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract =
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['objects'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'body'),
@@ -12855,7 +13179,7 @@ const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorC
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['compatibilityMode', 'createNewCopies', 'includeReferences', 'objects', 'retries'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'body'),
@@ -12875,7 +13199,7 @@ const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['objects', 'spacesToAdd', 'spacesToRemove'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'body'),
@@ -12915,7 +13239,17 @@ const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      '_reserved',
+      'color',
+      'description',
+      'disabledFeatures',
+      'id',
+      'imageUrl',
+      'initials',
+      'name',
+      'solution',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_spaces_space_request, 'body'),
@@ -12975,7 +13309,17 @@ const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      '_reserved',
+      'color',
+      'description',
+      'disabledFeatures',
+      'id',
+      'imageUrl',
+      'initials',
+      'name',
+      'solution',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_spaces_space_id_request, 'body'),
@@ -13203,7 +13547,7 @@ Forks a wired stream and creates a child stream<br/><br/>[Required authorization
   parameterTypes: {
     pathParams: ['name'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['status', 'stream', 'where'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_streams_name_fork_request, 'body'),
@@ -13255,7 +13599,7 @@ Upserts the group settings of a group stream definition<br/><br/>[Required autho
   parameterTypes: {
     pathParams: ['name'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['group'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_streams_name_group_request, 'body'),
@@ -13307,7 +13651,7 @@ Upserts the ingest settings of an ingest stream definition<br/><br/>[Required au
   parameterTypes: {
     pathParams: ['name'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['ingest'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_streams_name_ingest_request, 'body'),
@@ -13333,7 +13677,7 @@ Exports the content associated to a stream.<br/><br/>[Required authorization] Ro
   parameterTypes: {
     pathParams: ['name'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'include', 'name', 'version'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_streams_name_content_export_request, 'body'),
@@ -13411,7 +13755,7 @@ Bulk update dashboards linked to a stream. Can link new dashboards and delete ex
   parameterTypes: {
     pathParams: ['name'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['operations'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'body'),
@@ -13515,7 +13859,7 @@ Bulk update queries of a stream. Can add new queries and delete existing ones.<b
   parameterTypes: {
     pathParams: ['name'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['operations'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'body'),
@@ -13567,7 +13911,7 @@ Adds a query to a stream. Noop if the query is already present on the stream.<br
   parameterTypes: {
     pathParams: ['name', 'queryId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['feature', 'kql', 'title'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'body'),
@@ -13697,7 +14041,7 @@ Generate significant events queries based on the stream data<br/><br/>[Required 
   parameterTypes: {
     pathParams: ['name'],
     urlParams: ['connectorId', 'currentDate', 'from', 'to'],
-    bodyParams: [],
+    bodyParams: ['feature'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'body'),
@@ -13723,7 +14067,7 @@ Preview significant event results based on a given query<br/><br/>[Required auth
   parameterTypes: {
     pathParams: ['name'],
     urlParams: ['from', 'to', 'bucketSize'],
-    bodyParams: [],
+    bodyParams: ['query'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'body'),
@@ -13847,7 +14191,7 @@ Delete multiple monitors by sending a list of config IDs.
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['ids'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(delete_synthetic_monitors_request, 'body'),
@@ -14011,7 +14355,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['ids'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(delete_parameters_request, 'body'),
@@ -14095,7 +14439,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'key', 'tags', 'value'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_parameter_request, 'body'),
@@ -14149,7 +14493,7 @@ You must have \`all\` privileges for the Synthetics and Uptime feature in the Ob
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['agentPolicyId', 'geo', 'label', 'spaces', 'tags'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(post_private_location_request, 'body'),
@@ -14234,7 +14578,7 @@ When a private location's label is updated, all monitors using this location wil
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['label'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_private_location_request, 'body'),
@@ -14281,7 +14625,7 @@ Delete one or more Timelines or Timeline templates.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['savedObjectIds', 'searchIds'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(delete_timelines_request, 'body'),
@@ -14333,7 +14677,7 @@ Update an existing Timeline. You can update the title, description, date range, 
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['timeline', 'timelineId', 'version'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(patch_timeline_request, 'body'),
@@ -14359,7 +14703,15 @@ Create a new Timeline or Timeline template.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'status',
+      'templateTimelineId',
+      'templateTimelineVersion',
+      'timeline',
+      'timelineId',
+      'timelineType',
+      'version',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(create_timelines_request, 'body'),
@@ -14386,7 +14738,7 @@ Copies and returns a timeline or timeline template.
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['timeline', 'timelineIdToCopy'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(copy_timeline_request, 'body'),
@@ -14441,7 +14793,7 @@ Create a clean draft Timeline or Timeline template for the current user.
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['timelineType'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(clean_draft_timelines_request, 'body'),
@@ -14467,7 +14819,7 @@ Export Timelines as an NDJSON file.`,
   parameterTypes: {
     pathParams: [],
     urlParams: ['file_name'],
-    bodyParams: [],
+    bodyParams: ['ids'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(export_timelines_request, 'body'),
@@ -14493,7 +14845,7 @@ Favorite a Timeline or Timeline template for the current user.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['templateTimelineId', 'templateTimelineVersion', 'timelineId', 'timelineType'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(persist_favorite_route_request, 'body'),
@@ -14519,7 +14871,7 @@ Import Timelines.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['file', 'isImmutable'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(import_timelines_request, 'body'),
@@ -14545,7 +14897,7 @@ Install or update prepackaged Timelines.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['prepackagedTimelines', 'timelinesToInstall', 'timelinesToUpdate'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(install_prepacked_timelines_request, 'body'),
@@ -14678,7 +15030,13 @@ Update uptime setting attributes like \`heartbeatIndices\`, \`certExpirationThre
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'certAgeThreshold',
+      'certExpirationThreshold',
+      'defaultConnectors',
+      'defaultEmail',
+      'heartbeatIndices',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_uptime_settings_request, 'body'),
@@ -14697,7 +15055,7 @@ const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId'],
     urlParams: [
       'kqlQuery',
       'size',
@@ -14727,7 +15085,7 @@ const CREATESLOOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14748,7 +15106,7 @@ const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14769,7 +15127,7 @@ const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: ['taskId'],
+    pathParams: ['spaceId', 'taskId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14790,7 +15148,7 @@ const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14811,7 +15169,7 @@ const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14832,7 +15190,7 @@ const DELETESLOOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId', 'sloId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14853,7 +15211,7 @@ const GETSLOOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId', 'sloId'],
     urlParams: ['instanceId'],
     bodyParams: [],
   },
@@ -14874,7 +15232,7 @@ const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId', 'sloId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14895,7 +15253,7 @@ const RESETSLOOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId', 'sloId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14916,7 +15274,7 @@ const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId', 'sloId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14937,7 +15295,7 @@ const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId', 'sloId'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14958,7 +15316,7 @@ const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
   isInternal: true,
   documentation: 'URL_NOT_IMPLEMENTED',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['spaceId'],
     urlParams: ['includeOutdatedOnly', 'includeHealth', 'tags', 'search', 'page', 'perPage'],
     bodyParams: [],
   },
@@ -14995,8 +15353,8 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   GET_AGENT_BUILDER_TOOLS_CONTRACT,
   POST_AGENT_BUILDER_TOOLS_CONTRACT,
   POST_AGENT_BUILDER_TOOLS_EXECUTE_CONTRACT,
-  DELETE_AGENT_BUILDER_TOOLS_ID_CONTRACT,
-  GET_AGENT_BUILDER_TOOLS_ID_CONTRACT,
+  DELETE_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT,
+  GET_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT,
   PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT,
   GETALERTINGHEALTH_CONTRACT,
   GETRULETYPES_CONTRACT,

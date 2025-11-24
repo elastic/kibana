@@ -25,6 +25,7 @@ import {
   type ContractMeta,
   escapeString,
   generateOutputSchemaString,
+  generateParameterTypes,
   generateParamsSchemaString,
   getRequestSchemaName,
   getResponseSchemaName,
@@ -184,7 +185,7 @@ function generateContractMetasFromPath(
     const type = `kibana.${toSnakeCase(operationId)}`;
     const description = operation.description;
     const documentation = getDocumentationUrl(path, pathItem);
-    const parameterTypes = generateParameterTypes(operation, openApiDocument);
+    const parameterTypes = generateParameterTypes([operation], openApiDocument);
     const contractName = generateContractName(operationId);
     const schemaImports = [getRequestSchemaName(operationId), getResponseSchemaName(operationId)];
 
@@ -207,29 +208,4 @@ function generateContractMetasFromPath(
 
 function getDocumentationUrl(path: string, pathItem: OpenAPIV3.PathItemObject): string {
   return 'URL_NOT_IMPLEMENTED';
-}
-
-function generateParameterTypes(
-  operation: OpenAPIV3.OperationObject,
-  openApiDocument: OpenAPIV3.Document
-): {
-  pathParams: string[];
-  urlParams: string[];
-  bodyParams: string[];
-} {
-  const nonReferenceParameters = operation.parameters?.filter(
-    (param): param is OpenAPIV3.ParameterObject => param !== undefined && 'name' in param
-  );
-  const pathParams =
-    nonReferenceParameters?.filter((param) => param.in === 'path').map((param) => param.name) ?? [];
-  const urlParams =
-    nonReferenceParameters?.filter((param) => param.in === 'query').map((param) => param.name) ??
-    [];
-  const bodyParams =
-    nonReferenceParameters?.filter((param) => param.in === 'body').map((param) => param.name) ?? [];
-  return {
-    pathParams,
-    urlParams,
-    bodyParams,
-  };
 }

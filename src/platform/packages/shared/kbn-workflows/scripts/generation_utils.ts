@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
 import type { InternalConnectorContract } from '../types/latest';
 
 export interface ContractMeta
@@ -142,4 +143,92 @@ export function escapeString(str: string): string {
     .replace(/\\/g, '\\\\') // Escape backslashes first
     .replace(/`/g, '\\`') // Escape backticks
     .replace(/\$/g, '\\$'); // Escape dollar signs (template literals)
+}
+
+export function generateParameterTypes(
+  operations: OpenAPIV3.OperationObject[],
+  openApiDocument: OpenAPIV3.Document
+): {
+  pathParams: string[];
+  urlParams: string[];
+  bodyParams: string[];
+} {
+  const allParameters = operations
+    .flatMap((operation) => operation.parameters)
+    .filter(
+      (param): param is OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject => param !== undefined
+    )
+    .map((param) => ('$ref' in param ? resolveReferenceObject(param, openApiDocument) : param))
+    .filter((param): param is OpenAPIV3.ParameterObject => param !== null && 'name' in param);
+
+  const pathParams = new Set(
+    allParameters.filter((param) => param.in === 'path').map((param) => param.name)
+  );
+  const urlParams = new Set(
+    allParameters.filter((param) => param.in === 'query').map((param) => param.name)
+  );
+  const requestBodiesSchemas = operations
+    .map((operation) => operation.requestBody)
+    .filter(
+      (requestBody): requestBody is OpenAPIV3.RequestBodyObject | OpenAPIV3.ReferenceObject =>
+        requestBody !== undefined
+    )
+    .map((requestBody) =>
+      '$ref' in requestBody ? resolveReferenceObject(requestBody, openApiDocument) : requestBody
+    )
+    .filter(
+      (requestBody): requestBody is OpenAPIV3.RequestBodyObject =>
+        requestBody !== null &&
+        'content' in requestBody &&
+        requestBody.content !== undefined &&
+        'application/json' in requestBody.content &&
+        requestBody.content['application/json']?.schema !== undefined
+    )
+    .map((requestBody) => requestBody.content['application/json'].schema);
+  const bodyParams = new Set(
+    requestBodiesSchemas
+      .map((schema) => ('ref' in schema ? resolveReferenceObject(schema, openApiDocument) : schema))
+      .filter(
+        (schema): schema is OpenAPIV3.SchemaObject =>
+          schema !== null &&
+          schema !== undefined &&
+          'properties' in schema &&
+          schema.properties !== undefined
+      )
+      .map((schema) => Object.keys(schema.properties))
+      .flat()
+  );
+  return {
+    pathParams: Array.from(pathParams),
+    urlParams: Array.from(urlParams),
+    bodyParams: Array.from(bodyParams),
+  };
+}
+
+/**
+ * Resolve a reference object to a parameter object
+ * @param param - The reference object to resolve, e.g. { "$ref": "#/components/parameters/search-index" }
+ * @param openApiDocument - The OpenAPI document
+ * @returns The parameter object
+ */
+function resolveReferenceObject(
+  param: OpenAPIV3.ReferenceObject,
+  openApiDocument: OpenAPIV3.Document
+):
+  | OpenAPIV3.ParameterObject
+  | OpenAPIV3.SchemaObject
+  | OpenAPIV3.ResponseObject
+  | OpenAPIV3.RequestBodyObject
+  | null {
+  const path = param.$ref.replace(/^#\//, '').split('/');
+  let current: unknown = openApiDocument;
+  for (const segment of path) {
+    if (current && typeof current === 'object' && segment in current) {
+      current = current[segment];
+    } else {
+      return null;
+    }
+  }
+
+  return current;
 }

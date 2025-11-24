@@ -23,6 +23,7 @@ import type { SpecificationTypes } from './types';
 import type { HttpMethod, InternalConnectorContract } from '../../types/latest';
 import {
   generateContractBlock,
+  generateParameterTypes,
   getRequestSchemaName,
   getResponseSchemaName,
   toSnakeCase,
@@ -162,7 +163,7 @@ function generateContractMeta(
   const summary = generateSummary(operations);
   const documentation = endpoint.docUrl;
   const { methods, patterns } = generateMethodsAndPatterns(endpoint);
-  const parameterTypes = generateParameterTypes(endpoint, openApiDocument);
+  const parameterTypes = generateParameterTypes(operations, openApiDocument);
 
   const contractName = generateContractName(endpoint);
   const operationIds = operations
@@ -214,49 +215,11 @@ function generateSummary(operations: OpenAPIV3.OperationObject[]): string {
   return operations.find((operation) => operation.summary)?.summary ?? '';
 }
 
-function generateParameterTypes(
-  endpoint: SpecificationTypes.Endpoint,
-  openApiDocument: OpenAPIV3.Document
-): {
-  pathParams: string[];
-  urlParams: string[];
-  bodyParams: string[];
-} {
-  console.log('Generating parameter types for endpoint:', endpoint.name);
-  const endpointPaths = endpoint.urls.map((url) => url.path);
-  console.log('Endpoint paths:', endpointPaths);
-  const oasPaths = endpointPaths
-    .map((path) => openApiDocument.paths[path])
-    .filter((path): path is { [key: string]: OpenAPIV3.PathItemObject } => path !== undefined);
-  console.log('OAS paths:', oasPaths);
-  const allParameters = oasPaths
-    .flatMap((path) => Object.values(path).flatMap((p) => p.parameters))
-    .filter((param): param is OpenAPIV3.ParameterObject => param !== undefined && 'name' in param);
-  console.log('All parameters:', allParameters);
-  const pathParams = allParameters
-    .filter((param) => param.in === 'path')
-    .map((param) => param.name);
-  const urlParams = allParameters
-    .filter((param) => param.in === 'query')
-    .map((param) => param.name);
-  const bodyParams = allParameters
-    .filter((param) => param.in === 'body')
-    .map((param) => param.name);
-  console.log('Path params:', pathParams);
-  console.log('URL params:', urlParams);
-  console.log('Body params:', bodyParams);
-  return {
-    pathParams,
-    urlParams,
-    bodyParams,
-  };
-}
-
 function generateMethodsAndPatterns(endpoint: SpecificationTypes.Endpoint): {
   methods: HttpMethod[];
   patterns: string[];
 } {
-  const methods = endpoint.urls.flatMap((url) => url.methods as HttpMethod[]);
+  const methods = new Set(endpoint.urls.flatMap((url) => url.methods as HttpMethod[]));
   const patterns = endpoint.urls.map((url) => url.path);
-  return { methods, patterns };
+  return { methods: Array.from(methods), patterns };
 }

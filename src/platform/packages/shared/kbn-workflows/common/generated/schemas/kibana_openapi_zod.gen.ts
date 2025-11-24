@@ -16239,10 +16239,10 @@ export const post_agent_builder_tools_execute_request = z.object({
     })
 });
 
-export const delete_agent_builder_tools_id_request = z.object({
+export const delete_agent_builder_tools_toolid_request = z.object({
     body: z.optional(z.never()),
     path: z.object({
-        id: z.string().register(z.globalRegistry, {
+        toolId: z.string().register(z.globalRegistry, {
             description: 'The unique identifier of the tool to delete.'
         })
     }),
@@ -16254,10 +16254,10 @@ export const delete_agent_builder_tools_id_request = z.object({
     })
 });
 
-export const get_agent_builder_tools_id_request = z.object({
+export const get_agent_builder_tools_toolid_request = z.object({
     body: z.optional(z.never()),
     path: z.object({
-        id: z.string().register(z.globalRegistry, {
+        toolId: z.string().register(z.globalRegistry, {
             description: 'The unique identifier of the tool to retrieve.'
         })
     }),

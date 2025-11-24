@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
- * Generated at: 2025-11-21T23:59:35.484Z
+ * Generated at: 2025-11-24T08:16:25.378Z
  * Source: elasticsearch-specification repository (582 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -1658,8 +1658,8 @@ If the Elasticsearch security features are enabled, the deletion of a specific a
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['keep_alive', 'typed_keys', 'wait_for_completion_timeout'],
+    pathParams: ['id'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -1682,7 +1682,7 @@ If the Elasticsearch security features are enabled, access to the results of a s
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: ['keep_alive', 'typed_keys', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
@@ -1731,15 +1731,92 @@ Warning: Asynchronous search does not support scroll or search requests that inc
 
 By default, Elasticsearch does not allow you to store an async search response larger than 10Mb and an attempt to do this results in an error.
 The maximum allowed size for a stored async search response can be set by changing the \`search.max_async_search_response_size\` cluster level setting.`,
-  methods: ['POST', 'POST'],
+  methods: ['POST'],
   patterns: ['/_async_search', '/{index}/_async_search'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'wait_for_completion_timeout',
+      'keep_alive',
+      'keep_on_completion',
+      'allow_no_indices',
+      'allow_partial_search_results',
+      'analyzer',
+      'analyze_wildcard',
+      'batched_reduce_size',
+      'ccs_minimize_roundtrips',
+      'default_operator',
+      'df',
+      'docvalue_fields',
+      'expand_wildcards',
+      'explain',
+      'ignore_throttled',
+      'ignore_unavailable',
+      'lenient',
+      'max_concurrent_shard_requests',
+      'preference',
+      'request_cache',
+      'routing',
+      'search_type',
+      'stats',
+      'stored_fields',
+      'suggest_field',
+      'suggest_mode',
+      'suggest_size',
+      'suggest_text',
+      'terminate_after',
+      'timeout',
+      'track_total_hits',
+      'track_scores',
+      'typed_keys',
+      'rest_total_hits_as_int',
+      'version',
+      '_source',
+      '_source_excludes',
+      '_source_includes',
+      'seq_no_primary_term',
+      'q',
+      'size',
+      'from',
+      'sort',
+    ],
+    bodyParams: [
+      'aggregations',
+      'collapse',
+      'explain',
+      'ext',
+      'from',
+      'highlight',
+      'track_total_hits',
+      'indices_boost',
+      'docvalue_fields',
+      'knn',
+      'min_score',
+      'post_filter',
+      'profile',
+      'query',
+      'rescore',
+      'script_fields',
+      'search_after',
+      'size',
+      'slice',
+      'sort',
+      '_source',
+      'fields',
+      'suggest',
+      'terminate_after',
+      'timeout',
+      'track_scores',
+      'version',
+      'seq_no_primary_term',
+      'stored_fields',
+      'pit',
+      'runtime_mappings',
+      'stats',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(async_search_submit_request, 'body'),
@@ -1955,13 +2032,26 @@ The other two shards that make up the index do not participate in the \`_bulk\` 
 
 You might want to disable the refresh interval temporarily to improve indexing throughput for large bulk requests.
 Refer to the linked documentation for step-by-step instructions using the index settings API.`,
-  methods: ['POST', 'PUT', 'POST', 'PUT'],
+  methods: ['POST', 'PUT'],
   patterns: ['/_bulk', '/{index}/_bulk'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'include_source_on_error',
+      'list_executed_pipelines',
+      'pipeline',
+      'refresh',
+      'routing',
+      '_source',
+      '_source_excludes',
+      '_source_includes',
+      'timeout',
+      'wait_for_active_shards',
+      'require_alias',
+      'require_data_stream',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2006,14 +2096,14 @@ Get the cluster's index aliases, including filter and routing information.
 This API does not return data stream aliases.
 
 IMPORTANT: CAT APIs are only intended for human consumption using the command line or the Kibana console. They are not intended for use by applications. For application consumption, use the aliases API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/aliases', '/_cat/aliases/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-aliases',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['name'],
+    urlParams: ['h', 's', 'expand_wildcards', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2034,14 +2124,14 @@ const CAT_ALLOCATION_CONTRACT: InternalConnectorContract = {
 Get a snapshot of the number of shards allocated to each data node and their disk space.
 
 IMPORTANT: CAT APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/allocation', '/_cat/allocation/{node_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-allocation',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['node_id'],
+    urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2058,7 +2148,7 @@ const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.circuit_breaker',
   summary: ``,
   description: `Get circuit breakers statistics`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/circuit_breaker', '/_cat/circuit_breaker/{circuit_breaker_patterns}'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
@@ -2080,14 +2170,14 @@ Component templates are building blocks for constructing index templates that sp
 
 IMPORTANT: CAT APIs are only intended for human consumption using the command line or Kibana console.
 They are not intended for use by applications. For application consumption, use the get component template API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/component_templates', '/_cat/component_templates/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-component-templates',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['name'],
+    urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2110,13 +2200,13 @@ The document count only includes live documents, not deleted documents which hav
 
 IMPORTANT: CAT APIs are only intended for human consumption using the command line or Kibana console.
 They are not intended for use by applications. For application consumption, use the count API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/count', '/_cat/count/{index}'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-count',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: ['h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2138,14 +2228,14 @@ Get the amount of heap memory currently used by the field data cache on every da
 
 IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console.
 They are not intended for use by applications. For application consumption, use the nodes stats API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/fielddata', '/_cat/fielddata/{fields}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-fielddata',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['fields'],
+    urlParams: ['fields', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2229,14 +2319,22 @@ To get an accurate count of Elasticsearch documents, use the cat count or count 
 
 CAT APIs are only intended for human consumption using the command line or Kibana console.
 They are not intended for use by applications. For application consumption, use an index endpoint.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/indices', '/_cat/indices/{index}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-indices',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'expand_wildcards',
+      'health',
+      'include_unloaded_segments',
+      'pri',
+      'master_timeout',
+      'h',
+      's',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2283,14 +2381,14 @@ Get configuration and usage information about data frame analytics jobs.
 IMPORTANT: CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
 application consumption, use the get data frame analytics jobs statistics API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/ml/data_frame/analytics', '/_cat/ml/data_frame/analytics/{id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-data-frame-analytics',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['id'],
+    urlParams: ['allow_no_match', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2319,14 +2417,14 @@ cluster privileges to use this API.
 IMPORTANT: CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
 application consumption, use the get datafeed statistics API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/ml/datafeeds', '/_cat/ml/datafeeds/{datafeed_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-datafeeds',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['datafeed_id'],
+    urlParams: ['allow_no_match', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2352,14 +2450,14 @@ If the Elasticsearch security features are enabled, you must have \`monitor_ml\`
 IMPORTANT: CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
 application consumption, use the get anomaly detection job statistics API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/ml/anomaly_detectors', '/_cat/ml/anomaly_detectors/{job_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-jobs',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['job_id'],
+    urlParams: ['allow_no_match', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2382,14 +2480,14 @@ Get configuration and usage information about inference trained models.
 IMPORTANT: CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
 application consumption, use the get trained models statistics API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/ml/trained_models', '/_cat/ml/trained_models/{model_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-trained-models',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['model_id'],
+    urlParams: ['allow_no_match', 'h', 's', 'from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2506,14 +2604,14 @@ Get information about ongoing and completed shard recoveries.
 Shard recovery is the process of initializing a shard copy, such as restoring a primary shard from a snapshot or syncing a replica shard from a primary shard. When a shard recovery completes, the recovered shard is available for search and indexing.
 For data streams, the API returns information about the stream’s backing indices.
 IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the index recovery API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/recovery', '/_cat/recovery/{index}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-recovery',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: ['active_only', 'detailed', 'index', 'h', 's'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2558,14 +2656,24 @@ const CAT_SEGMENTS_CONTRACT: InternalConnectorContract = {
 Get low-level information about the Lucene segments in index shards.
 For data streams, the API returns information about the backing indices.
 IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the index segments API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/segments', '/_cat/segments/{index}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-segments',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'h',
+      's',
+      'local',
+      'master_timeout',
+      'expand_wildcards',
+      'allow_no_indices',
+      'ignore_throttled',
+      'ignore_unavailable',
+      'allow_closed',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2586,13 +2694,13 @@ const CAT_SHARDS_CONTRACT: InternalConnectorContract = {
 Get information about the shards in a cluster.
 For data streams, the API returns information about the backing indices.
 IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/shards', '/_cat/shards/{index}'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-shards',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: ['h', 's', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2613,14 +2721,14 @@ const CAT_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
 Get information about the snapshots stored in one or more repositories.
 A snapshot is a backup of an index or running Elasticsearch cluster.
 IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the get snapshot API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/snapshots', '/_cat/snapshots/{repository}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-snapshots',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['repository'],
+    urlParams: ['ignore_unavailable', 'h', 's', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2673,14 +2781,14 @@ const CAT_TEMPLATES_CONTRACT: InternalConnectorContract = {
 Get information about the index templates in a cluster.
 You can use index templates to apply index settings and field mappings to new indices at creation.
 IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the get index template API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/templates', '/_cat/templates/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-templates',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['name'],
+    urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2701,14 +2809,14 @@ const CAT_THREAD_POOL_CONTRACT: InternalConnectorContract = {
 Get thread pool statistics for each node in a cluster.
 Returned information includes all built-in thread pools and custom thread pools.
 IMPORTANT: cat APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications. For application consumption, use the nodes info API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/thread_pool', '/_cat/thread_pool/{thread_pool_patterns}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-thread-pool',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['thread_pool_patterns'],
+    urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2731,14 +2839,14 @@ Get configuration and usage information about transforms.
 CAT APIs are only intended for human consumption using the Kibana
 console or command line. They are not intended for use by applications. For
 application consumption, use the get transform statistics API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cat/transforms', '/_cat/transforms/{transform_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-transforms',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['transform_id'],
+    urlParams: ['allow_no_match', 'from', 'h', 's', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2763,8 +2871,8 @@ Delete a collection of cross-cluster replication auto-follow patterns.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-delete-auto-follow-pattern',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2787,7 +2895,22 @@ When the API returns, the follower index exists and cross-cluster replication st
   parameterTypes: {
     pathParams: ['index'],
     urlParams: ['master_timeout', 'wait_for_active_shards'],
-    bodyParams: [],
+    bodyParams: [
+      'data_stream_name',
+      'leader_index',
+      'max_outstanding_read_requests',
+      'max_outstanding_write_requests',
+      'max_read_request_operation_count',
+      'max_read_request_size',
+      'max_retry_delay',
+      'max_write_buffer_count',
+      'max_write_buffer_size',
+      'max_write_request_operation_count',
+      'max_write_request_size',
+      'read_poll_timeout',
+      'remote_cluster',
+      'settings',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ccr_follow_request, 'body'),
@@ -2867,7 +2990,12 @@ The only purpose of this API is to handle the case of failure to remove the foll
   parameterTypes: {
     pathParams: ['index'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: [
+      'follower_cluster',
+      'follower_index',
+      'follower_index_uuid',
+      'leader_remote_cluster',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ccr_forget_follower_request, 'body'),
@@ -2882,14 +3010,14 @@ const CCR_GET_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   description: `Get auto-follow patterns.
 
 Get cross-cluster replication auto-follow patterns.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ccr/auto_follow', '/_ccr/auto_follow/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-get-auto-follow-pattern-1',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -2976,9 +3104,25 @@ NOTE: Follower indices that were configured automatically before updating an aut
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-put-auto-follow-pattern',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'master_timeout'],
-    bodyParams: [],
+    pathParams: ['name'],
+    urlParams: ['master_timeout'],
+    bodyParams: [
+      'remote_cluster',
+      'follow_index_pattern',
+      'leader_index_patterns',
+      'leader_index_exclusion_patterns',
+      'max_outstanding_read_requests',
+      'settings',
+      'max_outstanding_write_requests',
+      'read_poll_timeout',
+      'max_read_request_operation_count',
+      'max_read_request_size',
+      'max_retry_delay',
+      'max_write_buffer_count',
+      'max_write_buffer_size',
+      'max_write_request_operation_count',
+      'max_write_request_size',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ccr_put_auto_follow_pattern_request, 'body'),
@@ -3028,7 +3172,18 @@ When this API returns, the follower index will resume fetching operations from t
   parameterTypes: {
     pathParams: ['index'],
     urlParams: ['master_timeout'],
-    bodyParams: [],
+    bodyParams: [
+      'max_outstanding_read_requests',
+      'max_outstanding_write_requests',
+      'max_read_request_operation_count',
+      'max_read_request_size',
+      'max_retry_delay',
+      'max_write_buffer_count',
+      'max_write_buffer_size',
+      'max_write_request_operation_count',
+      'max_write_request_size',
+      'read_poll_timeout',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ccr_resume_follow_request, 'body'),
@@ -3092,15 +3247,15 @@ const CLEAR_SCROLL_CONTRACT: InternalConnectorContract = {
   summary: `Clear a scrolling search`,
   description: `Clear a scrolling search.
 Clear the search context and results for a scrolling search.`,
-  methods: ['DELETE', 'DELETE'],
+  methods: ['DELETE'],
   patterns: ['/_search/scroll', '/_search/scroll/{scroll_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-clear-scroll',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['scroll_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['scroll_id'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(clear_scroll_request, 'body'),
@@ -3128,7 +3283,7 @@ However, keeping points in time has a cost; close them as soon as they are no lo
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['id'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(close_point_in_time_request, 'body'),
@@ -3154,8 +3309,16 @@ Refer to the linked documentation for examples of how to troubleshoot allocation
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-allocation-explain',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    urlParams: [
+      'index',
+      'shard',
+      'primary',
+      'current_node',
+      'include_disk_info',
+      'include_yes_decisions',
+      'master_timeout',
+    ],
+    bodyParams: ['index', 'shard', 'primary', 'current_node'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(cluster_allocation_explain_request, 'body'),
@@ -3181,8 +3344,8 @@ Component templates are building blocks for constructing index templates that sp
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'local'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3204,14 +3367,7 @@ Remove master-eligible nodes from the voting configuration exclusion list.`,
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-post-voting-config-exclusions',
   parameterTypes: {
     pathParams: [],
-    urlParams: [
-      'node_names',
-      'node_ids',
-      'master_timeout',
-      'timeout',
-      'master_timeout',
-      'wait_for_removal',
-    ],
+    urlParams: ['master_timeout', 'wait_for_removal'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3232,8 +3388,8 @@ Returns information about whether a particular component template exists.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'local'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout', 'local'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3248,14 +3404,14 @@ const CLUSTER_GET_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   summary: `Get component templates`,
   description: `Get component templates.
 Get information about component templates.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_component_template', '/_component_template/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'local'],
+    pathParams: ['name'],
+    urlParams: ['flat_settings', 'settings_filter', 'include_defaults', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3284,15 +3440,7 @@ By default, it returns only settings that have been explicitly defined.`,
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-get-settings',
   parameterTypes: {
     pathParams: [],
-    urlParams: [
-      'flat_settings',
-      'include_defaults',
-      'master_timeout',
-      'timeout',
-      'flat_settings',
-      'master_timeout',
-      'timeout',
-    ],
+    urlParams: ['flat_settings', 'include_defaults', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3316,14 +3464,26 @@ The index level status is controlled by the worst shard status.
 
 One of the main benefits of the API is the ability to wait until the cluster reaches a certain high watermark health level.
 The cluster status is controlled by the worst index status.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cluster/health', '/_cluster/health/{index}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-health',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'expand_wildcards',
+      'level',
+      'local',
+      'master_timeout',
+      'timeout',
+      'wait_for_active_shards',
+      'wait_for_events',
+      'wait_for_nodes',
+      'wait_for_no_initializing_shards',
+      'wait_for_no_relocating_shards',
+      'wait_for_status',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3412,14 +3572,7 @@ They are not required when removing master-ineligible nodes or when removing few
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-post-voting-config-exclusions',
   parameterTypes: {
     pathParams: [],
-    urlParams: [
-      'node_names',
-      'node_ids',
-      'master_timeout',
-      'timeout',
-      'master_timeout',
-      'wait_for_removal',
-    ],
+    urlParams: ['node_names', 'node_ids', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3458,9 +3611,9 @@ To be applied, a component template must be included in an index template's \`co
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'local'],
-    bodyParams: [],
+    pathParams: ['name'],
+    urlParams: ['create', 'cause', 'master_timeout'],
+    bodyParams: ['template', 'version', '_meta', 'deprecated'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(cluster_put_component_template_request, 'body'),
@@ -3504,16 +3657,8 @@ If a cluster becomes unstable, transient settings can clear unexpectedly, result
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-settings',
   parameterTypes: {
     pathParams: [],
-    urlParams: [
-      'flat_settings',
-      'include_defaults',
-      'master_timeout',
-      'timeout',
-      'flat_settings',
-      'master_timeout',
-      'timeout',
-    ],
-    bodyParams: [],
+    urlParams: ['flat_settings', 'master_timeout', 'timeout'],
+    bodyParams: ['persistent', 'transient'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(cluster_put_settings_request, 'body'),
@@ -3577,7 +3722,7 @@ Once the problem has been corrected, allocation can be manually retried by calli
   parameterTypes: {
     pathParams: [],
     urlParams: ['dry_run', 'explain', 'metric', 'retry_failed', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    bodyParams: ['commands'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(cluster_reroute_request, 'body'),
@@ -3608,14 +3753,23 @@ WARNING: The response is a representation of an internal data structure.
 Its format is not subject to the same compatibility guarantees as other more stable APIs and may change from version to version.
 Do not query this API using external monitoring tools.
 Instead, obtain the information you require using other more stable cluster APIs.`,
-  methods: ['GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cluster/state', '/_cluster/state/{metric}', '/_cluster/state/{metric}/{index}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-state',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['metric', 'index'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'flat_settings',
+      'ignore_unavailable',
+      'local',
+      'master_timeout',
+      'wait_for_metadata_version',
+      'wait_for_timeout',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3636,14 +3790,14 @@ const CLUSTER_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get cluster statistics`,
   description: `Get cluster statistics.
 Get basic index metrics (shard numbers, store size, memory usage) and information about the current nodes that form the cluster (number, roles, os, jvm versions, memory usage, cpu and installed plugins).`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_cluster/stats', '/_cluster/stats/nodes/{node_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['node_id'],
+    urlParams: ['include_remotes', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3694,8 +3848,8 @@ These need to be removed manually.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-delete',
   parameterTypes: {
-    pathParams: ['connector_id', 'connector_id'],
-    urlParams: ['include_deleted', 'delete_sync_jobs', 'hard'],
+    pathParams: ['connector_id'],
+    urlParams: ['delete_sync_jobs', 'hard'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3717,8 +3871,8 @@ Get the details about a connector.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-get',
   parameterTypes: {
-    pathParams: ['connector_id', 'connector_id'],
-    urlParams: ['include_deleted', 'delete_sync_jobs', 'hard'],
+    pathParams: ['connector_id'],
+    urlParams: ['include_deleted'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -3794,16 +3948,8 @@ Self-managed connectors (Connector clients) are self-managed on your infrastruct
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-put',
   parameterTypes: {
     pathParams: [],
-    urlParams: [
-      'from',
-      'size',
-      'index_name',
-      'connector_name',
-      'service_type',
-      'include_deleted',
-      'query',
-    ],
-    bodyParams: [],
+    urlParams: [],
+    bodyParams: ['description', 'index_name', 'is_native', 'language', 'name', 'service_type'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_post_request, 'body'),
@@ -3816,26 +3962,15 @@ const CONNECTOR_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.put',
   summary: `Create or update a connector`,
   description: `Create or update a connector.`,
-  methods: ['PUT', 'PUT'],
+  methods: ['PUT'],
   patterns: ['/_connector/{connector_id}', '/_connector'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-put',
   parameterTypes: {
-    pathParams: ['connector_id', 'connector_id'],
-    urlParams: [
-      'include_deleted',
-      'delete_sync_jobs',
-      'hard',
-      'from',
-      'size',
-      'index_name',
-      'connector_name',
-      'service_type',
-      'include_deleted',
-      'query',
-    ],
-    bodyParams: [],
+    pathParams: ['connector_id'],
+    urlParams: [],
+    bodyParams: ['description', 'index_name', 'is_native', 'language', 'name', 'service_type'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_put_request, 'body'),
@@ -3980,7 +4115,7 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
   parameterTypes: {
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['sync_cursor', 'worker_hostname'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_sync_job_claim_request, 'body'),
@@ -4002,7 +4137,7 @@ This is a destructive action that is not recoverable.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-delete',
   parameterTypes: {
-    pathParams: ['connector_sync_job_id', 'connector_sync_job_id'],
+    pathParams: ['connector_sync_job_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -4029,7 +4164,7 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
   parameterTypes: {
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['error'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_sync_job_error_request, 'body'),
@@ -4048,7 +4183,7 @@ const CONNECTOR_SYNC_JOB_GET_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-get',
   parameterTypes: {
-    pathParams: ['connector_sync_job_id', 'connector_sync_job_id'],
+    pathParams: ['connector_sync_job_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -4095,8 +4230,8 @@ Create a connector sync job document in the internal index and initialize its co
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-post',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['from', 'size', 'status', 'connector_id', 'job_type'],
-    bodyParams: [],
+    urlParams: [],
+    bodyParams: ['id', 'job_type', 'trigger_method'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_sync_job_post_request, 'body'),
@@ -4123,7 +4258,14 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
   parameterTypes: {
     pathParams: ['connector_sync_job_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'deleted_document_count',
+      'indexed_document_count',
+      'indexed_document_volume',
+      'last_seen',
+      'metadata',
+      'total_document_count',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_sync_job_update_stats_request, 'body'),
@@ -4172,7 +4314,7 @@ Self-managed connectors (connector clients) do not use this field.`,
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['api_key_id', 'api_key_secret_id'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_api_key_id_request, 'body'),
@@ -4195,7 +4337,7 @@ Update the configuration field in the connector document.`,
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['configuration', 'values'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_configuration_request, 'body'),
@@ -4220,7 +4362,7 @@ Otherwise, if the error is reset to null, the connector status is updated to con
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['error'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_error_request, 'body'),
@@ -4254,7 +4396,7 @@ This service runs automatically on Elastic Cloud for Elastic managed connectors.
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['features'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_features_request, 'body'),
@@ -4279,7 +4421,7 @@ The filtering property is used to configure sync rules (both basic and advanced)
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['filtering', 'rules', 'advanced_snippet'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_filtering_request, 'body'),
@@ -4302,7 +4444,7 @@ Update the draft filtering validation info for a connector.`,
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['validation'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_filtering_validation_request, 'body'),
@@ -4325,7 +4467,7 @@ Update the \`index_name\` field of a connector, specifying the index where the d
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['index_name'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_index_name_request, 'body'),
@@ -4346,7 +4488,7 @@ const CONNECTOR_UPDATE_NAME_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['name', 'description'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_name_request, 'body'),
@@ -4367,7 +4509,7 @@ const CONNECTOR_UPDATE_NATIVE_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['is_native'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_native_request, 'body'),
@@ -4390,7 +4532,7 @@ When you create a new connector, the configuration of an ingest pipeline is popu
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['pipeline'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_pipeline_request, 'body'),
@@ -4411,7 +4553,7 @@ const CONNECTOR_UPDATE_SCHEDULING_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['scheduling'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_scheduling_request, 'body'),
@@ -4432,7 +4574,7 @@ const CONNECTOR_UPDATE_SERVICE_TYPE_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['service_type'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_service_type_request, 'body'),
@@ -4453,7 +4595,7 @@ const CONNECTOR_UPDATE_STATUS_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['connector_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['status'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(connector_update_status_request, 'body'),
@@ -4476,14 +4618,29 @@ The count API supports multi-target syntax. You can run a single count API searc
 The operation is broadcast across all shards.
 For each shard ID group, a replica is chosen and the search is run against it.
 This means that replicas increase the scalability of the count.`,
-  methods: ['POST', 'GET', 'POST', 'GET'],
+  methods: ['POST', 'GET'],
   patterns: ['/_count', '/{index}/_count'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-count',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'analyzer',
+      'analyze_wildcard',
+      'default_operator',
+      'df',
+      'expand_wildcards',
+      'ignore_throttled',
+      'ignore_unavailable',
+      'lenient',
+      'min_score',
+      'preference',
+      'routing',
+      'terminate_after',
+      'q',
+    ],
+    bodyParams: ['query'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(count_request, 'body'),
@@ -4581,8 +4738,19 @@ The \`_shards\` section of the API response reveals the number of shard copies o
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index', 'id'],
+    urlParams: [
+      'include_source_on_error',
+      'pipeline',
+      'refresh',
+      'require_alias',
+      'require_data_stream',
+      'routing',
+      'timeout',
+      'version',
+      'version_type',
+      'wait_for_active_shards',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -4607,15 +4775,8 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-delete-dangling-index',
   parameterTypes: {
-    pathParams: ['index_uuid', 'index_uuid'],
-    urlParams: [
-      'accept_data_loss',
-      'master_timeout',
-      'timeout',
-      'accept_data_loss',
-      'master_timeout',
-      'timeout',
-    ],
+    pathParams: ['index_uuid'],
+    urlParams: ['accept_data_loss', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -4638,15 +4799,8 @@ For example, this can happen if you delete more than \`cluster.indices.tombstone
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-import-dangling-index',
   parameterTypes: {
-    pathParams: ['index_uuid', 'index_uuid'],
-    urlParams: [
-      'accept_data_loss',
-      'master_timeout',
-      'timeout',
-      'accept_data_loss',
-      'master_timeout',
-      'timeout',
-    ],
+    pathParams: ['index_uuid'],
+    urlParams: ['accept_data_loss', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -4729,19 +4883,8 @@ It then gets redirected into the primary shard within that ID group and replicat
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete',
   parameterTypes: {
-    pathParams: ['index', 'id', 'index', 'id', 'index', 'id'],
+    pathParams: ['index', 'id'],
     urlParams: [
-      'preference',
-      'realtime',
-      'refresh',
-      'routing',
-      '_source',
-      '_source_excludes',
-      '_source_exclude_vectors',
-      '_source_includes',
-      'stored_fields',
-      'version',
-      'version_type',
       'if_primary_term',
       'if_seq_no',
       'refresh',
@@ -4750,16 +4893,6 @@ It then gets redirected into the primary shard within that ID group and replicat
       'version',
       'version_type',
       'wait_for_active_shards',
-      'preference',
-      'realtime',
-      'refresh',
-      'routing',
-      '_source',
-      '_source_excludes',
-      '_source_includes',
-      'stored_fields',
-      'version',
-      'version_type',
     ],
     bodyParams: [],
   },
@@ -4891,7 +5024,7 @@ The get task status API will continue to list the delete by query task until thi
       'wait_for_active_shards',
       'wait_for_completion',
     ],
-    bodyParams: [],
+    bodyParams: ['max_docs', 'query', 'slice', 'sort'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(delete_by_query_request, 'body'),
@@ -4935,8 +5068,8 @@ Deletes a stored script or search template.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-script',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'master_timeout', 'timeout'],
+    pathParams: ['id'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -4957,8 +5090,8 @@ Deletes an existing enrich policy and its enrich index.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-delete-policy',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -4995,14 +5128,14 @@ const ENRICH_GET_POLICY_CONTRACT: InternalConnectorContract = {
   summary: `Get an enrich policy`,
   description: `Get an enrich policy.
 Returns information about an enrich policy.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_enrich/policy/{name}', '/_enrich/policy'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-get-policy',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -5026,9 +5159,9 @@ Creates an enrich policy.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-put-policy',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'master_timeout'],
-    bodyParams: [],
+    pathParams: ['name'],
+    urlParams: ['master_timeout'],
+    bodyParams: ['geo_match', 'match', 'range'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(enrich_put_policy_request, 'body'),
@@ -5070,8 +5203,8 @@ The API also deletes results for the search.`,
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-delete',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['keep_alive', 'wait_for_completion_timeout'],
+    pathParams: ['id'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -5091,7 +5224,7 @@ Get the current status and available results for an async EQL search or a stored
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-get',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: ['keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
@@ -5135,9 +5268,37 @@ EQL assumes each document in a data stream or index corresponds to an event.`,
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-search',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'allow_partial_search_results',
+      'allow_partial_sequence_results',
+      'expand_wildcards',
+      'ccs_minimize_roundtrips',
+      'ignore_unavailable',
+      'keep_alive',
+      'keep_on_completion',
+      'wait_for_completion_timeout',
+    ],
+    bodyParams: [
+      'query',
+      'case_sensitive',
+      'event_category_field',
+      'tiebreaker_field',
+      'timestamp_field',
+      'fetch_size',
+      'filter',
+      'keep_alive',
+      'keep_on_completion',
+      'wait_for_completion_timeout',
+      'allow_partial_search_results',
+      'allow_partial_sequence_results',
+      'size',
+      'fields',
+      'result_position',
+      'runtime_mappings',
+      'max_samples_per_key',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(eql_search_request, 'body'),
@@ -5164,7 +5325,20 @@ The API accepts the same parameters and request body as the synchronous query AP
   parameterTypes: {
     pathParams: [],
     urlParams: ['allow_partial_results', 'delimiter', 'drop_null_columns', 'format'],
-    bodyParams: [],
+    bodyParams: [
+      'columnar',
+      'filter',
+      'locale',
+      'params',
+      'profile',
+      'query',
+      'tables',
+      'include_ccs_metadata',
+      'include_execution_metadata',
+      'wait_for_completion_timeout',
+      'keep_alive',
+      'keep_on_completion',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(esql_async_query_request, 'body'),
@@ -5190,8 +5364,8 @@ If the Elasticsearch security features are enabled, only the following users can
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-delete',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['drop_null_columns', 'format', 'keep_alive', 'wait_for_completion_timeout'],
+    pathParams: ['id'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -5213,7 +5387,7 @@ If the Elasticsearch security features are enabled, only the user who first subm
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-get',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: ['drop_null_columns', 'format', 'keep_alive', 'wait_for_completion_timeout'],
     bodyParams: [],
   },
@@ -5304,7 +5478,17 @@ Get search results for an ES|QL (Elasticsearch query language) query.`,
   parameterTypes: {
     pathParams: [],
     urlParams: ['format', 'delimiter', 'drop_null_columns', 'allow_partial_results'],
-    bodyParams: [],
+    bodyParams: [
+      'columnar',
+      'filter',
+      'locale',
+      'params',
+      'profile',
+      'query',
+      'tables',
+      'include_ccs_metadata',
+      'include_execution_metadata',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(esql_query_request, 'body'),
@@ -5340,27 +5524,8 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
   parameterTypes: {
-    pathParams: ['index', 'id', 'index', 'id', 'index', 'id'],
+    pathParams: ['index', 'id'],
     urlParams: [
-      'preference',
-      'realtime',
-      'refresh',
-      'routing',
-      '_source',
-      '_source_excludes',
-      '_source_exclude_vectors',
-      '_source_includes',
-      'stored_fields',
-      'version',
-      'version_type',
-      'if_primary_term',
-      'if_seq_no',
-      'refresh',
-      'routing',
-      'timeout',
-      'version',
-      'version_type',
-      'wait_for_active_shards',
       'preference',
       'realtime',
       'refresh',
@@ -5399,17 +5564,8 @@ A document's source is not available if it is disabled in the mapping.`,
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
   parameterTypes: {
-    pathParams: ['index', 'id', 'index', 'id'],
+    pathParams: ['index', 'id'],
     urlParams: [
-      'preference',
-      'realtime',
-      'refresh',
-      'routing',
-      '_source',
-      '_source_excludes',
-      '_source_includes',
-      'version',
-      'version_type',
       'preference',
       'realtime',
       'refresh',
@@ -5440,9 +5596,22 @@ It computes a score explanation for a query and a specific document.`,
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-explain',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index', 'id'],
+    urlParams: [
+      'analyzer',
+      'analyze_wildcard',
+      'default_operator',
+      'df',
+      'lenient',
+      'preference',
+      'routing',
+      '_source',
+      '_source_excludes',
+      '_source_includes',
+      'stored_fields',
+      'q',
+    ],
+    bodyParams: ['query'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(explain_request, 'body'),
@@ -5531,14 +5700,23 @@ Get information about the capabilities of fields among multiple indices.
 For data streams, the API returns field capabilities among the stream’s backing indices.
 It returns runtime fields like any other field.
 For example, a runtime field with a type of keyword is returned the same as any other field that belongs to the \`keyword\` family.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_field_caps', '/{index}/_field_caps'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-field-caps',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'fields',
+      'ignore_unavailable',
+      'include_unmapped',
+      'filters',
+      'types',
+      'include_empty_fields',
+    ],
+    bodyParams: ['fields', 'index_filter', 'runtime_mappings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(field_caps_request, 'body'),
@@ -5623,14 +5801,28 @@ const FLEET_MSEARCH_CONTRACT: InternalConnectorContract = {
 Run several Fleet searches with a single API request.
 The API follows the same structure as the multi search API.
 However, similar to the Fleet search API, it supports the \`wait_for_checkpoints\` parameter.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_fleet/_fleet_msearch', '/{index}/_fleet/_fleet_msearch'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-fleet-msearch',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'ccs_minimize_roundtrips',
+      'expand_wildcards',
+      'ignore_throttled',
+      'ignore_unavailable',
+      'max_concurrent_searches',
+      'max_concurrent_shard_requests',
+      'pre_filter_shard_size',
+      'search_type',
+      'rest_total_hits_as_int',
+      'typed_keys',
+      'wait_for_checkpoints',
+      'allow_partial_search_results',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -5682,9 +5874,85 @@ after the provided checkpoint has been processed and is visible for searches ins
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-fleet-search',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'analyzer',
+      'analyze_wildcard',
+      'batched_reduce_size',
+      'ccs_minimize_roundtrips',
+      'default_operator',
+      'df',
+      'docvalue_fields',
+      'expand_wildcards',
+      'explain',
+      'ignore_throttled',
+      'ignore_unavailable',
+      'lenient',
+      'max_concurrent_shard_requests',
+      'preference',
+      'pre_filter_shard_size',
+      'request_cache',
+      'routing',
+      'scroll',
+      'search_type',
+      'stats',
+      'stored_fields',
+      'suggest_field',
+      'suggest_mode',
+      'suggest_size',
+      'suggest_text',
+      'terminate_after',
+      'timeout',
+      'track_total_hits',
+      'track_scores',
+      'typed_keys',
+      'rest_total_hits_as_int',
+      'version',
+      '_source',
+      '_source_excludes',
+      '_source_includes',
+      'seq_no_primary_term',
+      'q',
+      'size',
+      'from',
+      'sort',
+      'wait_for_checkpoints',
+      'allow_partial_search_results',
+    ],
+    bodyParams: [
+      'aggregations',
+      'collapse',
+      'explain',
+      'ext',
+      'from',
+      'highlight',
+      'track_total_hits',
+      'indices_boost',
+      'docvalue_fields',
+      'min_score',
+      'post_filter',
+      'profile',
+      'query',
+      'rescore',
+      'script_fields',
+      'search_after',
+      'size',
+      'slice',
+      'sort',
+      '_source',
+      'fields',
+      'suggest',
+      'terminate_after',
+      'timeout',
+      'track_scores',
+      'version',
+      'seq_no_primary_term',
+      'stored_fields',
+      'pit',
+      'runtime_mappings',
+      'stats',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(fleet_search_request, 'body'),
@@ -5762,7 +6030,7 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
   parameterTypes: {
-    pathParams: ['index', 'id', 'index', 'id', 'index', 'id'],
+    pathParams: ['index', 'id'],
     urlParams: [
       'preference',
       'realtime',
@@ -5771,24 +6039,6 @@ Elasticsearch cleans up deleted documents in the background as you continue to i
       '_source',
       '_source_excludes',
       '_source_exclude_vectors',
-      '_source_includes',
-      'stored_fields',
-      'version',
-      'version_type',
-      'if_primary_term',
-      'if_seq_no',
-      'refresh',
-      'routing',
-      'timeout',
-      'version',
-      'version_type',
-      'wait_for_active_shards',
-      'preference',
-      'realtime',
-      'refresh',
-      'routing',
-      '_source',
-      '_source_excludes',
       '_source_includes',
       'stored_fields',
       'version',
@@ -5813,8 +6063,8 @@ Retrieves a stored script or search template.`,
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'master_timeout', 'timeout'],
+    pathParams: ['id'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -5892,17 +6142,8 @@ GET my-index-000001/_source/1/?_source_includes=*.id&_source_excludes=entities
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get',
   parameterTypes: {
-    pathParams: ['index', 'id', 'index', 'id'],
+    pathParams: ['index', 'id'],
     urlParams: [
-      'preference',
-      'realtime',
-      'refresh',
-      'routing',
-      '_source',
-      '_source_excludes',
-      '_source_includes',
-      'version',
-      'version_type',
       'preference',
       'realtime',
       'refresh',
@@ -5936,9 +6177,9 @@ You can exclude vertices that have already been returned.`,
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-graph',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: ['routing', 'timeout'],
+    bodyParams: ['connections', 'controls', 'query', 'vertices'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(graph_explore_request, 'body'),
@@ -5971,14 +6212,14 @@ A diagnosis contains a cause detailing a root cause analysis, an action containi
 
 NOTE: The health indicators perform root cause analysis of non-green health statuses. This can be computationally expensive when called frequently.
 When setting up automated polling of the API for health status, set verbose to false to disable the more expensive analysis logic.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_health_report', '/_health_report/{feature}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-health-report',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['feature'],
+    urlParams: ['timeout', 'verbose', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -6002,8 +6243,8 @@ You cannot delete policies that are currently in use. If the policy is being use
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-delete-lifecycle',
   parameterTypes: {
-    pathParams: ['policy', 'policy'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
+    pathParams: ['policy'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -6042,14 +6283,14 @@ const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ilm.get_lifecycle',
   summary: `Get lifecycle policies`,
   description: `Get lifecycle policies.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ilm/policy/{policy}', '/_ilm/policy'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-get-lifecycle',
   parameterTypes: {
-    pathParams: ['policy', 'policy'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
+    pathParams: ['policy'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -6110,7 +6351,7 @@ Use the stop ILM and get ILM status APIs to wait until the reported operation mo
   parameterTypes: {
     pathParams: [],
     urlParams: ['dry_run', 'master_timeout'],
-    bodyParams: [],
+    bodyParams: ['legacy_template_to_delete', 'node_attribute'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ilm_migrate_to_data_tiers_request, 'body'),
@@ -6144,7 +6385,7 @@ An index cannot move to a step that is not part of its policy.`,
   parameterTypes: {
     pathParams: ['index'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['current_step', 'next_step'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ilm_move_to_step_request, 'body'),
@@ -6166,9 +6407,9 @@ NOTE: Only the latest version of the policy is stored, you cannot revert to prev
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle',
   parameterTypes: {
-    pathParams: ['policy', 'policy'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    pathParams: ['policy'],
+    urlParams: ['master_timeout', 'timeout'],
+    bodyParams: ['policy'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ilm_put_lifecycle_request, 'body'),
@@ -6393,42 +6634,26 @@ If the document was already updated and its version was set to 2 or higher, the 
 
 A nice side effect is that there is no need to maintain strict ordering of async indexing operations run as a result of changes to a source database, as long as version numbers from the source database are used.
 Even the simple case of updating the Elasticsearch index using data from a database is simplified if external versioning is used, as only the latest version will be used if the index operations arrive out of order.`,
-  methods: ['PUT', 'POST', 'POST'],
+  methods: ['PUT', 'POST'],
   patterns: ['/{index}/_doc/{id}', '/{index}/_doc'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create',
   parameterTypes: {
-    pathParams: ['index', 'id', 'index', 'id', 'index', 'id'],
+    pathParams: ['index', 'id'],
     urlParams: [
-      'preference',
-      'realtime',
-      'refresh',
-      'routing',
-      '_source',
-      '_source_excludes',
-      '_source_exclude_vectors',
-      '_source_includes',
-      'stored_fields',
-      'version',
-      'version_type',
       'if_primary_term',
       'if_seq_no',
+      'include_source_on_error',
+      'op_type',
+      'pipeline',
       'refresh',
       'routing',
       'timeout',
       'version',
       'version_type',
       'wait_for_active_shards',
-      'preference',
-      'realtime',
-      'refresh',
-      'routing',
-      '_source',
-      '_source_excludes',
-      '_source_includes',
-      'stored_fields',
-      'version',
-      'version_type',
+      'require_alias',
+      'require_data_stream',
     ],
     bodyParams: [],
   },
@@ -6458,13 +6683,8 @@ Index blocks limit the operations allowed on an index by blocking specific opera
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-add-block',
   parameterTypes: {
-    pathParams: ['index', 'block', 'index', 'block'],
+    pathParams: ['index', 'block'],
     urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_unavailable',
-      'master_timeout',
-      'timeout',
       'allow_no_indices',
       'expand_wildcards',
       'ignore_unavailable',
@@ -6490,15 +6710,25 @@ Generating excessive amount of tokens may cause a node to run out of memory.
 The \`index.analyze.max_token_count\` setting enables you to limit the number of tokens that can be produced.
 If more than this limit of tokens gets generated, an error occurs.
 The \`_analyze\` endpoint without a specified index will always use \`10000\` as its limit.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_analyze', '/{index}/_analyze'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-analyze',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: ['index'],
+    bodyParams: [
+      'analyzer',
+      'attributes',
+      'char_filter',
+      'explain',
+      'field',
+      'filter',
+      'normalizer',
+      'text',
+      'tokenizer',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_analyze_request, 'body'),
@@ -6554,14 +6784,23 @@ For data streams, the API clears the caches of the stream's backing indices.
 By default, the clear cache API clears all caches.
 To clear only specific caches, use the \`fielddata\`, \`query\`, or \`request\` parameters.
 To clear the cache only of specific fields, use the \`fields\` parameter.`,
-  methods: ['POST', 'POST'],
+  methods: ['POST'],
   patterns: ['/_cache/clear', '/{index}/_cache/clear'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-clear-cache',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'index',
+      'allow_no_indices',
+      'expand_wildcards',
+      'fielddata',
+      'fields',
+      'ignore_unavailable',
+      'query',
+      'request',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -6628,9 +6867,9 @@ Because the clone operation creates a new index to clone the shards to, the wait
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-clone',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index', 'target'],
+    urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
+    bodyParams: ['aliases', 'settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_clone_request, 'body'),
@@ -6716,32 +6955,9 @@ Note that changing this setting will also affect the \`wait_for_active_shards\` 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create',
   parameterTypes: {
-    pathParams: ['index', 'index', 'index', 'index'],
-    urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'flat_settings',
-      'ignore_unavailable',
-      'include_defaults',
-      'local',
-      'master_timeout',
-      'features',
-      'master_timeout',
-      'timeout',
-      'wait_for_active_shards',
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_unavailable',
-      'master_timeout',
-      'timeout',
-      'allow_no_indices',
-      'expand_wildcards',
-      'flat_settings',
-      'ignore_unavailable',
-      'include_defaults',
-      'local',
-    ],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
+    bodyParams: ['aliases', 'mappings', 'settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_create_request, 'body'),
@@ -6762,8 +6978,8 @@ You must have a matching index template with data stream enabled.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create-data-stream',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'expand_wildcards'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -6785,7 +7001,7 @@ Copy the mappings and settings from the source index to a destination index whil
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create-from',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['source', 'dest'],
     urlParams: [],
     bodyParams: [],
   },
@@ -6805,14 +7021,14 @@ const INDICES_DATA_STREAMS_STATS_CONTRACT: InternalConnectorContract = {
   description: `Get data stream stats.
 
 Get statistics for one or more data streams.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_data_stream/_stats', '/_data_stream/{name}/_stats'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-data-streams-stats-1',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['name'],
+    urlParams: ['expand_wildcards'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -6844,30 +7060,13 @@ You can then use the delete index API to delete the previous write index.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete',
   parameterTypes: {
-    pathParams: ['index', 'index', 'index', 'index'],
+    pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
       'expand_wildcards',
-      'flat_settings',
-      'ignore_unavailable',
-      'include_defaults',
-      'local',
-      'master_timeout',
-      'features',
-      'master_timeout',
-      'timeout',
-      'wait_for_active_shards',
-      'allow_no_indices',
-      'expand_wildcards',
       'ignore_unavailable',
       'master_timeout',
       'timeout',
-      'allow_no_indices',
-      'expand_wildcards',
-      'flat_settings',
-      'ignore_unavailable',
-      'include_defaults',
-      'local',
     ],
     bodyParams: [],
   },
@@ -6883,14 +7082,14 @@ const INDICES_DELETE_ALIAS_CONTRACT: InternalConnectorContract = {
   summary: `Delete an alias`,
   description: `Delete an alias.
 Removes a data stream or index from an alias.`,
-  methods: ['DELETE', 'DELETE'],
+  methods: ['DELETE'],
   patterns: ['/{index}/_alias/{name}', '/{index}/_aliases/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-alias',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index', 'name'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -6914,18 +7113,8 @@ Removes the data stream lifecycle from a data stream, rendering it not managed b
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-lifecycle',
   parameterTypes: {
-    pathParams: ['name', 'name', 'name'],
-    urlParams: [
-      'expand_wildcards',
-      'include_defaults',
-      'master_timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-    ],
+    pathParams: ['name'],
+    urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -6946,8 +7135,8 @@ Deletes one or more data streams and their backing indices.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-stream',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'expand_wildcards'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout', 'expand_wildcards'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -6968,17 +7157,8 @@ Removes the data stream options from a data stream.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-stream-options',
   parameterTypes: {
-    pathParams: ['name', 'name', 'name'],
-    urlParams: [
-      'expand_wildcards',
-      'master_timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-    ],
+    pathParams: ['name'],
+    urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7001,8 +7181,8 @@ existing templates.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-index-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'local', 'flat_settings', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7040,8 +7220,8 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'flat_settings', 'local', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7131,24 +7311,8 @@ Check if one or more indices, index aliases, or data streams exist.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists',
   parameterTypes: {
-    pathParams: ['index', 'index', 'index', 'index'],
+    pathParams: ['index'],
     urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'flat_settings',
-      'ignore_unavailable',
-      'include_defaults',
-      'local',
-      'master_timeout',
-      'features',
-      'master_timeout',
-      'timeout',
-      'wait_for_active_shards',
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_unavailable',
-      'master_timeout',
-      'timeout',
       'allow_no_indices',
       'expand_wildcards',
       'flat_settings',
@@ -7171,14 +7335,14 @@ const INDICES_EXISTS_ALIAS_CONTRACT: InternalConnectorContract = {
   description: `Check aliases.
 
 Check if one or more data stream or index aliases exist.`,
-  methods: ['HEAD', 'HEAD'],
+  methods: ['HEAD'],
   patterns: ['/_alias/{name}', '/{index}/_alias/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-alias',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['name', 'index'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7203,8 +7367,8 @@ Check whether index templates exist.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-index-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'local', 'flat_settings', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['local', 'flat_settings', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7228,8 +7392,8 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'flat_settings', 'local', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['flat_settings', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7302,14 +7466,20 @@ The transaction log is made up of multiple files, called generations, and Elasti
 
 It is also possible to trigger a flush on one or more indices using the flush API, although it is rare for users to need to call this API directly.
 If you call the flush API after indexing some documents then a successful response indicates that Elasticsearch has flushed all the documents that were indexed before the flush API was called.`,
-  methods: ['POST', 'GET', 'POST', 'GET'],
+  methods: ['POST', 'GET'],
   patterns: ['/_flush', '/{index}/_flush'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-flush',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'force',
+      'ignore_unavailable',
+      'wait_if_ongoing',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7389,14 +7559,22 @@ For example:
 \`\`\`
 POST /.ds-my-data-stream-2099.03.07-000001/_forcemerge?max_num_segments=1
 \`\`\``,
-  methods: ['POST', 'POST'],
+  methods: ['POST'],
   patterns: ['/_forcemerge', '/{index}/_forcemerge'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-forcemerge',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'flush',
+      'ignore_unavailable',
+      'max_num_segments',
+      'only_expunge_deletes',
+      'wait_for_completion',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7421,7 +7599,7 @@ stream’s backing indices.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get',
   parameterTypes: {
-    pathParams: ['index', 'index', 'index', 'index'],
+    pathParams: ['index'],
     urlParams: [
       'allow_no_indices',
       'expand_wildcards',
@@ -7431,20 +7609,6 @@ stream’s backing indices.`,
       'local',
       'master_timeout',
       'features',
-      'master_timeout',
-      'timeout',
-      'wait_for_active_shards',
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_unavailable',
-      'master_timeout',
-      'timeout',
-      'allow_no_indices',
-      'expand_wildcards',
-      'flat_settings',
-      'ignore_unavailable',
-      'include_defaults',
-      'local',
     ],
     bodyParams: [],
   },
@@ -7460,14 +7624,14 @@ const INDICES_GET_ALIAS_CONTRACT: InternalConnectorContract = {
   summary: `Get aliases`,
   description: `Get aliases.
 Retrieves information for one or more data stream or index aliases.`,
-  methods: ['GET', 'GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_alias', '/_alias/{name}', '/{index}/_alias/{name}', '/{index}/_alias'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-alias',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['name', 'index'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7520,18 +7684,8 @@ Get the data stream lifecycle configuration of one or more data streams.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-lifecycle',
   parameterTypes: {
-    pathParams: ['name', 'name', 'name'],
-    urlParams: [
-      'expand_wildcards',
-      'include_defaults',
-      'master_timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-    ],
+    pathParams: ['name'],
+    urlParams: ['expand_wildcards', 'include_defaults', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7569,14 +7723,14 @@ const INDICES_GET_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   description: `Get data streams.
 
 Get information about one or more data streams.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_data_stream', '/_data_stream/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'expand_wildcards'],
+    pathParams: ['name'],
+    urlParams: ['expand_wildcards', 'include_defaults', 'master_timeout', 'verbose'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7601,8 +7755,8 @@ Get mapping information for one or more data streams.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream-mappings',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'dry_run', 'master_timeout', 'timeout'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7624,17 +7778,8 @@ Get the data stream options configuration of one or more data streams.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream-options',
   parameterTypes: {
-    pathParams: ['name', 'name', 'name'],
-    urlParams: [
-      'expand_wildcards',
-      'master_timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-    ],
+    pathParams: ['name'],
+    urlParams: ['expand_wildcards', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7656,8 +7801,8 @@ Get setting information for one or more data streams.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream-settings',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'dry_run', 'master_timeout', 'timeout'],
+    pathParams: ['name'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7675,14 +7820,14 @@ Retrieves mapping definitions for one or more fields.
 For data streams, the API retrieves field mappings for the stream’s backing indices.
 
 This API is useful if you don't need a complete mapping or if an index mapping contains a large number of fields.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_mapping/field/{fields}', '/{index}/_mapping/field/{fields}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-mapping',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['fields', 'index'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'include_defaults'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7700,14 +7845,14 @@ const INDICES_GET_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   summary: `Get index templates`,
   description: `Get index templates.
 Get information about one or more index templates.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_index_template', '/_index_template/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-index-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'local', 'flat_settings', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['local', 'flat_settings', 'master_timeout', 'include_defaults'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7728,14 +7873,20 @@ const INDICES_GET_MAPPING_CONTRACT: InternalConnectorContract = {
   summary: `Get mapping definitions`,
   description: `Get mapping definitions.
 For data streams, the API retrieves mappings for the stream’s backing indices.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_mapping', '/{index}/_mapping'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-mapping',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'ignore_unavailable',
+      'local',
+      'master_timeout',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7825,14 +7976,22 @@ const INDICES_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   description: `Get index settings.
 Get setting information for one or more indices.
 For data streams, it returns setting information for the stream's backing indices.`,
-  methods: ['GET', 'GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_settings', '/{index}/_settings', '/{index}/_settings/{name}', '/_settings/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-settings',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index', 'name'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'flat_settings',
+      'ignore_unavailable',
+      'include_defaults',
+      'local',
+      'master_timeout',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7863,14 +8022,14 @@ const INDICES_GET_TEMPLATE_CONTRACT: InternalConnectorContract = {
 Get information about one or more index templates.
 
 IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_template', '/_template/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'flat_settings', 'local', 'master_timeout'],
+    pathParams: ['name'],
+    urlParams: ['flat_settings', 'local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -7952,7 +8111,7 @@ Performs one or more data stream modification actions in a single atomic operati
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['actions'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_modify_data_stream_request, 'body'),
@@ -8047,15 +8206,15 @@ const INDICES_PUT_ALIAS_CONTRACT: InternalConnectorContract = {
   summary: `Create or update an alias`,
   description: `Create or update an alias.
 Adds a data stream or index to an alias.`,
-  methods: ['PUT', 'POST', 'PUT', 'POST'],
+  methods: ['PUT', 'POST'],
   patterns: ['/{index}/_alias/{name}', '/{index}/_aliases/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-alias',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index', 'name'],
+    urlParams: ['master_timeout', 'timeout'],
+    bodyParams: ['filter', 'index_routing', 'is_write_index', 'routing', 'search_routing'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_put_alias_request, 'body'),
@@ -8089,19 +8248,9 @@ Update the data stream lifecycle of the specified data streams.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-lifecycle',
   parameterTypes: {
-    pathParams: ['name', 'name', 'name'],
-    urlParams: [
-      'expand_wildcards',
-      'include_defaults',
-      'master_timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-    ],
-    bodyParams: [],
+    pathParams: ['name'],
+    urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
+    bodyParams: ['data_retention', 'downsampling', 'enabled'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_put_data_lifecycle_request, 'body'),
@@ -8124,8 +8273,8 @@ that are created during rollover after this API is called. No indices are change
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-mappings',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'dry_run', 'master_timeout', 'timeout'],
+    pathParams: ['name'],
+    urlParams: ['dry_run', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -8146,18 +8295,9 @@ Update the data stream options of the specified data streams.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-options',
   parameterTypes: {
-    pathParams: ['name', 'name', 'name'],
-    urlParams: [
-      'expand_wildcards',
-      'master_timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-      'expand_wildcards',
-      'master_timeout',
-      'timeout',
-    ],
-    bodyParams: [],
+    pathParams: ['name'],
+    urlParams: ['expand_wildcards', 'master_timeout', 'timeout'],
+    bodyParams: ['failure_store'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_put_data_stream_options_request, 'body'),
@@ -8181,8 +8321,8 @@ backing indices. Otherwise, it will be applied when the data stream is next roll
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-settings',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'dry_run', 'master_timeout', 'timeout'],
+    pathParams: ['name'],
+    urlParams: ['dry_run', 'master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -8229,9 +8369,20 @@ If an entry already exists with the same key, then it is overwritten by the new 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-index-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'local', 'flat_settings', 'master_timeout'],
-    bodyParams: [],
+    pathParams: ['name'],
+    urlParams: ['create', 'master_timeout', 'cause'],
+    bodyParams: [
+      'index_patterns',
+      'composed_of',
+      'template',
+      'data_stream',
+      'priority',
+      'version',
+      '_meta',
+      'allow_auto_create',
+      'ignore_missing_component_templates',
+      'deprecated',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_put_index_template_request, 'body'),
@@ -8268,9 +8419,28 @@ Learn how to use the update mapping API with practical examples in the [Update m
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-mapping',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'ignore_unavailable',
+      'master_timeout',
+      'timeout',
+      'write_index_only',
+    ],
+    bodyParams: [
+      'date_detection',
+      'dynamic',
+      'dynamic_date_formats',
+      'dynamic_templates',
+      '_field_names',
+      '_meta',
+      'numeric_detection',
+      'properties',
+      '_routing',
+      '_source',
+      'runtime',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_put_mapping_request, 'body'),
@@ -8357,14 +8527,23 @@ This affects searches and any new data added to the stream after the rollover.
 However, it does not affect the data stream's backing indices or their existing data.
 To change the analyzer for existing backing indices, you must create a new data stream and reindex your data into it.
 Refer to [updating analyzers on existing indices](https://www.elastic.co/docs/manage-data/data-store/text-analysis/specify-an-analyzer#update-analyzers-on-existing-indices) for step-by-step examples.`,
-  methods: ['PUT', 'PUT'],
+  methods: ['PUT'],
   patterns: ['/_settings', '/{index}/_settings'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'flat_settings',
+      'ignore_unavailable',
+      'master_timeout',
+      'preserve_existing',
+      'reopen',
+      'timeout',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -8407,9 +8586,9 @@ NOTE: Multiple matching templates with the same order value will result in a non
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-template',
   parameterTypes: {
-    pathParams: ['name', 'name'],
-    urlParams: ['master_timeout', 'timeout', 'flat_settings', 'local', 'master_timeout'],
-    bodyParams: [],
+    pathParams: ['name'],
+    urlParams: ['create', 'master_timeout', 'order', 'cause'],
+    bodyParams: ['aliases', 'index_patterns', 'mappings', 'order', 'settings', 'version'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_put_template_request, 'body'),
@@ -8447,14 +8626,20 @@ You can determine the cause of a shard recovery using the recovery or cat recove
 The index recovery API reports information about completed recoveries only for shard copies that currently exist in the cluster.
 It only reports the last recovery for each shard copy and does not report historical information about earlier recoveries, nor does it report information about the recoveries of shard copies that no longer exist.
 This means that if a shard copy completes a recovery and then Elasticsearch relocates it onto a different node then the information about the original recovery will not be shown in the recovery API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_recovery', '/{index}/_recovery'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-recovery',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'active_only',
+      'detailed',
+      'allow_no_indices',
+      'expand_wildcards',
+      'ignore_unavailable',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -8486,14 +8671,14 @@ To ensure good cluster performance, it's recommended to wait for Elasticsearch's
 
 If your application workflow indexes documents and then runs a search to retrieve the indexed document, it's recommended to use the index API's \`refresh=wait_for\` query parameter option.
 This option ensures the indexing operation waits for a periodic refresh before running the search.`,
-  methods: ['POST', 'GET', 'POST', 'GET'],
+  methods: ['POST', 'GET'],
   patterns: ['/_refresh', '/{index}/_refresh'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-refresh',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -8540,8 +8725,8 @@ This ensures the synonym file is updated everywhere in the cluster in case shard
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-reload-search-analyzers',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'resource'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -8570,13 +8755,8 @@ Index blocks limit the operations allowed on an index by blocking specific opera
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-remove-block',
   parameterTypes: {
-    pathParams: ['index', 'block', 'index', 'block'],
+    pathParams: ['index', 'block'],
     urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_unavailable',
-      'master_timeout',
-      'timeout',
       'allow_no_indices',
       'expand_wildcards',
       'ignore_unavailable',
@@ -8641,14 +8821,20 @@ You can use the \`_resolve/cluster\` API to attempt to reconnect to remote clust
 For example with \`GET _resolve/cluster\` or \`GET _resolve/cluster/*:*\`.
 The \`connected\` field in the response will indicate whether it was successful.
 If a connection was (re-)established, this will also cause the \`remote/info\` endpoint to now indicate a connected status.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_resolve/cluster', '/_resolve/cluster/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-cluster',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['name'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'ignore_throttled',
+      'ignore_unavailable',
+      'timeout',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -8725,15 +8911,15 @@ If you use an index alias for time series data, you can use date math in the ind
 For example, you can create an alias that points to an index named \`<my-index-{now/d}-000001>\`.
 If you create the index on May 6, 2099, the index's name is \`my-index-2099.05.06-000001\`.
 If you roll over the alias on May 7, 2099, the new index's name is \`my-index-2099.05.07-000002\`.`,
-  methods: ['POST', 'POST'],
+  methods: ['POST'],
   patterns: ['/{alias}/_rollover', '/{alias}/_rollover/{new_index}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-rollover',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['alias', 'new_index'],
+    urlParams: ['dry_run', 'master_timeout', 'timeout', 'wait_for_active_shards', 'lazy'],
+    bodyParams: ['aliases', 'conditions', 'mappings', 'settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_rollover_request, 'body'),
@@ -8751,14 +8937,14 @@ const INDICES_SEGMENTS_CONTRACT: InternalConnectorContract = {
   description: `Get index segments.
 Get low-level information about the Lucene segments in index shards.
 For data streams, the API returns information about the stream's backing indices.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_segments', '/{index}/_segments'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-segments',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -8786,14 +8972,14 @@ The index shard stores API returns the following information:
 * Any errors encountered while opening the shard index or from an earlier failure.
 
 By default, the API returns store information only for primary shards that are unassigned or have one or more unassigned replica shards.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_shard_stores', '/{index}/_shard_stores'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-shard-stores',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'status'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -8847,9 +9033,9 @@ IMPORTANT: Indices can only be shrunk if they satisfy the following requirements
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-shrink',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index', 'target'],
+    urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
+    bodyParams: ['aliases', 'settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_shrink_request, 'body'),
@@ -8888,15 +9074,26 @@ const INDICES_SIMULATE_TEMPLATE_CONTRACT: InternalConnectorContract = {
   summary: `Simulate an index template`,
   description: `Simulate an index template.
 Get the index configuration that would be applied by a particular index template.`,
-  methods: ['POST', 'POST'],
+  methods: ['POST'],
   patterns: ['/_index_template/_simulate', '/_index_template/_simulate/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-simulate-template',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['name'],
+    urlParams: ['create', 'cause', 'master_timeout', 'include_defaults'],
+    bodyParams: [
+      'allow_auto_create',
+      'index_patterns',
+      'composed_of',
+      'template',
+      'data_stream',
+      'priority',
+      'version',
+      '_meta',
+      'ignore_missing_component_templates',
+      'deprecated',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_simulate_template_request, 'body'),
@@ -8950,9 +9147,9 @@ IMPORTANT: Indices can only be split if they satisfy the following requirements:
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-split',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index', 'target'],
+    urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
+    bodyParams: ['aliases', 'settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_split_request, 'body'),
@@ -8978,14 +9175,24 @@ To get shard-level statistics, set the \`level\` parameter to \`shards\`.
 
 NOTE: When moving to another node, the shard-level statistics for a shard are cleared.
 Although the shard is no longer part of the node, that node retains any node-level statistics to which the shard contributed.`,
-  methods: ['GET', 'GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_stats', '/_stats/{metric}', '/{index}/_stats', '/{index}/_stats/{metric}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['metric', 'index'],
+    urlParams: [
+      'completion_fields',
+      'expand_wildcards',
+      'fielddata_fields',
+      'fields',
+      'forbid_closed_indices',
+      'groups',
+      'include_segment_file_sizes',
+      'include_unloaded_segments',
+      'level',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -9022,7 +9229,7 @@ Adds a data stream or index to an alias.`,
   parameterTypes: {
     pathParams: [],
     urlParams: ['master_timeout', 'timeout'],
-    bodyParams: [],
+    bodyParams: ['actions'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_update_aliases_request, 'body'),
@@ -9036,15 +9243,28 @@ const INDICES_VALIDATE_QUERY_CONTRACT: InternalConnectorContract = {
   summary: `Validate a query`,
   description: `Validate a query.
 Validates a query without running it.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_validate/query', '/{index}/_validate/query'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-validate-query',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'all_shards',
+      'analyzer',
+      'analyze_wildcard',
+      'default_operator',
+      'df',
+      'expand_wildcards',
+      'explain',
+      'ignore_unavailable',
+      'lenient',
+      'rewrite',
+      'q',
+    ],
+    bodyParams: ['query'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(indices_validate_query_request, 'body'),
@@ -9116,7 +9336,7 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
   parameterTypes: {
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['input', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_completion_request, 'body'),
@@ -9131,14 +9351,14 @@ const INFERENCE_DELETE_CONTRACT: InternalConnectorContract = {
 `,
   description: `Delete an inference endpoint
 This API requires the manage_inference cluster privilege (the built-in \`inference_admin\` role grants this privilege).`,
-  methods: ['DELETE', 'DELETE'],
+  methods: ['DELETE'],
   patterns: ['/_inference/{inference_id}', '/_inference/{task_type}/{inference_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-delete',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['inference_id', 'task_type'],
+    urlParams: ['dry_run', 'force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -9157,13 +9377,13 @@ const INFERENCE_GET_CONTRACT: InternalConnectorContract = {
 `,
   description: `Get an inference endpoint
 This API requires the \`monitor_inference\` cluster privilege (the built-in \`inference_admin\` and \`inference_user\` roles grant this privilege).`,
-  methods: ['GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_inference', '/_inference/{inference_id}', '/_inference/{task_type}/{inference_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-get',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['inference_id', 'task_type'],
     urlParams: [],
     bodyParams: [],
   },
@@ -9193,15 +9413,15 @@ For details about using this API with a service, such as Amazon Bedrock, Anthrop
 
 > info
 > The inference APIs enable you to use certain services, such as built-in machine learning models (ELSER, E5), models uploaded through Eland, Cohere, OpenAI, Azure, Google AI Studio, Google Vertex AI, Anthropic, Watsonx.ai, or Hugging Face. For built-in models and models uploaded through Eland, the inference APIs offer an alternative way to use and manage trained models. However, if you do not plan to use the inference APIs to use these models or if you want to use non-NLP models, use the machine learning trained model APIs.`,
-  methods: ['POST', 'POST'],
+  methods: ['POST'],
   patterns: ['/_inference/{inference_id}', '/_inference/{task_type}/{inference_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['inference_id', 'task_type'],
+    urlParams: ['timeout'],
+    bodyParams: ['query', 'input', 'input_type', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_inference_request, 'body'),
@@ -9243,14 +9463,14 @@ The following integrations are available through the inference API. You can find
 * OpenAI (\`chat_completion\`, \`completion\`, \`text_embedding\`)
 * VoyageAI (\`rerank\`, \`text_embedding\`)
 * Watsonx inference integration (\`text_embedding\`)`,
-  methods: ['PUT', 'PUT'],
+  methods: ['PUT'],
   patterns: ['/_inference/{inference_id}', '/_inference/{task_type}/{inference_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['inference_id', 'task_type'],
+    urlParams: ['timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -9277,7 +9497,7 @@ Create an inference endpoint to perform an inference task with the \`ai21\` serv
   parameterTypes: {
     pathParams: ['task_type', 'ai21_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['service', 'service_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_ai21_request, 'body'),
@@ -9300,7 +9520,7 @@ Create an inference endpoint to perform an inference task with the \`alibabaclou
   parameterTypes: {
     pathParams: ['task_type', 'alibabacloud_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_alibabacloud_request, 'body'),
@@ -9326,7 +9546,7 @@ Create an inference endpoint to perform an inference task with the \`amazonbedro
   parameterTypes: {
     pathParams: ['task_type', 'amazonbedrock_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_amazonbedrock_request, 'body'),
@@ -9349,7 +9569,7 @@ Create an inference endpoint to perform an inference task with the \`amazon_sage
   parameterTypes: {
     pathParams: ['task_type', 'amazonsagemaker_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_amazonsagemaker_request, 'body'),
@@ -9372,7 +9592,7 @@ Create an inference endpoint to perform an inference task with the \`anthropic\`
   parameterTypes: {
     pathParams: ['task_type', 'anthropic_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_anthropic_request, 'body'),
@@ -9395,7 +9615,7 @@ Create an inference endpoint to perform an inference task with the \`azureaistud
   parameterTypes: {
     pathParams: ['task_type', 'azureaistudio_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_azureaistudio_request, 'body'),
@@ -9425,7 +9645,7 @@ The list of embeddings models that you can choose from in your deployment can be
   parameterTypes: {
     pathParams: ['task_type', 'azureopenai_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_azureopenai_request, 'body'),
@@ -9448,7 +9668,7 @@ Create an inference endpoint to perform an inference task with the \`cohere\` se
   parameterTypes: {
     pathParams: ['task_type', 'cohere_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_cohere_request, 'body'),
@@ -9473,7 +9693,7 @@ To review the available \`rerank\` models, refer to <https://docs.contextual.ai/
   parameterTypes: {
     pathParams: ['task_type', 'contextualai_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_contextualai_request, 'body'),
@@ -9535,7 +9755,7 @@ Pre-defined templates:
   parameterTypes: {
     pathParams: ['task_type', 'custom_inference_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_custom_request, 'body'),
@@ -9558,7 +9778,7 @@ Create an inference endpoint to perform an inference task with the \`deepseek\` 
   parameterTypes: {
     pathParams: ['task_type', 'deepseek_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['service', 'service_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_deepseek_request, 'body'),
@@ -9594,7 +9814,7 @@ Avoid creating multiple endpoints for the same model unless required, as each en
   parameterTypes: {
     pathParams: ['task_type', 'elasticsearch_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_elasticsearch_request, 'body'),
@@ -9631,7 +9851,7 @@ Avoid creating multiple endpoints for the same model unless required, as each en
   parameterTypes: {
     pathParams: ['task_type', 'elser_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_elser_request, 'body'),
@@ -9654,7 +9874,7 @@ Create an inference endpoint to perform an inference task with the \`googleaistu
   parameterTypes: {
     pathParams: ['task_type', 'googleaistudio_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_googleaistudio_request, 'body'),
@@ -9677,7 +9897,7 @@ Create an inference endpoint to perform an inference task with the \`googleverte
   parameterTypes: {
     pathParams: ['task_type', 'googlevertexai_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_googlevertexai_request, 'body'),
@@ -9735,7 +9955,7 @@ Tested models for \`rerank\` task:
   parameterTypes: {
     pathParams: ['task_type', 'huggingface_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_hugging_face_request, 'body'),
@@ -9761,7 +9981,7 @@ To review the available \`text_embedding\` models, refer to the <https://jina.ai
   parameterTypes: {
     pathParams: ['task_type', 'jinaai_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_jinaai_request, 'body'),
@@ -9784,7 +10004,7 @@ Create an inference endpoint to perform an inference task with the \`llama\` ser
   parameterTypes: {
     pathParams: ['task_type', 'llama_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_llama_request, 'body'),
@@ -9807,7 +10027,7 @@ Create an inference endpoint to perform an inference task with the \`mistral\` s
   parameterTypes: {
     pathParams: ['task_type', 'mistral_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_mistral_request, 'body'),
@@ -9830,7 +10050,7 @@ Create an inference endpoint to perform an inference task with the \`openai\` se
   parameterTypes: {
     pathParams: ['task_type', 'openai_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_openai_request, 'body'),
@@ -9855,7 +10075,7 @@ Avoid creating multiple endpoints for the same model unless required, as each en
   parameterTypes: {
     pathParams: ['task_type', 'voyageai_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_voyageai_request, 'body'),
@@ -9880,7 +10100,7 @@ You can provision one through the IBM catalog, the Cloud Databases CLI plug-in, 
   parameterTypes: {
     pathParams: ['task_type', 'watsonx_inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['chunking_settings', 'service', 'service_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_put_watsonx_request, 'body'),
@@ -9901,7 +10121,7 @@ const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['query', 'input', 'return_documents', 'top_n', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_rerank_request, 'body'),
@@ -9922,7 +10142,7 @@ const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['input', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_sparse_embedding_request, 'body'),
@@ -9950,7 +10170,7 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
   parameterTypes: {
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['input', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_stream_completion_request, 'body'),
@@ -9971,7 +10191,7 @@ const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['inference_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['input', 'input_type', 'task_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(inference_text_embedding_request, 'body'),
@@ -9990,7 +10210,7 @@ Modify \`task_settings\`, secrets (within \`service_settings\`), or \`num_alloca
 IMPORTANT: The inference APIs enable you to use certain services, such as built-in machine learning models (ELSER, E5), models uploaded through Eland, Cohere, OpenAI, Azure, Google AI Studio, Google Vertex AI, Anthropic, Watsonx.ai, or Hugging Face.
 For built-in models and models uploaded through Eland, the inference APIs offer an alternative way to use and manage trained models.
 However, if you do not plan to use the inference APIs to use these models or if you want to use non-NLP models, use the machine learning trained model APIs.`,
-  methods: ['PUT', 'PUT'],
+  methods: ['PUT'],
   patterns: [
     '/_inference/{inference_id}/_update',
     '/_inference/{task_type}/{inference_id}/_update',
@@ -9999,7 +10219,7 @@ However, if you do not plan to use the inference APIs to use these models or if 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-update',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['inference_id', 'task_type'],
     urlParams: [],
     bodyParams: [],
   },
@@ -10047,8 +10267,8 @@ Delete one or more IP geolocation database configurations.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-geoip-database',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
+    pathParams: ['id'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10068,8 +10288,8 @@ const INGEST_DELETE_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-ip-location-database',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
+    pathParams: ['id'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10090,8 +10310,8 @@ Delete one or more ingest pipelines.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-pipeline',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'timeout', 'if_version', 'master_timeout', 'timeout'],
+    pathParams: ['id'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10128,14 +10348,14 @@ const INGEST_GET_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {
   description: `Get GeoIP database configurations.
 
 Get information about one or more IP geolocation database configurations.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ingest/geoip/database', '/_ingest/geoip/database/{id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-geoip-database',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
+    pathParams: ['id'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10152,14 +10372,14 @@ const INGEST_GET_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ingest.get_ip_location_database',
   summary: `Get IP geolocation database configurations`,
   description: `Get IP geolocation database configurations.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ingest/ip_location/database', '/_ingest/ip_location/database/{id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-ip-location-database',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
+    pathParams: ['id'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10182,14 +10402,14 @@ const INGEST_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
 
 Get information about one or more ingest pipelines.
 This API returns a local reference of the pipeline.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ingest/pipeline', '/_ingest/pipeline/{id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-pipeline',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'timeout', 'if_version', 'master_timeout', 'timeout'],
+    pathParams: ['id'],
+    urlParams: ['master_timeout', 'summary'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10237,9 +10457,9 @@ Refer to the create or update IP geolocation database configuration API.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-put-geoip-database',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    pathParams: ['id'],
+    urlParams: ['master_timeout', 'timeout'],
+    bodyParams: ['name', 'maxmind'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ingest_put_geoip_database_request, 'body'),
@@ -10258,8 +10478,8 @@ const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-put-ip-location-database',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
+    pathParams: ['id'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10279,9 +10499,17 @@ Changes made using this API take effect immediately.`,
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'timeout', 'if_version', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    pathParams: ['id'],
+    urlParams: ['master_timeout', 'timeout', 'if_version'],
+    bodyParams: [
+      '_meta',
+      'description',
+      'on_failure',
+      'processors',
+      'version',
+      'deprecated',
+      'field_access_pattern',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ingest_put_pipeline_request, 'body'),
@@ -10297,15 +10525,15 @@ const INGEST_SIMULATE_CONTRACT: InternalConnectorContract = {
 
 Run an ingest pipeline against a set of provided documents.
 You can either specify an existing pipeline to use with the provided documents or supply a pipeline definition in the body of the request.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_ingest/pipeline/_simulate', '/_ingest/pipeline/{id}/_simulate'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-simulate',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['id'],
+    urlParams: ['verbose'],
+    bodyParams: ['docs', 'pipeline'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ingest_simulate_request, 'body'),
@@ -10359,7 +10587,7 @@ If the operator privileges feature is enabled, only operator users can use this 
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-delete',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['accept_enterprise', 'local', 'master_timeout', 'timeout'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10386,7 +10614,7 @@ Get information about your Elastic license including its type, its status, when 
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-get',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['accept_enterprise', 'local', 'master_timeout', 'timeout'],
+    urlParams: ['accept_enterprise', 'local'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10457,8 +10685,8 @@ If the operator privileges feature is enabled, only operator users can use this 
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-post',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['accept_enterprise', 'local', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    urlParams: ['acknowledge', 'master_timeout', 'timeout'],
+    bodyParams: ['license', 'licenses'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(license_post_request, 'body'),
@@ -10539,7 +10767,7 @@ If the request succeeds, you receive an empty response with an appropriate statu
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-delete-pipeline',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -10555,13 +10783,13 @@ const LOGSTASH_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
   summary: `Get Logstash pipelines`,
   description: `Get Logstash pipelines.
 Get pipelines that are used for Logstash Central Management.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_logstash/pipeline', '/_logstash/pipeline/{id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-get-pipeline',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -10588,7 +10816,7 @@ If the specified pipeline exists, it is replaced.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-put-pipeline',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -10619,14 +10847,23 @@ You can include the \`_source\`, \`_source_includes\`, and \`_source_excludes\` 
 Use the \`stored_fields\` attribute to specify the set of stored fields you want to retrieve.
 Any requested fields that are not stored are ignored.
 You can include the \`stored_fields\` query parameter in the request URI to specify the defaults to use when there are no per-document instructions.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_mget', '/{index}/_mget'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mget',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'preference',
+      'realtime',
+      'refresh',
+      'routing',
+      '_source',
+      '_source_excludes',
+      '_source_includes',
+      'stored_fields',
+    ],
+    bodyParams: ['docs', 'ids'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(mget_request, 'body'),
@@ -10652,13 +10889,13 @@ Get information about different cluster, node, and index level settings that use
 
 TIP: This APIs is designed for indirect use by the Upgrade Assistant.
 You are strongly recommended to use the Upgrade Assistant.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_migration/deprecations', '/{index}/_migration/deprecations'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-deprecations',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['index'],
     urlParams: [],
     bodyParams: [],
   },
@@ -10768,7 +11005,7 @@ When a datafeed that has a specified end date stops, it automatically closes its
   parameterTypes: {
     pathParams: ['job_id'],
     urlParams: ['allow_no_match', 'force', 'timeout'],
-    bodyParams: [],
+    bodyParams: ['allow_no_match', 'force', 'timeout'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_close_job_request, 'body'),
@@ -10789,7 +11026,7 @@ Remove all scheduled events from a calendar, then delete it.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-calendar',
   parameterTypes: {
-    pathParams: ['calendar_id', 'calendar_id'],
+    pathParams: ['calendar_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -10831,7 +11068,7 @@ const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-calendar-job',
   parameterTypes: {
-    pathParams: ['calendar_id', 'job_id', 'calendar_id', 'job_id'],
+    pathParams: ['calendar_id', 'job_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -10852,7 +11089,7 @@ const ML_DELETE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-data-frame-analytics',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
@@ -10873,14 +11110,8 @@ const ML_DELETE_DATAFEED_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-datafeed',
   parameterTypes: {
-    pathParams: ['datafeed_id', 'datafeed_id'],
-    urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_throttled',
-      'ignore_unavailable',
-      'force',
-    ],
+    pathParams: ['datafeed_id'],
+    urlParams: ['force'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10903,15 +11134,15 @@ using a job identifier, a group name, a comma-separated list of jobs, or a
 wildcard expression. You can delete expired data for all anomaly detection
 jobs by using \`_all\`, by specifying \`*\` as the \`<job_id>\`, or by omitting the
 \`<job_id>\`.`,
-  methods: ['DELETE', 'DELETE'],
+  methods: ['DELETE'],
   patterns: ['/_ml/_delete_expired_data/{job_id}', '/_ml/_delete_expired_data'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-expired-data',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['job_id'],
+    urlParams: ['requests_per_second', 'timeout'],
+    bodyParams: ['requests_per_second', 'timeout'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_delete_expired_data_request, 'body'),
@@ -10936,7 +11167,7 @@ filter. You must update or delete the job before you can delete the filter.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-filter',
   parameterTypes: {
-    pathParams: ['filter_id', 'filter_id'],
+    pathParams: ['filter_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -10956,7 +11187,7 @@ By default, forecasts are retained for 14 days. You can specify a
 different retention period with the \`expires_in\` parameter in the forecast
 jobs API. The delete forecast API enables you to delete one or more
 forecasts before they expire.`,
-  methods: ['DELETE', 'DELETE'],
+  methods: ['DELETE'],
   patterns: [
     '/_ml/anomaly_detectors/{job_id}/_forecast',
     '/_ml/anomaly_detectors/{job_id}/_forecast/{forecast_id}',
@@ -10965,8 +11196,8 @@ forecasts before they expire.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-forecast',
   parameterTypes: {
-    pathParams: ['job_id'],
-    urlParams: ['duration', 'expires_in', 'max_model_memory'],
+    pathParams: ['job_id', 'forecast_id'],
+    urlParams: ['allow_no_forecasts', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -10996,16 +11227,8 @@ delete job request.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-job',
   parameterTypes: {
-    pathParams: ['job_id', 'job_id'],
-    urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_throttled',
-      'ignore_unavailable',
-      'force',
-      'delete_user_annotations',
-      'wait_for_completion',
-    ],
+    pathParams: ['job_id'],
+    urlParams: ['force', 'delete_user_annotations', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11052,8 +11275,8 @@ The request deletes a trained inference model that is not referenced by an inges
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-trained-model',
   parameterTypes: {
-    pathParams: ['model_id', 'model_id'],
-    urlParams: ['defer_definition_decompression', 'wait_for_completion', 'force', 'timeout'],
+    pathParams: ['model_id'],
+    urlParams: ['force', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11077,8 +11300,8 @@ by the \`model_id\`, this API returns an error.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-trained-model-alias',
   parameterTypes: {
-    pathParams: ['model_id', 'model_alias', 'model_id', 'model_alias'],
-    urlParams: ['reassign'],
+    pathParams: ['model_id', 'model_alias'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11104,7 +11327,7 @@ estimates for the fields it references.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['analysis_config', 'max_bucket_cardinality', 'overall_cardinality'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_estimate_model_memory_request, 'body'),
@@ -11130,7 +11353,7 @@ field and an analytics result field to be present.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['evaluation', 'index', 'query'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_evaluate_data_frame_request, 'body'),
@@ -11150,15 +11373,24 @@ explanations are provided:
 * which fields are included or not in the analysis and why,
 * how much memory is estimated to be required. The estimate can be used when deciding the appropriate value for model_memory_limit setting later on.
 If you have object fields or fields that are excluded via source filtering, they are not included in the explanation.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_ml/data_frame/analytics/_explain', '/_ml/data_frame/analytics/{id}/_explain'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-explain-data-frame-analytics',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'source',
+      'dest',
+      'analysis',
+      'description',
+      'model_memory_limit',
+      'max_num_threads',
+      'analyzed_fields',
+      'allow_lazy_start',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_explain_data_frame_analytics_request, 'body'),
@@ -11201,7 +11433,7 @@ analyzing further data.`,
   parameterTypes: {
     pathParams: ['job_id'],
     urlParams: ['advance_time', 'calc_interim', 'end', 'skip_time', 'start'],
-    bodyParams: [],
+    bodyParams: ['advance_time', 'calc_interim', 'end', 'skip_time', 'start'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_flush_job_request, 'body'),
@@ -11227,7 +11459,7 @@ based on historical data.`,
   parameterTypes: {
     pathParams: ['job_id'],
     urlParams: ['duration', 'expires_in', 'max_model_memory'],
-    bodyParams: [],
+    bodyParams: ['duration', 'expires_in', 'max_model_memory'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_forecast_request, 'body'),
@@ -11241,7 +11473,7 @@ const ML_GET_BUCKETS_CONTRACT: InternalConnectorContract = {
   summary: `Get anomaly detection job results for buckets`,
   description: `Get anomaly detection job results for buckets.
 The API presents a chronological view of the records, grouped by bucket.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: [
     '/_ml/anomaly_detectors/{job_id}/results/buckets/{timestamp}',
     '/_ml/anomaly_detectors/{job_id}/results/buckets',
@@ -11250,9 +11482,28 @@ The API presents a chronological view of the records, grouped by bucket.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-buckets',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['job_id', 'timestamp'],
+    urlParams: [
+      'anomaly_score',
+      'desc',
+      'end',
+      'exclude_interim',
+      'expand',
+      'from',
+      'size',
+      'sort',
+      'start',
+    ],
+    bodyParams: [
+      'anomaly_score',
+      'desc',
+      'end',
+      'exclude_interim',
+      'expand',
+      'page',
+      'sort',
+      'start',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_get_buckets_request, 'body'),
@@ -11285,7 +11536,7 @@ const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-calendar-events',
   parameterTypes: {
-    pathParams: ['calendar_id', 'calendar_id'],
+    pathParams: ['calendar_id'],
     urlParams: ['end', 'from', 'job_id', 'size', 'start'],
     bodyParams: [],
   },
@@ -11300,15 +11551,15 @@ const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_calendars',
   summary: `Get calendar configuration info`,
   description: `Get calendar configuration info.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_ml/calendars', '/_ml/calendars/{calendar_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-calendars',
   parameterTypes: {
-    pathParams: ['calendar_id', 'calendar_id'],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['calendar_id'],
+    urlParams: ['from', 'size'],
+    bodyParams: ['page'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_get_calendars_request, 'body'),
@@ -11335,7 +11586,7 @@ const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_categories',
   summary: `Get anomaly detection job results for categories`,
   description: `Get anomaly detection job results for categories.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: [
     '/_ml/anomaly_detectors/{job_id}/results/categories/{category_id}',
     '/_ml/anomaly_detectors/{job_id}/results/categories',
@@ -11344,9 +11595,9 @@ const ML_GET_CATEGORIES_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-categories',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['job_id', 'category_id'],
+    urlParams: ['from', 'partition_field_value', 'size'],
+    bodyParams: ['page'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_get_categories_request, 'body'),
@@ -11376,14 +11627,14 @@ const ML_GET_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
 You can get information for multiple data frame analytics jobs in a single
 API request by using a comma-separated list of data frame analytics jobs or a
 wildcard expression.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/data_frame/analytics/{id}', '/_ml/data_frame/analytics'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-data-frame-analytics',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['force', 'timeout'],
+    pathParams: ['id'],
+    urlParams: ['allow_no_match', 'from', 'size', 'exclude_generated'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11403,14 +11654,14 @@ const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_data_frame_analytics_stats',
   summary: `Get data frame analytics job stats`,
   description: `Get data frame analytics job stats.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/data_frame/analytics/_stats', '/_ml/data_frame/analytics/{id}/_stats'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-data-frame-analytics-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['id'],
+    urlParams: ['allow_no_match', 'from', 'size', 'verbose'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11436,14 +11687,14 @@ get statistics for all datafeeds by using \`_all\`, by specifying \`*\` as the
 \`<feed_id>\`, or by omitting the \`<feed_id>\`. If the datafeed is stopped, the
 only information you receive is the \`datafeed_id\` and the \`state\`.
 This API returns a maximum of 10,000 datafeeds.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/datafeeds/{datafeed_id}/_stats', '/_ml/datafeeds/_stats'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-datafeed-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['datafeed_id'],
+    urlParams: ['allow_no_match'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11465,20 +11716,14 @@ using a comma-separated list of datafeeds or a wildcard expression. You can
 get information for all datafeeds by using \`_all\`, by specifying \`*\` as the
 \`<feed_id>\`, or by omitting the \`<feed_id>\`.
 This API returns a maximum of 10,000 datafeeds.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/datafeeds/{datafeed_id}', '/_ml/datafeeds'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-datafeeds',
   parameterTypes: {
-    pathParams: ['datafeed_id', 'datafeed_id'],
-    urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_throttled',
-      'ignore_unavailable',
-      'force',
-    ],
+    pathParams: ['datafeed_id'],
+    urlParams: ['allow_no_match', 'exclude_generated'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11496,14 +11741,14 @@ const ML_GET_FILTERS_CONTRACT: InternalConnectorContract = {
   summary: `Get filters`,
   description: `Get filters.
 You can get a single filter or all filters.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/filters', '/_ml/filters/{filter_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-filters',
   parameterTypes: {
-    pathParams: ['filter_id', 'filter_id'],
-    urlParams: [],
+    pathParams: ['filter_id'],
+    urlParams: ['from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11529,9 +11774,18 @@ the anomalies. Influencer results are available only if an
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-influencers',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['job_id'],
+    urlParams: [
+      'desc',
+      'end',
+      'exclude_interim',
+      'influencer_score',
+      'from',
+      'size',
+      'sort',
+      'start',
+    ],
+    bodyParams: ['page'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_get_influencers_request, 'body'),
@@ -11547,14 +11801,14 @@ const ML_GET_JOB_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_job_stats',
   summary: `Get anomaly detection job stats`,
   description: `Get anomaly detection job stats.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/anomaly_detectors/_stats', '/_ml/anomaly_detectors/{job_id}/_stats'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-job-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['job_id'],
+    urlParams: ['allow_no_match'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11575,22 +11829,14 @@ You can get information for multiple anomaly detection jobs in a single API
 request by using a group name, a comma-separated list of jobs, or a wildcard
 expression. You can get information for all anomaly detection jobs by using
 \`_all\`, by specifying \`*\` as the \`<job_id>\`, or by omitting the \`<job_id>\`.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/anomaly_detectors/{job_id}', '/_ml/anomaly_detectors'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-jobs',
   parameterTypes: {
-    pathParams: ['job_id', 'job_id'],
-    urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_throttled',
-      'ignore_unavailable',
-      'force',
-      'delete_user_annotations',
-      'wait_for_completion',
-    ],
+    pathParams: ['job_id'],
+    urlParams: ['allow_no_match', 'exclude_generated'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11609,14 +11855,14 @@ const ML_GET_MEMORY_STATS_CONTRACT: InternalConnectorContract = {
   description: `Get machine learning memory usage info.
 Get information about how machine learning jobs and trained models are using memory,
 on each node, both within the JVM heap, and natively, outside of the JVM.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/memory/_stats', '/_ml/memory/{node_id}/_stats'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-memory-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['node_id'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11654,7 +11900,7 @@ const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_model_snapshots',
   summary: `Get model snapshots info`,
   description: `Get model snapshots info.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: [
     '/_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}',
     '/_ml/anomaly_detectors/{job_id}/model_snapshots',
@@ -11664,8 +11910,8 @@ const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-model-snapshots',
   parameterTypes: {
     pathParams: ['job_id', 'snapshot_id'],
-    urlParams: [],
-    bodyParams: [],
+    urlParams: ['desc', 'end', 'from', 'size', 'sort', 'start'],
+    bodyParams: ['desc', 'end', 'page', 'sort', 'start'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_get_model_snapshots_request, 'body'),
@@ -11716,9 +11962,25 @@ jobs' largest bucket span.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-overall-buckets',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['job_id'],
+    urlParams: [
+      'allow_no_match',
+      'bucket_span',
+      'end',
+      'exclude_interim',
+      'overall_score',
+      'start',
+      'top_n',
+    ],
+    bodyParams: [
+      'allow_no_match',
+      'bucket_span',
+      'end',
+      'exclude_interim',
+      'overall_score',
+      'start',
+      'top_n',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_get_overall_buckets_request, 'body'),
@@ -11750,9 +12012,9 @@ number of detectors.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-records',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['job_id'],
+    urlParams: ['desc', 'end', 'exclude_interim', 'from', 'record_score', 'size', 'sort', 'start'],
+    bodyParams: ['desc', 'end', 'exclude_interim', 'page', 'record_score', 'sort', 'start'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_get_records_request, 'body'),
@@ -11768,14 +12030,22 @@ const ML_GET_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.ml.get_trained_models',
   summary: `Get trained model configuration info`,
   description: `Get trained model configuration info.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/trained_models/{model_id}', '/_ml/trained_models'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-trained-models',
   parameterTypes: {
-    pathParams: ['model_id', 'model_id'],
-    urlParams: ['defer_definition_decompression', 'wait_for_completion', 'force', 'timeout'],
+    pathParams: ['model_id'],
+    urlParams: [
+      'allow_no_match',
+      'decompress_definition',
+      'exclude_generated',
+      'from',
+      'include',
+      'size',
+      'tags',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11794,14 +12064,14 @@ const ML_GET_TRAINED_MODELS_STATS_CONTRACT: InternalConnectorContract = {
   description: `Get trained models usage info.
 You can get usage information for multiple trained
 models in a single API request by using a comma-separated list of model IDs or a wildcard expression.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_ml/trained_models/{model_id}/_stats', '/_ml/trained_models/_stats'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-trained-models-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['model_id'],
+    urlParams: ['allow_no_match', 'from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -11829,7 +12099,7 @@ const ML_INFER_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['model_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['docs', 'inference_config'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_infer_trained_model_request, 'body'),
@@ -11884,7 +12154,7 @@ new data is received.`,
   parameterTypes: {
     pathParams: ['job_id'],
     urlParams: ['timeout'],
-    bodyParams: [],
+    bodyParams: ['timeout'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_open_job_request, 'body'),
@@ -11903,9 +12173,9 @@ const ML_POST_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-post-calendar-events',
   parameterTypes: {
-    pathParams: ['calendar_id', 'calendar_id'],
-    urlParams: ['end', 'from', 'job_id', 'size', 'start'],
-    bodyParams: [],
+    pathParams: ['calendar_id'],
+    urlParams: [],
+    bodyParams: ['events'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_post_calendar_events_request, 'body'),
@@ -11943,15 +12213,15 @@ const ML_PREVIEW_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   summary: `Preview features used by data frame analytics`,
   description: `Preview features used by data frame analytics.
 Preview the extracted features used by a data frame analytics config.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_ml/data_frame/analytics/_preview', '/_ml/data_frame/analytics/{id}/_preview'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-preview-data-frame-analytics',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['config'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_preview_data_frame_analytics_request, 'body'),
@@ -11986,15 +12256,15 @@ IMPORTANT: When Elasticsearch security features are enabled, the preview uses th
 called the API. However, when the datafeed starts it uses the roles of the last user that created or updated the
 datafeed. To get a preview that accurately reflects the behavior of the datafeed, use the appropriate credentials.
 You can also use secondary authorization headers to supply the credentials.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_ml/datafeeds/{datafeed_id}/_preview', '/_ml/datafeeds/_preview'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-preview-datafeed',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['datafeed_id'],
+    urlParams: ['start', 'end'],
+    bodyParams: ['datafeed_config', 'job_config'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_preview_datafeed_request, 'body'),
@@ -12027,9 +12297,9 @@ const ML_PUT_CALENDAR_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-calendar',
   parameterTypes: {
-    pathParams: ['calendar_id', 'calendar_id'],
+    pathParams: ['calendar_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['job_ids', 'description'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_put_calendar_request, 'body'),
@@ -12048,7 +12318,7 @@ const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-calendar-job',
   parameterTypes: {
-    pathParams: ['calendar_id', 'job_id', 'calendar_id', 'job_id'],
+    pathParams: ['calendar_id', 'job_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -12076,9 +12346,21 @@ If you supply only a subset of the regression or classification parameters, hype
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-data-frame-analytics',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['force', 'timeout'],
-    bodyParams: [],
+    pathParams: ['id'],
+    urlParams: [],
+    bodyParams: [
+      'allow_lazy_start',
+      'analysis',
+      'analyzed_fields',
+      'description',
+      'dest',
+      'max_num_threads',
+      '_meta',
+      'model_memory_limit',
+      'source',
+      'headers',
+      'version',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_put_data_frame_analytics_request, 'body'),
@@ -12108,15 +12390,24 @@ directly to the \`.ml-config\` index. Do not give users \`write\` privileges on 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-datafeed',
   parameterTypes: {
-    pathParams: ['datafeed_id', 'datafeed_id'],
-    urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_throttled',
-      'ignore_unavailable',
-      'force',
+    pathParams: ['datafeed_id'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_throttled', 'ignore_unavailable'],
+    bodyParams: [
+      'aggregations',
+      'chunking_config',
+      'delayed_data_check_config',
+      'frequency',
+      'indices',
+      'indices_options',
+      'job_id',
+      'max_empty_searches',
+      'query',
+      'query_delay',
+      'runtime_mappings',
+      'script_fields',
+      'scroll_size',
+      'headers',
     ],
-    bodyParams: [],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_put_datafeed_request, 'body'),
@@ -12137,9 +12428,9 @@ Specifically, filters are referenced in the \`custom_rules\` property of detecto
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-filter',
   parameterTypes: {
-    pathParams: ['filter_id', 'filter_id'],
+    pathParams: ['filter_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'items'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_put_filter_request, 'body'),
@@ -12160,17 +12451,26 @@ If you include a \`datafeed_config\` but do not provide a query, the datafeed us
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-job',
   parameterTypes: {
-    pathParams: ['job_id', 'job_id'],
-    urlParams: [
-      'allow_no_indices',
-      'expand_wildcards',
-      'ignore_throttled',
-      'ignore_unavailable',
-      'force',
-      'delete_user_annotations',
-      'wait_for_completion',
+    pathParams: ['job_id'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_throttled', 'ignore_unavailable'],
+    bodyParams: [
+      'allow_lazy_open',
+      'analysis_config',
+      'analysis_limits',
+      'background_persist_interval',
+      'custom_settings',
+      'daily_model_snapshot_retention_after_days',
+      'data_description',
+      'datafeed_config',
+      'description',
+      'job_id',
+      'groups',
+      'model_plot_config',
+      'model_snapshot_retention_days',
+      'renormalization_window_days',
+      'results_index_name',
+      'results_retention_days',
     ],
-    bodyParams: [],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_put_job_request, 'body'),
@@ -12190,9 +12490,21 @@ Enable you to supply a trained model that is not created by data frame analytics
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model',
   parameterTypes: {
-    pathParams: ['model_id', 'model_id'],
-    urlParams: ['defer_definition_decompression', 'wait_for_completion', 'force', 'timeout'],
-    bodyParams: [],
+    pathParams: ['model_id'],
+    urlParams: ['defer_definition_decompression', 'wait_for_completion'],
+    bodyParams: [
+      'compressed_definition',
+      'definition',
+      'description',
+      'inference_config',
+      'input',
+      'metadata',
+      'model_type',
+      'model_size_bytes',
+      'platform_architecture',
+      'tags',
+      'prefix_strings',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_put_trained_model_request, 'body'),
@@ -12227,7 +12539,7 @@ returns a warning.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model-alias',
   parameterTypes: {
-    pathParams: ['model_id', 'model_alias', 'model_id', 'model_alias'],
+    pathParams: ['model_id', 'model_alias'],
     urlParams: ['reassign'],
     bodyParams: [],
   },
@@ -12250,7 +12562,7 @@ const ML_PUT_TRAINED_MODEL_DEFINITION_PART_CONTRACT: InternalConnectorContract =
   parameterTypes: {
     pathParams: ['model_id', 'part'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['definition', 'total_definition_length', 'total_parts'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_put_trained_model_definition_part_request, 'body'),
@@ -12273,7 +12585,7 @@ The vocabulary is stored in the index as described in \`inference_config.*.vocab
   parameterTypes: {
     pathParams: ['model_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['vocabulary', 'merges', 'scores'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_put_trained_model_vocabulary_request, 'body'),
@@ -12326,7 +12638,7 @@ snapshot after Black Friday or a critical system failure.`,
   parameterTypes: {
     pathParams: ['job_id', 'snapshot_id'],
     urlParams: ['delete_intervening_results'],
-    bodyParams: [],
+    bodyParams: ['delete_intervening_results'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_revert_model_snapshot_request, 'body'),
@@ -12424,7 +12736,7 @@ authorization headers when you created or updated the datafeed, those credential
   parameterTypes: {
     pathParams: ['datafeed_id'],
     urlParams: ['end', 'start', 'timeout'],
-    bodyParams: [],
+    bodyParams: ['end', 'start', 'timeout'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_start_datafeed_request, 'body'),
@@ -12455,7 +12767,7 @@ It allocates the model to every machine learning node.`,
       'timeout',
       'wait_for',
     ],
-    bodyParams: [],
+    bodyParams: ['adaptive_allocations'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_start_trained_model_deployment_request, 'body'),
@@ -12501,7 +12813,7 @@ multiple times throughout its lifecycle.`,
   parameterTypes: {
     pathParams: ['datafeed_id'],
     urlParams: ['allow_no_match', 'force', 'timeout'],
-    bodyParams: [],
+    bodyParams: ['allow_no_match', 'force', 'timeout'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_stop_datafeed_request, 'body'),
@@ -12543,7 +12855,7 @@ const ML_UPDATE_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'model_memory_limit', 'max_num_threads', 'allow_lazy_start'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_update_data_frame_analytics_request, 'body'),
@@ -12568,7 +12880,21 @@ those credentials are used instead.`,
   parameterTypes: {
     pathParams: ['datafeed_id'],
     urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_throttled', 'ignore_unavailable'],
-    bodyParams: [],
+    bodyParams: [
+      'aggregations',
+      'chunking_config',
+      'delayed_data_check_config',
+      'frequency',
+      'indices',
+      'indices_options',
+      'job_id',
+      'max_empty_searches',
+      'query',
+      'query_delay',
+      'runtime_mappings',
+      'script_fields',
+      'scroll_size',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_update_datafeed_request, 'body'),
@@ -12590,7 +12916,7 @@ Updates the description of a filter, adds items, or removes items from the list.
   parameterTypes: {
     pathParams: ['filter_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['add_items', 'description', 'remove_items'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_update_filter_request, 'body'),
@@ -12612,7 +12938,23 @@ Updates certain properties of an anomaly detection job.`,
   parameterTypes: {
     pathParams: ['job_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'allow_lazy_open',
+      'analysis_limits',
+      'background_persist_interval',
+      'custom_settings',
+      'categorization_filters',
+      'description',
+      'model_plot_config',
+      'model_prune_window',
+      'daily_model_snapshot_retention_after_days',
+      'model_snapshot_retention_days',
+      'renormalization_window_days',
+      'results_retention_days',
+      'groups',
+      'detectors',
+      'per_partition_categorization',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_update_job_request, 'body'),
@@ -12634,7 +12976,7 @@ Updates certain properties of a snapshot.`,
   parameterTypes: {
     pathParams: ['job_id', 'snapshot_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['description', 'retain'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_update_model_snapshot_request, 'body'),
@@ -12655,7 +12997,7 @@ const ML_UPDATE_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: ['model_id'],
     urlParams: ['number_of_allocations'],
-    bodyParams: [],
+    bodyParams: ['number_of_allocations', 'adaptive_allocations'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(ml_update_trained_model_deployment_request, 'body'),
@@ -12731,7 +13073,7 @@ const MONITORING_BULK_CONTRACT: InternalConnectorContract = {
   summary: ``,
   description: `Send monitoring data.
 This API is used by the monitoring features to send monitoring data.`,
-  methods: ['POST', 'PUT', 'POST', 'PUT'],
+  methods: ['POST', 'PUT'],
   patterns: ['/_monitoring/bulk', '/_monitoring/{type}/bulk'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch',
@@ -12763,13 +13105,28 @@ This structure is specifically optimized to reduce parsing if a specific search 
 IMPORTANT: The final line of data must end with a newline character \`\\n\`.
 Each newline character may be preceded by a carriage return \`\\r\`.
 When sending requests to this endpoint the \`Content-Type\` header should be set to \`application/x-ndjson\`.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_msearch', '/{index}/_msearch'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'ccs_minimize_roundtrips',
+      'expand_wildcards',
+      'ignore_throttled',
+      'ignore_unavailable',
+      'include_named_queries_score',
+      'index',
+      'max_concurrent_searches',
+      'max_concurrent_shard_requests',
+      'pre_filter_shard_size',
+      'rest_total_hits_as_int',
+      'routing',
+      'search_type',
+      'typed_keys',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -12811,14 +13168,20 @@ For example:
 
 \$ curl -H "Content-Type: application/x-ndjson" -XGET localhost:9200/_msearch/template --data-binary "@requests"; echo
 \`\`\``,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_msearch/template', '/{index}/_msearch/template'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch-template',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'ccs_minimize_roundtrips',
+      'max_concurrent_searches',
+      'search_type',
+      'rest_total_hits_as_int',
+      'typed_keys',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -12857,15 +13220,28 @@ Each element has the structure provided by the termvectors API.
 
 You can also use \`mtermvectors\` to generate term vectors for artificial documents provided in the body of the request.
 The mapping used is determined by the specified \`_index\`.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_mtermvectors', '/{index}/_mtermvectors'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mtermvectors',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'ids',
+      'fields',
+      'field_statistics',
+      'offsets',
+      'payloads',
+      'positions',
+      'preference',
+      'realtime',
+      'routing',
+      'term_statistics',
+      'version',
+      'version_type',
+    ],
+    bodyParams: ['docs', 'ids'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(mtermvectors_request, 'body'),
@@ -12940,14 +13316,22 @@ const NODES_HOT_THREADS_CONTRACT: InternalConnectorContract = {
   description: `Get the hot threads for nodes.
 Get a breakdown of the hot threads on each selected node in the cluster.
 The output is plain text with a breakdown of the top hot threads for each node.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_nodes/hot_threads', '/_nodes/{node_id}/hot_threads'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-hot-threads',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['node_id'],
+    urlParams: [
+      'ignore_idle_threads',
+      'interval',
+      'snapshots',
+      'threads',
+      'timeout',
+      'type',
+      'sort',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -12966,13 +13350,13 @@ const NODES_INFO_CONTRACT: InternalConnectorContract = {
   description: `Get node information.
 
 By default, the API returns all attributes and core settings for cluster nodes.`,
-  methods: ['GET', 'GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_nodes', '/_nodes/{node_id}', '/_nodes/{metric}', '/_nodes/{node_id}/{metric}'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-info',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['node_id', 'metric'],
+    urlParams: ['flat_settings', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -13008,15 +13392,15 @@ When you have updated reloadable secure settings in your keystore, you can use t
 When the Elasticsearch keystore is password protected and not simply obfuscated, you must provide the password for the keystore when you reload the secure settings.
 Reloading the settings for the whole cluster assumes that the keystores for all nodes are protected with the same password; this method is allowed only when inter-node communications are encrypted.
 Alternatively, you can reload the secure settings on each node by locally accessing the API and passing the node-specific Elasticsearch keystore password.`,
-  methods: ['POST', 'POST'],
+  methods: ['POST'],
   patterns: ['/_nodes/reload_secure_settings', '/_nodes/{node_id}/reload_secure_settings'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-reload-secure-settings',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['node_id'],
+    urlParams: ['timeout'],
+    bodyParams: ['secure_settings_password'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(nodes_reload_secure_settings_request, 'body'),
@@ -13037,7 +13421,7 @@ const NODES_STATS_CONTRACT: InternalConnectorContract = {
   description: `Get node statistics.
 Get statistics for nodes in a cluster.
 By default, all stats are returned. You can limit the returned information by using metrics.`,
-  methods: ['GET', 'GET', 'GET', 'GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: [
     '/_nodes/stats',
     '/_nodes/{node_id}/stats',
@@ -13050,8 +13434,18 @@ By default, all stats are returned. You can limit the returned information by us
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['node_id', 'metric', 'index_metric'],
+    urlParams: [
+      'completion_fields',
+      'fielddata_fields',
+      'fields',
+      'groups',
+      'include_segment_file_sizes',
+      'level',
+      'timeout',
+      'types',
+      'include_unloaded_segments',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -13087,7 +13481,7 @@ const NODES_USAGE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.nodes.usage',
   summary: `Get feature usage information`,
   description: `Get feature usage information.`,
-  methods: ['GET', 'GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: [
     '/_nodes/usage',
     '/_nodes/{node_id}/usage',
@@ -13098,8 +13492,8 @@ const NODES_USAGE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-usage',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['node_id', 'metric'],
+    urlParams: ['timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -13179,7 +13573,7 @@ You can check how many point-in-times (that is, search contexts) are open with t
       'allow_partial_search_results',
       'max_concurrent_shard_requests',
     ],
-    bodyParams: [],
+    bodyParams: ['index_filter'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(open_point_in_time_request, 'body'),
@@ -13296,14 +13690,14 @@ const PUT_SCRIPT_CONTRACT: InternalConnectorContract = {
   summary: `Create or update a script or search template`,
   description: `Create or update a script or search template.
 Creates or updates a stored script or search template.`,
-  methods: ['PUT', 'POST', 'PUT', 'POST'],
+  methods: ['PUT', 'POST'],
   patterns: ['/_scripts/{id}', '/_scripts/{id}/{context}'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-put-script',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: ['master_timeout', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    pathParams: ['id', 'context'],
+    urlParams: ['context', 'master_timeout', 'timeout'],
+    bodyParams: ['script'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(put_script_request, 'body'),
@@ -13338,7 +13732,7 @@ This is a destructive action that is only recoverable by re-adding the same rule
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-delete-rule',
   parameterTypes: {
-    pathParams: ['ruleset_id', 'rule_id', 'ruleset_id', 'rule_id', 'ruleset_id', 'rule_id'],
+    pathParams: ['ruleset_id', 'rule_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -13361,7 +13755,7 @@ This is a destructive action that is not recoverable.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-delete-ruleset',
   parameterTypes: {
-    pathParams: ['ruleset_id', 'ruleset_id', 'ruleset_id'],
+    pathParams: ['ruleset_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -13383,7 +13777,7 @@ Get details about a query rule within a query ruleset.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-get-rule',
   parameterTypes: {
-    pathParams: ['ruleset_id', 'rule_id', 'ruleset_id', 'rule_id', 'ruleset_id', 'rule_id'],
+    pathParams: ['ruleset_id', 'rule_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -13405,7 +13799,7 @@ Get details about a query ruleset.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-get-ruleset',
   parameterTypes: {
-    pathParams: ['ruleset_id', 'ruleset_id', 'ruleset_id'],
+    pathParams: ['ruleset_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -13454,9 +13848,9 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-put-rule',
   parameterTypes: {
-    pathParams: ['ruleset_id', 'rule_id', 'ruleset_id', 'rule_id', 'ruleset_id', 'rule_id'],
+    pathParams: ['ruleset_id', 'rule_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['type', 'criteria', 'actions', 'priority'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(query_rules_put_rule_request, 'body'),
@@ -13482,9 +13876,9 @@ If multiple matching rules pin more than 100 documents, only the first 100 docum
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-put-ruleset',
   parameterTypes: {
-    pathParams: ['ruleset_id', 'ruleset_id', 'ruleset_id'],
+    pathParams: ['ruleset_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['rules'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(query_rules_put_ruleset_request, 'body'),
@@ -13506,7 +13900,7 @@ Evaluate match criteria against a query ruleset to identify the rules that would
   parameterTypes: {
     pathParams: ['ruleset_id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['match_criteria'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(query_rules_test_request, 'body'),
@@ -13521,14 +13915,14 @@ const RANK_EVAL_CONTRACT: InternalConnectorContract = {
   description: `Evaluate ranked search results.
 
 Evaluate the quality of ranked search results over a set of typical search queries.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_rank_eval', '/{index}/_rank_eval'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rank-eval',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: ['allow_no_indices', 'expand_wildcards', 'ignore_unavailable', 'search_type'],
+    bodyParams: ['requests', 'metric'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(rank_eval_request, 'body'),
@@ -13619,7 +14013,7 @@ Refer to the linked documentation for examples of how to reindex documents.`,
       'wait_for_completion',
       'require_alias',
     ],
-    bodyParams: [],
+    bodyParams: ['conflicts', 'dest', 'max_docs', 'script', 'source'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(reindex_request, 'body'),
@@ -13665,15 +14059,15 @@ const RENDER_SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   description: `Render a search template.
 
 Render a search template as a search request body.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_render/template', '/_render/template/{id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-render-search-template',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['id', 'file', 'params', 'source'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(render_search_template_request, 'body'),
@@ -13729,7 +14123,7 @@ POST my_rollup_index/_delete_by_query
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-delete-job',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -13749,13 +14143,13 @@ Get the configuration, stats, and status of rollup jobs.
 NOTE: This API returns only active (both \`STARTED\` and \`STOPPED\`) jobs.
 If a job was created, ran for a while, then was deleted, the API does not return any details about it.
 For details about a historical rollup job, the rollup capabilities API may be more useful.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_rollup/job/{id}', '/_rollup/job'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-get-jobs',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -13781,13 +14175,13 @@ This API enables you to inspect an index and determine:
 
 1. Does this index have associated rollup data somewhere in the cluster?
 2. If yes to the first question, what fields were rolled up, what aggregations can be performed, and where does the data live?`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_rollup/data/{id}', '/_rollup/data'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-get-rollup-caps',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -13845,9 +14239,18 @@ Jobs are created in a \`STOPPED\` state. You can start them with the start rollu
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-put-job',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'cron',
+      'groups',
+      'index_pattern',
+      'metrics',
+      'page_size',
+      'rollup_index',
+      'timeout',
+      'headers',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(rollup_put_job_request, 'body'),
@@ -13876,9 +14279,9 @@ For more detailed examples of using the rollup search API, including querying ro
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-rollup-search',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: ['rest_total_hits_as_int', 'typed_keys'],
+    bodyParams: ['aggregations', 'query', 'size'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(rollup_rollup_search_request, 'body'),
@@ -13965,7 +14368,7 @@ Each context requires a script, but additional parameters depend on the context 
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['context', 'context_setup', 'script'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(scripts_painless_execute_request, 'body'),
@@ -13994,14 +14397,14 @@ If the Elasticsearch security features are enabled, the access to the results of
 You can also use the scroll API to specify a new scroll parameter that extends or shortens the retention period for the search context.
 
 IMPORTANT: Results from a scrolling search reflect the state of the index at the time of the initial search request. Subsequent indexing or document changes only affect later search and scroll requests.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_search/scroll', '/_search/scroll/{scroll_id}'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-scroll',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['scroll_id'],
+    urlParams: ['scroll', 'scroll_id', 'rest_total_hits_as_int'],
+    bodyParams: ['scroll', 'scroll_id'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(scroll_request, 'body'),
@@ -14042,14 +14445,94 @@ For instance if the number of shards is equal to 2 and you request 4 slices, the
 IMPORTANT: The same point-in-time ID should be used for all slices.
 If different PIT IDs are used, slices can overlap and miss documents.
 This situation can occur because the splitting criterion is based on Lucene document IDs, which are not stable across changes to the index.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_search', '/{index}/_search'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'allow_partial_search_results',
+      'analyzer',
+      'analyze_wildcard',
+      'batched_reduce_size',
+      'ccs_minimize_roundtrips',
+      'default_operator',
+      'df',
+      'docvalue_fields',
+      'expand_wildcards',
+      'explain',
+      'ignore_throttled',
+      'ignore_unavailable',
+      'include_named_queries_score',
+      'lenient',
+      'max_concurrent_shard_requests',
+      'preference',
+      'pre_filter_shard_size',
+      'request_cache',
+      'routing',
+      'scroll',
+      'search_type',
+      'stats',
+      'stored_fields',
+      'suggest_field',
+      'suggest_mode',
+      'suggest_size',
+      'suggest_text',
+      'terminate_after',
+      'timeout',
+      'track_total_hits',
+      'track_scores',
+      'typed_keys',
+      'rest_total_hits_as_int',
+      'version',
+      '_source',
+      '_source_excludes',
+      '_source_exclude_vectors',
+      '_source_includes',
+      'seq_no_primary_term',
+      'q',
+      'size',
+      'from',
+      'sort',
+    ],
+    bodyParams: [
+      'aggregations',
+      'collapse',
+      'explain',
+      'ext',
+      'from',
+      'highlight',
+      'track_total_hits',
+      'indices_boost',
+      'docvalue_fields',
+      'knn',
+      'rank',
+      'min_score',
+      'post_filter',
+      'profile',
+      'query',
+      'rescore',
+      'retriever',
+      'script_fields',
+      'search_after',
+      'size',
+      'slice',
+      'sort',
+      '_source',
+      'fields',
+      'suggest',
+      'terminate_after',
+      'timeout',
+      'track_scores',
+      'version',
+      'seq_no_primary_term',
+      'stored_fields',
+      'pit',
+      'runtime_mappings',
+      'stats',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(search_request, 'body'),
@@ -14079,8 +14562,8 @@ Remove a search application and its associated alias. Indices attached to the se
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-delete',
   parameterTypes: {
-    pathParams: ['name', 'name', 'name'],
-    urlParams: ['create'],
+    pathParams: ['name'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -14101,7 +14584,7 @@ The associated data stream is also deleted.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-delete-behavioral-analytics',
   parameterTypes: {
-    pathParams: ['name', 'name'],
+    pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14122,8 +14605,8 @@ const SEARCH_APPLICATION_GET_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get',
   parameterTypes: {
-    pathParams: ['name', 'name', 'name'],
-    urlParams: ['create'],
+    pathParams: ['name'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -14137,13 +14620,13 @@ const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
   type: 'elasticsearch.search_application.get_behavioral_analytics',
   summary: `Get behavioral analytics collections`,
   description: `Get behavioral analytics collections.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_application/analytics', '/_application/analytics/{name}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get-behavioral-analytics',
   parameterTypes: {
-    pathParams: ['name', 'name'],
+    pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14213,7 +14696,7 @@ const SEARCH_APPLICATION_PUT_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-put',
   parameterTypes: {
-    pathParams: ['name', 'name', 'name'],
+    pathParams: ['name'],
     urlParams: ['create'],
     bodyParams: [],
   },
@@ -14234,7 +14717,7 @@ const SEARCH_APPLICATION_PUT_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorCon
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-put-behavioral-analytics',
   parameterTypes: {
-    pathParams: ['name', 'name'],
+    pathParams: ['name'],
     urlParams: [],
     bodyParams: [],
   },
@@ -14262,7 +14745,7 @@ You must have \`read\` privileges on the backing alias of the search application
   parameterTypes: {
     pathParams: ['name'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['params'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(search_application_render_query_request, 'body'),
@@ -14283,9 +14766,9 @@ Unspecified template parameters are assigned their default values if applicable.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-search',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['name'],
+    urlParams: ['typed_keys'],
+    bodyParams: ['params'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(search_application_search_request, 'body'),
@@ -14394,9 +14877,33 @@ Learn how to use the vector tile search API with practical examples in the [Vect
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-mvt',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index', 'field', 'zoom', 'x', 'y'],
+    urlParams: [
+      'exact_bounds',
+      'extent',
+      'grid_agg',
+      'grid_precision',
+      'grid_type',
+      'size',
+      'track_total_hits',
+      'with_labels',
+    ],
+    bodyParams: [
+      'aggs',
+      'buffer',
+      'exact_bounds',
+      'extent',
+      'fields',
+      'grid_agg',
+      'grid_precision',
+      'grid_type',
+      'query',
+      'runtime_mappings',
+      'size',
+      'sort',
+      'track_total_hits',
+      'with_labels',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(search_mvt_request, 'body'),
@@ -14418,14 +14925,22 @@ This information can be useful for working out issues or planning optimizations 
 When filtered aliases are used, the filter is returned as part of the \`indices\` section.
 
 If the Elasticsearch security features are enabled, you must have the \`view_index_metadata\` or \`manage\` index privilege for the target data stream, index, or alias.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_search_shards', '/{index}/_search_shards'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-shards',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'expand_wildcards',
+      'ignore_unavailable',
+      'local',
+      'master_timeout',
+      'preference',
+      'routing',
+    ],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -14453,15 +14968,29 @@ const SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.search_template',
   summary: `Run a search with a search template`,
   description: `Run a search with a search template.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_search/template', '/{index}/_search/template'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-template',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: [
+      'allow_no_indices',
+      'ccs_minimize_roundtrips',
+      'expand_wildcards',
+      'explain',
+      'ignore_throttled',
+      'ignore_unavailable',
+      'preference',
+      'profile',
+      'routing',
+      'scroll',
+      'search_type',
+      'rest_total_hits_as_int',
+      'typed_keys',
+    ],
+    bodyParams: ['explain', 'id', 'params', 'profile', 'source'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(search_template_request, 'body'),
@@ -14489,14 +15018,14 @@ const SEARCHABLE_SNAPSHOTS_CACHE_STATS_CONTRACT: InternalConnectorContract = {
   summary: `Get cache statistics`,
   description: `Get cache statistics.
 Get statistics about the shared cache for partially mounted indices.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_searchable_snapshots/cache/stats', '/_searchable_snapshots/{node_id}/cache/stats'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-cache-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['node_id'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -14517,14 +15046,14 @@ const SEARCHABLE_SNAPSHOTS_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
   summary: `Clear the cache`,
   description: `Clear the cache.
 Clear indices and data streams from the shared cache for partially mounted indices.`,
-  methods: ['POST', 'POST'],
+  methods: ['POST'],
   patterns: ['/_searchable_snapshots/cache/clear', '/{index}/_searchable_snapshots/cache/clear'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-clear-cache',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: ['expand_wildcards', 'allow_no_indices', 'ignore_unavailable'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -14555,7 +15084,7 @@ Manually mounting ILM-managed snapshots can interfere with ILM processes.`,
   parameterTypes: {
     pathParams: ['repository', 'snapshot'],
     urlParams: ['master_timeout', 'wait_for_completion', 'storage'],
-    bodyParams: [],
+    bodyParams: ['index', 'renamed_index', 'index_settings', 'ignore_index_settings'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(searchable_snapshots_mount_request, 'body'),
@@ -14568,14 +15097,14 @@ const SEARCHABLE_SNAPSHOTS_STATS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.searchable_snapshots.stats',
   summary: `Get searchable snapshot statistics`,
   description: `Get searchable snapshot statistics.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_searchable_snapshots/stats', '/{index}/_searchable_snapshots/stats'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['index'],
+    urlParams: ['level'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -14616,7 +15145,7 @@ Any updates do not change existing content for either the \`labels\` or \`data\`
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['access_token', 'grant_type', 'password', 'username'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_activate_user_profile_request, 'body'),
@@ -14665,8 +15194,8 @@ The bulk delete roles API cannot delete roles that are defined in roles files.`,
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-bulk-delete-role',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['refresh', 'refresh'],
-    bodyParams: [],
+    urlParams: ['refresh'],
+    bodyParams: ['names'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_bulk_delete_role_request, 'body'),
@@ -14689,8 +15218,8 @@ The bulk create or update roles API cannot update roles that are defined in role
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-bulk-put-role',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['refresh', 'refresh'],
-    bodyParams: [],
+    urlParams: ['refresh'],
+    bodyParams: ['roles'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_bulk_put_role_request, 'body'),
@@ -14726,7 +15255,7 @@ A successful request returns a JSON structure that contains the IDs of all updat
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['expiration', 'ids', 'metadata', 'role_descriptors'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_bulk_update_api_keys_request, 'body'),
@@ -14741,15 +15270,15 @@ const SECURITY_CHANGE_PASSWORD_CONTRACT: InternalConnectorContract = {
   description: `Change passwords.
 
 Change the passwords of users in the native realm and built-in users.`,
-  methods: ['PUT', 'POST', 'PUT', 'POST'],
+  methods: ['PUT', 'POST'],
   patterns: ['/_security/user/{username}/_password', '/_security/user/_password'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-change-password',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['username'],
+    urlParams: ['refresh'],
+    bodyParams: ['password', 'password_hash'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_change_password_request, 'body'),
@@ -14923,17 +15452,8 @@ To configure or turn off the API key service, refer to API key service setting d
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key',
   parameterTypes: {
     pathParams: [],
-    urlParams: [
-      'id',
-      'name',
-      'owner',
-      'realm_name',
-      'username',
-      'with_limited_by',
-      'active_only',
-      'with_profile_uid',
-    ],
-    bodyParams: [],
+    urlParams: ['refresh'],
+    bodyParams: ['expiration', 'name', 'role_descriptors', 'metadata'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_create_api_key_request, 'body'),
@@ -14973,7 +15493,7 @@ Attempting to update them with the update REST API key API or the bulk update RE
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['access', 'expiration', 'metadata', 'name', 'certificate_identity'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_create_cross_cluster_api_key_request, 'body'),
@@ -14991,7 +15511,7 @@ Create a service accounts token for access without requiring basic authenticatio
 
 NOTE: Service account tokens never expire.
 You must actively delete them if they are no longer needed.`,
-  methods: ['PUT', 'POST', 'POST'],
+  methods: ['PUT', 'POST'],
   patterns: [
     '/_security/service/{namespace}/{service}/credential/token/{name}',
     '/_security/service/{namespace}/{service}/credential/token',
@@ -15043,7 +15563,7 @@ The proxy is trusted to have performed the TLS authentication and this API trans
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['x509_certificate_chain'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_delegate_pki_request, 'body'),
@@ -15188,8 +15708,8 @@ You can use this API to revoke a user's access to Elasticsearch.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-disable-user',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['username'],
+    urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -15221,8 +15741,8 @@ To re-enable a disabled user profile, use the enable user profile API .`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-disable-user-profile',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['uid'],
+    urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -15251,8 +15771,8 @@ By default, when you create users, they are enabled.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['username'],
+    urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -15284,8 +15804,8 @@ If you later disable the user profile, you can use the enable user profile API t
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user-profile',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['uid'],
+    urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -15419,7 +15939,7 @@ To use this API, you must have one of the following privileges:
 
 * The \`read_security\` cluster privilege (or a greater privilege such as \`manage_security\` or \`all\`).
 * The "Manage Application Privileges" global privilege for the application being referenced in the request.`,
-  methods: ['GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: [
     '/_security/privilege',
     '/_security/privilege/{application}',
@@ -15430,7 +15950,7 @@ To use this API, you must have one of the following privileges:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-privileges',
   parameterTypes: {
     pathParams: ['application', 'name'],
-    urlParams: ['refresh'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -15458,14 +15978,14 @@ const SECURITY_GET_ROLE_CONTRACT: InternalConnectorContract = {
 Get roles in the native realm.
 The role management APIs are generally the preferred way to manage roles, rather than using file-based role management.
 The get roles API cannot retrieve roles that are defined in roles files.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_security/role/{name}', '/_security/role'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-role',
   parameterTypes: {
     pathParams: ['name'],
-    urlParams: ['refresh', 'refresh', 'refresh'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -15486,14 +16006,14 @@ const SECURITY_GET_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {
 Role mappings define which roles are assigned to each user.
 The role mapping APIs are generally the preferred way to manage role mappings rather than using role mapping files.
 The get role mappings API cannot retrieve role mappings that are defined in role mapping files.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_security/role_mapping/{name}', '/_security/role_mapping'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-role-mapping',
   parameterTypes: {
     pathParams: ['name'],
-    urlParams: ['refresh'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -15514,7 +16034,7 @@ const SECURITY_GET_SERVICE_ACCOUNTS_CONTRACT: InternalConnectorContract = {
 Get a list of service accounts that match the provided path parameters.
 
 NOTE: Currently, only the \`elastic/fleet-server\` service account is available.`,
-  methods: ['GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: [
     '/_security/service/{namespace}/{service}',
     '/_security/service/{namespace}',
@@ -15524,7 +16044,7 @@ NOTE: Currently, only the \`elastic/fleet-server\` service account is available.
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-service-accounts',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['namespace', 'service'],
     urlParams: [],
     bodyParams: [],
   },
@@ -15591,7 +16111,7 @@ This includes:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-settings',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['master_timeout', 'master_timeout', 'timeout'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -15649,7 +16169,7 @@ If you want to invalidate a token immediately, you can do so by using the invali
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['grant_type', 'scope', 'password', 'kerberos_ticket', 'refresh_token', 'username'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_get_token_request, 'body'),
@@ -15664,14 +16184,14 @@ const SECURITY_GET_USER_CONTRACT: InternalConnectorContract = {
   description: `Get users.
 
 Get information about users in the native realm and built-in users.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_security/user/{username}', '/_security/user'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-user',
   parameterTypes: {
     pathParams: ['username'],
-    urlParams: ['refresh'],
+    urlParams: ['with_profile_uid'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -15770,7 +16290,7 @@ By default, API keys never expire. You can specify expiration information when y
   parameterTypes: {
     pathParams: [],
     urlParams: ['refresh'],
-    bodyParams: [],
+    bodyParams: ['api_key', 'grant_type', 'access_token', 'username', 'password', 'run_as'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_grant_api_key_request, 'body'),
@@ -15787,15 +16307,15 @@ const SECURITY_HAS_PRIVILEGES_CONTRACT: InternalConnectorContract = {
 Determine whether the specified user has a specified list of privileges.
 All users can use this API, but only to determine their own privileges.
 To check the privileges of other users, you must use the run as feature.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_security/user/_has_privileges', '/_security/user/{user}/_has_privileges'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-has-privileges',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['user'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['application', 'cluster', 'index'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_has_privileges_request, 'body'),
@@ -15835,7 +16355,7 @@ Elastic reserves the right to change or remove this feature in future releases w
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['uids', 'privileges'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_has_privileges_user_profile_request, 'body'),
@@ -15874,17 +16394,8 @@ In addition, with the \`manage_own_api_key\` privilege, an invalidation request 
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-invalidate-api-key',
   parameterTypes: {
     pathParams: [],
-    urlParams: [
-      'id',
-      'name',
-      'owner',
-      'realm_name',
-      'username',
-      'with_limited_by',
-      'active_only',
-      'with_profile_uid',
-    ],
-    bodyParams: [],
+    urlParams: [],
+    bodyParams: ['id', 'ids', 'name', 'owner', 'realm_name', 'username'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_invalidate_api_key_request, 'body'),
@@ -15917,7 +16428,7 @@ If none of these two are specified, then \`realm_name\` and/or \`username\` need
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['token', 'refresh_token', 'realm_name', 'username'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_invalidate_token_request, 'body'),
@@ -15943,7 +16454,7 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['nonce', 'realm', 'redirect_uri', 'state'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_oidc_authenticate_request, 'body'),
@@ -15971,7 +16482,7 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['token', 'refresh_token'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_oidc_logout_request, 'body'),
@@ -15999,7 +16510,7 @@ These APIs are used internally by Kibana in order to provide OpenID Connect base
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['iss', 'login_hint', 'nonce', 'realm', 'state'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_oidc_prepare_authentication_request, 'body'),
@@ -16037,7 +16548,7 @@ Action names can contain any number of printable ASCII characters and must conta
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-privileges',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
+    urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -16066,7 +16577,18 @@ File-based role management is not available in Elastic Serverless.`,
   parameterTypes: {
     pathParams: ['name'],
     urlParams: ['refresh'],
-    bodyParams: [],
+    bodyParams: [
+      'applications',
+      'cluster',
+      'global',
+      'indices',
+      'remote_indices',
+      'remote_cluster',
+      'metadata',
+      'run_as',
+      'description',
+      'transient_metadata',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_put_role_request, 'body'),
@@ -16115,7 +16637,7 @@ If the format of the template is set to "json" then the template is expected to 
   parameterTypes: {
     pathParams: ['name'],
     urlParams: ['refresh'],
-    bodyParams: [],
+    bodyParams: ['enabled', 'metadata', 'roles', 'role_templates', 'rules', 'run_as'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_put_role_mapping_request, 'body'),
@@ -16143,7 +16665,16 @@ To change a user's password without updating any other fields, use the change pa
   parameterTypes: {
     pathParams: ['username'],
     urlParams: ['refresh'],
-    bodyParams: [],
+    bodyParams: [
+      'username',
+      'email',
+      'full_name',
+      'metadata',
+      'password',
+      'password_hash',
+      'roles',
+      'enabled',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_put_user_request, 'body'),
@@ -16174,8 +16705,8 @@ Refer to the linked documentation for examples of how to find API keys:`,
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-query-api-keys',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    urlParams: ['with_limited_by', 'with_profile_uid', 'typed_keys'],
+    bodyParams: ['aggregations', 'query', 'from', 'sort', 'size', 'search_after'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_query_api_keys_request, 'body'),
@@ -16205,7 +16736,7 @@ Also, the results can be paginated and sorted.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['query', 'from', 'sort', 'size', 'search_after'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_query_role_request, 'body'),
@@ -16234,8 +16765,8 @@ This API is only for native users.`,
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-query-user',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    urlParams: ['with_profile_uid'],
+    bodyParams: ['query', 'from', 'sort', 'size', 'search_after'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_query_user_request, 'body'),
@@ -16274,7 +16805,7 @@ This API endpoint essentially exchanges SAML responses that indicate successful 
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['content', 'ids', 'realm'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_saml_authenticate_request, 'body'),
@@ -16306,7 +16837,7 @@ The caller of this API must prepare the request accordingly so that this API can
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['realm', 'ids', 'query_string', 'content'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_saml_complete_logout_request, 'body'),
@@ -16337,7 +16868,7 @@ Thus the user can be redirected back to their IdP.`,
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['acs', 'query_string', 'realm'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_saml_invalidate_request, 'body'),
@@ -16366,7 +16897,7 @@ If the SAML realm in Elasticsearch is configured accordingly and the SAML IdP su
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['token', 'refresh_token'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_saml_logout_request, 'body'),
@@ -16400,7 +16931,7 @@ The caller of this API needs to store this identifier as it needs to be used in 
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['acs', 'realm', 'relay_state'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_saml_prepare_authentication_request, 'body'),
@@ -16452,8 +16983,8 @@ Elastic reserves the right to change or remove this feature in future releases w
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-suggest-user-profiles',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    urlParams: ['data'],
+    bodyParams: ['name', 'size', 'data', 'hint'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_suggest_user_profiles_request, 'body'),
@@ -16499,7 +17030,7 @@ This change can occur if the owner user's permissions have changed since the API
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['role_descriptors', 'metadata', 'expiration'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_update_api_key_request, 'body'),
@@ -16538,7 +17069,7 @@ To learn more about how to use this API, refer to the [Update cross cluter API k
   parameterTypes: {
     pathParams: ['id'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['access', 'expiration', 'metadata', 'certificate_identity'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_update_cross_cluster_api_key_request, 'body'),
@@ -16565,8 +17096,8 @@ This API does not yet support configuring the settings for indices before they a
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-settings',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['master_timeout', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    urlParams: ['master_timeout', 'timeout'],
+    bodyParams: ['security', 'security-profile', 'security-tokens'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_update_settings_request, 'body'),
@@ -16602,9 +17133,9 @@ The \`update_profile_data\` global privilege grants privileges for updating only
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-user-profile-data',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['uid'],
+    urlParams: ['if_seq_no', 'if_primary_term', 'refresh'],
+    bodyParams: ['labels', 'data'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(security_update_user_profile_data_request, 'body'),
@@ -16655,7 +17186,7 @@ The API returns status information for each part of the shut down process.
 NOTE: This feature is designed for indirect use by Elasticsearch Service, Elastic Cloud Enterprise, and Elastic Cloud on Kubernetes. Direct use is not supported.
 
 If the operator privileges feature is enabled, you must be an operator to use this API.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_nodes/shutdown', '/_nodes/{node_id}/shutdown'],
   isInternal: false,
   documentation:
@@ -16720,15 +17251,21 @@ The simulate pipeline API is more useful for developing a single pipeline, while
 By default, the pipeline definitions that are currently in the system are used.
 However, you can supply substitute pipeline definitions in the body of the request.
 These will be used in place of the pipeline definitions that are already in the system. This can be used to replace existing pipeline definitions or to create new ones. The pipeline substitutions are used only within this request.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_ingest/_simulate', '/_ingest/{index}/_simulate'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-simulate-ingest',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index'],
+    urlParams: ['pipeline', 'merge_type'],
+    bodyParams: [
+      'docs',
+      'component_template_substitutions',
+      'index_template_substitutions',
+      'mapping_addition',
+      'pipeline_substitutions',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(simulate_ingest_request, 'body'),
@@ -16763,8 +17300,8 @@ This operation prevents any future snapshots from being taken but does not cance
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-delete-lifecycle',
   parameterTypes: {
-    pathParams: ['policy_id', 'policy_id'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
+    pathParams: ['policy_id'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -16825,14 +17362,14 @@ const SLM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   summary: `Get policy information`,
   description: `Get policy information.
 Get snapshot lifecycle policy definitions and information about the latest snapshot attempts.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_slm/policy/{policy_id}', '/_slm/policy'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-get-lifecycle',
   parameterTypes: {
-    pathParams: ['policy_id', 'policy_id'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
+    pathParams: ['policy_id'],
+    urlParams: ['master_timeout', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -16901,9 +17438,9 @@ Only the latest version of a policy is stored.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-put-lifecycle',
   parameterTypes: {
-    pathParams: ['policy_id', 'policy_id'],
-    urlParams: ['master_timeout', 'timeout', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    pathParams: ['policy_id'],
+    urlParams: ['master_timeout', 'timeout'],
+    bodyParams: ['config', 'name', 'repository', 'retention', 'schedule'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(slm_put_lifecycle_request, 'body'),
@@ -16996,7 +17533,7 @@ Clone part of all of a snapshot into another snapshot in the same repository.`,
   parameterTypes: {
     pathParams: ['repository', 'snapshot', 'target_snapshot'],
     urlParams: ['master_timeout'],
-    bodyParams: [],
+    bodyParams: ['indices'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(snapshot_clone_request, 'body'),
@@ -17016,26 +17553,17 @@ Take a snapshot of a cluster or of data streams and indices.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-create',
   parameterTypes: {
-    pathParams: ['repository', 'snapshot', 'repository', 'snapshot'],
-    urlParams: [
-      'after',
-      'from_sort_value',
+    pathParams: ['repository', 'snapshot'],
+    urlParams: ['master_timeout', 'wait_for_completion'],
+    bodyParams: [
+      'expand_wildcards',
+      'feature_states',
       'ignore_unavailable',
-      'index_details',
-      'index_names',
-      'include_repository',
-      'master_timeout',
-      'order',
-      'offset',
-      'size',
-      'slm_policy_filter',
-      'sort',
-      'state',
-      'verbose',
-      'master_timeout',
-      'wait_for_completion',
+      'include_global_state',
+      'indices',
+      'metadata',
+      'partial',
     ],
-    bodyParams: [],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(snapshot_create_request, 'body'),
@@ -17064,7 +17592,7 @@ If both parameters are specified, only the query parameter is used.`,
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-create-repository',
   parameterTypes: {
     pathParams: ['repository'],
-    urlParams: ['master_timeout', 'timeout'],
+    urlParams: ['master_timeout', 'timeout', 'verify'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -17090,25 +17618,8 @@ const SNAPSHOT_DELETE_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-delete',
   parameterTypes: {
-    pathParams: ['repository', 'snapshot', 'repository', 'snapshot'],
-    urlParams: [
-      'after',
-      'from_sort_value',
-      'ignore_unavailable',
-      'index_details',
-      'index_names',
-      'include_repository',
-      'master_timeout',
-      'order',
-      'offset',
-      'size',
-      'slm_policy_filter',
-      'sort',
-      'state',
-      'verbose',
-      'master_timeout',
-      'wait_for_completion',
-    ],
+    pathParams: ['repository', 'snapshot'],
+    urlParams: ['master_timeout', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -17155,7 +17666,7 @@ Snapshots concurrently created may be seen during an iteration.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-get',
   parameterTypes: {
-    pathParams: ['repository', 'snapshot', 'repository', 'snapshot'],
+    pathParams: ['repository', 'snapshot'],
     urlParams: [
       'after',
       'from_sort_value',
@@ -17171,8 +17682,6 @@ Snapshots concurrently created may be seen during an iteration.`,
       'sort',
       'state',
       'verbose',
-      'master_timeout',
-      'wait_for_completion',
     ],
     bodyParams: [],
   },
@@ -17187,14 +17696,14 @@ const SNAPSHOT_GET_REPOSITORY_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.snapshot.get_repository',
   summary: `Get snapshot repository information`,
   description: `Get snapshot repository information.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_snapshot', '/_snapshot/{repository}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-get-repository',
   parameterTypes: {
     pathParams: ['repository'],
-    urlParams: ['master_timeout', 'timeout'],
+    urlParams: ['local', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -17438,7 +17947,18 @@ If your snapshot contains data from App Search or Workplace Search, you must res
   parameterTypes: {
     pathParams: ['repository', 'snapshot'],
     urlParams: ['master_timeout', 'wait_for_completion'],
-    bodyParams: [],
+    bodyParams: [
+      'feature_states',
+      'ignore_index_settings',
+      'ignore_unavailable',
+      'include_aliases',
+      'include_global_state',
+      'index_settings',
+      'indices',
+      'partial',
+      'rename_pattern',
+      'rename_replacement',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(snapshot_restore_request, 'body'),
@@ -17472,7 +17992,7 @@ For example, if you have 100 snapshots with 1,000 shards each, an API request th
 
 Depending on the latency of your storage, such requests can take an extremely long time to return results.
 These requests can also tax machine resources and, when using cloud storage, incur high processing costs.`,
-  methods: ['GET', 'GET', 'GET'],
+  methods: ['GET'],
   patterns: [
     '/_snapshot/_status',
     '/_snapshot/{repository}/_status',
@@ -17482,8 +18002,8 @@ These requests can also tax machine resources and, when using cloud storage, inc
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-status',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['repository', 'snapshot'],
+    urlParams: ['ignore_unavailable', 'master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -17537,7 +18057,7 @@ const SQL_CLEAR_CURSOR_CONTRACT: InternalConnectorContract = {
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['cursor'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(sql_clear_cursor_request, 'body'),
@@ -17631,8 +18151,26 @@ Run an SQL request.`,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-query',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    urlParams: ['format'],
+    bodyParams: [
+      'allow_partial_search_results',
+      'catalog',
+      'columnar',
+      'cursor',
+      'fetch_size',
+      'field_multi_value_leniency',
+      'filter',
+      'index_using_frozen',
+      'keep_alive',
+      'keep_on_completion',
+      'page_timeout',
+      'params',
+      'query',
+      'request_timeout',
+      'runtime_mappings',
+      'time_zone',
+      'wait_for_completion_timeout',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(sql_query_request, 'body'),
@@ -17658,7 +18196,7 @@ It accepts the same request body parameters as the SQL search API, excluding \`c
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['fetch_size', 'filter', 'query', 'time_zone'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(sql_translate_request, 'body'),
@@ -17792,8 +18330,8 @@ When the synonyms set is not used in analyzers, you will be able to delete it.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-delete-synonym',
   parameterTypes: {
-    pathParams: ['id', 'id', 'id'],
-    urlParams: ['from', 'size', 'refresh'],
+    pathParams: ['id'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -17814,8 +18352,8 @@ Delete a synonym rule from a synonym set.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-delete-synonym-rule',
   parameterTypes: {
-    pathParams: ['set_id', 'rule_id', 'set_id', 'rule_id', 'set_id', 'rule_id'],
-    urlParams: ['refresh', 'refresh'],
+    pathParams: ['set_id', 'rule_id'],
+    urlParams: ['refresh'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -17835,8 +18373,8 @@ const SYNONYMS_GET_SYNONYM_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym',
   parameterTypes: {
-    pathParams: ['id', 'id', 'id'],
-    urlParams: ['from', 'size', 'refresh'],
+    pathParams: ['id'],
+    urlParams: ['from', 'size'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -17857,8 +18395,8 @@ Get a synonym rule from a synonym set.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym-rule',
   parameterTypes: {
-    pathParams: ['set_id', 'rule_id', 'set_id', 'rule_id', 'set_id', 'rule_id'],
-    urlParams: ['refresh', 'refresh'],
+    pathParams: ['set_id', 'rule_id'],
+    urlParams: [],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -17907,9 +18445,9 @@ For practical examples of how to create or update a synonyms set, refer to the E
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-put-synonym',
   parameterTypes: {
-    pathParams: ['id', 'id', 'id'],
-    urlParams: ['from', 'size', 'refresh'],
-    bodyParams: [],
+    pathParams: ['id'],
+    urlParams: ['refresh'],
+    bodyParams: ['synonyms_set'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(synonyms_put_synonym_request, 'body'),
@@ -17933,9 +18471,9 @@ When you update a synonym rule, all analyzers using the synonyms set will be rel
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-put-synonym-rule',
   parameterTypes: {
-    pathParams: ['set_id', 'rule_id', 'set_id', 'rule_id', 'set_id', 'rule_id'],
-    urlParams: ['refresh', 'refresh'],
-    bodyParams: [],
+    pathParams: ['set_id', 'rule_id'],
+    urlParams: ['refresh'],
+    bodyParams: ['synonyms'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(synonyms_put_synonym_rule_request, 'body'),
@@ -17959,13 +18497,13 @@ The cancelled flag in the response indicates that the cancellation command has b
 
 To troubleshoot why a cancelled task does not complete promptly, use the get task information API with the \`?detailed\` parameter to identify the other tasks the system is running.
 You can also use the node hot threads API to obtain detailed information about the work the system is doing instead of completing the cancelled task.`,
-  methods: ['POST', 'POST'],
+  methods: ['POST'],
   patterns: ['/_tasks/_cancel', '/_tasks/{task_id}/_cancel'],
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['task_id'],
+    urlParams: ['actions', 'nodes', 'parent_task_id', 'wait_for_completion'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -18105,9 +18643,17 @@ This API is designed for low-latency look-ups used in auto-complete scenarios.
   isInternal: false,
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-terms-enum',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['index'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: [
+      'field',
+      'size',
+      'timeout',
+      'case_insensitive',
+      'index_filter',
+      'string',
+      'search_after',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(terms_enum_request, 'body'),
@@ -18164,15 +18710,40 @@ The term and field statistics are therefore only useful as relative measures whe
 By default, when requesting term vectors of artificial documents, a shard to get the statistics from is randomly selected.
 Use \`routing\` only to hit a particular shard.
 Refer to the linked documentation for detailed examples of how to use this API.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/{index}/_termvectors/{id}', '/{index}/_termvectors'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-termvectors',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['index', 'id'],
+    urlParams: [
+      'fields',
+      'field_statistics',
+      'offsets',
+      'payloads',
+      'positions',
+      'preference',
+      'realtime',
+      'routing',
+      'term_statistics',
+      'version',
+      'version_type',
+    ],
+    bodyParams: [
+      'doc',
+      'filter',
+      'per_field_analyzer',
+      'fields',
+      'field_statistics',
+      'offsets',
+      'payloads',
+      'positions',
+      'term_statistics',
+      'routing',
+      'version',
+      'version_type',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(termvectors_request, 'body'),
@@ -18276,8 +18847,20 @@ It helps determine why the returned structure was chosen.`,
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-text-structure-find-message-structure',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    urlParams: [
+      'column_names',
+      'delimiter',
+      'ecs_compatibility',
+      'explain',
+      'format',
+      'grok_pattern',
+      'quote',
+      'should_trim_fields',
+      'timeout',
+      'timestamp_field',
+      'timestamp_format',
+    ],
+    bodyParams: ['messages'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(text_structure_find_message_structure_request, 'body'),
@@ -18358,8 +18941,8 @@ The API indicates whether the lines match the pattern together with the offsets 
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-text-structure-test-grok-pattern',
   parameterTypes: {
     pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    urlParams: ['ecs_compatibility'],
+    bodyParams: ['grok_pattern', 'text'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(text_structure_test_grok_pattern_request, 'body'),
@@ -18384,8 +18967,8 @@ const TRANSFORM_DELETE_TRANSFORM_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-delete-transform',
   parameterTypes: {
-    pathParams: ['transform_id', 'transform_id'],
-    urlParams: ['defer_validation', 'timeout', 'force', 'delete_dest_index', 'timeout'],
+    pathParams: ['transform_id'],
+    urlParams: ['force', 'delete_dest_index', 'timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -18417,14 +19000,14 @@ const TRANSFORM_GET_TRANSFORM_CONTRACT: InternalConnectorContract = {
   summary: `Get transforms`,
   description: `Get transforms.
 Get configuration information for transforms.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_transform/{transform_id}', '/_transform'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-get-transform',
   parameterTypes: {
-    pathParams: ['transform_id', 'transform_id'],
-    urlParams: ['defer_validation', 'timeout', 'force', 'delete_dest_index', 'timeout'],
+    pathParams: ['transform_id'],
+    urlParams: ['allow_no_match', 'from', 'size', 'exclude_generated'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -18469,15 +19052,25 @@ Generates a preview of the results that you will get when you create a transform
 It returns a maximum of 100 results. The calculations are based on all the current data in the source index. It also
 generates a list of mappings and settings for the destination index. These values are determined based on the field
 types of the source index and the transform aggregations.`,
-  methods: ['GET', 'POST', 'GET', 'POST'],
+  methods: ['GET', 'POST'],
   patterns: ['/_transform/{transform_id}/_preview', '/_transform/_preview'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-preview-transform',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['transform_id'],
+    urlParams: ['timeout'],
+    bodyParams: [
+      'dest',
+      'description',
+      'frequency',
+      'pivot',
+      'source',
+      'settings',
+      'sync',
+      'retention_policy',
+      'latest',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(transform_preview_transform_request, 'body'),
@@ -18531,9 +19124,20 @@ give users any privileges on \`.data-frame-internal*\` indices.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-put-transform',
   parameterTypes: {
-    pathParams: ['transform_id', 'transform_id'],
-    urlParams: ['defer_validation', 'timeout', 'force', 'delete_dest_index', 'timeout'],
-    bodyParams: [],
+    pathParams: ['transform_id'],
+    urlParams: ['defer_validation', 'timeout'],
+    bodyParams: [
+      'dest',
+      'description',
+      'frequency',
+      'latest',
+      '_meta',
+      'pivot',
+      'retention_policy',
+      'settings',
+      'source',
+      'sync',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(transform_put_transform_request, 'body'),
@@ -18703,7 +19307,16 @@ time of update and runs with those privileges.`,
   parameterTypes: {
     pathParams: ['transform_id'],
     urlParams: ['defer_validation', 'timeout'],
-    bodyParams: [],
+    bodyParams: [
+      'dest',
+      'description',
+      'frequency',
+      '_meta',
+      'source',
+      'settings',
+      'sync',
+      'retention_policy',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(transform_update_transform_request, 'body'),
@@ -18791,7 +19404,15 @@ For usage examples such as partial updates, upserts, and scripted updates, see t
       '_source_excludes',
       '_source_includes',
     ],
-    bodyParams: [],
+    bodyParams: [
+      'detect_noop',
+      'doc',
+      'doc_as_upsert',
+      'script',
+      'scripted_upsert',
+      '_source',
+      'upsert',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(update_request, 'body'),
@@ -18936,7 +19557,7 @@ Refer to the linked documentation for examples of how to update documents using 
       'wait_for_active_shards',
       'wait_for_completion',
     ],
-    bodyParams: [],
+    bodyParams: ['max_docs', 'query', 'script', 'slice', 'conflicts'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(update_by_query_request, 'body'),
@@ -18983,13 +19604,13 @@ The reason for this behavior is to prevent overwriting the watch status from a w
 Acknowledging an action throttles further executions of that action until its \`ack.state\` is reset to \`awaits_successful_execution\`.
 This happens when the condition of the watch is not met (the condition evaluates to false).
 To demonstrate how throttling works in practice and how it can be configured for individual actions within a watch, refer to External documentation.`,
-  methods: ['PUT', 'POST', 'PUT', 'POST'],
+  methods: ['PUT', 'POST'],
   patterns: ['/_watcher/watch/{watch_id}/_ack', '/_watcher/watch/{watch_id}/_ack/{action_id}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-ack-watch',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['watch_id', 'action_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -19025,7 +19646,7 @@ A watch can be either active or inactive.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-activate-watch',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['watch_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -19050,7 +19671,7 @@ A watch can be either active or inactive.`,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-deactivate-watch',
   parameterTypes: {
-    pathParams: [],
+    pathParams: ['watch_id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -19081,7 +19702,7 @@ When Elasticsearch security features are enabled, make sure no write privileges 
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-delete-watch',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -19110,15 +19731,23 @@ If your user is allowed to read index \`a\`, but not index \`b\`, then the exact
 
 When using the run watch API, the authorization data of the user that called the API will be used as a base, instead of the information who stored the watch.
 Refer to the external documentation for examples of watch execution requests, including existing, customized, and inline watches.`,
-  methods: ['PUT', 'POST', 'PUT', 'POST'],
+  methods: ['PUT', 'POST'],
   patterns: ['/_watcher/watch/{id}/_execute', '/_watcher/watch/_execute'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-execute-watch',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['id'],
+    urlParams: ['debug'],
+    bodyParams: [
+      'action_modes',
+      'alternative_input',
+      'ignore_condition',
+      'record_execution',
+      'simulated_actions',
+      'trigger_data',
+      'watch',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(watcher_execute_watch_request, 'body'),
@@ -19154,7 +19783,7 @@ Only a subset of settings are shown, for example \`index.auto_expand_replicas\` 
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-get-settings',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['master_timeout', 'master_timeout', 'timeout'],
+    urlParams: ['master_timeout'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -19174,7 +19803,7 @@ const WATCHER_GET_WATCH_CONTRACT: InternalConnectorContract = {
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-get-watch',
   parameterTypes: {
-    pathParams: ['id', 'id'],
+    pathParams: ['id'],
     urlParams: [],
     bodyParams: [],
   },
@@ -19206,9 +19835,18 @@ If the user is able to read index \`a\`, but not index \`b\`, the same will appl
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-put-watch',
   parameterTypes: {
-    pathParams: ['id', 'id'],
-    urlParams: [],
-    bodyParams: [],
+    pathParams: ['id'],
+    urlParams: ['active', 'if_primary_term', 'if_seq_no', 'version'],
+    bodyParams: [
+      'actions',
+      'condition',
+      'input',
+      'metadata',
+      'throttle_period',
+      'throttle_period_in_millis',
+      'transform',
+      'trigger',
+    ],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(watcher_put_watch_request, 'body'),
@@ -19235,7 +19873,7 @@ Note that only the \`_id\` and \`metadata.*\` fields are queryable or sortable.`
   parameterTypes: {
     pathParams: [],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['from', 'size', 'query', 'sort', 'search_after'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(watcher_query_watches_request, 'body'),
@@ -19275,14 +19913,14 @@ const WATCHER_STATS_CONTRACT: InternalConnectorContract = {
   description: `Get Watcher statistics.
 This API always returns basic metrics.
 You retrieve more metrics by using the metric parameter.`,
-  methods: ['GET', 'GET'],
+  methods: ['GET'],
   patterns: ['/_watcher/stats', '/_watcher/stats/{metric}'],
   isInternal: false,
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-stats',
   parameterTypes: {
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['metric'],
+    urlParams: ['emit_stacktraces', 'metric'],
     bodyParams: [],
   },
   paramsSchema: z.union([
@@ -19334,8 +19972,8 @@ Watcher shards must always be in the \`data_content\` tier.`,
     'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-update-settings',
   parameterTypes: {
     pathParams: [],
-    urlParams: ['master_timeout', 'master_timeout', 'timeout'],
-    bodyParams: [],
+    urlParams: ['master_timeout', 'timeout'],
+    bodyParams: ['index.auto_expand_replicas', 'index.number_of_replicas'],
   },
   paramsSchema: z.union([
     getLooseObjectFromProperty(watcher_update_settings_request, 'body'),
