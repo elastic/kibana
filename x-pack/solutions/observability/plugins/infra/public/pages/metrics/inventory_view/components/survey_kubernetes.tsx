@@ -35,6 +35,7 @@ export const SurveyKubernetes = () => {
             defaultMessage="Tell us what you think! (K8s)"
           />
         }
+        sanitizedPath={document.location.pathname}
       />
       {!isToastSeen && (
         <EuiGlobalToastList
@@ -75,6 +76,7 @@ export const SurveyKubernetes = () => {
                             defaultMessage="Start survey"
                           />
                         }
+                        sanitizedPath={document.location.pathname}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

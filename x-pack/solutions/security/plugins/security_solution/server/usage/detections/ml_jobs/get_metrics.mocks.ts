@@ -348,6 +348,9 @@ export const getMockRuleSearchResponse = (
               ? {
                   type: 'external',
                   isCustomized,
+                  customizedFields: isCustomized
+                    ? [{ fieldName: 'tags' }, { fieldName: 'name' }, { fieldName: 'description' }]
+                    : [],
                 }
               : { type: 'internal' },
           },

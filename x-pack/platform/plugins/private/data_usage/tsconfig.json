@@ -36,6 +36,7 @@
     "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/charts-theme",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

@@ -49,7 +49,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           port: registryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
         },
       })
     : undefined;
@@ -90,7 +90,6 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           'enableAutomaticAgentUpgrades',
           'enableAgentMigrations',
         ])}`,
-        `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,

@@ -21,8 +21,8 @@ import { deleteAllRules } from '../../../../../../../config/services/detections_
 import {
   MOCK_BETA_PKG_VERSION,
   MOCK_PKG_VERSION,
-  PREBUILT_RULE_ID_A,
-  PREBUILT_RULE_ID_B,
+  PREBUILT_RULE_A_ASSET_ID,
+  PREBUILT_RULE_B_ASSET_ID,
 } from '../../configs/edge_cases/ess_air_gapped_with_bundled_packages.config';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -61,8 +61,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(fleetPackageInstallationResponse.items.length).toBe(2);
       expect(fleetPackageInstallationResponse.items).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ id: PREBUILT_RULE_ID_A }),
-          expect.objectContaining({ id: PREBUILT_RULE_ID_B }),
+          expect.objectContaining({ id: PREBUILT_RULE_A_ASSET_ID }),
+          expect.objectContaining({ id: PREBUILT_RULE_B_ASSET_ID }),
         ])
       );
 

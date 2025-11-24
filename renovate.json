@@ -211,7 +211,6 @@
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
-        "@types/react-test-renderer",
         "babel-plugin-istanbul",
         "lighthouse",
         "nyc",
@@ -221,7 +220,6 @@
         "playwright",
         "pngjs",
         "qs",
-        "react-test-renderer",
         "rxjs-marbles",
         "sharp",
         "superagent",
@@ -498,9 +496,11 @@
         "prop-types",
         "react",
         "react-dom",
+        "react-test-renderer",
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
+        "@types/react-test-renderer",
         "csstype"
       ],
       "reviewers": [
@@ -2683,12 +2683,8 @@
     {
       "groupName": "kibana-presentation misc canvas dependencies",
       "matchDepNames": [
-        "expose-loader",
-        "html-loader",
         "object-path-immutable",
-        "postcss-prefix-selector",
-        "safe-squel",
-        "string-replace-loader"
+        "safe-squel"
       ],
       "reviewers": [
         "team:kibana-presentation"
@@ -2714,7 +2710,6 @@
         "puppeteer"
       ],
       "reviewers": [
-        "team:kibana-presentation",
         "team:response-ops"
       ],
       "matchBaseBranches": [
@@ -4188,13 +4183,13 @@
         "@xstate/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4209,13 +4204,13 @@
         "@xstate5/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4229,13 +4224,13 @@
         "constate"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4248,13 +4243,13 @@
         "oniguruma-to-es"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],

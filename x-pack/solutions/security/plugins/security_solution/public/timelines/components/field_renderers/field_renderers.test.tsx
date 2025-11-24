@@ -162,6 +162,20 @@ describe('Field Renderers', () => {
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
+
+    test('it renders multiple host ids', () => {
+      render(
+        <TestProviders>
+          {hostIdRenderer({
+            scopeId,
+            host: { ...emptyIdHost, id: ['test1', 'test2'] },
+            isFlyoutOpen: false,
+          })}
+        </TestProviders>
+      );
+      expect(screen.getByText('test1')).toBeInTheDocument();
+      expect(screen.getByText('+1 More')).toBeInTheDocument();
+    });
   });
 
   describe('#hostNameRenderer', () => {

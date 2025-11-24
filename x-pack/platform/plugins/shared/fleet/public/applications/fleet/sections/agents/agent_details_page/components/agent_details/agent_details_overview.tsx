@@ -70,7 +70,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                           />
                         }
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.cpuTitle"
                             defaultMessage="CPU"
@@ -92,7 +92,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                           />
                         }
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.memoryTitle"
                             defaultMessage="Memory"

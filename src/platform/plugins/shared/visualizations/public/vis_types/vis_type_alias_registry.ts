@@ -23,7 +23,7 @@ export interface VisualizationListItem {
   error?: string;
   icon: string;
   id: string;
-  stage: VisualizationStage;
+  stage?: VisualizationStage;
   savedObjectType: string;
   title: string;
   description?: string;
@@ -31,7 +31,7 @@ export interface VisualizationListItem {
   typeTitle: string;
   image?: string;
   type?: BaseVisType | string;
-  editor:
+  editor?:
     | { editUrl: string; editApp?: string }
     | { onEdit: (savedObjectId: string) => Promise<void> };
 }

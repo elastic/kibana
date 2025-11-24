@@ -2230,7 +2230,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -3868,7 +3868,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -15016,7 +15016,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/download": {
       "get": {
-        "description": "Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.",
+        "description": "Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.",
         "operationId": "get-fleet-agent-policies-agentpolicyid-download",
         "parameters": [
           {
@@ -15188,6 +15188,26 @@
                                 "download": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "proxy_headers": {
+                                      "additionalProperties": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "boolean"
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ]
+                                      },
+                                      "nullable": true,
+                                      "type": "object"
+                                    },
+                                    "proxy_url": {
+                                      "type": "string"
+                                    },
                                     "secrets": {
                                       "additionalProperties": true,
                                       "properties": {
@@ -15385,7 +15405,23 @@
                                       },
                                       "type": "array"
                                     },
-                                    "proxy_headers": {},
+                                    "proxy_headers": {
+                                      "additionalProperties": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "boolean"
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ]
+                                      },
+                                      "nullable": true,
+                                      "type": "object"
+                                    },
                                     "proxy_url": {
                                       "type": "string"
                                     },
@@ -15439,8 +15475,7 @@
                                     }
                                   },
                                   "required": [
-                                    "hosts",
-                                    "proxy_headers"
+                                    "hosts"
                                   ],
                                   "type": "object"
                                 },
@@ -15646,7 +15681,23 @@
                                     },
                                     "type": "array"
                                   },
-                                  "proxy_headers": {},
+                                  "proxy_headers": {
+                                    "additionalProperties": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "boolean"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    },
+                                    "nullable": true,
+                                    "type": "object"
+                                  },
                                   "proxy_url": {
                                     "type": "string"
                                   },
@@ -15655,8 +15706,7 @@
                                   }
                                 },
                                 "required": [
-                                  "type",
-                                  "proxy_headers"
+                                  "type"
                                 ],
                                 "type": "object"
                               },
@@ -27078,7 +27128,7 @@
     },
     "/api/fleet/kubernetes": {
       "get": {
-        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.",
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.",
         "operationId": "get-fleet-kubernetes",
         "parameters": [
           {
@@ -27164,7 +27214,7 @@
     },
     "/api/fleet/kubernetes/download": {
       "get": {
-        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.",
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.",
         "operationId": "get-fleet-kubernetes-download",
         "parameters": [
           {
@@ -41403,7 +41453,6 @@
                   }
                 },
                 "required": [
-                  "proxy_headers",
                   "certificate_authorities",
                   "certificate",
                   "certificate_key"
@@ -41561,6 +41610,21 @@
                           },
                           "type": {
                             "type": "string"
+                          },
+                          "warning": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "message": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "type": "object"
                           }
                         },
                         "required": [
@@ -41757,6 +41821,21 @@
                           },
                           "type": {
                             "type": "string"
+                          },
+                          "warning": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "message": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "type": "object"
                           }
                         },
                         "required": [
@@ -42156,6 +42235,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "additional_yaml_config": {
+                    "deprecated": true,
                     "type": "string"
                   },
                   "delete_unenrolled_agents": {
@@ -42175,12 +42255,15 @@
                     "type": "object"
                   },
                   "has_seen_add_data_notice": {
+                    "deprecated": true,
                     "type": "boolean"
                   },
                   "kibana_ca_sha256": {
+                    "deprecated": true,
                     "type": "string"
                   },
                   "kibana_urls": {
+                    "deprecated": true,
                     "items": {
                       "format": "uri",
                       "type": "string"

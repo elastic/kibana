@@ -16,7 +16,7 @@ import {
 } from './fixtures/summary_search_document';
 import { GetSLOHealth } from './get_slo_health';
 import { createSLORepositoryMock } from './mocks';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 
 describe('GetSLOHealth', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -53,6 +53,9 @@ describe('GetSLOHealth', () => {
         ],
       },
     });
+    mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
+      transforms: [],
+    } as any);
 
     const result = await getSLOHealth.execute({
       list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
@@ -63,11 +66,12 @@ describe('GetSLOHealth', () => {
         Object {
           "health": Object {
             "overall": "unhealthy",
-            "rollup": "unhealthy",
-            "summary": "unhealthy",
+            "rollup": "missing",
+            "summary": "missing",
           },
           "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
           "sloInstanceId": "*",
+          "sloName": "irrelevant",
           "sloRevision": 1,
           "state": "no_data",
         },
@@ -95,6 +99,9 @@ describe('GetSLOHealth', () => {
         hits: [],
       },
     });
+    mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
+      transforms: [],
+    } as any);
 
     const result = await getSLOHealth.execute({
       list: [{ sloId: 'inexistant', sloInstanceId: ALL_VALUE }],
@@ -154,6 +161,7 @@ describe('GetSLOHealth', () => {
             },
             "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
             "sloInstanceId": "*",
+            "sloName": "irrelevant",
             "sloRevision": 1,
             "state": "no_data",
           },
@@ -211,11 +219,128 @@ describe('GetSLOHealth', () => {
             },
             "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
             "sloInstanceId": "*",
+            "sloName": "irrelevant",
             "sloRevision": 1,
             "state": "no_data",
           },
         ]
       `);
+    });
+
+    it('reports a healthy SLO as healthy even when another SLO has a missing summary transform', async () => {
+      const slo1 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d1' });
+      const slo2 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d2' });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo1, slo2]);
+      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
+        took: 0,
+        timed_out: false,
+        _shards: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          failed: 0,
+        },
+        hits: {
+          total: {
+            value: 2,
+            relation: 'eq',
+          },
+          max_score: 1,
+          hits: [
+            aHitFromSummaryIndex(aSummaryDocument(slo1)),
+            aHitFromSummaryIndex(aSummaryDocument(slo2)),
+          ],
+        },
+      });
+
+      // @ts-ignore
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
+        transforms: [
+          {
+            id: getSLOTransformId(slo1.id, slo1.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+          {
+            id: getSLOTransformId(slo2.id, slo2.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+          // Missing summary transform for slo1
+          {
+            id: getSLOSummaryTransformId(slo2.id, slo2.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+        ],
+      });
+
+      const result = await getSLOHealth.execute({
+        list: [
+          { sloId: slo1.id, sloInstanceId: ALL_VALUE },
+          { sloId: slo2.id, sloInstanceId: ALL_VALUE },
+        ],
+      });
+
+      expect(result).toHaveLength(2);
+      expect(result[0].health.summary).toBe('missing');
+      expect(result[1].health.summary).toBe('healthy');
+    });
+
+    it('shows only 1 missing summary transform', async () => {
+      const slo1 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d1' });
+      const slo2 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d2' });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo1, slo2]);
+      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
+        took: 0,
+        timed_out: false,
+        _shards: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          failed: 0,
+        },
+        hits: {
+          total: {
+            value: 2,
+            relation: 'eq',
+          },
+          max_score: 1,
+          hits: [
+            aHitFromSummaryIndex(aSummaryDocument(slo1)),
+            aHitFromSummaryIndex(aSummaryDocument(slo2)),
+          ],
+        },
+      });
+
+      // @ts-ignore
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
+        transforms: [
+          {
+            id: getSLOTransformId(slo1.id, slo1.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+          {
+            id: getSLOTransformId(slo2.id, slo2.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+          // Missing summary transform for slo1
+          {
+            id: getSLOSummaryTransformId(slo2.id, slo2.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+        ],
+      });
+
+      const result = await getSLOHealth.execute({
+        list: [
+          { sloId: slo1.id, sloInstanceId: ALL_VALUE },
+          { sloId: slo2.id, sloInstanceId: ALL_VALUE },
+        ],
+      });
+
+      const missingSummaryTotal = result.filter((res) => res.health.summary === 'missing').length;
+      expect(missingSummaryTotal).toBe(1);
+      expect(result).toHaveLength(2);
+      expect(result[0].health.summary).toBe('missing');
+      expect(result[1].health.summary).toBe('healthy');
     });
   });
 

@@ -98,7 +98,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
         },
       }),
       testFiles: options.testFiles,

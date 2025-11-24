@@ -295,6 +295,13 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
+  const JEST_CONFIGS_DEPS =
+    process.env.JEST_CONFIGS_DEPS !== undefined
+      ? process.env.JEST_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build'];
+
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
     : {};
@@ -422,7 +429,7 @@ export async function pickTestGroupRunOrder() {
         queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 1.5,
+        overheadMin: 0,
         names,
       })),
     ],
@@ -505,11 +512,12 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 85,
+              diskSizeGb: 115,
             },
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -531,6 +539,7 @@ export async function pickTestGroupRunOrder() {
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -563,7 +572,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
+                  timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
@@ -642,8 +651,8 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
             },
             retry: {
               automatic: [
-                { exit_status: '-1', limit: 1 },
-                { exit_status: '*', limit: 0 },
+                { exit_status: '10', limit: 1 },
+                { exit_status: '*', limit: 3 },
               ],
             },
           })

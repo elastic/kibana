@@ -13,7 +13,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { RuleTypeModalComponent } from '.';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_types_query', () => ({
   useGetRuleTypesQuery: jest.fn().mockImplementation(() => ({

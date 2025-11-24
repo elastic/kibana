@@ -182,7 +182,12 @@ export class MarkerSizeLegend extends Component<Props, State> {
               title={this.props.style.getDisplayStyleName()}
               content={this.state.label}
             >
-              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+              <EuiText
+                tabIndex={0}
+                className="eui-textTruncate"
+                size="xs"
+                style={{ maxWidth: '180px' }}
+              >
                 <small>
                   <strong>{this.state.label}</strong>
                 </small>

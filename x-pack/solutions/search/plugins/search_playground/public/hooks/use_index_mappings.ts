@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { useFormContext } from 'react-hook-form';

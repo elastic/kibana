@@ -46,10 +46,10 @@ import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
-import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
+import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
 import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
 
-type VisualizeUserContent = VisualizationListItem &
+export type VisualizeUserContent = VisualizationListItem &
   UserContentCommonSchema & {
     type: string;
     attributes: {
@@ -119,7 +119,7 @@ const useTableListViewProps = (
   }, [closeNewVisModal]);
 
   const editItem = useCallback(
-    async ({ attributes: { id }, editor }: VisualizeUserContent) => {
+    async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
       if (!('editApp' in editor || 'editUrl' in editor)) {
         await editor.onEdit(id);
         return;
@@ -345,6 +345,11 @@ export const VisualizeListing = () => {
   });
   useUnmount(() => closeNewVisModal.current());
 
+  const getVisualizeListItemLink = useMemo(
+    () => getVisualizeListItemLinkFn(application, kbnUrlStateStorage),
+    [application, kbnUrlStateStorage]
+  );
+
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
@@ -405,19 +410,11 @@ export const VisualizeListing = () => {
               defaultMessage: 'visualizations',
             })}
             getOnClickTitle={(item) =>
-              item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
-            }
-            getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
-              readOnly || (editor && 'onEdit' in editor)
+              item.attributes.readOnly || item.error
                 ? undefined
-                : getVisualizeListItemLink(
-                    application,
-                    kbnUrlStateStorage,
-                    editor.editApp,
-                    editor.editUrl,
-                    error
-                  )
+                : () => tableViewProps.editItem?.(item)
             }
+            getDetailViewLink={getVisualizeListItemLink}
             tableCaption={visualizeLibraryTitle}
             {...tableViewProps}
             {...propsFromParent}
@@ -429,9 +426,9 @@ export const VisualizeListing = () => {
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    kbnUrlStateStorage,
     tableViewProps,
     visualizeLibraryTitle,
+    getVisualizeListItemLink,
   ]);
 
   const tabs = useMemo(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { CoreStart } from '@kbn/core/public';

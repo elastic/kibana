@@ -118,7 +118,7 @@ export const useSloDetailsTabs = ({
           })}
           position="right"
         >
-          <>{ALERTS_LABEL}</>
+          <span tabIndex={0}>{ALERTS_LABEL}</span>
         </EuiToolTip>
       ) : (
         ALERTS_LABEL

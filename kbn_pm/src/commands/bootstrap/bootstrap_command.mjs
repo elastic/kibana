@@ -22,6 +22,7 @@ import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
 import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
+import { bootstrapBuildkite } from './buildkite.mjs';
 
 const IS_CI = process.env.CI?.match(/(1|true)/i);
 
@@ -85,6 +86,9 @@ export const command = {
       }),
       time('regenerate tsconfig.base.json', async () => {
         await regenerateBaseTsconfig(packages, log);
+      }),
+      time('bootstrap .buildkite folder', async () => {
+        await bootstrapBuildkite();
       }),
     ]);
 

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { Headers, Logger } from '@kbn/core/server';
-import {
-  KBN_SCREENSHOT_MODE_HEADER,
-  ScreenshotModePluginSetup,
-} from '@kbn/screenshot-mode-plugin/server';
-import { ConfigType } from '@kbn/screenshotting-server';
+import type { Headers, Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import { KBN_SCREENSHOT_MODE_HEADER } from '@kbn/screenshot-mode-plugin/server';
+import type { ConfigType } from '@kbn/screenshotting-server';
+import type { CDPSession } from 'puppeteer';
 import { truncate } from 'lodash';
 import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';

@@ -33,8 +33,12 @@ import { i18n } from '@kbn/i18n';
 import { NO_DEFAULT_CONNECTOR } from '../lib/constants';
 import { useDefaultAiConnectorSettingContext } from '../context/default_ai_connector_context';
 
+/** Feature flag for the default AI connector setting */
 export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
   'aiAssistant.defaultLlmSettingEnabled' as const;
+
+/** The default value for the default AI connector setting */
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE = true as const;
 
 interface ConnectorData {
   connectors?: Array<{
@@ -272,7 +276,12 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors, settings }) =>
     );
   }, [elasticManagedLlmExists, application, docLinks]);
 
-  if (!featureFlags.getBooleanValue(AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, false)) {
+  if (
+    !featureFlags.getBooleanValue(
+      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
+    )
+  ) {
     return null;
   }
 
@@ -311,7 +320,6 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors, settings }) =>
                   options={options}
                   selectedOptions={selectedOptions}
                   onChange={onChangeDefaultLlm}
-                  isDisabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]?.isReadOnly}
                   isLoading={connectors.loading}
                   isInvalid={
                     (selectedOptions.length === 0 && !connectors.loading) ||
@@ -326,9 +334,6 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors, settings }) =>
                     <EuiCheckbox
                       id="defaultAiConnectorCheckbox"
                       data-test-subj="defaultAiConnectorCheckbox"
-                      disabled={
-                        fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly
-                      }
                       label={
                         <FormattedMessage
                           id="genAiSettings.gen_ai_settings.settings.defaultLlmOnly.checkbox.label"

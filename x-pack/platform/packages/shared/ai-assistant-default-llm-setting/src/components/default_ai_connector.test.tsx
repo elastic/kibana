@@ -10,7 +10,7 @@ import {
   AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
   DefaultAIConnector,
 } from './default_ai_connector';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { FieldDefinition, UnsavedFieldChange } from '@kbn/management-settings-types';

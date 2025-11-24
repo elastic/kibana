@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'searchProfiler']);
   const retry = getService('retry');
   const es = getService('es');
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
   describe('Search Profiler Editor', () => {
@@ -74,8 +73,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('With a test index', function () {
-      // see details: https://github.com/elastic/kibana/issues/215660
-      this.tags(['failsOnMKI']);
       before(async () => {
         await es.indices.create({ index: indexName });
       });
@@ -85,7 +82,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('profiles a simple query', async () => {
-        await browser.refresh();
         await PageObjects.searchProfiler.setIndexName(indexName);
         await PageObjects.searchProfiler.setQuery(testQuery);
 

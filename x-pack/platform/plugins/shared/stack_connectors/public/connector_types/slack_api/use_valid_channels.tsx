@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
 import { ValidChannelRouteResponse } from '../../../common/slack_api/types';

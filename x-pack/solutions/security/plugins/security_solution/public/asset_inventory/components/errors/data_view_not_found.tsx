@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { useInstallDataView } from './hooks/use_install_data_view';
 import { AssetInventoryTitle } from '../asset_inventory_title';
 import { CenteredWrapper } from '../onboarding/centered_wrapper';

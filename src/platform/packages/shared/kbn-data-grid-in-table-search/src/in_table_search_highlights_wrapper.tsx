@@ -61,7 +61,7 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
     onHighlightsCountFound,
   ]);
 
-  return <div ref={cellValueRef}>{children}</div>;
+  return <span ref={cellValueRef}>{children}</span>;
 };
 
 const searchTermRegExpCache = new Map<string, RegExp>();

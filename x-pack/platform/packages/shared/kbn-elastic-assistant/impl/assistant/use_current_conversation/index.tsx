@@ -11,7 +11,7 @@ import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { FetchConversationsResponse } from '../api';

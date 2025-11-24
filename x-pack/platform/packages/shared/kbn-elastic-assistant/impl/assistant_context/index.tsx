@@ -21,7 +21,7 @@ import {
   UserProfileService,
 } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { updatePromptContexts } from './helpers';
 import type {

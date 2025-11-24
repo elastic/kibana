@@ -6,15 +6,14 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { PromptContext } from '@kbn/elastic-assistant';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { type PromptContext } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
 import { AlertSummary } from './alert_summary';
 import { AlertSummaryOptionsMenu } from './settings_menu';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAIForSOCDetailsContext } from '../context';
-import { DEFAULT_AI_CONNECTOR } from '../../../../common/constants';
-
+import { useDefaultAIConnectorId } from '../../../common/hooks/use_default_ai_connector_id';
 export const ALERT_SUMMARY_SECTION_TEST_ID = 'ai-for-soc-alert-flyout-alert-summary-section';
 
 const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummarySection.title', {
@@ -37,13 +36,12 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
 
   const {
     application: { capabilities },
-    uiSettings,
   } = useKibana().services;
 
   const { eventId, showAnonymizedValues } = useAIForSOCDetailsContext();
+  const { defaultConnectorId, isLoading: isLoadingDefaultConnectorId } = useDefaultAIConnectorId();
 
   const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
-  const defaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
 
   const promptContext: PromptContext = useMemo(
     () => ({
@@ -69,14 +67,18 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <AlertSummary
-        alertId={eventId}
-        canSeeAdvancedSettings={canSeeAdvancedSettings}
-        defaultConnectorId={defaultConnectorId}
-        promptContext={promptContext}
-        setHasAlertSummary={setHasAlertSummary}
-        showAnonymizedValues={showAnonymizedValues}
-      />
+      {isLoadingDefaultConnectorId ? (
+        <EuiSkeletonText lines={3} size="s" />
+      ) : (
+        <AlertSummary
+          alertId={eventId}
+          canSeeAdvancedSettings={canSeeAdvancedSettings}
+          defaultConnectorId={defaultConnectorId}
+          promptContext={promptContext}
+          setHasAlertSummary={setHasAlertSummary}
+          showAnonymizedValues={showAnonymizedValues}
+        />
+      )}
     </>
   );
 });

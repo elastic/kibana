@@ -36,7 +36,11 @@ describe('TimestampTooltip', () => {
         display="inlineBlock"
         position="top"
       >
-        Oct 10, 2019, 08:06:40.123 (UTC-7)
+        <span
+          tabIndex={0}
+        >
+          Oct 10, 2019, 08:06:40.123 (UTC-7)
+        </span>
       </EuiToolTip>
     `);
   });

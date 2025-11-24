@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 
 interface CreateReactQueryResponseInput<TData = unknown, TError = unknown> {
   status?: UseQueryResult['status'] | 'idle';

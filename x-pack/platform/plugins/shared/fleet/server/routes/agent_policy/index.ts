@@ -423,8 +423,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
@@ -463,8 +464,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
@@ -498,8 +500,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },

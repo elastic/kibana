@@ -35,7 +35,8 @@
     "@kbn/inference-common",
     "@kbn/licensing-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/ai-assistant-default-llm-setting"
+    "@kbn/ai-assistant-default-llm-setting",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"

@@ -43,6 +43,7 @@ export const reloadPageToast = (startDeps: StartDeps): ToastInput => {
             size="s"
             onClick={() => window.location.reload()}
             data-test-subj={DATA_TEST_SUBJ_PAGE_RELOAD_BUTTON}
+            autoFocus
           >
             {i18n.translate('management.settings.form.requiresPageReloadToastButtonLabel', {
               defaultMessage: 'Reload page',

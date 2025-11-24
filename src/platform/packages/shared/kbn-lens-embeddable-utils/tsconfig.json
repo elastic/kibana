@@ -18,5 +18,6 @@
     "@kbn/visualizations-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/esql-utils",
+    "@kbn/content-management-utils",
   ]
 }

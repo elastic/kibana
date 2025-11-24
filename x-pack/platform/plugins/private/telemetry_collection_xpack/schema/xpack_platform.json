@@ -5699,6 +5699,78 @@
         }
       }
     },
+    "observability_ai_assistant": {
+      "properties": {
+        "knowledge_base": {
+          "properties": {
+            "users_with_global_entries": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with global knowledge base entries"
+              }
+            },
+            "users_with_global_entries_user_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with global knowledge base entries created by user"
+              }
+            },
+            "users_with_global_entries_assistant_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with global knowledge base entries created by assistant"
+              }
+            },
+            "users_with_private_entries": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private knowledge base entries"
+              }
+            },
+            "users_with_private_entries_user_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private knowledge base entries created by user"
+              }
+            },
+            "users_with_private_entries_assistant_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private knowledge base entries created by assistant"
+              }
+            },
+            "users_with_user_instructions": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users who have configured custom user instructions"
+              }
+            }
+          }
+        },
+        "conversations": {
+          "properties": {
+            "users_with_archived_conversations": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with archived conversations"
+              }
+            },
+            "users_with_private_conversations": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private conversations"
+              }
+            },
+            "users_with_shared_conversations": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with shared conversations"
+              }
+            }
+          }
+        }
+      }
+    },
     "reporting": {
       "properties": {
         "available": {

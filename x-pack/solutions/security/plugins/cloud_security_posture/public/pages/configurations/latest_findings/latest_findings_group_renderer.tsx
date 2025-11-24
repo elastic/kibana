@@ -197,6 +197,7 @@ const FindingsCountComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
         `}
         color="hollow"
         data-test-subj={FINDINGS_GROUPING_COUNTER}
+        tabIndex={0}
       >
         {getAbbreviatedNumber(bucket.doc_count)}
       </EuiBadge>

@@ -171,6 +171,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                       color="subdued"
                       size="xs"
                       className="eui-textNoWrap"
+                      tabIndex={0}
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"

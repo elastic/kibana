@@ -107,5 +107,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/apm-sources-access-plugin",
     "@kbn/lock-manager",
+    "@kbn/deeplinks-management",
+    "@kbn/react-query",
   ]
 }

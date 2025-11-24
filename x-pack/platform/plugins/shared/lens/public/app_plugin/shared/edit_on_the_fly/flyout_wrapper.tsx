@@ -76,6 +76,7 @@ export const FlyoutWrapper = ({
                         )}
                       >
                         <EuiBetaBadge
+                          tabIndex={0}
                           label=""
                           iconType="beaker"
                           size="s"

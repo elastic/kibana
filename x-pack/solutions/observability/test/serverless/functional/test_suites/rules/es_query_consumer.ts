@@ -22,7 +22,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
 
-  function createESQueryRule({ ruleName }: { ruleName: string }) {
+  function createESQueryRule({
+    ruleName,
+    consumersToVerify,
+  }: {
+    ruleName: string;
+    consumersToVerify: Set<string>;
+  }) {
     it('navigates to the rules page', async () => {
       await retry.try(async () => {
         await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
@@ -49,6 +55,31 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const input = await testSubjects.find('ruleDetailsNameInput');
       await input.clearValueWithKeyboard();
       await testSubjects.setValue('ruleDetailsNameInput', ruleName);
+
+      const consumerSelect = await testSubjects.find('ruleConsumerSelection');
+      await consumerSelect.click();
+
+      const consumerOptionsList = await testSubjects.find(
+        'comboBoxOptionsList ruleConsumerSelectionInput-optionsList'
+      );
+
+      const consumerOptions = await consumerOptionsList.findAllByClassName(
+        'euiComboBoxOption__content'
+      );
+
+      const allAvailableConsumers: Set<string> = new Set();
+
+      for (const option of consumerOptions) {
+        allAvailableConsumers.add(await option.getVisibleText());
+      }
+
+      // Check if sets are equal by verifying they have the same size and all elements match
+      const areConsumersEqual =
+        allAvailableConsumers.size === consumersToVerify.size &&
+        [...consumersToVerify].every((consumer) => allAvailableConsumers.has(consumer));
+
+      expect(areConsumersEqual).toBe(true);
+
       await retry.try(async () => {
         await testSubjects.click('rulePageFooterSaveButton');
         const doesConfirmModalExist = await testSubjects.exists('confirmModalConfirmButton');
@@ -99,15 +130,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await svlCommonPage.loginWithPrivilegedRole();
       });
 
-      createESQueryRule({ ruleName });
+      createESQueryRule({ ruleName, consumersToVerify: new Set(['All', 'Logs', 'Metrics']) });
 
-      it('should have logs consumer by default', async () => {
+      it('should have alerts consumer by default', async () => {
         const searchResults = await alertingApi.searchRules(
           roleAuthc,
           `alert.attributes.name:"${ruleName}"`
         );
         const rule = searchResults.body.data[0];
-        expect(rule.consumer).toEqual('logs');
+        expect(rule.consumer).toEqual('alerts');
         ruleIdList.push(rule.id);
       });
     });
@@ -121,15 +152,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await svlCommonPage.loginWithCustomRole();
       });
 
-      createESQueryRule({ ruleName });
+      createESQueryRule({ ruleName, consumersToVerify: new Set(['All', 'Logs']) });
 
-      it('should have logs consumer by default', async () => {
+      it('should have alerts consumer by default', async () => {
         const searchResults = await alertingApi.searchRules(
           roleAuthc,
           `alert.attributes.name:"${ruleName}"`
         );
         const rule = searchResults.body.data[0];
-        expect(rule.consumer).toEqual('logs');
+        expect(rule.consumer).toEqual('alerts');
         ruleIdList.push(rule.id);
       });
     });
@@ -144,15 +175,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await svlCommonPage.loginWithCustomRole();
       });
 
-      createESQueryRule({ ruleName });
+      createESQueryRule({ ruleName, consumersToVerify: new Set(['All', 'Metrics']) });
 
-      it('should have infrastructure consumer by default', async () => {
+      it('should have alerts consumer by default', async () => {
         const searchResults = await alertingApi.searchRules(
           roleAuthc,
           `alert.attributes.name:"${ruleName}"`
         );
         const rule = searchResults.body.data[0];
-        expect(rule.consumer).toEqual('infrastructure');
+        expect(rule.consumer).toEqual('alerts');
         ruleIdList.push(rule.id);
       });
     });

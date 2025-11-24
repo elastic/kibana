@@ -74,23 +74,65 @@ tags:
       url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
   - name: Data streams
+    description: |
+      Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
+    x-displayName: Data streams
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
     x-displayName: Data views
   - name: Elastic Agent actions
+    description: |
+      Elastic Agent actions APIs enable you to manage actions performed on Elastic Agents, including agent reassignment, diagnostics collection, enrollment management, upgrades, and bulk operations for agent lifecycle management.
+    x-displayName: Elastic Agent actions
   - name: Elastic Agent binary download sources
+    description: |
+      Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent binaries.
+    x-displayName: Elastic Agent binary download sources
   - name: Elastic Agent policies
+    description: |
+      Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as to retrieve agent policy outputs, manifests, and auto-upgrade status information.
+    x-displayName: Elastic Agent policies
   - name: Elastic Agent status
+    description: |
+      Enables you to retrieve status information about Elastic Agents, including health summaries and operational status.
+    x-displayName: Elastic Agent status
   - name: Elastic Agents
+    description: |
+      Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and initiating agent setup.
+    x-displayName: Elastic Agents
   - name: Elastic Package Manager (EPM)
+    description: |
+      Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
+    x-displayName: Elastic Package Manager (EPM)
   - name: Fleet enrollment API keys
+    description: |
+      Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
+    x-displayName: Fleet enrollment API keys
   - name: Fleet internals
+    description: |
+      Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
+    x-displayName: Fleet internals
   - name: Fleet outputs
+    description: |
+      Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating Logstash API keys, and monitoring output health.
+    x-displayName: Fleet outputs
   - name: Fleet package policies
+    description: |
+      Fleet package policies APIs enable you to manage Fleet package policies, including creating, updating, and deleting policies, performing bulk operations, and managing policy upgrades.
+    x-displayName: Fleet package policies
   - name: Fleet proxies
+    description: |
+      Fleet proxies APIs enable you to manage Fleet proxies, including creating, updating, and deleting proxy configurations for Fleet agent communication.
+    x-displayName: Fleet proxies
   - name: Fleet Server hosts
+    description: |
+      Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
+    x-displayName: Fleet Server hosts
   - name: Fleet service tokens
   - name: Fleet uninstall tokens
+    description: |
+      Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
+    x-displayName: Fleet uninstall tokens
   - name: maintenance-window
     description: |
       You can schedule single or recurring maintenance windows to temporarily reduce rule notifications. For example, a maintenance window prevents false alarms during planned outages.
@@ -99,7 +141,11 @@ tags:
       url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
     x-displayName: Maintenance windows
   - name: Message Signing Service
-  - description: Machine learning
+    description: |
+      Enables you to rotate message signing key pairs for secure Fleet communication.
+    x-displayName: Fleet Message Signing Service
+  - description: |
+      Enables you to synchronize machine learning saved objects.
     name: ml
     x-displayName: Machine learning
   - name: roles
@@ -144,7 +190,8 @@ tags:
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management
-  - description: ''
+  - description: |
+      Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality, privileged user monitoring, and entity engines.
     name: Security Entity Analytics API
     x-displayName: Security entity analytics
   - description: |
@@ -222,15 +269,19 @@ tags:
   - name: spaces
     x-displayName: Spaces
     description: Manage your Kibana spaces.
+    externalDocs:
+      url: https://www.elastic.co/docs/deploy-manage/manage-spaces
+      description: Space overview
   - name: streams
     description: |
-      Streams is a new and experimental way to manage your data in Kibana. The API is currently not considered stable and can change at any point.
+      Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
     x-displayName: Streams
   - name: system
     x-displayName: System
     description: |
-      Get information about the system status, resource usage, and installed plugins.
-  - externalDocs:
+      Get information about the system status, resource usage, features, and installed plugins.
+  - description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
+    externalDocs:
       description: Task manager
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager
@@ -1811,7 +1862,7 @@ paths:
                       type: object
                       properties:
                         blob:
-                          maxLength: 1000
+                          maxLength: 10000
                           type: string
                       required:
                         - blob
@@ -3083,7 +3134,7 @@ paths:
                       type: object
                       properties:
                         blob:
-                          maxLength: 1000
+                          maxLength: 10000
                           type: string
                       required:
                         - blob
@@ -19443,7 +19494,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - in: path
@@ -19562,6 +19613,16 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  proxy_headers:
+                                    additionalProperties:
+                                      anyOf:
+                                        - type: string
+                                        - type: boolean
+                                        - type: number
+                                    nullable: true
+                                    type: object
+                                  proxy_url:
+                                    type: string
                                   secrets:
                                     additionalProperties: true
                                     type: object
@@ -19694,7 +19755,14 @@ paths:
                                     items:
                                       type: string
                                     type: array
-                                  proxy_headers: {}
+                                  proxy_headers:
+                                    additionalProperties:
+                                      anyOf:
+                                        - type: string
+                                        - type: boolean
+                                        - type: number
+                                    nullable: true
+                                    type: object
                                   proxy_url:
                                     type: string
                                   secrets:
@@ -19731,7 +19799,6 @@ paths:
                                         type: string
                                 required:
                                   - hosts
-                                  - proxy_headers
                               - additionalProperties: false
                                 type: object
                                 properties:
@@ -19868,14 +19935,20 @@ paths:
                                   items:
                                     type: string
                                   type: array
-                                proxy_headers: {}
+                                proxy_headers:
+                                  additionalProperties:
+                                    anyOf:
+                                      - type: string
+                                      - type: boolean
+                                      - type: number
+                                  nullable: true
+                                  type: object
                                 proxy_url:
                                   type: string
                                 type:
                                   type: string
                               required:
                                 - type
-                                - proxy_headers
                             type: object
                           revision:
                             type: number
@@ -27680,7 +27753,7 @@ paths:
         - Fleet internals
   /api/fleet/kubernetes:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -27735,7 +27808,7 @@ paths:
         - Elastic Agent policies
   /api/fleet/kubernetes/download:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query
@@ -37156,7 +37229,6 @@ paths:
                 url:
                   type: string
               required:
-                - proxy_headers
                 - certificate_authorities
                 - certificate
                 - certificate_key
@@ -37659,6 +37731,7 @@ paths:
               type: object
               properties:
                 additional_yaml_config:
+                  deprecated: true
                   type: string
                 delete_unenrolled_agents:
                   additionalProperties: false
@@ -37672,10 +37745,13 @@ paths:
                     - enabled
                     - is_preconfigured
                 has_seen_add_data_notice:
+                  deprecated: true
                   type: boolean
                 kibana_ca_sha256:
+                  deprecated: true
                   type: string
                 kibana_urls:
+                  deprecated: true
                   items:
                     format: uri
                     type: string
@@ -52895,7 +52971,7 @@ paths:
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -52906,7 +52982,7 @@ paths:
           description: If a draft Timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -52945,7 +53021,7 @@ paths:
           description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -52956,7 +53032,7 @@ paths:
           description: Indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -53052,7 +53128,7 @@ paths:
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -53177,7 +53253,7 @@ paths:
           description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -53312,7 +53388,7 @@ paths:
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -60930,10 +61006,28 @@ components:
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
       type: string
+    Security_Detections_API_ExternalRuleCustomizedFields:
+      description: An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
+      items:
+        type: object
+        properties:
+          field_name:
+            description: Name of a user-modified field in the rule object.
+            type: string
+        required:
+          - field_name
+      type: array
+    Security_Detections_API_ExternalRuleHasBaseVersion:
+      description: Determines whether an external/prebuilt rule has its original, unmodified version present when the calculation of its customization status is performed (`rule_source.is_customized` and `rule_source.customized_fields`).
+      type: boolean
     Security_Detections_API_ExternalRuleSource:
       description: Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
       type: object
       properties:
+        customized_fields:
+          $ref: '#/components/schemas/Security_Detections_API_ExternalRuleCustomizedFields'
+        has_base_version:
+          $ref: '#/components/schemas/Security_Detections_API_ExternalRuleHasBaseVersion'
         is_customized:
           $ref: '#/components/schemas/Security_Detections_API_IsExternalRuleCustomized'
         type:
@@ -60943,6 +61037,8 @@ components:
       required:
         - type
         - is_customized
+        - has_base_version
+        - customized_fields
     Security_Detections_API_FindRulesSortField:
       enum:
         - created_at

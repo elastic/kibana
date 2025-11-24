@@ -1863,7 +1863,7 @@ describe('getBinarySourceSettings', () => {
   } as any;
 
   it('should return sourceURI for agent download config', () => {
-    expect(getBinarySourceSettings(downloadSource, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSource, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
     });
   });
@@ -1877,20 +1877,13 @@ describe('getBinarySourceSettings', () => {
         key: 'KEY1',
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSSL, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSourceSSL, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       ssl: {
         certificate: 'cert',
         certificate_authorities: ['ca'],
         key: 'KEY1',
       },
-    });
-  });
-
-  it('should return agent download config when there is a proxy', () => {
-    expect(getBinarySourceSettings(downloadSource, 'http://proxy_uri.it')).toEqual({
-      proxy_url: 'http://proxy_uri.it',
-      sourceURI: 'http://custom-registry-test',
     });
   });
 
@@ -1903,7 +1896,7 @@ describe('getBinarySourceSettings', () => {
         },
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSecrets, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSourceSecrets, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       secrets: {
         ssl: {
@@ -1926,7 +1919,7 @@ describe('getBinarySourceSettings', () => {
         },
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSecrets, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSourceSecrets, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       ssl: {
         certificate: 'cert',
@@ -1939,6 +1932,7 @@ describe('getBinarySourceSettings', () => {
       },
     });
   });
+
   it('should return agent download config using secrets key if both keys are present', () => {
     const downloadSourceSecrets = {
       ...downloadSource,
@@ -1953,7 +1947,7 @@ describe('getBinarySourceSettings', () => {
         },
       },
     };
-    expect(getBinarySourceSettings(downloadSourceSecrets, null)).toEqual({
+    expect(getBinarySourceSettings(downloadSourceSecrets, undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       ssl: {
         certificate: 'cert',
@@ -1964,6 +1958,94 @@ describe('getBinarySourceSettings', () => {
           key: { id: 'secretkeyid' },
         },
       },
+    });
+  });
+
+  describe('with proxy', () => {
+    const proxy = {
+      id: 'proxy_1',
+      name: 'proxy1',
+      url: 'http://proxy_uri.it',
+      certificate: 'proxy_cert',
+      certificate_authorities: 'PROXY_CA',
+      certificate_key: 'PROXY_KEY1',
+      proxy_headers: { ProxyHeader1: 'Test' },
+      is_preconfigured: false,
+    };
+
+    it('should return config with ssl options coming from the proxy', () => {
+      expect(getBinarySourceSettings(downloadSource, proxy)).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        proxy_headers: { ProxyHeader1: 'Test' },
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+          key: 'PROXY_KEY1',
+        },
+      });
+    });
+
+    it('should return no proxy_headers if they are not present in proxy', () => {
+      const proxyWithNoHeaders = {
+        id: 'proxy_1',
+        name: 'proxy1',
+        url: 'http://proxy_uri.it',
+        certificate: 'proxy_cert',
+        certificate_authorities: 'PROXY_CA',
+        certificate_key: 'PROXY_KEY1',
+        is_preconfigured: false,
+      };
+      expect(getBinarySourceSettings(downloadSource, proxyWithNoHeaders)).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+          key: 'PROXY_KEY1',
+        },
+      });
+    });
+
+    it('should use proxy SSL options when present', () => {
+      expect(getBinarySourceSettings(downloadSource, proxy)).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        proxy_headers: { ProxyHeader1: 'Test' },
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+          key: 'PROXY_KEY1',
+        },
+      });
+    });
+
+    it('should keep SSL secrets when present', () => {
+      const downloadSourceSecrets = {
+        ...downloadSource,
+        secrets: {
+          ssl: {
+            key: { id: 'keyid' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceSecrets, proxy)).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        secrets: {
+          ssl: {
+            key: {
+              id: 'keyid',
+            },
+          },
+        },
+        proxy_headers: { ProxyHeader1: 'Test' },
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+          key: 'PROXY_KEY1',
+        },
+      });
     });
   });
 });

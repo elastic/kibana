@@ -14,7 +14,7 @@ import { DragDropContext } from '@hello-pangea/dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
 import { ThemeProvider } from 'styled-components';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { createStore as createReduxStore } from 'redux';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';

@@ -32,6 +32,15 @@ export type ScoutPage = Page & {
    */
   waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
   /**
+   * Types text into an input field character by character with a specified delay between each character.
+   * @param selector - The css selector for the input element.
+   * @param text - The text to type into the input field.
+   * @param options - Optional configuration object.
+   * @param options.delay - The delay in milliseconds between typing each character (default: 25ms).
+   * @returns A Promise that resolves once the text has been typed.
+   */
+  typeWithDelay: (selector: string, text: string, options?: { delay: number }) => Promise<void>;
+  /**
    * Simplified API to interact with elements using Kibana's 'data-test-subj' attribute.
    */
   testSubj: {
@@ -101,5 +110,5 @@ export type ScoutPage = Page & {
   };
 };
 
-export { scoutPageFixture } from './single_thread';
 export { scoutPageParallelFixture } from './parallel';
+export { scoutPageFixture } from './single_thread';

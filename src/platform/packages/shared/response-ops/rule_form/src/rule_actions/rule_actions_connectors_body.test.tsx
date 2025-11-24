@@ -137,4 +137,73 @@ describe('ruleActionsConnectorsBody', () => {
     expect(await screen.findAllByTestId('ruleActionsConnectorsModalCard')).toHaveLength(1);
     expect(await screen.findByText('connector-1')).toBeInTheDocument();
   });
+
+  test('filters out when connector should be hidden in UI', async () => {
+    const connectorTypes = [
+      { id: '.slack', name: 'Slack', enabledInConfig: false },
+      { id: '.slack_api', name: 'Slack API', enabledInConfig: true },
+      { id: '.cases', name: 'Cases', enabledInConfig: true },
+    ];
+
+    const availableConnectors = [
+      { actionTypeId: '.slack', name: 'Slack' },
+      { actionTypeId: '.slack_api', name: 'Slack API' },
+      { actionTypeId: '.cases', name: 'Cases' },
+    ];
+
+    const subtype = [
+      { id: '.slack_api', name: 'Slack API' },
+      { id: '.slack', name: 'Slack' },
+    ];
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(
+      getActionTypeModel('Slack', {
+        id: '.slack',
+        subtype,
+        getHideInUi: () => true,
+      })
+    );
+    actionTypeRegistry.register(
+      getActionTypeModel('Slack API', {
+        id: '.slack_api',
+        subtype,
+        getHideInUi: () => false,
+      })
+    );
+    actionTypeRegistry.register(
+      getActionTypeModel('Cases', {
+        id: '.cases',
+      })
+    );
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: [...availableConnectors],
+      connectorTypes,
+      aadTemplateFields: [],
+      selectedRuleType: {
+        defaultActionGroupId: 'default',
+      },
+    });
+
+    render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
+
+    const modalCards = await screen.findAllByTestId('ruleActionsConnectorsModalCard');
+    expect(modalCards).toHaveLength(2);
+    expect(modalCards[0]).toHaveTextContent('Slack API');
+    expect(modalCards[1]).toHaveTextContent('Cases');
+
+    expect(screen.queryByText('Slack')).not.toBeInTheDocument();
+
+    const filterButtons = await screen.findAllByTestId('ruleActionsConnectorsModalFilterButton');
+    expect(filterButtons).toHaveLength(3);
+    expect(filterButtons[0]).toHaveTextContent('All');
+    expect(filterButtons[1]).toHaveTextContent('Cases');
+    expect(filterButtons[2]).toHaveTextContent('Slack API');
+  });
 });

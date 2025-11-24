@@ -263,6 +263,7 @@ export interface Props {
   // subject to watch the completition of the request
   fetcherOpts?: Pick<FetcherOptions, 'autoFetch' | 'requestObservable$'>;
   hideSelectGroup?: boolean;
+  onJobTypeChange?: (jobType: 'host' | 'pod') => void;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
@@ -270,12 +271,30 @@ const DEFAULT_DATE_RANGE: TimeRange = {
   to: 'now',
 };
 
+export const JOB_OPTIONS = [
+  {
+    id: `hosts` as JobType,
+    label: i18n.translate('xpack.infra.ml.anomalyFlyout.hostBtn', {
+      defaultMessage: 'Hosts',
+    }),
+    'data-test-subj': 'anomaliesHostComboBoxItem',
+  },
+  {
+    id: `k8s` as JobType,
+    label: i18n.translate('xpack.infra.ml.anomalyFlyout.podsBtn', {
+      defaultMessage: 'Kubernetes Pods',
+    }),
+    'data-test-subj': 'anomaliesK8sComboBoxItem',
+  },
+];
+
 export const AnomaliesTable = ({
   closeFlyout,
   hostName,
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
   fetcherOpts,
+  onJobTypeChange,
   hideSelectGroup,
 }: Props) => {
   const [search, setSearch] = useState('');
@@ -288,26 +307,9 @@ export const AnomaliesTable = ({
     field: 'startTime',
     direction: 'desc',
   });
-  const jobOptions = [
-    {
-      id: `hosts` as JobType,
-      label: i18n.translate('xpack.infra.ml.anomalyFlyout.hostBtn', {
-        defaultMessage: 'Hosts',
-      }),
-      'data-test-subj': 'anomaliesHostComboBoxItem',
-    },
-    {
-      id: `k8s` as JobType,
-      label: i18n.translate('xpack.infra.ml.anomalyFlyout.podsBtn', {
-        defaultMessage: 'Kubernetes Pods',
-      }),
-      'data-test-subj': 'anomaliesK8sComboBoxItem',
-    },
-  ];
-  const [jobType, setJobType] = useState<JobType>('hosts');
-  const [selectedJobType, setSelectedJobType] = useState<JobOption[]>([
-    jobOptions.find((item) => item.id === 'hosts') || jobOptions[0],
-  ]);
+
+  const [jobType, setJobType] = useState<JobType>(JOB_OPTIONS[0].id);
+  const [selectedJobType, setSelectedJobType] = useState<JobOption[]>([JOB_OPTIONS[0]]);
   const { source } = useSourceContext();
   const anomalyThreshold = source?.configuration.anomalyThreshold;
 
@@ -417,10 +419,14 @@ export const AnomaliesTable = ({
     setSearch(e.target.value);
   }, []);
 
-  const changeJobType = useCallback((selectedOptions: any) => {
-    setSelectedJobType(selectedOptions);
-    setJobType(selectedOptions[0].id);
-  }, []);
+  const changeJobType = useCallback(
+    (selectedOptions: any) => {
+      setSelectedJobType(selectedOptions);
+      setJobType(selectedOptions[0].id);
+      onJobTypeChange?.(selectedOptions[0].id === 'hosts' ? 'host' : 'pod');
+    },
+    [onJobTypeChange]
+  );
 
   const changeSortOptions = useCallback(
     (nextSortOptions: Sort) => {
@@ -570,7 +576,7 @@ export const AnomaliesTable = ({
                     defaultMessage: 'Select group',
                   })}
                   singleSelection={{ asPlainText: true }}
-                  options={jobOptions}
+                  options={JOB_OPTIONS}
                   selectedOptions={selectedJobType}
                   onChange={changeJobType}
                   fullWidth

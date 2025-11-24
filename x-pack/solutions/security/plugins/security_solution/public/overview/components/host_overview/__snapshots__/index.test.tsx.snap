@@ -80,21 +80,42 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
         <dd
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
-          <div
-            data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
-            tabindex="-1"
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
           >
-            <span
-              class="c1"
-              data-test-subj="render-content-host.id"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                aa7ca589f1b8220002f2fc61c64cfbf1
-              </span>
-            </span>
-          </div>
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_id-aa7ca589f1b8220002f2fc61c64cfbf1"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.id"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      aa7ca589f1b8220002f2fc61c64cfbf1
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
         </dd>
         <dt
           class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
@@ -748,21 +769,42 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
         <dd
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
-          <div
-            data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
-            tabindex="-1"
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
           >
-            <span
-              class="c1"
-              data-test-subj="render-content-host.id"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                aa7ca589f1b8220002f2fc61c64cfbf1
-              </span>
-            </span>
-          </div>
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_id-aa7ca589f1b8220002f2fc61c64cfbf1"
+                  tabindex="-1"
+                >
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.id"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      aa7ca589f1b8220002f2fc61c64cfbf1
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
         </dd>
         <dt
           class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"

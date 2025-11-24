@@ -148,7 +148,7 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
                   data-test-subj="deleteMigrationItem"
                 >
                   <EuiToolTip content={isDeletable ? undefined : i18n.NOT_DELETABLE_MIGRATION_TEXT}>
-                    <span>{i18n.DELETE_BUTTON_TEXT}</span>
+                    <span tabIndex={0}>{i18n.DELETE_BUTTON_TEXT}</span>
                   </EuiToolTip>
                 </EuiContextMenuItem>
               </EuiContextMenuPanel>

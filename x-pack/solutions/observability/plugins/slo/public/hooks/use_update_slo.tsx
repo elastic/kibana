@@ -18,7 +18,7 @@ import {
   type UpdateSLOInput,
   type UpdateSLOResponse,
 } from '@kbn/slo-schema';
-import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKey, useMutation, useQueryClient } from '@kbn/react-query';
 import React from 'react';
 import { paths } from '../../common/locators/paths';
 import { sloKeys } from './query_key_factory';
