@@ -445,8 +445,6 @@ src/platform/packages/shared/kbn-ambient-storybook-types @elastic/kibana-operati
 src/platform/packages/shared/kbn-ambient-ui-types @elastic/kibana-operations
 src/platform/packages/shared/kbn-analytics @elastic/kibana-core
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
-src/platform/packages/shared/kbn-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
@@ -603,6 +601,8 @@ src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui @elastic/kibana-core
 src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
+src/platform/packages/shared/kbn-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
 src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
