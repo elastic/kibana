@@ -40,11 +40,11 @@ export interface NodeImplementation {
 }
 
 export interface NodeWithErrorCatching {
-  catchError(): Promise<void>;
+  catchError(): Promise<void> | void;
 }
 
 export interface MonitorableNode {
-  monitor(monitoredContext: StepExecutionRuntime): Promise<void>;
+  monitor(monitoredContext: StepExecutionRuntime): Promise<void> | void;
 }
 
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep> implements NodeImplementation {

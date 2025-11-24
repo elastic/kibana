@@ -102,7 +102,7 @@ export async function catchError(
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
 
         try {
-          await stepErrorCatcher.catchError();
+          await Promise.resolve(stepErrorCatcher.catchError());
         } catch (error) {
           params.workflowExecutionState.updateWorkflowExecution({
             error,

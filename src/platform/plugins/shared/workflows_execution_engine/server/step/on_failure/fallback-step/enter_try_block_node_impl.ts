@@ -24,7 +24,7 @@ export class EnterTryBlockNodeImpl implements NodeImplementation, NodeWithErrorC
     this.wfExecutionRuntimeManager.navigateToNode(this.node.enterNormalPathNodeId);
   }
 
-  async catchError(): Promise<void> {
+  catchError(): void {
     this.stepExecutionRuntime.stepLogger.logError(
       'Error caught by the OnFailure zone. Redirecting to the fallback path'
     );

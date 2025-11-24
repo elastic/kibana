@@ -30,7 +30,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     this.advanceRetryAttempt();
   }
 
-  public async catchError(): Promise<void> {
+  public catchError(): void {
     const attempt = this.stepExecutionRuntime.getCurrentStepState()?.attempt ?? 0;
 
     if (attempt < this.node.configuration['max-attempts']) {
