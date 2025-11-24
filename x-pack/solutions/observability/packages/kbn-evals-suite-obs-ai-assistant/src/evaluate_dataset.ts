@@ -78,6 +78,7 @@ export function createEvaluateObservabilityAIAssistantDataset({
           const result: any = {
             errors: response.errors,
             messages: response.messages,
+            steps: response.steps,
           };
 
           if (useQualitativeEvaluators) {
@@ -90,7 +91,7 @@ export function createEvaluateObservabilityAIAssistantDataset({
                 messages: [response.messages[response.messages.length - 1]].map((message) => ({
                   message: message.content,
                 })),
-                steps: response.messages,
+                steps: response.steps,
               },
               metadata,
             };
