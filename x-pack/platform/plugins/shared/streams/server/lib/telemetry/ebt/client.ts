@@ -13,7 +13,7 @@ const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
   'POST /api/streams/{name}/processing/_simulate 2023-10-31',
   'POST /api/streams/{name}/processing/_suggestions 2023-10-31',
   'POST /api/streams/{name}/_fork 2023-10-31',
-  'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+  'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
   'PUT /api/streams/{name} 2023-10-31',
   'PUT /api/streams/{name}/_group 2023-10-31',
   'PUT /api/streams/{name}/_ingest 2023-10-31',
