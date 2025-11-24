@@ -25,7 +25,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  public async monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): Promise<void> {
+  public monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): void {
     const timeoutMs = parseDuration(this.node.timeout);
     const whenStepStartedTime = new Date(
       this.wfExecutionRuntimeManager.getWorkflowExecution().startedAt
@@ -59,7 +59,5 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
       this.wfExecutionRuntimeManager.setWorkflowError(undefined);
       this.wfExecutionRuntimeManager.markWorkflowTimeouted();
     }
-
-    return Promise.resolve();
   }
 }
