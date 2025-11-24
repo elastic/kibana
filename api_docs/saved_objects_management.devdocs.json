@@ -294,7 +294,7 @@
             "label": "euiColumn",
             "description": [],
             "signature": [
-              "{ id?: string | undefined; prefix?: string | undefined; onError?: React.ReactEventHandler<HTMLTableCellElement> | undefined; scope?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; name: React.ReactNode; security?: string | undefined; className?: string | undefined; 'aria-label'?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
+              "{ id?: string | undefined; prefix?: string | undefined; onError?: React.ReactEventHandler<HTMLTableCellElement> | undefined; scope?: string | undefined; name: React.ReactNode; security?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; className?: string | undefined; 'aria-label'?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
               "Interpolation",
               "<",
               "Theme",

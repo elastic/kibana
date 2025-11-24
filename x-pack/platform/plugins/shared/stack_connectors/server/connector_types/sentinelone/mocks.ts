@@ -16,16 +16,16 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Readable } from 'stream';
-import { createAxiosResponseMock } from '../lib/mocks';
-import { SENTINELONE_CONNECTOR_ID } from '../../../common/sentinelone/constants';
-import { SentinelOneConnector } from './sentinelone';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/sentinelone';
 import type {
   SentinelOneConfig,
   SentinelOneFetchAgentFilesResponse,
   SentinelOneGetAgentsResponse,
   SentinelOneGetRemoteScriptResults,
   SentinelOneSecrets,
-} from '../../../common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
+import { createAxiosResponseMock } from '../lib/mocks';
+import { SentinelOneConnector } from './sentinelone';
 
 const createAgentDetailsMock = (
   overrides: DeepPartial<SentinelOneGetAgentsResponse['data'][number]> = {}
@@ -212,7 +212,7 @@ class SentinelOneConnectorTestClass extends SentinelOneConnector {
 const createSentinelOneTestInstance = (): SentinelOneConnectorTestClass => {
   return new SentinelOneConnectorTestClass({
     configurationUtilities: actionsConfigMock.create(),
-    connector: { id: '1', type: SENTINELONE_CONNECTOR_ID },
+    connector: { id: '1', type: CONNECTOR_ID },
     config: {
       url: 'https://mock-sentinelone-api-server.com',
     },
