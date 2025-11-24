@@ -10,6 +10,11 @@ import type { StaticToolRegistration } from '@kbn/onechat-server';
 import type { APMPluginStartDependencies, APMPluginSetupDependencies } from '../types';
 import { createDownstreamDependenciesTool } from './get_downstream_dependencies';
 import { createGetServicesTool } from './get_services';
+import { createGetErrorByIdTool } from './get_error_by_id';
+import { createGetTransactionByIdTool } from './get_transaction_by_id';
+import { createGetTraceOverviewByIdTool } from './get_trace_overview_by_id';
+import { createGetSpanByIdTool } from './get_span_by_id';
+import { createGetErrorGroupByKeyTool } from './get_error_group_by_key';
 
 export async function registerAgentTools({
   core,
@@ -23,6 +28,11 @@ export async function registerAgentTools({
   const apmTools: StaticToolRegistration<any>[] = [
     createDownstreamDependenciesTool({ core, plugins, logger }),
     createGetServicesTool({ core, plugins, logger }),
+    createGetErrorByIdTool({ core, plugins, logger }),
+    createGetTransactionByIdTool({ core, plugins, logger }),
+    createGetTraceOverviewByIdTool({ core, plugins, logger }),
+    createGetSpanByIdTool({ core, plugins, logger }),
+    createGetErrorGroupByKeyTool({ core, plugins, logger }),
   ];
 
   for (const tool of apmTools) {

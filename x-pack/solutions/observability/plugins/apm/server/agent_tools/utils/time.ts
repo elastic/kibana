@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-// Duplicate of the attachment type ID defined in @kbn/observability-agent-plugin/server/attachments/error.ts
-// Re-defined here to avoid cross-plugin dependency cycles
-export const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = 'observability.error';
+import datemath from '@kbn/datemath';
+
+export function parseDatemath(value: string, options?: Parameters<typeof datemath.parse>[1]) {
+  return datemath.parse(value, options)?.valueOf() ?? 0;
+}

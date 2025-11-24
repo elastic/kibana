@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { createErrorAttachmentType } from './error';
 import type { ObservabilityAgentPluginSetupDependencies } from '../types';
-import { createErrorContextAttachmentType } from './error_context';
 
 export async function registerAttachments({
   plugins,
 }: {
   plugins: ObservabilityAgentPluginSetupDependencies;
 }) {
-  const attachmentTypes = [createErrorContextAttachmentType()];
+  const attachmentTypes = [createErrorAttachmentType()];
 
   for (const attachment of attachmentTypes) {
     plugins.onechat.attachments.registerType(attachment);
