@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { DashboardControlsState } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,
   StoredControlGroupInput,
@@ -22,7 +21,7 @@ export function transformControlGroupOut(
   references: Reference[],
   ignoreParentSettingsJSON?: string
 ): DashboardState['controlGroupInput'] {
-  let controls = controlGroupInput.panelsJSON
+  const controls = controlGroupInput.panelsJSON
     ? transformControlsState(controlGroupInput.panelsJSON, references)
     : [];
 
@@ -37,16 +36,15 @@ export function transformControlGroupOut(
       controlGroupInput.chainingSystem === 'NONE' ||
       legacyControlGroupOptions.ignoreFilters ||
       legacyControlGroupOptions.ignoreQuery;
-    controls = controls.reduce((prev, control) => {
-      return [
-        ...prev,
-        {
-          ...control,
-          useGlobalFilters: !ignoreFilters,
-          ignoreValidations: legacyControlGroupOptions.ignoreValidations,
-        },
-      ];
-    }, [] as DashboardControlsState);
+    controls.map(({ config, ...rest }) => ({
+      ...rest,
+      config: {
+        useGlobalFilters: !ignoreFilters,
+        ignoreValidations: legacyControlGroupOptions.ignoreValidations,
+        ...config,
+      },
+    }));
   }
+
   return { controls };
 }

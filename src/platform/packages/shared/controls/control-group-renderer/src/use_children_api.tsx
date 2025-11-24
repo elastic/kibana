@@ -12,12 +12,13 @@ import { omit } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 
-import type { StickyControlState, TimeSlice } from '@kbn/controls-schemas';
+import type { TimeSlice } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import {
   apiPublishesESQLVariable,
   type ESQLControlVariable,
+  type ESQLVariableType,
   type PublishesESQLVariable,
 } from '@kbn/esql-types';
 import {
@@ -34,11 +35,11 @@ import {
   type SerializedPanelState,
 } from '@kbn/presentation-publishing';
 
-import type { ControlGroupCreationOptions } from './types';
+import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 
 export const useChildrenApi = (
   state: ControlGroupCreationOptions | undefined,
-  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
+  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ) => {
   const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));
   const currentChildState$Ref = useRef(
@@ -47,6 +48,7 @@ export const useChildrenApi = (
   const lastSavedChildState$Ref = useRef(
     new BehaviorSubject<{ [id: string]: SerializedPanelState }>({}) // derived from lastSavedState$Ref
   );
+  const cleanupCallbackRef = useRef<() => void | undefined>();
 
   useEffect(() => {
     /** Derive `lastSavedChildState$Ref` from `lastSavedState$Ref` */
@@ -87,6 +89,58 @@ export const useChildrenApi = (
   const childrenApi = useMemo(() => {
     if (!state) return; // don't return children API until state is initialized
 
+    /**
+     * Define behaviour subjects that will rely on compatible children API observables
+     */
+    const esqlVariables$ = new BehaviorSubject<ESQLVariableType[]>([]);
+    const esqlVariablesSubscription = combineCompatibleChildrenApis<
+      PublishesESQLVariable,
+      ESQLControlVariable[]
+    >({ children$: children$Ref.current }, 'esqlVariable$', apiPublishesESQLVariable, [])
+      .pipe(distinctUntilChanged(deepEqual))
+      .subscribe((variables) => {
+        esqlVariables$.next(variables);
+      });
+
+    const appliedFilters$ = new BehaviorSubject<Filter | undefined>(undefined);
+    const appliedFiltersSubscription = combineCompatibleChildrenApis<
+      AppliesFilters,
+      Filter[] | undefined
+    >({ children$: children$Ref.current }, 'appliedFilters$', apiAppliesFilters, [], (values) => {
+      const allOutputFilters = values.filter(
+        (childOutputFilters) => childOutputFilters && childOutputFilters.length > 0
+      ) as Filter[][];
+      return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : [];
+    })
+      .pipe(distinctUntilChanged(deepEqual))
+      .subscribe((filters) => {
+        appliedFilters$.next(filters);
+      });
+
+    const appliedTimeslice$ = new BehaviorSubject<TimeSlice | undefined>(undefined);
+    const appliedTimesliceSubscription = combineCompatibleChildrenApis<
+      AppliesTimeslice,
+      TimeSlice | undefined
+    >(
+      { children$: children$Ref.current },
+      'appliedTimeslice$',
+      apiAppliesTimeslice,
+      undefined, // flatten method is unnecessary since there is only ever one timeslice
+      (values) => {
+        return values.length === 0 ? undefined : values[values.length - 1];
+      }
+    )
+      .pipe(distinctUntilChanged(deepEqual))
+      .subscribe((timeSlice) => {
+        appliedTimeslice$.next(timeSlice);
+      });
+
+    cleanupCallbackRef.current = () => {
+      esqlVariablesSubscription.unsubscribe();
+      appliedFiltersSubscription.unsubscribe();
+      appliedTimesliceSubscription.unsubscribe();
+    };
+
     return {
       children$: children$Ref.current,
       registerChildApi: (child: DefaultEmbeddableApi) => {
@@ -126,35 +180,20 @@ export const useChildrenApi = (
         return lastSavedChildState$Ref.current.pipe(map((lastSavedState) => lastSavedState[id]));
       },
       getLastSavedStateForChild: (id: string) => lastSavedChildState$Ref.current.getValue()[id],
-      appliedFilters$: combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
-        { children$: children$Ref.current },
-        'appliedFilters$',
-        apiAppliesFilters,
-        [],
-        (values) => {
-          const allOutputFilters = values.filter(
-            (childOutputFilters) => childOutputFilters && childOutputFilters.length > 0
-          ) as Filter[][];
-          return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : [];
-        }
-      ).pipe(distinctUntilChanged(deepEqual)),
-      esqlVariables$: combineCompatibleChildrenApis<PublishesESQLVariable, ESQLControlVariable[]>(
-        { children$: children$Ref.current },
-        'esqlVariable$',
-        apiPublishesESQLVariable,
-        []
-      ).pipe(distinctUntilChanged(deepEqual)),
-      appliedTimeslice$: combineCompatibleChildrenApis<AppliesTimeslice, TimeSlice | undefined>(
-        { children$: children$Ref.current },
-        'appliedTimeslice$',
-        apiAppliesTimeslice,
-        undefined, // flatten method is unnecessary since there is only ever one timeslice
-        (values) => {
-          return values.length === 0 ? undefined : values[values.length - 1];
-        }
-      ).pipe(distinctUntilChanged(deepEqual)),
+      appliedFilters$,
+      esqlVariables$,
+      appliedTimeslice$,
     };
   }, [state, lastSavedChildState$Ref]);
+
+  useEffect(() => {
+    // run cleanup on dismount
+    return () => {
+      if (cleanupCallbackRef.current) {
+        cleanupCallbackRef.current();
+      }
+    };
+  }, []);
 
   return { childrenApi, currentChildState$Ref };
 };

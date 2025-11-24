@@ -20,8 +20,8 @@
       "navigation",
       "unifiedSearch",
       "developerExamples",
-      "uiActions"
-    ],
-    "requiredBundles": ["kibanaReact"]
+      "uiActions",
+      "kibanaReact"
+    ]
   }
 }

@@ -20,6 +20,7 @@
     "@kbn/std",
     "@kbn/embeddable-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/presentation-containers"
+    "@kbn/presentation-containers",
+    "@kbn/kibana-react-plugin"
   ]
 }

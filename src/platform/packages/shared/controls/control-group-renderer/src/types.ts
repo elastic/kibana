@@ -93,7 +93,12 @@ export type FieldFilterPredicate = (f: DataViewField) => boolean;
  * ----------------------------------------------------------------
  */
 
-export interface ControlGroupRuntimeState<State extends StickyControlState = StickyControlState> {
+export type FlattenedStickyControlState = Omit<StickyControlState, 'config'> &
+  StickyControlState['config'];
+
+export interface ControlGroupRuntimeState<
+  State extends FlattenedStickyControlState = FlattenedStickyControlState
+> {
   initialChildControlState: ControlPanelsState<State>;
   ignoreParentSettings?: LegacyIgnoreParentSettings; // these will be translated to panel-level settings
 }
@@ -104,12 +109,15 @@ export interface ControlGroupCreationOptions {
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
 
-export interface ControlPanelsState<State extends StickyControlState = StickyControlState> {
+export interface ControlPanelsState<
+  State extends FlattenedStickyControlState = FlattenedStickyControlState
+> {
   [panelId: string]: ControlPanelState<State>;
 }
 
-export type ControlPanelState<ControlState extends StickyControlState = StickyControlState> =
-  ControlState & {
-    type: string; // prevents having to cast to the literal type
-    order: number;
-  };
+export type ControlPanelState<
+  ControlState extends FlattenedStickyControlState = FlattenedStickyControlState
+> = ControlState & {
+  type: string; // prevents having to cast to the literal type
+  order: number;
+};

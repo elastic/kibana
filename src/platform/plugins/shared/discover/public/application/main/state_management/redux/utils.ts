@@ -14,6 +14,7 @@ import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
@@ -101,8 +102,9 @@ export const extractEsqlVariables = (panels: ControlPanelsState | null): ESQLCon
   }
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
     if (panel.type === ESQL_CONTROL) {
-      const isSingleSelect = panel.singleSelect ?? true;
-      const selectedValues = panel.selectedOptions || [];
+      const typedPanel = panel as OptionsListESQLControlState;
+      const isSingleSelect = typedPanel.singleSelect ?? true;
+      const selectedValues = typedPanel.selectedOptions || [];
 
       let value: string | number | (string | number)[];
 
@@ -116,8 +118,8 @@ export const extractEsqlVariables = (panels: ControlPanelsState | null): ESQLCon
       }
 
       acc.push({
-        key: panel.variableName,
-        type: panel.variableType as ESQLVariableType,
+        key: typedPanel.variableName,
+        type: typedPanel.variableType as ESQLVariableType,
         value,
       });
     }

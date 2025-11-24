@@ -48,18 +48,22 @@ describe('layout manager', () => {
   const pinnedControls: DashboardState['controlGroupInput'] = {
     controls: [
       {
-        id: 'control1',
+        uid: 'control1',
         type: 'optionsListControl',
-        dataViewId: '',
-        fieldName: '',
+        config: {
+          dataViewId: '',
+          fieldName: '',
+        },
       },
       {
-        id: 'control2',
+        uid: 'control2',
         grow: true,
         width: 'small',
         type: 'optionsListControl',
-        dataViewId: '',
-        fieldName: '',
+        config: {
+          dataViewId: '',
+          fieldName: '',
+        },
       },
     ],
   };
