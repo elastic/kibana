@@ -4466,6 +4466,10 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
               },
               {
