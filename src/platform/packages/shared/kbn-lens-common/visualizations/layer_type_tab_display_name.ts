@@ -39,5 +39,14 @@ export function getLensLayerTypeTabDisplayName(layerType?: LensLayerType, count?
   }
 
   const baseLabel = lensLayerTypeTabDisplayNames[layerType] || layerType;
-  return count ? `${baseLabel} ${count}` : baseLabel;
+
+  return count
+    ? i18n.translate('xpack.lens.layerTypes.tabDisplayName.withCount', {
+        defaultMessage: '{baseLabel} {count}',
+        values: {
+          baseLabel,
+          count,
+        },
+      })
+    : baseLabel;
 }
