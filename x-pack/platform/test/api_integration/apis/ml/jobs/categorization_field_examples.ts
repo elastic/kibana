@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
             message: '250 field values analyzed, 95% contain 3 or more tokens.',
           },
           {
-            id: 5,
+            id: 4,
             valid: 'partially_valid',
             message: 'More than 75% of field values are null.',
           },
