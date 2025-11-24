@@ -18,7 +18,7 @@ const _allowedExperimentalValues = {
   enableOtelIntegrations: true,
   enableAgentStatusAlerting: true,
   enableAgentPrivilegeLevelChange: false,
-  installIntegrationsKnowledge: false,
+  installIntegrationsKnowledge: true,
   agentlessPoliciesAPI: true,
   useAgentlessAPIInUI: false,
   disabledAgentlessLegacyAPI: false,
