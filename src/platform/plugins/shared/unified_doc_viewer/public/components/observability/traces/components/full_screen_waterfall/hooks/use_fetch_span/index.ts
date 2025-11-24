@@ -10,42 +10,46 @@
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { unflattenObject } from '@kbn/object-utils';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
-interface UseFetchLogParams {
-  id: string;
+interface UseFetchSpanParams {
+  spanId: string;
+  traceId: string;
 }
 
-export function useFetchLog({ id }: UseFetchLogParams) {
-  const { discoverShared, core } = getUnifiedDocViewerServices();
+export const useFetchSpan = ({ spanId, traceId }: UseFetchSpanParams) => {
+  const { discoverShared, core, data } = getUnifiedDocViewerServices();
+  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
 
-  const fetchLogDocumentByIdFeature = discoverShared.features.registry.getById(
-    'observability-logs-fetch-document-by-id'
+  const fetchSpanFeature = discoverShared.features.registry.getById(
+    'observability-traces-fetch-span'
   );
 
   const { loading, error, value } = useAbortableAsync(
     async ({ signal }) => {
-      if (!fetchLogDocumentByIdFeature?.fetchLogDocumentById || !id) {
+      if (!fetchSpanFeature?.fetchSpan || !traceId || !spanId) {
         return undefined;
       }
 
-      return fetchLogDocumentByIdFeature.fetchLogDocumentById(
+      return fetchSpanFeature.fetchSpan(
         {
-          id,
+          traceId,
+          spanId,
+          start: timeFilter.from,
+          end: timeFilter.to,
         },
         signal
       );
     },
-    [fetchLogDocumentByIdFeature, id]
+    [fetchSpanFeature, traceId, spanId, timeFilter.from, timeFilter.to]
   );
 
   useEffect(() => {
     if (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       core.notifications.toasts.addDanger({
-        title: i18n.translate('unifiedDocViewer.fullScreenWaterfall.logDocument.error', {
-          defaultMessage: 'An error occurred while fetching the log document',
+        title: i18n.translate('unifiedDocViewer.fullScreenWaterfall.spanDocument.error', {
+          defaultMessage: 'An error occurred while fetching the span document',
         }),
         text: errorMessage,
       });
@@ -54,7 +58,7 @@ export function useFetchLog({ id }: UseFetchLogParams) {
 
   return {
     loading,
-    log: value?.fields ? unflattenObject(value.fields) : undefined,
-    index: value?._index,
+    error,
+    span: value,
   };
-}
+};
