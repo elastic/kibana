@@ -23,6 +23,11 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
   );
   const [isOpen, setIsOpen] = useState(false);
 
+  const dismiss = () => {
+    setShowCallOut(false);
+    sessionStorage.setItem('slo_health_callout_hidden', 'true');
+  };
+
   if (!showCallOut) {
     return null;
   }
@@ -31,17 +36,12 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
     return null;
   }
 
-  const problematicSloList = results.filter((result) => result.health.overall !== 'healthy');
+  const problematicSloList = results.filter((result) => result.health.isProblematic);
   if (problematicSloList.length === 0) {
     return null;
   }
 
   const deduplicatedList = uniqBy(problematicSloList, (item) => item.sloId);
-
-  const dismiss = () => {
-    setShowCallOut(false);
-    sessionStorage.setItem('slo_health_callout_hidden', 'true');
-  };
 
   return (
     <EuiCallOut

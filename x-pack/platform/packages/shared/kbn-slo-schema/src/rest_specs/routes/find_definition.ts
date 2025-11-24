@@ -6,7 +6,7 @@
  */
 import { toBooleanRt } from '@kbn/io-ts-utils/src/to_boolean_rt';
 import * as t from 'io-ts';
-import { healthStatusSchema, sloDefinitionSchema, transformHealthSchema } from '../../schema';
+import { sloDefinitionSchema, transformHealthSchema } from '../../schema';
 
 const findSloDefinitionsParamsSchema = t.partial({
   query: t.partial({
@@ -21,7 +21,7 @@ const findSloDefinitionsParamsSchema = t.partial({
 
 const healthMetadataSchema = t.partial({
   health: t.type({
-    overall: healthStatusSchema,
+    isProblematic: t.boolean,
     rollup: transformHealthSchema,
     summary: transformHealthSchema,
   }),

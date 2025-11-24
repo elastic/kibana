@@ -278,7 +278,7 @@ export function SloManagementTable() {
           );
         }
 
-        return item.health.overall === 'healthy' ? (
+        return !item.health.isProblematic ? (
           <EuiHealth color="success">
             {i18n.translate('xpack.slo.sloManagementTable.columns.health.healthy', {
               defaultMessage: 'Healthy',

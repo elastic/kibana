@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import kbnRison from '@kbn/rison';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { values } from 'lodash';
 import React from 'react';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
 import { useActionModal } from '../../../context/action_modal';
@@ -57,7 +56,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   }
 
   const health = data[0].health;
-  if (health.overall === 'healthy') {
+  if (!health.isProblematic) {
     return null;
   }
 
@@ -67,20 +66,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const rollupUrl = getUrl(rollupTransformId);
   const summaryUrl = getUrl(summaryTransformId);
 
-  const rollup = {
-    unhealthy: health.rollup.status === 'unhealthy',
-    missing: health.rollup.status === 'missing',
-    stopped: health.rollup.transformState === 'stopped',
-  };
-  const summary = {
-    unhealthy: health.summary.status === 'unhealthy',
-    missing: health.summary.status === 'missing',
-    stopped: health.summary.transformState === 'stopped',
-  };
-
-  const rollupHasIssue = values(rollup).some(Boolean);
-  const summaryHasIssue = values(summary).some(Boolean);
-  const count = [rollupHasIssue, summaryHasIssue].filter(Boolean).length;
+  const count = [health.rollup.isProblematic, health.summary.isProblematic].filter(Boolean).length;
 
   return (
     <EuiCallOut
@@ -98,20 +84,21 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
             values={{ count }}
           />
           <ul>
-            {(rollup.unhealthy || rollup.stopped) && !!rollupUrl && (
-              <li>
-                <ContentWithInspectCta
-                  textSize="s"
-                  content={
-                    rollup.unhealthy
-                      ? getUnhealthyText(rollupTransformId)
-                      : getStoppedText(rollupTransformId)
-                  }
-                  url={rollupUrl}
-                />
-              </li>
-            )}
-            {rollup.missing && (
+            {(health.rollup.status === 'unhealthy' || health.rollup.stateMatches === false) &&
+              !!rollupUrl && (
+                <li>
+                  <ContentWithInspectCta
+                    textSize="s"
+                    content={
+                      health.rollup.status === 'unhealthy'
+                        ? getUnhealthyText(rollupTransformId)
+                        : getStateConflictText(rollupTransformId)
+                    }
+                    url={rollupUrl}
+                  />
+                </li>
+              )}
+            {health.rollup.missing && (
               <li>
                 <ContentWithResetCta
                   textSize="s"
@@ -121,20 +108,21 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
               </li>
             )}
 
-            {(summary.unhealthy || summary.stopped) && !!summaryUrl && (
-              <li>
-                <ContentWithInspectCta
-                  textSize="s"
-                  content={
-                    summary.unhealthy
-                      ? getUnhealthyText(summaryTransformId)
-                      : getStoppedText(summaryTransformId)
-                  }
-                  url={summaryUrl}
-                />
-              </li>
-            )}
-            {summary.missing && (
+            {(health.summary.status === 'unhealthy' || health.summary.stateMatches === false) &&
+              !!summaryUrl && (
+                <li>
+                  <ContentWithInspectCta
+                    textSize="s"
+                    content={
+                      health.summary.status === 'unhealthy'
+                        ? getUnhealthyText(summaryTransformId)
+                        : getStateConflictText(rollupTransformId)
+                    }
+                    url={summaryUrl}
+                  />
+                </li>
+              )}
+            {health.summary.missing && (
               <li>
                 <ContentWithResetCta
                   textSize="s"
@@ -156,9 +144,9 @@ const getUnhealthyText = (transformId: string) =>
     values: { transformId },
   });
 
-const getStoppedText = (transformId: string) =>
-  i18n.translate('xpack.slo.sloDetails.healthCallout.stoppedTransformText', {
-    defaultMessage: '{transformId} (stopped)',
+const getStateConflictText = (transformId: string) =>
+  i18n.translate('xpack.slo.sloDetails.healthCallout.transformStateConflictText', {
+    defaultMessage: '{transformId} (conflicting state)',
     values: { transformId },
   });
 

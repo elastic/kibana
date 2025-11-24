@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { healthStatusSchema, sloIdSchema, stateSchema, transformHealthSchema } from '../../schema';
+import { sloIdSchema, transformHealthSchema } from '../../schema';
 import { allOrAnyString } from '../../schema/common';
 
 const fetchSLOHealthResponseSchema = t.array(
@@ -14,11 +14,10 @@ const fetchSLOHealthResponseSchema = t.array(
     sloInstanceId: allOrAnyString,
     sloRevision: t.number,
     sloName: t.string,
-    state: stateSchema,
     health: t.type({
-      overall: transformHealthSchema,
-      rollup: healthStatusSchema,
-      summary: healthStatusSchema,
+      isProblematic: t.boolean,
+      rollup: transformHealthSchema,
+      summary: transformHealthSchema,
     }),
   })
 );
@@ -33,4 +32,4 @@ type FetchSLOHealthResponse = t.OutputOf<typeof fetchSLOHealthResponseSchema>;
 type FetchSLOHealthParams = t.TypeOf<typeof fetchSLOHealthParamsSchema.props.body>;
 
 export { fetchSLOHealthParamsSchema, fetchSLOHealthResponseSchema };
-export type { FetchSLOHealthResponse, FetchSLOHealthParams };
+export type { FetchSLOHealthParams, FetchSLOHealthResponse };
