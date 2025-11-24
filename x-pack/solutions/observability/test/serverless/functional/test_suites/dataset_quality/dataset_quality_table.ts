@@ -204,11 +204,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await synthtrace.deleteCustomPipeline('synth.no-fs@pipeline');
       });
       it('changes link text on hover when failure store is not enabled', async () => {
-        const links = await testSubjects.findAll(
-          PageObjects.datasetQuality.testSubjectSelectors.enableFailureStoreFromTableButton
-        );
-        expect(links.length).to.be.greaterThan(0);
-        const link = links[links.length - 1];
+        const targetDataStreamName = 'logs-synth.no-fs-default';
+        const targetLink = `${PageObjects.datasetQuality.testSubjectSelectors.enableFailureStoreFromTableButton}-${targetDataStreamName}`;
+
+        await testSubjects.existOrFail(targetLink);
+        const link = await testSubjects.find(targetLink);
 
         expect(await link.getVisibleText()).to.eql('N/A');
 
@@ -230,24 +230,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           enableFailureStoreFromTableButton,
         } = PageObjects.datasetQuality.testSubjectSelectors;
 
-        const originalLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
-        expect(originalLinks.length).to.be.greaterThan(0);
+        const targetDataStreamName = 'logs-synth.no-fs-default';
 
-        const link = originalLinks[0];
-        await link.click();
+        const targetLink = `${enableFailureStoreFromTableButton}-${targetDataStreamName}`;
+        await testSubjects.existOrFail(targetLink);
+        await testSubjects.click(targetLink);
 
         await testSubjects.existOrFail(editFailureStoreModal);
 
-        const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
         await testSubjects.click(enableFailureStoreToggle);
-        expect(await saveModalButton.isEnabled()).to.be(true);
-        await testSubjects.click(failureStoreModalSaveButton);
+        await testSubjects.clickWhenNotDisabled(failureStoreModalSaveButton);
         await testSubjects.missingOrFail(editFailureStoreModal);
 
-        await retry.try(async () => {
-          const updatedLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
-          expect(updatedLinks.length).to.be.lessThan(originalLinks.length);
-        });
+        await testSubjects.missingOrFail(targetLink);
       });
     });
   });
