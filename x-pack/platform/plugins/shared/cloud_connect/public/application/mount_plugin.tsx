@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { CloudConnectedAppContextProvider } from './app_context';
 import { CloudConnectedAppMain } from './app';
+import { apiService } from '../lib/api';
 import type { CloudConnectedAppComponentProps } from '../types';
 
 const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
@@ -30,6 +31,9 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
 };
 
 export const CloudConnectedApp = (core: CoreStart, params: AppMountParameters) => {
+  // Initialize the API service with the HTTP client
+  apiService.setup(core.http);
+
   ReactDOM.render(
     core.rendering.addContext(
       <CloudConnectedAppComponent

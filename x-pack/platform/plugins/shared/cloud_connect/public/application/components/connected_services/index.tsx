@@ -60,7 +60,7 @@ interface ClusterDetails {
 
 export interface ConnectedServicesPageProps {
   clusterDetails: ClusterDetails;
-  onRefetch: () => Promise<void>;
+  onRefetch: () => void;
 }
 
 export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({

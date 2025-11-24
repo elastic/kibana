@@ -10,8 +10,9 @@ import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ServiceCard } from './details_card';
-import { DisableServiceModal } from '../disable_service_modal';
+import { DisableServiceModal } from './disable_service_modal';
 import { useCloudConnectedAppContext } from '../../../app_context';
+import { apiService } from '../../../../lib/api';
 import { SERVICE_CONFIG } from '../../../../../common/constants';
 
 interface ServiceMetadata {
@@ -38,111 +39,72 @@ interface ServicesSectionProps {
     auto_ops?: Service;
     eis?: Service;
   };
-  onRefetch: () => Promise<void>;
+  onRefetch: () => void;
 }
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRefetch }) => {
-  const { http, notifications } = useCloudConnectedAppContext();
+  const { notifications } = useCloudConnectedAppContext();
   const [loadingService, setLoadingService] = useState<string | null>(null);
   const [disableModalService, setDisableModalService] = useState<{
     key: string;
     name: string;
   } | null>(null);
 
-  const handleEnableService = async (serviceKey: string) => {
+  const handleServiceUpdate = async (serviceKey: string, enabled: boolean) => {
     setLoadingService(serviceKey);
-    try {
-      const response = await http.put<{
-        success: boolean;
-        warning?: string;
-        warningError?: string;
-      }>('/internal/cloud_connect/cluster_details', {
-        body: JSON.stringify({
-          services: {
-            [serviceKey]: { enabled: true },
-          },
-        }),
-      });
 
-      // Check if there's a warning in the response
-      if (response.warning) {
-        notifications.toasts.addWarning({
-          title: i18n.translate('xpack.cloudConnect.services.enable.warningTitle', {
-            defaultMessage: 'Service enabled with warnings',
-          }),
-          text: response.warning,
-        });
-      } else {
-        notifications.toasts.addSuccess({
-          title: i18n.translate('xpack.cloudConnect.services.enable.successTitle', {
-            defaultMessage: 'Service enabled successfully',
-          }),
-        });
-      }
+    const { data, error } = await apiService.updateServices({
+      [serviceKey]: { enabled },
+    });
 
-      // Refetch cluster details to update the UI
-      await onRefetch();
-    } catch (error) {
-      const errorMessage = error?.body?.message || (error as Error).message;
+    if (error) {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.cloudConnect.services.enable.errorTitle', {
-          defaultMessage: 'Failed to enable service',
-        }),
-        text: errorMessage,
+        title: enabled
+          ? i18n.translate('xpack.cloudConnect.services.enable.errorTitle', {
+              defaultMessage: 'Failed to enable service',
+            })
+          : i18n.translate('xpack.cloudConnect.services.disable.errorTitle', {
+              defaultMessage: 'Failed to disable service',
+            }),
+        text: error.message,
       });
-    } finally {
       setLoadingService(null);
+      return;
     }
+
+    if (data?.warning) {
+      notifications.toasts.addWarning({
+        title: enabled
+          ? i18n.translate('xpack.cloudConnect.services.enable.warningTitle', {
+              defaultMessage: 'Service enabled with warnings',
+            })
+          : i18n.translate('xpack.cloudConnect.services.disable.warningTitle', {
+              defaultMessage: 'Service disabled with warnings',
+            }),
+        text: data.warning,
+      });
+    } else {
+      notifications.toasts.addSuccess({
+        title: enabled
+          ? i18n.translate('xpack.cloudConnect.services.enable.successTitle', {
+              defaultMessage: 'Service enabled successfully',
+            })
+          : i18n.translate('xpack.cloudConnect.services.disable.successTitle', {
+              defaultMessage: 'Service disabled successfully',
+            }),
+      });
+    }
+
+    setLoadingService(null);
+    onRefetch();
   };
+
+  const handleEnableService = (serviceKey: string) => handleServiceUpdate(serviceKey, true);
 
   const handleDisableService = async () => {
     if (!disableModalService) return;
-
-    setLoadingService(disableModalService.key);
-    try {
-      const response = await http.put<{
-        success: boolean;
-        warning?: string;
-        warningError?: string;
-      }>('/internal/cloud_connect/cluster_details', {
-        body: JSON.stringify({
-          services: {
-            [disableModalService.key]: { enabled: false },
-          },
-        }),
-      });
-
-      // Check if there's a warning in the response
-      if (response.warning) {
-        notifications.toasts.addWarning({
-          title: i18n.translate('xpack.cloudConnect.services.disable.warningTitle', {
-            defaultMessage: 'Service disabled with warnings',
-          }),
-          text: response.warning,
-        });
-      } else {
-        notifications.toasts.addSuccess({
-          title: i18n.translate('xpack.cloudConnect.services.disable.successTitle', {
-            defaultMessage: 'Service disabled successfully',
-          }),
-        });
-      }
-
-      setDisableModalService(null);
-
-      // Refetch cluster details to update the UI
-      await onRefetch();
-    } catch (error) {
-      const errorMessage = error?.body?.message || (error as Error).message;
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.cloudConnect.services.disable.errorTitle', {
-          defaultMessage: 'Failed to disable service',
-        }),
-        text: errorMessage,
-      });
-    } finally {
-      setLoadingService(null);
-    }
+    await handleServiceUpdate(disableModalService.key, false);
+    setDisableModalService(null);
   };
 
   const showDisableModal = (serviceKey: string, serviceName: string) => {

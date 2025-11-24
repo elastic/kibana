@@ -18,6 +18,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { useCloudConnectedAppContext } from '../../../app_context';
+import { apiService } from '../../../../lib/api';
 import {
   STEP_1_TITLE,
   STEP_1_DESCRIPTION_1,
@@ -37,7 +38,7 @@ interface ConnectionWizardProps {
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
-  const { docLinks, http, hasEncryptedSOEnabled } = useCloudConnectedAppContext();
+  const { docLinks, hasEncryptedSOEnabled } = useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,24 +53,20 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
     setError(null);
     setSuccess(false);
 
-    try {
-      const response = await http.post('/internal/cloud_connect/authenticate', {
-        body: JSON.stringify({ apiKey: apiKey.trim() }),
-      });
+    const { data, error: apiError } = await apiService.authenticate(apiKey.trim());
 
+    if (apiError) {
+      setError(apiError.message || 'Failed to authenticate with Cloud Connect');
+      setIsLoading(false);
+      return;
+    }
+
+    if (data?.success) {
       setSuccess(true);
       onConnect();
-      // eslint-disable-next-line no-console
-      console.log('Authentication successful:', response);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to authenticate with Cloud Connect';
-      setError(errorMessage);
-      // eslint-disable-next-line no-console
-      console.error('Authentication failed:', err);
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   };
 
   const step1 = {
