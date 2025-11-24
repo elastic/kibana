@@ -13,11 +13,12 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { estypes } from '@elastic/elasticsearch';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
-import { dateRangeQuery, kqlQuery } from '@kbn/es-query';
+import { dateRangeQuery, termsQuery } from '@kbn/es-query';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
-import type { Dimension, MetricField } from '../../../common/types';
+import type { Dimension, MetricField, DimensionFilters } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import { normalizeUnit } from './normalize_unit';
+import { NUMERIC_TYPES } from '../../../common/fields/constants';
 
 export interface MetricMetadata {
   dimensions: string[];
@@ -96,22 +97,41 @@ function buildMetricMetadataMap(
   return new Map(entries);
 }
 
+const buildFilters = (filterEntries: Array<[string, string[]]>, dimensions: Dimension[]) => {
+  const dimensionMap = new Map(dimensions.map((dimension) => [dimension.name, dimension]));
+
+  return filterEntries.flatMap(([dimensionName, values]) => {
+    const dimension = dimensionMap.get(dimensionName);
+
+    if (!dimension) {
+      return termsQuery(dimensionName, values);
+    }
+
+    return termsQuery(
+      dimensionName,
+      NUMERIC_TYPES.includes(dimension.type) ? values.map(Number).filter(Boolean) : values
+    );
+  });
+};
+
 export async function sampleMetricMetadata({
   esClient,
   metricFields,
   logger,
   timerange: { from, to },
-  kuery,
+  filters,
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   logger: Logger;
   timerange: EpochTimeRange;
-  kuery?: string;
+  filters: DimensionFilters;
 }): Promise<MetricMetadataMap> {
   if (metricFields.length === 0) {
     return new Map();
   }
+
+  const filterEntries = Object.entries(filters);
 
   try {
     const body: MsearchRequestItem[] = [];
@@ -130,7 +150,16 @@ export async function sampleMetricMetadata({
                 },
               },
               ...dateRangeQuery(from, to),
-              ...kqlQuery(kuery),
+              ...(filterEntries.length > 0
+                ? [
+                    {
+                      bool: {
+                        should: buildFilters(filterEntries, dimensions),
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ]
+                : []),
             ],
           },
         },
@@ -160,14 +189,14 @@ export async function enrichMetricFields({
   indexFieldCapsMap,
   logger,
   timerange,
-  kuery,
+  filters = {},
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   indexFieldCapsMap: IndexFieldCapsMap;
   logger: Logger;
   timerange: EpochTimeRange;
-  kuery?: string;
+  filters?: DimensionFilters;
 }): Promise<MetricField[]> {
   if (metricFields.length === 0) {
     return metricFields;
@@ -178,7 +207,7 @@ export async function enrichMetricFields({
     metricFields,
     logger,
     timerange,
-    kuery,
+    filters,
   });
 
   const uniqueDimensionSets = new Map<string, Array<Dimension>>();
