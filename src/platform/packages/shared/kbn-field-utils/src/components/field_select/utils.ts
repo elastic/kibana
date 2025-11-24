@@ -95,9 +95,9 @@ export const getFieldLabel = (type: string) => {
 };
 
 export const getFieldIconType = (type: string): string => {
-  const fieldIconTpye = getTextBasedColumnIconType({ type: KBN_FIELD_TYPES.UNKNOWN, esType: type });
-  if (fieldIconTpye && fieldIconTpye !== KBN_FIELD_TYPES.UNKNOWN) {
-    return fieldIconTpye;
+  const fieldIconType = getTextBasedColumnIconType({ type: KBN_FIELD_TYPES.UNKNOWN, esType: type });
+  if (fieldIconType && fieldIconType !== KBN_FIELD_TYPES.UNKNOWN) {
+    return fieldIconType;
   }
   const kibanaFieldType = esFieldTypeToKibanaFieldType(type);
   return kibanaFieldType === KBN_FIELD_TYPES.UNKNOWN ? type : kibanaFieldType;
