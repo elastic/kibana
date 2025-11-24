@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import { createAiInsightAttachmentType } from './ai_insight';
 import type { ObservabilityAgentPluginSetupDependencies } from '../types';
+import { createAlertAttachmentType } from './alert';
 
 export async function registerAttachments({
   plugins,
 }: {
   plugins: ObservabilityAgentPluginSetupDependencies;
 }) {
-  const attachmentTypes = [createAiInsightAttachmentType()];
+  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
+    createAiInsightAttachmentType(),
+    createAlertAttachmentType(),
+  ];
 
   for (const attachment of attachmentTypes) {
     plugins.onechat.attachments.registerType(attachment);

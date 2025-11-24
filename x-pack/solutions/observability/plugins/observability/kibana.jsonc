@@ -48,6 +48,7 @@
       "streams",
     ],
     "optionalPlugins": [
+      "onechat",
       "aiops",
       "cases",
       "discover",
