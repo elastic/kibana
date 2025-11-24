@@ -18,16 +18,16 @@ export interface TopNavMenuItemBetaProps extends TopNavMenuItemBetaInterface {
 }
 
 export const TopNavMenuItemBeta = ({
+  run,
+  htmlId,
   label,
+  testId,
+  iconType,
   disableButton,
-  isMobileMenu,
   href,
   target,
-  htmlId,
-  testId,
   isLoading,
-  isExternalLink,
-  run,
+  isMobileMenu,
   closePopover,
 }: TopNavMenuItemBetaProps) => {
   const itemText = upperFirst(label);
@@ -46,17 +46,17 @@ export const TopNavMenuItemBeta = ({
 
   return (
     <EuiHeaderLink
-      size="s"
       onClick={href ? undefined : handleClick}
-      isDisabled={isDisabled()}
       id={htmlId}
       data-test-subj={testId}
-      isLoading={isLoading}
-      iconSide="right"
+      iconType={iconType}
+      isDisabled={isDisabled()}
       href={href}
       target={href ? target : undefined}
-      iconSize="s"
-      iconType={isExternalLink ? 'popout' : undefined}
+      isLoading={isLoading}
+      size="s"
+      iconSide="left"
+      iconSize="m"
     >
       {itemText}
     </EuiHeaderLink>

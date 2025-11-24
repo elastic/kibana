@@ -52,9 +52,16 @@ export const TopNavMenuItemsBeta = ({
               />
             );
           })}
-          {config.actionItem && (
+          {config.secondaryActionItem && (
             <TopNavMenuActionButton
-              {...config.actionItem}
+              {...config.secondaryActionItem}
+              closePopover={closePopover}
+              isMobileMenu={isMobileMenu}
+            />
+          )}
+          {config.primaryActionItem && (
+            <TopNavMenuActionButton
+              {...config.primaryActionItem}
               closePopover={closePopover}
               isMobileMenu={isMobileMenu}
             />

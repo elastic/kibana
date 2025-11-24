@@ -49,7 +49,12 @@ export function createTopNav(
                     ...(props.config as TopNavMenuPropsBeta<QT>['config'])!.items,
                     ...relevantConfig,
                   ],
-                  actionItem: (props.config as TopNavMenuPropsBeta<QT>['config'])!.actionItem,
+                  primaryActionItem: (props.config as TopNavMenuPropsBeta<QT>['config'])!
+                    .primaryActionItem,
+                  secondaryActionItem: (props.config as TopNavMenuPropsBeta<QT>['config'])!
+                    .secondaryActionItem,
+                  enableShowMoreButton: (props.config as TopNavMenuPropsBeta<QT>['config'])!
+                    .enableShowMoreButton,
                 }
               : { items: relevantConfig }
           }

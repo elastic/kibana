@@ -71,50 +71,45 @@ const createEditModeConfig = (): TopNavMenuDataBeta => {
   return {
     items: [
       {
-        id: 'settings',
-        label: 'Settings',
-        run: action('settings-clicked'),
-        testId: 'settingsButton',
-        disableButton: false,
+        run: action('exit-edit-clicked'),
+        id: 'exitEdit',
+        label: 'exit edit',
+        testId: 'exitEditButton',
+        iconType: 'exit', // use 'logOut' when added to EUI
       },
       {
-        id: 'cancel',
-        label: 'Exit edit',
-        run: action('switch-to-view-clicked'),
-        testId: 'switchToViewButton',
-        disableButton: false,
-      },
-      {
+        run: action('export-clicked'),
         id: 'export',
         label: 'export',
-        run: action('export-clicked'),
         testId: 'exportButton',
-        disableButton: false,
+        iconType: 'download',
       },
       {
+        run: action('share-clicked'),
         id: 'share',
         label: 'share',
-        run: action('share-clicked'),
         testId: 'shareButton',
-        disableButton: false,
-      },
-      {
-        id: 'add',
-        label: 'add',
-        run: action('share-clicked'),
-        testId: 'shareButton',
-        disableButton: false,
+        iconType: 'share',
       },
     ],
-    actionItem: {
-      id: 'save',
-      label: 'Save',
+    secondaryActionItem: {
       run: action('add-clicked'),
+      id: 'add',
+      label: 'add',
       testId: 'addButton',
+      iconType: 'plusInCircle',
+      color: 'success',
+    },
+    primaryActionItem: {
+      run: action('save-clicked'),
+      id: 'save',
+      label: 'save',
+      testId: 'saveButton',
+      iconType: 'save',
+      color: 'text',
       splitButtonProps: {
         run: action('add-split-clicked'),
-        secondaryButtonAriaLabel: 'Add options',
-        isMainButtonDisabled: true,
+        secondaryButtonAriaLabel: 'Save options',
       },
     },
   };
@@ -126,7 +121,7 @@ const unsavedChangesBadge: TopNavMenuBadgeProps = {
   color: '#F6E58D',
   toolTipProps: {
     content:
-      ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
+      'You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
     position: 'bottom',
   } as EuiToolTipProps,
 };

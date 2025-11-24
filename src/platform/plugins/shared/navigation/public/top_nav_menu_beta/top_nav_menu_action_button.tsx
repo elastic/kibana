@@ -20,16 +20,18 @@ interface TopNavMenuActionButtonProps extends TopNavMenuActionItemBeta {
 }
 
 export const TopNavMenuActionButton = ({
-  label,
-  disableButton,
-  isMobileMenu,
-  href,
-  splitButtonProps,
-  htmlId,
-  testId,
-  isLoading,
-  target,
   run,
+  htmlId,
+  label,
+  testId,
+  iconType,
+  disableButton,
+  href,
+  target,
+  isLoading,
+  color,
+  splitButtonProps,
+  isMobileMenu,
   closePopover,
 }: TopNavMenuActionButtonProps) => {
   const itemText = upperFirst(label);
@@ -58,16 +60,18 @@ export const TopNavMenuActionButton = ({
   };
 
   const commonProps = {
-    size: 's' as const,
     onClick: href ? undefined : handleClick,
-    isDisabled: isDisabled(),
     id: htmlId,
     'data-test-subj': testId,
-    isLoading,
-    fill: false,
-    color: 'text' as const,
+    iconType,
+    isDisabled: isDisabled(),
     href,
     target: href ? target : undefined,
+    isLoading,
+    color,
+    size: 's' as const,
+    iconSize: 'm' as const,
+    fill: false,
   };
 
   if (splitButtonProps) {
