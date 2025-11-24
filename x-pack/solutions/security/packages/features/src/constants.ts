@@ -75,6 +75,10 @@ export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
   `${RULES_FEATURE_ID_V2}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
 export const EXCEPTIONS_UI_READ = 'readExceptions' as const;
 export const EXCEPTIONS_UI_CRUD = 'crudExceptions' as const;
+export const EXCEPTIONS_UI_READ_PRIVILEGES =
+  `${RULES_FEATURE_ID_V2}.${EXCEPTIONS_UI_READ}` as const;
+export const EXCEPTIONS_UI_CRUD_PRIVILEGES =
+  `${RULES_FEATURE_ID_V2}.${EXCEPTIONS_UI_CRUD}` as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;

@@ -81,7 +81,10 @@ const RuleActionsOverflowComponent = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
-  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
+  const {
+    rules: { edit: canEditRules, read: canReadRules },
+    exceptions: { crud: canCrudExceptions },
+  } = useUserPrivileges().rulesPrivileges;
 
   const onRuleDeletedCallback = useCallback(() => {
     navigateToApp(APP_UI_ID, {
@@ -107,8 +110,9 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
-                const modalDuplicationConfirmationResult =
-                  await showBulkDuplicateExceptionsConfirmation();
+                const modalDuplicationConfirmationResult = canCrudExceptions
+                  ? await showBulkDuplicateExceptionsConfirmation()
+                  : DuplicateOptions.withoutExceptions;
                 if (modalDuplicationConfirmationResult === null) {
                   return;
                 }
@@ -245,6 +249,7 @@ const RuleActionsOverflowComponent = ({
       doesBaseVersionExist,
       startTransaction,
       closePopover,
+      canCrudExceptions,
       showBulkDuplicateExceptionsConfirmation,
       executeBulkAction,
       navigateToApp,

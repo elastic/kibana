@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  EXCEPTIONS_UI_READ_PRIVILEGES,
   RULES_UI_DETECTIONS_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
   SECURITY_UI_SHOW_PRIVILEGE,
@@ -84,7 +85,10 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.showEndpointExceptions`],
+      capabilities: [
+        EXCEPTIONS_UI_READ_PRIVILEGES,
+        `${SECURITY_FEATURE_ID}.showEndpointExceptions`,
+      ],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [
