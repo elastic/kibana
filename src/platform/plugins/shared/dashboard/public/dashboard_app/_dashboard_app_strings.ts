@@ -199,7 +199,7 @@ export const topNavStrings = {
     }),
     writeRestrictedTooltip: i18n.translate('dashboard.topNave.editButtonTooltip.writeRestricted', {
       defaultMessage:
-        "You don't have permission to edit this dashboard. Contact the author to change it.",
+        "You don't have permission to edit this dashboard. Contact the owner to change it.",
     }),
     managedDashboardTooltip: i18n.translate('dashboard.editButtonTooltip.managed', {
       defaultMessage: 'This dashboard is managed by Elastic. Duplicate it to make changes.',
@@ -344,7 +344,7 @@ export const contentEditorFlyoutStrings = {
   readonlyReason: {
     accessControl: i18n.translate('dashboard.contentEditorFlyout.readonlyReason.accessControl', {
       defaultMessage:
-        "You don't have permissions to edit this dashboard. Contact the author to change it.",
+        "You don't have permissions to edit this dashboard. Contact the owner to change it.",
     }),
     missingPrivileges: i18n.translate(
       'dashboard.contentEditorFlyout.readonlyReason.missingPrivileges',

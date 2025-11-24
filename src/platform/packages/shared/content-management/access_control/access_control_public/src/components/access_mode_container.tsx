@@ -59,8 +59,9 @@ const getSpaceIcon = (space: Space['solution']) => {
     case 'oblt':
       return 'logoObservability';
     case 'classic':
-    default:
       return 'logoElasticStack';
+    default:
+      return undefined; // No icon for default space and serverless spaces
   }
 };
 
@@ -202,14 +203,14 @@ export const AccessModeContainer = ({
                       content={
                         <FormattedMessage
                           id="contentManagement.accessControl.accessMode.container.description.tooltipContent"
-                          defaultMessage="Only the {contentTypeId} author can edit permissions."
+                          defaultMessage="Only the {contentTypeId} owner can edit permissions."
                           values={{ contentTypeId }}
                         />
                       }
                       aria-label={i18n.translate(
                         'contentManagement.accessControl.accessMode.container.description.tooltipAriaLabel',
                         {
-                          defaultMessage: 'Only the {contentTypeId} author can edit permissions.',
+                          defaultMessage: 'Only the {contentTypeId} owner can edit permissions.',
                           values: { contentTypeId },
                         }
                       )}

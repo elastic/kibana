@@ -125,6 +125,7 @@ export const useDashboardListingTable = ({
         {
           ...currentState,
           ...updatedState,
+          accessControl: undefined, // updating access control via update is not supported
         },
         dashboard.references
       );
