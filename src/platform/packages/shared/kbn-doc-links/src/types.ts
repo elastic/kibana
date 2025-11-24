@@ -91,6 +91,7 @@ export interface DocLinks {
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
     readonly notebooksExamples: string;
+    readonly elasticTraining: string;
   };
   readonly metricbeat: {
     readonly base: string;
@@ -706,6 +707,10 @@ export interface DocLinks {
     readonly mcpServer: string;
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
+  };
+  readonly indexManagement: {
+    readonly componentTemplate: string;
+    readonly indexAlias: string;
   };
 }
 

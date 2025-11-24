@@ -25,6 +25,7 @@ export const maintenanceWindowStatusSchema = schema.oneOf([
   schema.literal(maintenanceWindowStatus.FINISHED),
   schema.literal(maintenanceWindowStatus.UPCOMING),
   schema.literal(maintenanceWindowStatus.ARCHIVED),
+  schema.literal(maintenanceWindowStatus.DISABLED),
 ]);
 
 export const maintenanceWindowPageSchema = schema.number({
