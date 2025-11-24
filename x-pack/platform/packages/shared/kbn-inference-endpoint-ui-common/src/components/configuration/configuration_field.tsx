@@ -414,7 +414,7 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   isPreconfigured,
 }) => {
   const validateAndSetConfigValue = (value: number | string | boolean | Map) => {
-    setConfigValue(ensureCorrectTyping(configEntry.type, value));
+    setConfigValue(configEntry.type === FieldType.STRING && value === '' ? null : ensureCorrectTyping(configEntry.type, value));
   };
 
   const { key, type, sensitive } = configEntry;
