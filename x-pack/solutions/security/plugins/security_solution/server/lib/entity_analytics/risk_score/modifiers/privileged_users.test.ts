@@ -13,6 +13,7 @@ import type { RiskScoreBucket } from '../../types';
 import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics';
 
 import { applyPrivmonModifier } from './privileged_users';
+import { allowedExperimentalValues } from '../../../../../common';
 
 // No need to mock bayesianUpdate - we'll use the actual implementation
 
@@ -65,6 +66,11 @@ describe('applyPrivmonModifier', () => {
     },
   };
 
+  const experimentalFeatures = {
+    ...allowedExperimentalValues,
+    enableRiskScorePrivmonModifier: true,
+  };
+
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     privmonUserCrudService = {
@@ -92,6 +98,7 @@ describe('applyPrivmonModifier', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       expect(result).toEqual([]);
@@ -112,6 +119,7 @@ describe('applyPrivmonModifier', () => {
             privmonUserCrudService,
             logger,
           },
+          experimentalFeatures,
         })
       ).rejects.toThrow('Either lower or upper after key must be provided for pagination');
     });
@@ -130,6 +138,7 @@ describe('applyPrivmonModifier', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       expect(privmonUserCrudService.list).toHaveBeenCalledWith('user.name > test-user-a');
@@ -149,6 +158,7 @@ describe('applyPrivmonModifier', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       expect(privmonUserCrudService.list).toHaveBeenCalledWith('user.name <= test-user-z');
@@ -162,6 +172,7 @@ describe('applyPrivmonModifier', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       expect(privmonUserCrudService.list).toHaveBeenCalledWith(
@@ -191,6 +202,7 @@ describe('applyPrivmonModifier', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       expect(privmonUserCrudService.list).toHaveBeenCalledWith(
@@ -205,6 +217,7 @@ describe('applyPrivmonModifier', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       expect(result).toHaveLength(2);
@@ -230,6 +243,7 @@ describe('applyPrivmonModifier', () => {
           logger,
         },
         globalWeight,
+        experimentalFeatures,
       });
 
       // Verify contribution score is calculated with global weight
@@ -244,6 +258,7 @@ describe('applyPrivmonModifier', () => {
           logger,
         },
         globalWeight: undefined,
+        experimentalFeatures,
       });
 
       // Verify contribution score is calculated without global weight
@@ -257,6 +272,7 @@ describe('applyPrivmonModifier', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       // Verify contribution score is calculated (should be greater than 0)
@@ -271,6 +287,7 @@ describe('applyPrivmonModifier', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       // Verify the modifier is applied (result should have privileged_user_modifier set)
@@ -290,6 +307,7 @@ describe('applyPrivmonModifier', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       expect(result).toEqual([
@@ -323,6 +341,7 @@ describe('applyPrivmonModifier', () => {
 
     it('should apply modifier only to privileged users', async () => {
       const result = await applyPrivmonModifier({
+        experimentalFeatures,
         page: mockPage,
         deps: {
           privmonUserCrudService,
@@ -363,6 +382,7 @@ describe('applyPrivmonModifier', () => {
 
     it('should not apply modifier when is_privileged is false', async () => {
       const result = await applyPrivmonModifier({
+        experimentalFeatures,
         page: mockPage,
         deps: {
           privmonUserCrudService,
@@ -400,6 +420,7 @@ describe('applyPrivmonModifier', () => {
 
     it('should handle users with missing properties gracefully', async () => {
       const result = await applyPrivmonModifier({
+        experimentalFeatures,
         page: mockPage,
         deps: {
           privmonUserCrudService,
@@ -429,6 +450,7 @@ describe('applyPrivmonModifier', () => {
 
     it('should handle errors gracefully and return non-privileged status', async () => {
       const result = await applyPrivmonModifier({
+        experimentalFeatures,
         page: mockPage,
         deps: {
           privmonUserCrudService,
@@ -455,6 +477,7 @@ describe('applyPrivmonModifier', () => {
 
     it('should continue scoring when service fails', async () => {
       const result = await applyPrivmonModifier({
+        experimentalFeatures,
         page: mockPage,
         deps: {
           privmonUserCrudService,
@@ -491,6 +514,7 @@ describe('applyPrivmonModifier', () => {
 
     it('should apply modifier to all privileged users', async () => {
       const result = await applyPrivmonModifier({
+        experimentalFeatures,
         page: mockPage,
         deps: {
           privmonUserCrudService,
@@ -538,6 +562,7 @@ describe('applyPrivmonModifier', () => {
 
     it('should construct KQL query with correct identifier field', async () => {
       await applyPrivmonModifier({
+        experimentalFeatures,
         page: {
           buckets: [hostBucket],
           identifierField: 'host.name',
