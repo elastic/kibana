@@ -9,19 +9,8 @@
 
 import type { Filter, FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '@kbn/es-query';
-import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
-import type { DiscoverServices } from '../../../build_services';
-import { type AppStateUrl, cleanupUrlState } from './utils/cleanup_url_state';
-import { APP_STATE_URL_KEY } from '../../../../common';
 import type { DiscoverAppState } from './redux';
-
-export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
-  return (
-    cleanupUrlState(stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {}, services.uiSettings) ??
-    {}
-  );
-}
 
 /**
  * Helper function to compare 2 different filter states

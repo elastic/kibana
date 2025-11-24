@@ -42,7 +42,7 @@ import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverAppLocatorParams } from '../../../../common';
 import { APP_STATE_URL_KEY, DISCOVER_APP_LOCATOR } from '../../../../common';
 import type { DiscoverAppState } from './redux';
-import { getCurrentUrlState } from './discover_app_state_container';
+import { getCurrentUrlState } from './utils/cleanup_url_state';
 import { updateFiltersReferences } from './utils/update_filter_references';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {
