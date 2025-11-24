@@ -44,7 +44,6 @@ export function ErrorSampleContextualInsight({
 }) {
   const { observabilityAIAssistant, onechat, core } = useApmPluginContext();
   const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
-  console.log('isObservabilityAgentEnabled', isObservabilityAgentEnabled);
 
   const [logStacktrace, setLogStacktrace] = useState('');
   const [exceptionStacktrace, setExceptionStacktrace] = useState('');
