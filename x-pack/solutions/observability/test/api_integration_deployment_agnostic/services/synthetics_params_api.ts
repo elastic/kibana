@@ -6,6 +6,7 @@
  */
 
 import type {
+  KibanaRoleDescriptors,
   RoleCredentials,
   SamlAuthProviderType,
   SupertestWithoutAuthProviderType,
@@ -22,13 +23,16 @@ export interface ParamPayload {
   share_across_spaces?: boolean;
 }
 
+export type AuthType = SupertestWithRoleScopeType | KibanaRoleDescriptors;
+
 /**
  * Service for interacting with Synthetics Global Params API
- * Supports both RoleCredentials (custom roles) and SupertestWithRoleScopeType (standard roles)
+ * Supports SupertestWithRoleScopeType, or KibanaRoleDescriptors
  */
 export class SyntheticsParamsApiService {
   private supertestWithoutAuth: SupertestWithoutAuthProviderType;
   private samlAuth: SamlAuthProviderType;
+  private customRoleCredentials: Map<string, RoleCredentials> = new Map();
 
   constructor(getService: DeploymentAgnosticFtrProviderContext['getService']) {
     this.supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -36,12 +40,47 @@ export class SyntheticsParamsApiService {
   }
 
   /**
-   * Type guard to determine authentication method
+   * Type guards to determine authentication method
    */
   private isRoleCredentials(
     auth: RoleCredentials | SupertestWithRoleScopeType
   ): auth is RoleCredentials {
     return 'apiKeyHeader' in auth;
+  }
+
+  private isKibanaRoleDescriptors(auth: AuthType): auth is KibanaRoleDescriptors {
+    return !('get' in auth) && 'kibana' in auth;
+  }
+
+  /**
+   * Get or create RoleCredentials from role config
+   */
+  private async getAuthCredentials(
+    auth: AuthType
+  ): Promise<RoleCredentials | SupertestWithRoleScopeType> {
+    if (this.isKibanaRoleDescriptors(auth)) {
+      const roleKey = JSON.stringify(auth);
+
+      if (!this.customRoleCredentials.has(roleKey)) {
+        await this.samlAuth.setCustomRole(auth);
+        const credentials = await this.samlAuth.createM2mApiKeyWithCustomRoleScope();
+        this.customRoleCredentials.set(roleKey, credentials);
+      }
+
+      return this.customRoleCredentials.get(roleKey)!;
+    }
+    return auth;
+  }
+
+  /**
+   * Clean up all custom role credentials created by this service
+   */
+  async cleanup() {
+    for (const credentials of this.customRoleCredentials.values()) {
+      await this.samlAuth.invalidateM2mApiKeyWithRoleScope(credentials);
+    }
+    this.customRoleCredentials.clear();
+    await this.samlAuth.deleteCustomRole();
   }
 
   /**
@@ -54,7 +93,7 @@ export class SyntheticsParamsApiService {
     expectedStatus = 200,
   }: {
     param: ParamPayload;
-    auth: RoleCredentials | SupertestWithRoleScopeType;
+    auth: AuthType;
     spaceId?: string;
     expectedStatus?: number;
   }) {
@@ -62,15 +101,17 @@ export class SyntheticsParamsApiService {
       ? `/s/${spaceId}${SYNTHETICS_API_URLS.PARAMS}`
       : SYNTHETICS_API_URLS.PARAMS;
 
-    if (this.isRoleCredentials(auth)) {
+    const authCredentials = await this.getAuthCredentials(auth);
+
+    if (this.isRoleCredentials(authCredentials)) {
       return this.supertestWithoutAuth
         .post(path)
-        .set(auth.apiKeyHeader)
+        .set(authCredentials.apiKeyHeader)
         .set(this.samlAuth.getInternalRequestHeader())
         .send(param)
         .expect(expectedStatus);
     } else {
-      return auth.post(path).send(param).expect(expectedStatus);
+      return authCredentials.post(path).send(param).expect(expectedStatus);
     }
   }
 
@@ -82,7 +123,7 @@ export class SyntheticsParamsApiService {
     spaceId,
     expectedStatus = 200,
   }: {
-    auth: RoleCredentials | SupertestWithRoleScopeType;
+    auth: AuthType;
     spaceId?: string;
     expectedStatus?: number;
   }) {
@@ -90,14 +131,16 @@ export class SyntheticsParamsApiService {
       ? `/s/${spaceId}${SYNTHETICS_API_URLS.PARAMS}`
       : SYNTHETICS_API_URLS.PARAMS;
 
-    if (this.isRoleCredentials(auth)) {
+    const authCredentials = await this.getAuthCredentials(auth);
+
+    if (this.isRoleCredentials(authCredentials)) {
       return this.supertestWithoutAuth
         .get(path)
-        .set(auth.apiKeyHeader)
+        .set(authCredentials.apiKeyHeader)
         .set(this.samlAuth.getInternalRequestHeader())
         .expect(expectedStatus);
     } else {
-      return auth.get(path).expect(expectedStatus);
+      return authCredentials.get(path).expect(expectedStatus);
     }
   }
 
@@ -111,7 +154,7 @@ export class SyntheticsParamsApiService {
     expectedStatus = 200,
   }: {
     paramId: string;
-    auth: RoleCredentials | SupertestWithRoleScopeType;
+    auth: AuthType;
     spaceId?: string;
     expectedStatus?: number;
   }) {
@@ -119,14 +162,16 @@ export class SyntheticsParamsApiService {
       ? `/s/${spaceId}${SYNTHETICS_API_URLS.PARAMS}/${paramId}`
       : `${SYNTHETICS_API_URLS.PARAMS}/${paramId}`;
 
-    if (this.isRoleCredentials(auth)) {
+    const authCredentials = await this.getAuthCredentials(auth);
+
+    if (this.isRoleCredentials(authCredentials)) {
       return this.supertestWithoutAuth
         .get(path)
-        .set(auth.apiKeyHeader)
+        .set(authCredentials.apiKeyHeader)
         .set(this.samlAuth.getInternalRequestHeader())
         .expect(expectedStatus);
     } else {
-      return auth.get(path).expect(expectedStatus);
+      return authCredentials.get(path).expect(expectedStatus);
     }
   }
 
@@ -142,7 +187,7 @@ export class SyntheticsParamsApiService {
   }: {
     paramId: string;
     param: Partial<ParamPayload>;
-    auth: RoleCredentials | SupertestWithRoleScopeType;
+    auth: AuthType;
     spaceId?: string;
     expectedStatus?: number;
   }) {
@@ -150,15 +195,17 @@ export class SyntheticsParamsApiService {
       ? `/s/${spaceId}${SYNTHETICS_API_URLS.PARAMS}/${paramId}`
       : `${SYNTHETICS_API_URLS.PARAMS}/${paramId}`;
 
-    if (this.isRoleCredentials(auth)) {
+    const authCredentials = await this.getAuthCredentials(auth);
+
+    if (this.isRoleCredentials(authCredentials)) {
       return this.supertestWithoutAuth
         .put(path)
-        .set(auth.apiKeyHeader)
+        .set(authCredentials.apiKeyHeader)
         .set(this.samlAuth.getInternalRequestHeader())
         .send(param)
         .expect(expectedStatus);
     } else {
-      return auth.put(path).send(param).expect(expectedStatus);
+      return authCredentials.put(path).send(param).expect(expectedStatus);
     }
   }
 
@@ -172,7 +219,7 @@ export class SyntheticsParamsApiService {
     expectedStatus = 200,
   }: {
     paramId: string;
-    auth: RoleCredentials | SupertestWithRoleScopeType;
+    auth: AuthType;
     spaceId?: string;
     expectedStatus?: number;
   }) {
@@ -180,14 +227,16 @@ export class SyntheticsParamsApiService {
       ? `/s/${spaceId}${SYNTHETICS_API_URLS.PARAMS}/${paramId}`
       : `${SYNTHETICS_API_URLS.PARAMS}/${paramId}`;
 
-    if (this.isRoleCredentials(auth)) {
+    const authCredentials = await this.getAuthCredentials(auth);
+
+    if (this.isRoleCredentials(authCredentials)) {
       return this.supertestWithoutAuth
         .delete(path)
-        .set(auth.apiKeyHeader)
+        .set(authCredentials.apiKeyHeader)
         .set(this.samlAuth.getInternalRequestHeader())
         .expect(expectedStatus);
     } else {
-      return auth.delete(path).expect(expectedStatus);
+      return authCredentials.delete(path).expect(expectedStatus);
     }
   }
 
@@ -201,7 +250,7 @@ export class SyntheticsParamsApiService {
     expectedStatus = 200,
   }: {
     ids: string[];
-    auth: RoleCredentials | SupertestWithRoleScopeType;
+    auth: AuthType;
     spaceId?: string;
     expectedStatus?: number;
   }) {
@@ -209,15 +258,17 @@ export class SyntheticsParamsApiService {
       ? `/s/${spaceId}${SYNTHETICS_API_URLS.PARAMS}/_bulk_delete`
       : `${SYNTHETICS_API_URLS.PARAMS}/_bulk_delete`;
 
-    if (this.isRoleCredentials(auth)) {
+    const authCredentials = await this.getAuthCredentials(auth);
+
+    if (this.isRoleCredentials(authCredentials)) {
       return this.supertestWithoutAuth
         .post(path)
-        .set(auth.apiKeyHeader)
+        .set(authCredentials.apiKeyHeader)
         .set(this.samlAuth.getInternalRequestHeader())
         .send({ ids })
         .expect(expectedStatus);
     } else {
-      return auth.post(path).send({ ids }).expect(expectedStatus);
+      return authCredentials.post(path).send({ ids }).expect(expectedStatus);
     }
   }
 }
