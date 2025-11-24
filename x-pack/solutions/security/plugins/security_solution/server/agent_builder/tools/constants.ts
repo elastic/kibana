@@ -19,6 +19,7 @@ export const securityTool = (toolName: string): string => {
  * These fields contain the most relevant information for security analysis.
  */
 export const ESSENTIAL_ALERT_FIELDS = [
+  '_id',
   '@timestamp',
   'message',
 
@@ -38,6 +39,19 @@ export const ESSENTIAL_ALERT_FIELDS = [
   'user.risk.calculated_level',
   'user.risk.calculated_score_norm',
   'user.target.name',
+
+  /* Service */
+  'service.name',
+  'service.id',
+
+  /* Entity */
+  'entity.id',
+  'entity.name',
+  'entity.type',
+  'entity.sub_type',
+
+  /* Agent */
+  'agent.id',
 
   /* Process */
   'process.name',
@@ -71,6 +85,7 @@ export const ESSENTIAL_ALERT_FIELDS = [
   /* File */
   'file.name',
   'file.path',
+  'file.Ext.original.path',
   'file.hash.sha256',
 
   /* Groups */
@@ -79,6 +94,8 @@ export const ESSENTIAL_ALERT_FIELDS = [
 
   /* Cloud */
   'cloud.provider',
+  'cloud.account.name',
+  'cloud.service.name',
   'cloud.region',
   'cloud.availability_zone',
 

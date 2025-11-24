@@ -55,7 +55,7 @@ MANDATORY WORKFLOW - Complete in order:
 
 1. Extract alert id: kibana.alert.uuid or _id
 2. Extract rule name: kibana.alert.rule.name
-3. Extract entities: host.name, host.ip, host.os.name, host.os.version, user.name, user.domain, source.ip, destination.ip, file.hash.sha256
+3. Extract entities: host.name, user.name, service.name, entity.id
 4. Extract MITRE fields: kibana.alert.rule.threat.tactic.id, kibana.alert.rule.threat.technique.id, threat.tactic.id
 5. Query RISK SCORES for entities:
    Tool: ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)}
