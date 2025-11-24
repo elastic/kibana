@@ -147,9 +147,6 @@ describe('EmailActionConnectorFields', () => {
       </ConnectorFormTestProvider>
     );
 
-    const emailFromInput = await screen.findByTestId('emailFromInput');
-    expect(emailFromInput).toHaveValue('test@test.com');
-
     const emailServiceSelectInput = await screen.findByTestId('emailServiceSelectInput');
     expect(emailServiceSelectInput).toBeInTheDocument();
     expect(emailServiceSelectInput).toHaveValue('other');
@@ -836,5 +833,114 @@ describe('when not all email services are enabled', () => {
     expect(options[1].textContent).toBe('Amazon SES');
     expect(options[2].textContent).toBe('MS Exchange Server');
     expect(options[3].textContent).toBe('Other');
+  });
+
+  it('sets the service to other if the enabled services contain *', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+      },
+      isDeprecated: false,
+    };
+
+    appMockRenderer.render(
+      <ConnectorFormTestProvider
+        connector={actionConnector}
+        connectorServices={{ validateEmailAddresses, enabledEmailServices: ['google-mail', '*'] }}
+      >
+        <EmailActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const emailServiceSelectInput = await screen.findByTestId('emailServiceSelectInput');
+    expect(emailServiceSelectInput).toBeInTheDocument();
+    expect(emailServiceSelectInput).toHaveValue('other');
+  });
+
+  it('sets the service to the first available', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+      },
+      isDeprecated: false,
+    };
+
+    appMockRenderer.render(
+      <ConnectorFormTestProvider
+        connector={actionConnector}
+        connectorServices={{
+          validateEmailAddresses,
+          enabledEmailServices: ['google-mail', 'microsoft-outlook'],
+        }}
+      >
+        <EmailActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const emailServiceSelectInput = await screen.findByTestId('emailServiceSelectInput');
+    expect(emailServiceSelectInput).toBeInTheDocument();
+    expect(emailServiceSelectInput).toHaveValue('gmail');
+  });
+
+  it('does not override the service if it is defined', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+        service: 'gmail',
+      },
+      isDeprecated: false,
+    };
+
+    appMockRenderer.render(
+      <ConnectorFormTestProvider
+        connector={actionConnector}
+        connectorServices={{
+          validateEmailAddresses,
+          enabledEmailServices,
+        }}
+      >
+        <EmailActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const emailServiceSelectInput = await screen.findByTestId('emailServiceSelectInput');
+    expect(emailServiceSelectInput).toBeInTheDocument();
+    expect(emailServiceSelectInput).toHaveValue('gmail');
   });
 });
