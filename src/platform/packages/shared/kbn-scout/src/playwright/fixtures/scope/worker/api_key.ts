@@ -150,17 +150,12 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       ): Promise<RoleApiCredentials> => {
         isCustomRoleCreated = true;
 
-        try {
-          await samlAuth.setCustomRole(roleDescriptor);
+        await samlAuth.setCustomRole(roleDescriptor);
 
-          const result = await createApiKeyWithAdminCredentials(samlAuth.customRoleName, {
-            [samlAuth.customRoleName]: roleDescriptor,
-          });
-          return result;
-        } catch (error: any) {
-          log.error(`Failed to create API key for custom role: ${error.message}`);
-          throw error;
-        }
+        const result = await createApiKeyWithAdminCredentials(samlAuth.customRoleName, {
+          [samlAuth.customRoleName]: roleDescriptor,
+        });
+        return result;
       };
 
       await use({ getApiKey, getApiKeyForCustomRole });
