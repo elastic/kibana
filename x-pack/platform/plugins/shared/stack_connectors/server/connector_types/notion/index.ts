@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
@@ -148,24 +148,37 @@ export class NotionConnector extends SubActionConnector<NotionConfig, NotionSecr
     connectorUsageCollector: ConnectorUsageCollector
   ) {
     // https://developers.notion.com/reference/query-a-data-source
-    let requestData = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let requestData: Record<string, any> = {
+      page_size: params.pageSize,
+      start_cursor: params.startCursor,
+    };
     if (params.filter) {
-      requestData = { filter: params.filter };
+      requestData = { ...requestData, filter: JSON.parse(params.filter) };
     }
-    const response = await this.request(
-      {
-        url: `https://api.notion.com/v1/data_sources/${params.dataSourceId}/query`,
-        method: 'post',
-        responseSchema: NotionQueryActionResponseSchema,
-        headers: {
-          'Notion-Version': '2025-09-03',
-          Authorization: `Bearer ${this.secrets.token}`,
+
+    this.logger.info(JSON.stringify(requestData));
+    try {
+      const response = await this.request(
+        {
+          url: `https://api.notion.com/v1/data_sources/${params.dataSourceId}/query`,
+          method: 'post',
+          responseSchema: NotionQueryActionResponseSchema,
+          headers: {
+            'Notion-Version': '2025-09-03',
+            Authorization: `Bearer ${this.secrets.token}`,
+          },
+          data: requestData,
         },
-        data: requestData,
-      },
-      connectorUsageCollector
-    );
-    return response.data;
+        connectorUsageCollector
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        this.logger.error(JSON.stringify(error.response?.data));
+      }
+      throw new Error('Failed to query data source');
+    }
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
