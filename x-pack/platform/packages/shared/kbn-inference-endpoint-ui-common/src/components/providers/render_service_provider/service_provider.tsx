@@ -190,5 +190,9 @@ export const ServiceProviderName: React.FC<ServiceProviderProps> = ({
   const provider = SERVICE_PROVIDERS[providerKey];
   const providerName = provider ? provider.name : providerKey;
 
-  return <EuiHighlight search={searchValue ?? ''}>{providerName}</EuiHighlight>;
+  return (
+    <EuiHighlight data-test-subj={`${providerName}-provider`} search={searchValue ?? ''}>
+      {providerName}
+    </EuiHighlight>
+  );
 };

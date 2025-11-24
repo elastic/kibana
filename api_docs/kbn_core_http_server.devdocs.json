@@ -6325,6 +6325,10 @@
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_summary.ts"
               },
               {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/bulk_update_tags.ts"
+              },
+              {
                 "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
               },
@@ -6854,6 +6858,10 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/server/init_routes.ts"
               },
               {
@@ -7031,6 +7039,14 @@
               {
                 "plugin": "@kbn/search-api-keys-server",
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "@kbn/workplaceai-api-keys-server",
+                "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "@kbn/workplaceai-api-keys-server",
+                "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/src/routes/routes.ts"
               },
               {
                 "plugin": "esql",
