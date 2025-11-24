@@ -40,6 +40,8 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
           const transformedState = transformed.state as StoredControlState['explicitInput'];
           transformedControlState.explicitInput = transformedState;
           transformedControlState.explicitInput.dataViewRefName = `${uid}:${transformedState.dataViewRefName}`;
+        } else {
+          transformedControlState.explicitInput = controlState.config;
         }
       } catch (transformInError) {
         // do not prevent save if transformIn throws
@@ -56,11 +58,12 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
           type,
           width,
           grow,
-          explicitInput: { id: uid, ...omit(explicitInput, ['type']) },
+          explicitInput: { ...omit(explicitInput, ['type']) },
         },
       ];
     })
   );
+
   return {
     controlsJSON: JSON.stringify(updatedControls),
     references,
