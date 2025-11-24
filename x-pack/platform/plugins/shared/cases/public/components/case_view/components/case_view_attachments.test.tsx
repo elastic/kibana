@@ -57,22 +57,22 @@ describe('Case View Attachments tab', () => {
       'true'
     );
   });
+
+  it('shows the events tab as active', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
+      {
+        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
+      }
+    );
+
+    expect(await screen.findByTestId('case-view-tab-title-events')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
 });
 
-//
-// it('shows the events tab as active', async () => {
-//   renderWithTestingProviders(
-//     <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
-//     {
-//       wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
-//     }
-//   );
-//
-//   expect(await screen.findByTestId('case-view-tab-title-events')).toHaveAttribute(
-//     'aria-selected',
-//     'true'
-//   );
-// });
 // it('shows the files tab with the correct count', async () => {
 //   renderWithTestingProviders(
 //     <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
